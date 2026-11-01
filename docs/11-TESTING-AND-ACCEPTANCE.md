@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-PLANNED. This documentation change does not implement or test installer behavior.
+The installer remains PLANNED and has not been tested end to end. The first-slice common/preflight test script has been executed successfully against temporary local copies; their Git blob hashes matched the committed module and test files. This does not verify installer integration or hardware behavior.
 
 ## Documentation checks
 - Verify expected files and relative links.
@@ -81,4 +81,4 @@ Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. T
 A release candidate requires reviewed requirements and architecture, passing static checks, mocked safety/error paths, verified package/upstream dependencies, docs consistent with behavior, and evidence for hardware claims. Disclose known failures and untested items.
 
 ## Results
-No installer tests were run for this documentation-only change. Published docs and links should be checked after commit; do not report this as an installer test pass.
+The first-slice test command `bash tests/test-common-preflight.sh` passed against temporary local copies with blob hashes matching the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
