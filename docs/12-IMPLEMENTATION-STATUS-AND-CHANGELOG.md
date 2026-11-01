@@ -12,11 +12,18 @@
 | Installer entry-point skeleton | IMPLEMENTED | `installer` is a safe placeholder that exits without changing the system. |
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
 | Test plan | IMPLEMENTED | `tests/README.md` describes intended test layers; no tests executed yet. |
+| Storage module contract | IMPLEMENTED | Proposed stage interface and requirement/test traceability documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; no storage behavior implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
 | Static checks | NOT TESTED | ShellCheck, shfmt, and syntax checks have not been run. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Storage module contract and traceability
+- Documented the planned `lib/storage.sh` stage interface and its fail-closed safety boundary; no executable storage behavior was added.
+- Linked the storage contract to REQ-INSTALL-005, REQ-DISK-002, REQ-DISK-003, REQ-DISK-006, and REQ-RECOVERY-001, plus the mapped test cases in `docs/11-TESTING-AND-ACCEPTANCE.md`.
+- Recorded the change as documentation/contract work only. No syntax, automated, disk, VM, or hardware tests were run.
+
 
 ### 2026-11-01 — AI development instructions
 - Added `AGENTS.md` with repository inspection, change-scope, safety, testing, verification, and reporting rules for AI-assisted work.
