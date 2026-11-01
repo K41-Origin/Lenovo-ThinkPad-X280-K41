@@ -11,6 +11,8 @@
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
 | Installer entry-point skeleton | IMPLEMENTED | `installer` is a safe placeholder that exits without changing the system. |
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
+| Common logging helpers | IMPLEMENTED | `lib/common.sh` provides argument-checked stderr logging; runtime tests are present but have not yet been executed in this environment. |
+| Read-only preflight helpers | IMPLEMENTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics; it does not install packages or change system state. Runtime tests are present but have not yet been executed in this environment. |
 | Test plan | IMPLEMENTED | `tests/README.md` describes intended test layers; no tests executed yet. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
@@ -18,6 +20,11 @@
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Common and read-only preflight first slice
+- Defined first-slice contracts and acceptance cases for `lib/common.sh` and `lib/preflight.sh`.
+- Implemented side-effect-free logging helpers and explicitly invoked, read-only preflight diagnostics; added `tests/test-common-preflight.sh`.
+- Added a documented command for running the tests. Tests and static checks have not yet been executed; no installer, package, service, network, or disk changes were performed.
 
 ### 2026-11-02 — Manual bootstrap review procedure
 - Added a documented Git retrieval and pre-execution review sequence to the architecture, including resolved-commit display, working-tree/log inspection, and shell-code review aids.
