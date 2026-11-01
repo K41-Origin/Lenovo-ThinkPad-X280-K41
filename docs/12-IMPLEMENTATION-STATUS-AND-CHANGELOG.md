@@ -13,7 +13,7 @@
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
 | Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
-| Test plan | IMPLEMENTED | `tests/README.md` describes intended test layers; no tests executed yet. |
+| Test plan and first-slice test harness | TESTED | `tests/README.md` describes test layers; `tests/test-common-preflight.sh` passed against temporary copies matching committed blobs. Installer integration tests remain PLANNED. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
 | Static checks | TESTED | `bash -n` passed for `lib/common.sh`, `lib/preflight.sh`, and `tests/test-common-preflight.sh`. ShellCheck and shfmt were unavailable. |
@@ -29,7 +29,7 @@
 ### 2026-11-02 — Common and read-only preflight first slice
 - Defined first-slice contracts and acceptance cases for `lib/common.sh` and `lib/preflight.sh`.
 - Implemented side-effect-free logging helpers and explicitly invoked, read-only preflight diagnostics; added `tests/test-common-preflight.sh`.
-- Added a documented command for running the tests. Tests and static checks have not yet been executed; no installer, package, service, network, or disk changes were performed.
+- Added a documented command for running the tests. Initial test execution and syntax-check results are recorded in the following validation entry; no installer, package, service, network, or disk changes were performed.
 
 ### 2026-11-02 — Manual bootstrap review procedure
 - Added a documented Git retrieval and pre-execution review sequence to the architecture, including resolved-commit display, working-tree/log inspection, and shell-code review aids.
