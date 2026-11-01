@@ -7,7 +7,7 @@ This document indexes approved planning decisions. Domain details live in the re
 - REQ-INSTALL-002 — APPROVED: Keep the implementation modular internally; one entry point coordinates focused modules.
 - REQ-INSTALL-003 — APPROVED: Retrieve the latest repository code from `main` for each installation attempt. Display the resolved commit SHA so the version used is identifiable.
 - REQ-INSTALL-004 — APPROVED: Do not pipe remote scripts directly into a shell. Bootstrap must retrieve code with Git and invoke the project entry point explicitly.
-- REQ-INSTALL-005 — APPROVED: No installation logic may proceed until prerequisites pass, a full disk plan is shown, and the user explicitly confirms the identified target disk.
+- REQ-INSTALL-005 — APPROVED: Read-only preflight, disk discovery, and storage-plan preparation/review may run before confirmation. No installation step that depends on the target disk, and no destructive storage action, may proceed until prerequisites pass, the complete plan for the identified target is displayed, and the user explicitly confirms that target and plan.
 
 ## Installation and storage
 - REQ-DISK-001 — APPROVED: Replace Windows; user reports no data to retain.
