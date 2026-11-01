@@ -23,7 +23,7 @@
 
 ### 2026-11-02 — Common/preflight first-slice validation
 - Ran `bash -n` on `lib/common.sh`, `lib/preflight.sh`, and `tests/test-common-preflight.sh`; all passed.
-- Ran `bash tests/test-common-preflight.sh` against temporary local copies. Their Git blob hashes matched the committed GitHub files; all five test groups passed.
+- Ran `bash tests/test-common-preflight.sh` against temporary local copies. Their Git blob hashes matched the committed GitHub files; all six test groups passed, including the unavailable-network-tool case.
 - ShellCheck and shfmt were unavailable. The installer was not run; no real disk, package, service, or network configuration was changed.
 
 ### 2026-11-02 — Common and read-only preflight first slice
