@@ -4,23 +4,30 @@
 
 | Area | Status | Evidence / next action |
 | --- | --- | --- |
-| Repository baseline | VERIFIED | Initial commit inspected; baseline contains LICENSE and a minimal README.md. |
-| Requirements capture | IMPLEMENTED | User-approved planning choices recorded in requirements/decision log. |
-| Documentation split | IMPLEMENTED | Domain documents added in this change. |
-| Installer architecture | PLANNED | Verify upstream dependencies and installation/post-install boundary. |
-| ISO installer | PLANNED | Not implemented. |
-| Post-install setup | PLANNED | Not implemented. |
-| Hardware optimization | PLANNED | Actual hardware inventory and compatibility checks required. |
-| Automated tests | PLANNED | No installer code added; no installer tests run. |
-| X280 installation / hibernation | NOT TESTED | Requires controlled hardware testing. |
+| Repository baseline | VERIFIED | Initial commit inspected; baseline contained LICENSE and a minimal README.md. |
+| Requirements capture | IMPLEMENTED | Planning choices recorded in requirements/decision log. |
+| Documentation split | IMPLEMENTED | Domain documents are present on main. |
+| Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
+| Installer entry-point skeleton | IMPLEMENTED | `installer` is a safe placeholder that exits without changing the system. |
+| Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
+| Test plan | IMPLEMENTED | `tests/README.md` describes intended test layers; no tests executed yet. |
+| Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
+| Static checks | NOT TESTED | ShellCheck, shfmt, and syntax checks have not been run. |
+| X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
 
+### 2026-11-01 — Interactive installer skeleton
+- Added the safe `installer` placeholder and module placeholders under `lib/`.
+- Added the initial test strategy.
+- Recorded the decision to use one interactive flow from the Arch ISO shell and retrieve latest `main` via Git while displaying the resolved commit SHA.
+- No disk, package, service, or system configuration operations were implemented.
+- No syntax, static-analysis, integration, or hardware tests were run in this change.
+
 ### 2026-11-01 — Documentation split
 - Added project charter, requirements/decisions, architecture outline, installation/disk, security/authentication, desktop UX, hardware/power/network, package/software management, development/bug bounty, recovery/reporting, testing/acceptance, and implementation status.
-- README is the intended project entry point and documentation index.
-- No installer code or system configuration changed.
-- No installer behavior was tested or verified by this documentation change.
+- README is the project entry point and documentation index.
+- No installer behavior was tested or verified by the documentation change.
 
 ## Updating status
 - PLANNED: not implemented.
