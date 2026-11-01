@@ -4,23 +4,43 @@
 
 | Area | Status | Evidence / next action |
 | --- | --- | --- |
-| Repository baseline | VERIFIED | Initial commit inspected; baseline contains LICENSE and a minimal README.md. |
-| Requirements capture | IMPLEMENTED | User-approved planning choices recorded in requirements/decision log. |
-| Documentation split | IMPLEMENTED | Domain documents added in this change. |
-| Installer architecture | PLANNED | Verify upstream dependencies and installation/post-install boundary. |
-| ISO installer | PLANNED | Not implemented. |
-| Post-install setup | PLANNED | Not implemented. |
-| Hardware optimization | PLANNED | Actual hardware inventory and compatibility checks required. |
-| Automated tests | PLANNED | No installer code added; no installer tests run. |
-| X280 installation / hibernation | NOT TESTED | Requires controlled hardware testing. |
+| Repository baseline | VERIFIED | Initial commit inspected; baseline contained LICENSE and a minimal README.md. |
+| AI development instructions | IMPLEMENTED | `AGENTS.md` defines repository inspection, focused changes, safety rules, test honesty, and verification/reporting requirements; content re-fetched after creation. |
+| Requirements capture | IMPLEMENTED | Planning choices recorded in requirements/decision log. |
+| Documentation split | IMPLEMENTED | Domain documents are present on main. |
+| Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
+| Installer entry-point skeleton | IMPLEMENTED | `installer` is a safe placeholder that exits without changing the system. |
+| Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
+| Test plan | IMPLEMENTED | `tests/README.md` describes intended test layers; no tests executed yet. |
+| Storage module contract | IMPLEMENTED | Proposed stage interface and requirement/test traceability documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; no storage behavior implemented. |
+| Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
+| Static checks | NOT TESTED | ShellCheck, shfmt, and syntax checks have not been run. |
+| X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
 
+### 2026-11-02 — Storage module contract and traceability
+- Documented the planned `lib/storage.sh` stage interface and its fail-closed safety boundary; no executable storage behavior was added.
+- Linked the storage contract to REQ-INSTALL-005, REQ-DISK-002, REQ-DISK-003, REQ-DISK-006, and REQ-RECOVERY-001, plus the mapped test cases in `docs/11-TESTING-AND-ACCEPTANCE.md`.
+- Recorded the change as documentation/contract work only. No syntax, automated, disk, VM, or hardware tests were run.
+
+
+### 2026-11-01 — AI development instructions
+- Added `AGENTS.md` with repository inspection, change-scope, safety, testing, verification, and reporting rules for AI-assisted work.
+- Linked the instructions from `README.md`.
+- Re-fetched the new file from the target branch and checked required sections. No installer logic was added and no tests were run because this change is documentation-only.
+
+### 2026-11-01 — Interactive installer skeleton
+- Added the safe `installer` placeholder and module placeholders under `lib/`.
+- Added the initial test strategy.
+- Recorded the decision to use one interactive flow from the Arch ISO shell and retrieve latest `main` via Git while displaying the resolved commit SHA.
+- No disk, package, service, or system configuration operations were implemented.
+- No syntax, static-analysis, integration, or hardware tests were run in this change.
+
 ### 2026-11-01 — Documentation split
 - Added project charter, requirements/decisions, architecture outline, installation/disk, security/authentication, desktop UX, hardware/power/network, package/software management, development/bug bounty, recovery/reporting, testing/acceptance, and implementation status.
-- README is the intended project entry point and documentation index.
-- No installer code or system configuration changed.
-- No installer behavior was tested or verified by this documentation change.
+- README is the project entry point and documentation index.
+- No installer behavior was tested or verified by the documentation change.
 
 ## Updating status
 - PLANNED: not implemented.

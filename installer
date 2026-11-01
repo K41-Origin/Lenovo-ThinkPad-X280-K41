@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Lenovo-ThinkPad-X280-K41
+# Entry point placeholder. Installation logic is intentionally not implemented yet.
+set -Eeuo pipefail
+
+printf '%s\n' \
+  'Lenovo ThinkPad X280 K41 installer' \
+  '' \
+  'STATUS: PLANNED — installer logic is not implemented.' \
+  'No disks, packages, services, or system configuration were changed.' \
+  '' \
+  'Do not use this skeleton to install a system.'
+exit 2
