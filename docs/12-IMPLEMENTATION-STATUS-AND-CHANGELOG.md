@@ -9,17 +9,17 @@
 | Requirements capture | IMPLEMENTED | Planning choices recorded in requirements/decision log. |
 | Documentation split | IMPLEMENTED | Domain documents are present on main. |
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
-| Installer entry-point skeleton | IMPLEMENTED | `installer` is a safe placeholder that exits without changing the system. |
+| Diagnostic-only installer entry point | TESTED | `installer --help` and `installer --preflight` are implemented; preflight is read-only and always returns nonzero because installation is disabled. Focused tests cover the entry-point safety boundary. |
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
 | Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
-| Test plan and first-slice test harness | TESTED | `tests/README.md` describes test layers; `tests/test-common-preflight.sh` passed against temporary copies matching committed blobs. Installer integration tests remain PLANNED. |
+| Test plan and focused test harnesses | TESTED | `tests/test-common-preflight.sh` and `tests/test-installer-entry.sh` passed against temporary copies matching fetched GitHub blobs. Installer integration tests remain PLANNED. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED | `bash -n` passed for `lib/common.sh`, `lib/preflight.sh`, and `tests/test-common-preflight.sh`. ShellCheck and shfmt were unavailable. |
+| Static checks | TESTED | `bash -n` passed for the entry point, common/preflight modules, and both focused test scripts. ShellCheck and shfmt were unavailable. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
-## Changelog
+## Changelog\n\n### 2026-11-02 — Diagnostic-only entry point\n- Replaced the placeholder output with explicit `--help` and read-only `--preflight` handling using module paths relative to the entry point.\n- Preflight reports unresolved boot mode and required-command failures, treats network-link diagnostics as optional, and never returns success because installation remains disabled.\n- Added `tests/test-installer-entry.sh` for argument handling, invocation from another working directory, diagnostic-only status, and a static entry-point safety boundary.\n- Syntax and focused tests were run against temporary local copies matching fetched GitHub blobs. This is not an end-to-end installer test; no disk, package, service, or network configuration was changed.\n
 
 ### 2026-11-02 — Common/preflight first-slice validation
 - Ran `bash -n` on `lib/common.sh`, `lib/preflight.sh`, and `tests/test-common-preflight.sh`; all passed.
