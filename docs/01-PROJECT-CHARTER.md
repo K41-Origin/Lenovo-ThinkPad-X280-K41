@@ -19,15 +19,20 @@ Build a reliable, modular, secure, reproducible Arch Linux installation and setu
 7. Distinguish implementation from test evidence.
 
 ## Scope
-The project may need both an ISO-based installer and a post-install setup tool. Decide that boundary before implementation; a post-install script alone cannot install Arch onto a blank disk.
+The approved initial direction is one interactive installer launched from the shell of an official Arch Linux ISO; see `docs/02-REQUIREMENTS-AND-DECISIONS.md` and `docs/03-ARCHITECTURE-AND-MODULES.md` for the authoritative decision and design details.
+
+Whether to provide a separate post-install setup tool remains an open scope question and is not required by the current decision. A post-install script alone cannot install Arch onto a blank disk.
 
 ## Status vocabulary
+This charter owns the project-status definitions used across the repository:
 - PLANNED: proposed, not implemented.
 - APPROVED: user-approved requirement or decision.
 - IMPLEMENTED: code or documentation exists.
 - TESTED: a specified test was run.
 - VERIFIED: behavior was confirmed with evidence.
 - RELEASED: included in a designated release.
+
+Other documents must use these definitions rather than maintain competing definitions. AI workflow instructions in `AGENTS.md` may add evidence and reporting rules, but should refer here for the status meanings.
 
 ## Initial state
 This is a documentation foundation. Described features are not thereby implemented or tested.
