@@ -10,7 +10,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Goals
 - One interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB.
-- Retrieve and run the latest code from the repository's `main` branch, displaying the resolved commit SHA so the exact code used is identifiable.
+- Retrieve the latest code from the repository's `main` branch, display the resolved commit SHA, and review the relevant shell code before invoking the installer.
 - Carefully verified encrypted ext4 system with swapfile and hibernation readiness.
 - Hyprland with Caelestia Shell / Quickshell, subject to verified upstream compatibility.
 - ThinkPad hardware, power, and network configuration based on actual device inventory.
@@ -28,10 +28,11 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 1. Boot the official Arch Linux ISO from USB.
 2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
 3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
-4. Run preflight checks and show the complete installation plan.
-5. Require explicit confirmation of the identified target disk before destructive storage operations.
-6. Install and configure the base system, desktop, and selected software in one interactive flow.
-7. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
+4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See the manual bootstrap review procedure in [Architecture and modules](docs/03-ARCHITECTURE-AND-MODULES.md#manual-bootstrap-and-pre-execution-review).
+5. Run preflight checks and show the complete installation plan.
+6. Require explicit confirmation of the identified target disk before destructive storage operations.
+7. Install and configure the base system, desktop, and selected software in one interactive flow.
+8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
 **Important:** the current repository does not yet implement this workflow. Do not run the placeholder as an installer.
 
