@@ -39,16 +39,16 @@ These planned tests verify the architecture's bootstrap review gate before any f
 
 ## Common and preflight first-slice tests
 
-These cases are planned for the first implementation slice. They must run as an ordinary user and must not inspect or modify real target disks.
+These cases define the first-slice coverage. The current script executes source-output/options/trap checks, logging checks, boot-mode fixtures, command-availability cases, and available/unavailable network-diagnostic cases. The broader no-side-effect boundary still also relies on code review; the current script does not instrument every possible filesystem or external-command access. Tests must run as an ordinary user and must not inspect or modify real target disks.
 
 | Test ID | Module / contract | Setup and action | Expected result |
 |---|---|---|---|
-| TC-COMMON-001 | `lib/common.sh` source safety | Source the module in a clean Bash subprocess while capturing stdout/stderr and command calls. | No output, external command, trap, shell-option, or filesystem side effect occurs at source time. |
+| TC-COMMON-001 | `lib/common.sh` source safety | Source the module in a clean Bash subprocess while capturing stdout/stderr and command calls. | No output or shell-option/trap changes occur at source time; source-time code review confirms the modules contain only function definitions and no command invocations or filesystem operations. |
 | TC-COMMON-002 | Logging interface | Call each public logging helper with ordinary diagnostic text and with invalid/missing arguments. | Output goes to stderr; invalid input returns nonzero; no hidden success or secret-bearing test value is used. |
-| TC-PREFLIGHT-001 | `lib/preflight.sh` source safety | Source the module in a clean Bash subprocess with command calls monitored. | No checks run and no output or mutation occurs at source time. |
+| TC-PREFLIGHT-001 | `lib/preflight.sh` source safety | Source the module in a clean Bash subprocess with command calls monitored. | No checks run, no output appears, and shell options/traps remain unchanged at source time; source-time code review confirms no external command or filesystem operation is invoked. |
 | TC-PREFLIGHT-002 | Required-command check | Use controlled command-availability fixtures for present and missing required commands. | Present commands pass; a missing required command returns failure with a clear diagnostic. |
 | TC-PREFLIGHT-003 | Boot-mode detection | Provide mocked read-only indicators for UEFI, legacy, and unknown states. | UEFI and legacy are reported distinctly; unknown remains unknown and is not treated as verified. |
-| TC-PREFLIGHT-004 | Network diagnostic | Mock available/unavailable diagnostic tools and link states. | Reports available observations without changing interfaces or claiming external connectivity was verified. |
+| TC-PREFLIGHT-004 | Network diagnostic | Mock an available diagnostic tool and run with the tool unavailable. | Reports available observations without changing interfaces or claiming external connectivity was verified. |
 | TC-PREFLIGHT-005 | Read-only boundary | Monitor invoked commands and filesystem access while running every preflight check. | No package install, service change, network reconfiguration, target-disk probe, or destructive storage command is invoked. |
 
 ## Requirement-linked test cases
@@ -81,4 +81,4 @@ Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. T
 A release candidate requires reviewed requirements and architecture, passing static checks, mocked safety/error paths, verified package/upstream dependencies, docs consistent with behavior, and evidence for hardware claims. Disclose known failures and untested items.
 
 ## Results
-The first-slice test command `bash tests/test-common-preflight.sh` passed against temporary local copies with blob hashes matching the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
+The first-slice test command `bash tests/test-common-preflight.sh` passed with six test groups against temporary local copies whose blob hashes matched the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
