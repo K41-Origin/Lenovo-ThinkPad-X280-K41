@@ -2,6 +2,8 @@
 
 Status: PLANNED. No installer tests have been run because the installer is a skeleton.
 
+Run the first-slice unit tests from the repository root with `bash tests/test-common-preflight.sh`. This exercises mocked/read-only helper behavior and does not test installer integration.
+
 Initial test layers:
 - Bash syntax checks for all shell files.
 - ShellCheck and shfmt when available.
