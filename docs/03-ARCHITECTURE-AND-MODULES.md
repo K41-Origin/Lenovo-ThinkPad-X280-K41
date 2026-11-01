@@ -156,14 +156,21 @@ These contracts define the first implementation slice. They are read-only founda
 
 **Traceability:** `REQ-INSTALL-005` is the global gate; `REQ-DISK-003` defines target identification, full-plan review, and explicit confirmation; `REQ-DISK-002` supplies storage/encryption/swap/resume constraints; `REQ-DISK-006` blocks destructive work while bootloader/resume compatibility is unresolved; `REQ-RECOVERY-001` governs interrupted runs. Acceptance criteria are in `docs/02-REQUIREMENTS-AND-DECISIONS.md`; linked test cases are in `docs/11-TESTING-AND-ACCEPTANCE.md`.
 
-**Proposed stage interface** (function names and data representation remain a design contract, not implemented behavior):
-1. `storage::discover_candidates` — read-only disk discovery; return candidate identities and available stable identifiers.
-2. `storage::build_plan <target_identity> <verified_storage_profile>` — construct a complete plan only after required storage and boot/resume design inputs are resolved.
-3. `storage::render_plan <plan>` — display the selected physical target and the complete planned partition, encryption, filesystem, and swap/resume choices.
-4. `storage::validate_target <target_identity> <plan>` — re-read identity and verify that the target still matches the plan.
-5. `storage::confirm_plan <target_identity> <plan>` — obtain explicit user confirmation bound to the reviewed target and plan; cancellation is a non-success result.
-6. `storage::execute_plan <validated_target> <confirmed_plan>` — sole stage permitted to invoke destructive storage tools; revalidate preconditions immediately before the first destructive command.
-7. `storage::verify_result <plan>` — read-only verification after execution reports success.
+**Proposed stage interface** (Bash associative-array records; design contract only, not implemented behavior):
+1. `storage::discover_candidates <output_assoc_array_name>` — read-only block-device discovery; return candidate records with current device locator and available stable identity evidence. Enumeration order or device path alone must not resolve an ambiguous target.
+2. `storage::build_plan <target_assoc_array_name> <profile_assoc_array_name> <output_plan_assoc_array_name>` — validate input schemas and resolved requirements, then build a complete plan. Unknown critical storage/boot/encryption/resume inputs block plan completion.
+3. `storage::render_plan <plan_assoc_array_name>` — display the physical target and every proposed partition, encryption, filesystem, mount, swap, and resume choice before confirmation.
+4. `storage::validate_target <target_assoc_array_name> <plan_assoc_array_name>` — re-discover and compare stable identity evidence and relevant device attributes against the plan snapshot. A changed device path is acceptable only when stable identity proves continuity; path equality alone is insufficient.
+5. `storage::confirm_plan <target_assoc_array_name> <plan_assoc_array_name> <output_confirmation>` — obtain explicit final confirmation after review. The result binds the exact target identity and deterministic canonical plan digest; cancellation returns status 10.
+6. `storage::execute_plan <target_assoc_array_name> <plan_assoc_array_name> <confirmation>` — sole stage permitted to invoke destructive storage tools. Immediately before the first destructive command, revalidate target, plan completeness/digest, prerequisites, boot/resume design, and confirmation.
+7. `storage::verify_result <plan_assoc_array_name>` — read-only verification of resulting partition, encryption, filesystem, mount, and swap/resume state; report observed facts only.
+
+**Data and status conventions**
+- Interfaces use validated names of caller-declared Bash associative arrays (namerefs); never use `eval`, source serialized plans, or interpret plan values as shell code.
+- Candidate records retain raw stable identifiers for comparison but must not log or display full serial numbers by default. Show only the minimum identifying details needed for safe target distinction.
+- Plans have an explicit schema version and contain target identity snapshot, boot mode, ordered partition definitions, encryption/filesystem/mount details, swap/resume design, prerequisite evidence, and unresolved-decision state. No secrets or shell fragments are permitted in records.
+- Confirmation is invalidated by any target identity, plan, schema, or required-evidence change. Digest serialization must be deterministic and safely testable before implementation.
+- Status: `0` success; `1` operational/critical failure; `2` invalid arguments/schema; `10` cancellation/safe stop. Only `0` advances orchestration.
 
 **Common contract requirements:**
 - Discovery, planning, display, validation, confirmation, execution, and verification must remain distinct testable stages.
