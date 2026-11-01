@@ -34,8 +34,10 @@ Use one project-owned interactive installer launched from the shell of an offici
 - Boot from the official Arch ISO, establish connectivity, then use Git to retrieve this repository and invoke `installer` explicitly.
 - Approved project policy: use the latest `main` branch for each installation attempt and display the resolved commit SHA.
 - Do not use `curl | sh`, `wget | sh`, or equivalent remote-code piping.
-- Latest-`main` execution is a deliberate supply-chain trade-off: the branch can change after review and a commit can contain unsafe privileged code. Showing the SHA provides traceability but does not establish that code is safe. Before real disk operations, inspect/review the fetched code and do not proceed if its integrity or expected origin is uncertain.
-- Never claim that fetching Git code alone proves correctness or safety.
+- Latest-`main` execution is a deliberate supply-chain trade-off: the branch can change after review and a commit can contain unsafe privileged code. Showing the SHA provides traceability, but does not establish that the code is safe or correct.
+- Before executing fetched project code, inspect/review the resolved commit and relevant scripts, especially any code that may run with elevated privileges. Do not start the installer with elevated privileges before this review. If the origin, integrity, or contents of the fetched code are uncertain, stop and do not execute it.
+- Security review must happen before code execution, not merely before disk operations. A disk-operation gate cannot undo unsafe actions that may already have occurred while privileged code was running.
+- Keep privilege elevation limited to the specific operation that requires it; never treat fetching Git code, displaying a commit SHA, or passing a review checklist as proof that the code is safe.
 
 ## Module responsibilities
 - `installer`: user-facing entry point, stage orchestration, cancellation, and high-level status. It must fail closed until implementation gates pass.
