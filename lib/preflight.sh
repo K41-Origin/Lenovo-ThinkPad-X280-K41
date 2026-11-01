@@ -17,19 +17,30 @@ preflight::check_root() {
   fi
 }
 
-preflight::detect_boot_mode() {
-  if [[ -d /sys/firmware/efi ]]; then
+preflight::detect_boot_mode_at() {
+  local firmware_root
+  if [[ $# -ne 1 || -z "$1" ]]; then
+    k41::log_error 'preflight::detect_boot_mode_at requires a firmware-root path.'
+    return 2
+  fi
+  firmware_root=$1
+
+  if [[ -d "$firmware_root/efi" ]]; then
     k41::log_info 'Boot mode: UEFI (firmware interface directory detected).'
     return 0
   fi
 
-  if [[ -d /sys/firmware ]]; then
+  if [[ -d "$firmware_root" ]]; then
     k41::log_info 'Boot mode: legacy/BIOS candidate (UEFI interface directory not detected).'
     return 0
   fi
 
   k41::log_warn 'Boot mode: unknown (system firmware indicators unavailable).'
   return 2
+}
+
+preflight::detect_boot_mode() {
+  preflight::detect_boot_mode_at /sys/firmware
 }
 
 preflight::check_commands() {
