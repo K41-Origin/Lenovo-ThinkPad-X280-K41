@@ -108,6 +108,19 @@ These are **planned test cases**, not executed tests. They map directly to the a
 - Do not treat a passing mock test as proof of correct real-disk behavior; validate integration separately in an isolated environment.
 - If an implementation cannot expose a stage safely for testing, document the design limitation and resolve it before enabling destructive operations.
 
+## Boot, encryption, and hibernation acceptance tests — PLANNED
+
+These tests validate the approved design direction. They must use disposable VM images/mocks first; no test may repartition a user's real disk. A VM pass does not establish ThinkPad X280 hardware compatibility.
+
+- **TC-BOOT-001 — UEFI/systemd-boot asset visibility:** verify the firmware is in UEFI mode, systemd-boot entries resolve to files on the ESP or supported XBOOTLDR partition, and no entry depends on reading kernel/initramfs from encrypted root.
+- **TC-BOOT-002 — Kernel update lifecycle:** install/update the official Arch `linux` package and verify the selected boot-asset mechanism regenerates/copies the required kernel, initramfs or UKI files and leaves a bootable entry. Verify fallback behavior and ESP free-space handling.
+- **TC-CRYPT-001 — Encrypted root unlock:** with LUKS2 + ext4 on the mapped root, verify the initramfs contains required modules/tools, prompts for the passphrase, unlocks the expected device, and mounts the intended root. Wrong passphrase, missing device, and malformed parameters must fail safely.
+- **TC-RESUME-001 — Swapfile mapping:** verify the swapfile is inside the unlocked ext4 mapper filesystem and the `resume=` parameter identifies that unlocked device, not the raw LUKS partition.
+- **TC-RESUME-002 — Offset correctness:** calculate the actual ext4 swapfile physical offset using the supported method and verify the generated `resume_offset=` matches it. Test recreated, resized, and relocated swapfiles; stale/missing offset must be detected and must not be reported as hibernation-ready.
+- **TC-RESUME-003 — Capacity policy:** test swap sizing against measured RAM, disk free space, and documented hibernation assumptions; insufficient capacity must block the hibernation-ready status rather than silently shrinking or overcommitting.
+- **TC-RESUME-004 — End-to-end hibernation:** manually hibernate and resume in a disposable VM where supported, then on the actual X280 with explicit authorization. Record VERIFIED/FAILED/NOT TESTED separately; do not infer successful resume from configuration alone.
+- **TC-BOOT-003 — ESP integrity and limitation:** verify the installer reports that Secure Boot is disabled and that an unencrypted ESP is not authenticated against offline tampering by LUKS alone.
+
 ## Integration and hardware validation
 Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. Test on the actual X280 only with authorization and verified target. Check boot, encryption, filesystem, network, audio, desktop, and services. Actual hibernation must be tested manually.
 
