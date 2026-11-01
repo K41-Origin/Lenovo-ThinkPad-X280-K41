@@ -31,8 +31,8 @@ preflight::detect_boot_mode_at() {
   fi
 
   if [[ -d "$firmware_root" ]]; then
-    k41::log_info 'Boot mode: legacy/BIOS candidate (UEFI interface directory not detected).'
-    return 0
+    k41::log_warn 'Boot mode: legacy/BIOS candidate only; absence of the UEFI directory is not conclusive.'
+    return 2
   fi
 
   k41::log_warn 'Boot mode: unknown (system firmware indicators unavailable).'
