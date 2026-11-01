@@ -11,15 +11,20 @@
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
 | Installer entry-point skeleton | IMPLEMENTED | `installer` is a safe placeholder that exits without changing the system. |
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
-| Common logging helpers | IMPLEMENTED | `lib/common.sh` provides argument-checked stderr logging; runtime tests are present but have not yet been executed in this environment. |
-| Read-only preflight helpers | IMPLEMENTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics; it does not install packages or change system state. Runtime tests are present but have not yet been executed in this environment. |
+| Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
+| Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
 | Test plan | IMPLEMENTED | `tests/README.md` describes intended test layers; no tests executed yet. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | NOT TESTED | ShellCheck, shfmt, and syntax checks have not been run. |
+| Static checks | TESTED | `bash -n` passed for `lib/common.sh`, `lib/preflight.sh`, and `tests/test-common-preflight.sh`. ShellCheck and shfmt were unavailable. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Common/preflight first-slice validation
+- Ran `bash -n` on `lib/common.sh`, `lib/preflight.sh`, and `tests/test-common-preflight.sh`; all passed.
+- Ran `bash tests/test-common-preflight.sh` against temporary local copies. Their Git blob hashes matched the committed GitHub files; all five test groups passed.
+- ShellCheck and shfmt were unavailable. The installer was not run; no real disk, package, service, or network configuration was changed.
 
 ### 2026-11-02 — Common and read-only preflight first slice
 - Defined first-slice contracts and acceptance cases for `lib/common.sh` and `lib/preflight.sh`.
