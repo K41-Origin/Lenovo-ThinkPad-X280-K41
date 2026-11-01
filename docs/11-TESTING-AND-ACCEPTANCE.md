@@ -73,6 +73,18 @@ These are planned tests for the read-only `lib/inventory.sh` contract. Use tempo
 | TC-INVENTORY-004 | Interface validation | Pass a missing, indexed, or non-associative output variable and invalid fixture-root arguments. | The function returns the documented invalid-input status and does not modify unrelated caller variables. |
 | TC-INVENTORY-005 | Read-only boundary | Monitor filesystem writes and invoked commands while collecting/rendering fixture data. | No writes, package/service/network operations, block-device reads, or destructive storage tools are invoked. |
 
+### Storage contract implementation tests
+
+The existing TC-DISK cases remain the requirement-level acceptance tests. Add these interface-level checks when `lib/storage.sh` is implemented:
+
+- Validate associative-array arguments and schema versions; reject missing, indexed, or ordinary scalar variables without using `eval`.
+- Use deterministic fixtures to prove canonical plan serialization/digest is stable for identical data and changes when any target, partition, encryption, filesystem, swap/resume, or prerequisite field changes.
+- Prove a confirmation cannot be reused with a different target, modified plan, changed schema, or stale prerequisite evidence.
+- Mock all destructive commands behind an injectable test boundary. For every invalid input, incomplete plan, failed prerequisite, changed identity, cancellation, stale confirmation, and interrupted/recovery state, assert an exact destructive-call count of zero.
+- Test the execution boundary separately: only a valid, freshly revalidated target + complete plan + matching confirmation can reach mocked destructive operations.
+- Verify post-operation checks are read-only and distinguish observed success, mismatch/failure, and unavailable/NOT TESTED results.
+- Do not claim the plan digest is a cryptographic authorization mechanism; it is an integrity binding within the reviewed installer flow, not protection against a compromised process or malicious root code.
+
 ## Requirement-linked test cases
 
 These are **planned test cases**, not executed tests. They map directly to the acceptance criteria for **REQ-DISK-003** in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. When implementation begins, destructive commands must be replaced with mocks/fakes in automated tests; these cases must not operate on real disks.
