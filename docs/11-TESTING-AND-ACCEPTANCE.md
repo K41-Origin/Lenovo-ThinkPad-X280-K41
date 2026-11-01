@@ -121,6 +121,19 @@ These tests validate the approved design direction. They must use disposable VM 
 - **TC-RESUME-004 — End-to-end hibernation:** manually hibernate and resume in a disposable VM where supported, then on the actual X280 with explicit authorization. Record VERIFIED/FAILED/NOT TESTED separately; do not infer successful resume from configuration alone.
 - **TC-BOOT-003 — ESP integrity and limitation:** verify the installer reports that Secure Boot is disabled and that an unencrypted ESP is not authenticated against offline tampering by LUKS alone.
 
+## UKI-specific acceptance tests — PLANNED
+
+The approved boot design uses a native mkinitcpio UKI on the ESP, with the source kernel/configuration on encrypted root. These tests must run against disposable VM disks or mocks first. They do not authorize testing on a user's real disk.
+
+- **TC-UKI-001 — Preset output:** verify the installed official `linux` package and mkinitcpio preset produce the expected default UKI under `/efi/EFI/Linux/`; verify the UKI contains the intended kernel, initramfs, and kernel command line.
+- **TC-UKI-002 — systemd-boot discovery:** verify systemd-boot discovers and boots the default UKI from the ESP in UEFI mode without reading kernel/initramfs from encrypted root.
+- **TC-UKI-003 — Encrypted-root boot:** verify the UKI's initramfs uses the approved systemd-based `sd-encrypt` path and unlocks/mounts the intended LUKS2 + ext4 root. Wrong passphrase, unavailable device, and malformed parameters must fail safely.
+- **TC-UKI-004 — Kernel update with ESP mounted:** update the official `linux` package and verify the package/mkinitcpio preset lifecycle regenerates the UKI, and systemd-boot still discovers it.
+- **TC-UKI-005 — ESP not mounted:** simulate or arrange a safe test environment where the ESP is not mounted at `/efi`; verify the update process detects the missing mount and does not silently write into the root filesystem's ordinary `/efi` directory or report a fresh UKI.
+- **TC-UKI-006 — Generation failure / known-good artifact:** force UKI generation to fail; verify the failure is visible and the previous known-good UKI is not deleted or overwritten by an incomplete artifact.
+- **TC-UKI-007 — Capacity and fallback policy:** verify the 1 GiB ESP has sufficient measured headroom for the required default UKI and update operation. No fallback UKI is required initially; if later enabled, test its measured capacity impact and update lifecycle.
+- **TC-UKI-008 — Recovery path:** verify the official Arch ISO USB can be used to recover/rebuild the UKI after a failed boot-artifact update. This is a recovery test, not proof that the installed system boots.
+
 ## Integration and hardware validation
 Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. Test on the actual X280 only with authorization and verified target. Check boot, encryption, filesystem, network, audio, desktop, and services. Actual hibernation must be tested manually.
 
