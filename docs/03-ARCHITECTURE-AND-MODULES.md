@@ -55,6 +55,32 @@ Use one project-owned interactive installer launched from the shell of an offici
 ## Module contract
 Before implementing a module, document its purpose, non-goals, inputs, validation, privilege requirements, changed files/services/packages, failure recovery, idempotency, tests, logging, dependencies, and upstream references.
 
+### Storage module contract — PLANNED
+
+**Owner:** `lib/storage.sh` is the sole owner of disk partitioning/formatting and the only module permitted to invoke destructive storage tools. The entry point may orchestrate storage stages but must not issue disk commands itself.
+
+**Traceability:** `REQ-INSTALL-005` is the global gate; `REQ-DISK-003` defines target identification, full-plan review, and explicit confirmation; `REQ-DISK-002` supplies storage/encryption/swap/resume constraints; `REQ-DISK-006` blocks destructive work while bootloader/resume compatibility is unresolved; `REQ-RECOVERY-001` governs interrupted runs. Acceptance criteria are in `docs/02-REQUIREMENTS-AND-DECISIONS.md`; linked test cases are in `docs/11-TESTING-AND-ACCEPTANCE.md`.
+
+**Proposed stage interface** (function names and data representation remain a design contract, not implemented behavior):
+1. `storage::discover_candidates` — read-only disk discovery; return candidate identities and available stable identifiers.
+2. `storage::build_plan <target_identity> <verified_storage_profile>` — construct a complete plan only after required storage and boot/resume design inputs are resolved.
+3. `storage::render_plan <plan>` — display the selected physical target and the complete planned partition, encryption, filesystem, and swap/resume choices.
+4. `storage::validate_target <target_identity> <plan>` — re-read identity and verify that the target still matches the plan.
+5. `storage::confirm_plan <target_identity> <plan>` — obtain explicit user confirmation bound to the reviewed target and plan; cancellation is a non-success result.
+6. `storage::execute_plan <validated_target> <confirmed_plan>` — sole stage permitted to invoke destructive storage tools; revalidate preconditions immediately before the first destructive command.
+7. `storage::verify_result <plan>` — read-only verification after execution reports success.
+
+**Common contract requirements:**
+- Discovery, planning, display, validation, confirmation, execution, and verification must remain distinct testable stages.
+- Ambiguous/missing identity, incomplete plan, failed prerequisite, changed target, cancellation, or unknown critical state must fail closed.
+- Return statuses must distinguish success from safe abort/cancellation and critical failure. Missing output or unset state must never count as success.
+- Never pass or log passphrases, recovery keys, or credentials. Keep privilege elevation limited to the stage that requires it.
+- No exact partition layout, bootloader, encryption mapping, or resume mechanism is implied by this contract; those decisions remain blocked on verified design.
+- Every abort path must be testable with mocks and assert zero destructive-tool invocations. Do not run automated tests against real disks.
+
+**Stage ordering:** preflight success → discover candidates → build complete plan → render plan → validate target → explicit confirmation → immediate target/precondition revalidation → execute → verify result. Any failed gate exits before execution. Recovery after interruption must inspect current state and must not automatically repeat destructive work.
+
+
 ## Safety and recovery boundaries
 - Storage is the only module permitted to own partitioning/formatting logic; other modules must not call destructive disk tools directly.
 - Disk discovery, proposed plan, target validation, explicit confirmation, execution, and post-operation verification are separate stages.
