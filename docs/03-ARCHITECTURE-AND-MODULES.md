@@ -140,6 +140,44 @@ These contracts define the first implementation slice. They are read-only founda
 
 **Stage ordering:** preflight success → discover candidates → build complete plan → render plan → validate target → explicit confirmation → immediate target/precondition revalidation → execute → verify result. Any failed gate exits before execution. Recovery after interruption must inspect current state and must not automatically repeat destructive work.
 
+### Installer orchestration contract — PLANNED
+
+**Purpose:** define the responsibilities and gate order for the single user-facing `installer` entry point. This is a design contract only; no orchestration stage beyond the existing diagnostic preflight is implemented.
+
+**Entry-point responsibilities**
+- Own the interactive session, stage order, cancellation propagation, high-level status, and safe shutdown.
+- Call focused module interfaces; do not duplicate module logic or perform storage, package, service, or network changes directly.
+- Never source or invoke a later-stage module until its prerequisites and the applicable pre-execution review gate have passed.
+- Treat missing, malformed, stale, or unknown stage output as a failure to establish the next gate; never infer success from empty output.
+- Keep secrets out of arguments where practical, logs, temporary plan files, and reports. Secret collection and handling must be designed by the owning module.
+- Do not elevate the entire entry point merely for convenience. Each module must declare the narrow privilege boundary for its operations.
+
+**Top-level stage sequence**
+1. **Preflight** — run required read-only environment checks. A failed required check blocks dependent stages; optional diagnostics remain informational.
+2. **Inventory** — collect the hardware, firmware, and candidate-storage facts required for planning. Inventory is read-only. Unknown critical facts remain unresolved, not guessed.
+3. **Plan** — build a complete installation plan from approved requirements and verified inventory. Do not silently substitute defaults for unresolved hardware, storage, boot, encryption, or resume decisions.
+4. **Review** — present the relevant installation choices and the complete storage target/partition/encryption/filesystem/swap-resume plan in human-readable form.
+5. **Confirm** — obtain the explicit final confirmation required by `REQ-INSTALL-005` and `REQ-DISK-003`, bound to the displayed target and plan. Cancellation exits safely.
+6. **Execute** — invoke the owning modules in dependency order. The entry point coordinates but does not issue destructive storage commands. `lib/storage.sh` remains the sole owner of partitioning/formatting. Storage identity and critical preconditions must be revalidated immediately before the first destructive operation.
+7. **Verify** — run read-only post-operation checks through the appropriate validation interfaces. Report each result as VERIFIED, FAILED, or NOT TESTED; do not claim success when a check was skipped or inconclusive.
+
+**Gate and failure behavior**
+- No target-disk-dependent installation stage may run until required preflight checks, inventory, planning, review, and the target/plan confirmation have succeeded.
+- No destructive storage command may run if the target identity is ambiguous or changed, the plan is incomplete, a required prerequisite fails, confirmation is cancelled, or a critical state is unknown.
+- A stage failure stops all dependent later stages. Independent diagnostics may be reported only if they are read-only and cannot obscure the original failure.
+- Cancellation is a safe stop, not success. Critical failures stop for manual intervention. Recovery must inspect current system state and must not automatically repeat destructive work.
+- The orchestrator must preserve the original failing stage and status in its final diagnostic; cleanup errors must not overwrite the primary failure.
+- Automated tests must mock all disk/system-changing operations and assert zero destructive invocations for every blocked or cancelled path.
+
+**Status convention (proposed; implementation pending):**
+- `0` — stage completed successfully.
+- `1` — operational or critical failure; dependent stages must stop.
+- `2` — invalid invocation or invalid stage input.
+- `10` — user cancellation or deliberate safe stop; this is not success and dependent stages must stop.
+
+These values are an internal Bash interface proposal, not yet implemented. Modules must document any richer diagnostic detail separately without changing the rule that only status `0` advances the orchestration.
+
+**Acceptance boundary:** the contract is considered implemented only when the entry point has deterministic stage sequencing, explicit module interfaces, cancellation/failure propagation, and mocked tests proving that blocked paths cannot reach destructive operations. Documentation alone does not satisfy this boundary.
 
 ## Safety and recovery boundaries
 - Storage is the only module permitted to own partitioning/formatting logic; other modules must not call destructive disk tools directly.
