@@ -1,13 +1,73 @@
 #!/usr/bin/env bash
 # Lenovo-ThinkPad-X280-K41
-# Entry point placeholder. Installation logic is intentionally not implemented yet.
+# Diagnostic entry point only. Installation orchestration is not implemented.
 set -Eeuo pipefail
 
-printf '%s\n' \
-  'Lenovo ThinkPad X280 K41 installer' \
-  '' \
-  'STATUS: PLANNED — installer logic is not implemented.' \
-  'No disks, packages, services, or system configuration were changed.' \
-  '' \
-  'Do not use this skeleton to install a system.'
-exit 2
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck source=lib/common.sh
+source "$SCRIPT_DIR/lib/common.sh"
+# shellcheck source=lib/preflight.sh
+source "$SCRIPT_DIR/lib/preflight.sh"
+
+usage() {
+  cat <<'USAGE'
+Usage: ./installer [--help | --preflight]
+
+  --help       Show this help.
+  --preflight  Run read-only environment diagnostics only.
+
+Installation is not implemented. This entry point never installs packages,
+changes services or network settings, or reads/writes target-disk contents.
+USAGE
+}
+
+run_preflight() {
+  local failed=0 status
+
+  k41::log_info 'Starting read-only diagnostics; this is not an installation approval.'
+  preflight::check_root || failed=1
+
+  if preflight::detect_boot_mode; then
+    :
+  else
+    status=$?
+    k41::log_error "Boot mode is unresolved (check status $status); later stages must remain blocked."
+    failed=1
+  fi
+
+  if preflight::check_commands bash id; then
+    :
+  else
+    status=$?
+    k41::log_error "Required command check failed (status $status)."
+    failed=1
+  fi
+
+  # Network link state is diagnostic only; the 'ip' utility is optional here.
+  preflight::report_network_links || k41::log_warn 'Network diagnostics are incomplete; this is not treated as a required-command failure.'
+
+  if (( failed != 0 )); then
+    k41::log_error 'Preflight unresolved. No installation stage exists or was invoked.'
+    return 2
+  fi
+
+  k41::log_info 'Read-only diagnostics completed, but installation remains disabled.'
+  return 2
+}
+
+case "${1-}" in
+  --help)
+    [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+    usage
+    exit 0
+    ;;
+  --preflight)
+    [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+    run_preflight
+    exit $?
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
