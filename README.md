@@ -4,6 +4,10 @@ A personal, modular, security-conscious Arch Linux installation and setup projec
 
 > **Project status:** installer skeleton only. Installation logic is not implemented; no installation or hardware tests have been run.
 
+## AI-assisted development
+
+Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). AI-assisted changes must follow those rules and verify repository writes and relevant tests before reporting completion.
+
 ## Goals
 - One interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB.
 - Retrieve and run the latest code from the repository's `main` branch, displaying the resolved commit SHA so the exact code used is identifiable.
