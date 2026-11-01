@@ -15,7 +15,7 @@
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
 | Test plan and focused test harnesses | TESTED | `tests/test-common-preflight.sh`, `tests/test-installer-entry.sh`, and `tests/test-preflight-gate.sh` have focused coverage; the gate test uses a deterministic mocked module. Installer integration tests remain PLANNED. |
 | Approved UEFI/LUKS2/ext4/hibernation design direction | IMPLEMENTED | Architecture direction recorded; systemd-boot asset placement, exact initramfs parameters, swap sizing, resume-offset lifecycle, VM and X280 validation remain PLANNED/NOT TESTED. |
-| Storage module contract documentation | IMPLEMENTED || Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
+| Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
 | Static checks | TESTED | `bash -n` passed for the entry point, common/preflight modules, and both focused test scripts. ShellCheck and shfmt were unavailable. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
