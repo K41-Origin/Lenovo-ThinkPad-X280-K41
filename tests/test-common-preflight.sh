@@ -63,4 +63,11 @@ grep -q 'not proof of internet connectivity' "$tmp/network.log" || fail 'network
 grep -q 'lo UNKNOWN' "$tmp/network.log" || fail 'network link observation missing'
 pass 'network check reports link state without claiming internet access'
 
+mkdir -p "$tmp/empty-bin"
+if PATH="$tmp/empty-bin" preflight::report_network_links 2>"$tmp/network-unknown.log"; then
+  fail 'network check treated unavailable ip tool as verified'
+fi
+grep -q 'state unknown' "$tmp/network-unknown.log" || fail 'unavailable ip tool was not reported as unknown'
+pass 'network check reports unavailable diagnostics as unknown'
+
 printf '%s\n' 'All common/preflight tests passed.'
