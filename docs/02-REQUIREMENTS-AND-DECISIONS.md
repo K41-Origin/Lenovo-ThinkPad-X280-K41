@@ -2,8 +2,14 @@
 
 This document indexes approved planning decisions. Domain details live in the relevant document; avoid conflicting duplication.
 
+## Installer architecture
+- REQ-INSTALL-001 — APPROVED: Boot an official, unmodified Arch Linux ISO from USB; run the project's own installer from the ISO shell; use one interactive flow from base installation through desktop configuration.
+- REQ-INSTALL-002 — APPROVED: Keep the implementation modular internally; one entry point coordinates focused modules.
+- REQ-INSTALL-003 — APPROVED: Retrieve the latest repository code from `main` for each installation attempt. Display the resolved commit SHA so the version used is identifiable.
+- REQ-INSTALL-004 — APPROVED: Do not pipe remote scripts directly into a shell. Bootstrap must retrieve code with Git and invoke the project entry point explicitly.
+- REQ-INSTALL-005 — APPROVED: No installation logic may proceed until prerequisites pass, a full disk plan is shown, and the user explicitly confirms the identified target disk.
+
 ## Installation and storage
-- REQ-INSTALL-001 — APPROVED: Official, unmodified Arch ISO from USB; interactive TUI; minimize typing.
 - REQ-DISK-001 — APPROVED: Replace Windows; user reports no data to retain.
 - REQ-DISK-002 — APPROVED: LUKS, ext4, swapfile, and hibernation readiness; size/layout based on verified constraints.
 - REQ-DISK-003 — APPROVED: Show full disk plan and verify target identity before destructive work; require explicit final confirmation.
@@ -46,7 +52,7 @@ This document indexes approved planning decisions. Domain details live in the re
 - REQ-RECOVERY-002 — APPROVED: Unknown critical failures stop for manual intervention.
 
 ## Verification still required
-Actual hardware and wireless chipset; current Caelestia/Quickshell/Hyprland dependencies; bootloader and encrypted-root/resume design; package availability; encrypted DNS implementation; service compatibility; and final module boundaries.
+Actual hardware and wireless chipset; current Caelestia/Quickshell/Hyprland dependencies; bootloader and encrypted-root/resume design; package availability; encrypted DNS implementation; service compatibility; module contracts; and acceptance tests.
 
 ## Change process
 When a decision changes, update its ID and owning domain document together, recording rationale and evidence. Do not mark anything implemented, tested, verified, or released without evidence.
