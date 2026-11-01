@@ -6,6 +6,21 @@ The repository contains tested first-slice logging/read-only preflight helpers a
 ## Architecture decision
 Use one project-owned interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB. The same interactive flow coordinates base Arch installation, desktop configuration, selected packages, validation, and reporting. Modules remain separate internally to keep responsibilities testable and failures easier to isolate.
 
+## Approved storage and boot design direction
+
+The following direction is approved for the X280 project. It is not yet implemented, hardware-verified, or a finalized target-specific partition plan.
+
+- Firmware and partitioning: UEFI with GPT. Detect the actual boot mode on every run; do not assume the machine was booted in UEFI mode.
+- EFI System Partition: FAT32, approximately 1 GiB as an initial proposal. The final size and mount/boot-asset strategy must account for kernel, initramfs or Unified Kernel Image (UKI), fallback images, and future updates.
+- Boot manager: systemd-boot. It can load EFI executables from the ESP or supported XBOOTLDR partition; it cannot simply read arbitrary files from an encrypted root filesystem. Therefore the project must explicitly choose and test a compatible boot-asset arrangement (likely UKI on the ESP, or a deliberately ESP-mounted kernel/initramfs layout) before writing bootloader code.
+- Encryption and root: one LUKS2 container on the main Linux partition, with ext4 directly on the unlocked mapper device. No LVM is planned because the approved initial layout needs only one root filesystem and a swapfile.
+- Kernel/initramfs: official Arch `linux` package; mkinitcpio with the systemd-based `sd-encrypt` path is the current candidate for unlocking root in early userspace. Exact hook ordering, kernel command line, microcode handling, and boot-asset generation/update hooks require verification before implementation. Do not install `linux-headers` unless a selected DKMS module requires them.
+- Swap and hibernation: swapfile located inside encrypted ext4 root. Its size is derived from measured RAM, available disk capacity, and an explicit hibernation sizing policy. Resume must target the unlocked mapper device; ext4's actual physical swapfile offset must be calculated and kept synchronized with the boot configuration whenever the swapfile is created, resized, replaced, or relocated. Filesystem allocation/fragmentation behavior and update lifecycle must be tested.
+- No separate unencrypted swap partition, separate swap LUKS container, or LVM layer is planned in this initial design.
+- Secure Boot remains disabled according to REQ-SEC-006. This means LUKS protects data at rest but does not authenticate the boot chain; the unencrypted ESP remains exposed to offline modification. Explain this limitation in installer review and documentation.
+
+**Mandatory unresolved checks before implementation:** verify the X280's actual UEFI mode and hardware/RAM/storage inventory; confirm systemd-boot boot-asset placement and kernel-update integration; verify LUKS2 + mkinitcpio `sd-encrypt` root unlock; verify ext4 swapfile resume parameters and offset lifecycle; establish a safe swap-size policy; test boot and resume in an isolated VM, then perform authorized hardware validation. Any unresolved critical check blocks destructive storage execution.
+
 ## Repository layout
 ```text
 .
