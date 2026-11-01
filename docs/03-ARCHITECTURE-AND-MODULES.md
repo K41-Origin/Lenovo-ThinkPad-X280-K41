@@ -39,6 +39,29 @@ Use one project-owned interactive installer launched from the shell of an offici
 - Security review must happen before code execution, not merely before disk operations. A disk-operation gate cannot undo unsafe actions that may already have occurred while privileged code was running.
 - Keep privilege elevation limited to the specific operation that requires it; never treat fetching Git code, displaying a commit SHA, or passing a review checklist as proof that the code is safe.
 
+### Manual bootstrap and pre-execution review
+
+The following is the intended safe retrieval/review sequence, not an installer and not permission to execute the retrieved code. It deliberately stops before invoking `installer`.
+
+```bash
+set -eu
+workdir="$(mktemp -d)"
+git clone --branch main --single-branch https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git "$workdir/repo"
+cd "$workdir/repo"
+
+printf '\\nResolved commit: '
+git rev-parse HEAD
+git status --short
+git show --format=fuller --stat --no-renames HEAD
+git log -5 --oneline --decorate
+git ls-files '*.sh' installer
+git grep -n -E 'sudo|mkfs|parted|sgdisk|fdisk|cryptsetup|pacman|systemctl|curl|wget|eval|bash' -- '*.sh' installer || true
+```
+
+Review the full contents of `installer` and every tracked shell file, plus the relevant commit changes, before any execution. The search above is only a review aid: it is not exhaustive and a lack of matches does not prove safety. Confirm the repository URL, resolved commit, working-tree state, privilege transitions, remote-code handling, package verification, secret handling, and all disk/system-changing paths. A clean working tree and commit SHA provide traceability, not proof of correctness or trustworthiness.
+
+**Stop conditions:** if the source, commit, integrity, relevant code, or effect of any privileged operation cannot be understood and reviewed, do not execute the installer. Do not run the project entry point with `sudo` or as root merely to inspect it. The current `installer` is a placeholder and exits without installing anything. Any future bootstrap automation must preserve this pre-execution review gate and must have dedicated tests before it is used for installation.
+
 ## Module responsibilities
 - `installer`: user-facing entry point, stage orchestration, cancellation, and high-level status. It must fail closed until implementation gates pass.
 - `lib/common.sh`: shared logging without secrets, error contracts, stage tracking, privilege checks, and safe cleanup.
