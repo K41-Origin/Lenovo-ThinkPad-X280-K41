@@ -1,8 +1,8 @@
 # Tests
 
-Status: First-slice common/preflight tests are implemented and passed locally against temporary copies whose Git blob hashes matched the committed files. The installer itself remains a skeleton and has not been tested end to end.
+Status: First-slice common/preflight tests are implemented and passed locally against temporary copies whose Git blob hashes matched the committed files. The installer now has a diagnostic-only entry point and focused entry-point tests; actual installation remains unimplemented and has not been tested end to end.
 
-Run the first-slice unit tests from the repository root with `bash tests/test-common-preflight.sh`. This exercises mocked/read-only helper behavior and does not test installer integration.
+Run the focused tests from the repository root with `bash tests/test-common-preflight.sh` and `bash tests/test-installer-entry.sh`. The latter checks argument handling, relative module loading, diagnostic-only behavior, and a static safety boundary; it does not prove all possible side effects are absent or test installation integration.
 
 Initial test layers:
 - Bash syntax checks for all shell files.
