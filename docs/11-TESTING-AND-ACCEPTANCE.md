@@ -61,6 +61,18 @@ These cases define the first-slice coverage. The current script executes source-
 | TC-PREFLIGHT-004 | Network diagnostic | Mock an available diagnostic tool and run with the tool unavailable. | Reports available observations without changing interfaces or claiming external connectivity was verified. |
 | TC-PREFLIGHT-005 | Read-only boundary | Monitor invoked commands and filesystem access while running every preflight check. | No package install, service change, network reconfiguration, target-disk probe, or destructive storage command is invoked. |
 
+## Host inventory test cases
+
+These are planned tests for the read-only `lib/inventory.sh` contract. Use temporary procfs/sysfs-shaped fixtures; do not depend on the host machine's actual hardware.
+
+| Test ID | Module / contract | Setup and action | Expected result |
+|---|---|---|---|
+| TC-INVENTORY-001 | Source safety | Source `lib/inventory.sh` in a clean Bash subprocess while capturing output, shell options, traps, and monitored command calls. | No output, external command, filesystem write, trap change, or shell-option change occurs at source time. |
+| TC-INVENTORY-002 | Host fact collection | Supply deterministic procfs/sysfs fixtures containing CPU, memory, and DMI values; call `inventory::collect_host`. | Documented associative-array keys contain the normalized fixture values; no shell code is emitted or evaluated. |
+| TC-INVENTORY-003 | Missing/invalid optional facts | Omit optional DMI/CPU fields and provide malformed memory data. | Unavailable or invalid fields remain absent/unknown; no guessed defaults are inserted and optional omissions do not become verified facts. |
+| TC-INVENTORY-004 | Interface validation | Pass a missing, indexed, or non-associative output variable and invalid fixture-root arguments. | The function returns the documented invalid-input status and does not modify unrelated caller variables. |
+| TC-INVENTORY-005 | Read-only boundary | Monitor filesystem writes and invoked commands while collecting/rendering fixture data. | No writes, package/service/network operations, block-device reads, or destructive storage tools are invoked. |
+
 ## Requirement-linked test cases
 
 These are **planned test cases**, not executed tests. They map directly to the acceptance criteria for **REQ-DISK-003** in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. When implementation begins, destructive commands must be replaced with mocks/fakes in automated tests; these cases must not operate on real disks.
