@@ -1,6 +1,6 @@
 # Tests
 
-Status: PLANNED. No installer tests have been run because the installer is a skeleton.
+Status: First-slice common/preflight tests are implemented and passed locally against temporary copies whose Git blob hashes matched the committed files. The installer itself remains a skeleton and has not been tested end to end.
 
 Run the first-slice unit tests from the repository root with `bash tests/test-common-preflight.sh`. This exercises mocked/read-only helper behavior and does not test installer integration.
 
