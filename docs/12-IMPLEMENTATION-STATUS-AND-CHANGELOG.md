@@ -21,6 +21,7 @@
 
 ### 2026-11-02 — Manual bootstrap review procedure
 - Added a documented Git retrieval and pre-execution review sequence to the architecture, including resolved-commit display, working-tree/log inspection, and shell-code review aids.
+- Updated the README workflow to require review before any project code is invoked.
 - Explicitly states that the commands stop before invoking the installer and that SHA/clean-tree checks do not prove code safety.
 - Documentation-only change. No installer behavior or tests were run.
 
