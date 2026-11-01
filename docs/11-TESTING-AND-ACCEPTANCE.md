@@ -37,6 +37,20 @@ These planned tests verify the architecture's bootstrap review gate before any f
 | TC-BOOT-002 | Source/integrity uncertainty | Simulate an unavailable or failed required source/integrity check. | Bootstrap stops with a failure status; it does not treat the commit SHA alone as proof of safety or execute fetched code. |
 | TC-BOOT-003 | Pre-execution privilege boundary | Mock the bootstrap flow and record execution/privilege transitions while the review gate is pending or failed. | No installer execution or elevated installation stage occurs before the review gate passes. |
 
+## Common and preflight first-slice tests
+
+These cases are planned for the first implementation slice. They must run as an ordinary user and must not inspect or modify real target disks.
+
+| Test ID | Module / contract | Setup and action | Expected result |
+|---|---|---|---|
+| TC-COMMON-001 | `lib/common.sh` source safety | Source the module in a clean Bash subprocess while capturing stdout/stderr and command calls. | No output, external command, trap, shell-option, or filesystem side effect occurs at source time. |
+| TC-COMMON-002 | Logging interface | Call each public logging helper with ordinary diagnostic text and with invalid/missing arguments. | Output goes to stderr; invalid input returns nonzero; no hidden success or secret-bearing test value is used. |
+| TC-PREFLIGHT-001 | `lib/preflight.sh` source safety | Source the module in a clean Bash subprocess with command calls monitored. | No checks run and no output or mutation occurs at source time. |
+| TC-PREFLIGHT-002 | Required-command check | Use controlled command-availability fixtures for present and missing required commands. | Present commands pass; a missing required command returns failure with a clear diagnostic. |
+| TC-PREFLIGHT-003 | Boot-mode detection | Provide mocked read-only indicators for UEFI, legacy, and unknown states. | UEFI and legacy are reported distinctly; unknown remains unknown and is not treated as verified. |
+| TC-PREFLIGHT-004 | Network diagnostic | Mock available/unavailable diagnostic tools and link states. | Reports available observations without changing interfaces or claiming external connectivity was verified. |
+| TC-PREFLIGHT-005 | Read-only boundary | Monitor invoked commands and filesystem access while running every preflight check. | No package install, service change, network reconfiguration, target-disk probe, or destructive storage command is invoked. |
+
 ## Requirement-linked test cases
 
 These are **planned test cases**, not executed tests. They map directly to the acceptance criteria for **REQ-DISK-003** in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. When implementation begins, destructive commands must be replaced with mocks/fakes in automated tests; these cases must not operate on real disks.
