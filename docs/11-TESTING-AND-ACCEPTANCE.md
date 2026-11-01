@@ -15,13 +15,27 @@ PLANNED. This documentation change does not implement or test installer behavior
 - Mock disk, package-manager, network, and service operations.
 
 ## Safety tests
+- Bootstrap must not execute fetched installer code until the resolved source/commit and relevant code have passed the required pre-execution review.
+- If source identity, integrity, or review status is uncertain or a required check fails, bootstrap stops without executing the installer or privileged installation code.
 - Disk identity and stable identifiers are reported.
 - Proposed partition plan appears before confirmation.
 - Destructive operations require explicit confirmation.
 - Ambiguous target identity stops execution.
+- Failed preflight or incomplete/unverified storage profile blocks installation steps that depend on the target disk.
 - Interrupted installation does not automatically repartition.
 - Signature/integrity failures never bypass verification.
 - Logs and reports contain no secrets.
+- For every failed prerequisite, cancelled confirmation, ambiguous target, incomplete plan, changed target, or unknown critical state, tests explicitly assert that destructive storage commands were invoked zero times.
+
+## Bootstrap pre-execution gate test cases
+
+These planned tests verify the architecture's bootstrap review gate before any fetched project code is executed. Use fixtures and mocks; do not execute untrusted code as part of the test.
+
+| Test ID | Requirement / contract | Setup and action | Expected result |
+|---|---|---|---|
+| TC-BOOT-001 | Bootstrap source/commit review | Provide a fetched-source fixture with an identifiable commit but mark the required code review as incomplete; attempt to continue bootstrap. | Bootstrap refuses to execute the installer; no installer or privileged installation code is invoked. |
+| TC-BOOT-002 | Source/integrity uncertainty | Simulate an unavailable or failed required source/integrity check. | Bootstrap stops with a failure status; it does not treat the commit SHA alone as proof of safety or execute fetched code. |
+| TC-BOOT-003 | Pre-execution privilege boundary | Mock the bootstrap flow and record execution/privilege transitions while the review gate is pending or failed. | No installer execution or elevated installation stage occurs before the review gate passes. |
 
 ## Requirement-linked test cases
 
@@ -40,7 +54,8 @@ These are **planned test cases**, not executed tests. They map directly to the a
 | TC-RECOVERY-001-01 | REQ-RECOVERY-001 / related to REQ-DISK-003 | Simulate a previously interrupted run with partially changed storage state and restart the installer. | The installer inspects/reports current state and does not automatically wipe or repartition again. |
 
 ### Test implementation rules
-- Assert destructive-tool invocations explicitly, including an expected call count of **zero** for every abort, cancellation, ambiguity, incomplete-plan, and changed-target case.
+- Assert destructive-tool invocations explicitly, including an expected call count of **zero** whenever a prerequisite or safety gate fails, confirmation is cancelled, target identity is ambiguous or changed, the plan is incomplete, or a critical state is unknown.
+- Test that failed preflight or unresolved storage/boot-resume inputs prevent entry into any target-disk-dependent installation stage.
 - Keep fixtures deterministic and avoid relying on unstable device-path ordering or real hardware discovery in unit tests.
 - Do not treat a passing mock test as proof of correct real-disk behavior; validate integration separately in an isolated environment.
 - If an implementation cannot expose a stage safely for testing, document the design limitation and resolve it before enabling destructive operations.
