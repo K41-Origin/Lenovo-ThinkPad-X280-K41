@@ -30,8 +30,10 @@ pass 'logging helpers validate arguments and write to stderr'
 mkdir -p "$tmp/uefi/efi" "$tmp/legacy"
 preflight::detect_boot_mode_at "$tmp/uefi" 2>"$tmp/uefi.log" || fail 'UEFI fixture failed'
 grep -q 'UEFI' "$tmp/uefi.log" || fail 'UEFI result not reported'
-preflight::detect_boot_mode_at "$tmp/legacy" 2>"$tmp/legacy.log" || fail 'legacy fixture failed'
-grep -q 'legacy/BIOS candidate' "$tmp/legacy.log" || fail 'legacy result not reported'
+if preflight::detect_boot_mode_at "$tmp/legacy" 2>"$tmp/legacy.log"; then
+  fail 'legacy candidate was incorrectly treated as verified'
+fi
+grep -q 'legacy/BIOS candidate only' "$tmp/legacy.log" || fail 'legacy candidate not reported as uncertain'
 if preflight::detect_boot_mode_at "$tmp/missing" 2>"$tmp/unknown.log"; then
   fail 'unknown firmware state was treated as success'
 fi
