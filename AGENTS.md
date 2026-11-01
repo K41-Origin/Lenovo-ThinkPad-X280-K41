@@ -50,6 +50,20 @@ After changing files:
 - Verify current official upstream documentation for version-sensitive packages, dependencies, and installation methods. Record important sources and unresolved compatibility questions.
 - Preserve the approved policy of retrieving the latest `main` commit for an installation attempt and displaying its resolved SHA. A SHA identifies a revision; it does not prove that the revision is safe.
 
+## Documentation ownership and conflicts
+
+- Give each topic one owning document. The owning document is the canonical location for the complete, authoritative treatment of that topic.
+- Use this ownership map:
+  - `AGENTS.md`: AI workflow, repository-editing rules, safety boundaries, and reporting requirements.
+  - `docs/01-PROJECT-CHARTER.md`: project purpose, scope, goals, and guiding principles.
+  - `docs/02-REQUIREMENTS-AND-DECISIONS.md`: requirement IDs and approved project decisions.
+  - `docs/03-ARCHITECTURE-AND-MODULES.md`: system architecture, module boundaries, and interfaces, consistent with approved requirements and decisions.
+  - Domain documents: detailed procedures, contracts, implementation guidance, and testing criteria for their named domain.
+- Other documents may include a brief summary when useful, but must link to or name the owning document instead of duplicating its full requirements, decisions, or procedures. Keep indexes and cross-references concise.
+- This map assigns ownership by subject; it is not a blanket rule that one document overrides every other document. Approved decisions in the requirements-and-decisions document constrain the architecture. Architecture and domain documents must remain consistent with them.
+- If documents conflict, identify the exact conflicting statements and affected requirements. Do not silently choose one, invent a compromise, or propagate the conflict. Ask for clarification when resolving it would change scope, an approved decision, safety behavior, or an interface. For non-material editorial inconsistencies, make the smallest correction in the non-owning document and preserve the owning document's meaning.
+- When a topic changes, update its owning document first, then update only affected summaries, status records, and cross-references. Before finishing, check for stale or duplicated statements in the documents affected by the change.
+
 ## Shell and test quality
 
 - Use Bash for installer code unless another language has a documented, material advantage.
