@@ -19,6 +19,11 @@
 
 ## Changelog
 
+### 2026-11-02 — Manual bootstrap review procedure
+- Added a documented Git retrieval and pre-execution review sequence to the architecture, including resolved-commit display, working-tree/log inspection, and shell-code review aids.
+- Explicitly states that the commands stop before invoking the installer and that SHA/clean-tree checks do not prove code safety.
+- Documentation-only change. No installer behavior or tests were run.
+
 ### 2026-11-02 — Bootstrap safety and installation-gate documentation
 - Clarified that the resolved project commit must be inspected before fetched installer code is executed, and that a commit SHA alone does not establish safety.
 - Tightened REQ-INSTALL-005 to require passing prerequisites, displaying the complete storage plan for the identified target, and explicit user confirmation before target-disk-dependent installation or destructive storage actions.
