@@ -1,7 +1,7 @@
 # Architecture and Modules
 
 ## Status
-PLANNED. The repository now contains a file/directory skeleton only. Installer behavior is not implemented.
+The repository contains a skeleton plus tested first-slice logging and read-only preflight helpers. Installer orchestration and installation behavior are not implemented end to end.
 
 ## Architecture decision
 Use one project-owned interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB. The same interactive flow coordinates base Arch installation, desktop configuration, selected packages, validation, and reporting. Modules remain separate internally to keep responsibilities testable and failures easier to isolate.
@@ -65,7 +65,7 @@ Review the full contents of `installer` and every tracked shell file, plus the r
 ## Module responsibilities
 - `installer`: user-facing entry point, stage orchestration, cancellation, and high-level status. It must fail closed until implementation gates pass.
 - `lib/common.sh`: shared logging without secrets, error contracts, stage tracking, privilege checks, and safe cleanup.
-- `lib/preflight.sh`: inspect boot mode, network, actual hardware, available storage, and required commands; no destructive changes.
+- `lib/preflight.sh`: first slice reports root status, boot-mode indicators, required-command availability, and network-link state; actual hardware/storage inventory and further preflight gates remain future work. No destructive changes.
 - `lib/storage.sh`: identify candidate disk, render full plan, validate target identity, obtain explicit confirmation, then perform storage operations only after design approval.
 - `lib/base-system.sh`: install/configure the base Arch system after storage and prerequisites are validated.
 - `lib/bootloader.sh`: implement only the boot/encryption/resume combination verified in advance.
@@ -80,7 +80,7 @@ Review the full contents of `installer` and every tracked shell file, plus the r
 ## Module contract
 Before implementing a module, document its purpose, non-goals, inputs, validation, privilege requirements, changed files/services/packages, failure recovery, idempotency, tests, logging, dependencies, and upstream references.
 
-### Common and preflight module contracts — PLANNED
+### Common and preflight module contracts — TESTED (first slice only)
 
 These contracts define the first implementation slice. They are read-only foundations; they do not authorize package installation, network reconfiguration, service changes, or disk operations.
 
@@ -113,7 +113,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Functions are deterministic under controlled fixtures/mocks where practical.
 - Failures are distinguishable from success; unknown states are never silently reported as verified.
 - Tests run without root and without real disk access. No package, service, network, or disk changes are permitted.
-- These contracts remain PLANNED until code and tests are added and the results are recorded.
+- The initial helper implementation and focused unit tests exist; the test script and Bash syntax check passed against temporary copies matching the committed blobs. End-to-end installer integration remains PLANNED.
 
 ### Storage module contract — PLANNED
 
