@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status:** installer skeleton only. Installation logic is not implemented; no installation or hardware tests have been run.
+> **Project status:** installer orchestration and installation logic are not implemented. The first-slice logging/preflight helpers and their unit tests are implemented; installation and hardware tests have not been run.
 
 ## AI-assisted development
 
