@@ -5,14 +5,15 @@ repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$1"; }
 
+tmp="$(mktemp -d)"
+trap 'rm -rf -- "$tmp"' EXIT
+
 # Sourcing must not emit output or alter shell options/traps.
 before_options="$(set +o)"
 before_traps="$(trap -p)"
-source_output="$(
-  source "$repo_root/lib/common.sh"
-  source "$repo_root/lib/preflight.sh"
-)" || fail 'module sourcing returned failure'
-[[ -z "$source_output" ]] || fail 'module sourcing emitted output'
+source "$repo_root/lib/common.sh" >"$tmp/source.out" 2>"$tmp/source.err" || fail 'common module sourcing returned failure'
+source "$repo_root/lib/preflight.sh" >>"$tmp/source.out" 2>>"$tmp/source.err" || fail 'preflight module sourcing returned failure'
+[[ ! -s "$tmp/source.out" && ! -s "$tmp/source.err" ]] || fail 'module sourcing emitted output'
 [[ "$(set +o)" == "$before_options" ]] || fail 'module sourcing changed shell options'
 [[ "$(trap -p)" == "$before_traps" ]] || fail 'module sourcing changed traps'
 pass 'module sourcing has no output or shell-option/trap changes'
@@ -26,8 +27,6 @@ if k41::log_warn >/dev/null 2>&1; then fail 'logger accepted missing argument'; 
 pass 'logging helpers validate arguments and write to stderr'
 
 # Boot-mode detector accepts a fixture root, allowing deterministic tests.
-tmp="$(mktemp -d)"
-trap 'rm -rf -- "$tmp"' EXIT
 mkdir -p "$tmp/uefi/efi" "$tmp/legacy"
 preflight::detect_boot_mode_at "$tmp/uefi" 2>"$tmp/uefi.log" || fail 'UEFI fixture failed'
 grep -q 'UEFI' "$tmp/uefi.log" || fail 'UEFI result not reported'
