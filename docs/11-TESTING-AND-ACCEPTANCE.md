@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The first-slice common/preflight test script has been executed successfully against temporary local copies; their Git blob hashes matched the committed module and test files. This does not verify installer integration or hardware behavior.
+The installer remains PLANNED and has not been tested end to end. The common/preflight and diagnostic-entry test scripts have been run against temporary local copies matching fetched GitHub blobs. This does not verify installation integration or hardware behavior.
 
 ## Documentation checks
 - Verify expected files and relative links.
@@ -37,7 +37,7 @@ These planned tests verify the architecture's bootstrap review gate before any f
 | TC-BOOT-002 | Source/integrity uncertainty | Simulate an unavailable or failed required source/integrity check. | Bootstrap stops with a failure status; it does not treat the commit SHA alone as proof of safety or execute fetched code. |
 | TC-BOOT-003 | Pre-execution privilege boundary | Mock the bootstrap flow and record execution/privilege transitions while the review gate is pending or failed. | No installer execution or elevated installation stage occurs before the review gate passes. |
 
-## Common and preflight first-slice tests
+## Diagnostic entry-point tests\n\nThe diagnostic-only entry point supports `--help` and `--preflight`. It sources only the common/preflight modules, uses a repository-relative module path, and never treats diagnostics as installation approval. `--preflight` intentionally returns nonzero because no installation workflow exists. The focused entry test covers help from another working directory, invalid arguments, non-success from preflight, explicit disabled status, and a static check that the entry point does not source installation modules or name common destructive/system-changing commands. Static checks are supplementary and do not prove the absence of every possible side effect.\n\nRun with `bash tests/test-installer-entry.sh`.\n\n## Common and preflight first-slice tests
 
 These cases define the first-slice coverage. The current script executes source-output/options/trap checks, logging checks, boot-mode fixtures, command-availability cases, and available/unavailable network-diagnostic cases. The broader no-side-effect boundary still also relies on code review; the current script does not instrument every possible filesystem or external-command access. Tests must run as an ordinary user and must not inspect or modify real target disks.
 
