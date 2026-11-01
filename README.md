@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status:** installer orchestration and installation logic are not implemented. The first-slice logging/preflight helpers and their unit tests are implemented; installation and hardware tests have not been run.
+> **Project status:** the entry point supports `--help` and diagnostic-only `--preflight`. Installer orchestration and installation logic are not implemented. Logging/preflight helpers and focused tests exist; installation and hardware tests have not been run.
 
 ## AI-assisted development
 
@@ -19,7 +19,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Current repository structure
 
-- `installer` — single interactive entry point; currently a safe placeholder that exits without changing the system.
+- `installer` — diagnostic-only entry point with `--help` and `--preflight`; it always exits nonzero after preflight because installation is disabled.
 - `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
 - `tests/` — test strategy and future isolated test coverage.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
@@ -29,12 +29,12 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
 3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
 4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See the manual bootstrap review procedure in [Architecture and modules](docs/03-ARCHITECTURE-AND-MODULES.md#manual-bootstrap-and-pre-execution-review).
-5. Run preflight checks and show the complete installation plan.
+5. Run diagnostic preflight checks. A complete installation plan is not implemented yet.
 6. Require explicit confirmation of the identified target disk before destructive storage operations.
 7. Install and configure the base system, desktop, and selected software in one interactive flow.
 8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
-**Important:** the current repository does not yet implement this workflow. Do not run the placeholder as an installer.
+**Important:** the current repository does not yet implement installation. `./installer --preflight` is read-only diagnostics only and deliberately does not return success; do not treat it as approval to install.
 
 ## Documentation index
 1. [Project charter](docs/01-PROJECT-CHARTER.md) — scope, goals, principles, and status vocabulary.
