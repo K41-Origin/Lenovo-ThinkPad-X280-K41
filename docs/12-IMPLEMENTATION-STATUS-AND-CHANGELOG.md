@@ -15,12 +15,19 @@
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
 | Test plan and focused test harnesses | TESTED | `tests/test-common-preflight.sh`, `tests/test-installer-entry.sh`, and `tests/test-preflight-gate.sh` have focused coverage; the gate test uses a deterministic mocked module. Installer integration tests remain PLANNED. |
 | Approved UEFI/LUKS2/ext4/hibernation design direction | IMPLEMENTED | Architecture direction recorded; systemd-boot asset placement, exact initramfs parameters, swap sizing, resume-offset lifecycle, VM and X280 validation remain PLANNED/NOT TESTED. |
+| Native mkinitcpio UKI boot design | IMPLEMENTED | Decision documented: default UKI on 1 GiB ESP at `/efi/EFI/Linux/`, source kernel/configuration on encrypted root, systemd-boot discovery, no initial fallback UKI. Generation/update lifecycle and boot behavior remain PLANNED / NOT TESTED. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
 | Static checks | TESTED | `bash -n` passed for the entry point, common/preflight modules, and both focused test scripts. ShellCheck and shfmt were unavailable. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Finalized native mkinitcpio UKI boot design
+- Approved a single default mkinitcpio-generated UKI on the 1 GiB FAT32 ESP at `/efi/EFI/Linux/`, with the source kernel and mkinitcpio configuration on encrypted ext4 root and systemd-boot discovering the UKI.
+- A fallback UKI is not required in the initial profile; the official Arch ISO USB is the recovery path. Reconsider fallback only after measuring artifact sizes and ESP update headroom.
+- Recorded kernel-update/ESP-mount and known-good-artifact preservation requirements, plus dedicated UKI acceptance tests. The supplied 8 GiB RAM and 256 GB SSD are planning inputs; swap sizing and target partitioning are still separate unresolved decisions.
+- Documentation-only. No code, mkinitcpio preset, UKI, boot entry, VM, or hardware test was performed; this design is not yet implemented or verified.
 
 ### 2026-11-02 — Approved storage/boot design direction
 - Recorded the approved direction: UEFI/GPT, FAT32 ESP (approximately 1 GiB initial proposal), systemd-boot, LUKS2-encrypted ext4 root, swapfile inside encrypted root, official Arch `linux`, and mkinitcpio with systemd-based `sd-encrypt` as the candidate early-unlock path.
