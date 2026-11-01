@@ -13,6 +13,7 @@ Use one project-owned interactive installer launched from the shell of an offici
 ├── lib/
 │   ├── common.sh
 │   ├── preflight.sh
+│   ├── inventory.sh
 │   ├── storage.sh
 │   ├── base-system.sh
 │   ├── bootloader.sh
@@ -65,7 +66,8 @@ Review the full contents of `installer` and every tracked shell file, plus the r
 ## Module responsibilities
 - `installer`: user-facing entry point, stage orchestration, cancellation, and high-level status. It must fail closed until implementation gates pass.
 - `lib/common.sh`: shared logging without secrets, error contracts, stage tracking, privilege checks, and safe cleanup.
-- `lib/preflight.sh`: first slice reports root status, boot-mode indicators, required-command availability, and network-link state; actual hardware/storage inventory and further preflight gates remain future work. No destructive changes.
+- `lib/preflight.sh`: first slice reports root status, boot-mode indicators, required-command availability, and network-link state; no destructive changes.
+- `lib/inventory.sh`: read-only collection and presentation of host hardware facts needed for planning; does not discover/select disks or apply settings.
 - `lib/storage.sh`: identify candidate disk, render full plan, validate target identity, obtain explicit confirmation, then perform storage operations only after design approval.
 - `lib/base-system.sh`: install/configure the base Arch system after storage and prerequisites are validated.
 - `lib/bootloader.sh`: implement only the boot/encryption/resume combination verified in advance.
@@ -114,6 +116,39 @@ These contracts define the first implementation slice. They are read-only founda
 - Failures are distinguishable from success; unknown states are never silently reported as verified.
 - Tests run without root and without real disk access. No package, service, network, or disk changes are permitted.
 - The initial helper implementation and focused unit tests exist; the test script and Bash syntax check passed against temporary copies matching the committed blobs. End-to-end installer integration remains PLANNED.
+
+### Inventory module contract — PLANNED
+
+**Purpose:** collect a deterministic, read-only snapshot of host hardware facts needed by the installation planner. This module does not configure hardware and does not discover, select, read contents from, or modify target disks.
+
+**Ownership boundaries**
+- `lib/preflight.sh` owns initial environment readiness checks, including boot-mode indicators and required-command checks.
+- `lib/inventory.sh` owns host hardware facts such as CPU identity, physical memory total, and DMI system identity where available.
+- `lib/storage.sh` exclusively owns block-device discovery, stable disk identity, storage planning, and all partitioning/formatting operations.
+- `lib/hardware.sh` owns later application of approved, evidence-backed hardware settings; it must not duplicate inventory collection logic.
+- Inventory data is descriptive evidence, not approval to install or proof that a proposed configuration is compatible.
+
+**Proposed public interface** (not implemented):
+1. `inventory::collect_host <output_assoc_array_name> [proc_root] [sys_root]`
+   - Collect host facts from read-only procfs/sysfs paths.
+   - The first argument names a caller-declared Bash associative array, populated through a validated nameref; do not emit data as shell code or use `eval`.
+   - Optional roots exist for deterministic fixture-based tests; production defaults are `/proc` and `/sys`.
+   - Stable keys: `cpu.vendor`, `cpu.model`, `cpu.family`, `cpu.model_id`, `cpu.cores`, `memory.total_bytes`, `dmi.sys_vendor`, `dmi.product_name`, and `dmi.product_version`.
+   - A key is omitted when its source is unavailable or invalid. Empty or missing values must not be fabricated or silently treated as verified.
+2. `inventory::render_host_summary <input_assoc_array_name>`
+   - Render known values as human-readable diagnostics only; never interpret values as shell syntax or commands.
+   - Missing fields are explicitly displayed as unknown/unavailable.
+
+**Input validation and behavior**
+- Validate argument count, associative-array variable name, and fixture-root paths before reading.
+- Use Bash built-ins for file reads and parsing where practical; no package installation, network access, privilege escalation, service changes, or writes.
+- Never read block-device contents. Disk candidates and their stable identifiers come only from `storage::discover_candidates`.
+- Source-time behavior must be inert: no output, command execution, filesystem writes, traps, or shell-option changes.
+- Return `0` only when collection/rendering completes according to its contract; return `2` for invalid arguments/output variable; return `1` for an operational failure. Missing optional hardware fields alone are not a failure, but must remain absent/unknown.
+- Do not log serial numbers or other unique device identifiers by default. If later requirements need them, expose only the minimum necessary fields and obtain a separate privacy review.
+- No inventory result may be used to infer an unverified bootloader, encryption, resume, wireless compatibility, or exact storage layout.
+
+**Acceptance boundary:** implementation requires fixture tests for supported and missing procfs/sysfs fields, malformed values, invalid output-array arguments, safe sourcing, and a read-only boundary. Tests must not require root or inspect real target disks. This contract is PLANNED; no inventory implementation or hardware verification exists.
 
 ### Storage module contract — PLANNED
 
