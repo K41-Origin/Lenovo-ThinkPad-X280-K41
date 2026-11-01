@@ -1,16 +1,35 @@
 # Lenovo-ThinkPad-X280-K41
 
-A planned, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
+A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status:** planning and documentation foundation. The installer is not implemented. Describing a feature does not mean it exists or has been tested.
+> **Project status:** installer skeleton only. Installation logic is not implemented; no installation or hardware tests have been run.
 
 ## Goals
-- Interactive installation from an official, unmodified Arch Linux ISO.
+- One interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB.
+- Retrieve and run the latest code from the repository's `main` branch, displaying the resolved commit SHA so the exact code used is identifiable.
 - Carefully verified encrypted ext4 system with swapfile and hibernation readiness.
 - Hyprland with Caelestia Shell / Quickshell, subject to verified upstream compatibility.
 - ThinkPad hardware, power, and network configuration based on actual device inventory.
 - Optional AUR workflow and selective BlackArch integration.
 - Safe recovery, testable modules, and honest post-install reporting.
+
+## Current repository structure
+
+- `installer` — single interactive entry point; currently a safe placeholder that exits without changing the system.
+- `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
+- `tests/` — test strategy and future isolated test coverage.
+- `docs/` — project requirements, decisions, architecture, safety, and status.
+
+## Intended workflow
+1. Boot the official Arch Linux ISO from USB.
+2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
+3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
+4. Run preflight checks and show the complete installation plan.
+5. Require explicit confirmation of the identified target disk before destructive storage operations.
+6. Install and configure the base system, desktop, and selected software in one interactive flow.
+7. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
+
+**Important:** the current repository does not yet implement this workflow. Do not run the placeholder as an installer.
 
 ## Documentation index
 1. [Project charter](docs/01-PROJECT-CHARTER.md) — scope, goals, principles, and status vocabulary.
@@ -27,16 +46,16 @@ A planned, modular, security-conscious Arch Linux installation and setup project
 12. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md) — evidence-based status and history.
 
 ## Safety principles
-- Inspect repository state before modifying existing work.
 - Never perform destructive disk operations without explicit authorization and verified target identification.
 - Never bypass package signature or integrity verification.
 - Never pipe remote scripts directly into a shell.
 - Build AUR packages as an unprivileged user.
 - Never log passwords, encryption keys, tokens, or credentials.
 - Report untested behavior honestly.
+- Latest `main` execution is the chosen update policy, but it carries a supply-chain risk: a new commit may change privileged code. Show the resolved SHA and review the retrieved code before any production use.
 
 ## Development status
-See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md). Technical architecture and upstream compatibility must be verified before installer implementation.
+See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md). The structure exists, but technical architecture, upstream compatibility, and installer behavior remain unfinished.
 
 ## License
 See [LICENSE](LICENSE).
