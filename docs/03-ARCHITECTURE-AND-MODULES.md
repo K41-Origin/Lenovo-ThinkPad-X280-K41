@@ -1,7 +1,7 @@
 # Architecture and Modules
 
 ## Status
-The repository contains a skeleton plus tested first-slice logging and read-only preflight helpers. Installer orchestration and installation behavior are not implemented end to end.
+The repository contains tested first-slice logging/read-only preflight helpers and a diagnostic-only entry point. Installer orchestration and installation behavior are not implemented end to end.
 
 ## Architecture decision
 Use one project-owned interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB. The same interactive flow coordinates base Arch installation, desktop configuration, selected packages, validation, and reporting. Modules remain separate internally to keep responsibilities testable and failures easier to isolate.
@@ -157,3 +157,12 @@ These contracts define the first implementation slice. They are read-only founda
 
 ## Testing
 Syntax checks do not prove behavior. VM tests do not replace hardware checks for Wi-Fi, audio, suspend, hibernation/resume, lid behavior, and power management.
+
+
+## Diagnostic entry-point slice — TESTED (limited scope)
+
+The `installer` entry point supports `--help` and `--preflight` only. It resolves `lib/common.sh` and `lib/preflight.sh` relative to its own location, reports root status, boot-mode indicators, required-command availability, and optional network-link diagnostics. An unresolved boot mode or missing required command is reported as a preflight failure. Network diagnostics are optional and do not gate the diagnostic command.
+
+**Important:** `--preflight` always exits nonzero because installation is not implemented. A successful set of read-only diagnostics is not an installation approval. The entry point does not source installation modules or invoke package, service, network-configuration, or storage operations. This boundary is checked by focused tests and code review; static text checks are not a proof against every possible side effect.
+
+Validation covered Bash syntax and focused entry-point tests on temporary local copies matching the fetched GitHub blobs. No VM, hardware, installation, or real-disk tests were performed.
