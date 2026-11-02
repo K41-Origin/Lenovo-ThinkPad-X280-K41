@@ -157,6 +157,9 @@ These contracts define the first implementation slice. They are read-only founda
 2. `inventory::render_host_summary <input_assoc_array_name>`
    - Render known values as human-readable diagnostics only; never interpret values as shell syntax or commands.
    - Missing fields are explicitly displayed as unknown/unavailable.
+3. `inventory::compare_target_profile <inventory_assoc_array_name> <profile_file>`
+   - Compare observed DMI product name, CPU model (allowing the normal Linux `/proc/cpuinfo` suffix), and measured memory against the target profile.
+   - Return nonzero when any compared fact mismatches or is unavailable. This is a compatibility diagnostic, not disk authorization.
 
 **Input validation and behavior**
 - Validate argument count, associative-array variable name, and fixture-root paths before reading.
