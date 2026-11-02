@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status:** the entry point supports `--help` and diagnostic-only `--preflight`. Installer orchestration and installation logic are not implemented. Logging/preflight helpers and focused tests exist; installation and hardware tests have not been run.
+> **Project status:** the entry point supports `--help` and diagnostic-only `--preflight`. Installer orchestration and installation logic are not implemented. Read-only storage discovery/target validation and fixture tests are implemented; destructive storage execution remains unimplemented. No real disk has been modified.
 
 ## AI-assisted development
 
@@ -21,7 +21,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 - `installer` — diagnostic-only entry point with `--help` and `--preflight`; it always exits nonzero after preflight because installation is disabled.
 - `config/hardware/thinkpad-x280.conf` — executable target profile for the project laptop (planning data, never runtime detection or disk-selection authority).
-- `lib/inventory.sh` — read-only runtime host discovery and comparison against the target profile.
+- `lib/inventory.sh` — read-only runtime host discovery and comparison against the target profile.\n- `lib/storage.sh` — read-only whole-disk discovery and target revalidation; no partition/format/mount operations.
 - `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
 - `tests/` — test strategy and future isolated test coverage.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
