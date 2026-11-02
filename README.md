@@ -59,7 +59,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 ## Storage safety boundary
 - The approved installation scope is a full replacement of the internal SSD; Windows and recovery partitions are not retained.
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
-- Discovery requires `lsblk`, `jq`, `swapon`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
+- Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
 - These checks are a conservative safety gate, not proof that a disk is safe to erase. The storage module performs no destructive operation.
 
