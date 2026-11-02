@@ -4,7 +4,7 @@ Status: First-slice common/preflight tests are implemented and passed locally ag
 
 Run the focused tests from the repository root with `bash tests/test-common-preflight.sh`, `bash tests/test-installer-entry.sh`, `bash tests/test-preflight-gate.sh`, and `bash tests/test-inventory.sh`. The entry test checks argument handling, relative module loading, diagnostic-only behavior, and a static safety boundary. The gate test uses a mocked preflight module in a temporary copy to exercise inventory mismatch, unresolved boot-mode, required-command, and optional network-diagnostic outcomes. These are not end-to-end installation tests.
 
-Inventory tests use temporary procfs/sysfs-shaped fixtures and do not inspect real disks or require root.\n\nInitial test layers:
+Inventory tests use temporary procfs/sysfs-shaped fixtures and exercise the preflight inventory adapter; they do not inspect real disks or require root. The mocked gate test verifies inventory failure blocks preflight success and that no installation/destructive marker is invoked.\n\nInitial test layers:
 - Bash syntax checks for all shell files.
 - ShellCheck and shfmt when available.
 - Unit tests with mocked commands for preflight, stage tracking, and error handling.
