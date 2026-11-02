@@ -2,6 +2,9 @@
 # Read-only storage discovery and target validation.
 # No partitioning, formatting, mounting, or privileged operations live here.
 
+# shellcheck source=lib/storage-topology.sh
+source "$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)/storage-topology.sh"
+
 storage::valid_assoc_name() {
   [[ $# -eq 1 && $1 =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] || return 2
   local declaration
@@ -22,8 +25,8 @@ storage::discover_candidates() {
   command -v base64 >/dev/null 2>&1 || return 1
   command -v readlink >/dev/null 2>&1 || return 1
 
-  local json swaps encoded index=0 object path type size model transport wwn serial removable readonly mounted active_swap
-  json="$(lsblk --json --bytes --paths --output NAME,TYPE,SIZE,MODEL,TRAN,WWN,SERIAL,RM,RO,MOUNTPOINTS)" || return 1
+  local json swaps encoded index=0 object path major_minor type size model transport wwn serial removable readonly mounted active_swap
+  json="$(lsblk --json --bytes --paths --output NAME,MAJ:MIN,TYPE,SIZE,MODEL,TRAN,WWN,SERIAL,RM,RO,MOUNTPOINTS)" || return 1
   jq -e '.blockdevices | type == "array"' >/dev/null 2>&1 <<<"$json" || return 1
   swaps="$(swapon --show --noheadings --raw --output NAME)" || return 1
 
@@ -34,7 +37,7 @@ storage::discover_candidates() {
     | select(.type == "disk")
     | . as $disk
     | {
-        name, type, size, model, tran, wwn, serial, rm, ro,
+        name, "maj:min", type, size, model, tran, wwn, serial, rm, ro,
         mounted: ([$disk | walk | .mountpoints[]? | select(. != null and . != "")] | length > 0),
         descendants: ([$disk | walk | .name] | map(select(type == "string")))
       }
@@ -45,6 +48,7 @@ storage::discover_candidates() {
     [[ -n "$encoded" ]] || continue
     object="$(printf '%s' "$encoded" | base64 --decode)" || return 1
     path="$(jq -er '.name | strings | select(length > 0)' <<<"$object")" || return 1
+    major_minor="$(jq -er '.["maj:min"] | strings | select(test("^[0-9]+:[0-9]+$"))' <<<"$object")" || return 1
     type="$(jq -er '.type | strings | select(length > 0)' <<<"$object")" || return 1
     size="$(jq -er 'if (.size|type) == "number" and .size > 0 then (.size|tostring) else error("invalid size") end' <<<"$object")" || return 1
     model="$(jq -r '.model // "" | strings' <<<"$object")" || return 1
@@ -79,6 +83,7 @@ storage::discover_candidates() {
     fi
 
     _out["$index.device_path"]="$path"
+    _out["$index.major_minor"]="$major_minor"
     _out["$index.device_type"]="$type"
     _out["$index.size_bytes"]="$size"
     _out["$index.model"]="$model"
@@ -130,6 +135,8 @@ storage::validate_target() {
     [[ ${current[$i.size_bytes]} == "${_target[size_bytes]}" ]] || return 1
     [[ ${current[$i.removable]} == false && ${current[$i.read_only]} == false ]] || return 1
     [[ ${current[$i.transport]} == nvme ]] || return 1
+    [[ ${current[$i.major_minor]} =~ ^[0-9]+:[0-9]+$ ]] || return 1
+    storage::topology_check_target "${current[$i.major_minor]}" /sys /proc/self/mountinfo /proc/swaps || return 1
     [[ ${current[$i.has_mounted_descendant]} == no ]] || return 1
     [[ ${current[$i.has_active_swap_descendant]} == no ]] || return 1
     if [[ -n ${_target[wwn]-} ]]; then
