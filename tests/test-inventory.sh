@@ -30,12 +30,25 @@ inventory::collect_host facts "$tmp/proc" "$tmp/sys"
 [[ "${facts[cpu.threads]}" == 2 ]]
 [[ "${facts[memory.total_bytes]}" == 8375185408 ]]
 [[ "${facts[dmi.product_name]}" == '20KESC2Y00' ]]
+inventory::validate_required_facts facts
 inventory::compare_target_profile facts "$PROFILE" >/dev/null
 # Mismatched target identity and missing required facts fail closed.
 declare -A wrong_device=([dmi.product_name]='20KESC2Y10' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
 if inventory::compare_target_profile wrong_device "$PROFILE" >/dev/null 2>&1; then exit 1; fi
 declare -A missing_facts=([dmi.product_name]='20KESC2Y00')
 if inventory::compare_target_profile missing_facts "$PROFILE" >/dev/null 2>&1; then exit 1; fi
+declare -A wrong_vendor=([dmi.sys_vendor]='DELL' [dmi.product_name]='20KESC2Y00' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
+if inventory::compare_target_profile wrong_vendor "$PROFILE" >/dev/null 2>&1; then exit 1; fi
+declare -A incomplete=([cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408 [dmi.product_name]='20KESC2Y00')
+if inventory::validate_required_facts incomplete >/dev/null 2>&1; then exit 1; fi
+declare -A bad_memory=([cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]='8GiB' [dmi.sys_vendor]='LENOVO' [dmi.product_name]='20KESC2Y00')
+if inventory::validate_required_facts bad_memory >/dev/null 2>&1; then exit 1; fi
+printf '%s\\n' 'processor : 0' 'model name : CPU A' 'processor : 1' 'model name : CPU B' > "$tmp/proc/cpuinfo"
+declare -A cpu_conflict=()
+inventory::collect_host cpu_conflict "$tmp/proc" "$tmp/sys"
+[[ -n ${cpu_conflict[cpu.model_conflict]+x} ]]
+if inventory::validate_required_facts cpu_conflict >/dev/null 2>&1; then exit 1; fi
+
 # Malformed profile content is rejected without executing shell syntax.
 cat > "$tmp/malicious.conf" <<EOF_BAD
 K41_TARGET_PRODUCT_NAME=\$(touch "$tmp/should-not-exist")
