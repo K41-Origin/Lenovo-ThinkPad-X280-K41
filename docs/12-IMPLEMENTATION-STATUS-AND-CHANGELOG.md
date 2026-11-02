@@ -21,10 +21,17 @@
 | Native mkinitcpio UKI boot design | IMPLEMENTED | Decision documented: default UKI on 1 GiB ESP at `/efi/EFI/Linux/`, source kernel/configuration on encrypted root, systemd-boot discovery, no initial fallback UKI. Generation/update lifecycle and boot behavior remain PLANNED / NOT TESTED. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED | `bash -n` passed for the entry point, common/preflight modules, and both focused test scripts. ShellCheck and shfmt were unavailable. |
+| Static checks | PARTIALLY TESTED | A GitHub Actions workflow now runs `bash -n` over shell files and executes all four repository test scripts on push/PR/manual dispatch. Workflow implementation is committed; its first run is not yet confirmed. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Add repository-native automated Bash validation
+- Added `.github/workflows/bash-tests.yml` for pushes to `main`, pull requests targeting `main`, and manual dispatch.
+- The workflow checks Bash syntax for discovered `.sh` files and the `installer` entry point, then executes all four required test scripts on an Ubuntu GitHub-hosted runner. Permissions are limited to `contents: read`; the job has a 10-minute timeout.
+- Updated `tests/README.md` to document the CI gate and distinguish implementation from a successful run.
+- Workflow file was re-fetched from GitHub and its contents verified. The Actions run has not yet been confirmed; no claim is made that the full suite passed.
+
 
 ### 2026-11-02 — Integrate read-only target inventory into preflight\n- `lib/preflight.sh` now loads the inventory module and exposes `preflight::check_target_inventory`, which collects procfs/sysfs facts, prints a summary, validates required facts, and compares the detected host with the X280 profile.\n- `installer --preflight` invokes this check; missing, inconsistent, or mismatched inventory blocks the preflight result. No disk enumeration or storage operation is introduced.\n- Updated the mocked preflight gate test to assert inventory invocation and failure handling. Validation is pending; do not mark this integration TESTED until local syntax and fixture/gate tests pass.\n\n### 2026-11-02 — Validate inventory completeness and consistency
 - Added `inventory::validate_required_facts` for CPU model, numeric memory total, DMI vendor, and DMI product identity.
