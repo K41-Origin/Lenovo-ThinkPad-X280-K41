@@ -27,6 +27,14 @@ run_preflight() {
   k41::log_info 'Starting read-only diagnostics; this is not an installation approval.'
   preflight::check_root || failed=1
 
+  if preflight::check_target_inventory; then
+    :
+  else
+    status=$?
+    k41::log_error "Target hardware inventory check failed (status $status); target-dependent stages must remain blocked."
+    failed=1
+  fi
+
   if preflight::detect_boot_mode; then
     :
   else
