@@ -33,7 +33,7 @@ inventory::collect_host facts "$tmp/proc" "$tmp/sys"
 inventory::validate_required_facts facts
 inventory::compare_target_profile facts "$PROFILE" >/dev/null
 # Mismatched target identity and missing required facts fail closed.
-declare -A wrong_device=([dmi.product_name]='20KESC2Y10' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
+declare -A wrong_device=([dmi.sys_vendor]='LENOVO' [dmi.product_name]='20KESC2Y10' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
 if inventory::compare_target_profile wrong_device "$PROFILE" >/dev/null 2>&1; then exit 1; fi
 declare -A missing_facts=([dmi.product_name]='20KESC2Y00')
 if inventory::compare_target_profile missing_facts "$PROFILE" >/dev/null 2>&1; then exit 1; fi
@@ -51,6 +51,7 @@ if inventory::validate_required_facts cpu_conflict >/dev/null 2>&1; then exit 1;
 
 # Malformed profile content is rejected without executing shell syntax.
 cat > "$tmp/malicious.conf" <<EOF_BAD
+K41_TARGET_VENDOR='LENOVO'
 K41_TARGET_PRODUCT_NAME=\$(touch "$tmp/should-not-exist")
 K41_TARGET_CPU_MODEL_LINUX='Intel(R) Core(TM) i5-8250U'
 K41_TARGET_MEMORY_MIN_BYTES='7516192768'
