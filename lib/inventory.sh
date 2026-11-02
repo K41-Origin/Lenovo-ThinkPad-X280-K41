@@ -39,7 +39,7 @@ inventory::collect_host() {
 
       esac
     done < "$cpuinfo"
-    (( core_count > 0 )) && output_ref[cpu.cores]=$core_count
+    (( core_count > 0 )) && output_ref[cpu.threads]=$core_count
   fi
 
   local meminfo="$proc_root/meminfo"
@@ -71,7 +71,7 @@ inventory::render_host_summary() {
   inventory::valid_assoc_name "$input_name" || return 2
   local -n input_ref="$input_name"
   local key
-  for key in cpu.vendor cpu.model cpu.family cpu.model_id cpu.cores memory.total_bytes dmi.sys_vendor dmi.product_name dmi.product_version dmi.bios_version dmi.bios_date; do
+  for key in cpu.vendor cpu.model cpu.family cpu.model_id cpu.threads memory.total_bytes dmi.sys_vendor dmi.product_name dmi.product_version dmi.bios_version dmi.bios_date; do
     if [[ -n ${input_ref[$key]+x} && -n ${input_ref[$key]} ]]; then
       printf '%-24s %s\n' "$key" "${input_ref[$key]}"
     else
