@@ -49,6 +49,8 @@ jobs:
             tests/test-installer-entry.sh
             tests/test-inventory.sh
             tests/test-storage-discovery.sh
+            tests/test-storage-topology.sh
+            tests/test-storage-plan.sh
             tests/test-preflight-gate.sh
           )
           for test in "${tests[@]}"; do
