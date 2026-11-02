@@ -87,42 +87,52 @@ inventory::compare_target_profile() {
   [[ -r "$profile_file" ]] || return 1
   local -n facts_ref="$inventory_name"
 
-  # shellcheck source=/dev/null
-  source "$profile_file" || return 1
+  # Parse only the four expected literal assignments; never source/evaluate a profile.
+  local line value expected_product='' expected_cpu='' memory_min='' memory_max=''
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    case "$line" in
+      K41_TARGET_PRODUCT_NAME=*) value=${line#*=}; expected_product=${value#\\'}; expected_product=${expected_product%\\'} ;;
+      K41_TARGET_CPU_MODEL_LINUX=*) value=${line#*=}; expected_cpu=${value#\\'}; expected_cpu=${expected_cpu%\\'} ;;
+      K41_TARGET_MEMORY_MIN_BYTES=*) value=${line#*=}; memory_min=${value#\\'}; memory_min=${memory_min%\\'} ;;
+      K41_TARGET_MEMORY_MAX_BYTES=*) value=${line#*=}; memory_max=${value#\\'}; memory_max=${memory_max%\\'} ;;
+    esac
+  done < "$profile_file"
+  [[ -n "$expected_product" && -n "$expected_cpu" && "$memory_min" =~ ^[0-9]+$ && "$memory_max" =~ ^[0-9]+$ ]] || return 1
+
   local mismatch=0
   if [[ -n ${facts_ref[dmi.product_name]+x} ]]; then
-    if [[ "${facts_ref[dmi.product_name]}" != "$K41_TARGET_PRODUCT_NAME" ]]; then
-      printf 'WARN: target product mismatch (expected %s; detected %s).\n' "$K41_TARGET_PRODUCT_NAME" "${facts_ref[dmi.product_name]}" >&2
+    if [[ "${facts_ref[dmi.product_name]}" != "$expected_product" ]]; then
+      printf 'WARN: target product mismatch (expected %s; detected %s).\\n' "$expected_product" "${facts_ref[dmi.product_name]}" >&2
       mismatch=1
     else
-      printf 'OK: target product matches %s.\n' "$K41_TARGET_PRODUCT_NAME"
+      printf 'OK: target product matches %s.\\n' "$expected_product"
     fi
   else
-    printf 'UNKNOWN: DMI product name unavailable; target identity not verified.\n' >&2
+    printf 'UNKNOWN: DMI product name unavailable; target identity not verified.\\n' >&2
     mismatch=1
   fi
 
   if [[ -n ${facts_ref[cpu.model]+x} ]]; then
-    if [[ "${facts_ref[cpu.model]}" != *"$K41_TARGET_CPU_MODEL_LINUX"* ]]; then
-      printf 'WARN: CPU mismatch (expected %s; detected %s).\n' "$K41_TARGET_CPU_MODEL_LINUX" "${facts_ref[cpu.model]}" >&2
+    if [[ "${facts_ref[cpu.model]}" != *"$expected_cpu"* ]]; then
+      printf 'WARN: CPU mismatch (expected %s; detected %s).\\n' "$expected_cpu" "${facts_ref[cpu.model]}" >&2
       mismatch=1
     else
-      printf 'OK: CPU matches %s.\n' "$K41_TARGET_CPU_MODEL_LINUX"
+      printf 'OK: CPU matches %s.\\n' "$expected_cpu"
     fi
   else
-    printf 'UNKNOWN: CPU model unavailable; CPU compatibility not verified.\n' >&2
+    printf 'UNKNOWN: CPU model unavailable; CPU compatibility not verified.\\n' >&2
     mismatch=1
   fi
 
   if [[ -n ${facts_ref[memory.total_bytes]+x} ]]; then
-    if (( facts_ref[memory.total_bytes] < K41_TARGET_MEMORY_MIN_BYTES || facts_ref[memory.total_bytes] > K41_TARGET_MEMORY_MAX_BYTES )); then
-      printf 'WARN: memory outside target range (%s bytes detected).\n' "${facts_ref[memory.total_bytes]}" >&2
+    if (( facts_ref[memory.total_bytes] < memory_min || facts_ref[memory.total_bytes] > memory_max )); then
+      printf 'WARN: memory outside target range (%s bytes detected).\\n' "${facts_ref[memory.total_bytes]}" >&2
       mismatch=1
     else
-      printf 'OK: memory is within the configured 8 GiB target range.\n'
+      printf 'OK: memory is within the configured target range.\\n'
     fi
   else
-    printf 'UNKNOWN: memory total unavailable; memory-dependent planning must use another verified source.\n' >&2
+    printf 'UNKNOWN: memory total unavailable; memory-dependent planning must use another verified source.\\n' >&2
     mismatch=1
   fi
   return "$mismatch"
