@@ -1,7 +1,7 @@
 # Hardware, Power, and Network
 
 ## Hardware discovery
-Planning baseline: ThinkPad X280, Intel Core i5-8250U, 8 GB RAM, 256 GB SSD, Intel UHD Graphics 620. Verify actual hardware and discover Wi-Fi/Bluetooth devices before device-specific changes.
+The owner-reported Windows hardware baseline and evidence limitations are recorded in [X280 Hardware Baseline](13-X280-HARDWARE-BASELINE.md). Treat it as a planning reference, not runtime detection. Verify actual hardware from the Arch ISO/Linux system and discover Wi-Fi/Bluetooth devices before device-specific changes. Do not hard-code the baseline into installer behavior.
 
 ## Firmware and thermals
 Install official firmware only when required for detected hardware and basic functionality. Do not automatically install Intel microcode under the current decision; report recommendation. Use firmware/kernel thermal and fan control; no third-party fan controller. Monitor sensors only if supported and avoid undocumented tweaks.
