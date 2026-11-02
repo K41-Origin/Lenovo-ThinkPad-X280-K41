@@ -20,6 +20,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 ## Current repository structure
 
 - `installer` — diagnostic-only entry point with `--help` and `--preflight`; it always exits nonzero after preflight because installation is disabled.
+- `config/hardware/thinkpad-x280.conf` — executable target profile for the project laptop (planning data, never runtime detection or disk-selection authority).
+- `lib/inventory.sh` — read-only runtime host discovery and comparison against the target profile.
 - `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
 - `tests/` — test strategy and future isolated test coverage.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
@@ -50,6 +52,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 11. [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md) — test strategy and release gates.
 12. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md) — evidence-based status and history.
 13. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md) — owner-reported device specifications, evidence quality, and Linux verification checklist.
+
+The operational target values are stored in `config/hardware/thinkpad-x280.conf`. `lib/inventory.sh` independently reads the running host and compares only facts it can actually observe. A profile match is not authorization to partition a disk.
 
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
