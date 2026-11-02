@@ -196,7 +196,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Ambiguous/missing identity, incomplete plan, failed prerequisite, changed target, cancellation, or unknown critical state must fail closed.
 - Return statuses must distinguish success from safe abort/cancellation and critical failure. Missing output or unset state must never count as success.
 - Never pass or log passphrases, recovery keys, or credentials. Keep privilege elevation limited to the stage that requires it.
-- No exact partition layout, bootloader, encryption mapping, or resume mechanism is implied by this contract; those decisions remain blocked on verified design.
+- The approved architecture is UEFI/GPT, a 1 GiB FAT32 ESP at `/efi`, systemd-boot, a native mkinitcpio UKI, LUKS2 with ext4 directly on the unlocked root mapper, and an encrypted-root swapfile. This contract does not define a finalized target-specific partition table or authorize destructive operations. Exact device mapping, mkinitcpio hooks/kernel command line, UKI update behavior, swap sizing, and resume offset remain implementation and compatibility checks; unresolved critical checks block execution.
 - Every abort path must be testable with mocks and assert zero destructive-tool invocations. Do not run automated tests against real disks.
 
 **Stage ordering:** preflight success → discover candidates → build complete plan → render plan → validate target → explicit confirmation → immediate target/precondition revalidation → execute → verify result. Any failed gate exits before execution. Recovery after interruption must inspect current state and must not automatically repeat destructive work.
@@ -249,7 +249,7 @@ These values are an internal Bash interface proposal, not yet implemented. Modul
 
 ## Implementation gates
 1. Verify current official Arch installation guidance and upstream desktop dependencies.
-2. Finalize UEFI, partition, LUKS, bootloader, swapfile, and resume design.
+2. Verify the approved UEFI/GPT, ESP, systemd-boot, mkinitcpio UKI, LUKS2/ext4, and swapfile/resume design against current upstream guidance; resolve exact hooks, kernel command line, device mapping, sizing, and update lifecycle before enabling destructive actions.
 3. Define exact module interfaces and privilege boundaries.
 4. Add syntax/static checks and mocked tests before implementing destructive actions.
 5. Test in an isolated VM before controlled testing on the ThinkPad X280.
