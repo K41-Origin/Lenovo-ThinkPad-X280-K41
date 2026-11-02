@@ -49,3 +49,9 @@ if storage::plan_gpt_layout swap_overflow 274877906944 512 4096 9223372036854775
   echo 'FAIL: swap-size addition overflow accepted' >&2; exit 1
 fi
 echo 'PASS: rejects swap-size arithmetic overflow'
+
+declare -A leading_zero=()
+storage::plan_gpt_layout leading_zero 0274877906944 0512 04096 08589934592 01073741824
+[[ ${leading_zero[disk_bytes]} == 274877906944 ]]
+[[ ${leading_zero[logical_sector_bytes]} == 512 ]]
+echo 'PASS: normalizes decimal inputs with leading zeros without octal interpretation'
