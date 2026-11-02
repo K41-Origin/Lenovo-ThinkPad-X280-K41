@@ -10,6 +10,57 @@ storage::topology_decode_mount_field() {
   printf '%s' "$value"
 }
 
+# Resolve a regular file's containing filesystem to kernel major:minor.
+# GNU stat %d returns st_dev as a decimal dev_t; decode Linux's new_dev_t layout.
+storage::topology_path_major_minor() {
+  [[ $# -eq 1 && -e $1 ]] || return 1
+  local dev major minor
+  dev=$(stat -Lc '%d' -- "$1") || return 1
+  [[ $dev =~ ^[0-9]+$ ]] || return 1
+  (( dev >= 0 )) || return 1
+  major=$(( ((dev >> 8) & 0xfff) | ((dev >> 32) & 0xfffff000) ))
+  minor=$(( (dev & 0xff) | ((dev >> 12) & 0xffffff00) ))
+  printf '%s:%s' "$major" "$minor"
+}
+
+# Check every path in overlay lowerdir/upperdir/workdir options. Each path
+# must resolve to a filesystem outside the selected disk dependency closure.
+storage::topology_check_overlay_options() {
+  [[ $# -eq 2 ]] || return 2
+  local options=$1 seen_name=$2 item path mm
+  local -a values=()
+  local key value
+  IFS=',' read -r -a values <<< "$options"
+  local found=0
+  for item in "${values[@]}"; do
+    case $item in lowerdir=*|upperdir=*|workdir=*)
+      found=1; value=${item#*=}
+      [[ -n $value ]] || return 1
+      local -a paths=()
+      if [[ $item == lowerdir=* ]]; then IFS=':' read -r -a paths <<< "$value"; else paths=("$value"); fi
+      for path in "${paths[@]}"; do
+        path=$(storage::topology_decode_mount_field "$path")
+        [[ $path == /* && -e $path ]] || return 1
+        mm=$(storage::topology_path_major_minor "$path") || return 1
+        [[ ! -v ${seen_name}[$mm] ]] || return 1
+      done
+      ;;
+    esac
+  done
+  (( found == 1 )) || return 1
+}
+
+# Resolve a mounted loop device's backing file and prove it is not on target.
+storage::topology_check_loop_backing() {
+  [[ $# -eq 3 ]] || return 2
+  local mount_mm=$1 sys_root=$2 seen_name=$3 loop_link backing mm
+  loop_link=$sys_root/dev/block/$mount_mm/loop/backing_file
+  [[ -r $loop_link ]] || return 1
+  IFS= read -r backing < "$loop_link" || return 1
+  [[ $backing == /* && -e $backing ]] || return 1
+  mm=$(storage::topology_path_major_minor "$backing") || return 1
+  [[ ! -v ${seen_name}[$mm] ]] || return 1
+}
 # Parse one mountinfo record and reject filesystems whose backing-device
 # relationship is not safely represented by mountinfo's major:minor field.
 storage::topology_parse_mount_record() {
@@ -25,12 +76,19 @@ storage::topology_parse_mount_record() {
   TOPOLOGY_MOUNT_MM=${fields[2]}
   TOPOLOGY_MOUNT_POINT=$(storage::topology_decode_mount_field "${fields[4]}") || return 1
   TOPOLOGY_MOUNT_FSTYPE=${fields[separator+1]}
+  TOPOLOGY_MOUNT_SOURCE=${fields[separator+2]}
+  TOPOLOGY_MOUNT_SUPER_OPTIONS=${fields[separator+3]-}
   [[ $TOPOLOGY_MOUNT_MM =~ ^[0-9]+:[0-9]+$ && -n $TOPOLOGY_MOUNT_POINT ]] || return 1
   case $TOPOLOGY_MOUNT_FSTYPE in
     ext2|ext3|ext4|xfs|vfat|fat|msdos|exfat|ntfs|ntfs3|f2fs|jfs|reiserfs|udf|iso9660)
       ;;
     proc|sysfs|tmpfs|devtmpfs|devpts|cgroup|cgroup2|mqueue|securityfs|debugfs|tracefs|pstore|configfs|autofs|rpc_pipefs|hugetlbfs|binfmt_misc|efivarfs|bpf)
-      # Kernel pseudo-filesystems do not represent block-device backing.
+      ;;
+    overlay)
+      TOPOLOGY_MOUNT_SUPER_OPTIONS=${fields[separator+3]}
+      ;;
+    squashfs)
+      TOPOLOGY_MOUNT_SUPER_OPTIONS=
       ;;
     *)
       printf 'storage: cannot prove backing-device topology for filesystem type %s\\n' "$TOPOLOGY_MOUNT_FSTYPE" >&2
@@ -113,6 +171,15 @@ storage::topology_check_target() {
     storage::topology_parse_mount_record "$line" || return 1
     mount_mm=$TOPOLOGY_MOUNT_MM
     mount_point=$TOPOLOGY_MOUNT_POINT
+    case $TOPOLOGY_MOUNT_FSTYPE in
+      overlay)
+        storage::topology_check_overlay_options "$TOPOLOGY_MOUNT_SUPER_OPTIONS" seen || return 1
+        ;;
+      squashfs)
+        [[ $TOPOLOGY_MOUNT_SOURCE == /dev/loop* ]] || return 1
+        storage::topology_check_loop_backing "$mount_mm" "$sys_root" seen || return 1
+        ;;
+    esac
     if [[ -v seen[$mount_mm] ]]; then
       printf 'storage: target topology is mounted at %s (device %s)\n' "$mount_point" "$mount_mm" >&2
       return 1
