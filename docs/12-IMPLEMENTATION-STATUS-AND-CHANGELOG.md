@@ -19,12 +19,21 @@
 | Test plan and focused test harnesses | IMPLEMENTED | Existing common/preflight/entry tests and new `tests/test-inventory.sh` are present. Inventory syntax and focused fixture tests passed on a temporary local reconstruction of fetched GitHub contents; actual X280 Linux detection remains NOT TESTED. Installer integration tests remain PLANNED. |
 | Approved UEFI/LUKS2/ext4/hibernation design direction | IMPLEMENTED | Architecture direction recorded; systemd-boot asset placement, exact initramfs parameters, swap sizing, resume-offset lifecycle, VM and X280 validation remain PLANNED/NOT TESTED. |
 | Native mkinitcpio UKI boot design | IMPLEMENTED | Decision documented: default UKI on 1 GiB ESP at `/efi/EFI/Linux/`, source kernel/configuration on encrypted root, systemd-boot discovery, no initial fallback UKI. Generation/update lifecycle and boot behavior remain PLANNED / NOT TESTED. |
-| Read-only storage discovery and target validation | IMPLEMENTED (CI PENDING) | `lib/storage.sh` implements `lsblk`/`jq`-based whole-disk discovery and fresh target checks for stable identity, size, removability, read-only state, and mounted descendants. Fixture tests added; GitHub Actions result pending. No destructive storage operations exist. |\n| Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
+| Read-only storage discovery and target validation | TESTED (mocked CI) | `lib/storage.sh` uses `lsblk`, `jq`, `swapon`, `readlink`, and `base64` to discover whole disks, require internal NVMe, compare supplied WWN/serial identities, reject duplicate IDs, removable/read-only disks, mounted descendants, and active swap descendants (including symlink aliases). GitHub Actions run #16 passed all fixture tests and Bash syntax checks. Real X280/disk behavior remains NOT TESTED; no destructive storage operations exist. |\n| Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
 | Static checks | PARTIALLY TESTED | A GitHub Actions workflow now runs `bash -n` over shell files and executes all four repository test scripts on push/PR/manual dispatch. Workflow implementation is committed; its first run is not yet confirmed. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Restrict storage target validation to internal NVMe and detect active swap
+- Recorded the owner-approved scope: full replacement of the internal SSD; Windows and recovery partitions are not retained; removable and non-NVMe targets are rejected.
+- Extended read-only discovery to require successful `swapon` output, correlate active swap block devices with descendants after resolving symlink aliases, and fail closed when safety fields or required tools are unavailable.
+- Target revalidation now requires internal NVMe transport and checks every stable identity supplied by the caller; discovery rejects duplicate WWN or serial identifiers.
+- Expanded mocked fixtures for mounted mapper descendants, active swap and aliases, removable media, duplicate WWN, changed serial, missing safety state, and command failures.
+- CI run #16 on commit `5a0c455cf87c6ef4b9285108ae61acf6978d1691` passed the full repository suite. The additional swap-alias regression test and final documentation updates are newer and require a subsequent CI run.
+- No real disk was queried or modified. This is fixture-tested logic, not real-hardware verification.
+
 
 ### 2026-11-02 — Add repository-native automated Bash validation
 - Added `.github/workflows/bash-tests.yml` for pushes to `main`, pull requests targeting `main`, and manual dispatch.
