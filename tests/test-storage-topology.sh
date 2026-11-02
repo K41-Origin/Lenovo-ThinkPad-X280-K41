@@ -98,7 +98,7 @@ mkdir -p "$sys/devices/virtual/block/loop0/loop"
 ln -s "$sys/devices/virtual/block/loop0" "$sys/dev/block/7:0"
 backing_file="$tmp/loop-backing.img"
 : >"$backing_file"
-printf '%s\\n' "$backing_file" >"$sys/devices/virtual/block/loop0/loop/backing_file"
+printf '%s\n' "$backing_file" >"$sys/devices/virtual/block/loop0/loop/backing_file"
 backing_mm=$(storage::topology_path_major_minor "$backing_file")
 [[ $backing_mm =~ ^[0-9]+:[0-9]+$ ]]
 declare -A no_seen=()
