@@ -153,10 +153,10 @@ inventory::compare_target_profile() {
 
   local mismatch=0
   if [[ "${facts_ref[dmi.sys_vendor]}" != "$expected_vendor" ]]; then
-    printf "WARN: system vendor mismatch (expected %s; detected %s).\\n" "$expected_vendor" "${facts_ref[dmi.sys_vendor]}" >&2
+    printf 'WARN: system vendor mismatch (expected %s; detected %s).\n' "$expected_vendor" "${facts_ref[dmi.sys_vendor]}" >&2
     mismatch=1
   else
-    printf "OK: system vendor matches %s.\\n" "$expected_vendor"
+    printf 'OK: system vendor matches %s.\n' "$expected_vendor"
   fi
   if [[ -n ${facts_ref[dmi.product_name]+x} ]]; then
     if [[ "${facts_ref[dmi.product_name]}" != "$expected_product" ]]; then
