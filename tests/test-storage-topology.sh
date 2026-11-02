@@ -91,3 +91,35 @@ if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; th
   echo 'FAIL: malformed mountinfo was accepted' >&2; exit 1
 fi
 echo 'PASS: rejects malformed mountinfo'
+
+# Backing-path resolution is tested against real temporary files and their
+# actual st_dev major:minor values; no mounts or block-device writes are used.
+mkdir -p "$sys/devices/virtual/block/loop0/loop"
+ln -s "$sys/devices/virtual/block/loop0" "$sys/dev/block/7:0"
+backing_file="$tmp/loop-backing.img"
+: >"$backing_file"
+printf '%s\\n' "$backing_file" >"$sys/devices/virtual/block/loop0/loop/backing_file"
+backing_mm=$(storage::topology_path_major_minor "$backing_file")
+[[ $backing_mm =~ ^[0-9]+:[0-9]+$ ]]
+declare -A no_seen=()
+storage::topology_check_loop_backing 7:0 "$sys" no_seen
+echo 'PASS: resolves loop backing file on an unrelated filesystem'
+
+declare -A loop_seen=()
+loop_seen[$backing_mm]=1
+if storage::topology_check_loop_backing 7:0 "$sys" loop_seen; then
+  echo 'FAIL: loop backing file on target dependency was accepted' >&2; exit 1
+fi
+echo 'PASS: rejects loop backing file on target dependency'
+
+storage::topology_check_overlay_options "lowerdir=$tmp,upperdir=$tmp,workdir=$tmp" no_seen
+echo 'PASS: resolves overlay lower, upper, and work paths outside target dependency'
+if storage::topology_check_overlay_options "lowerdir=$tmp,upperdir=$tmp,workdir=$tmp" loop_seen; then
+  echo 'FAIL: overlay path on target dependency was accepted' >&2; exit 1
+fi
+echo 'PASS: rejects overlay paths on target dependency'
+
+if storage::topology_check_overlay_options "lowerdir=/path/that/does/not/exist" no_seen; then
+  echo 'FAIL: unresolved overlay backing path was accepted' >&2; exit 1
+fi
+echo 'PASS: fails closed on unresolved overlay backing path'
