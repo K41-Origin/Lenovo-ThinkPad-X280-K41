@@ -29,13 +29,13 @@ inventory::collect_host() {
   local -n output_ref="$output_name"
   output_ref=()
 
-  local key value line core_count=0
+  local key value line core_count=0 cpu_model_seen=''
   local cpuinfo="$proc_root/cpuinfo"
   if [[ -r "$cpuinfo" ]]; then
     while IFS= read -r line || [[ -n "$line" ]]; do
       case "$line" in
         'vendor_id'*) value=${line#*:}; value=${value# }; [[ -n "$value" ]] && output_ref[cpu.vendor]=$value ;;
-        'model name'*) value=${line#*:}; value=${value# }; [[ -n "$value" && -z ${output_ref[cpu.model]+x} ]] && output_ref[cpu.model]=$value ;;
+        'model name'*) value=${line#*:}; value=${value# }; if [[ -n "$value" ]]; then if [[ -z "$cpu_model_seen" ]]; then cpu_model_seen=$value; output_ref[cpu.model]=$value; elif [[ "$cpu_model_seen" != "$value" ]]; then output_ref[cpu.model_conflict]=1; fi; fi ;;
         'cpu family'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && output_ref[cpu.family]=$value ;;
         'model'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && output_ref[cpu.model_id]=$value ;;
         'processor'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && (( core_count += 1 )) ;;
@@ -68,13 +68,32 @@ inventory::collect_host() {
   return 0
 }
 
+inventory::validate_required_facts() {
+  [[ $# -eq 1 ]] || return 2
+  local input_name=$1
+  inventory::valid_assoc_name "$input_name" || return 2
+  local -n facts_ref="$input_name"
+  local failed=0 key value
+  for key in cpu.model memory.total_bytes dmi.sys_vendor dmi.product_name; do
+    value=${facts_ref[$key]-}
+    if [[ -z "$value" ]]; then printf 'UNKNOWN: required inventory fact unavailable: %s\n' "$key" >&2; failed=1; fi
+  done
+  if [[ -n ${facts_ref[cpu.model_conflict]+x} ]]; then printf '%s\n' 'ERROR: conflicting CPU model names in /proc/cpuinfo.' >&2; failed=1; fi
+  value=${facts_ref[memory.total_bytes]-}
+  if [[ -n "$value" && ! "$value" =~ ^[0-9]+$ ]]; then printf '%s\n' 'ERROR: memory.total_bytes is not an unsigned decimal integer.' >&2; failed=1; fi
+  if [[ -n "$value" && "$value" =~ ^[0-9]+$ ]]; then
+    local max_int=9223372036854775807
+    if ((${#value} > 19)) || { ((${#value} == 19)) && [[ "$value" > "$max_int" ]]; }; then printf '%s\n' 'ERROR: memory.total_bytes exceeds supported integer range.' >&2; failed=1; fi
+  fi
+  return "$failed"
+}
 inventory::render_host_summary() {
   [[ $# -eq 1 ]] || return 2
   local input_name=$1
   inventory::valid_assoc_name "$input_name" || return 2
   local -n input_ref="$input_name"
   local key
-  for key in cpu.vendor cpu.model cpu.family cpu.model_id cpu.threads memory.total_bytes dmi.sys_vendor dmi.product_name dmi.product_version dmi.bios_version dmi.bios_date; do
+  for key in cpu.vendor cpu.model cpu.family cpu.model_id cpu.threads cpu.model_conflict memory.total_bytes dmi.sys_vendor dmi.product_name dmi.product_version dmi.bios_version dmi.bios_date; do
     if [[ -n ${input_ref[$key]+x} && -n ${input_ref[$key]} ]]; then
       printf '%-24s %s\n' "$key" "${input_ref[$key]}"
     else
@@ -89,12 +108,18 @@ inventory::compare_target_profile() {
   inventory::valid_assoc_name "$inventory_name" || return 2
   [[ -r "$profile_file" ]] || return 1
   local -n facts_ref="$inventory_name"
+  inventory::validate_required_facts "$inventory_name" || return 1
 
   # Parse only whitelisted single-quoted scalar assignments; never source/evaluate.
-  local line value expected_product='' expected_cpu='' memory_min='' memory_max=''
+  local line value expected_vendor='' expected_product='' expected_cpu='' memory_min='' memory_max=''
+  local seen_vendor=0
   local seen_product=0 seen_cpu=0 seen_min=0 seen_max=0
   while IFS= read -r line || [[ -n "$line" ]]; do
     case "$line" in
+      K41_TARGET_VENDOR=*)
+        (( seen_vendor == 0 )) || return 1
+        value=${line#*=}; [[ $value =~ ^\'[^']*'\'$ ]] || return 1
+        expected_vendor=${value:1:${#value}-2}; seen_vendor=1 ;;
       K41_TARGET_PRODUCT_NAME=*)
         (( seen_product == 0 )) || return 1
         value=${line#*=}; [[ $value =~ ^\'[^\']*\'$ ]] || return 1
@@ -113,8 +138,8 @@ inventory::compare_target_profile() {
         memory_max=${value:1:${#value}-2}; seen_max=1 ;;
     esac
   done < "$profile_file"
-  (( seen_product && seen_cpu && seen_min && seen_max )) || return 1
-  [[ -n "$expected_product" && -n "$expected_cpu" ]] || return 1
+  (( seen_vendor && seen_product && seen_cpu && seen_min && seen_max )) || return 1
+  [[ -n "$expected_vendor" && -n "$expected_product" && -n "$expected_cpu" ]] || return 1
   # Reject values outside Bash signed 64-bit arithmetic range.
   local max_int=9223372036854775807
   ((${#memory_min} < 19)) || { ((${#memory_min} == 19)) && [[ "$memory_min" < "$max_int" ]]; } || return 1
@@ -123,6 +148,12 @@ inventory::compare_target_profile() {
   (( min_num > 0 && max_num >= min_num )) || return 1
 
   local mismatch=0
+  if [[ "${facts_ref[dmi.sys_vendor]}" != "$expected_vendor" ]]; then
+    printf "WARN: system vendor mismatch (expected %s; detected %s).\\n" "$expected_vendor" "${facts_ref[dmi.sys_vendor]}" >&2
+    mismatch=1
+  else
+    printf "OK: system vendor matches %s.\\n" "$expected_vendor"
+  fi
   if [[ -n ${facts_ref[dmi.product_name]+x} ]]; then
     if [[ "${facts_ref[dmi.product_name]}" != "$expected_product" ]]; then
       printf 'WARN: target product mismatch (expected %s; detected %s).\n' "$expected_product" "${facts_ref[dmi.product_name]}" >&2
@@ -148,7 +179,8 @@ inventory::compare_target_profile() {
   fi
 
   if [[ -n ${facts_ref[memory.total_bytes]+x} ]]; then
-    if (( facts_ref[memory.total_bytes] < min_num || facts_ref[memory.total_bytes] > max_num )); then
+    local detected_memory=$((10#${facts_ref[memory.total_bytes]}))
+    if (( detected_memory < min_num || detected_memory > max_num )); then
       printf 'WARN: memory outside target range (%s bytes detected).\n' "${facts_ref[memory.total_bytes]}" >&2
       mismatch=1
     else
