@@ -128,10 +128,12 @@ echo 'PASS: fails closed on unresolved overlay backing path'
 cat >"$tmp/mountinfo" <<EOF_MOUNT
 42 25 7:0 / /run/archiso/bootmnt rw,relatime - squashfs /dev/loop0 ro
 EOF_MOUNT
+storage::topology_parse_mount_record "$(cat "$tmp/mountinfo")" || { echo 'FAIL: squashfs mountinfo parse' >&2; exit 1; }
+storage::topology_check_loop_backing 7:0 "$sys" no_seen || { echo 'FAIL: squashfs backing check' >&2; exit 1; }
 cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
 EOF_SWAP
-storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"
+if ! storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then echo 'FAIL: full squashfs mount check' >&2; exit 1; fi
 echo 'PASS: accepts squashfs loop mount backed by an unrelated filesystem'
 
 ln -s "$sys/devices/pci/block/nvme0n1" "$sys/dev/block/$backing_mm"
