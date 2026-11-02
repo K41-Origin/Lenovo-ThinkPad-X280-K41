@@ -12,7 +12,7 @@
 | Read-only host inventory | IMPLEMENTED | `lib/inventory.sh` collects CPU, memory, and DMI facts, validates required-fact availability and CPU consistency, and compares vendor/product/CPU/memory with the target profile. Actual X280 Linux detection remains NOT TESTED. |
 | Documentation split | IMPLEMENTED | Domain documents are present on main. |
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
-| Diagnostic-only installer entry point | TESTED | `installer --help` and `installer --preflight` are implemented; preflight is read-only and always returns nonzero because installation is disabled. Focused tests cover the entry-point safety boundary. |
+| Diagnostic-only installer entry point | IMPLEMENTED | `installer --help` and `installer --preflight` are implemented; preflight now includes read-only host inventory and X280 profile comparison. Focused gate test updated; rerun validation before marking TESTED. Preflight always returns nonzero because installation is disabled. |
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
 | Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
@@ -26,7 +26,7 @@
 
 ## Changelog
 
-### 2026-11-02 — Validate inventory completeness and consistency
+### 2026-11-02 — Integrate read-only target inventory into preflight\n- `lib/preflight.sh` now loads the inventory module and exposes `preflight::check_target_inventory`, which collects procfs/sysfs facts, prints a summary, validates required facts, and compares the detected host with the X280 profile.\n- `installer --preflight` invokes this check; missing, inconsistent, or mismatched inventory blocks the preflight result. No disk enumeration or storage operation is introduced.\n- Updated the mocked preflight gate test to assert inventory invocation and failure handling. Validation is pending; do not mark this integration TESTED until local syntax and fixture/gate tests pass.\n\n### 2026-11-02 — Validate inventory completeness and consistency
 - Added `inventory::validate_required_facts` for CPU model, numeric memory total, DMI vendor, and DMI product identity.
 - Detects conflicting CPU model records rather than silently accepting the first model; profile comparison now checks DMI vendor as well as product, CPU, and memory.
 - Bounds memory parsing and rejects malformed or unsupported numeric values before arithmetic. Added fixture tests for missing facts, invalid memory, CPU conflicts, and vendor mismatch.
