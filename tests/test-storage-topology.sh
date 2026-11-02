@@ -67,3 +67,27 @@ if storage::topology_check_target invalid "$sys" "$tmp/mountinfo" "$tmp/swaps"; 
   echo 'FAIL: invalid target major:minor accepted' >&2; exit 1
 fi
 echo 'PASS: rejects malformed target identity'
+
+cat >"$tmp/mountinfo" <<'EOF_MOUNT'
+40 25 8:0 / / rw,relatime - btrfs /dev/sda rw
+EOF_MOUNT
+if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+  echo 'FAIL: multi-device btrfs backing was accepted' >&2; exit 1
+fi
+echo 'PASS: fails closed on btrfs backing topology'
+
+cat >"$tmp/mountinfo" <<'EOF_MOUNT'
+41 25 8:0 / / rw,relatime - overlay overlay rw
+EOF_MOUNT
+if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+  echo 'FAIL: overlay backing was accepted' >&2; exit 1
+fi
+echo 'PASS: fails closed on overlay backing topology'
+
+cat >"$tmp/mountinfo" <<'EOF_MOUNT'
+malformed mountinfo record
+EOF_MOUNT
+if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+  echo 'FAIL: malformed mountinfo was accepted' >&2; exit 1
+fi
+echo 'PASS: rejects malformed mountinfo'
