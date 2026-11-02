@@ -2,6 +2,13 @@
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 source "$ROOT/lib/storage.sh"
+
+# Isolate target-validation integration from the host's real /sys and /proc.
+# The topology algorithm itself is exercised with synthetic fixtures separately.
+storage::topology_check_target() {
+  [[ $# -eq 4 && $1 == 259:0 && $2 == /sys && $3 == /proc/self/mountinfo && $4 == /proc/swaps ]] || return 2
+  [[ ${K41_TOPOLOGY_FAIL:-0} == 0 ]]
+}
 tmp="$(mktemp -d)"
 trap 'rm -rf -- "$tmp"' EXIT
 mkdir -p "$tmp/bin"
@@ -28,12 +35,12 @@ export K41_SWAP_FIXTURE="$tmp/swaps.txt"
 write_safe_fixture() {
   cat >"$K41_LSBLK_FIXTURE" <<'JSON'
 {"blockdevices":[
- {"name":"/dev/nvme0n1","type":"disk","size":256000000000,"model":"WDC PC SN730","tran":"nvme","wwn":"eui.001","serial":"SN001","rm":false,"ro":false,"mountpoints":[null],"children":[
+ {"name":"/dev/nvme0n1","maj:min":"259:0","type":"disk","size":256000000000,"model":"WDC PC SN730","tran":"nvme","wwn":"eui.001","serial":"SN001","rm":false,"ro":false,"mountpoints":[null],"children":[
   {"name":"/dev/nvme0n1p1","type":"part","size":1073741824,"mountpoints":[null]},
   {"name":"/dev/nvme0n1p2","type":"part","size":255000000000,"mountpoints":[null],
    "children":[{"name":"/dev/mapper/cryptroot","type":"crypt","mountpoints":[null]}]}
  ]},
- {"name":"/dev/sda","type":"disk","size":32000000000,"model":"USB","tran":"usb","wwn":null,"serial":"USB001","rm":true,"ro":false,"mountpoints":[null],"children":[]}
+ {"name":"/dev/sda","maj:min":"8:0","type":"disk","size":32000000000,"model":"USB","tran":"usb","wwn":null,"serial":"USB001","rm":true,"ro":false,"mountpoints":[null],"children":[]}
 ]}
 JSON
 }
@@ -49,7 +56,12 @@ echo 'PASS: discovers disks and records identity and safety facts'
 
 declare -A target=([device_path]=/dev/nvme0n1 [size_bytes]=256000000000 [wwn]=eui.001 [serial]=SN001)
 storage::validate_target target || { echo 'FAIL: valid internal NVMe rejected'; exit 1; }
-echo 'PASS: accepts unchanged internal NVMe with matching WWN and serial'
+echo 'PASS: accepts unchanged internal NVMe with matching WWN and serial and invokes topology validation'
+
+export K41_TOPOLOGY_FAIL=1
+if storage::validate_target target; then echo 'FAIL: topology validation failure was ignored'; exit 1; fi
+unset K41_TOPOLOGY_FAIL
+echo 'PASS: blocks target when topology validation fails'
 
 # Any mounted descendant, including a mapper below a partition, blocks erasure.
 sed -i 's/"mountpoints":\[null\]}/"mountpoints":["\/"]}/' "$K41_LSBLK_FIXTURE"
