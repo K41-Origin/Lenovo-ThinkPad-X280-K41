@@ -9,7 +9,7 @@
 | Requirements capture | IMPLEMENTED | Planning choices recorded in requirements/decision log. |
 | Owner-reported X280 hardware baseline | IMPLEMENTED | `docs/13-X280-HARDWARE-BASELINE.md` records Windows-observed and owner-reported specifications, evidence limitations, and Linux verification checklist. |
 | X280 target hardware profile | IMPLEMENTED | `config/hardware/thinkpad-x280.conf` stores the operational target values; values are not runtime detection or disk-selection authority. |
-| Read-only host inventory | IMPLEMENTED | `lib/inventory.sh` collects CPU, memory, and DMI facts, renders diagnostics, and compares observed product/CPU/memory with the target profile. Actual X280 Linux detection remains NOT TESTED. |
+| Read-only host inventory | IMPLEMENTED | `lib/inventory.sh` collects CPU, memory, and DMI facts, validates required-fact availability and CPU consistency, and compares vendor/product/CPU/memory with the target profile. Actual X280 Linux detection remains NOT TESTED. |
 | Documentation split | IMPLEMENTED | Domain documents are present on main. |
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
 | Diagnostic-only installer entry point | TESTED | `installer --help` and `installer --preflight` are implemented; preflight is read-only and always returns nonzero because installation is disabled. Focused tests cover the entry-point safety boundary. |
@@ -25,6 +25,12 @@
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Validate inventory completeness and consistency
+- Added `inventory::validate_required_facts` for CPU model, numeric memory total, DMI vendor, and DMI product identity.
+- Detects conflicting CPU model records rather than silently accepting the first model; profile comparison now checks DMI vendor as well as product, CPU, and memory.
+- Bounds memory parsing and rejects malformed or unsupported numeric values before arithmetic. Added fixture tests for missing facts, invalid memory, CPU conflicts, and vendor mismatch.
+- This remains read-only fixture validation; actual X280 hardware is NOT TESTED.
 
 ### 2026-11-02 — Harden inventory profile parsing and fixtures
 - Restricted parsing to four whitelisted single-quoted fields; rejects malformed and duplicate fields and validates decimal memory bounds without sourcing/evaluating the profile.
