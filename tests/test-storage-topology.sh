@@ -46,7 +46,7 @@ fi
 echo 'PASS: rejects mounted target partition'
 
 cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-36 25 8:0 / / rw,relatime - ext4 /dev/sda rw
+36 25 253:0 / / rw,relatime - ext4 /dev/mapper/cryptroot rw
 EOF_MOUNT
 cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
