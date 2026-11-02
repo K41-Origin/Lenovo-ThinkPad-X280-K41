@@ -7,6 +7,7 @@
 | Repository baseline at initial commit | VERIFIED | Historical baseline inspection identified LICENSE and a minimal README.md in the initial commit. This does not verify the current repository as a whole. |
 | AI development instructions | IMPLEMENTED | `AGENTS.md` defines repository inspection, focused changes, safety rules, test honesty, and verification/reporting requirements; content re-fetched after creation. |
 | Requirements capture | IMPLEMENTED | Planning choices recorded in requirements/decision log. |
+| Owner-reported X280 hardware baseline | IMPLEMENTED | `docs/13-X280-HARDWARE-BASELINE.md` records Windows-observed and owner-reported specifications, evidence limitations, and Linux verification checklist; no Linux hardware verification has been performed. |
 | Documentation split | IMPLEMENTED | Domain documents are present on main. |
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
 | Diagnostic-only installer entry point | TESTED | `installer --help` and `installer --preflight` are implemented; preflight is read-only and always returns nonzero because installation is disabled. Focused tests cover the entry-point safety boundary. |
@@ -22,6 +23,12 @@
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Record owner-reported ThinkPad X280 hardware baseline
+- Added `docs/13-X280-HARDWARE-BASELINE.md` with the supplied model, CPU, memory, graphics, display, SSD, network, audio, camera, firmware, and battery details.
+- Recorded evidence source and confidence; omitted the battery serial number and other unnecessary identifiers. Clarified that Windows `SCSI` InterfaceType does not establish physical storage transport and that Linux driver/device IDs remain to be verified.
+- Linked the baseline from the README and hardware/power/network documentation. Updated the requirements log to distinguish captured baseline data from outstanding Linux-side verification.
+- Documentation-only. Repository writes were re-fetched for verification; no Linux hardware, installer, syntax, or automated tests were run.
 
 ### 2026-11-02 — Finalized native mkinitcpio UKI boot design
 - Approved a single default mkinitcpio-generated UKI on the 1 GiB FAT32 ESP at `/efi/EFI/Linux/`, with the source kernel and mkinitcpio configuration on encrypted ext4 root and systemd-boot discovering the UKI.
