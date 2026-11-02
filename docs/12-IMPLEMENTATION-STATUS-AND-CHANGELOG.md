@@ -26,6 +26,12 @@
 
 ## Changelog
 
+### 2026-11-02 — Add X280 target profile and runtime inventory (initial implementation)
+- Added `config/hardware/thinkpad-x280.conf` with the owner-confirmed X280 target values. The profile is project configuration, not runtime detection or disk-selection authority.
+- Added `lib/inventory.sh` to collect CPU identity/logical thread count, memory, and DMI facts from read-only procfs/sysfs, render a summary, and compare observed DMI product, CPU model, and memory range against the target profile. The profile parser reads only whitelisted literal fields and does not source/evaluate the file.
+- Added fixture-based `tests/test-inventory.sh`; updated architecture, README, and test instructions. Inventory test execution and syntax validation are pending; actual Linux hardware discovery on the X280 remains NOT TESTED.
+- No disk discovery, partitioning, package installation, service changes, or hardware tuning was added.
+
 ### 2026-11-02 — Record owner-reported ThinkPad X280 hardware baseline
 - Added `docs/13-X280-HARDWARE-BASELINE.md` with the supplied model, CPU, memory, graphics, display, SSD, network, audio, camera, firmware, and battery details.
 - Recorded evidence source and confidence; omitted the battery serial number and other unnecessary identifiers. Clarified that Windows `SCSI` InterfaceType does not establish physical storage transport and that Linux driver/device IDs remain to be verified.
