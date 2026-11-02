@@ -81,7 +81,6 @@ echo 'PASS: rejects duplicate WWN'
 write_safe_fixture
 
 # Both identity fields supplied by the caller must still match.
-target_bad=([device_path]=/dev/nvme0n1 [size_bytes]=256000000000 [wwn]=eui.001 [serial]=CHANGED)
 declare -A bad=([device_path]=/dev/nvme0n1 [size_bytes]=256000000000 [wwn]=eui.001 [serial]=CHANGED)
 if storage::validate_target bad; then echo 'FAIL: changed serial accepted'; exit 1; fi
 echo 'PASS: rejects changed secondary identity'
