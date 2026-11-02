@@ -10,6 +10,13 @@ storage::plan_gpt_layout() {
   local value
   for value in "$disk_bytes" "$logical_sector" "$physical_sector" "$ram_bytes" "$swap_margin_bytes"; do
     [[ $value =~ ^[0-9]+$ ]] || return 2
+    # Bash arithmetic uses signed 64-bit integers on supported Arch platforms.
+    # Reject out-of-range decimal strings before evaluating them arithmetically.
+    value=${value##+(0)}
+    [[ -n $value ]] || value=0
+    (( ${#value} < 19 )) || {
+      (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 2
+    }
     (( value > 0 )) || return 2
   done
   (( logical_sector >= 512 && logical_sector <= 65536 )) || return 2
@@ -34,9 +41,11 @@ storage::plan_gpt_layout() {
   local esp_end=$((esp_start + esp_sectors - 1))
   local root_start=$((((esp_end + 1 + align_sectors - 1) / align_sectors) * align_sectors))
   local root_end=$last_usable
-  local swap_bytes=$((ram_bytes + swap_margin_bytes))
-  local root_bytes=$(((root_end - root_start + 1) * logical_sector))
   local minimum_root_bytes=$((32 * 1024 * 1024 * 1024))
+  (( ram_bytes <= 9223372036854775807 - swap_margin_bytes )) || return 2
+  local swap_bytes=$((ram_bytes + swap_margin_bytes))
+  (( swap_bytes <= 9223372036854775807 - minimum_root_bytes )) || return 2
+  local root_bytes=$(((root_end - root_start + 1) * logical_sector))
 
   (( esp_end <= last_usable && root_start <= root_end )) || return 1
   (( root_bytes >= minimum_root_bytes + swap_bytes )) || return 1
