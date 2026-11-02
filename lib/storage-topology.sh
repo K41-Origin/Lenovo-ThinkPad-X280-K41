@@ -93,7 +93,7 @@ storage::topology_parse_mount_record() {
       TOPOLOGY_MOUNT_SUPER_OPTIONS=
       ;;
     *)
-      printf 'storage: cannot prove backing-device topology for filesystem type %s\\n' "$TOPOLOGY_MOUNT_FSTYPE" >&2
+      printf 'storage: cannot prove backing-device topology for filesystem type %s\n' "$TOPOLOGY_MOUNT_FSTYPE" >&2
       return 1
       ;;
   esac
