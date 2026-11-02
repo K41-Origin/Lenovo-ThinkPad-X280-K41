@@ -7,17 +7,18 @@ storage::plan_gpt_layout() {
   [[ $(declare -p "$1" 2>/dev/null) == 'declare -A '* ]] || return 2
   [[ ! -v _plan[status] ]] || return 2
   local disk_bytes=$2 logical_sector=$3 physical_sector=$4 ram_bytes=$5 swap_margin_bytes=$6
-  local value
-  for value in "$disk_bytes" "$logical_sector" "$physical_sector" "$ram_bytes" "$swap_margin_bytes"; do
+  local value variable
+  for variable in disk_bytes logical_sector physical_sector ram_bytes swap_margin_bytes; do
+    value=${!variable}
     [[ $value =~ ^[0-9]+$ ]] || return 2
-    # Bash arithmetic uses signed 64-bit integers on supported Arch platforms.
-    # Reject out-of-range decimal strings before evaluating them arithmetically.
-    value=${value##+(0)}
-    [[ -n $value ]] || value=0
+    # Canonicalize decimal strings before arithmetic; Bash otherwise treats
+    # leading-zero values as octal. Reject values outside signed 64-bit range.
+    while [[ ${#value} -gt 1 && $value == 0* ]]; do value=${value#0}; done
     (( ${#value} < 19 )) || {
       (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 2
     }
     (( value > 0 )) || return 2
+    printf -v "$variable" '%s' "$value"
   done
   (( logical_sector >= 512 && logical_sector <= 65536 )) || return 2
   (( (logical_sector & (logical_sector - 1)) == 0 )) || return 2
