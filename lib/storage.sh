@@ -20,6 +20,7 @@ storage::discover_candidates() {
   command -v jq >/dev/null 2>&1 || return 1
   command -v swapon >/dev/null 2>&1 || return 1
   command -v base64 >/dev/null 2>&1 || return 1
+  command -v readlink >/dev/null 2>&1 || return 1
 
   local json swaps encoded index=0 object path type size model transport wwn serial removable readonly mounted active_swap
   json="$(lsblk --json --bytes --paths --output NAME,TYPE,SIZE,MODEL,TRAN,WWN,SERIAL,RM,RO,MOUNTPOINTS)" || return 1
@@ -56,13 +57,18 @@ storage::discover_candidates() {
     [[ "$path" == /dev/* && "$type" == disk && "$size" =~ ^[0-9]+$ ]] || return 1
 
     active_swap=no
-    local descendant
+    local descendant swap_path resolved_descendant resolved_swap
     while IFS= read -r descendant; do
       [[ -n "$descendant" ]] || continue
-      if grep -Fqx -- "$descendant" <<<"$swaps"; then
-        active_swap=yes
-        break
-      fi
+      resolved_descendant="$(readlink -f -- "$descendant")" || return 1
+      while IFS= read -r swap_path; do
+        [[ -n "$swap_path" ]] || continue
+        resolved_swap="$(readlink -f -- "$swap_path")" || continue
+        if [[ "$resolved_descendant" == "$resolved_swap" ]]; then
+          active_swap=yes
+          break 2
+        fi
+      done <<<"$swaps"
     done < <(jq -r '.descendants[]' <<<"$object")
 
     local stable_kind=none stable_id=
