@@ -37,3 +37,15 @@ if storage::plan_gpt_layout misaligned 274877906943 512 4096 8589934592 10737418
   echo 'FAIL: non-sector-aligned disk capacity accepted' >&2; exit 1
 fi
 echo 'PASS: rejects capacity not divisible by logical sector size'
+
+declare -A overflow=()
+if storage::plan_gpt_layout overflow 9223372036854775808 512 4096 8589934592 1073741824; then
+  echo 'FAIL: out-of-range disk size accepted' >&2; exit 1
+fi
+echo 'PASS: rejects arithmetic input outside signed 64-bit range'
+
+declare -A swap_overflow=()
+if storage::plan_gpt_layout swap_overflow 274877906944 512 4096 9223372036854775807 1; then
+  echo 'FAIL: swap-size addition overflow accepted' >&2; exit 1
+fi
+echo 'PASS: rejects swap-size arithmetic overflow'
