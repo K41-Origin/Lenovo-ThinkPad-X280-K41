@@ -1,100 +1,120 @@
 #!/usr/bin/env bash
-# Storage module contract — PLANNED; no executable storage behavior is implemented.
+# Read-only storage discovery and target validation.
+# No partitioning, formatting, mounting, or privileged operations live here.
+
+storage::valid_assoc_name() {
+  [[ $# -eq 1 && $1 =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] || return 2
+  local declaration
+  declaration="$(declare -p "$1" 2>/dev/null)" || return 2
+  [[ "$declaration" == 'declare -A '* || "$declaration" == 'declare -Ar '* ]]
+}
+
+# Populate a caller-declared associative array:
+#   candidate_count
+#   <index>.device_path, .device_type, .size_bytes, .model, .transport,
+#   .wwn, .serial, .removable, .read_only, .has_mounted_descendant,
+#   .stable_id_kind, .stable_id
 #
-# Requirement links:
-#   REQ-INSTALL-005 — global gate before installation work proceeds.
-#   REQ-DISK-002    — storage/encryption/swap/resume design constraints.
-#   REQ-DISK-003    — target identity, full plan, confirmation, and destructive-operation gate.
-#   REQ-DISK-006    — unresolved bootloader/resume compatibility blocks destructive work.
-#   REQ-RECOVERY-001 — inspect actual state after interruption; never auto-wipe on restart.
-# Test mapping: docs/11-TESTING-AND-ACCEPTANCE.md (TC-DISK-003-01..08,
-# TC-RECOVERY-001-01).
-#
-# Ownership and safety:
-# - This is the only module allowed to own partitioning/formatting operations.
-# - No function may run destructive tools until storage design is approved,
-#   prerequisites pass, a complete plan is displayed, target identity is
-#   revalidated, and explicit confirmation for that exact target/plan is received.
-# - Missing/ambiguous identity, incomplete plan, changed target, failed
-#   prerequisite, cancellation, or unknown critical state must fail closed.
-# - Keep discovery, planning, display, validation, confirmation, execution,
-#   and post-operation verification as separate testable stages.
-# - Automated tests must mock/fake destructive tools and assert zero calls on
-#   every abort path. Never test this module against a real disk.
-#
-# Data model — design contract, not implemented:
-# - Public functions accept names of caller-declared Bash associative arrays
-#   and use validated namerefs; do not use eval or execute serialized data.
-# - Candidate identity fields: device_path (current locator only), device_type,
-#   size_bytes, model, transport, and available stable identifiers such as
-#   WWN or device serial. Missing stable identifiers remain missing; a path
-#   alone must never resolve an otherwise ambiguous physical target.
-# - Keep raw identifiers available for comparison, but do not log or expose
-#   full serials by default. Render only the minimum identifying detail needed
-#   for the user to distinguish the target safely.
-# - A plan is a validated associative-array record with an explicit schema
-#   version and fields for target identity snapshot, boot mode, partition table,
-#   ordered partition definitions, encryption, filesystems, mount points,
-#   swapfile/resume design, prerequisite evidence, and unresolved decisions.
-# - Plan records contain no passphrases, recovery keys, credentials, or shell
-#   fragments. Never source a plan file or interpret plan values as commands.
-# - Confirmation binds the reviewed target identity and canonical plan digest.
-#   Any change to target identity, plan contents, schema, or required evidence
-#   invalidates the confirmation. Digest construction and serialization must
-#   be deterministic and safely testable before implementation.
-#
-# Planned public stage interface (names/signatures are design proposals):
-#
-#   storage::discover_candidates <output_assoc_array_name>
-#     Read-only block-device discovery. Return candidate records with stable
-#     identity evidence; no writes, mounts, partition-table reads that mutate,
-#     or selection based only on enumeration order.
-#
-#   storage::build_plan <target_assoc_array_name> <profile_assoc_array_name> <output_plan_assoc_array_name>
-#     Validate target/profile schemas and required resolved decisions, then
-#     build a complete plan. Return failure if any critical input is unknown.
-#
-#   storage::render_plan <plan_assoc_array_name>
-#     Display target identification and every proposed partition, encryption,
-#     filesystem, mount, swap, and resume choice. No mutation.
-#
-#   storage::validate_target <target_assoc_array_name> <plan_assoc_array_name>
-#     Re-discover the selected device and compare all available identity
-#     evidence and relevant capacity/type attributes against the plan snapshot.
-#     A changed path may be accepted only if stable identity proves it is the
-#     same device; a path match alone is insufficient.
-#
-#   storage::confirm_plan <target_assoc_array_name> <plan_assoc_array_name> <output_confirmation>
-#     Interactively obtain explicit final confirmation after rendering. The
-#     confirmation result binds target identity and canonical plan digest.
-#     Cancellation returns status 10; no destructive command is invoked.
-#
-#   storage::execute_plan <target_assoc_array_name> <plan_assoc_array_name> <confirmation>
-#     Sole stage permitted to invoke destructive storage tools. Revalidate
-#     target, plan completeness/digest, prerequisites, boot/resume design,
-#     and confirmation immediately before the first destructive command.
-#     Never infer confirmation from environment variables or stale files.
-#
-#   storage::verify_result <plan_assoc_array_name>
-#     Read-only verification of resulting partition, encryption, filesystem,
-#     mount, and swap/resume state. Report observed facts, not assumptions.
-#
-# Status convention — proposed and aligned with the orchestration contract:
-#   0  stage succeeded
-#   1  operational/critical failure
-#   2  invalid arguments or invalid data schema
-#   10 user cancellation or deliberate safe stop (never success)
-# Only status 0 permits the caller to advance.
-#
-# Privilege and recovery boundaries:
-# - Discovery/planning/rendering/validation should be read-only and need no
-#   elevated privilege unless verified implementation evidence proves otherwise.
-# - Elevate only the narrow execution operation that requires it; do not run
-#   the entire installer as root merely for convenience.
-# - If execution is interrupted or partially fails, stop. A later run must
-#   inspect actual on-disk state and require a newly reviewed plan; never
-#   automatically repeat partitioning/formatting.
-# - Do not place secrets in arguments, environment variables, plan records,
-#   logs, traces, reports, or test fixtures.
-#
-# No real storage command or executable storage function is implemented here.
+# Requires lsblk with JSON output and jq. Uses only read-only queries.
+storage::discover_candidates() {
+  [[ $# -eq 1 ]] || return 2
+  storage::valid_assoc_name "$1" || return 2
+  local -n _out="$1"
+  [[ ! -v _out[candidate_count] ]] || return 2
+  command -v lsblk >/dev/null 2>&1 || return 1
+  command -v jq >/dev/null 2>&1 || return 1
+
+  local json
+  json="$(lsblk --json --bytes --paths --output NAME,TYPE,SIZE,MODEL,TRAN,WWN,SERIAL,RM,RO,MOUNTPOINTS)" || return 1
+  jq -e '.blockdevices | type == "array"' >/dev/null 2>&1 <<<"$json" || return 1
+
+  local encoded index=0 object path type size model transport wwn serial removable readonly mounted stable_kind stable_id
+  while IFS= read -r encoded; do
+    [[ -n "$encoded" ]] || continue
+    object="$(printf '%s' "$encoded" | base64 --decode)" || return 1
+    path="$(jq -r '.name // ""' <<<"$object")" || return 1
+    type="$(jq -r '.type // ""' <<<"$object")" || return 1
+    size="$(jq -r 'if .size == null then "" else (.size|tostring) end' <<<"$object")" || return 1
+    model="$(jq -r '.model // ""' <<<"$object")" || return 1
+    transport="$(jq -r '.tran // ""' <<<"$object")" || return 1
+    wwn="$(jq -r '.wwn // ""' <<<"$object")" || return 1
+    serial="$(jq -r '.serial // ""' <<<"$object")" || return 1
+    removable="$(jq -r 'if .rm == null then "" else (.rm|tostring) end' <<<"$object")" || return 1
+    readonly="$(jq -r 'if .ro == null then "" else (.ro|tostring) end' <<<"$object")" || return 1
+    mounted="$(jq -r 'if .mounted then "yes" else "no" end' <<<"$object")" || return 1
+
+    [[ "$path" == /dev/* && "$type" == disk && "$size" =~ ^[0-9]+$ ]] || return 1
+    [[ "$removable" == true || "$removable" == false ]] || return 1
+    [[ "$readonly" == true || "$readonly" == false ]] || return 1
+    if [[ -n "$wwn" ]]; then
+      stable_kind=wwn; stable_id="$wwn"
+    elif [[ -n "$serial" ]]; then
+      stable_kind=serial; stable_id="$serial"
+    else
+      stable_kind=none; stable_id=
+    fi
+
+    _out["$index.device_path"]="$path"
+    _out["$index.device_type"]="$type"
+    _out["$index.size_bytes"]="$size"
+    _out["$index.model"]="$model"
+    _out["$index.transport"]="$transport"
+    _out["$index.wwn"]="$wwn"
+    _out["$index.serial"]="$serial"
+    _out["$index.removable"]="$removable"
+    _out["$index.read_only"]="$readonly"
+    _out["$index.has_mounted_descendant"]="$mounted"
+    _out["$index.stable_id_kind"]="$stable_kind"
+    _out["$index.stable_id"]="$stable_id"
+    ((index += 1))
+  done < <(
+    jq -r '
+      def walk: ., (.children[]? | walk);
+      .blockdevices[]
+      | select(.type == "disk")
+      | . as $disk
+      | {
+          name, type, size, model, tran, wwn, serial, rm, ro,
+          mounted: ([$disk | walk | .mountpoints[]? | select(. != null and . != "")] | length > 0)
+        }
+      | @base64
+    ' <<<"$json"
+  ) || return 1
+
+  _out[candidate_count]="$index"
+}
+
+# Validate a selected candidate against a fresh read-only discovery.
+# Target array must contain device_path, size_bytes, and at least one stable
+# identifier (wwn or serial). Refuses removable, read-only, mounted, or changed
+# targets. This is a safety gate, not proof that a disk is safe to erase.
+storage::validate_target() {
+  [[ $# -eq 1 ]] || return 2
+  storage::valid_assoc_name "$1" || return 2
+  local -n _target="$1"
+  local required
+  for required in device_path size_bytes; do
+    [[ -n ${_target[$required]-} ]] || return 2
+  done
+  [[ -n ${_target[wwn]-} || -n ${_target[serial]-} ]] || return 1
+  [[ ${_target[device_path]} == /dev/* && ${_target[size_bytes]} =~ ^[0-9]+$ ]] || return 2
+
+  local -A current=()
+  storage::discover_candidates current || return 1
+  local i found=0
+  for ((i=0; i<current[candidate_count]; i++)); do
+    [[ ${current[$i.device_path]} == "${_target[device_path]}" ]] || continue
+    found=1
+    [[ ${current[$i.size_bytes]} == "${_target[size_bytes]}" ]] || return 1
+    [[ ${current[$i.removable]} == false ]] || return 1
+    [[ ${current[$i.read_only]} == false ]] || return 1
+    [[ ${current[$i.has_mounted_descendant]} == no ]] || return 1
+    if [[ -n ${_target[wwn]-} ]]; then
+      [[ ${current[$i.wwn]} == "${_target[wwn]}" ]] || return 1
+    else
+      [[ ${current[$i.serial]} == "${_target[serial]}" ]] || return 1
+    fi
+    return 0
+  done
+  (( found == 1 )) || return 1
+}
