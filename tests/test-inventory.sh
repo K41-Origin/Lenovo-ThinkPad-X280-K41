@@ -31,6 +31,25 @@ inventory::collect_host facts "$tmp/proc" "$tmp/sys"
 [[ "${facts[memory.total_bytes]}" == 8375185408 ]]
 [[ "${facts[dmi.product_name]}" == '20KESC2Y00' ]]
 inventory::compare_target_profile facts "$PROFILE" >/dev/null
+# Mismatched target identity and missing required facts fail closed.
+declare -A wrong_device=([dmi.product_name]='20KESC2Y10' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
+if inventory::compare_target_profile wrong_device "$PROFILE" >/dev/null 2>&1; then exit 1; fi
+declare -A missing_facts=([dmi.product_name]='20KESC2Y00')
+if inventory::compare_target_profile missing_facts "$PROFILE" >/dev/null 2>&1; then exit 1; fi
+# Malformed profile content is rejected without executing shell syntax.
+cat > "$tmp/malicious.conf" <<EOF_BAD
+K41_TARGET_PRODUCT_NAME=\$(touch "$tmp/should-not-exist")
+K41_TARGET_CPU_MODEL_LINUX='Intel(R) Core(TM) i5-8250U'
+K41_TARGET_MEMORY_MIN_BYTES='7516192768'
+K41_TARGET_MEMORY_MAX_BYTES='9663676416'
+EOF_BAD
+if inventory::compare_target_profile facts "$tmp/malicious.conf" >/dev/null 2>&1; then exit 1; fi
+[[ ! -e "$tmp/should-not-exist" ]]
+cp "$PROFILE" "$tmp/duplicate.conf"
+printf "%s\\n" "K41_TARGET_PRODUCT_NAME='20KESC2Y00'" >> "$tmp/duplicate.conf"
+if inventory::compare_target_profile facts "$tmp/duplicate.conf" >/dev/null 2>&1; then exit 1; fi
+declare -Ar readonly_facts=([dmi.product_name]='20KESC2Y00')
+if inventory::collect_host readonly_facts "$tmp/proc" "$tmp/sys"; then exit 1; else [[ $? -eq 2 ]]; fi
 # Missing optional fields remain absent; malformed memory is not guessed.
 rm "$tmp/proc/meminfo"
 printf '%s\n' 'MemTotal: invalid kB' > "$tmp/proc/meminfo"
