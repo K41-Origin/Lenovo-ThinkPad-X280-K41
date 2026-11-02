@@ -43,7 +43,7 @@ declare -A incomplete=([cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_by
 if inventory::validate_required_facts incomplete >/dev/null 2>&1; then exit 1; fi
 declare -A bad_memory=([cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]='8GiB' [dmi.sys_vendor]='LENOVO' [dmi.product_name]='20KESC2Y00')
 if inventory::validate_required_facts bad_memory >/dev/null 2>&1; then exit 1; fi
-printf '%s\\n' 'processor : 0' 'model name : CPU A' 'processor : 1' 'model name : CPU B' > "$tmp/proc/cpuinfo"
+printf '%s\n' 'processor : 0' 'model name : CPU A' 'processor : 1' 'model name : CPU B' > "$tmp/proc/cpuinfo"
 declare -A cpu_conflict=()
 inventory::collect_host cpu_conflict "$tmp/proc" "$tmp/sys"
 [[ -n ${cpu_conflict[cpu.model_conflict]+x} ]]
@@ -59,7 +59,7 @@ EOF_BAD
 if inventory::compare_target_profile facts "$tmp/malicious.conf" >/dev/null 2>&1; then exit 1; fi
 [[ ! -e "$tmp/should-not-exist" ]]
 cp "$PROFILE" "$tmp/duplicate.conf"
-printf "%s\\n" "K41_TARGET_PRODUCT_NAME='20KESC2Y00'" >> "$tmp/duplicate.conf"
+printf "%s\n" "K41_TARGET_PRODUCT_NAME='20KESC2Y00'" >> "$tmp/duplicate.conf"
 if inventory::compare_target_profile facts "$tmp/duplicate.conf" >/dev/null 2>&1; then exit 1; fi
 declare -Ar readonly_facts=([dmi.product_name]='20KESC2Y00')
 if inventory::collect_host readonly_facts "$tmp/proc" "$tmp/sys"; then exit 1; else [[ $? -eq 2 ]]; fi
