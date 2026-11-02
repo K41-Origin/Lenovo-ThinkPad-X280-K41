@@ -21,6 +21,9 @@ inventory::collect_host() {
   [[ $# -ge 1 && $# -le 3 ]] || return 2
   local output_name=$1 proc_root=${2:-/proc} sys_root=${3:-/sys}
   inventory::valid_assoc_name "$output_name" || return 2
+  local output_declaration
+  output_declaration="$(declare -p "$output_name" 2>/dev/null)" || return 2
+  [[ "$output_declaration" != "declare -Ar "* ]] || return 2
   [[ -d "$proc_root" && -d "$sys_root" ]] || return 1
 
   local -n output_ref="$output_name"
@@ -87,17 +90,37 @@ inventory::compare_target_profile() {
   [[ -r "$profile_file" ]] || return 1
   local -n facts_ref="$inventory_name"
 
-  # Parse only the four expected literal assignments; never source/evaluate a profile.
+  # Parse only whitelisted single-quoted scalar assignments; never source/evaluate.
   local line value expected_product='' expected_cpu='' memory_min='' memory_max=''
+  local seen_product=0 seen_cpu=0 seen_min=0 seen_max=0
   while IFS= read -r line || [[ -n "$line" ]]; do
     case "$line" in
-      K41_TARGET_PRODUCT_NAME=*) value=${line#*=}; expected_product=${value:1:${#value}-2} ;;
-      K41_TARGET_CPU_MODEL_LINUX=*) value=${line#*=}; expected_cpu=${value:1:${#value}-2} ;;
-      K41_TARGET_MEMORY_MIN_BYTES=*) value=${line#*=}; memory_min=${value:1:${#value}-2} ;;
-      K41_TARGET_MEMORY_MAX_BYTES=*) value=${line#*=}; memory_max=${value:1:${#value}-2} ;;
+      K41_TARGET_PRODUCT_NAME=*)
+        (( seen_product == 0 )) || return 1
+        value=${line#*=}; [[ $value =~ ^\'[^\']*\'$ ]] || return 1
+        expected_product=${value:1:${#value}-2}; seen_product=1 ;;
+      K41_TARGET_CPU_MODEL_LINUX=*)
+        (( seen_cpu == 0 )) || return 1
+        value=${line#*=}; [[ $value =~ ^\'[^\']*\'$ ]] || return 1
+        expected_cpu=${value:1:${#value}-2}; seen_cpu=1 ;;
+      K41_TARGET_MEMORY_MIN_BYTES=*)
+        (( seen_min == 0 )) || return 1
+        value=${line#*=}; [[ $value =~ ^\'[0-9]+\'$ ]] || return 1
+        memory_min=${value:1:${#value}-2}; seen_min=1 ;;
+      K41_TARGET_MEMORY_MAX_BYTES=*)
+        (( seen_max == 0 )) || return 1
+        value=${line#*=}; [[ $value =~ ^\'[0-9]+\'$ ]] || return 1
+        memory_max=${value:1:${#value}-2}; seen_max=1 ;;
     esac
   done < "$profile_file"
-  [[ -n "$expected_product" && -n "$expected_cpu" && "$memory_min" =~ ^[0-9]+$ && "$memory_max" =~ ^[0-9]+$ ]] || return 1
+  (( seen_product && seen_cpu && seen_min && seen_max )) || return 1
+  [[ -n "$expected_product" && -n "$expected_cpu" ]] || return 1
+  # Reject values outside Bash signed 64-bit arithmetic range.
+  local max_int=9223372036854775807
+  ((${#memory_min} < 19)) || { ((${#memory_min} == 19)) && [[ "$memory_min" < "$max_int" ]]; } || return 1
+  ((${#memory_max} < 19)) || { ((${#memory_max} == 19)) && [[ "$memory_max" < "$max_int" || "$memory_max" == "$max_int" ]]; } || return 1
+  local min_num=$((10#$memory_min)) max_num=$((10#$memory_max))
+  (( min_num > 0 && max_num >= min_num )) || return 1
 
   local mismatch=0
   if [[ -n ${facts_ref[dmi.product_name]+x} ]]; then
@@ -125,7 +148,7 @@ inventory::compare_target_profile() {
   fi
 
   if [[ -n ${facts_ref[memory.total_bytes]+x} ]]; then
-    if (( facts_ref[memory.total_bytes] < memory_min || facts_ref[memory.total_bytes] > memory_max )); then
+    if (( facts_ref[memory.total_bytes] < min_num || facts_ref[memory.total_bytes] > max_num )); then
       printf 'WARN: memory outside target range (%s bytes detected).\n' "${facts_ref[memory.total_bytes]}" >&2
       mismatch=1
     else
