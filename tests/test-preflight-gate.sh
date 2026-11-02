@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-repo_root="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")/.." && pwd -P)"
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$1"; }
 
@@ -14,11 +14,11 @@ cp "$repo_root/lib/common.sh" "$tmp/repo/lib/common.sh"
 
 cat >"$tmp/repo/lib/preflight.sh" <<'MOCK_PREFLIGHT'
 mock_record() { printf '%s\n' "$1" >>"$K41_TEST_CALL_LOG"; }
-preflight::check_root() { mock_record root; return "\${K41_MOCK_ROOT_STATUS:-0}"; }
-preflight::check_target_inventory() { mock_record inventory; return "\${K41_MOCK_INVENTORY_STATUS:-0}"; }
-preflight::detect_boot_mode() { mock_record boot; return "\${K41_MOCK_BOOT_STATUS:-0}"; }
-preflight::check_commands() { mock_record commands; return "\${K41_MOCK_COMMANDS_STATUS:-0}"; }
-preflight::report_network_links() { mock_record network; return "\${K41_MOCK_NETWORK_STATUS:-0}"; }
+preflight::check_root() { mock_record root; return "${K41_MOCK_ROOT_STATUS:-0}"; }
+preflight::check_target_inventory() { mock_record inventory; return "${K41_MOCK_INVENTORY_STATUS:-0}"; }
+preflight::detect_boot_mode() { mock_record boot; return "${K41_MOCK_BOOT_STATUS:-0}"; }
+preflight::check_commands() { mock_record commands; return "${K41_MOCK_COMMANDS_STATUS:-0}"; }
+preflight::report_network_links() { mock_record network; return "${K41_MOCK_NETWORK_STATUS:-0}"; }
 MOCK_PREFLIGHT
 
 run_case() {
