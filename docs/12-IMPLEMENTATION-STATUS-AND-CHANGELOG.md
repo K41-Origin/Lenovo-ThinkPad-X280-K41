@@ -16,7 +16,7 @@
 | Module file skeleton | IMPLEMENTED | Focused shell module placeholders added under `lib/`. |
 | Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
-| Test plan and focused test harnesses | IMPLEMENTED | Existing common/preflight/entry tests and new `tests/test-inventory.sh` are present. Inventory test execution and syntax validation are pending. Installer integration tests remain PLANNED. |
+| Test plan and focused test harnesses | IMPLEMENTED | Existing common/preflight/entry tests and new `tests/test-inventory.sh` are present. Inventory syntax and focused fixture tests passed on a temporary local reconstruction of fetched GitHub contents; actual X280 Linux detection remains NOT TESTED. Installer integration tests remain PLANNED. |
 | Approved UEFI/LUKS2/ext4/hibernation design direction | IMPLEMENTED | Architecture direction recorded; systemd-boot asset placement, exact initramfs parameters, swap sizing, resume-offset lifecycle, VM and X280 validation remain PLANNED/NOT TESTED. |
 | Native mkinitcpio UKI boot design | IMPLEMENTED | Decision documented: default UKI on 1 GiB ESP at `/efi/EFI/Linux/`, source kernel/configuration on encrypted root, systemd-boot discovery, no initial fallback UKI. Generation/update lifecycle and boot behavior remain PLANNED / NOT TESTED. |
 | Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
@@ -25,6 +25,12 @@
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-02 — Harden inventory profile parsing and fixtures
+- Restricted parsing to four whitelisted single-quoted fields; rejects malformed and duplicate fields and validates decimal memory bounds without sourcing/evaluating the profile.
+- Rejects readonly associative arrays as inventory output targets.
+- Added fixture cases for mismatched identity, missing facts, malformed/duplicate profile values, shell-syntax non-execution, and readonly output arrays.
+- Actual ThinkPad X280 Linux hardware detection remains NOT TESTED.
 
 ### 2026-11-02 — Add X280 target profile and runtime inventory (initial implementation)
 - Added `config/hardware/thinkpad-x280.conf` with the owner-confirmed X280 target values. The profile is project configuration, not runtime detection or disk-selection authority.
