@@ -61,6 +61,10 @@ write_safe_fixture
 printf '%s\n' /dev/nvme0n1p2 >"$K41_SWAP_FIXTURE"
 if storage::validate_target target; then echo 'FAIL: active swap target accepted'; exit 1; fi
 echo 'PASS: rejects active swap descendants'
+ln -s /dev/nvme0n1p2 "$tmp/swap-alias"
+printf '%s\n' "$tmp/swap-alias" >"$K41_SWAP_FIXTURE"
+if storage::validate_target target; then echo 'FAIL: aliased active swap target accepted'; exit 1; fi
+echo 'PASS: rejects active swap device aliases'
 : >"$K41_SWAP_FIXTURE"
 
 # A removable or non-NVMe disk cannot be accepted as the target.
