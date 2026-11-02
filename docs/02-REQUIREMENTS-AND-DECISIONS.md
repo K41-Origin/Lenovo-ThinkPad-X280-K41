@@ -64,7 +64,7 @@ This document indexes approved planning decisions. Domain details live in the re
 
 ## Verification still required
 The following implementation details and evidence remain outstanding; their architectural direction may already be approved above:
-- Actual ThinkPad X280 hardware inventory and wireless chipset.
+- Linux-side verification of the owner-reported ThinkPad X280 baseline (recorded in `docs/13-X280-HARDWARE-BASELINE.md`), including exact wireless PCI/USB IDs and bound drivers.
 - Current Caelestia/Quickshell/Hyprland dependencies and compatibility.
 - systemd-boot and mkinitcpio UKI generation/update lifecycle, including ESP mount validation and preservation of the last known-good UKI.
 - Exact `sd-encrypt` hook ordering, crypt device identification, kernel command line, and encrypted-root boot behavior.
