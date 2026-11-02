@@ -142,7 +142,7 @@ These contracts define the first implementation slice. They are read-only founda
 
 **Ownership boundaries**
 - `lib/preflight.sh` owns initial environment readiness checks, including boot-mode indicators and required-command checks.
-- `lib/inventory.sh` owns host hardware facts such as CPU identity, physical memory total, and DMI system identity where available.
+- `lib/inventory.sh` owns host hardware facts such as CPU identity and logical processor count, physical memory total, and DMI system identity where available.
 - `lib/storage.sh` exclusively owns block-device discovery, stable disk identity, storage planning, and all partitioning/formatting operations.
 - `lib/hardware.sh` owns later application of approved, evidence-backed hardware settings; it must not duplicate inventory collection logic.
 - Inventory data is descriptive evidence, not approval to install or proof that a proposed configuration is compatible.
@@ -152,7 +152,7 @@ These contracts define the first implementation slice. They are read-only founda
    - Collect host facts from read-only procfs/sysfs paths.
    - The first argument names a caller-declared Bash associative array, populated through a validated nameref; do not emit data as shell code or use `eval`.
    - Optional roots exist for deterministic fixture-based tests; production defaults are `/proc` and `/sys`.
-   - Stable keys: `cpu.vendor`, `cpu.model`, `cpu.family`, `cpu.model_id`, `cpu.cores`, `memory.total_bytes`, `dmi.sys_vendor`, `dmi.product_name`, and `dmi.product_version`.
+   - Stable keys: `cpu.vendor`, `cpu.model`, `cpu.family`, `cpu.model_id`, `cpu.threads`, `memory.total_bytes`, `dmi.sys_vendor`, `dmi.product_name`, and `dmi.product_version`.
    - A key is omitted when its source is unavailable or invalid. Empty or missing values must not be fabricated or silently treated as verified.
 2. `inventory::render_host_summary <input_assoc_array_name>`
    - Render known values as human-readable diagnostics only; never interpret values as shell syntax or commands.
