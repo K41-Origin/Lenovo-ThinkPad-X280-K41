@@ -49,7 +49,11 @@ inventory::collect_host() {
   if [[ -r "$meminfo" ]]; then
     while IFS= read -r line || [[ -n "$line" ]]; do
       if [[ "$line" =~ ^MemTotal:[[:space:]]+([0-9]+)[[:space:]]+kB$ ]]; then
-        output_ref[memory.total_bytes]=$(( BASH_REMATCH[1] * 1024 ))
+        local mem_kib=${BASH_REMATCH[1]}
+        while [[ "$mem_kib" == 0* && "$mem_kib" != 0 ]]; do mem_kib=${mem_kib#0}; done
+        local max_kib=9007199254740991
+        if ((${#mem_kib} > 16)) || { ((${#mem_kib} == 16)) && [[ "$mem_kib" > "$max_kib" ]]; }; then break; fi
+        output_ref[memory.total_bytes]=$(( mem_kib * 1024 ))
         break
       fi
     done < "$meminfo"
