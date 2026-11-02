@@ -2,6 +2,10 @@
 # Read-only diagnostics for the current live environment.
 # Source lib/common.sh before calling these functions.
 # No checks run automatically when this file is sourced.
+# shellcheck source=inventory.sh
+_PREFLIGHT_MODULE_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+source "$_PREFLIGHT_MODULE_DIR/inventory.sh"
+unset _PREFLIGHT_MODULE_DIR
 
 preflight::check_root() {
   local uid
@@ -65,6 +69,45 @@ preflight::check_commands() {
     return 1
   fi
   k41::log_info 'All requested commands are available.'
+}
+
+
+# Collect and validate the live host against the project target profile.
+# Optional arguments are procfs root, sysfs root, and profile path (test seam).
+preflight::check_target_inventory() {
+  [[ $# -le 3 ]] || {
+    k41::log_error 'preflight::check_target_inventory accepts at most three paths.'
+    return 2
+  }
+  local proc_root=${1:-/proc} sys_root=${2:-/sys}
+  local module_dir profile_file
+  module_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)" || return 1
+  profile_file=${3:-"$module_dir/../config/hardware/thinkpad-x280.conf"}
+  [[ -r "$profile_file" ]] || {
+    k41::log_error "Target hardware profile is unavailable: $profile_file"
+    return 1
+  }
+
+  local -A host_facts=()
+  if ! inventory::collect_host host_facts "$proc_root" "$sys_root"; then
+    k41::log_error 'Unable to collect host inventory from procfs/sysfs.'
+    return 1
+  fi
+
+  k41::log_info 'Detected host inventory (read-only):'
+  inventory::render_host_summary host_facts >&2
+
+  if ! inventory::validate_required_facts host_facts; then
+    k41::log_error 'Host inventory is incomplete or inconsistent; target compatibility is unresolved.'
+    return 1
+  fi
+
+  if ! inventory::compare_target_profile host_facts "$profile_file"; then
+    k41::log_error 'Detected hardware does not match the configured ThinkPad X280 target profile.'
+    return 1
+  fi
+
+  k41::log_info 'Target hardware profile matches the detected host.'
 }
 
 preflight::report_network_links() {
