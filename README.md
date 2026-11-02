@@ -49,6 +49,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 10. [Error recovery and reporting](docs/10-ERROR-RECOVERY-AND-REPORTING.md) — failures, interruption, diagnostics, final report.
 11. [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md) — test strategy and release gates.
 12. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md) — evidence-based status and history.
+13. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md) — owner-reported device specifications, evidence quality, and Linux verification checklist.
 
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
