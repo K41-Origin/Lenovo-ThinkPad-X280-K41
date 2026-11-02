@@ -14,7 +14,7 @@ bash tests/test-preflight-gate.sh
 
 GitHub Actions runs Bash syntax checks and all five test scripts on pushes to `main`, pull requests targeting `main`, and manual workflow dispatch. Treat the workflow as implemented, not passed, until its run completes successfully.
 
-Storage tests mock `lsblk` and `swapon` and use JSON fixtures. They cover whole-disk discovery, internal NVMe acceptance, removable-device rejection, mounted descendants (including a mapper child), active swap descendants, duplicate WWN detection, changed secondary identity, unknown safety state, tool failures, and invalid output arrays. The tests do not inspect or modify host disks. Storage discovery requires `lsblk`, `jq`, `swapon`, and `base64`.
+Storage tests mock `lsblk` and `swapon` and use JSON fixtures. They cover whole-disk discovery, internal NVMe acceptance, removable-device rejection, mounted descendants (including a mapper child), active swap descendants and symlink aliases, duplicate WWN detection, changed secondary identity, unknown safety state, tool failures, and invalid output arrays. The tests do not inspect or modify host disks. Storage discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`.
 
 Inventory tests use temporary procfs/sysfs-shaped fixtures; they do not inspect actual hardware or require root. The mocked preflight gate verifies inventory failure blocks preflight success and that no installation/destructive marker is invoked.
 
