@@ -3,6 +3,10 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 # shellcheck source=lib/inventory.sh
 source "$ROOT/lib/inventory.sh"
+# shellcheck source=lib/common.sh
+source "$ROOT/lib/common.sh"
+# shellcheck source=lib/preflight.sh
+source "$ROOT/lib/preflight.sh"
 # shellcheck source=config/hardware/thinkpad-x280.conf
 PROFILE="$ROOT/config/hardware/thinkpad-x280.conf"
 tmp="$(mktemp -d)"
@@ -32,9 +36,12 @@ inventory::collect_host facts "$tmp/proc" "$tmp/sys"
 [[ "${facts[dmi.product_name]}" == '20KESC2Y00' ]]
 inventory::validate_required_facts facts
 inventory::compare_target_profile facts "$PROFILE" >/dev/null
+# Exercise the actual preflight adapter with fixture procfs/sysfs roots.
+preflight::check_target_inventory "$tmp/proc" "$tmp/sys" "$PROFILE" >/dev/null 2>&1
 # Mismatched target identity and missing required facts fail closed.
 declare -A wrong_device=([dmi.sys_vendor]='LENOVO' [dmi.product_name]='20KESC2Y10' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
 if inventory::compare_target_profile wrong_device "$PROFILE" >/dev/null 2>&1; then exit 1; fi
+if preflight::check_target_inventory "$tmp/proc" "$tmp/sys" "$tmp/nonexistent-profile" >/dev/null 2>&1; then exit 1; fi
 declare -A missing_facts=([dmi.product_name]='20KESC2Y00')
 if inventory::compare_target_profile missing_facts "$PROFILE" >/dev/null 2>&1; then exit 1; fi
 declare -A wrong_vendor=([dmi.sys_vendor]='DELL' [dmi.product_name]='20KESC2Y00' [cpu.model]='Intel(R) Core(TM) i5-8250U' [memory.total_bytes]=8375185408)
