@@ -37,7 +37,7 @@ storage::discover_candidates() {
     | select(.type == "disk")
     | . as $disk
     | {
-        name, "maj:min", type, size, model, tran, wwn, serial, rm, ro,
+        name, "maj:min": .["maj:min"], type, size, model, tran, wwn, serial, rm, ro,
         mounted: ([$disk | walk | .mountpoints[]? | select(. != null and . != "")] | length > 0),
         descendants: ([$disk | walk | .name] | map(select(type == "string")))
       }
