@@ -138,7 +138,7 @@ These contracts define the first implementation slice. They are read-only founda
 
 ### Target hardware profile and inventory module — IMPLEMENTED (initial slice)
 
-**Purpose:** keep the project laptop's target specifications in `config/hardware/thinkpad-x280.conf` and collect a deterministic, read-only snapshot of observable host facts. The inventory module compares observed DMI product name, CPU model, and memory range against that profile. It does not configure hardware and does not discover, select, read contents from, or modify target disks.
+**Purpose:** keep the project laptop's target specifications in `config/hardware/thinkpad-x280.conf` and collect a deterministic, read-only snapshot of observable host facts. The inventory module validates required fact availability and CPU consistency, then compares observed DMI vendor/product, CPU model, and memory range against that profile. It does not configure hardware and does not discover, select, read contents from, or modify target disks.
 
 **Ownership boundaries**
 - `lib/preflight.sh` owns initial environment readiness checks, including boot-mode indicators and required-command checks.
@@ -172,7 +172,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Do not log serial numbers or other unique device identifiers by default. If later requirements need them, expose only the minimum necessary fields and obtain a separate privacy review.
 - No inventory result may be used to infer an unverified bootloader, encryption, resume, wireless compatibility, or exact storage layout.
 
-**Acceptance boundary:** the initial implementation and fixture test are present. Coverage includes supported facts, malformed/missing memory, invalid output-array arguments, missing required facts, conflicting CPU model records, vendor/product mismatch, and profile comparison. Hardware discovery on the actual X280 remains NOT TESTED. The test suite must be run before treating the implementation as TESTED. Source safety and read-only behavior are enforced by implementation review; runtime hardware discovery on the actual X280 remains NOT TESTED. The profile is trusted project configuration, so only reviewed repository-controlled static assignments may be sourced.
+**Acceptance boundary:** the initial implementation and fixture test are present. Coverage includes supported facts, malformed/missing memory, invalid output-array arguments, missing required facts, conflicting CPU model records, vendor/product mismatch, and profile comparison. Hardware discovery on the actual X280 remains NOT TESTED. Focused fixture tests and syntax checks have passed on temporary local reconstructions of fetched GitHub contents. This is limited validation, not a repository checkout or CI run; source safety and read-only behavior also require code review. Runtime hardware discovery on the actual X280 remains NOT TESTED. The profile is declarative configuration parsed through a strict field whitelist; it must never be sourced or evaluated.
 
 ### Storage module contract — PLANNED
 
