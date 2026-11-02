@@ -21,7 +21,7 @@ cat > "$tmp/proc/meminfo" <<'EOF_MEM'
 MemTotal:        8178892 kB
 EOF_MEM
 printf '%s\n' 'LENOVO' > "$tmp/sys/class/dmi/id/sys_vendor"
-printf '%s\n' 'LENOVO 20KESC2Y00' > "$tmp/sys/class/dmi/id/product_name"
+printf '%s\n' '20KESC2Y00' > "$tmp/sys/class/dmi/id/product_name"
 printf '%s\n' 'ThinkPad X280' > "$tmp/sys/class/dmi/id/product_version"
 printf '%s\n' 'N20ET49W (1.34)' > "$tmp/sys/class/dmi/id/bios_version"
 declare -A facts=()
@@ -29,7 +29,7 @@ inventory::collect_host facts "$tmp/proc" "$tmp/sys"
 [[ "${facts[cpu.model]}" == 'Intel(R) Core(TM) i5-8250U' ]]
 [[ "${facts[cpu.cores]}" == 2 ]]
 [[ "${facts[memory.total_bytes]}" == 8375185408 ]]
-[[ "${facts[dmi.product_name]}" == 'LENOVO 20KESC2Y00' ]]
+[[ "${facts[dmi.product_name]}" == '20KESC2Y00' ]]
 inventory::compare_target_profile facts "$PROFILE" >/dev/null
 # Missing optional fields remain absent; malformed memory is not guessed.
 rm "$tmp/proc/meminfo"
