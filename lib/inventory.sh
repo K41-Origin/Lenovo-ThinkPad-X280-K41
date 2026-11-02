@@ -122,7 +122,7 @@ inventory::compare_target_profile() {
     case "$line" in
       K41_TARGET_VENDOR=*)
         (( seen_vendor == 0 )) || return 1
-        value=${line#*=}; [[ $value =~ ^\'[^']*'\'$ ]] || return 1
+        value=${line#*=}; [[ $value =~ ^\'[^\']*\'$ ]] || return 1
         expected_vendor=${value:1:${#value}-2}; seen_vendor=1 ;;
       K41_TARGET_PRODUCT_NAME=*)
         (( seen_product == 0 )) || return 1
