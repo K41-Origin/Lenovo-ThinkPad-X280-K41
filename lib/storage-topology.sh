@@ -28,6 +28,7 @@ storage::topology_path_major_minor() {
 storage::topology_check_overlay_options() {
   [[ $# -eq 2 ]] || return 2
   local options=$1 seen_name=$2 item path mm
+  local -n _seen="$seen_name"
   local -a values=()
   local key value
   IFS=',' read -r -a values <<< "$options"
@@ -42,7 +43,7 @@ storage::topology_check_overlay_options() {
         path=$(storage::topology_decode_mount_field "$path")
         [[ $path == /* && -e $path ]] || return 1
         mm=$(storage::topology_path_major_minor "$path") || return 1
-        [[ ! -v ${seen_name}[$mm] ]] || return 1
+        [[ ! -v _seen[$mm] ]] || return 1
       done
       ;;
     esac
@@ -54,12 +55,13 @@ storage::topology_check_overlay_options() {
 storage::topology_check_loop_backing() {
   [[ $# -eq 3 ]] || return 2
   local mount_mm=$1 sys_root=$2 seen_name=$3 loop_link backing mm
+  local -n _seen="$seen_name"
   loop_link=$sys_root/dev/block/$mount_mm/loop/backing_file
   [[ -r $loop_link ]] || return 1
   IFS= read -r backing < "$loop_link" || return 1
   [[ $backing == /* && -e $backing ]] || return 1
   mm=$(storage::topology_path_major_minor "$backing") || return 1
-  [[ ! -v ${seen_name}[$mm] ]] || return 1
+  [[ ! -v _seen[$mm] ]] || return 1
 }
 # Parse one mountinfo record and reject filesystems whose backing-device
 # relationship is not safely represented by mountinfo's major:minor field.
@@ -72,7 +74,7 @@ storage::topology_parse_mount_record() {
   for ((i=6; i<${#fields[@]}; i++)); do
     if [[ ${fields[i]} == - ]]; then separator=$i; break; fi
   done
-  (( separator >= 6 && ${#fields[@]} > separator + 2 )) || return 1
+  (( separator >= 6 && ${#fields[@]} > separator + 3 )) || return 1
   TOPOLOGY_MOUNT_MM=${fields[2]}
   TOPOLOGY_MOUNT_POINT=$(storage::topology_decode_mount_field "${fields[4]}") || return 1
   TOPOLOGY_MOUNT_FSTYPE=${fields[separator+1]}
