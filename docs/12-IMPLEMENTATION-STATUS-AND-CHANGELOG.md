@@ -31,6 +31,7 @@
 - Rejects readonly associative arrays as inventory output targets.
 - Added fixture cases for mismatched identity, missing facts, malformed/duplicate profile values, shell-syntax non-execution, and readonly output arrays.
 - Actual ThinkPad X280 Linux hardware detection remains NOT TESTED.
+- Validation on a temporary local reconstruction of the fetched file contents: `bash -n lib/inventory.sh`, `bash -n tests/test-inventory.sh`, and `bash tests/test-inventory.sh` all passed. This is not a repository checkout, GitHub Actions run, or actual-hardware test.
 
 ### 2026-11-02 — Add X280 target profile and runtime inventory (initial implementation)
 - Added `config/hardware/thinkpad-x280.conf` with the owner-confirmed X280 target values. The profile is project configuration, not runtime detection or disk-selection authority.
