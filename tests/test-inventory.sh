@@ -27,7 +27,7 @@ printf '%s\n' 'N20ET49W (1.34)' > "$tmp/sys/class/dmi/id/bios_version"
 declare -A facts=()
 inventory::collect_host facts "$tmp/proc" "$tmp/sys"
 [[ "${facts[cpu.model]}" == 'Intel(R) Core(TM) i5-8250U' ]]
-[[ "${facts[cpu.cores]}" == 2 ]]
+[[ "${facts[cpu.threads]}" == 2 ]]
 [[ "${facts[memory.total_bytes]}" == 8375185408 ]]
 [[ "${facts[dmi.product_name]}" == '20KESC2Y00' ]]
 inventory::compare_target_profile facts "$PROFILE" >/dev/null
