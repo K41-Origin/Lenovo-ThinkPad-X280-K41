@@ -136,9 +136,9 @@ These contracts define the first implementation slice. They are read-only founda
 - Tests run without root and without real disk access. No package, service, network, or disk changes are permitted.
 - The initial helper implementation and focused unit tests exist; the test script and Bash syntax check passed against temporary copies matching the committed blobs. End-to-end installer integration remains PLANNED.
 
-### Inventory module contract — PLANNED
+### Target hardware profile and inventory module — IMPLEMENTED (initial slice)
 
-**Purpose:** collect a deterministic, read-only snapshot of host hardware facts needed by the installation planner. This module does not configure hardware and does not discover, select, read contents from, or modify target disks.
+**Purpose:** keep the project laptop's target specifications in `config/hardware/thinkpad-x280.conf` and collect a deterministic, read-only snapshot of observable host facts. The inventory module compares observed DMI product name, CPU model, and memory range against that profile. It does not configure hardware and does not discover, select, read contents from, or modify target disks.
 
 **Ownership boundaries**
 - `lib/preflight.sh` owns initial environment readiness checks, including boot-mode indicators and required-command checks.
@@ -147,7 +147,7 @@ These contracts define the first implementation slice. They are read-only founda
 - `lib/hardware.sh` owns later application of approved, evidence-backed hardware settings; it must not duplicate inventory collection logic.
 - Inventory data is descriptive evidence, not approval to install or proof that a proposed configuration is compatible.
 
-**Proposed public interface** (not implemented):
+**Implemented public interface (initial slice):**
 1. `inventory::collect_host <output_assoc_array_name> [proc_root] [sys_root]`
    - Collect host facts from read-only procfs/sysfs paths.
    - The first argument names a caller-declared Bash associative array, populated through a validated nameref; do not emit data as shell code or use `eval`.
@@ -167,7 +167,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Do not log serial numbers or other unique device identifiers by default. If later requirements need them, expose only the minimum necessary fields and obtain a separate privacy review.
 - No inventory result may be used to infer an unverified bootloader, encryption, resume, wireless compatibility, or exact storage layout.
 
-**Acceptance boundary:** implementation requires fixture tests for supported and missing procfs/sysfs fields, malformed values, invalid output-array arguments, safe sourcing, and a read-only boundary. Tests must not require root or inspect real target disks. This contract is PLANNED; no inventory implementation or hardware verification exists.
+**Acceptance boundary:** the initial implementation and fixture test are present. Coverage includes supported facts, malformed/missing memory, invalid output-array arguments, and profile comparison. The test suite must be run before treating the implementation as TESTED. Source safety and read-only behavior are enforced by implementation review; runtime hardware discovery on the actual X280 remains NOT TESTED. The profile is trusted project configuration, so only reviewed repository-controlled static assignments may be sourced.
 
 ### Storage module contract — PLANNED
 
