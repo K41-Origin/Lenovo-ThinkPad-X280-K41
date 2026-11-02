@@ -1,0 +1,60 @@
+name: Bash validation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bash-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bash-tests:
+    name: Syntax and test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Bash syntax
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mapfile -d '' shell_files < <(
+            find . -type f \( -name '*.sh' -o -name installer \) -not -path './.git/*' -print0
+          )
+          if (( ${#shell_files[@]} == 0 )); then
+            echo 'No Bash files found.' >&2
+            exit 1
+          fi
+          for file in "${shell_files[@]}"; do
+            bash -n "$file"
+            printf 'PASS: bash -n %s\n' "$file"
+          done
+
+      - name: Run repository test suite
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tests=(
+            tests/test-common-preflight.sh
+            tests/test-installer-entry.sh
+            tests/test-inventory.sh
+            tests/test-preflight-gate.sh
+          )
+          for test in "${tests[@]}"; do
+            if [[ ! -f "$test" ]]; then
+              echo "Required test is missing: $test" >&2
+              exit 1
+            fi
+            printf '\n== %s ==\n' "$test"
+            bash "$test"
+          done
