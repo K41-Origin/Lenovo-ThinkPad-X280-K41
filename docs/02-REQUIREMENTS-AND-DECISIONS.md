@@ -22,7 +22,7 @@ This document indexes approved planning decisions. Domain details live in the re
   - Traceability: REQ-INSTALL-005 (global execution gate); REQ-DISK-002 (storage/encryption/swap design); REQ-DISK-006 (bootloader compatibility and stop condition); REQ-RECOVERY-001 (safe behavior after interruption); see Architecture and Modules and Testing and Acceptance for module boundaries and verification strategy.
 - REQ-DISK-004 — APPROVED: One standard Arch linux kernel.
 - REQ-DISK-005 — APPROVED: Actual hibernation test is manual; readiness is not proof of successful resume.
-- DESIGN-STORAGE-001 — APPROVED DIRECTION: Use UEFI/GPT, a FAT32 EFI System Partition (approximately 1 GiB as an initial sizing proposal), systemd-boot, one LUKS2-encrypted root container with ext4, and a swapfile inside that encrypted ext4 filesystem. Do not add LVM unless a verified requirement emerges.
+- DESIGN-STORAGE-001 — APPROVED: Use UEFI/GPT, one 1 GiB FAT32 EFI System Partition mounted at `/efi`, systemd-boot, one LUKS2-encrypted root container with ext4 directly on the unlocked mapper device, and a swapfile inside that encrypted ext4 filesystem. Do not add LVM unless a verified requirement emerges.
 - DESIGN-BOOT-001 — APPROVED: Use the official Arch `linux` kernel with mkinitcpio-generated Unified Kernel Images (UKIs) stored on the FAT32 ESP at `/efi/EFI/Linux/`; use systemd-boot to discover and boot the UKI. Keep the source kernel and mkinitcpio configuration under `/boot` on the encrypted ext4 root. Use one default UKI as the required boot artifact; do not require a fallback UKI in the initial implementation. The ESP target size is 1 GiB. Configure and test the mkinitcpio preset and kernel-package update lifecycle so a kernel update regenerates the UKI while the ESP is mounted. Use the systemd-based `sd-encrypt` initramfs path for encrypted root, with exact hooks and kernel command line verified before implementation. Do not add a separate `kernel-install`/`systemd-ukify` generation layer in the initial design.
 - DESIGN-HIBERNATION-001 — APPROVED DIRECTION: Keep the swapfile inside the encrypted root filesystem. Determine swap size from actual installed RAM, storage capacity, and hibernation requirements; never assume a fixed size. The resume device must be the unlocked mapper device, and the ext4 swapfile's physical resume offset must be obtained from the actual file and kept current whenever the file is recreated or relocated. Hibernation readiness is not proof of successful resume; actual testing remains manual per REQ-DISK-005.
 - These are approved architectural decisions, not a finalized target-specific partition table or authorization to erase a disk. UKI generation/update integration, initramfs parameters, swap sizing, and actual target identity still require implementation review and acceptance tests. A fallback UKI may be considered later only if measured artifact sizes and update headroom justify it; the official Arch ISO USB remains the recovery path in the initial design. Existing target-identification, complete-plan review, and explicit final-confirmation gates remain mandatory.
@@ -63,7 +63,13 @@ This document indexes approved planning decisions. Domain details live in the re
 - REQ-RECOVERY-002 — APPROVED: Unknown critical failures stop for manual intervention.
 
 ## Verification still required
-Actual hardware and wireless chipset; current Caelestia/Quickshell/Hyprland dependencies; bootloader and encrypted-root/resume design; package availability; encrypted DNS implementation; service compatibility; module contracts; and acceptance tests.
+The following implementation details and evidence remain outstanding; their architectural direction may already be approved above:
+- Actual ThinkPad X280 hardware inventory and wireless chipset.
+- Current Caelestia/Quickshell/Hyprland dependencies and compatibility.
+- systemd-boot and mkinitcpio UKI generation/update lifecycle, including ESP mount validation and preservation of the last known-good UKI.
+- Exact `sd-encrypt` hook ordering, crypt device identification, kernel command line, and encrypted-root boot behavior.
+- Swapfile sizing from the installed system, ext4 physical resume-offset calculation/maintenance, and an actual hibernate/resume test.
+- Package availability; encrypted DNS implementation; service compatibility; module contracts; and acceptance tests.
 
 ## Requirement traceability and acceptance criteria
 
