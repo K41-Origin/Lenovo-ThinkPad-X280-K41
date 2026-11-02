@@ -22,8 +22,11 @@ storage::plan_gpt_layout() {
   (( 1048576 % logical_sector == 0 )) || return 2
   (( align_sectors > 0 )) || return 2
 
-  # GPT with 128 entries: 1 header + 32 entry sectors at each end.
-  local first_usable=34 last_usable=$((total_sectors - 34))
+  # GPT uses a 128-entry (16 KiB) array; reserve one header sector
+  # plus the rounded-up entry-array sectors at both ends of the disk.
+  local entry_sectors=$(((128 * 128 + logical_sector - 1) / logical_sector))
+  local first_usable=$((2 + entry_sectors))
+  local last_usable=$((total_sectors - entry_sectors - 2))
   (( last_usable > first_usable )) || return 1
   local esp_start=$((((first_usable + align_sectors - 1) / align_sectors) * align_sectors))
   local esp_sectors=$((1073741824 / logical_sector))
