@@ -113,7 +113,7 @@ storage::topology_check_target() {
         read -r -a fields <<< "$line"
         (( ${#fields[@]} >= 10 )) || return 1
         decoded=$(storage::topology_decode_mount_field "${fields[4]}") || return 1
-        if [[ $swap_source == "$decoded" || $swap_source == "$decoded/"* ]]; then
+        if [[ $decoded == "/" && $swap_source == /* ]] || [[ $swap_source == "$decoded" || $swap_source == "$decoded/"* ]]; then
           if (( ${#decoded} > best_len )); then
             best_len=${#decoded}; best_mm=${fields[2]}
           fi
