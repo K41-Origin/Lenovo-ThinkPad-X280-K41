@@ -19,24 +19,35 @@ These are approved architecture decisions, not proof that the installer implemen
 ## Mandatory safety gates
 
 1. Detect and report firmware boot mode. Require UEFI for the approved layout.
-2. Inventory disks and show model, capacity, and stable identifiers.
-3. Display the complete partition, encryption, filesystem, mount, swap, and boot plan with rationale.
-4. Verify that the selected target matches the intended internal SSD using stable identifiers; do not rely on device names alone.
-5. Require explicit final confirmation immediately before destructive operations, after showing the complete target-specific plan.
-6. Stop if disk identity, partitioning, encryption, boot, or resume compatibility is ambiguous.
-7. Never automatically repartition or reformat after interruption.
-8. Keep partitioning, formatting, and other destructive storage operations exclusively in `lib/storage.sh`.
-9. Never log encryption passphrases, recovery keys, or other key material.
+2. Inventory whole disks and show model, capacity, transport, and stable identifiers.
+3. Build a read-only block-device topology, including physical disks, partitions, device-mapper/LUKS devices, and their backing-device relationships.
+4. Correlate mounted filesystems and active swap with their backing physical disks. Reject a target if any descendant, holder, or backing relationship is used by the live root, an active EFI/system mount, any mounted filesystem, or active swap.
+5. If a device relationship cannot be resolved unambiguously, fail closed. Never infer that a disk is unused merely because its own lsblk row has no mountpoint.
+6. Display the complete partition, encryption, filesystem, mount, swap, and boot plan with rationale.
+7. Verify that the selected target matches the intended internal SSD using stable identifiers; do not rely on device names alone.
+8. Require explicit final confirmation immediately before destructive operations, after showing the complete target-specific plan.
+9. Stop if disk identity, topology, partitioning, encryption, boot, or resume compatibility is ambiguous.
+10. Never automatically repartition or reformat after interruption.
+11. Keep partitioning, formatting, and other destructive storage operations exclusively in `lib/storage.sh`.
+12. Never log encryption passphrases, recovery keys, or other key material.
+
+Topology validation must use independent read-only evidence rather than only a nested lsblk display tree. The implementation design should compare kernel block-device major:minor identities and inspect both dependency directions (holders/slaves) so device-mapper and multi-device relationships are not silently missed. It must also resolve mount and swap sources to their backing block devices. A missing tool, malformed result, unresolved source, or inconsistent graph is a hard validation failure.
 
 ## Storage layout
 
-The approved logical layout is:
+The approved logical layout is a deliberately simple two-partition GPT layout:
 
-| Partition / device | Filesystem / format | Mount / purpose |
-| --- | --- | --- |
-| GPT ESP, 1 GiB | FAT32 | `/efi`; systemd-boot and generated UKI |
-| Remaining target space | LUKS2 container | Encrypted root container |
-| Unlocked LUKS mapper | ext4 | Root filesystem; kernel files, mkinitcpio configuration, and swapfile |
+| Order | Partition type | Planned size | Filesystem / format | Mount / purpose |
+| --- | --- | --- | --- | --- |
+| 1 | EFI System Partition (GPT type GUID `C12A7328-F81F-11D2-BA4B-00A0C93EC93B`) | 1 GiB | FAT32 | `/efi`; systemd-boot and generated UKI |
+| 2 | Linux filesystem partition (GPT type GUID `0FC63DAF-8483-4772-8E79-3D69D8477DE4`) | Remaining usable space | LUKS2 container | Encrypted root |
+| Mapper opened from partition 2 | Not a GPT partition | Container size less metadata | ext4 | `/`; kernel files, mkinitcpio configuration, and swapfile |
+
+Partition 1 begins at the normal 1 MiB-aligned GPT boundary. Partition 2 begins at the next 1 MiB-aligned boundary after partition 1 and ends before the backup GPT metadata. The implementation must calculate exact sector boundaries from the actual logical sector size and device capacity, reserve GPT metadata correctly, and show the exact result. These values are a plan, not permission to write a partition table.
+
+No separate swap partition, LVM layer, or unencrypted data partition is planned. The swapfile resides inside encrypted ext4 root. The current X280 baseline reports a 256 GB-class WDC NVMe SSD and 8 GiB RAM, but the runtime inventory—not the profile—must supply the disk's actual capacity and RAM. A missing or mismatched disk model/identity must stop target selection.
+
+The initial swapfile sizing proposal for an 8 GiB machine is 9 GiB (RAM plus a 1 GiB planning margin), subject to runtime RAM, free-space, filesystem, and hibernation-policy checks. This is a planning value, not a hardcoded size or guarantee that hibernation will work. The installer must calculate and display the proposed size and refuse to create it if safe free-space headroom is insufficient.
 
 The installer must calculate and present exact partition boundaries and sizes from the detected target before asking for confirmation. Do not assume the remaining disk space is available without inspecting the actual device.
 
@@ -72,6 +83,10 @@ Hibernation readiness does not prove that suspend-to-disk works. A real hibernat
 ## Acceptance
 
 - [ ] Installer confirms UEFI mode and GPT target identity before proposing changes.
+- [ ] Read-only topology resolves physical disk, partitions, mapper holders/slaves, mounted sources, root, EFI, and active swap by kernel device identity.
+- [ ] Target is rejected if any mounted filesystem or active swap maps back to it, or if topology cannot be resolved completely.
+- [ ] The generated two-partition plan uses the correct GPT type GUIDs, 1 MiB alignment, and exact device-sector boundaries.
+- [ ] Swapfile sizing is computed from runtime RAM and available space; the 9 GiB X280 proposal is not a hardcoded assumption.
 - [ ] Exact partition boundaries, sizes, encryption, filesystem, mount, swap, and boot plan are displayed before final confirmation.
 - [ ] ESP is FAT32, 1 GiB, and mounted at `/efi`.
 - [ ] Root uses LUKS2 with ext4 directly on the unlocked mapper device.
