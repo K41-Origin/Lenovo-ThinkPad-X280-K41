@@ -2,8 +2,8 @@
 set -Eeuo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
-pass() { printf 'PASS: %s\n' "$1"; }
+fail() { printf 'FAIL: %s\\n' "$1" >&2; exit 1; }
+pass() { printf 'PASS: %s\\n' "$1"; }
 
 tmp="$(mktemp -d)"
 trap 'rm -rf -- "$tmp"' EXIT
@@ -12,14 +12,13 @@ mkdir -p "$tmp/repo/lib"
 cp "$repo_root/installer" "$tmp/repo/installer"
 cp "$repo_root/lib/common.sh" "$tmp/repo/lib/common.sh"
 
-# Inject a deterministic preflight module into an isolated copy of the entry
-# point. The mock records calls and can force each required gate to fail.
+# Mock every preflight operation so the entry-point gate is deterministic.
 cat >"$tmp/repo/lib/preflight.sh" <<'MOCK_PREFLIGHT'
-mock_record() { printf '%s\n' "$1" >>"$K41_TEST_CALL_LOG"; }
+mock_record() { printf '%s\\n' "$1" >>"$K41_TEST_CALL_LOG"; }
 preflight::check_root() { mock_record root; return "${K41_MOCK_ROOT_STATUS:-0}"; }
+preflight::check_target_inventory() { mock_record inventory; return "${K41_MOCK_INVENTORY_STATUS:-0}"; }
 preflight::detect_boot_mode() { mock_record boot; return "${K41_MOCK_BOOT_STATUS:-0}"; }
 preflight::check_commands() { mock_record commands; return "${K41_MOCK_COMMANDS_STATUS:-0}"; }
-preflight::check_target_inventory() { mock_record inventory; return "${K41_MOCK_INVENTORY_STATUS:-0}"; }
 preflight::report_network_links() { mock_record network; return "${K41_MOCK_NETWORK_STATUS:-0}"; }
 MOCK_PREFLIGHT
 
@@ -39,27 +38,11 @@ run_case() {
   pass "$label"
 }
 
-run_case 'all required checks resolved still leaves installation disabled' 2  env
-run_case 'target inventory mismatch blocks preflight' 2  is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_BOOT_STATUS=2
-run_case 'required-command failure is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_COMMANDS_STATUS=1
-run_case 'optional network diagnostic failure does not change the required gate result' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_NETWORK_STATUS=2
+expected=$'root\\ninventory\\nboot\\ncommands\\nnetwork'
+run_case 'resolved diagnostics still leave installation disabled' 2 "$expected" env
+run_case 'inventory mismatch blocks preflight success' 2 "$expected" env K41_MOCK_INVENTORY_STATUS=1
+run_case 'unresolved boot mode is reported' 2 "$expected" env K41_MOCK_BOOT_STATUS=2
+run_case 'required-command failure is reported' 2 "$expected" env K41_MOCK_COMMANDS_STATUS=1
+run_case 'optional network diagnostic failure does not change required gate result' 2 "$expected" env K41_MOCK_NETWORK_STATUS=2
 
-printf '%s\n' 'All preflight-gate tests passed.'
-root\ninventory\nboot\ncommands\nnetwork' env
-run_case 'unresolved boot mode is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_BOOT_STATUS=2
-run_case 'required-command failure is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_COMMANDS_STATUS=1
-run_case 'optional network diagnostic failure does not change the required gate result' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_NETWORK_STATUS=2
-
-printf '%s\n' 'All preflight-gate tests passed.'
-root\ninventory\nboot\ncommands\nnetwork' env K41_MOCK_INVENTORY_STATUS=1
-run_case 'unresolved boot mode is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_BOOT_STATUS=2
-run_case 'required-command failure is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_COMMANDS_STATUS=1
-run_case 'optional network diagnostic failure does not change the required gate result' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_NETWORK_STATUS=2
-
-printf '%s\n' 'All preflight-gate tests passed.'
-root\ninventory\nboot\ncommands\nnetwork' env
-run_case 'unresolved boot mode is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_BOOT_STATUS=2
-run_case 'required-command failure is reported and does not invoke any installation stage' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_COMMANDS_STATUS=1
-run_case 'optional network diagnostic failure does not change the required gate result' 2 $'root\nboot\ncommands\nnetwork' env K41_MOCK_NETWORK_STATUS=2
-
-printf '%s\n' 'All preflight-gate tests passed.'
+printf '%s\\n' 'All preflight-gate tests passed.'
