@@ -152,13 +152,15 @@ These contracts define the first implementation slice. They are read-only founda
    - Collect host facts from read-only procfs/sysfs paths.
    - The first argument names a caller-declared Bash associative array, populated through a validated nameref; do not emit data as shell code or use `eval`.
    - Optional roots exist for deterministic fixture-based tests; production defaults are `/proc` and `/sys`.
-   - Stable keys: `cpu.vendor`, `cpu.model`, `cpu.family`, `cpu.model_id`, `cpu.threads`, `memory.total_bytes`, `dmi.sys_vendor`, `dmi.product_name`, and `dmi.product_version`.
+   - Stable keys: `cpu.vendor`, `cpu.model`, `cpu.family`, `cpu.model_id`, `cpu.threads`, optional `cpu.model_conflict`, `memory.total_bytes`, `dmi.sys_vendor`, `dmi.product_name`, and `dmi.product_version`.
    - A key is omitted when its source is unavailable or invalid. Empty or missing values must not be fabricated or silently treated as verified.
 2. `inventory::render_host_summary <input_assoc_array_name>`
    - Render known values as human-readable diagnostics only; never interpret values as shell syntax or commands.
    - Missing fields are explicitly displayed as unknown/unavailable.
-3. `inventory::compare_target_profile <inventory_assoc_array_name> <profile_file>`
-   - Compare observed DMI product name, CPU model (allowing the normal Linux `/proc/cpuinfo` suffix), and measured memory against the target profile.
+3. `inventory::validate_required_facts <inventory_assoc_array_name>`
+   - Require CPU model, numeric memory total, DMI vendor, and DMI product name; reject missing or invalid facts and conflicting CPU model records.
+4. `inventory::compare_target_profile <inventory_assoc_array_name> <profile_file>`
+   - Compare observed DMI vendor and product name, CPU model (allowing the normal Linux `/proc/cpuinfo` suffix), and measured memory against the target profile. Required facts are validated first.
    - Return nonzero when any compared fact mismatches or is unavailable. This is a compatibility diagnostic, not disk authorization.
 
 **Input validation and behavior**
@@ -170,7 +172,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Do not log serial numbers or other unique device identifiers by default. If later requirements need them, expose only the minimum necessary fields and obtain a separate privacy review.
 - No inventory result may be used to infer an unverified bootloader, encryption, resume, wireless compatibility, or exact storage layout.
 
-**Acceptance boundary:** the initial implementation and fixture test are present. Coverage includes supported facts, malformed/missing memory, invalid output-array arguments, and profile comparison. The test suite must be run before treating the implementation as TESTED. Source safety and read-only behavior are enforced by implementation review; runtime hardware discovery on the actual X280 remains NOT TESTED. The profile is trusted project configuration, so only reviewed repository-controlled static assignments may be sourced.
+**Acceptance boundary:** the initial implementation and fixture test are present. Coverage includes supported facts, malformed/missing memory, invalid output-array arguments, missing required facts, conflicting CPU model records, vendor/product mismatch, and profile comparison. Hardware discovery on the actual X280 remains NOT TESTED. The test suite must be run before treating the implementation as TESTED. Source safety and read-only behavior are enforced by implementation review; runtime hardware discovery on the actual X280 remains NOT TESTED. The profile is trusted project configuration, so only reviewed repository-controlled static assignments may be sourced.
 
 ### Storage module contract — PLANNED
 
