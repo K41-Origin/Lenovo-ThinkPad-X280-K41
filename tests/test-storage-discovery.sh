@@ -64,7 +64,6 @@ echo 'PASS: rejects active swap descendants'
 : >"$K41_SWAP_FIXTURE"
 
 # A removable or non-NVMe disk cannot be accepted as the target.
-target_usb=([device_path]=/dev/sda [size_bytes]=32000000000 [serial]=USB001)
 declare -A usb=([device_path]=/dev/sda [size_bytes]=32000000000 [serial]=USB001)
 if storage::validate_target usb; then echo 'FAIL: removable USB target accepted'; exit 1; fi
 echo 'PASS: rejects removable USB target'
