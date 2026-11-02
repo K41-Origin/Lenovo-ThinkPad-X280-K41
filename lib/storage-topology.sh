@@ -10,6 +10,32 @@ storage::topology_decode_mount_field() {
   printf '%s' "$value"
 }
 
+# Parse one mountinfo record and reject filesystems whose backing-device
+# relationship is not safely represented by mountinfo's major:minor field.
+storage::topology_parse_mount_record() {
+  [[ $# -eq 1 ]] || return 2
+  local -a fields=()
+  local separator=-1 i
+  read -r -a fields <<< "$1"
+  (( ${#fields[@]} >= 10 )) || return 1
+  for ((i=6; i<${#fields[@]}; i++)); do
+    if [[ ${fields[i]} == - ]]; then separator=$i; break; fi
+  done
+  (( separator >= 6 && ${#fields[@]} > separator + 2 )) || return 1
+  TOPOLOGY_MOUNT_MM=${fields[2]}
+  TOPOLOGY_MOUNT_POINT=$(storage::topology_decode_mount_field "${fields[4]}") || return 1
+  TOPOLOGY_MOUNT_FSTYPE=${fields[separator+1]}
+  [[ $TOPOLOGY_MOUNT_MM =~ ^[0-9]+:[0-9]+$ && -n $TOPOLOGY_MOUNT_POINT ]] || return 1
+  case $TOPOLOGY_MOUNT_FSTYPE in
+    ext2|ext3|ext4|xfs|vfat|fat|msdos|exfat|ntfs|ntfs3|f2fs|jfs|reiserfs|udf|iso9660)
+      ;;
+    *)
+      printf 'storage: cannot prove backing-device topology for filesystem type %s\\n' "$TOPOLOGY_MOUNT_FSTYPE" >&2
+      return 1
+      ;;
+  esac
+}
+
 # Return success only when the target's sysfs dependency closure is known and
 # no mounted filesystem or active swap uses any device in that closure.
 # Args: target major:minor, sysfs root, mountinfo file, swaps file.
@@ -81,11 +107,9 @@ storage::topology_check_target() {
   local line rest mount_mm mount_point
   while IFS= read -r line; do
     [[ -n $line ]] || continue
-    read -r -a fields <<< "$line"
-    (( ${#fields[@]} >= 10 )) || return 1
-    mount_mm=${fields[2]}
-    mount_point=$(storage::topology_decode_mount_field "${fields[4]}") || return 1
-    [[ $mount_mm =~ ^[0-9]+:[0-9]+$ && -n $mount_point ]] || return 1
+    storage::topology_parse_mount_record "$line" || return 1
+    mount_mm=$TOPOLOGY_MOUNT_MM
+    mount_point=$TOPOLOGY_MOUNT_POINT
     if [[ -v seen[$mount_mm] ]]; then
       printf 'storage: target topology is mounted at %s (device %s)\n' "$mount_point" "$mount_mm" >&2
       return 1
@@ -110,12 +134,11 @@ storage::topology_check_target() {
     else
       best_len=-1; best_mm=
       while IFS= read -r line; do
-        read -r -a fields <<< "$line"
-        (( ${#fields[@]} >= 10 )) || return 1
-        decoded=$(storage::topology_decode_mount_field "${fields[4]}") || return 1
+        storage::topology_parse_mount_record "$line" || return 1
+        decoded=$TOPOLOGY_MOUNT_POINT
         if [[ $decoded == "/" && $swap_source == /* ]] || [[ $swap_source == "$decoded" || $swap_source == "$decoded/"* ]]; then
           if (( ${#decoded} > best_len )); then
-            best_len=${#decoded}; best_mm=${fields[2]}
+            best_len=${#decoded}; best_mm=$TOPOLOGY_MOUNT_MM
           fi
         fi
       done < "$mountinfo"
