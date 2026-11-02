@@ -26,7 +26,7 @@ inventory::collect_host() {
   local -n output_ref="$output_name"
   output_ref=()
 
-  local key value
+  local key value line core_count=0
   local cpuinfo="$proc_root/cpuinfo"
   if [[ -r "$cpuinfo" ]]; then
     while IFS= read -r line || [[ -n "$line" ]]; do
@@ -35,9 +35,11 @@ inventory::collect_host() {
         'model name'*) value=${line#*:}; value=${value# }; [[ -n "$value" && -z ${output_ref[cpu.model]+x} ]] && output_ref[cpu.model]=$value ;;
         'cpu family'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && output_ref[cpu.family]=$value ;;
         'model'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && output_ref[cpu.model_id]=$value ;;
-        'processor'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && (( output_ref[cpu.cores]++ )) ;;
+        'processor'*) value=${line#*:}; value=${value//[[:space:]]/}; [[ "$value" =~ ^[0-9]+$ ]] && (( core_count += 1 )) ;;
+
       esac
     done < "$cpuinfo"
+    (( core_count > 0 )) && output_ref[cpu.cores]=$core_count
   fi
 
   local meminfo="$proc_root/meminfo"
@@ -101,7 +103,7 @@ inventory::compare_target_profile() {
   fi
 
   if [[ -n ${facts_ref[cpu.model]+x} ]]; then
-    if [[ "${facts_ref[cpu.model]}" != "$K41_TARGET_CPU_MODEL_LINUX" ]]; then
+    if [[ "${facts_ref[cpu.model]}" != *"$K41_TARGET_CPU_MODEL_LINUX"* ]]; then
       printf 'WARN: CPU mismatch (expected %s; detected %s).\n' "$K41_TARGET_CPU_MODEL_LINUX" "${facts_ref[cpu.model]}" >&2
       mismatch=1
     else
