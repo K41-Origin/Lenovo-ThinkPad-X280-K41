@@ -1,10 +1,28 @@
 #!/usr/bin/env bash
 # Pure arithmetic storage layout planner. This module never invokes disk tools.
 
+# Validate a caller variable before creating a nameref. Read-only associative
+# arrays are valid inputs for read-only operations.
+storage::plan_valid_assoc_name() {
+  [[ $# -eq 1 && $1 =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]] || return 1
+  local declaration
+  declaration=$(declare -p "$1" 2>/dev/null) || return 1
+  [[ $declaration == 'declare -A '* || $declaration == 'declare -Ar '* ]]
+}
+
+# Mutating planner outputs must be writable associative arrays.
+storage::plan_valid_mutable_assoc_name() {
+  [[ $# -eq 1 ]] || return 1
+  storage::plan_valid_assoc_name "$1" || return 1
+  local declaration
+  declaration=$(declare -p "$1" 2>/dev/null) || return 1
+  [[ $declaration == 'declare -A '* ]]
+}
+
 storage::plan_gpt_layout() {
   [[ $# -eq 6 ]] || return 2
+  storage::plan_valid_mutable_assoc_name "$1" || return 2
   local -n _plan=$1
-  [[ $(declare -p "$1" 2>/dev/null) == 'declare -A '* ]] || return 2
   [[ ! -v _plan[status] ]] || return 2
   local disk_bytes=$2 logical_sector=$3 physical_sector=$4 ram_bytes=$5 swap_margin_bytes=$6
   local value variable
@@ -61,9 +79,7 @@ storage::plan_gpt_layout() {
 # Stable key-sorted representation for review and integrity binding.
 storage::plan_serialize() {
   [[ $# -eq 1 ]] || return 2
-  local declaration
-  declaration=$(declare -p "$1" 2>/dev/null) || return 2
-  [[ $declaration == 'declare -A '* ]] || return 2
+  storage::plan_valid_assoc_name "$1" || return 2
   local -n _plan="$1"
   (( ${#_plan[@]} > 0 )) || return 1
   local LC_ALL=C key value i j
@@ -101,11 +117,8 @@ storage::plan_digest() {
 # the approved installation profile. This function only changes plan data.
 storage::plan_bind_target() {
   [[ $# -eq 2 ]] || return 2
-  local declaration
-  declaration=$(declare -p "$1" 2>/dev/null) || return 2
-  [[ $declaration == 'declare -A '* ]] || return 2
-  declaration=$(declare -p "$2" 2>/dev/null) || return 2
-  [[ $declaration == 'declare -A '* ]] || return 2
+  storage::plan_valid_mutable_assoc_name "$1" || return 2
+  storage::plan_valid_assoc_name "$2" || return 2
   local -n _plan="$1" _target="$2"
   [[ ${_plan[status]-} == calculated ]] || return 1
 
