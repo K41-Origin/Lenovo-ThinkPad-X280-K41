@@ -107,3 +107,51 @@ if storage::plan_serialize malformed >/dev/null; then
   echo 'FAIL: multiline plan value accepted' >&2; exit 1
 fi
 echo 'PASS: rejects ambiguous multiline serialization values'
+
+# A plan is incomplete until the caller binds a successful prerequisite snapshot.
+declare -A prerequisites=(
+  [boot_mode]=uefi [required_tools]=passed [topology]=passed
+  [target_unused]=passed [target_identity]=passed [evidence_id]=fixture-snapshot-001
+)
+storage::plan_bind_prerequisites bound prerequisites
+storage::plan_validate bound
+echo 'PASS: accepts complete geometry, target, profile, and prerequisite state'
+
+declare -A changed_prereq=()
+for key in "${!bound[@]}"; do changed_prereq["$key"]=${bound[$key]}; done
+changed_prereq[prereq_topology]=failed
+if storage::plan_validate changed_prereq; then
+  echo 'FAIL: failed topology prerequisite accepted' >&2; exit 1
+fi
+changed_prereq[prereq_topology]=passed
+changed_prereq[profile_root_filesystem]=btrfs
+if storage::plan_validate changed_prereq; then
+  echo 'FAIL: unsupported root filesystem profile accepted' >&2; exit 1
+fi
+changed_prereq[profile_root_filesystem]=ext4
+changed_prereq[esp_end_sector]=$((changed_prereq[esp_end_sector] - 1))
+if storage::plan_validate changed_prereq; then
+  echo 'FAIL: inconsistent ESP geometry accepted' >&2; exit 1
+fi
+echo 'PASS: rejects failed prerequisites and inconsistent profile/partition geometry'
+
+declare -A missing_prerequisite=([boot_mode]=uefi [required_tools]=passed [topology]=passed [target_unused]=passed [target_identity]=passed)
+declare -A no_prereq_plan=()
+storage::plan_gpt_layout no_prereq_plan 274877906944 512 4096 8589934592 1073741824
+storage::plan_bind_target no_prereq_plan target
+if storage::plan_bind_prerequisites no_prereq_plan missing_prerequisite; then
+  echo 'FAIL: prerequisite snapshot without evidence ID accepted' >&2; exit 1
+fi
+if storage::plan_validate no_prereq_plan; then
+  echo 'FAIL: plan without prerequisite state accepted' >&2; exit 1
+fi
+echo 'PASS: refuses missing prerequisite evidence and incomplete plans'
+
+declare -A invalid_prerequisite=(
+  [boot_mode]=legacy [required_tools]=passed [topology]=passed
+  [target_unused]=passed [target_identity]=passed [evidence_id]=fixture-snapshot-002
+)
+if storage::plan_bind_prerequisites no_prereq_plan invalid_prerequisite; then
+  echo 'FAIL: non-UEFI prerequisite state accepted' >&2; exit 1
+fi
+echo 'PASS: refuses non-UEFI prerequisite state'
