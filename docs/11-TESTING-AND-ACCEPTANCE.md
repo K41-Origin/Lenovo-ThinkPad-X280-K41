@@ -1,11 +1,25 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow is configured to validate Bash syntax and run ten repository test scripts. The Stage 5 workflow result has not yet been independently retrieved. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
+The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs ten repository test scripts. Run #106 on commit `5ef865d52370f4364678ff614cb8839d8da57ace` passed both steps; later commits require their own validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
 
 The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
 Stage 5 adds a dry-run operation manifest and deterministic failure-injection simulator. The manifest describes the intended order (GPT, partition creation/type assignment, LUKS2 format/open, ext4), while the simulator records attempted/completed steps and stops at an injected failure. It does not invoke an executor callback, shell command, block-device API, or privileged utility. A ready final gate must match the current plan's review digest and target identity; simulation consumes the gate. This is test infrastructure and architecture validation only, not a production storage executor.
+
+## Stage 6 — Storage execution safety audit
+
+The Stage 6 review inspected the actual `installer` entry point and all `lib/*.sh` modules in the current repository tree, with focused review of the storage planner, live prerequisite collector, confirmation gate, topology validator, and dry-run model.
+
+Findings:
+- The executable entry point is `installer`, not `install.sh`. It sources only `lib/common.sh` and `lib/preflight.sh`; it remains diagnostic-only and returns nonzero for preflight because installation is disabled.
+- The storage discovery, topology, planning, prerequisite, confirmation, and dry-run modules contain no active disk-writing workflow. The reviewed source contains no invocation path for partitioning, filesystem formatting, LUKS formatting/opening, package installation, mounting, or service mutation.
+- `lib/storage-execution-dry-run.sh` creates in-memory operation descriptors and result records only. It contains no external-command dispatch, command substitution, shell evaluation, or executor callback.
+- The final gate and plan digest are in-process integrity checks, not a security boundary against a compromised process, arbitrary caller mutation, or malicious root code. The dry-run simulator must not be treated as an authorization system.
+- The Stage 5 test initially failed because its helper declared a local variable named `target`, shadowing the caller's final-revalidation output array. The helper variable was renamed to `bound_target`; run #106 then passed the complete suite.
+- Static source inspection is not a formal proof of absence of side effects. Future executor work must introduce a separate injectable boundary, test zero destructive invocations on every failed gate, and undergo a new review before any real-disk execution is considered.
+
+No real disk, package database, service, firmware setting, or network configuration was changed during this audit.
 
 The prerequisite binder itself records caller assertions; the live collector is the component that performs the read-only checks and produces fresh evidence. Fixture-based tests mock discovery and topology behavior, so they do not establish that the actual X280 disk is unused or that hardware identity is correct at installation time.
 
@@ -188,3 +202,6 @@ On 2026-11-03, GitHub Actions run `41614921278` completed successfully at commit
 A failed final check consumes the confirmation; a new review and explicit confirmation are required. A successful gate is an in-process state record only. It is not a security boundary against compromised root code, is not persistent across process restarts, and does not itself authorize or execute any disk operation. No partitioning, formatting, encryption, mounting, package installation, or firmware changes were added. The installer entry point remains diagnostics-only.
 
 `tests/test-storage-confirmation.sh` covers cancellation, incorrect phrase, successful exact confirmation, successful final revalidation, one-shot use, modified-plan rejection, changed stable identity, and topology failure. GitHub Actions run `41615793341` passed Bash syntax validation and all nine repository test scripts at commit `4ab82207fa682e8e2ec8bab760f8c42d8e745717`. The test run also passed the complete squashfs/overlay topology fixtures. These are CI fixture results, not a live confirmation or installation test on the ThinkPad X280.
+
+
+On 2026-11-03, GitHub Actions run `41616973862` (#106) passed Bash syntax validation and all ten repository test scripts at commit `5ef865d52370f4364678ff614cb8839d8da57ace`. The run includes the corrected Stage 5 dry-run test. This is fixture-based CI evidence only; no physical disk or ThinkPad hardware was tested.
