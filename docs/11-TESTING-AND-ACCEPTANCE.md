@@ -150,7 +150,7 @@ On 2026-11-03, GitHub Actions run `41613051552` passed Bash syntax validation an
 The first-slice test command `bash tests/test-common-preflight.sh` passed with six test groups against temporary local copies whose blob hashes matched the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
 
 
-## Live storage prerequisite integration — IMPLEMENTED, CI pending
+## Live storage prerequisite integration — IMPLEMENTED and CI TESTED
 
 `lib/storage-prerequisites.sh` adds `storage::plan_collect_live_prerequisites PLAN TARGET_OUT PREREQ_OUT`. It performs read-only live checks before a plan may carry passed prerequisite states:
 
@@ -166,4 +166,7 @@ The collector is read-only. It does not partition, format, mount, unlock, instal
 
 The new `tests/test-storage-prerequisites.sh` exercises successful collection/binding and fail-closed behavior for missing tools, non-UEFI, discovery failure, topology failure, and changed stable identity using controlled function fixtures. These tests validate the orchestration contract; the existing discovery/topology tests separately cover the underlying parsers and read-only topology logic. They do not establish a live pass on the ThinkPad or authorize disk erasure.
 
-The GitHub Actions suite now includes the new test. Record its result only after the corresponding workflow run completes. The earlier branch-tip CI failure in `tests/test-storage-topology.sh` (full squashfs mount fixture) remains unresolved until a subsequent run demonstrates otherwise.
+The GitHub Actions suite now includes the new test. Run `41614921278` passed Bash syntax validation and all eight test scripts at commit `ab2a6ee0aa80df234bf3edc554829cf4e714927c`. The previously failing full squashfs mount topology fixture also passed in this run. The new prerequisite test confirmed successful live-check orchestration and fail-closed behavior for the injected failures. This remains fixture-based CI evidence, not a live pass on the ThinkPad hardware.
+
+
+On 2026-11-03, GitHub Actions run `41614921278` completed successfully at commit `ab2a6ee0aa80df234bf3edc554829cf4e714927c`: Bash syntax validation passed for all shell files and all eight test scripts passed, including `tests/test-storage-prerequisites.sh`. The topology suite's full squashfs-loop case passed in this run. No real disk was modified and no live hardware prerequisite result was collected in this CI environment.
