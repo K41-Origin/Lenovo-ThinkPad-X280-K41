@@ -81,4 +81,5 @@ storage::plan_collect_live_prerequisites() {
   _prereq_out[target_stable_id]=${_target_out[stable_id]}
   _prereq_out[target_size_bytes]=${_target_out[size_bytes]}
   storage::plan_bind_prerequisites "$plan_name" "$prereq_name" || return 1
+  storage::plan_validate "$plan_name" || return 1
 }
