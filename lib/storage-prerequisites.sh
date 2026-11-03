@@ -60,8 +60,10 @@ storage::plan_collect_live_prerequisites() {
   [[ ${_target_out[serial]} == "${_plan[target_serial]-}" ]] || return 1
 
   local timestamp digest material
-  timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ) || return 1
-  material=$(printf '%s\n' "$timestamp" "${_plan[target_device_path]}" "${_target_out[major_minor]}" "${_target_out[stable_id_kind]}" "${_target_out[stable_id]}" "${_target_out[size_bytes]}") || return 1
+  timestamp=$(date -u +%Y-%m-%dT%H:%M:%S.%NZ) || return 1
+  local plan_fingerprint
+  plan_fingerprint=$(storage::plan_digest "$plan_name") || return 1
+  material=$(printf '%s\\n' "$timestamp" "$plan_fingerprint" "${_plan[target_device_path]}" "${_target_out[major_minor]}" "${_target_out[stable_id_kind]}" "${_target_out[stable_id]}" "${_target_out[size_bytes]}") || return 1
   digest=$(printf '%s' "$material" | sha256sum) || return 1
   digest=${digest%% *}
   [[ $digest =~ ^[a-f0-9]{64}$ ]] || return 1
