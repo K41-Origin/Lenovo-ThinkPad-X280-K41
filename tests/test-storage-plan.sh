@@ -155,3 +155,16 @@ if storage::plan_bind_prerequisites no_prereq_plan invalid_prerequisite; then
   echo 'FAIL: non-UEFI prerequisite state accepted' >&2; exit 1
 fi
 echo 'PASS: refuses non-UEFI prerequisite state'
+
+digest_with_prerequisites=$(storage::plan_digest bound)
+changed_prereq[prereq_evidence_id]=different-snapshot
+[[ $(storage::plan_digest changed_prereq) != "$digest_with_prerequisites" ]]
+echo 'PASS: prerequisite evidence changes alter the canonical plan digest'
+
+declare -A noncanonical_numeric=()
+for key in "${!bound[@]}"; do noncanonical_numeric["$key"]=${bound[$key]}; done
+noncanonical_numeric[esp_start_sector]=0${noncanonical_numeric[esp_start_sector]}
+if storage::plan_validate noncanonical_numeric; then
+  echo 'FAIL: non-canonical decimal geometry accepted' >&2; exit 1
+fi
+echo 'PASS: rejects non-canonical numeric fields before arithmetic evaluation'
