@@ -5,6 +5,10 @@ source "$ROOT/lib/storage-topology.sh"
 tmp=$(mktemp -d)
 trap 'rm -rf -- "$tmp"' EXIT
 sys=$tmp/sys
+backing_file=$tmp/loop-backing.img
+: >"$backing_file"
+backing_mm=$(storage::topology_path_major_minor "$backing_file")
+[[ $backing_mm =~ ^[0-9]+:[0-9]+$ ]]
 target_major=65000
 target_minor=0
 target_mm=$target_major:$target_minor
