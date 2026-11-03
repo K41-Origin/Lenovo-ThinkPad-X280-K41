@@ -26,6 +26,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-plan.sh`, `lib/storage-prerequisites.sh`, and `lib/storage-confirmation.sh` — target-bound storage planning, read-only prerequisite evidence, explicit confirmation, and final revalidation.
 - `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
+- `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — canonical Stage 8 design for a future native descriptor holder; implementation remains planned.
 - `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
 - `tests/` — test strategy and isolated fixture tests.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
@@ -56,6 +57,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 11. [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md)
 12. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md)
 13. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md)
+14. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
@@ -64,7 +66,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. The storage modules perform no destructive operation. The mock boundary's pathname rechecks do not eliminate the kernel-level time-of-check/time-of-use race; a native open-handle and recovery design is still required before any real executor.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. The storage modules perform no destructive operation. The Stage 8 native-handle design is documented, but its helper and tests are not implemented. A retained descriptor must be connected safely to every future operation; pathname-based tools are not assumed to use it.
 
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
