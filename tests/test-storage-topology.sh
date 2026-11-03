@@ -9,24 +9,29 @@ backing_file=$tmp/loop-backing.img
 : >"$backing_file"
 backing_mm=$(storage::topology_path_major_minor "$backing_file")
 [[ $backing_mm =~ ^[0-9]+:[0-9]+$ ]]
-target_major=65000
-target_minor=0
-target_mm=$target_major:$target_minor
-while [[ $target_mm == "$backing_mm" ]]; do ((target_minor += 1)); target_mm=$target_major:$target_minor; done
+synthetic_major=65000
+[[ ${backing_mm%%:*} != "$synthetic_major" ]] || synthetic_major=64999
+target_mm=$synthetic_major:0
+p1_mm=$synthetic_major:1
+p2_mm=$synthetic_major:2
+dm_mm=$synthetic_major:3
+sda_mm=$synthetic_major:4
+loop_mm=$synthetic_major:5
+overlay_mm=$synthetic_major:6
 mkdir -p "$sys/dev/block" "$sys/devices/pci/block/nvme0n1/nvme0n1p1/holders" "$sys/devices/pci/block/nvme0n1/nvme0n1p1/slaves"
 mkdir -p "$sys/devices/pci/block/nvme0n1/nvme0n1p2/holders" "$sys/devices/pci/block/nvme0n1/nvme0n1p2/slaves"
 mkdir -p "$sys/devices/pci/block/nvme0n1/holders" "$sys/devices/pci/block/nvme0n1/slaves"
 mkdir -p "$sys/devices/virtual/block/dm-0/holders" "$sys/devices/virtual/block/dm-0/slaves"
 mkdir -p "$sys/devices/virtual/block/sda/holders" "$sys/devices/virtual/block/sda/slaves"
 ln -s ../../devices/pci/block/nvme0n1 "$sys/dev/block/$target_mm"
-ln -s ../../devices/pci/block/nvme0n1/nvme0n1p1 "$sys/dev/block/259:1"
-ln -s ../../devices/pci/block/nvme0n1/nvme0n1p2 "$sys/dev/block/259:2"
-ln -s ../../devices/virtual/block/dm-0 "$sys/dev/block/253:0"
-ln -s ../../devices/virtual/block/sda "$sys/dev/block/8:0"
+ln -s ../../devices/pci/block/nvme0n1/nvme0n1p1 "$sys/dev/block/$p1_mm"
+ln -s ../../devices/pci/block/nvme0n1/nvme0n1p2 "$sys/dev/block/$p2_mm"
+ln -s ../../devices/virtual/block/dm-0 "$sys/dev/block/$dm_mm"
+ln -s ../../devices/virtual/block/sda "$sys/dev/block/$sda_mm"
 ln -s "$sys/devices/virtual/block/dm-0" "$sys/devices/pci/block/nvme0n1/nvme0n1p2/holders/dm-0"
 ln -s "$sys/devices/pci/block/nvme0n1/nvme0n1p2" "$sys/devices/virtual/block/dm-0/slaves/nvme0n1p2"
 cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-36 25 8:0 / / rw,relatime - ext4 /dev/sda rw
+36 25 $sda_mm / / rw,relatime - ext4 /dev/sda rw
 37 25 8:0 / /boot rw,relatime - vfat /dev/sda rw
 EOF_MOUNT
 cat >"$tmp/swaps" <<'EOF_SWAP'
@@ -37,16 +42,16 @@ storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"
 echo 'PASS: unrelated mounted disk does not block target'
 
 cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-36 25 253:0 / / rw,relatime - ext4 /dev/mapper/cryptroot rw
+36 25 $dm_mm / / rw,relatime - ext4 /dev/mapper/cryptroot rw
 EOF_MOUNT
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: mounted mapper dependent on target was accepted' >&2; exit 1
 fi
 echo 'PASS: rejects mounted LUKS/device-mapper dependent'
 
 cat >"$tmp/mountinfo" <<'EOF_MOUNT'
 36 25 8:0 / / rw,relatime - ext4 /dev/sda rw
-38 25 259:2 / /mnt/data rw,relatime - ext4 /dev/nvme0n1p2 rw
+38 25 $p2_mm / /mnt/data rw,relatime - ext4 /dev/nvme0n1p2 rw
 EOF_MOUNT
 if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: mounted target partition was accepted' >&2; exit 1
@@ -103,14 +108,14 @@ echo 'PASS: rejects malformed mountinfo'
 # Backing-path resolution is tested against real temporary files and their
 # actual st_dev major:minor values; no mounts or block-device writes are used.
 mkdir -p "$sys/devices/virtual/block/loop0/loop"
-ln -s "$sys/devices/virtual/block/loop0" "$sys/dev/block/7:0"
+ln -s "$sys/devices/virtual/block/loop0" "$sys/dev/block/$loop_mm"
 backing_file="$tmp/loop-backing.img"
 : >"$backing_file"
 printf '%s\n' "$backing_file" >"$sys/devices/virtual/block/loop0/loop/backing_file"
 backing_mm=$(storage::topology_path_major_minor "$backing_file")
 [[ $backing_mm =~ ^[0-9]+:[0-9]+$ ]]
 declare -A no_seen=()
-storage::topology_check_loop_backing 7:0 "$sys" no_seen
+storage::topology_check_loop_backing "$loop_mm" "$sys" no_seen
 echo 'PASS: resolves loop backing file on an unrelated filesystem'
 
 declare -A loop_seen=()
@@ -134,7 +139,7 @@ echo 'PASS: fails closed on unresolved overlay backing path'
 
 # Exercise the complete mountinfo dispatch for squashfs-on-loop and overlay.
 cat >"$tmp/mountinfo" <<EOF_MOUNT
-42 25 7:0 / /run/archiso/bootmnt rw,relatime - squashfs /dev/loop0 ro
+42 25 $loop_mm / /run/archiso/bootmnt rw,relatime - squashfs /dev/loop0 ro
 EOF_MOUNT
 storage::topology_parse_mount_record "$(cat "$tmp/mountinfo")" || { echo 'FAIL: squashfs mountinfo parse' >&2; exit 1; }
 storage::topology_check_loop_backing 7:0 "$sys" no_seen || { echo 'FAIL: squashfs backing check' >&2; exit 1; }
@@ -151,7 +156,7 @@ fi
 echo 'PASS: complete topology check rejects squashfs loop backing on target'
 
 cat >"$tmp/mountinfo" <<EOF_MOUNT
-43 25 0:42 / / rw,relatime - overlay overlay rw,lowerdir=$tmp,upperdir=$tmp,workdir=$tmp
+43 25 $overlay_mm / / rw,relatime - overlay overlay rw,lowerdir=$tmp,upperdir=$tmp,workdir=$tmp
 EOF_MOUNT
 storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"
 echo 'PASS: accepts overlay mount backed by unrelated filesystem'
