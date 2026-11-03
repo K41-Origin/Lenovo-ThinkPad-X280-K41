@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2079 # Output namerefs are associative arrays; ShellCheck cannot infer their declaration type.
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 source "$ROOT/tests/helpers/storage-fixtures.sh"
