@@ -45,6 +45,23 @@ if storage::plan_gpt_layout overflow 9223372036854775808 512 4096 8589934592 107
 fi
 echo 'PASS: rejects arithmetic input outside signed 64-bit range'
 
+# Public planner output validation must fail cleanly before nameref creation.
+if storage::plan_gpt_layout 'bad-name' 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: malformed output variable name accepted' >&2; exit 1
+fi
+if storage::plan_gpt_layout missing_plan 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: missing output variable accepted' >&2; exit 1
+fi
+declare -a indexed_plan=()
+if storage::plan_gpt_layout indexed_plan 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: indexed output array accepted' >&2; exit 1
+fi
+declare -Ar readonly_plan=()
+if storage::plan_gpt_layout readonly_plan 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: readonly associative output accepted' >&2; exit 1
+fi
+echo 'PASS: rejects malformed, missing, indexed, and readonly output variables before nameref creation'
+
 declare -A swap_overflow=()
 if storage::plan_gpt_layout swap_overflow 274877906944 512 4096 9223372036854775807 1; then
   echo 'FAIL: swap-size addition overflow accepted' >&2; exit 1
