@@ -87,7 +87,7 @@ inventory::validate_required_facts() {
   if [[ -n "$value" && ! "$value" =~ ^[0-9]+$ ]]; then printf '%s\n' 'ERROR: memory.total_bytes is not an unsigned decimal integer.' >&2; failed=1; fi
   if [[ -n "$value" && "$value" =~ ^[0-9]+$ ]]; then
     local max_int=9223372036854775807
-    if ((${#value} > 19)) || { ((${#value} == 19)) && [[ "$value" > "$max_int" ]]; }; then printf '%s\n' 'ERROR: memory.total_bytes exceeds supported integer range.' >&2; failed=1; fi
+    # Equal-length decimal strings are compared lexically to avoid signed overflow.\n  # shellcheck disable=SC2071\n  if ((${#value} > 19)) || { ((${#value} == 19)) && [[ "$value" > "$max_int" ]]; }; then printf '%s\n' 'ERROR: memory.total_bytes exceeds supported integer range.' >&2; failed=1; fi
   fi
   return "$failed"
 }
@@ -146,8 +146,8 @@ inventory::compare_target_profile() {
   [[ -n "$expected_vendor" && -n "$expected_product" && -n "$expected_cpu" ]] || return 1
   # Reject values outside Bash signed 64-bit arithmetic range.
   local max_int=9223372036854775807
-  ((${#memory_min} < 19)) || { ((${#memory_min} == 19)) && [[ "$memory_min" < "$max_int" ]]; } || return 1
-  ((${#memory_max} < 19)) || { ((${#memory_max} == 19)) && [[ "$memory_max" < "$max_int" || "$memory_max" == "$max_int" ]]; } || return 1
+  # Equal-length decimal strings are compared lexically to avoid signed overflow.\n  # shellcheck disable=SC2071\n  ((${#memory_min} < 19)) || { ((${#memory_min} == 19)) && [[ "$memory_min" < "$max_int" ]]; } || return 1
+  # shellcheck disable=SC2071\n  ((${#memory_max} < 19)) || { ((${#memory_max} == 19)) && [[ "$memory_max" < "$max_int" || "$memory_max" == "$max_int" ]]; } || return 1
   local min_num=$((10#$memory_min)) max_num=$((10#$memory_max))
   (( min_num > 0 && max_num >= min_num )) || return 1
 
