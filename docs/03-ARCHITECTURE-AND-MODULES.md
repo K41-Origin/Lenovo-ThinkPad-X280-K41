@@ -1,7 +1,7 @@
 # Architecture and Modules
 
 ## Status
-The repository contains tested first-slice logging/read-only preflight helpers and a diagnostic-only entry point. Installer orchestration and installation behavior are not implemented end to end.
+The repository contains tested first-slice logging/read-only preflight helpers and a diagnostic-only entry point. Nine future-domain module files are placeholders marked PLANNED; installer orchestration and installation behavior are not implemented end to end.
 
 ## Architecture decision
 Use one project-owned interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB. The same interactive flow coordinates base Arch installation, desktop configuration, selected packages, validation, and reporting. Modules remain separate internally to keep responsibilities testable and failures easier to isolate.
@@ -187,7 +187,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Ambiguous/missing identity, incomplete plan, failed prerequisite, changed target, cancellation, or unknown critical state must fail closed.
 - Return statuses must distinguish success from safe abort/cancellation and critical failure. Missing output or unset state must never count as success.
 - Never pass or log passphrases, recovery keys, or credentials. Keep privilege elevation limited to the stage that requires it.
-- The approved architecture is UEFI/GPT, a 1 GiB FAT32 ESP at `/efi`, systemd-boot, a native mkinitcpio UKI, LUKS2 with ext4 directly on the unlocked root mapper, and an encrypted-root swapfile. This contract does not define a finalized target-specific partition table or authorize destructive operations. Exact device mapping, mkinitcpio hooks/kernel command line, UKI update behavior, swap sizing, and resume offset remain implementation and compatibility checks; unresolved critical checks block execution.
+- The approved storage and boot decisions are indexed in `docs/02-REQUIREMENTS-AND-DECISIONS.md`; their detailed technical owner is `docs/04-INSTALLATION-AND-DISK.md`. This contract does not define a finalized target-specific partition table or authorize destructive operations.
 - Every abort path must be testable with mocks and assert zero destructive-tool invocations. Do not run automated tests against real disks.
 
 **Stage ordering:** preflight success → discover candidates → build complete plan → render plan → validate target → explicit confirmation → immediate target/precondition revalidation → execute → verify result. Any failed gate exits before execution. Recovery after interruption must inspect current state and must not automatically repeat destructive work.
