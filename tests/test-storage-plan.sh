@@ -157,8 +157,10 @@ fi
 echo 'PASS: refuses non-UEFI prerequisite state'
 
 digest_with_prerequisites=$(storage::plan_digest bound)
-changed_prereq[prereq_evidence_id]=different-snapshot
-[[ $(storage::plan_digest changed_prereq) != "$digest_with_prerequisites" ]]
+declare -A prereq_digest_variant=()
+for key in "${!bound[@]}"; do prereq_digest_variant["$key"]=${bound[$key]}; done
+prereq_digest_variant[prereq_evidence_id]=different-snapshot
+[[ $(storage::plan_digest prereq_digest_variant) != "$digest_with_prerequisites" ]]
 echo 'PASS: prerequisite evidence changes alter the canonical plan digest'
 
 declare -A noncanonical_numeric=()
@@ -168,3 +170,10 @@ if storage::plan_validate noncanonical_numeric; then
   echo 'FAIL: non-canonical decimal geometry accepted' >&2; exit 1
 fi
 echo 'PASS: rejects non-canonical numeric fields before arithmetic evaluation'
+declare -A wrong_esp_profile=()
+for key in "${!bound[@]}"; do wrong_esp_profile["$key"]=${bound[$key]}; done
+wrong_esp_profile[profile_esp_size_bytes]=536870912
+if storage::plan_validate wrong_esp_profile; then
+  echo 'FAIL: ESP profile size inconsistent with partition geometry accepted' >&2; exit 1
+fi
+echo 'PASS: rejects ESP profile size inconsistent with planned partition geometry'
