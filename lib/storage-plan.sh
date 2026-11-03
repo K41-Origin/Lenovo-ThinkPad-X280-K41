@@ -89,7 +89,8 @@ storage::plan_digest() {
   [[ $# -eq 1 ]] || return 2
   command -v sha256sum >/dev/null 2>&1 || return 1
   local serialized digest
-  serialized=$(storage::plan_serialize "$1") || return 1
+  serialized=$(storage::plan_serialize "$1" && printf .) || return 1
+  serialized=${serialized%.}
   digest=$(printf '%s\\n' "$serialized" | sha256sum) || return 1
   digest=${digest%% *}
   [[ $digest =~ ^[a-f0-9]{64}$ ]] || return 1
