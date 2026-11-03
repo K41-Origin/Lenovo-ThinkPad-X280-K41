@@ -213,8 +213,7 @@ storage::plan_validate() {
   local value
   for key in "${numeric_fields[@]}"; do
     value=${_plan[$key]-}
-    [[ $value =~ ^[0-9]+$ ]] || return 1
-    while [[ ${#value} -gt 1 && $value == 0* ]]; do value=${value#0}; done
+    [[ $value =~ ^[0-9]+$ && $value != 0* ]] || return 1
     (( ${#value} < 19 )) || {
       (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 1
     }
