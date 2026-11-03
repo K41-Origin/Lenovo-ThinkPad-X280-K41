@@ -69,6 +69,7 @@ storage::plan_gpt_layout bound 274877906944 512 4096 8589934592 1073741824
 storage::plan_bind_target bound target
 [[ ${bound[schema_version]} == 1 ]]
 [[ ${bound[target_stable_id]} == eui.0011223344556677 ]]
+[[ ${bound[target_removable]} == false && ${bound[target_read_only]} == false ]]
 [[ ${bound[profile_root_encryption]} == luks2 ]]
 [[ ${bound[profile_root_filesystem]} == ext4 ]]
 [[ ${bound[profile_esp_mountpoint]} == /efi ]]
