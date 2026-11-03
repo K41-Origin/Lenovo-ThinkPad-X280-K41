@@ -155,3 +155,13 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Added full mountinfo-dispatch fixtures for safe/unsafe loop-backed squashfs and overlay mounts, plus active block-swap dependency detection. Tests use temporary files and synthetic sysfs; no mounts, loop devices, or real block-device writes are created.
 - GitHub Actions run #53 on commit `b8d90d44f71b494079baff4edb74d95614430070` completed successfully. Bash syntax checks and all seven repository test scripts passed.
 - LIMITATIONS: no real Arch ISO boot environment or ThinkPad X280 kernel/sysfs tree has been tested. Mountinfo overlay option escaping and kernel-specific loop sysfs behavior still require validation on the actual Arch ISO. Storage operations remain unimplemented; no disk was queried or modified.
+
+
+### 2026-11-03 — Storage execution safety audit (Stage 6)
+- Audited the actual `installer` entry point and the repository shell modules. Confirmed the entry point sources only common/preflight modules and remains diagnostic-only; there is no `install.sh` file.
+- Reviewed storage discovery, topology, planning, live prerequisite collection, confirmation/final-revalidation, and the Stage 5 dry-run model. No active disk-writing or system-configuration execution path was found in these modules.
+- Confirmed the dry-run model builds in-memory descriptors/results only; it has no external command dispatch, command substitution, shell evaluation, or executor callback.
+- Corrected a Stage 5 test-helper defect: a local variable shadowed the caller's final-revalidation output array. The helper variable is now `bound_target`.
+- GitHub Actions run #106 (`41616973862`) passed Bash syntax validation and all ten test scripts at commit `5ef865d52370f4364678ff614cb8839d8da57ace`.
+- Updated testing and acceptance documentation. No physical disk or host system configuration was changed.
+- LIMITATION: static review and fixture CI do not establish real-hardware safety. The in-process gate/digest is not a security boundary against compromised root code. Real storage execution remains PLANNED and disabled.
