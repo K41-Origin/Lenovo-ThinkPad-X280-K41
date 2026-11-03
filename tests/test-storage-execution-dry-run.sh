@@ -16,19 +16,19 @@ preflight::detect_boot_mode() { return 0; }
 storage::discover_candidates() {
   local -n out="$1"
   out[candidate_count]=1
-  out[0.device_path]=/dev/nvme0n1
-  out[0.major_minor]=259:0
-  out[0.size_bytes]=274877906944
-  out[0.transport]=nvme
-  out[0.removable]=false
-  out[0.read_only]=false
-  out[0.stable_id_kind]=wwn
-  out[0.stable_id]=$TEST_ID
-  out[0.wwn]=$TEST_ID
-  out[0.serial]=SN-X280
-  out[0.model]="WDC PC SN730"
-  out[0.has_mounted_descendant]=no
-  out[0.has_active_swap_descendant]=no
+  out["0.device_path"]=/dev/nvme0n1
+  out["0.major_minor"]=259:0
+  out["0.size_bytes"]=274877906944
+  out["0.transport"]=nvme
+  out["0.removable"]=false
+  out["0.read_only"]=false
+  out["0.stable_id_kind"]=wwn
+  out["0.stable_id"]=$TEST_ID
+  out["0.wwn"]=$TEST_ID
+  out["0.serial"]=SN-X280
+  out["0.model"]="WDC PC SN730"
+  out["0.has_mounted_descendant"]=no
+  out["0.has_active_swap_descendant"]=no
 }
 storage::validate_target() {
   local -n selected_ref="$1"
