@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+source "$ROOT/tests/helpers/storage-fixtures.sh"
 source "$ROOT/lib/common.sh"
 source "$ROOT/lib/preflight.sh"
 source "$ROOT/lib/storage.sh"
@@ -41,13 +42,8 @@ storage::validate_target() {
 }
 
 make_plan() {
-  local -A target=(
-    [device_path]=/dev/nvme0n1 [major_minor]=259:0
-    [size_bytes]=274877906944 [transport]=nvme
-    [removable]=false [read_only]=false
-    [stable_id_kind]=wwn [stable_id]=eui.0011223344556677
-    [wwn]=eui.0011223344556677 [serial]=SN-X280 [model]="WDC PC SN730"
-  )
+  local -A target=()
+  storage_test::make_x280_target target "eui.0011223344556677" "SN-X280"
   storage::plan_gpt_layout "$1" 274877906944 512 4096 8589934592 1073741824
   storage::plan_bind_target "$1" target
   local -A initial_target=() initial_prereq=()
