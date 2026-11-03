@@ -14,6 +14,7 @@ TEST_ID=eui.0011223344556677
 MOCK_PROBE_COUNT=0
 MOCK_EXEC_COUNT=0
 MOCK_CHANGE_AT=0
+MOCK_READ_ONLY_CHANGE_AT=0
 MOCK_FAIL_AT=-1
 MOCK_PROBE_FAIL=0
 MOCK_CURRENT_ID=$TEST_ID
@@ -77,7 +78,14 @@ storage::mock_probe_target() {
   output[device_path]=/dev/nvme0n1
   output[major_minor]=259:0
   output[size_bytes]=274877906944
+  output[stable_id_kind]=wwn
   output[stable_id]=$MOCK_CURRENT_ID
+  output[wwn]=$MOCK_CURRENT_ID
+  output[serial]=SN-X280
+  output[transport]=nvme
+  output[removable]=false
+  output[read_only]=false
+  if (( MOCK_READ_ONLY_CHANGE_AT > 0 && MOCK_PROBE_COUNT >= MOCK_READ_ONLY_CHANGE_AT )); then output[read_only]=true; fi
 }
 storage::mock_record_operation() {
   [[ $# -eq 2 ]] || return 2
@@ -88,7 +96,7 @@ storage::mock_record_operation() {
   return 0
 }
 reset_mock() {
-  MOCK_PROBE_COUNT=0 MOCK_EXEC_COUNT=0 MOCK_CHANGE_AT=0 MOCK_FAIL_AT=-1 MOCK_PROBE_FAIL=0
+  MOCK_PROBE_COUNT=0 MOCK_EXEC_COUNT=0 MOCK_CHANGE_AT=0 MOCK_READ_ONLY_CHANGE_AT=0 MOCK_FAIL_AT=-1 MOCK_PROBE_FAIL=0
   MOCK_CURRENT_ID=$TEST_ID
   MOCK_LOG=()
 }
@@ -116,6 +124,20 @@ fi
 [[ ${changed_result[recovery_required]} == yes ]]
 [[ ${changed_gate[state]} == consumed ]]
 echo 'PASS: changed identity blocks the next mock operation and records partial-state recovery'
+
+# A safety-attribute change is treated as a target mismatch as well.
+declare -A readonly_plan=() readonly_confirmation=() readonly_target=() readonly_prereq=() readonly_gate=() readonly_result=()
+prepare_gate readonly_plan readonly_confirmation readonly_target readonly_prereq readonly_gate
+reset_mock
+MOCK_READ_ONLY_CHANGE_AT=2
+if storage::plan_mock_execution_boundary readonly_plan readonly_gate readonly_result storage::mock_probe_target storage::mock_record_operation ''; then
+  echo 'FAIL: newly read-only target was accepted' >&2; exit 1
+fi
+[[ ${readonly_result[state]} == aborted ]]
+[[ ${readonly_result[abort_reason]} == target_identity_changed ]]
+[[ ${readonly_result[completed_count]} == 1 && $MOCK_EXEC_COUNT == 1 ]]
+[[ ${readonly_result[recovery_required]} == yes ]]
+echo 'PASS: changed read-only safety attribute blocks the next operation'
 
 # A failed initial identity probe must result in zero executor calls.
 declare -A probe_plan=() probe_confirmation=() probe_target=() probe_prereq=() probe_gate=() probe_result=()
