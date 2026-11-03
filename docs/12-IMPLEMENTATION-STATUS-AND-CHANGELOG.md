@@ -23,9 +23,10 @@
 | Read-only storage topology validation | TESTED (fixture CI) | `lib/storage-topology.sh` is integrated into `storage::validate_target`; it walks partition and holder/slave dependencies, checks mounted devices and swap, and resolves loop-backed squashfs plus overlay lower/upper/work paths by backing filesystem major:minor. Synthetic fixtures and mocked integration pass in CI. Real Arch ISO/X280 sysfs behavior remains NOT TESTED. |
 | Read-only GPT storage plan calculator | TESTED (fixture CI) | `lib/storage-plan.sh` calculates 1 MiB-aligned ESP/root sector boundaries from disk bytes and logical/physical sector sizes, reserves GPT metadata for 128 entries, and proposes RAM-plus-margin swap size with minimum root headroom. Geometry, capacity, overflow, and decimal-input fixtures pass CI. No disk commands are invoked. |
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
-| Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #107 passed after test-helper output-array shadowing and a circular nameref were corrected. This is not a production executor or a security boundary. |
+| Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
+| Storage execution boundary | IMPLEMENTED (mock-only; CI pending) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. It opens no device handle and does not close the real kernel TOCTOU window. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED (CI) | GitHub Actions validates Bash syntax and runs ten repository test scripts. Run #107 on commit `0526112b092b0a0a1e06c4c7eadaee9245af9ac7` passed. ShellCheck/shfmt are not included in this workflow. |
+| Static checks | TESTED (CI; prior revision) | Run #108 passed Bash syntax validation and the ten-script suite before Stage 7. The current eleven-script workflow result is pending. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
@@ -165,3 +166,13 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - GitHub Actions run #107 (`41617706958`) passed Bash syntax validation and all ten test scripts at commit `0526112b092b0a0a1e06c4c7eadaee9245af9ac7`; the topology and dry-run fixtures passed without circular-nameref warnings.
 - Updated testing and acceptance documentation. No physical disk or host system configuration was changed.
 - LIMITATION: static review and fixture CI do not establish real-hardware safety. The in-process gate/digest is not a security boundary against compromised root code and does not close the time-of-check/time-of-use gap. A future executor must define immediate target revalidation and protection against target replacement. Real storage execution remains PLANNED and disabled.
+
+
+### 2026-11-03 — Storage execution boundary and TOCTOU design (Stage 7)
+- Added `lib/storage-execution-boundary.sh` as a mock-only orchestration boundary. Callback names are restricted to `storage::mock_*`; the final gate and plan digest must match before the gate is consumed.
+- Added a fresh mock identity probe immediately before each of the eight logical operations. The compared snapshot includes device path, kernel major:minor, capacity, and stable ID.
+- Extended the final gate with target capacity so the execution model compares the complete currently recorded target identity.
+- Added an operation ledger and explicit `recovery_required` state for target changes or failures after partial mock completion. No automatic rollback is attempted.
+- Added `tests/test-storage-execution-boundary.sh` and configured CI for eleven test scripts. Test and acceptance documentation now states clearly that pathname rechecks do not close the real kernel TOCTOU window.
+- CI for this Stage 7 revision is pending. No real block-device handle was opened, no device lock was acquired, and no disk or host configuration was changed.
+- LIMITATION: this is an orchestration test seam, not a production executor, authorization boundary, or real TOCTOU defense. A native open-handle/identity and recovery design must be separately reviewed before any destructive executor.
