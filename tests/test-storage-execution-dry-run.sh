@@ -66,7 +66,8 @@ storage::plan_build_dry_run_manifest plan gate manifest
 [[ ${manifest[1]} == esp_partition_create\|* ]]
 [[ ${manifest[2]} == root_partition_create\|* ]]
 [[ ${manifest[5]} == luks2_format\|* ]]
-[[ ${manifest[6]} == ext4_format\|* ]]
+[[ ${manifest[6]} == luks2_open\|* ]]
+[[ ${manifest[7]} == ext4_format\|* ]]
 echo 'PASS: manifest has deterministic GPT, partition, LUKS2, ext4 ordering'
 
 # A stale/modified plan cannot pass the gate binding.
