@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The common/preflight and diagnostic-entry test scripts have been run against temporary local copies matching fetched GitHub blobs. This does not verify installation integration or hardware behavior.
+The installer remains PLANNED and has not been tested end to end. GitHub Actions validates Bash syntax and runs the repository's seven test scripts. Passing these checks does not verify installation integration or hardware behavior.
 
 The pure storage-layout planner now has a target-bound plan model, deterministic key-sorted serialization, and a SHA-256 integrity digest. Target binding requires a matching disk capacity, NVMe transport, non-removable/read-write state, and a stable WWN or serial identity. The installation profile records the approved GPT/ESP/LUKS2/ext4/swapfile/systemd-boot/UKI choices; resume readiness remains explicitly deferred until the swapfile offset is verified. This is planning data only: no partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
