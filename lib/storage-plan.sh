@@ -90,7 +90,7 @@ storage::plan_digest() {
   command -v sha256sum >/dev/null 2>&1 || return 1
   local serialized digest
   serialized=$(storage::plan_serialize "$1") || return 1
-  digest=$(printf '%s' "$serialized" | sha256sum) || return 1
+  digest=$(printf '%s\\n' "$serialized" | sha256sum) || return 1
   digest=${digest%% *}
   [[ $digest =~ ^[a-f0-9]{64}$ ]] || return 1
   printf '%s\n' "$digest"
@@ -132,6 +132,8 @@ storage::plan_bind_target() {
   _plan[target_major_minor]=${_target[major_minor]}
   _plan[target_size_bytes]=${_target[size_bytes]}
   _plan[target_transport]=${_target[transport]}
+  _plan[target_removable]=${_target[removable]}
+  _plan[target_read_only]=${_target[read_only]}
   _plan[target_stable_id_kind]=${_target[stable_id_kind]}
   _plan[target_stable_id]=${_target[stable_id]}
   _plan[target_wwn]=${_target[wwn]-}
