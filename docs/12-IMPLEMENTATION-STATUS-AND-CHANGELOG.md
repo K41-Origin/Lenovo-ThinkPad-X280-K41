@@ -25,11 +25,20 @@
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
 | Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
 | Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #140 passed. The gate binds path, major:minor, capacity, stable-ID kind/value, WWN, serial, transport, removable, and read-only attributes. It opens no device handle and does not close the real kernel TOCTOU window. |
+| Native block-device handle design (Stage 8) | IMPLEMENTED (documentation only) | `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` records the proposed native C helper, descriptor-derived identity, exclusive-open caveats, lifecycle, recovery, and acceptance criteria. Helper implementation, loop-device tests, FD retention, and security review remain PLANNED / NOT TESTED. No storage operation was added. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
 | Static checks | TESTED (CI) | Run #140 passed Bash syntax validation and all eleven repository test scripts at commit `3fcc970f58d76e5f62d6b76f767a4075cbe0a95b`. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
+
+### 2026-11-03 — Record Stage 8 native block-device access design
+- Added `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` as the canonical design record for a narrow native C helper that retains a block-device file descriptor and validates identity from that descriptor.
+- Recorded documented Linux interface facts and their limits: block-device O_EXCL behavior, fstat/st_rdev, descriptor-based ioctls, diskseq correlation, and the distinction between kernel-internal APIs and userspace interfaces.
+- Explicitly documented the unresolved descriptor-to-tool boundary: retaining an FD does not make a pathname-based partitioning/LUKS/filesystem utility descriptor-bound. No /proc/self/fd shortcut or fallback to pathname rechecks is accepted without proof.
+- Defined lifecycle, identity fields, fail-closed behavior, privilege/protocol boundaries, recovery requirements, and disposable-loop/VM acceptance tests.
+- Documentation/design only. No C helper, device open, exclusive lock, loop-device test, destructive utility, or hardware test was performed. The installer remains diagnostic-only and destructive storage execution remains unimplemented.
+
 
 ### 2026-11-02 — Restrict storage target validation to internal NVMe and detect active swap
 - Recorded the owner-approved scope: full replacement of the internal SSD; Windows and recovery partitions are not retained; removable and non-NVMe targets are rejected.
