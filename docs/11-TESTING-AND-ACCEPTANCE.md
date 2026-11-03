@@ -1,9 +1,13 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. GitHub Actions validates Bash syntax and runs the repository's seven test scripts. Passing these checks does not verify installation integration or hardware behavior.
+The installer remains PLANNED and has not been tested end to end. GitHub Actions currently validates Bash syntax and runs ten repository test scripts. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
 
-The pure storage-layout planner now has a target-bound plan model, deterministic key-sorted serialization, and a SHA-256 integrity digest. Target binding requires a matching disk capacity, NVMe transport, non-removable/read-write state, and a stable WWN or serial identity. The installation profile records the approved GPT/ESP/LUKS2/ext4/swapfile/systemd-boot/UKI choices; resume readiness remains explicitly deferred until the swapfile offset is verified. This is planning data only: no partitioning, formatting, encryption, mounting, or other disk mutation is implemented. A completeness validator now checks the partition geometry, target/profile consistency, and prerequisite state. Prerequisite binding records UEFI mode, required-tool availability, topology validation, unused-target status, target identity validation, and a caller-supplied evidence identifier in the canonical plan. These values are assertions from the caller, not independently established by the validator; actual discovery/revalidation integration and freshness enforcement remain future work.
+The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
+
+Stage 5 adds a dry-run operation manifest and deterministic failure-injection simulator. The manifest describes the intended order (GPT, partition creation/type assignment, LUKS2, ext4), while the simulator records attempted/completed steps and stops at an injected failure. It does not invoke an executor callback, shell command, block-device API, or privileged utility. A ready final gate must match the current plan's review digest and target identity; simulation consumes the gate. This is test infrastructure and architecture validation only, not a production storage executor.
+
+The prerequisite binder itself records caller assertions; the live collector is the component that performs the read-only checks and produces fresh evidence. Fixture-based tests mock discovery and topology behavior, so they do not establish that the actual X280 disk is unused or that hardware identity is correct at installation time.
 
 ## Documentation checks
 - Verify expected files and relative links.
