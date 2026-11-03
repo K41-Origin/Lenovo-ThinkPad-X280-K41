@@ -173,3 +173,16 @@ if storage::plan_mock_execution_boundary invalid_plan invalid_gate invalid_resul
 fi
 [[ $MOCK_EXEC_COUNT == 0 && ${#invalid_result[@]} == 0 ]]
 echo 'PASS: non-mock executor callback is rejected before execution'
+
+# Gate metadata must agree with the immutable plan before any mock call.
+declare -A tampered_plan=() tampered_confirmation=() tampered_target=() tampered_prereq=() tampered_gate=() tampered_result=()
+prepare_gate tampered_plan tampered_confirmation tampered_target tampered_prereq tampered_gate
+tampered_gate[target_read_only]=true
+reset_mock
+if storage::plan_mock_execution_boundary tampered_plan tampered_gate tampered_result storage::mock_probe_target storage::mock_record_operation ''; then
+  echo 'FAIL: gate/plan target-attribute mismatch was accepted' >&2; exit 1
+fi
+[[ $MOCK_EXEC_COUNT == 0 && ${#tampered_result[@]} == 0 ]]
+[[ ${tampered_gate[state]} == ready ]]
+echo 'PASS: gate/plan target-attribute mismatch blocks before gate consumption and mock execution'
+
