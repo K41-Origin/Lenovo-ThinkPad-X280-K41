@@ -41,14 +41,14 @@ prepare_gate() {
   local -n plan_ref="$plan_name"
   local -A initial_target=() initial_prereq=()
   storage::plan_gpt_layout "$plan_name" 274877906944 512 4096 8589934592 1073741824
-  local -A target=(
+  local -A bound_target=(
     [device_path]=/dev/nvme0n1 [major_minor]=259:0
     [size_bytes]=274877906944 [transport]=nvme
     [removable]=false [read_only]=false
     [stable_id_kind]=wwn [stable_id]="$TEST_ID"
     [wwn]="$TEST_ID" [serial]=SN-X280 [model]="WDC PC SN730"
   )
-  storage::plan_bind_target "$plan_name" target
+  storage::plan_bind_target "$plan_name" bound_target
   storage::plan_collect_live_prerequisites "$plan_name" initial_target initial_prereq
   local digest phrase
   digest=$(storage::plan_review_digest "$plan_name")
