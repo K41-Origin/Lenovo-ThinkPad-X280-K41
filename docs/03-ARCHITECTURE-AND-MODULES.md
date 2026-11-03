@@ -245,6 +245,12 @@ These values are an internal Bash interface proposal, not yet implemented. Modul
 
 **Acceptance boundary:** the contract is considered implemented only when the entry point has deterministic stage sequencing, explicit module interfaces, cancellation/failure propagation, and mocked tests proving that blocked paths cannot reach destructive operations. Documentation alone does not satisfy this boundary.
 
+## Native block-device access design — Stage 8
+
+The canonical design and acceptance criteria for native block-device handle acquisition are in [Stage 8 — Native Block-Device Handle Design](14-STAGE-8-NATIVE-DEVICE-ACCESS.md). The proposed implementation is a narrow native C helper that retains a block-device file descriptor and derives device identity from that descriptor. This is design documentation only: no helper exists yet.
+
+A retained descriptor does not automatically bind external pathname-based partitioning, LUKS, or filesystem utilities to that descriptor. The exact descriptor-to-operation path must be demonstrated before any real storage executor is specified. Stage 8 must not add destructive operations or weaken existing topology, confirmation, or recovery gates.
+
 ## Safety and recovery boundaries
 - Storage is the only module permitted to own partitioning/formatting logic; other modules must not call destructive disk tools directly.
 - Disk discovery, proposed plan, target validation, explicit confirmation, execution, and post-operation verification are separate stages.
