@@ -65,6 +65,8 @@ storage::plan_build_dry_run_manifest plan gate manifest
 [[ ${manifest[0]} == gpt_create\|* ]]
 [[ ${manifest[1]} == esp_partition_create\|* ]]
 [[ ${manifest[2]} == root_partition_create\|* ]]
+[[ ${manifest[3]} == esp_type_set\|* ]]
+[[ ${manifest[4]} == root_type_set\|* ]]
 [[ ${manifest[5]} == luks2_format\|* ]]
 [[ ${manifest[6]} == luks2_open\|* ]]
 [[ ${manifest[7]} == ext4_format\|* ]]
