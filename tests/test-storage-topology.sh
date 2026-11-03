@@ -5,12 +5,16 @@ source "$ROOT/lib/storage-topology.sh"
 tmp=$(mktemp -d)
 trap 'rm -rf -- "$tmp"' EXIT
 sys=$tmp/sys
+target_major=65000
+target_minor=0
+target_mm=$target_major:$target_minor
+while [[ $target_mm == "$backing_mm" ]]; do ((target_minor += 1)); target_mm=$target_major:$target_minor; done
 mkdir -p "$sys/dev/block" "$sys/devices/pci/block/nvme0n1/nvme0n1p1/holders" "$sys/devices/pci/block/nvme0n1/nvme0n1p1/slaves"
 mkdir -p "$sys/devices/pci/block/nvme0n1/nvme0n1p2/holders" "$sys/devices/pci/block/nvme0n1/nvme0n1p2/slaves"
 mkdir -p "$sys/devices/pci/block/nvme0n1/holders" "$sys/devices/pci/block/nvme0n1/slaves"
 mkdir -p "$sys/devices/virtual/block/dm-0/holders" "$sys/devices/virtual/block/dm-0/slaves"
 mkdir -p "$sys/devices/virtual/block/sda/holders" "$sys/devices/virtual/block/sda/slaves"
-ln -s ../../devices/pci/block/nvme0n1 "$sys/dev/block/259:0"
+ln -s ../../devices/pci/block/nvme0n1 "$sys/dev/block/$target_mm"
 ln -s ../../devices/pci/block/nvme0n1/nvme0n1p1 "$sys/dev/block/259:1"
 ln -s ../../devices/pci/block/nvme0n1/nvme0n1p2 "$sys/dev/block/259:2"
 ln -s ../../devices/virtual/block/dm-0 "$sys/dev/block/253:0"
@@ -25,7 +29,7 @@ cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
 EOF_SWAP
 
-storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"
+storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"
 echo 'PASS: unrelated mounted disk does not block target'
 
 cat >"$tmp/mountinfo" <<'EOF_MOUNT'
