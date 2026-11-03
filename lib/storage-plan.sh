@@ -258,6 +258,7 @@ storage::plan_validate() {
   (( _plan[root_size_bytes] == (_plan[root_end_sector] - _plan[root_start_sector] + 1) * logical )) || return 1
   (( _plan[minimum_root_headroom_bytes] == 34359738368 )) || return 1
   (( _plan[swapfile_target_bytes] == _plan[profile_swap_target_bytes] )) || return 1
+  (( _plan[swapfile_target_bytes] <= 9223372036854775807 - _plan[minimum_root_headroom_bytes] )) || return 1
   (( _plan[root_size_bytes] >= _plan[minimum_root_headroom_bytes] + _plan[swapfile_target_bytes] )) || return 1
 
   [[ ${_plan[profile_partition_table]-} == gpt ]] || return 1
