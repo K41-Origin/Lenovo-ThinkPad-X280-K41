@@ -4,6 +4,15 @@
 
 These instructions govern AI-assisted work in this repository. The repository and its reviewed files are the source of truth; conversation history or model memory must not override them.
 
+## Project continuity and anti-drift
+
+- The committed repository is the source of truth, not conversation summaries, model memory, or assumptions about earlier work.
+- At the start of each substantial task, read the current implementation/status record, the owning domain document, the relevant approved requirements/decisions, and the actual code/tests being changed.
+- Continue from the latest verified repository state. Do not recreate, replace, or bypass an existing module because a conversation summary describes it incompletely.
+- Record material architecture decisions, evidence, test results, limitations, and the next gate in the owning documentation and status/changelog before ending the work.
+- Clearly label design proposals as PLANNED until code exists; label code IMPLEMENTED only after repository verification; label behavior TESTED only after the stated test actually ran; label hardware behavior NOT TESTED until observed on the actual device.
+- When repository evidence is missing or contradictory, stop and inspect it. Do not fill gaps with plausible-sounding implementation details.
+
 ## Required workflow
 
 Before changing files:
