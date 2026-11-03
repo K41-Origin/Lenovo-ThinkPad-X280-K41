@@ -234,6 +234,25 @@ After each pass, fetch the changed files, inspect the diff, run the complete tes
 - No physical ThinkPad X280 hardware, actual SSD, UEFI boot, LUKS, filesystem, suspend, or hibernation behavior was tested.
 - This audit does not authorize deletion of placeholder files, changes to approved storage layout, or activation of destructive execution.
 
+
+## Cleanup execution follow-up — 2026-11-03
+
+The following changes are being prepared on `maintenance/repository-cleanup` in pull request #3. This section records implementation scope, not a claim that the branch has passed CI or been merged.
+
+| Audit item | Action taken on the cleanup branch | State |
+| --- | --- | --- |
+| AUD-01 — documentation ownership | Document 04 is the detailed storage/boot owner; document 02 retains concise requirement IDs and approved decisions; document 03 links to the owner instead of repeating the design. | IMPLEMENTED; CI pending |
+| AUD-02 — test strategy vs history | Document 11 now owns strategy, coverage, acceptance, and limitations; the historical CI ledger remains in document 12. | IMPLEMENTED; CI pending |
+| AUD-03 / AUD-10 — changelog and status vocabulary | Added the canonical `NOT TESTED` definition to document 01 and made AGENTS.md refer to it. Existing historical run mapping is retained. | IMPLEMENTED; CI pending |
+| AUD-04 — test manifest | Added `tests/run.sh`; CI and `tests/README.md` invoke it. The runner checks `bash`, `jq`, and `python3`, and fails if a required script is missing. | IMPLEMENTED; CI pending |
+| AUD-05 — repeated fixtures | Added a small shared associative-array target fixture builder and reused it in five storage tests. Discovery/probe mocks remain scenario-specific; no generic mock framework was introduced. | PARTIALLY IMPLEMENTED; further extraction only if repetition remains material |
+| AUD-06 — placeholder modules | Kept all nine files to preserve repository structure and references; README, architecture, and status now label them PLANNED and state they contain no installation implementation. | IMPLEMENTED; no files deleted |
+| AUD-07 — hardware profile | Removed duplicate CPU/product aliases and the redundant GiB memory alias. Documented the five keys currently consumed by `inventory.sh`; remaining owner-reported fields are reference metadata and are not runtime-validated. | IMPLEMENTED; CI pending |
+| AUD-08 — CI reproducibility and lint | Pinned the runner to `ubuntu-24.04`, pinned checkout to an immutable v4.2.2 commit, and explicitly installs jq/python3/ShellCheck/shfmt. ShellCheck checks the full Bash tree at error severity; shfmt currently checks the new test infrastructure only, pending a deliberate project-wide formatting baseline. | PARTIALLY IMPLEMENTED; branch CI pending |
+| AUD-09 — nameref validation | Added shared associative-array name/type validation before planner nameref creation; mutating output APIs reject readonly arrays. Added malformed, missing, indexed, and readonly-array tests. | IMPLEMENTED; CI pending |
+
+No placeholder module was deleted. No approved storage decision or installer behavior was changed. No real disk, package database, service, firmware setting, or ThinkPad hardware was accessed or modified.
+
 ## Audit conclusion
 
 The repository does not need a broad directory reshuffle. Keep the existing top-level structure and improve **single ownership of information, one canonical test entry point, explicit planned-vs-implemented status, and reproducible CI**. This will reduce AI ambiguity and developer onboarding cost without changing the project's technical direction.
