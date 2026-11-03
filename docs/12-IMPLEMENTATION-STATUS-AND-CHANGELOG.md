@@ -24,9 +24,9 @@
 | Read-only GPT storage plan calculator | TESTED (fixture CI) | `lib/storage-plan.sh` calculates 1 MiB-aligned ESP/root sector boundaries from disk bytes and logical/physical sector sizes, reserves GPT metadata for 128 entries, and proposes RAM-plus-margin swap size with minimum root headroom. Geometry, capacity, overflow, and decimal-input fixtures pass CI. No disk commands are invoked. |
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
 | Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
-| Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #136 passed. The gate binds path, major:minor, capacity, stable-ID kind/value, WWN, serial, transport, removable, and read-only attributes. It opens no device handle and does not close the real kernel TOCTOU window. |
+| Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #140 passed. The gate binds path, major:minor, capacity, stable-ID kind/value, WWN, serial, transport, removable, and read-only attributes. It opens no device handle and does not close the real kernel TOCTOU window. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED (CI) | Run #136 passed Bash syntax validation and all eleven repository test scripts at commit `3fcc970f58d76e5f62d6b76f767a4075cbe0a95b`. ShellCheck/shfmt are not included in this workflow. |
+| Static checks | TESTED (CI) | Run #140 passed Bash syntax validation and all eleven repository test scripts at commit `3fcc970f58d76e5f62d6b76f767a4075cbe0a95b`. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
@@ -188,4 +188,9 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Extended the final gate to bind stable-ID kind, WWN, serial, transport, removable, and read-only attributes in addition to path, major:minor, and capacity.
 - The mock execution boundary now checks gate-to-plan consistency and compares all of those fields before every mock operation.
 - Added a fixture where the device becomes read-only between steps; the next mock operation is blocked.
-- Run #136 passed all eleven tests and Bash syntax validation. Real-device locking and TOCTOU closure remain NOT IMPLEMENTED.
+- Run #140 passed all eleven tests and Bash syntax validation. Real-device locking and TOCTOU closure remain NOT IMPLEMENTED.
+
+
+### Stage 7 gate consistency validation
+- Added a test that mutates a target safety attribute in the in-process gate while leaving the plan unchanged. The execution boundary rejects the mismatch before consuming the gate or invoking any mock operation.
+- GitHub Actions run #140 (`41618904994`) passed Bash syntax validation and all eleven repository test scripts at commit `30562c35a043f4fa10bf23d6153ba051b823350e`.
