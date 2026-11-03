@@ -27,7 +27,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
 - `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — canonical Stage 8 design for a future native descriptor holder; implementation remains planned.
-- `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
+- `lib/` — implemented read-only preflight, inventory, and storage-planning modules plus clearly marked PLANNED placeholders for base-system, bootloader, user, desktop, hardware, package, security, validation, and reporting work. Placeholder files contain no installation implementation.
 - `tests/` — test strategy and isolated fixture tests.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
 
