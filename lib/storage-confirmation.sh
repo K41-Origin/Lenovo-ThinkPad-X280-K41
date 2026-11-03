@@ -138,7 +138,13 @@ storage::plan_final_revalidate() {
   _gate_out[target_device_path]=${_target_out[device_path]}
   _gate_out[target_major_minor]=${_target_out[major_minor]}
   _gate_out[target_size_bytes]=${_target_out[size_bytes]}
+  _gate_out[target_transport]=${_target_out[transport]}
+  _gate_out[target_removable]=${_target_out[removable]}
+  _gate_out[target_read_only]=${_target_out[read_only]}
+  _gate_out[target_stable_id_kind]=${_target_out[stable_id_kind]}
   _gate_out[target_stable_id]=${_target_out[stable_id]}
+  _gate_out[target_wwn]=${_target_out[wwn]}
+  _gate_out[target_serial]=${_target_out[serial]}
   _gate_out[validated_at]=${_prereq_out[observed_at]}
   _confirmation[state]=validated
 }
