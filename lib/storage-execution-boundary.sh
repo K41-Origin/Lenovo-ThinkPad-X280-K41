@@ -20,6 +20,18 @@ storage::plan_mock_execution_boundary() {
   [[ ${_gate[state]-} == ready ]] || return 1
   storage::plan_validate "$plan_name" || return 1
 
+  local -n _plan_ref="$plan_name"
+  [[ ${_gate[target_device_path]-} == "${_plan_ref[target_device_path]-}" &&
+     ${_gate[target_major_minor]-} == "${_plan_ref[target_major_minor]-}" &&
+     ${_gate[target_size_bytes]-} == "${_plan_ref[target_size_bytes]-}" &&
+     ${_gate[target_transport]-} == "${_plan_ref[target_transport]-}" &&
+     ${_gate[target_removable]-} == "${_plan_ref[target_removable]-}" &&
+     ${_gate[target_read_only]-} == "${_plan_ref[target_read_only]-}" &&
+     ${_gate[target_stable_id_kind]-} == "${_plan_ref[target_stable_id_kind]-}" &&
+     ${_gate[target_stable_id]-} == "${_plan_ref[target_stable_id]-}" &&
+     ${_gate[target_wwn]-} == "${_plan_ref[target_wwn]-}" &&
+     ${_gate[target_serial]-} == "${_plan_ref[target_serial]-}" ]] || return 1
+
   local digest
   digest=$(storage::plan_review_digest "$plan_name") || return 1
   [[ $digest == "${_gate[review_digest]-}" ]] || return 1
@@ -41,7 +53,11 @@ storage::plan_mock_execution_boundary() {
   _result[state]=running
   _result[target_device_path]=${_gate[target_device_path]}
   _result[target_major_minor]=${_gate[target_major_minor]}
+  _result[target_stable_id_kind]=${_gate[target_stable_id_kind]}
   _result[target_stable_id]=${_gate[target_stable_id]}
+  _result[target_transport]=${_gate[target_transport]}
+  _result[target_removable]=${_gate[target_removable]}
+  _result[target_read_only]=${_gate[target_read_only]}
   _result[review_digest]=$digest
   _result[attempted_count]=0
   _result[completed_count]=0
@@ -62,8 +78,13 @@ storage::plan_mock_execution_boundary() {
     # Compare the full target identity immediately before each mock operation.
     if [[ ${observed[device_path]-} != "${_gate[target_device_path]}" ||
           ${observed[major_minor]-} != "${_gate[target_major_minor]}" ||
-          ${observed[stable_id]-} != "${_gate[target_stable_id]}" ||
-          ${observed[size_bytes]-} != "${_gate[target_size_bytes]-}" ]]; then
+          ${observed[size_bytes]-} != "${_gate[target_size_bytes]-}" ||
+          ${observed[stable_id_kind]-} != "${_gate[target_stable_id_kind]}" ||
+          ${observed[transport]-} != "${_gate[target_transport]}" ||
+          ${observed[removable]-} != "${_gate[target_removable]}" ||
+          ${observed[read_only]-} != "${_gate[target_read_only]}" ||
+          ${observed[wwn]-} != "${_gate[target_wwn]}" ||
+          ${observed[serial]-} != "${_gate[target_serial]}" ]]; then
       _result[state]=aborted
       _result[abort_reason]=target_identity_changed
       _result[recovery_required]=$([[ ${_result[completed_count]} -gt 0 ]] && printf yes || printf no)
