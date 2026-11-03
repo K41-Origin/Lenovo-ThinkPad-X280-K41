@@ -22,7 +22,7 @@ do
  done
 ```
 
-GitHub Actions also runs `bash -n` over all shell files and the eleven test scripts on pushes to `main`, pull requests targeting `main`, and manual workflow dispatch. Run #140 (commit `30562c35a043f4fa10bf23d6153ba051b823350e`) passed syntax validation and all eleven scripts, including full target-identity/read-only-attribute revalidation, tampered-gate rejection, and stabilized topology fixtures. Treat each later workflow run independently; a prior pass does not prove subsequent commits pass.
+GitHub Actions also runs `bash -n` over all shell files and the eleven test scripts on pushes to `main`, pull requests targeting `main`, and manual workflow dispatch. Run #148 (commit `719f537341b6d410ce2980144fee86237da01b42`) passed syntax validation and all eleven scripts, including full target-identity/read-only-attribute revalidation, tampered-gate rejection, and stabilized topology fixtures. Treat each later workflow run independently; a prior pass does not prove subsequent commits pass.
 
 Storage-discovery tests mock `lsblk` and `swapon` and use JSON fixtures. The topology module is called by `storage::validate_target` using the selected disk's kernel major:minor and live `/sys`, `/proc/self/mountinfo`, and `/proc/swaps`. The discovery test stubs that integration boundary; the topology test builds a synthetic sysfs graph and mountinfo/swaps fixtures. Coverage includes partition descendants, device-mapper holder/slave relationships, mounted dependencies, swapfiles, active block swap, loop-backed squashfs, overlay lower/upper/work directories, unresolved paths, malformed mountinfo, and unsupported filesystem types. Backing paths are mapped using their actual `st_dev` major:minor; no mounts or block-device writes are created.
 

@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. Run #140 (`41618904994`) passed both steps at commit `30562c35a043f4fa10bf23d6153ba051b823350e`. This is fixture-based CI, not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
+The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. Run #148 (`41619926870`) passed both steps at audit baseline commit `719f537341b6d410ce2980144fee86237da01b42`. This validates the repository state before the audit-report documentation commit. This is fixture-based CI, not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
 
 The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
