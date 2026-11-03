@@ -4,9 +4,8 @@
 # Callback names are restricted to storage::mock_* functions for test isolation.
 
 storage::plan_mock_execution_boundary() {
-  [[ $# -eq 7 ]] || return 2
-  local plan_name=$1 gate_name=$2 result_name=$3 probe_fn=$4 executor_fn=$5 fail_operation=$6 unused=$7
-  [[ $unused == mock-only ]] || return 2
+  [[ $# -eq 6 ]] || return 2
+  local plan_name=$1 gate_name=$2 result_name=$3 probe_fn=$4 executor_fn=$5 fail_operation=$6
 
   local declaration
   declaration=$(declare -p "$result_name" 2>/dev/null) || return 2
