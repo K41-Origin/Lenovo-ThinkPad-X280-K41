@@ -24,9 +24,9 @@
 | Read-only GPT storage plan calculator | TESTED (fixture CI) | `lib/storage-plan.sh` calculates 1 MiB-aligned ESP/root sector boundaries from disk bytes and logical/physical sector sizes, reserves GPT metadata for 128 entries, and proposes RAM-plus-margin swap size with minimum root headroom. Geometry, capacity, overflow, and decimal-input fixtures pass CI. No disk commands are invoked. |
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
 | Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
-| Storage execution boundary | IMPLEMENTED (mock-only; CI pending) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. It opens no device handle and does not close the real kernel TOCTOU window. |
+| Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #130 passed. It opens no device handle and does not close the real kernel TOCTOU window. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED (CI; prior revision) | Run #108 passed Bash syntax validation and the ten-script suite before Stage 7. The current eleven-script workflow result is pending. ShellCheck/shfmt are not included in this workflow. |
+| Static checks | TESTED (CI) | Run #130 passed Bash syntax validation and all eleven repository test scripts at commit `cf7f221bdcd2707616720b6bb56ddedb3a2d4a7d`. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
@@ -174,5 +174,11 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Extended the final gate with target capacity so the execution model compares the complete currently recorded target identity.
 - Added an operation ledger and explicit `recovery_required` state for target changes or failures after partial mock completion. No automatic rollback is attempted.
 - Added `tests/test-storage-execution-boundary.sh` and configured CI for eleven test scripts. Test and acceptance documentation now states clearly that pathname rechecks do not close the real kernel TOCTOU window.
-- CI for this Stage 7 revision is pending. No real block-device handle was opened, no device lock was acquired, and no disk or host configuration was changed.
+- GitHub Actions run #130 (`41618517486`) passed Bash syntax validation and all eleven test scripts at commit `cf7f221bdcd2707616720b6bb56ddedb3a2d4a7d`. No real block-device handle was opened, no device lock was acquired, and no disk or host configuration was changed.
 - LIMITATION: this is an orchestration test seam, not a production executor, authorization boundary, or real TOCTOU defense. A native open-handle/identity and recovery design must be separately reviewed before any destructive executor.
+
+
+### Stage 7 validation follow-up — stabilize topology fixtures
+- CI exposed a pre-existing fixture assumption: hard-coded synthetic major:minor values could collide with the GitHub runner's actual temporary-filesystem device ID. This made the full squashfs-loop test environment-dependent.
+- Updated `tests/test-storage-topology.sh` to derive the backing filesystem ID and allocate a separate synthetic major range for all fixture devices/mount records. This removes the host-device collision observed in failed runs #128/#129.
+- Run #130 passed the complete topology suite and all eleven repository tests. This is a test-fixture determinism correction, not a change to live topology behavior.
