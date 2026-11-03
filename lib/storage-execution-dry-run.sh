@@ -35,6 +35,7 @@ storage::plan_build_dry_run_manifest() {
     "esp_type_set|partition=1|type=${_plan[profile_esp_type_guid]}"
     "root_type_set|partition=2|type=${_plan[profile_root_type_guid]}"
     "luks2_format|partition=2|format=luks2"
+    "luks2_open|partition=2|mapper=cryptroot"
     "ext4_format|mapper=cryptroot|format=ext4"
   )
 }
