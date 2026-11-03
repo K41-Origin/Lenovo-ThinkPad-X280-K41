@@ -136,6 +136,9 @@ storage::validate_target() {
     [[ ${current[$i.removable]} == false && ${current[$i.read_only]} == false ]] || return 1
     [[ ${current[$i.transport]} == nvme ]] || return 1
     [[ ${current[$i.major_minor]} =~ ^[0-9]+:[0-9]+$ ]] || return 1
+    if [[ -n ${_target[major_minor]-} ]]; then
+      [[ ${current[$i.major_minor]} == "${_target[major_minor]}" ]] || return 1
+    fi
     storage::topology_check_target "${current[$i.major_minor]}" /sys /proc/self/mountinfo /proc/swaps || return 1
     [[ ${current[$i.has_mounted_descendant]} == no ]] || return 1
     [[ ${current[$i.has_active_swap_descendant]} == no ]] || return 1
