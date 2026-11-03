@@ -55,3 +55,54 @@ storage::plan_gpt_layout leading_zero 0274877906944 0512 04096 08589934592 01073
 [[ ${leading_zero[disk_bytes]} == 274877906944 ]]
 [[ ${leading_zero[logical_sector_bytes]} == 512 ]]
 echo 'PASS: normalizes decimal inputs with leading zeros without octal interpretation'
+
+# Bind the calculated geometry to a stable target and approved profile.
+declare -A target=(
+  [device_path]=/dev/nvme0n1 [major_minor]=259:0
+  [size_bytes]=274877906944 [transport]=nvme
+  [removable]=false [read_only]=false
+  [stable_id_kind]=wwn [stable_id]=eui.0011223344556677
+  [wwn]=eui.0011223344556677 [serial]=SERIAL-X280 [model]="WDC PC SN730"
+)
+declare -A bound=()
+storage::plan_gpt_layout bound 274877906944 512 4096 8589934592 1073741824
+storage::plan_bind_target bound target
+[[ ${bound[schema_version]} == 1 ]]
+[[ ${bound[target_stable_id]} == eui.0011223344556677 ]]
+[[ ${bound[profile_root_encryption]} == luks2 ]]
+[[ ${bound[profile_root_filesystem]} == ext4 ]]
+[[ ${bound[profile_esp_mountpoint]} == /efi ]]
+[[ ${bound[profile_uki_path]} == /efi/EFI/Linux/arch-linux.efi ]]
+serialized_a=$(storage::plan_serialize bound)
+serialized_b=$(storage::plan_serialize bound)
+[[ $serialized_a == "$serialized_b" ]]
+[[ $serialized_a == "$(printf '%s' "$serialized_a" | LC_ALL=C sort)" ]]
+digest_a=$(storage::plan_digest bound)
+digest_b=$(storage::plan_digest bound)
+[[ $digest_a == "$digest_b" && $digest_a =~ ^[a-f0-9]{64}$ ]]
+echo 'PASS: binds target/profile and produces deterministic serialization and digest'
+
+declare -A changed=()
+for key in "${!bound[@]}"; do changed["$key"]=${bound[$key]}; done
+changed[target_stable_id]=different-disk
+[[ $(storage::plan_digest changed) != "$digest_a" ]]
+changed[target_stable_id]=${bound[target_stable_id]}
+changed[profile_resume_policy]=different-policy
+[[ $(storage::plan_digest changed) != "$digest_a" ]]
+echo 'PASS: target identity and profile changes alter the plan digest'
+
+declare -A invalid_target=()
+for key in "${!target[@]}"; do invalid_target["$key"]=${target[$key]}; done
+invalid_target[stable_id]=
+declare -A rejected=()
+storage::plan_gpt_layout rejected 274877906944 512 4096 8589934592 1073741824
+if storage::plan_bind_target rejected invalid_target; then
+  echo 'FAIL: target without stable identity accepted' >&2; exit 1
+fi
+echo 'PASS: refuses target without stable identity'
+
+declare -A malformed=([safe]=value [unsafe]=$'line1\nline2')
+if storage::plan_serialize malformed >/dev/null; then
+  echo 'FAIL: multiline plan value accepted' >&2; exit 1
+fi
+echo 'PASS: rejects ambiguous multiline serialization values'
