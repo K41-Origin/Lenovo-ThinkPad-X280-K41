@@ -52,6 +52,7 @@ jobs:
             tests/test-storage-topology.sh
             tests/test-storage-plan.sh
             tests/test-storage-prerequisites.sh
+            tests/test-storage-confirmation.sh
             tests/test-preflight-gate.sh
           )
           for test in "${tests[@]}"; do
