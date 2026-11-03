@@ -31,7 +31,7 @@ storage::plan_gpt_layout() {
     [[ $value =~ ^[0-9]+$ ]] || return 2
     while [[ ${#value} -gt 1 && $value == 0* ]]; do value=${value#0}; done
     (( ${#value} < 19 )) || {
-      (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 2
+      # Equal-length decimal strings are compared lexically to avoid signed overflow.\n      # shellcheck disable=SC2071\n      (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 2
     }
     (( value > 0 )) || return 2
     printf -v "$variable" '%s' "$value"
@@ -228,7 +228,7 @@ storage::plan_validate() {
     value=${_plan[$key]-}
     [[ $value =~ ^[0-9]+$ && $value != 0* ]] || return 1
     (( ${#value} < 19 )) || {
-      (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 1
+      # shellcheck disable=SC2071\n      (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 1
     }
     (( value > 0 )) || return 1
   done
