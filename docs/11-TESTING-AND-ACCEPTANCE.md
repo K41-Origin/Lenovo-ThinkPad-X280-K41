@@ -148,3 +148,22 @@ On 2026-11-03, GitHub Actions run `41613718273` passed Bash syntax validation an
 On 2026-11-03, GitHub Actions run `41613051552` passed Bash syntax validation and all seven repository test scripts at commit `6ce3e9334f360ab59e78b865325360f3d76fa456`. The storage-plan tests confirmed target/profile binding, deterministic serialization and digest behavior, digest changes after target/profile mutation, rejection of missing stable identity, and rejection of multiline values. No real disk or system configuration was modified. The installer remains PLANNED; this CI result is not an end-to-end installation or hardware test.
 
 The first-slice test command `bash tests/test-common-preflight.sh` passed with six test groups against temporary local copies whose blob hashes matched the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
+
+
+## Live storage prerequisite integration — IMPLEMENTED, CI pending
+
+`lib/storage-prerequisites.sh` adds `storage::plan_collect_live_prerequisites PLAN TARGET_OUT PREREQ_OUT`. It performs read-only live checks before a plan may carry passed prerequisite states:
+
+- Required command availability: `lsblk`, `jq`, `swapon`, `base64`, `readlink`, `stat`, `sha256sum`, and `date`.
+- UEFI firmware indicator through `/sys/firmware/efi`; missing/ambiguous state fails closed.
+- Fresh whole-disk discovery from `lsblk` and active-swap inspection.
+- Selected device must match the plan's path, major:minor, capacity, NVMe transport, removable/read-only flags, and stable WWN/serial identity.
+- A second discovery via `storage::validate_target` checks that identity again and invokes the full sysfs dependency-closure + `/proc/self/mountinfo` + `/proc/swaps` topology check.
+- Any mounted descendant, active swap dependency, changed identity, unknown topology, missing tool, or non-UEFI state prevents a prerequisite snapshot from being bound to the plan.
+- Evidence ID incorporates a nanosecond UTC timestamp, plan digest, and observed target identity. It is an audit/binding identifier, not an authorization token or proof against a compromised root process.
+
+The collector is read-only. It does not partition, format, mount, unlock, install packages, or alter firmware settings. It requires the caller to source `common.sh`, `preflight.sh`, `storage.sh`, `storage-plan.sh`, and then `storage-prerequisites.sh`.
+
+The new `tests/test-storage-prerequisites.sh` exercises successful collection/binding and fail-closed behavior for missing tools, non-UEFI, discovery failure, topology failure, and changed stable identity using controlled function fixtures. These tests validate the orchestration contract; the existing discovery/topology tests separately cover the underlying parsers and read-only topology logic. They do not establish a live pass on the ThinkPad or authorize disk erasure.
+
+The GitHub Actions suite now includes the new test. Record its result only after the corresponding workflow run completes. The earlier branch-tip CI failure in `tests/test-storage-topology.sh` (full squashfs mount fixture) remains unresolved until a subsequent run demonstrates otherwise.
