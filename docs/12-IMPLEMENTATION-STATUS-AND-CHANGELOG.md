@@ -23,7 +23,7 @@
 | Read-only storage topology validation | TESTED (fixture CI) | `lib/storage-topology.sh` is integrated into `storage::validate_target`; it walks partition and holder/slave dependencies, checks mounted devices and swap, and resolves loop-backed squashfs plus overlay lower/upper/work paths by backing filesystem major:minor. Synthetic fixtures and mocked integration pass in CI. Real Arch ISO/X280 sysfs behavior remains NOT TESTED. |
 | Read-only GPT storage plan calculator | TESTED (fixture CI) | `lib/storage-plan.sh` calculates 1 MiB-aligned ESP/root sector boundaries from disk bytes and logical/physical sector sizes, reserves GPT metadata for 128 entries, and proposes RAM-plus-margin swap size with minimum root headroom. Geometry, capacity, overflow, and decimal-input fixtures pass CI. No disk commands are invoked. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | PARTIALLY TESTED | A GitHub Actions workflow runs `bash -n` over shell files and all seven repository test scripts on push/PR/manual dispatch. Latest successful run: #53 on commit `b8d90d44f71b494079baff4edb74d95614430070`. ShellCheck/shfmt are not included in this workflow. |
+| Static checks | TESTED (CI) | GitHub Actions validates Bash syntax and runs ten repository test scripts. Run #106 on commit `5ef865d52370f4364678ff614cb8839d8da57ace` passed. ShellCheck/shfmt are not included in this workflow. |
 | X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
 
 ## Changelog
