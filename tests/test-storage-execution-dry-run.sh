@@ -61,7 +61,7 @@ declare -A plan=() confirmation=() target=() prereq=() gate=() result=()
 prepare_gate plan confirmation target prereq gate
 declare -a manifest=()
 storage::plan_build_dry_run_manifest plan gate manifest
-[[ ${#manifest[@]} == 7 ]]
+[[ ${#manifest[@]} == 8 ]]
 [[ ${manifest[0]} == gpt_create\|* ]]
 [[ ${manifest[1]} == esp_partition_create\|* ]]
 [[ ${manifest[2]} == root_partition_create\|* ]]
@@ -113,6 +113,6 @@ prepare_gate success_plan success_confirmation success_target success_prereq suc
 storage::plan_simulate_dry_run success_plan success_gate success_result ''
 [[ ${success_result[state]} == simulated ]]
 [[ ${success_result[mode]} == dry-run ]]
-[[ ${success_result[attempted_count]} == 7 && ${success_result[completed_count]} == 7 ]]
+[[ ${success_result[attempted_count]} == 8 && ${success_result[completed_count]} == 8 ]]
 [[ ${success_gate[state]} == consumed ]]
 echo 'PASS: complete dry-run simulation records all operations without system execution'
