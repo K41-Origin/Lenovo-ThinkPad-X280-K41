@@ -30,10 +30,10 @@ storage::discover_candidates() {
   out[0.has_active_swap_descendant]=no
 }
 storage::validate_target() {
-  local -n target="$1"
-  [[ ${target[device_path]} == /dev/nvme0n1 &&
-     ${target[major_minor]} == 259:0 &&
-     ${target[stable_id]} == "$TEST_ID" ]]
+  local -n selected_ref="$1"
+  [[ ${selected_ref[device_path]} == /dev/nvme0n1 &&
+     ${selected_ref[major_minor]} == 259:0 &&
+     ${selected_ref[stable_id]} == "$TEST_ID" ]]
 }
 
 prepare_gate() {
