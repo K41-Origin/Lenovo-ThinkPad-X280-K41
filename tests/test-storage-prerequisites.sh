@@ -18,19 +18,19 @@ storage::discover_candidates() {
   local -n out="$1"
   [[ ${K41_TEST_DISCOVERY_FAIL:-0} == 0 ]] || return 1
   out[candidate_count]=1
-  out[0.device_path]=/dev/nvme0n1
-  out[0.major_minor]=259:0
-  out[0.size_bytes]=274877906944
-  out[0.transport]=nvme
-  out[0.removable]=false
-  out[0.read_only]=false
-  out[0.stable_id_kind]=wwn
-  out[0.stable_id]=eui.0011223344556677
-  out[0.wwn]=eui.0011223344556677
-  out[0.serial]=SN-X280
-  out[0.model]="WDC PC SN730"
-  out[0.has_mounted_descendant]=no
-  out[0.has_active_swap_descendant]=no
+  out["0.device_path"]=/dev/nvme0n1
+  out["0.major_minor"]=259:0
+  out["0.size_bytes"]=274877906944
+  out["0.transport"]=nvme
+  out["0.removable"]=false
+  out["0.read_only"]=false
+  out["0.stable_id_kind"]=wwn
+  out["0.stable_id"]=eui.0011223344556677
+  out["0.wwn"]=eui.0011223344556677
+  out["0.serial"]=SN-X280
+  out["0.model"]="WDC PC SN730"
+  out["0.has_mounted_descendant"]=no
+  out["0.has_active_swap_descendant"]=no
 }
 storage::validate_target() {
   local -n target="$1"
@@ -83,19 +83,19 @@ make_plan changed_plan
 storage::discover_candidates() {
   local -n out="$1"
   out[candidate_count]=1
-  out[0.device_path]=/dev/nvme0n1
-  out[0.major_minor]=259:0
-  out[0.size_bytes]=274877906944
-  out[0.transport]=nvme
-  out[0.removable]=false
-  out[0.read_only]=false
-  out[0.stable_id_kind]=wwn
-  out[0.stable_id]=DIFFERENT-WWN
-  out[0.wwn]=DIFFERENT-WWN
-  out[0.serial]=SN-X280
-  out[0.model]="WDC PC SN730"
-  out[0.has_mounted_descendant]=no
-  out[0.has_active_swap_descendant]=no
+  out["0.device_path"]=/dev/nvme0n1
+  out["0.major_minor"]=259:0
+  out["0.size_bytes"]=274877906944
+  out["0.transport"]=nvme
+  out["0.removable"]=false
+  out["0.read_only"]=false
+  out["0.stable_id_kind"]=wwn
+  out["0.stable_id"]=DIFFERENT-WWN
+  out["0.wwn"]=DIFFERENT-WWN
+  out["0.serial"]=SN-X280
+  out["0.model"]="WDC PC SN730"
+  out["0.has_mounted_descendant"]=no
+  out["0.has_active_swap_descendant"]=no
 }
 if storage::plan_collect_live_prerequisites changed_plan changed_target changed_prereq; then
   echo 'FAIL: changed stable identity accepted' >&2; exit 1
