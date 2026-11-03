@@ -153,7 +153,8 @@ inventory::compare_target_profile() {
   # Equal-length decimal strings are compared lexically to avoid signed overflow.
 # shellcheck disable=SC2071
 ((${#memory_min} < 19)) || { ((${#memory_min} == 19)) && [[ "$memory_min" < "$max_int" ]]; } || return 1
-  # shellcheck disable=SC2071\n  ((${#memory_max} < 19)) || { ((${#memory_max} == 19)) && [[ "$memory_max" < "$max_int" || "$memory_max" == "$max_int" ]]; } || return 1
+  # shellcheck disable=SC2071
+      ((${#memory_max} < 19)) || { ((${#memory_max} == 19)) && [[ "$memory_max" < "$max_int" || "$memory_max" == "$max_int" ]]; } || return 1
   local min_num=$((10#$memory_min)) max_num=$((10#$memory_max))
   (( min_num > 0 && max_num >= min_num )) || return 1
 
