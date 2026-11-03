@@ -5,24 +5,11 @@ The repository currently has eleven fixture-based test scripts covering common/p
 Run the complete test suite from the repository root:
 
 ```bash
-for test in \
-  tests/test-common-preflight.sh \
-  tests/test-installer-entry.sh \
-  tests/test-inventory.sh \
-  tests/test-storage-discovery.sh \
-  tests/test-storage-plan.sh \
-  tests/test-storage-prerequisites.sh \
-  tests/test-storage-confirmation.sh \
-  tests/test-storage-execution-dry-run.sh \
-  tests/test-storage-execution-boundary.sh \
-  tests/test-storage-topology.sh \
-  tests/test-preflight-gate.sh
-do
-  bash "$test" || exit
- done
+bash tests/run.sh
 ```
 
-GitHub Actions also runs `bash -n` over all shell files and the eleven test scripts on pushes to `main`, pull requests targeting `main`, and manual workflow dispatch. Run #148 (commit `719f537341b6d410ce2980144fee86237da01b42`) passed syntax validation and all eleven scripts, including full target-identity/read-only-attribute revalidation, tampered-gate rejection, and stabilized topology fixtures. Treat each later workflow run independently; a prior pass does not prove subsequent commits pass.
+`tests/run.sh` is the canonical manifest used by both local development and GitHub Actions. It checks for `bash`, `jq`, and `python3` before running all required scripts; missing scripts or dependencies fail the run. Install `jq` and `python3` using the package manager for the environment before running locally.
+
 
 Storage-discovery tests mock `lsblk` and `swapon` and use JSON fixtures. The topology module is called by `storage::validate_target` using the selected disk's kernel major:minor and live `/sys`, `/proc/self/mountinfo`, and `/proc/swaps`. The discovery test stubs that integration boundary; the topology test builds a synthetic sysfs graph and mountinfo/swaps fixtures. Coverage includes partition descendants, device-mapper holder/slave relationships, mounted dependencies, swapfiles, active block swap, loop-backed squashfs, overlay lower/upper/work directories, unresolved paths, malformed mountinfo, and unsupported filesystem types. Backing paths are mapped using their actual `st_dev` major:minor; no mounts or block-device writes are created.
 
