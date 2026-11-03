@@ -95,3 +95,65 @@ storage::plan_digest() {
   [[ $digest =~ ^[a-f0-9]{64}$ ]] || return 1
   printf '%s\n' "$digest"
 }
+
+# Bind calculated geometry to a freshly discovered stable disk identity and
+# the approved installation profile. This function only changes plan data.
+storage::plan_bind_target() {
+  [[ $# -eq 2 ]] || return 2
+  local declaration
+  declaration=$(declare -p "$1" 2>/dev/null) || return 2
+  [[ $declaration == 'declare -A '* ]] || return 2
+  declaration=$(declare -p "$2" 2>/dev/null) || return 2
+  [[ $declaration == 'declare -A '* ]] || return 2
+  local -n _plan="$1" _target="$2"
+  [[ ${_plan[status]-} == calculated ]] || return 1
+
+  local required
+  for required in device_path major_minor size_bytes transport removable read_only stable_id_kind stable_id; do
+    [[ -n ${_target[$required]-} ]] || return 1
+  done
+  [[ ${_target[device_path]} == /dev/* ]] || return 1
+  [[ ${_target[major_minor]} =~ ^[0-9]+:[0-9]+$ ]] || return 1
+  [[ ${_target[size_bytes]} =~ ^[0-9]+$ ]] || return 1
+  [[ ${_target[transport]} == nvme && ${_target[removable]} == false && ${_target[read_only]} == false ]] || return 1
+  [[ ${_target[size_bytes]} == "${_plan[disk_bytes]-}" ]] || return 1
+  case ${_target[stable_id_kind]} in
+    wwn) [[ -n ${_target[wwn]-} && ${_target[stable_id]} == "${_target[wwn]}" ]] || return 1 ;;
+    serial) [[ -n ${_target[serial]-} && ${_target[stable_id]} == "${_target[serial]}" ]] || return 1 ;;
+    *) return 1 ;;
+  esac
+
+  local key
+  for key in "${!_plan[@]}"; do
+    [[ $key != target_* && $key != profile_* && $key != schema_version ]] || return 2
+  done
+  _plan[schema_version]=1
+  _plan[target_device_path]=${_target[device_path]}
+  _plan[target_major_minor]=${_target[major_minor]}
+  _plan[target_size_bytes]=${_target[size_bytes]}
+  _plan[target_transport]=${_target[transport]}
+  _plan[target_stable_id_kind]=${_target[stable_id_kind]}
+  _plan[target_stable_id]=${_target[stable_id]}
+  _plan[target_wwn]=${_target[wwn]-}
+  _plan[target_serial]=${_target[serial]-}
+  _plan[target_model]=${_target[model]-}
+  _plan[profile_partition_table]=gpt
+  _plan[profile_partition_alignment_bytes]=1048576
+  _plan[profile_esp_size_bytes]=1073741824
+  _plan[profile_esp_type_guid]=c12a7328-f81f-11d2-ba4b-00a0c93ec93b
+  _plan[profile_esp_filesystem]=vfat
+  _plan[profile_esp_mountpoint]=/efi
+  _plan[profile_root_type_guid]=0fc63daf-8483-4772-8e79-3d69d8477de4
+  _plan[profile_root_encryption]=luks2
+  _plan[profile_root_filesystem]=ext4
+  _plan[profile_root_mountpoint]=/
+  _plan[profile_swap_type]=swapfile
+  _plan[profile_swap_target_bytes]=${_plan[swapfile_target_bytes]}
+  _plan[profile_swap_policy]=runtime_ram_plus_configured_margin
+  _plan[profile_resume_policy]=defer_until_swapfile_offset_verified
+  _plan[profile_bootloader]=systemd-boot
+  _plan[profile_boot_artifact]=uki
+  _plan[profile_uki_path]=/efi/EFI/Linux/arch-linux.efi
+  _plan[profile_kernel_package]=linux
+  _plan[profile_secure_boot]=disabled
+}
