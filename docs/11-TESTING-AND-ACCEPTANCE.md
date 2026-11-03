@@ -89,7 +89,7 @@ The existing TC-DISK cases remain the requirement-level acceptance tests. Add th
 
 ## Requirement-linked test cases
 
-These are **planned test cases**, not executed tests. They map directly to the acceptance criteria for **REQ-DISK-003** in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. When implementation begins, destructive commands must be replaced with mocks/fakes in automated tests; these cases must not operate on real disks.
+These are requirement-level acceptance cases for **REQ-DISK-003** in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. The current implementation executes mocked tests for review rendering, exact confirmation, plan-change rejection, target-identity revalidation, and topology-failure handling (see the Storage review/confirmation section below). The remaining execution-boundary and end-to-end cases are still planned. Any future disk-operation tests must use mocks/fakes and must never operate on real disks.
 
 | Test ID | Requirement / criterion | Setup and action | Expected result |
 |---|---|---|---|
