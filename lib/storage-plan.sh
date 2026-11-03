@@ -160,3 +160,124 @@ storage::plan_bind_target() {
   _plan[profile_kernel_package]=linux
   _plan[profile_secure_boot]=disabled
 }
+
+# Bind a prerequisite snapshot to the reviewed plan. Values are assertions
+# supplied by the caller; this function does not itself probe the host.
+storage::plan_bind_prerequisites() {
+  [[ $# -eq 2 ]] || return 2
+  local declaration
+  declaration=$(declare -p "$1" 2>/dev/null) || return 2
+  [[ $declaration == 'declare -A '* ]] || return 2
+  declaration=$(declare -p "$2" 2>/dev/null) || return 2
+  [[ $declaration == 'declare -A '* ]] || return 2
+  local -n _plan="$1" _prereq="$2"
+  [[ ${_plan[status]-} == calculated && ${_plan[schema_version]-} == 1 ]] || return 1
+
+  local key
+  for key in boot_mode required_tools topology target_unused target_identity evidence_id; do
+    [[ -n ${_prereq[$key]-} ]] || return 1
+  done
+  [[ ${_prereq[boot_mode]} == uefi ]] || return 1
+  for key in required_tools topology target_unused target_identity; do
+    [[ ${_prereq[$key]} == passed ]] || return 1
+  done
+  [[ ${_prereq[evidence_id]} != *[[:cntrl:]]* ]] || return 1
+
+  _plan[prereq_schema_version]=1
+  _plan[prereq_boot_mode]=${_prereq[boot_mode]}
+  _plan[prereq_required_tools]=${_prereq[required_tools]}
+  _plan[prereq_topology]=${_prereq[topology]}
+  _plan[prereq_target_unused]=${_prereq[target_unused]}
+  _plan[prereq_target_identity]=${_prereq[target_identity]}
+  _plan[prereq_evidence_id]=${_prereq[evidence_id]}
+}
+
+# Validate geometry, target binding, installation profile, and prerequisite
+# state before the plan can be reviewed or used by a later confirmation gate.
+storage::plan_validate() {
+  [[ $# -eq 1 ]] || return 2
+  local declaration
+  declaration=$(declare -p "$1" 2>/dev/null) || return 2
+  [[ $declaration == 'declare -A '* ]] || return 2
+  local -n _plan="$1"
+  [[ ${_plan[status]-} == calculated && ${_plan[schema_version]-} == 1 ]] || return 1
+
+  local key
+  local -a numeric_fields=(
+    disk_bytes logical_sector_bytes physical_sector_bytes total_sectors
+    gpt_entry_count esp_start_sector esp_end_sector esp_size_bytes
+    root_start_sector root_end_sector root_size_bytes swapfile_target_bytes
+    minimum_root_headroom_bytes target_size_bytes profile_partition_alignment_bytes
+    profile_esp_size_bytes profile_swap_target_bytes
+  )
+  local value
+  for key in "${numeric_fields[@]}"; do
+    value=${_plan[$key]-}
+    [[ $value =~ ^[0-9]+$ ]] || return 1
+    while [[ ${#value} -gt 1 && $value == 0* ]]; do value=${value#0}; done
+    (( ${#value} < 19 )) || {
+      (( ${#value} == 19 )) && [[ $value < 9223372036854775808 ]] || return 1
+    }
+    (( value > 0 )) || return 1
+  done
+
+  [[ ${_plan[target_device_path]-} == /dev/* ]] || return 1
+  [[ ${_plan[target_major_minor]-} =~ ^[0-9]+:[0-9]+$ ]] || return 1
+  [[ ${_plan[target_size_bytes]} == "${_plan[disk_bytes]}" ]] || return 1
+  [[ ${_plan[target_transport]-} == nvme ]] || return 1
+  [[ ${_plan[target_removable]-} == false && ${_plan[target_read_only]-} == false ]] || return 1
+  [[ -n ${_plan[target_stable_id]-} ]] || return 1
+  case ${_plan[target_stable_id_kind]-} in
+    wwn) [[ -n ${_plan[target_wwn]-} && ${_plan[target_stable_id]} == "${_plan[target_wwn]}" ]] || return 1 ;;
+    serial) [[ -n ${_plan[target_serial]-} && ${_plan[target_stable_id]} == "${_plan[target_serial]}" ]] || return 1 ;;
+    *) return 1 ;;
+  esac
+
+  local logical=${_plan[logical_sector_bytes]}
+  local physical=${_plan[physical_sector_bytes]}
+  local disk=${_plan[disk_bytes]}
+  local total=${_plan[total_sectors]}
+  local entries=${_plan[gpt_entry_count]}
+  (( logical >= 512 && logical <= 65536 && (logical & (logical - 1)) == 0 )) || return 1
+  (( physical >= logical && physical % logical == 0 )) || return 1
+  (( disk % logical == 0 && total == disk / logical )) || return 1
+  (( entries == 128 && 1048576 % logical == 0 && 1073741824 % logical == 0 )) || return 1
+  local align=$((1048576 / logical))
+  local entry_sectors=$(((128 * 128 + logical - 1) / logical))
+  local expected_first=$((2 + entry_sectors))
+  local expected_last=$((total - entry_sectors - 2))
+  local expected_esp_start=$((((expected_first + align - 1) / align) * align))
+  local expected_esp_end=$((expected_esp_start + 1073741824 / logical - 1))
+  local expected_root_start=$((((expected_esp_end + 1 + align - 1) / align) * align))
+  (( _plan[esp_start_sector] == expected_esp_start )) || return 1
+  (( _plan[esp_end_sector] == expected_esp_end )) || return 1
+  (( _plan[esp_size_bytes] == 1073741824 )) || return 1
+  (( _plan[root_start_sector] == expected_root_start )) || return 1
+  (( _plan[root_end_sector] == expected_last )) || return 1
+  (( _plan[root_start_sector] <= _plan[root_end_sector] )) || return 1
+  (( _plan[root_size_bytes] == (_plan[root_end_sector] - _plan[root_start_sector] + 1) * logical )) || return 1
+  (( _plan[minimum_root_headroom_bytes] == 34359738368 )) || return 1
+  (( _plan[swapfile_target_bytes] == _plan[profile_swap_target_bytes] )) || return 1
+  (( _plan[root_size_bytes] >= _plan[minimum_root_headroom_bytes] + _plan[swapfile_target_bytes] )) || return 1
+
+  [[ ${_plan[profile_partition_table]-} == gpt ]] || return 1
+  [[ ${_plan[profile_partition_alignment_bytes]-} == 1048576 ]] || return 1
+  [[ ${_plan[profile_esp_type_guid]-} == c12a7328-f81f-11d2-ba4b-00a0c93ec93b ]] || return 1
+  [[ ${_plan[profile_esp_filesystem]-} == vfat && ${_plan[profile_esp_mountpoint]-} == /efi ]] || return 1
+  [[ ${_plan[profile_root_type_guid]-} == 0fc63daf-8483-4772-8e79-3d69d8477de4 ]] || return 1
+  [[ ${_plan[profile_root_encryption]-} == luks2 && ${_plan[profile_root_filesystem]-} == ext4 ]] || return 1
+  [[ ${_plan[profile_root_mountpoint]-} == / ]] || return 1
+  [[ ${_plan[profile_swap_type]-} == swapfile && ${_plan[profile_swap_policy]-} == runtime_ram_plus_configured_margin ]] || return 1
+  [[ ${_plan[profile_resume_policy]-} == defer_until_swapfile_offset_verified ]] || return 1
+  [[ ${_plan[profile_bootloader]-} == systemd-boot && ${_plan[profile_boot_artifact]-} == uki ]] || return 1
+  [[ ${_plan[profile_uki_path]-} == /efi/EFI/Linux/arch-linux.efi && ${_plan[profile_kernel_package]-} == linux ]] || return 1
+  [[ ${_plan[profile_secure_boot]-} == disabled ]] || return 1
+
+  [[ ${_plan[prereq_schema_version]-} == 1 ]] || return 1
+  [[ ${_plan[prereq_boot_mode]-} == uefi ]] || return 1
+  for key in prereq_required_tools prereq_topology prereq_target_unused prereq_target_identity; do
+    [[ ${_plan[$key]-} == passed ]] || return 1
+  done
+  [[ -n ${_plan[prereq_evidence_id]-} && ${_plan[prereq_evidence_id]} != *[[:cntrl:]]* ]] || return 1
+  storage::plan_serialize "$1" >/dev/null || return 1
+}
