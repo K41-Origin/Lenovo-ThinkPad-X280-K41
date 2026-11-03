@@ -170,3 +170,17 @@ The GitHub Actions suite now includes the new test. Run `41614921278` passed Bas
 
 
 On 2026-11-03, GitHub Actions run `41614921278` completed successfully at commit `ab2a6ee0aa80df234bf3edc554829cf4e714927c`: Bash syntax validation passed for all shell files and all eight test scripts passed, including `tests/test-storage-prerequisites.sh`. The topology suite's full squashfs-loop case passed in this run. No real disk was modified and no live hardware prerequisite result was collected in this CI environment.
+
+
+## Storage review, explicit confirmation, and final revalidation — IMPLEMENTED and CI TESTED
+
+`lib/storage-confirmation.sh` adds three read-only gate functions:
+
+- `storage::plan_review_digest PLAN` calculates a stable SHA-256 review fingerprint over the plan while excluding only volatile `prereq_*` evidence fields. Target identity, geometry, and installation profile remain included.
+- `storage::plan_render_review PLAN` validates and prints the target path/model/capacity/stable identity, partition geometry, encryption/filesystem, swap/resume policy, boot artifact, Secure Boot setting, prerequisite status, and review digest.
+- `storage::plan_confirm_interactive PLAN CONFIRMATION_OUT` requires the user to type the exact challenge `ERASE <device-path> <first-12-review-digest-characters>`. Empty, cancelled, or mismatched input does not create a confirmation record.
+- `storage::plan_final_revalidate PLAN CONFIRMATION TARGET_OUT PREREQ_OUT GATE_OUT` consumes the confirmation before checking, rejects plan changes, calls the live prerequisite collector again, revalidates target identity/topology, and returns a `ready` gate record only if the stable review digest and all target identity fields still match.
+
+A failed final check consumes the confirmation; a new review and explicit confirmation are required. A successful gate is an in-process state record only. It is not a security boundary against compromised root code, is not persistent across process restarts, and does not itself authorize or execute any disk operation. No partitioning, formatting, encryption, mounting, package installation, or firmware changes were added. The installer entry point remains diagnostics-only.
+
+`tests/test-storage-confirmation.sh` covers cancellation, incorrect phrase, successful exact confirmation, successful final revalidation, one-shot use, modified-plan rejection, changed stable identity, and topology failure. GitHub Actions run `41615793341` passed Bash syntax validation and all eight repository test scripts at commit `4ab82207fa682e8e2ec8bab760f8c42d8e745717`. The test run also passed the complete squashfs/overlay topology fixtures. These are CI fixture results, not a live confirmation or installation test on the ThinkPad X280.
