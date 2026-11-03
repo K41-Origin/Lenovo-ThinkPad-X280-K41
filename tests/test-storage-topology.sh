@@ -30,9 +30,9 @@ ln -s ../../devices/virtual/block/dm-0 "$sys/dev/block/$dm_mm"
 ln -s ../../devices/virtual/block/sda "$sys/dev/block/$sda_mm"
 ln -s "$sys/devices/virtual/block/dm-0" "$sys/devices/pci/block/nvme0n1/nvme0n1p2/holders/dm-0"
 ln -s "$sys/devices/pci/block/nvme0n1/nvme0n1p2" "$sys/devices/virtual/block/dm-0/slaves/nvme0n1p2"
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
+cat >"$tmp/mountinfo" <<EOF_MOUNT
 36 25 $sda_mm / / rw,relatime - ext4 /dev/sda rw
-37 25 8:0 / /boot rw,relatime - vfat /dev/sda rw
+37 25 $sda_mm / /boot rw,relatime - vfat /dev/sda rw
 EOF_MOUNT
 cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
@@ -41,7 +41,7 @@ EOF_SWAP
 storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"
 echo 'PASS: unrelated mounted disk does not block target'
 
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
+cat >"$tmp/mountinfo" <<EOF_MOUNT
 36 25 $dm_mm / / rw,relatime - ext4 /dev/mapper/cryptroot rw
 EOF_MOUNT
 if storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
@@ -49,29 +49,29 @@ if storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swa
 fi
 echo 'PASS: rejects mounted LUKS/device-mapper dependent'
 
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-36 25 8:0 / / rw,relatime - ext4 /dev/sda rw
+cat >"$tmp/mountinfo" <<EOF_MOUNT
+36 25 $sda_mm / / rw,relatime - ext4 /dev/sda rw
 38 25 $p2_mm / /mnt/data rw,relatime - ext4 /dev/nvme0n1p2 rw
 EOF_MOUNT
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: mounted target partition was accepted' >&2; exit 1
 fi
 echo 'PASS: rejects mounted target partition'
 
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-36 25 253:0 / / rw,relatime - ext4 /dev/mapper/cryptroot rw
+cat >"$tmp/mountinfo" <<EOF_MOUNT
+36 25 $dm_mm / / rw,relatime - ext4 /dev/mapper/cryptroot rw
 EOF_MOUNT
 cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
 /var/swapfile file 1048576 0 -2
 EOF_SWAP
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: swapfile on target-backed filesystem was accepted' >&2; exit 1
 fi
 echo 'PASS: rejects swapfile on target-backed filesystem'
 
 : >"$tmp/mountinfo"
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: unresolved swapfile mount was accepted' >&2; exit 1
 fi
 echo 'PASS: fails closed when swapfile backing mount is unresolved'
@@ -81,26 +81,26 @@ if storage::topology_check_target invalid "$sys" "$tmp/mountinfo" "$tmp/swaps"; 
 fi
 echo 'PASS: rejects malformed target identity'
 
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-40 25 8:0 / / rw,relatime - btrfs /dev/sda rw
+cat >"$tmp/mountinfo" <<EOF_MOUNT
+40 25 $sda_mm / / rw,relatime - btrfs /dev/sda rw
 EOF_MOUNT
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: multi-device btrfs backing was accepted' >&2; exit 1
 fi
 echo 'PASS: fails closed on btrfs backing topology'
 
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-41 25 8:0 / / rw,relatime - overlay overlay rw
+cat >"$tmp/mountinfo" <<EOF_MOUNT
+41 25 $sda_mm / / rw,relatime - overlay overlay rw
 EOF_MOUNT
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: overlay backing was accepted' >&2; exit 1
 fi
 echo 'PASS: fails closed on overlay backing topology'
 
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
+cat >"$tmp/mountinfo" <<EOF_MOUNT
 malformed mountinfo record
 EOF_MOUNT
-if storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
+if storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: malformed mountinfo was accepted' >&2; exit 1
 fi
 echo 'PASS: rejects malformed mountinfo'
@@ -120,7 +120,7 @@ echo 'PASS: resolves loop backing file on an unrelated filesystem'
 
 declare -A loop_seen=()
 loop_seen[$backing_mm]=1
-if storage::topology_check_loop_backing 7:0 "$sys" loop_seen; then
+if storage::topology_check_loop_backing $loop_mm "$sys" loop_seen; then
   echo 'FAIL: loop backing file on target dependency was accepted' >&2; exit 1
 fi
 echo 'PASS: rejects loop backing file on target dependency'
@@ -142,11 +142,11 @@ cat >"$tmp/mountinfo" <<EOF_MOUNT
 42 25 $loop_mm / /run/archiso/bootmnt rw,relatime - squashfs /dev/loop0 ro
 EOF_MOUNT
 storage::topology_parse_mount_record "$(cat "$tmp/mountinfo")" || { echo 'FAIL: squashfs mountinfo parse' >&2; exit 1; }
-storage::topology_check_loop_backing 7:0 "$sys" no_seen || { echo 'FAIL: squashfs backing check' >&2; exit 1; }
+storage::topology_check_loop_backing $loop_mm "$sys" no_seen || { echo 'FAIL: squashfs backing check' >&2; exit 1; }
 cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
 EOF_SWAP
-if ! storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"; then echo 'FAIL: full squashfs mount check' >&2; exit 1; fi
+if ! storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"; then echo 'FAIL: full squashfs mount check' >&2; exit 1; fi
 echo 'PASS: accepts squashfs loop mount backed by an unrelated filesystem'
 
 ln -s "$sys/devices/pci/block/nvme0n1" "$sys/dev/block/$backing_mm"
@@ -158,7 +158,7 @@ echo 'PASS: complete topology check rejects squashfs loop backing on target'
 cat >"$tmp/mountinfo" <<EOF_MOUNT
 43 25 $overlay_mm / / rw,relatime - overlay overlay rw,lowerdir=$tmp,upperdir=$tmp,workdir=$tmp
 EOF_MOUNT
-storage::topology_check_target 259:0 "$sys" "$tmp/mountinfo" "$tmp/swaps"
+storage::topology_check_target $target_mm "$sys" "$tmp/mountinfo" "$tmp/swaps"
 echo 'PASS: accepts overlay mount backed by unrelated filesystem'
 if storage::topology_check_target "$backing_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"; then
   echo 'FAIL: complete topology check accepted overlay path on target dependency' >&2; exit 1
@@ -170,8 +170,8 @@ swap_major=$((16#${swap_mm%%:*}))
 swap_minor=$((16#${swap_mm##*:}))
 swap_mm=$swap_major:$swap_minor
 ln -s "$sys/devices/pci/block/nvme0n1" "$sys/dev/block/$swap_mm"
-cat >"$tmp/mountinfo" <<'EOF_MOUNT'
-36 25 8:0 / / rw,relatime - ext4 /dev/sda rw
+cat >"$tmp/mountinfo" <<EOF_MOUNT
+36 25 $sda_mm / / rw,relatime - ext4 /dev/sda rw
 EOF_MOUNT
 cat >"$tmp/swaps" <<'EOF_SWAP'
 Filename Type Size Used Priority
