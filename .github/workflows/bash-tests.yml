@@ -53,6 +53,7 @@ jobs:
             tests/test-storage-prerequisites.sh
             tests/test-storage-confirmation.sh
             tests/test-storage-execution-dry-run.sh
+            tests/test-storage-execution-boundary.sh
             tests/test-storage-topology.sh
             tests/test-preflight-gate.sh
           )
