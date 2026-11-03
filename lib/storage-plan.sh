@@ -262,6 +262,7 @@ storage::plan_validate() {
 
   [[ ${_plan[profile_partition_table]-} == gpt ]] || return 1
   [[ ${_plan[profile_partition_alignment_bytes]-} == 1048576 ]] || return 1
+  [[ ${_plan[profile_esp_size_bytes]-} == 1073741824 ]] || return 1
   [[ ${_plan[profile_esp_type_guid]-} == c12a7328-f81f-11d2-ba4b-00a0c93ec93b ]] || return 1
   [[ ${_plan[profile_esp_filesystem]-} == vfat && ${_plan[profile_esp_mountpoint]-} == /efi ]] || return 1
   [[ ${_plan[profile_root_type_guid]-} == 0fc63daf-8483-4772-8e79-3d69d8477de4 ]] || return 1
