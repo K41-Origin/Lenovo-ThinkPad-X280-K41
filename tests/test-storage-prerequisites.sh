@@ -40,7 +40,6 @@ storage::validate_target() {
 }
 
 make_plan() {
-  local -n _plan_ref="$1"
   local -A target=(
     [device_path]=/dev/nvme0n1 [major_minor]=259:0
     [size_bytes]=274877906944 [transport]=nvme
