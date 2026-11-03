@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. Run #148 (`41619926870`) passed both steps at audit baseline commit `719f537341b6d410ce2980144fee86237da01b42`. This validates the repository state before the audit-report documentation commit. This is fixture-based CI, not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
+The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. The latest verified `main` baseline is GitHub Actions run #149 at commit `fd91ddb5d863226ebf469c2c3084d7f5132602c3`. This cleanup branch requires its own pull-request CI run. All CI tests are fixture-based; they are not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
 
 The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
@@ -176,13 +176,11 @@ Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. T
 ## Acceptance gates
 A release candidate requires reviewed requirements and architecture, passing static checks, mocked safety/error paths, verified package/upstream dependencies, docs consistent with behavior, and evidence for hardware claims. Disclose known failures and untested items.
 
-## Results
-On 2026-11-03, GitHub Actions run `41613718273` passed Bash syntax validation and all seven repository test scripts at commit `7779aa99943982d85033f8157a8d001998c2a7ad`. The storage-plan tests additionally verified completeness checks for geometry/profile/prerequisites, rejection of failed or missing prerequisites, prerequisite-evidence digest binding, canonical decimal validation, and ESP profile-size consistency. This validates the pure data/validation layer only; prerequisite values are still caller-supplied assertions and have not yet been integrated with live host discovery or a confirmation/execution gate.
+## Test execution evidence
 
-On 2026-11-03, GitHub Actions run `41613051552` passed Bash syntax validation and all seven repository test scripts at commit `6ce3e9334f360ab59e78b865325360f3d76fa456`. The storage-plan tests confirmed target/profile binding, deterministic serialization and digest behavior, digest changes after target/profile mutation, rejection of missing stable identity, and rejection of multiline values. No real disk or system configuration was modified. The installer remains PLANNED; this CI result is not an end-to-end installation or hardware test.
+Chronological GitHub Actions run identifiers and commit-to-run mappings are maintained in [Implementation Status and Changelog](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md). This document owns test strategy, coverage, acceptance criteria, and limitations—not the historical CI ledger.
 
-The first-slice test command `bash tests/test-common-preflight.sh` passed with six test groups against temporary local copies whose blob hashes matched the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
-
+For a new change, use `bash tests/run.sh` and inspect the GitHub Actions result for the exact commit. A previous successful run does not validate a later commit. Fixture tests do not establish live X280 hardware behavior.
 
 ## Live storage prerequisite integration — IMPLEMENTED and CI TESTED
 
