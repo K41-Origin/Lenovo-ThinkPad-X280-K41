@@ -40,7 +40,7 @@ storage::validate_target() {
 }
 
 make_plan() {
-  local -n plan="$1"
+  local -n _plan_ref="$1"
   local -A target=(
     [device_path]=/dev/nvme0n1 [major_minor]=259:0
     [size_bytes]=274877906944 [transport]=nvme
@@ -48,8 +48,8 @@ make_plan() {
     [stable_id_kind]=wwn [stable_id]=eui.0011223344556677
     [wwn]=eui.0011223344556677 [serial]=SN-X280 [model]="WDC PC SN730"
   )
-  storage::plan_gpt_layout plan 274877906944 512 4096 8589934592 1073741824
-  storage::plan_bind_target plan target
+  storage::plan_gpt_layout "$1" 274877906944 512 4096 8589934592 1073741824
+  storage::plan_bind_target "$1" target
 }
 
 declare -A plan=() live_target=() prereq=()
