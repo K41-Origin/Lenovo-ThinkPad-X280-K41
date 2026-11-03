@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs ten repository test scripts. Run #107 on commit `0526112b092b0a0a1e06c4c7eadaee9245af9ac7` passed both steps; later commits require their own validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
+The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow is configured to validate Bash syntax and run eleven repository test scripts. The Stage 7 workflow result is pending; earlier run #108 passed the ten-script suite at that earlier commit. Each later commit requires its own validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
 
 The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
@@ -22,6 +22,22 @@ Findings:
 No real disk, package database, service, firmware setting, or network configuration was changed during this audit.
 
 The prerequisite binder itself records caller assertions; the live collector is the component that performs the read-only checks and produces fresh evidence. Fixture-based tests mock discovery and topology behavior, so they do not establish that the actual X280 disk is unused or that hardware identity is correct at installation time.
+
+## Stage 7 — Mock execution boundary and target revalidation
+
+Stage 7 adds `lib/storage-execution-boundary.sh`, a mock-only orchestration boundary. It accepts only callback names under the `storage::mock_*` namespace, requires a ready gate whose review digest matches the plan, builds the existing eight-operation manifest, and consumes the in-process gate before the first probe or callback.
+
+Immediately before each mock operation, the boundary asks the injected probe to return the target path, kernel major:minor, capacity, and stable ID. Any probe failure or mismatch aborts before that operation. The result ledger records attempted and completed operation IDs. If identity changes or an executor callback fails after one or more completed steps, the result marks `recovery_required=yes`; it does not attempt automatic rollback.
+
+The final confirmation gate now also carries the target capacity, so the mock boundary can compare that field alongside path, major:minor, and stable ID.
+
+Important limitations:
+- The callbacks are test-only mocks. This module does not open a block-device file descriptor, call ioctl, acquire an exclusive device lease, execute storage commands, or modify a disk.
+- Rechecking a pathname immediately before a callback narrows the modeled detection window but does not eliminate the kernel-level TOCTOU race between the check and a future real operation. It is not real TOCTOU protection.
+- A future real executor requires a separately reviewed native device-handle/identity design (including stable open-handle validation and a defined strategy for preventing/detecting target replacement), plus a recovery protocol. Do not infer that a Bash path check or in-process gate is sufficient.
+- Partial storage operations are not generally safely reversible. The correct default after a partial failure is stop, preserve the operation ledger, and require explicit recovery inspection; do not blindly rerun or auto-rollback.
+
+Fixture tests cover successful eight-step mock execution, target identity change before a later operation, failed initial probe with zero executor calls, injected partial failure and recovery flag, and rejection of a non-mock callback. These tests establish the orchestration contract only; no real block-device handle or physical disk is used.
 
 ## Documentation checks
 - Verify expected files and relative links.
@@ -205,3 +221,6 @@ A failed final check consumes the confirmation; a new review and explicit confir
 
 
 On 2026-11-03, GitHub Actions run `41617706958` (#107) passed Bash syntax validation and all ten repository test scripts at commit `0526112b092b0a0a1e06c4c7eadaee9245af9ac7`. The run includes the corrected Stage 5 test helper; the dry-run and full topology fixtures passed, with no circular-nameref warnings. This is fixture-based CI evidence only; no physical disk or ThinkPad hardware was tested.
+
+
+Stage 7 validation is pending for the current commit. The prior run #108 result applies only to its own commit and does not validate these new changes.
