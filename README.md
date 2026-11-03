@@ -23,6 +23,9 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
 - `lib/storage.sh` — read-only whole-disk discovery and fresh target validation; no partition/format/mount operations.
+- `lib/storage-plan.sh`, `lib/storage-prerequisites.sh`, and `lib/storage-confirmation.sh` — target-bound storage planning, read-only prerequisite evidence, explicit confirmation, and final revalidation.
+- `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
+- `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
 - `lib/` — focused internal modules for preflight, storage, base system, bootloader, user setup, desktop, hardware, packages, security, validation, and reporting.
 - `tests/` — test strategy and isolated fixture tests.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
@@ -61,7 +64,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. The storage module performs no destructive operation.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. The storage modules perform no destructive operation. The mock boundary's pathname rechecks do not eliminate the kernel-level time-of-check/time-of-use race; a native open-handle and recovery design is still required before any real executor.
 
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
