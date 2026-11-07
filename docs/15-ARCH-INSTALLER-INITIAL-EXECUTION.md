@@ -37,6 +37,10 @@ The installer installs systemd-boot and configures a mkinitcpio UKI using the sy
 - No complete transactional rollback or automatic safe resume after partial disk mutation is claimed. After a failure following the first destructive operation, stop and inspect the real disk state; do not rerun blindly.
 - A non-empty UKI file and generated configuration artifacts do not prove firmware boot, LUKS unlock, root mount, or successful first login.
 
+## Installer diagnostics
+
+The installer captures stdout/stderr and stage-specific validation failures in a root-only timestamped log at \`/var/log/x280-installer/<UTC timestamp>/installer.log\`, falling back to volatile \`/run/x280-installer/\` only when necessary. It prints the exact path on exit. Logging is initialized before host preflight and all storage operations; inability to initialize a secure log stops execution. The log does not use shell xtrace and must be reviewed for hardware identifiers before sharing. See [Error Recovery and Reporting](10-ERROR-RECOVERY-AND-REPORTING.md).
+
 ## Automated validation
 
 The canonical runner is:
