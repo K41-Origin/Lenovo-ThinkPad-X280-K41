@@ -120,11 +120,11 @@ ram_bytes="$(awk '/MemTotal:/ {print $2 * 1024}' /proc/meminfo)"
 [[ $ram_bytes =~ ^[0-9]+$ ]] || die "Tidak dapat menentukan kapasitas RAM."
 swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
 # shellcheck disable=SC2034 # output arrays are populated/read through nameref parameters
-declare -A plan=() prereq=() confirmation=() fresh_target=() fresh_prereq=() gate=()
+declare -A plan=() prereq=() confirmation=() initial_target=() fresh_target=() fresh_prereq=() gate=()
 storage::plan_gpt_layout plan "${target[size_bytes]}" "$(blockdev --getss "${target[device_path]}")" "$(blockdev --getpbsz "${target[device_path]}")" "$ram_bytes" "$swap_margin_bytes" || die "Perhitungan layout disk gagal."
 storage::plan_bind_target plan target || die "Binding identitas target gagal."
 installer::stage initial-revalidation "Mengumpulkan prasyarat read-only sebelum review"
-storage::plan_collect_live_prerequisites plan fresh_target prereq || die "Pemeriksaan prasyarat awal gagal."
+storage::plan_collect_live_prerequisites plan initial_target prereq || die "Pemeriksaan prasyarat awal gagal."
 storage::plan_render_review plan
 printf '\nPERINGATAN: SELURUH DATA PADA %s AKAN DIHAPUS. Pastikan backup tersedia.\n' "${target[device_path]}" >&2
 installer::stage operator-confirmation "Menampilkan rencana dan meminta konfirmasi target yang eksplisit"
