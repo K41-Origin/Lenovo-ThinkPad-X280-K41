@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Retrieve the latest main revision, expose its source for review, then launch
-# the destructive installer only after an explicit source-review acknowledgement.
+# Retrieve the latest main revision, require source review and a passing
+# read-only readiness gate, then require explicit authorization to launch.
 set -Eeuo pipefail
 umask 077
 
