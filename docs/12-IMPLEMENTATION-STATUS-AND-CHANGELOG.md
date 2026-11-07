@@ -5,7 +5,7 @@
 - `main` baseline inspected: `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`; run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the 12-script suite on that exact main commit.
 - PR #9 branch `feature/base-system-bootstrap-2026-11-07` contains the separate initial destructive installer and target-configuration scripts. CI runs #130 and #131 (`42362113267`, `42362119357`) passed on commit `2aae853df0c74c8ae9a46e702d457884f1d91fd8` with syntax, lint, and the 15-script suite including a disposable loop-device integration test. These runs predate the documentation-only commits in this current branch head; they are not CI evidence for the latest head. Earlier run #94 is historical and not the latest PR evidence.
 - Physical X280 observations from user-provided terminal photographs are documented in `docs/11-TESTING-AND-ACCEPTANCE.md` (Stages 8–9). They establish point-in-time raw system facts, not a successful run of the project's live validator.
-- `scripts/validate-live-storage.sh` has not yet been evidenced as successfully run on the physical laptop after the zero-capacity removable-reader fix. Physical NVMe behavior, complete installation, and successful boot remain NOT TESTED.
+- `scripts/validate-live-storage.sh` has not yet been evidenced as successfully run on the physical laptop after the zero-capacity removable-reader fix. Physical NVMe behavior, complete installation, and successful boot remain NOT TESTED. VM-based installation testing is OUT OF SCOPE by owner decision; full destructive installation testing is reserved for the actual X280 after the safety gate.
 
 ## PR #9 branch delta — 2026-11-07
 
@@ -318,3 +318,10 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Cross-checked the target configuration script against the security/hardware policy documents and found that it installs `intel-ucode` automatically despite the approved report-only policy.
 - Added REQ-HW-006 to the requirements index and marked this mismatch as a blocker in the implementation matrix and installer limitations.
 - Documentation records the mismatch; no code change or policy override was made in this documentation task.
+
+
+### 2026-11-07 — Owner decision: no VM installation testing
+- Confirmed that this project will not perform installer testing through a virtual machine.
+- Preserve the real destructive SSD replacement/erasure workflow as a required physical validation stage on the actual ThinkPad X280, subject to successful read-only live validation, independent source/safety review, verified exact target identity, backup/recovery preparation, stop conditions, and explicit authorization.
+- Fixtures, mocks, static checks, and disposable loop-backed images remain permitted for bounded automated tests; they do not simulate or replace the full physical installation.
+- This decision changes the test strategy, not the approved disk layout or destructive installer scope. No disk operation was performed by this documentation update.
