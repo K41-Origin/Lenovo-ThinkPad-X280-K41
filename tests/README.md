@@ -28,3 +28,21 @@ Initial and future test layers:
 - Hardware-only checks (Wi-Fi, audio, suspend, hibernate/resume, lid behavior) remain NOT TESTED until run on the actual device.
 
 Never treat a successful syntax check or mocked test as proof that installation works.
+
+## Live Arch ISO / ThinkPad validation
+
+From the repository root on the target machine, run:
+
+```bash
+bash scripts/live-validation.sh
+```
+
+The script performs read-only host/boot/storage/network inventory, validates Bash syntax, runs ShellCheck and shfmt when installed, executes the canonical `bash tests/run.sh` suite, and records installer help/preflight output. Missing optional inventory/lint tools are recorded as SKIPPED; failures in syntax, available static checks, or the canonical suite make the script exit non-zero.
+
+Evidence is saved automatically under `reports/live-validation/`:
+- `YYYYMMDDTHHMMSSZ.md` — timestamped report; existing reports are never overwritten.
+- `latest.md` — convenience copy of the most recent report.
+
+Reports are local working-tree artifacts, not automatically committed or uploaded. Review them for sensitive environment details before sharing or committing. Keep timestamped reports as historical evidence and consult `latest.md` before repeating checks. A report applies only to its recorded checkout/commit and host snapshot; it does not prove installation works or authorize disk changes. Re-run after changing code, booting a different environment, changing hardware/storage state, or when fresh evidence is required.
+
+The script is non-destructive: it does not partition, format, mount, install packages, alter services, or change firmware. The installer preflight's non-zero exit is recorded as informational because installation remains intentionally disabled.
