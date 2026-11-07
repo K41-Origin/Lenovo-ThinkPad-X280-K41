@@ -88,7 +88,7 @@ Stage 8 is not complete until all applicable criteria are implemented and eviden
 1. Native helper opens only an explicitly supplied candidate, rejects symlinks/non-block objects, and retains the FD for a defined session.
 2. fstat and block ioctls use the retained FD; major/minor, capacity, and geometry are checked against the plan.
 3. Stable identity and diskseq evidence are correlated with a documented fail-closed policy.
-4. Exclusive-open behavior is tested using disposable loop devices/VMs: already-open device, mounted/active child, partition opener, and competing process.
+4. Exclusive-open behavior is tested using disposable loop devices (not VMs): already-open device, mounted/active child, partition opener, and competing process.
 5. Symlink substitution, path replacement, remove/re-add, major/minor reuse where reproducible, permissions, unsupported ioctls, and helper termination are tested.
 6. FD lifetime, close-on-exec, explicit transfer if any, and cleanup are tested.
 7. Acquisition/inspection performs no writes and invokes no storage utilities.
