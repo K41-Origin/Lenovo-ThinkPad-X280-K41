@@ -25,6 +25,7 @@ tests=(
   tests/test-storage-topology.sh
   tests/test-preflight-gate.sh
   tests/test-native-storage-handle.sh
+  tests/test-base-system-fstab.sh
 )
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
