@@ -19,7 +19,9 @@ Run from the official Arch ISO booted in UEFI mode. The script requires root and
 5. Recheck the selected disk identity before each external storage command.
 6. Preserve unrelated live-ISO swap, erase old signatures, create GPT + ESP + Linux-LUKS-type root partitions.
 7. Format FAT32/ext4, open LUKS, mount at `/mnt` and `/mnt/efi`.
-8. Use the guarded `base_system::bootstrap` module to install the approved minimal Arch package set and generate UUID-based fstab.\n9. Run `scripts/configure-arch-x280.sh` inside the target to interactively set hostname, initial username/password, timezone, locale, Intel microcode, sudo access, and the planned ext4 swapfile.\n10. Install systemd-boot, configure a mkinitcpio UKI with the LUKS UUID kernel command line, and enable NetworkManager.
+8. Use the guarded `base_system::bootstrap` module to install the approved minimal Arch package set and generate UUID-based fstab.
+9. Run `scripts/configure-arch-x280.sh` inside the target to interactively set hostname, initial username/password, timezone, locale, Intel microcode, sudo access, and the planned ext4 swapfile.
+10. Install systemd-boot, configure a mkinitcpio UKI with the LUKS UUID kernel command line, and enable NetworkManager.
 
 ## Critical limitations
 
