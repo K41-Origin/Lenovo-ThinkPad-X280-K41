@@ -25,6 +25,8 @@ for required in \
   'storage::plan_gpt_layout' \
   'storage::plan_confirm_interactive' \
   'storage::plan_final_revalidate' \
+  'initial_target=() fresh_target=()' \
+  'storage::plan_collect_live_prerequisites plan initial_target prereq' \
   'exec {disk_fd}<>"$disk"' \
   'disk_ref="/proc/self/fd/$disk_fd"' \
   'root_ref="/proc/self/fd/$root_fd"' \
@@ -72,5 +74,13 @@ erase_line="$(grep -nF 'wipefs --all --force' "$SCRIPT" | cut -d: -f1)"
 [[ -n $confirmation_line && -n $revalidate_line && -n $erase_line ]] || fail "confirmation, revalidation, or erase step is absent"
 (( confirmation_line < revalidate_line && revalidate_line < erase_line )) || fail "destructive step appears before confirmation/revalidation"
 pass "destructive signature erasure is ordered after confirmation and final revalidation"
+initial_revalidation_line="$(grep -nF 'storage::plan_collect_live_prerequisites plan initial_target prereq' "$SCRIPT" | cut -d: -f1)"
+final_revalidation_line="$(grep -nF 'storage::plan_final_revalidate plan confirmation fresh_target fresh_prereq gate' "$SCRIPT" | cut -d: -f1)"
+[[ -n $initial_revalidation_line && -n $final_revalidation_line ]] || fail "initial or final prerequisite revalidation call is absent"
+(( initial_revalidation_line < final_revalidation_line )) || fail "final revalidation appears before initial prerequisite collection"
+if grep -Fq 'storage::plan_collect_live_prerequisites plan fresh_target prereq' "$SCRIPT"; then
+  fail "initial prerequisite collection reuses the final-revalidation output array"
+fi
+pass "initial and final revalidation use separate target snapshots, leaving final output arrays empty"
 
 printf '%s\n' 'All Arch installer script tests passed.'
