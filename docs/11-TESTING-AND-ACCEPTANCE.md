@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. The latest verified `main` baseline is GitHub Actions run #149 at commit `fd91ddb5d863226ebf469c2c3084d7f5132602c3`. This cleanup branch requires its own pull-request CI run. All CI tests are fixture-based; they are not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
+The installer remains PLANNED and has not been tested end to end. As of 2026-11-07, the canonical test runner contains 12 test scripts. GitHub Actions run #185 (`42349907205`) passed Bash syntax validation, ShellCheck, the configured shfmt check, and the repository test suite at `main` commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. These CI tests use fixtures/mocks and compile/CLI checks; they are not proof of real block-device behavior or installation integration. Physical X280 Arch ISO observations are recorded below, but the project's own live storage discovery/validation script has not yet been run on the laptop.
 
 The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
@@ -289,4 +289,13 @@ bash scripts/validate-live-storage.sh
 
 The script requires UEFI boot and the expected X280 internal SSD identity (model family `WDC PC SN730`, serial `193839803177`). It discovers all whole disks, prints their safety-relevant properties, requires exactly one identity match, and calls the repository's live target/topology validator. It fails closed if dependencies, identity, or topology cannot be verified. It performs no partitioning, formatting, encryption, mounting, or disk writes. Do not treat a successful read-only check as authorization to erase the disk or as proof that a future destructive executor is safe.
 
-**Status:** IMPLEMENTED in the repository. Syntax, ShellCheck, and physical-device execution are NOT YET VERIFIED for this new entry point. The operator must run it on the X280 Arch Live environment and preserve its complete output as hardware-validation evidence.
+**Status:** IMPLEMENTED in the repository. Bash syntax and ShellCheck are covered by successful CI run #185 at commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. Physical-device execution is NOT TESTED. The operator must run it on the X280 Arch Live environment and preserve its complete output as hardware-validation evidence. The earlier photographs validate the displayed raw system observations only; they do not validate this script or the project's programmatic topology walk.
+
+
+## Current evidence boundary — 2026-11-07
+
+- **CI VERIFIED:** run #185 passed at `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`; this covers repository automation only.
+- **Physical observations VERIFIED from user-provided terminal photographs:** UEFI boot, Arch ISO environment, USB installer identity, internal WDC NVMe model/serial alias, current partition listing, visible mount tree, loop-backed live root, and no active swap in the captured snapshots (Stages 8–9). These are point-in-time observations, not continuous guarantees.
+- **Project live validator NOT TESTED on hardware:** `scripts/validate-live-storage.sh` has not yet been run on the laptop. In particular, its complete programmatic mount/sysfs/loop/swap dependency walk has not been evidenced on the X280.
+- **Native helper NOT TESTED on a real block device:** CI validates compilation and CLI behavior; exclusive-open behavior, ioctl behavior, hot-unplug, and descriptor lifecycle against disposable/physical block devices remain outstanding.
+- **Destructive execution NOT IMPLEMENTED:** no partitioning, formatting, LUKS operation, filesystem creation, mounting, or real executor is available or authorized by these tests.
