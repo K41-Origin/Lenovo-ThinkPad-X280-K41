@@ -84,7 +84,7 @@ storage::topology_parse_mount_record() {
   case $TOPOLOGY_MOUNT_FSTYPE in
     ext2|ext3|ext4|xfs|vfat|fat|msdos|exfat|ntfs|ntfs3|f2fs|jfs|reiserfs|udf|iso9660)
       ;;
-    proc|sysfs|tmpfs|devtmpfs|devpts|cgroup|cgroup2|mqueue|securityfs|debugfs|tracefs|pstore|configfs|autofs|rpc_pipefs|hugetlbfs|binfmt_misc|efivarfs|bpf)
+    proc|sysfs|tmpfs|devtmpfs|devpts|cgroup|cgroup2|mqueue|securityfs|debugfs|tracefs|pstore|configfs|autofs|rpc_pipefs|hugetlbfs|binfmt_misc|efivarfs|bpf|fusectl)
       ;;
     overlay)
       TOPOLOGY_MOUNT_SUPER_OPTIONS=${fields[separator+3]}
