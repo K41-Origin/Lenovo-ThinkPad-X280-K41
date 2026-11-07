@@ -7,7 +7,7 @@ if (( EUID != 0 )); then
   exit 0
 fi
 
-for cmd in losetup sgdisk wipefs partprobe udevadm mkfs.fat cryptsetup mkfs.ext4 blkid; do
+for cmd in losetup sgdisk wipefs partprobe udevadm mkfs.fat cryptsetup mkfs.ext4 blkid mount umount findmnt; do
   command -v "$cmd" >/dev/null 2>&1 || { printf 'SKIP: missing command: %s\n' "$cmd"; exit 0; }
 done
 
@@ -64,6 +64,11 @@ root_ref="/proc/self/fd/$root_fd"
 [[ -b $esp_ref && -b $root_ref ]] || { printf 'FAIL: pinned partition descriptors are not block devices.\n' >&2; exit 1; }
 
 mkfs.fat -F 32 "$esp_ref" >/dev/null
+mkdir "$tmp/esp-mount"
+mount "$esp_ref" "$tmp/esp-mount"
+esp_source="$(findmnt --noheadings --raw --mountpoint "$tmp/esp-mount" --output SOURCE)"
+[[ $esp_source == /dev/* ]] || { printf 'FAIL: pinned ESP mount did not resolve to a block-device source.\\n' >&2; exit 1; }
+umount "$tmp/esp-mount"
 cryptsetup luksFormat --batch-mode --type luks2 --key-file "$tmp/key" "$root_ref"
 mapper=k41-ci-pinned-test
 cryptsetup open --key-file "$tmp/key" "$root_ref" "$mapper"
