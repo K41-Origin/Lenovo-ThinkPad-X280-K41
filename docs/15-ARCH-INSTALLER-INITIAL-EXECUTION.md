@@ -1,82 +1,61 @@
-# Stage 9 — Interactive Arch installer (initial execution path)
+# Stage 9 — Initial interactive Arch installer
 
-Status: **IMPLEMENTED, NOT YET TESTED ON HARDWARE**.
+## Status and scope
 
-Entry point:
+- Source: `scripts/install-arch-x280.sh` and `scripts/configure-arch-x280.sh` on PR #9 branch `feature/base-system-bootstrap-2026-11-07`.
+- Implementation: IMPLEMENTED on the feature branch.
+- Automated evidence: TESTED on the specific commits/runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md); the loop integration covers selected utilities against a disposable loop image.
+- VM installation: NOT TESTED.
+- Physical X280 installation and first boot: NOT TESTED.
+- Release/merge: not implied by branch implementation.
 
-```bash
-sudo ./scripts/install-arch-x280.sh
-```
+This is an initial destructive base-system installer, not the complete intended project installer. The legacy top-level `installer --preflight` remains read-only and is not its entry point.
 
-Run from the official Arch ISO booted in UEFI mode. The script requires root and checks for the storage, Arch installation, and partitioning commands before showing a disk list. It first verifies the host against the ThinkPad X280 inventory profile. It selects only discovered writable, non-removable NVMe whole disks with a WWN or serial, then requires the verified WDC PC SN730 model, exact capacity, and expected serial. The operator chooses the index and must type the exact destructive confirmation generated from the reviewed storage plan.
+## Implemented execution path
 
-## Current actions
+The script is intended to run manually as root from the official Arch ISO in UEFI mode. It checks required commands and host inventory, discovers whole-disk candidates, and requires the configured internal WDC PC SN730 target identity (model, exact capacity, and stable serial). It calculates the partition plan from runtime disk geometry and swap target from runtime RAM plus a configured 2 GiB margin.
 
-1. Discover and validate the selected NVMe target.
-2. Calculate GPT/ESP/root geometry using the existing planner and runtime RAM.
-3. Review target identity, layout, encryption, filesystem, and boot policy.
-4. Require exact confirmation and refresh read-only prerequisites.
-5. Recheck the selected disk identity before each external storage command.
-6. Preserve unrelated live-ISO swap, erase old signatures, create GPT + ESP + Linux-LUKS-type root partitions.
-7. Format FAT32/ext4, open LUKS, mount at `/mnt` and `/mnt/efi`.
-8. Use the guarded `base_system::bootstrap` module to install the approved minimal Arch package set and generate UUID-based fstab.
-9. Run `scripts/configure-arch-x280.sh` inside the target to interactively set hostname, initial username/password, timezone, locale, Intel microcode, sudo access, and the planned ext4 swapfile.
-10. Install systemd-boot, configure a mkinitcpio UKI with the LUKS UUID kernel command line, and enable NetworkManager.
+Before disk writes, the script binds target identity to the plan, collects live prerequisites, displays the plan, requires exact plan-bound confirmation, and performs final revalidation. It then retains Bash descriptors for the disk and partitions and passes inherited `/proc/self/fd/N` paths to selected storage utilities.
 
-## Critical limitations
+The current target layout is:
+- GPT, 1 GiB FAT32 ESP.
+- Linux-LUKS GPT partition, LUKS2.
+- ext4 directly on `/dev/mapper/cryptroot`.
+- ESP mounted at `/mnt/efi`, root at `/mnt`.
 
-- This is an initial real installer path, not the complete project installer.
-- The installer opens and retains the selected whole-disk and partition block descriptors in the Bash process, then passes inherited /proc/self/fd paths to wipefs, sgdisk, partprobe, cryptsetup, and mkfs tools. It checks that each retained descriptor matches the reviewed kernel major:minor identity and that the original /dev path still resolves to that descriptor. This avoids re-resolving the selected /dev pathname for the destructive tool opens. The isolated loop-device integration test exercises these tool interfaces. Physical NVMe hot-unplug/controller failure behavior and the complete hardware transaction remain untested; do not claim that the loop test proves all hardware races impossible.
-- No automated hardware test has been run by maintainers. Do not run it against a disk containing data that is not backed up.
-- The script currently stops after a minimal bootable base-system setup. It does not disable unrelated live-ISO swap. Caelestia/Hyprland/Quickshell, resume/hibernation, X280 power/thermal tuning, and optional BlackArch are not installed by this stage.
-- The first physical run must be treated as an integration test. Save the terminal output and test report, inspect the generated partition table and mounted system before reboot.
+The guarded `base_system::bootstrap` installs the minimal package set with `pacstrap -K` and generates UUID-based fstab. The target configuration script is copied into the target and run through `arch-chroot`; it prompts for hostname, username/password, timezone, and locale, installs Intel microcode, configures sudo wheel access, creates the swapfile, and enables NetworkManager.
 
-## Operator safety
+The installer installs systemd-boot and configures a mkinitcpio UKI using the systemd-based `sd-encrypt` hook and `rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw` kernel command line. The default UKI target is `/efi/EFI/Linux/arch-linux.efi`. It checks for expected configuration artifacts and does not reboot automatically.
 
-The script is destructive. It must only be run from the Arch ISO after confirming the displayed model, capacity, stable identifier, and exact target path. A successful command sequence is not equivalent to a verified boot. If any step fails after partitioning begins, stop and inspect the disk; do not blindly rerun.
+## Important boundaries and risks
 
+- The installer is destructive and replaces the selected SSD. Its existence or passing CI is not authorization to run it.
+- The separate native C helper in `native/storage-handle.c` is not called by this installer.
+- The loop integration test validates selected utility interfaces through inherited descriptor paths against a disposable loop image. It does not prove all kernel TOCTOU races impossible, physical NVMe hot-unplug behavior, or successful boot.
+- The earlier architecture plan assigned destructive storage ownership to `lib/storage.sh`; the current installer instead orchestrates destructive commands directly. This deviation is documented and remains an architectural item for review/refactor.
+- The installer does not configure resume/hibernation, recovery-key storage/registration, Caelestia/Hyprland/Quickshell, ThinkPad power/thermal tuning, or BlackArch.
+- No complete transactional rollback or automatic safe resume after partial disk mutation is claimed. After a failure following the first destructive operation, stop and inspect the real disk state; do not rerun blindly.
+- A non-empty UKI file and generated configuration artifacts do not prove firmware boot, LUKS unlock, root mount, or successful first login.
 
-## Automated checks
+## Automated validation
 
-`tests/test-arch-installer-script.sh` and `tests/test-arch-config-script.sh` perform `bash -n` and static checks for the X280 hardware guard, confirmation/revalidation ordering, LUKS2 setup, guarded base bootstrap, user/sudo configuration, swapfile setup, and UKI settings. `tests/test-pinned-device-path.sh` additionally runs disk tools against a temporary loop-backed image using inherited pinned descriptors; it never targets a physical disk. These tests do not prove bootability or physical NVMe hot-unplug behavior. The complete suite includes this test through `bash tests/run.sh`.
-
-
-## First physical X280 test
-
-1. Boot the official Arch ISO in UEFI mode, connect to the network, and ensure the target laptop is the ThinkPad X280 whose internal SSD identity is recorded in the project profile.
-2. Fetch this feature branch (PR #9), not main:
-
-```bash
-git clone --branch feature/base-system-bootstrap-2026-11-07 https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git
-cd Lenovo-ThinkPad-X280-K41
-```
-
-3. Ensure `jq` and `python3` are available, then run the complete test suite:
+The canonical runner is:
 
 ```bash
 bash tests/run.sh
 ```
 
-Do not proceed if any required test fails. The native C helper test may be SKIP if `cc` is unavailable; all other tests must pass. Inspect `reports/test-runs/<timestamp>/summary.md` and `combined.log`.
+It writes persistent summaries and logs under `reports/test-runs/`. Required suite dependencies are `bash`, `jq`, and `python3`; the native helper compile/CLI test is skipped only if `cc` is unavailable. Installer/configuration tests include static assertions; they do not execute the full installer. The pinned-device test uses a temporary loop-backed image, never the physical SSD.
 
-4. Run the installer as root:
+See [tests/README.md](../tests/README.md) for the single authoritative test procedure and [11 — Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) for acceptance criteria and evidence boundaries.
 
-```bash
-bash scripts/install-arch-x280.sh
-```
+## Physical-test gate
 
-The script is destructive. Confirm that the displayed target is the expected WDC PC SN730, 256052966400-byte SSD, and that its serial matches the verified value already present in the hardware profile. Do not continue if any identity field differs. The script will require the exact plan-bound confirmation phrase, a LUKS2 passphrase, and interactive hostname/user/timezone/locale/password inputs.
+**Do not begin physical destructive testing based solely on this document.** The next physical test is blocked until:
+1. Current branch CI is green for the latest documentation/code commit.
+2. The read-only `scripts/validate-live-storage.sh` has been run successfully on the actual X280 Arch ISO after the zero-capacity removable-reader fix, with its report reviewed.
+3. The installer, target identity, plan, destructive command ordering, descriptor behavior, and all failure/cleanup paths receive a final independent review.
+4. The operator confirms backup/recovery arrangements and the exact target identity from the live environment.
+5. The final test procedure and stop conditions are approved.
 
-5. Before reboot, verify that `/mnt/etc/fstab` exists, `/mnt/efi/EFI/Linux/arch-linux.efi` is non-empty, and the root/ESP mounts are correct. If any check fails, stop and capture the logs; do not reboot or rerun blindly.
-6. If all checks are correct, sync and cleanly unmount before reboot:
-
-```bash
-sync
-umount -R /mnt
-cryptsetup close cryptroot
-reboot
-```
-
-After the first boot, record whether the LUKS unlock prompt appears, whether the UKI starts, whether the root filesystem mounts, and whether the initial user can log in and use sudo. Run `bash scripts/live-validation.sh` from the installed system when practical. Preserve and review the generated reports, then push the test-run and live-validation report directories for analysis.
-
-Do not enable hibernation or proceed to desktop/hardware tuning during this first storage/base-system validation. Those are separate stages.
+No destructive physical test, successful VM installation, or successful X280 boot is claimed in this document.
