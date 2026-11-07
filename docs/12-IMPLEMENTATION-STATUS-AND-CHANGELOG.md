@@ -338,3 +338,37 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Updated the profile, installer guard, and installer regression fixture to use the observed capacity. Model and stable serial checks remain required; no identity checks were relaxed.
 - Added an explicit report-only Intel microcode notice and a regression assertion that the target configuration does not invoke pacman/pacstrap to install `intel-ucode`; synchronized the stale hardware/Stage 9 documentation.
 - Validation is pending CI. No destructive operation or physical installation was performed.
+
+
+### 2026-11-08 — Consolidated verification record before integration to main
+
+This entry consolidates existing evidence from PR #11, PR #12, the read-only X280 readiness report, the first committed repository test report, and their GitHub Actions runs. It records prior results; it does not claim that those tests were rerun on this date.
+
+#### Integrated change set
+
+- PR #11, `feat/x280-live-install-readiness-2026-11-07`, head `51e2b00a80b10f01ce5b359f8b91965b32ba5e0a`: adds the consolidated read-only X280 live-readiness gate, regression coverage, and synchronized status documentation.
+- PR #12, `feat/installer-policy-baseline-2026-11-07`, head `d71b8fb2f407ab00abb28eace72e5c8b09cebbb2`: reconciles the configured SSD capacity with the observed physical device and enforces the approved report-only Intel microcode policy. The latest commit also adds the first persistent test-run evidence.
+- The exact observed WDC PC SN730 capacity is `256060514304` bytes. The previous expected value `256052966400` bytes was inconsistent with the read-only hardware report. Model and stable-identity checks remain in place; no storage safety gate was relaxed.
+
+#### Existing validation evidence
+
+| Evidence | Result | Scope / limitation |
+|---|---|---|
+| X280 live-readiness report `reports/live-readiness/20261107T165046Z/` | 8/8 readiness checks PASS; Bash syntax check across 44 files PASS; test suite 15 PASS, 0 FAIL, 1 SKIP; exit 0 | Read-only physical environment and target identity/topology checks only. No disk writes or installation. |
+| First committed test report `reports/test-runs/20261107T170049Z/` | 15 test scripts PASS; 0 failed checks; 1 SKIP; overall PASS | Report metadata identifies tested checkout commit `bb33c74eb07ac185f0ff7fe531e3a728453363e7`, not the later report-only commit `d71b8fb`. |
+| PR #11 GitHub Actions run `42393410518` | SUCCESS | Bash syntax, ShellCheck, formatting check, and repository test suite passed for PR #11 head `51e2b00`. |
+| PR #12 GitHub Actions run `42394293479` | SUCCESS | Bash syntax, ShellCheck, and repository test suite passed for PR #12 head `d71b8fb`. |
+
+The optional `tests/test-native-storage-handle.sh` was skipped because the C compiler `cc` was unavailable in the first recorded test run. This is an explicit skip, not a passing execution of the native-helper test.
+
+#### Verification boundary and remaining work
+
+- **IMPLEMENTED:** consolidated read-only readiness gate; SSD-capacity reconciliation; report-only Intel microcode policy; persistent per-test report artifacts.
+- **TESTED:** the fixture suite and static/lint checks described above, on their recorded commits and CI runs.
+- **VERIFIED:** the recorded read-only X280 readiness checks and GitHub Actions outcomes. These results are point-in-time evidence and are not being rerun merely to repeat already-established checks.
+- **NOT TESTED:** destructive installation on the physical X280, successful first boot, LUKS unlock/recovery procedure, suspend/resume/hibernation, and post-install desktop/hardware configuration.
+- **NOT IMPLEMENTED:** Caelestia/Hyprland/Quickshell integration, ThinkPad power/thermal tuning, hibernation/resume configuration, recovery-key handling, and optional selective BlackArch integration.
+- The installer remains destructive. A passing CI suite or read-only readiness report is not permission to erase the SSD. The physical installation remains blocked until the documented independent source/safety review, current read-only live checks, backup/recovery preparation, exact target confirmation, approved stop conditions, and explicit operator authorization are complete.
+- No VM-based installer test is planned, per the recorded owner decision.
+
+Historical entries above that said validation was pending describe the state at the time they were written. The CI outcomes in this consolidated record supersede those pending statuses for the specific commits and runs listed here; they do not imply physical installation validation.
