@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Integration test: prove core disk tools accept inherited descriptor-pinned block paths.
 set -Eeuo pipefail
-(( EUID == 0 )) || { printf 'SKIP: requires root for loop-device integration test.\\n'; exit 0; }
+if (( EUID != 0 )); then
+  if command -v sudo >/dev/null 2>&1; then exec sudo bash "$0"; fi
+  printf 'SKIP: requires root for loop-device integration test.\\n'
+  exit 0
+fi
 
 for cmd in losetup sgdisk wipefs partprobe udevadm mkfs.fat cryptsetup mkfs.ext4 blkid; do
   command -v "$cmd" >/dev/null 2>&1 || { printf 'SKIP: missing command: %s\\n' "$cmd"; exit 0; }
