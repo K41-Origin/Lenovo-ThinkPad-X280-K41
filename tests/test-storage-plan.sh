@@ -84,6 +84,7 @@ storage::plan_bind_target bound target
 [[ ${bound[target_stable_id]} == eui.0011223344556677 ]]
 [[ ${bound[target_removable]} == false && ${bound[target_read_only]} == false ]]
 [[ ${bound[profile_root_encryption]} == luks2 ]]
+[[ ${bound[profile_root_type_guid]} == ca7d7ccb-63ed-4c53-861c-1742536059cc ]]
 [[ ${bound[profile_root_filesystem]} == ext4 ]]
 [[ ${bound[profile_esp_mountpoint]} == /efi ]]
 [[ ${bound[profile_uki_path]} == /efi/EFI/Linux/arch-linux.efi ]]
