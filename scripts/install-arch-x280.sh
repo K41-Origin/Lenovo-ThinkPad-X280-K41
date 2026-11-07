@@ -38,6 +38,7 @@ trap cleanup EXIT
 
 need_root
 need_commands
+preflight::check_target_inventory || die "Host tidak lolos verifikasi profil ThinkPad X280."
 [[ -d /sys/firmware/efi ]] || die "Boot ISO dalam mode UEFI terlebih dahulu."
 [[ ! -e /mnt/etc ]] || die "/mnt tampak sudah berisi sistem; unmount/periksa manual sebelum menjalankan installer."
 
@@ -75,8 +76,8 @@ storage::plan_confirm_interactive plan confirmation || die "Konfirmasi dibatalka
 storage::plan_final_revalidate plan confirmation fresh_target fresh_prereq gate || die "Validasi final gagal; tidak ada perubahan disk."
 
 disk=${gate[target_device_path]}
-diskseq_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN "$disk" | tr -s ' ' | sed 's/^ *//')"
-[[ -n $diskseq_before ]] || die "Identitas target tidak dapat dibaca ulang."
+disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed 's/[[:space:]]\+$//')"
+[[ -n $disk_identity_before ]] || die "Identitas target tidak dapat dibaca ulang."
 storage::validate_target fresh_target || die "Target berubah sebelum operasi pertama."
 
 # The external disk utilities open the device pathname themselves. The
@@ -85,8 +86,8 @@ storage::validate_target fresh_target || die "Target berubah sebelum operasi per
 # bound execution and must not be represented as race-proof.
 assert_target() {
   local now
-  now="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN "$disk" | tr -s ' ' | sed 's/^ *//')" || return 1
-  [[ $now == "$diskseq_before" ]] || {
+  now="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed 's/[[:space:]]\+$//')" || return 1
+  [[ $now == "$disk_identity_before" ]] || {
     k41::log_error "Identitas block device berubah; menghentikan proses."
     return 1
   }
@@ -99,8 +100,7 @@ run_step() {
   "$@" || die "Tahap gagal: $label"
 }
 
-# Stop automounters and ensure no child partition is mounted or used as swap.
-run_step "nonaktifkan swap aktif" swapoff -a
+# Do not disable unrelated swap devices or swapfiles on the live ISO.
 run_step "hapus signature lama" wipefs --all --force "$disk"
 run_step "buat tabel GPT dan partisi" sgdisk --zap-all --clear \
   --new=1:"${plan[esp_start_sector]}":"${plan[esp_end_sector]}" --typecode=1:ef00 --change-name=1:K41-ESP \
@@ -127,15 +127,8 @@ run_step "mount root" mount /dev/mapper/cryptroot /mnt
 mkdir -p /mnt/efi
 run_step "mount ESP" mount "$esp" /mnt/efi
 
-run_step "instal sistem dasar Arch" pacstrap -K /mnt base linux linux-firmware intel-ucode cryptsetup networkmanager sudo e2fsprogs dosfstools nano man-db man-pages
+run_step "instal sistem dasar Arch" base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"
 
-fstab_tmp="$(mktemp)"
-trap 'rm -f "$fstab_tmp"; cleanup' EXIT
-genfstab -U /mnt > "$fstab_tmp" || die "genfstab gagal."
-grep -qE '[[:space:]]/[[:space:]]' "$fstab_tmp" || die "fstab tidak memiliki root mount."
-grep -qE '[[:space:]]/efi[[:space:]]' "$fstab_tmp" || die "fstab tidak memiliki ESP mount."
-install -m 644 "$fstab_tmp" /mnt/etc/fstab
-rm -f "$fstab_tmp"
 
 # Minimal bootable configuration: systemd-boot + mkinitcpio UKI.
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
