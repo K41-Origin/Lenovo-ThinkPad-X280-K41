@@ -1,13 +1,21 @@
 # Implementation Status and Changelog
 
-## Current verified baseline — 2026-11-07 (repository branch audit)
+## Latest repository state — 2026-11-08
+
+- `main` is at `32a4366db2543ced6c59d09946559cfb20c6f04f`; PR #11 and PR #12 are merged.
+- PR #13, `Add reviewed Arch ISO bootstrap and readiness gate`, is OPEN on branch `feat/archiso-bootstrap-review-gate-2026-11-08`, head `d7e239e9d67e352df8af3b54b3c10df6c6aacd5d`. It has not been merged.
+- PR #13 CI on that exact head passed: Repository validation run `42395513751` and Syntax/lint/test run `42395513754`. The latter passed Bash syntax, ShellCheck, formatting checks, and the repository test suite.
+- **IMPLEMENTED on PR #13:** bootstrap source retrieval, origin/clean-checkout validation, commit display, manual source review, read-only live-readiness gate, and second exact launch acknowledgement. **TESTED:** static contract test and CI on the exact head above. **NOT TESTED:** running bootstrap on a live Arch ISO, physical X280 installation, or first boot.
+- The existing installer remains destructive and base-system-only. Caelestia/Hyprland/Quickshell, hibernation/resume, recovery-key handling, ThinkPad power/thermal tuning, and selective BlackArch remain NOT IMPLEMENTED.
+
+## Historical baseline snapshot — 2026-11-07 (repository branch audit)
 
 - `main` baseline inspected: `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`; run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the 12-script suite on that exact main commit.
 - PR #9 branch `feature/base-system-bootstrap-2026-11-07` contains the separate initial destructive installer and target-configuration scripts. CI runs #130 and #131 (`42362113267`, `42362119357`) passed on commit `2aae853df0c74c8ae9a46e702d457884f1d91fd8` with syntax, lint, and the 15-script suite including a disposable loop-device integration test. These runs predate the documentation-only commits in this current branch head; they are not CI evidence for the latest head. Earlier run #94 is historical and not the latest PR evidence.
 - Physical X280 observations from user-provided terminal photographs are documented in `docs/11-TESTING-AND-ACCEPTANCE.md` (Stages 8–9). They establish point-in-time raw system facts, not a successful run of the project's live validator.
 - `scripts/validate-live-storage.sh` has not yet been evidenced as successfully run on the physical laptop after the zero-capacity removable-reader fix. Physical NVMe behavior, complete installation, and successful boot remain NOT TESTED. VM-based installation testing is OUT OF SCOPE by owner decision; full destructive installation testing is reserved for the actual X280 after the safety gate.
 
-## PR #9 branch delta — 2026-11-07
+## Historical PR #9 branch delta — 2026-11-07
 
 The table below includes branch-only implementation not yet merged into main. The legacy top-level `installer` command remains diagnostic-only; the new destructive path is a separate explicit script.
 
@@ -371,4 +379,12 @@ The optional `tests/test-native-storage-handle.sh` was skipped because the C com
 - The installer remains destructive. A passing CI suite or read-only readiness report is not permission to erase the SSD. The physical installation remains blocked until the documented independent source/safety review, current read-only live checks, backup/recovery preparation, exact target confirmation, approved stop conditions, and explicit operator authorization are complete.
 - No VM-based installer test is planned, per the recorded owner decision.
 
-Historical entries above that said validation was pending describe the state at the time they were written. The CI outcomes in this consolidated record supersede those pending statuses for the specific commits and runs listed here; they do not imply physical installation validation.\n\n### 2026-11-08 — Add reviewed Arch ISO bootstrap gate\n- Added `scripts/bootstrap-archiso.sh` to retrieve the latest `main` branch using Git over HTTPS, verify the expected origin and clean checkout, and display the resolved commit SHA.\n- The bootstrap pages through the installer, target configuration, and storage/preflight source files for manual review. It launches the destructive installer only after an exact acknowledgement containing that commit SHA.\n- The bootstrap does not perform disk operations; the installer retains its separate target-specific plan confirmation and final revalidation.\n- Added a static contract test and documented the Arch ISO bootstrap workflow. This test does not execute the bootstrap or installer.\n- **IMPLEMENTED:** bootstrap and static test source added on feature branch. **TESTED:** pending CI. **NOT TESTED:** bootstrap execution on a live Arch ISO, physical installation, and first boot.\n
+Historical entries above that said validation was pending describe the state at the time they were written. The CI outcomes in this consolidated record supersede those pending statuses for the specific commits and runs listed here; they do not imply physical installation validation.
+
+
+### 2026-11-08 — Add reviewed Arch ISO bootstrap gate
+- Added `scripts/bootstrap-archiso.sh` to retrieve the latest `main` branch using Git over HTTPS, verify the expected origin and clean checkout, and display the resolved commit SHA.
+- The bootstrap pages through the bootstrap itself, installer, target configuration, storage/preflight modules, readiness scripts, canonical runner, and tracked test scripts. It requires source-review acknowledgement, a passing read-only readiness gate, and a second exact launch acknowledgement.
+- The bootstrap does not perform disk operations; the installer retains its separate target-specific plan confirmation and final revalidation.
+- Added a static contract test and documented the Arch ISO bootstrap workflow. This test does not execute the bootstrap or installer.
+- **IMPLEMENTED:** bootstrap and static test source added on feature branch. **TESTED:** CI passed on commit `d7e239e9d67e352df8af3b54b3c10df6c6aacd5d` (runs `42395513751` and `42395513754`). **NOT TESTED:** bootstrap execution on a live Arch ISO, physical installation, and first boot.
