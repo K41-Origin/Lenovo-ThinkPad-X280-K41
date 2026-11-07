@@ -67,7 +67,7 @@ installer::on_error() {
 }
 need_commands() {
   local cmd
-  for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt blockdev wipefs arch-chroot mount awk sed grep install; do
+  for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt blockdev wipefs arch-chroot mount awk sed grep install tee; do
     command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak ditemukan: $cmd"
   done
 }
