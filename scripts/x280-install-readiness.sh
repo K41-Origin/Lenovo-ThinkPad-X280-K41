@@ -8,6 +8,19 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+started="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+branch="$(git branch --show-current 2>/dev/null || printf 'unknown')"
+commit="$(git rev-parse HEAD 2>/dev/null || printf 'unknown')"
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  if [[ -z "$(git status --porcelain)" ]]; then
+    working_tree="clean before report generation"
+  else
+    working_tree="modified before report generation"
+  fi
+else
+  working_tree="not a Git checkout"
+fi
+
 report_root="$ROOT/reports/live-readiness"
 mkdir -p -- "$report_root"
 report_dir="$report_root/$timestamp"
@@ -21,19 +34,6 @@ diagnostics="$report_dir/diagnostics.log"
 : >"$summary"
 : >"$diagnostics"
 chmod 600 "$summary" "$diagnostics"
-
-started="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-branch="$(git branch --show-current 2>/dev/null || printf 'unknown')"
-commit="$(git rev-parse HEAD 2>/dev/null || printf 'unknown')"
-if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-  if [[ -z "$(git status --porcelain)" ]]; then
-    working_tree="clean before report generation"
-  else
-    working_tree="modified before report generation"
-  fi
-else
-  working_tree="not a Git checkout"
-fi
 
 checks_failed=0
 checks_passed=0
