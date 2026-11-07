@@ -8,12 +8,13 @@ Run from the repository root:
 bash tests/run.sh
 ```
 
-The test list is defined only in `tests/run.sh` (15 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
+The test list is defined only in `tests/run.sh` (17 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
 
 ## What the suite covers
 
 | Test | Scope |
 |---|---|
+| `test-bootstrap-archiso.sh` | Static source-review, commit identity, exact acknowledgement, and no-remote-pipe contract checks for the Arch ISO bootstrap. |
 | `test-common-preflight.sh` | Logging and read-only preflight helpers |
 | `test-installer-entry.sh` | Legacy `installer --help/--preflight` behavior and diagnostic-only boundary |
 | `test-arch-installer-script.sh` | Static syntax/contract checks for the separate PR #9 destructive installer; does not execute it |
@@ -65,7 +66,7 @@ It requires UEFI, matches the configured X280 internal SSD identity, discovers w
 
 The physical X280 validator has previously failed because the removable SD/MMC reader reported zero capacity. Discovery was changed to skip only numeric-zero whole-disk records with `RM=true`; zero-sized non-removable and unknown-size records remain fail-closed. The updated validator still requires a successful physical rerun after this fix.
 
-## Installer distinction
+## Arch ISO bootstrap\n\nThe operator-facing bootstrap is `scripts/bootstrap-archiso.sh`. It fetches the latest `main` checkout, prints its commit SHA, opens the relevant source files for manual review, and requires an exact acknowledgement before launching the separate destructive installer. See [Arch ISO bootstrap and source-review gate](../docs/16-ARCHISO-BOOTSTRAP.md). The bootstrap test is static contract coverage only; it does not run the bootstrap or the destructive installer.\n\n## Installer distinction
 
 - Top-level `installer --preflight`: read-only diagnostics only.
 - `scripts/install-arch-x280.sh` on PR #9: separate destructive initial Arch base installer. Its static test does not execute the script. The pinned-device integration test covers selected utility interfaces against a disposable loop image only.
