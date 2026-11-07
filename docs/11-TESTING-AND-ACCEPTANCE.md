@@ -310,4 +310,4 @@ The follow-up change now skips **only** a whole-disk record where `lsblk` report
 
 The original report is stored at `reports/x280-archiso-storage-test-20261107T082432Z.log`. It is preserved as evidence of the failed attempt; it is not rewritten to imply success.
 
-**Validation status:** code and fixture changes are committed to the follow-up branch; CI for that branch is pending. The physical X280 validator has **not** yet been rerun after the fix. No disk mutation was performed or authorized.
+**Validation status:** GitHub Actions run #191 (`42356761102`) passed on commit `6e784d08927996b7bb9af3c144e9fd3dbc5555ac`: Bash syntax, ShellCheck, configured shfmt, and all 12 repository test scripts passed, including the new zero-capacity fixtures. The physical X280 validator has **not** yet been rerun after the fix. No disk mutation was performed or authorized.
