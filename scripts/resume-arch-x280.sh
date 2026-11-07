@@ -65,7 +65,7 @@ on_exit() {
 need_root() { (( EUID == 0 )) || die 'Run as root from the official Arch ISO.'; }
 need_commands() {
   local cmd
-  for cmd in lsblk readlink blkid sgdisk cryptsetup e2fsck mount mountpoint findmnt blockdev pacman arch-chroot bootctl install mkinitcpio genfstab awk grep sed date tee mkdir chmod; do
+  for cmd in lsblk readlink blkid sgdisk cryptsetup e2fsck mount mountpoint findmnt blockdev pacman arch-chroot bootctl install mkinitcpio genfstab awk grep sed date tee mkdir chmod mktemp mv rm cat; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command missing: $cmd"
   done
 }
@@ -101,7 +101,7 @@ sgdisk -i 1 "$disk" | grep -qi 'EF00' || die 'Partition 1 is not the expected EF
 sgdisk -i 2 "$disk" | grep -qi '8309' || die 'Partition 2 is not the expected Linux LUKS type.'
 [[ $(blkid -s TYPE -o value "$esp") == vfat ]] || die 'Partition 1 is not FAT/vfat.'
 cryptsetup isLuks "$root_part" || die 'Partition 2 is not a LUKS container.'
-cryptsetup luksDump "$root_part" | grep -Fq 'Version: 2' || die 'Root container is not LUKS2.'
+cryptsetup luksDump "$root_part" | grep -Eq 'Version: +2' || die 'Root container is not LUKS2.'
 
 set_stage unlock 'Unlock the existing LUKS2 volume; no formatting is performed'
 cryptsetup open "$root_part" cryptroot || die 'Could not unlock the existing LUKS partition.'
