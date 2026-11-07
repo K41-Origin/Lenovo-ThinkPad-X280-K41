@@ -143,6 +143,14 @@ root_uuid="$(blkid -s UUID -o value "$root_part")"
 [[ -n $root_uuid ]] || die "UUID LUKS tidak ditemukan."
 arch-chroot /mnt /bin/bash -euo pipefail <<CHROOT
 sed -i 's|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)|' /etc/mkinitcpio.conf
+mkdir -p /efi/EFI/Linux /etc/kernel
+printf '%s\\n' 'cryptdevice=UUID=${root_uuid}:cryptroot root=/dev/mapper/cryptroot rw' > /etc/kernel/cmdline
+sed -i '/^default_uki=/d; /^default_image=/d' /etc/mkinitcpio.d/linux.preset
+printf '%s\\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' >> /etc/mkinitcpio.d/linux.preset
+systemctl enable NetworkManager
+mkinitcpio -P
+CHROOT
+sed -i 's|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)|' /etc/mkinitcpio.conf
 mkdir -p /efi/loader/entries
 printf '%s\\n' 'default arch-linux.conf' 'timeout 3' 'console-mode auto' 'editor no' > /efi/loader/loader.conf
 printf '%s\\n' 'title Arch Linux (K41)' 'linux /vmlinuz-linux' 'initrd /intel-ucode.img' 'initrd /initramfs-linux.img' 'options cryptdevice=UUID=${root_uuid}:cryptroot root=/dev/mapper/cryptroot rw' > /efi/loader/entries/arch-linux.conf
