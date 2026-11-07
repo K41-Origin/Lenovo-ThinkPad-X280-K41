@@ -151,7 +151,7 @@ rm -f -- /mnt/root/k41-configure-arch-x280.sh
 
 # Minimal bootable configuration: systemd-boot + mkinitcpio UKI.
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
-root_uuid="$(blkid -s UUID -o value "$root_part")"
+root_uuid="$(blkid -s UUID -o value "$root_ref")"
 [[ -n $root_uuid ]] || die "UUID LUKS tidak ditemukan."
 assert_target || die "Identitas disk berubah sebelum konfigurasi boot."
 arch-chroot /mnt /bin/bash -euo pipefail <<CHROOT
