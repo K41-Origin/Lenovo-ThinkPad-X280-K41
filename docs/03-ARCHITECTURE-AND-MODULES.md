@@ -10,14 +10,14 @@ This document defines the implemented repository architecture and module ownersh
 
 The project charter in [01](01-PROJECT-CHARTER.md) owns status definitions. The domain documents own detailed policies; this architecture document does not duplicate their full procedures.
 
-## Current architecture status — 2026-11-07
+## Current architecture status — 2026-11-08
 
 The repository contains two distinct entry paths:
 
 1. `installer` is the original diagnostic entry point. It supports `--help` and read-only `--preflight`; it does not install Arch.
 2. `scripts/bootstrap-archiso.sh` retrieves the latest `main` revision, displays its commit SHA, and gates launch on manual source review. `scripts/install-arch-x280.sh` is the initial destructive installer on `main`. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. It is IMPLEMENTED, but physical installation and first boot are NOT TESTED.
 
-Do not conflate these paths. The PR branch is not equivalent to merged/released code. See the status document for exact commit and CI evidence.
+Do not conflate these paths: the top-level entry point is diagnostic-only, while the bootstrap launches the separate destructive installer after source review. See the status document for exact commit and CI evidence.
 
 ## Runtime flow implemented by the initial installer
 
