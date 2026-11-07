@@ -201,6 +201,7 @@ capture_optional() {
 }
 
 capture_hardware() {
+  local item path
   printf 'Collection time (UTC): %s\n' "$started"
   printf 'Kernel: %s\nArchitecture: %s\n' "$(uname -sr)" "$(uname -m)"
   for item in sys_vendor product_name bios_version; do
