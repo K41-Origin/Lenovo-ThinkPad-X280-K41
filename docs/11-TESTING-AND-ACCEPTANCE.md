@@ -222,3 +222,32 @@ On 2026-11-03, GitHub Actions run `41617706958` (#107) passed Bash syntax valida
 
 
 On 2026-11-03, GitHub Actions run #136 (`41618734278`) passed Bash syntax validation and all eleven test scripts at commit `3fcc970f58d76e5f62d6b76f767a4075cbe0a95b`. The mock execution-boundary cases passed, including successful eight-step execution, stable-identity change abort, read-only safety-attribute change abort, zero mock calls after an initial probe failure, partial-failure recovery marking, and callback rejection, and rejection of tampered gate metadata before gate consumption. The full topology suite also passed after its synthetic major:minor IDs were isolated from the host filesystem device ID. No real block-device handle was opened and no disk was modified.
+
+
+## Stage 8 — ThinkPad X280 Arch ISO live-environment observations
+
+**Date:** 2026-11-07 (user-provided terminal photographs; manually reviewed)  
+**Environment:** Arch Linux ISO `2026.11.01`, running on the physical ThinkPad X280.
+
+Observed read-only results:
+
+| Check | Observed result | Evidence / status |
+|---|---|---|
+| Firmware boot mode | UEFI | `/sys/firmware/efi` exists and the terminal printed `UEFI MODE`. VERIFIED |
+| Live root | `/dev/loop0` / `archiso` overlay | `findmnt /` shows an overlay root with archiso lower/upper/work paths. VERIFIED |
+| Active swap | None listed | `swapon --show` returned no rows. VERIFIED for this snapshot |
+| Installer USB | `/dev/sda`, 7.5G, model `Flash Disk`, removable=1, read-only=1 | `lsblk` output. VERIFIED |
+| Internal SSD | `/dev/nvme0n1`, 238.5G, model `WDC PC SN730 SDBQNTY-256G-1001`, transport NVMe, removable=0, read-only=0 | `lsblk` output. VERIFIED |
+| Internal SSD serial alias | `nvme-WDC_PC_SN730_SDBQNTY-256G-1001_193839803177` | `/dev/disk/by-id/` symlink resolves to `../../nvme0n1`. VERIFIED |
+| Additional SSD aliases | Partition aliases `...-part1` through `...-part4`; an NVMe EUI alias is also present | `/dev/disk/by-id/` output. VERIFIED; full EUI string not transcribed because the photograph is not sufficiently clear |
+| Existing SSD partition table | Four partitions: 100M EFI/FAT, 16M reserved (no filesystem shown), 237.8G NTFS, 530M NTFS | `lsblk` output. VERIFIED as observed |
+
+Safety interpretation:
+- The kernel names observed in this boot are `/dev/sda` for the removable Arch USB and `/dev/nvme0n1` for the internal WDC NVMe. These names are runtime observations, not permanent identifiers.
+- The WDC model and serial-based by-id alias agree across the two terminal snapshots. This is strong identification evidence, but target selection must still bind to fresh kernel major:minor, capacity, transport, WWN/serial, removable/read-only state, and topology at execution time.
+- The SSD is reported writable (`RO=0`) and still contains the Windows partition layout. No partition, filesystem, encryption, mount, or package mutation was performed during these observations.
+- An empty `swapon --show` is expected in this live session; it does not establish that the target disk is unused.
+- The live root is an overlay. The target-safety decision is **NOT YET VERIFIED**: the complete mount dependency graph, loop backing relationship, overlay lower/upper/work backing devices, and active swap relationship must pass the repository topology validator before a target may be considered eligible.
+- The repository's `storage::discover_candidates` and `storage::validate_target` functions have not yet been executed on this physical host. The photographs validate raw system observations only, not the project's implementation.
+
+**Stage 8 result:** UEFI boot and device identity observations VERIFIED. Physical-disk topology exclusion, live candidate discovery, plan calculation, confirmation flow, and any destructive executor remain NOT TESTED. No permission to erase or repartition is implied by this record.
