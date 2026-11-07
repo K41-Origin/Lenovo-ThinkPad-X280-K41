@@ -1,0 +1,8 @@
+PASS: module sourcing has no output or shell-option/trap changes
+PASS: logging helpers validate arguments and write to stderr
+PASS: boot-mode detection distinguishes UEFI, legacy candidate, and unknown
+PASS: required-command check handles present, missing, and invalid names
+PASS: network check reports link state without claiming internet access
+PASS: network check reports unavailable diagnostics as unknown
+PASS: base-system module validates encrypted ext4 root, separate vfat ESP, and explicit confirmation
+All common/preflight tests passed.
