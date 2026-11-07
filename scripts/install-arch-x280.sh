@@ -24,7 +24,7 @@ die() { k41::log_error "$1"; exit 1; }
 need_root() { (( EUID == 0 )) || die "Jalankan dari Arch ISO sebagai root."; }
 need_commands() {
   local cmd
-  for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt; do
+  for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt blockdev wipefs arch-chroot; do
     command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak ditemukan: $cmd"
   done
 }
@@ -90,7 +90,7 @@ assert_target() {
     k41::log_error "Identitas block device berubah; menghentikan proses."
     return 1
   }
-  storage::validate_target fresh_target
+  [[ -b "$disk" ]] || return 1
 }
 run_step() {
   local label=$1; shift
@@ -119,7 +119,6 @@ assert_target || die "Identitas disk berubah setelah partisi."
 printf '\nBuat passphrase LUKS2 untuk root (input tidak dicatat):\n' >&2
 run_step "format partisi root dengan LUKS2" cryptsetup luksFormat --type luks2 --verify-passphrase "$root_part"
 run_step "buka volume LUKS2" cryptsetup open "$root_part" cryptroot
-crypt_open=1
 run_step "format ESP FAT32" mkfs.fat -F 32 -n K41_EFI "$esp"
 run_step "format root ext4" mkfs.ext4 -F -L K41_ROOT /dev/mapper/cryptroot
 
@@ -140,14 +139,16 @@ rm -f "$fstab_tmp"
 
 # Minimal bootable configuration: systemd-boot + mkinitcpio UKI.
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
-arch-chroot /mnt /bin/bash -euo pipefail -c '
+root_uuid="$(blkid -s UUID -o value "$root_part")"
+[[ -n $root_uuid ]] || die "UUID LUKS tidak ditemukan."
+arch-chroot /mnt /bin/bash -euo pipefail -c "
   sed -i "s/^HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)/" /etc/mkinitcpio.conf
   mkdir -p /etc/kernel
   printf "%s\n" "default arch-linux.conf" "timeout 3" "console-mode auto" "editor no" > /efi/loader/loader.conf
-  printf "%s\n" "title Arch Linux (K41)" "linux /vmlinuz-linux" "initrd /intel-ucode.img" "initrd /initramfs-linux.img" "options cryptdevice=UUID=$(blkid -s UUID -o value "$root_part"):cryptroot root=/dev/mapper/cryptroot rw" > /efi/loader/entries/arch-linux.conf
+  printf "%s\n" "title Arch Linux (K41)" "linux /vmlinuz-linux" "initrd /intel-ucode.img" "initrd /initramfs-linux.img" "options cryptdevice=UUID=$root_uuid:cryptroot root=/dev/mapper/cryptroot rw" > /efi/loader/entries/arch-linux.conf
   systemctl enable NetworkManager
   mkinitcpio -P
-' || die "Konfigurasi boot dasar gagal."
+" || die "Konfigurasi boot dasar gagal."
 
 k41::log_info "Base Arch berhasil dipasang ke /mnt. Bootloader systemd-boot dan initramfs dikonfigurasi."
 k41::log_warn "Tahap Caelestia/Hyprland, user non-root, locale, timezone, hostname, swapfile, dan optimasi X280 belum dijalankan."
