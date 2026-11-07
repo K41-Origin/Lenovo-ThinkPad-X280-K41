@@ -141,14 +141,14 @@ rm -f "$fstab_tmp"
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
 root_uuid="$(blkid -s UUID -o value "$root_part")"
 [[ -n $root_uuid ]] || die "UUID LUKS tidak ditemukan."
-arch-chroot /mnt /bin/bash -euo pipefail -c "
-  sed -i "s/^HOOKS=.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)/" /etc/mkinitcpio.conf
-  mkdir -p /etc/kernel
-  printf "%s\n" "default arch-linux.conf" "timeout 3" "console-mode auto" "editor no" > /efi/loader/loader.conf
-  printf "%s\n" "title Arch Linux (K41)" "linux /vmlinuz-linux" "initrd /intel-ucode.img" "initrd /initramfs-linux.img" "options cryptdevice=UUID=$root_uuid:cryptroot root=/dev/mapper/cryptroot rw" > /efi/loader/entries/arch-linux.conf
-  systemctl enable NetworkManager
-  mkinitcpio -P
-" || die "Konfigurasi boot dasar gagal."
+arch-chroot /mnt /bin/bash -euo pipefail <<CHROOT
+sed -i 's|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)|' /etc/mkinitcpio.conf
+mkdir -p /efi/loader/entries
+printf '%s\\n' 'default arch-linux.conf' 'timeout 3' 'console-mode auto' 'editor no' > /efi/loader/loader.conf
+printf '%s\\n' 'title Arch Linux (K41)' 'linux /vmlinuz-linux' 'initrd /intel-ucode.img' 'initrd /initramfs-linux.img' 'options cryptdevice=UUID=${root_uuid}:cryptroot root=/dev/mapper/cryptroot rw' > /efi/loader/entries/arch-linux.conf
+systemctl enable NetworkManager
+mkinitcpio -P
+CHROOT
 
 k41::log_info "Base Arch berhasil dipasang ke /mnt. Bootloader systemd-boot dan initramfs dikonfigurasi."
 k41::log_warn "Tahap Caelestia/Hyprland, user non-root, locale, timezone, hostname, swapfile, dan optimasi X280 belum dijalankan."
