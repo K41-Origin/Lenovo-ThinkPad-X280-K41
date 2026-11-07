@@ -8,10 +8,10 @@ The script does not repair or configure the system. It does not partition, forma
 
 ## Run after the first successful login
 
-From the installed Arch system, open a terminal and run:
+The installer copies the collector into the installed target at `/usr/local/sbin/x280-first-boot-check`, so it is available after reboot without needing network access or recloning the repository. After the first regular-user login, open a terminal and run:
 
 ```bash
-sudo bash scripts/x280-first-boot-check.sh
+sudo /usr/local/sbin/x280-first-boot-check
 ```
 
 The script creates a timestamped directory:
