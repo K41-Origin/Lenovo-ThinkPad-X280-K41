@@ -1,11 +1,11 @@
 # Implementation Status and Changelog
 
-## Current verified baseline — 2026-11-07
+## Current verified baseline — 2026-11-07 (repository branch audit)
 
-- Repository head inspected: `main` at `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`.
-- GitHub Actions run #185 (`42349907205`) completed successfully on that exact commit. Bash syntax, ShellCheck, configured shfmt checks, and the canonical 12-script test suite passed.
+- `main` baseline inspected: `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`; run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the 12-script suite on that exact main commit.
+- PR #9 branch `feature/base-system-bootstrap-2026-11-07` contains the separate initial destructive installer and configuration scripts. Its historical CI run #94 (`42361056504`) passed syntax, ShellCheck, and 15 test scripts including a disposable loop-device integration test. This is branch-specific evidence, not evidence for main or for later untested edits.
 - Physical X280 observations from user-provided terminal photographs are documented in `docs/11-TESTING-AND-ACCEPTANCE.md` (Stages 8–9). They establish point-in-time raw system facts, not a successful run of the project's live validator.
-- `scripts/validate-live-storage.sh` has not yet been run on the physical laptop. The initial installer exists only on PR #9's feature branch; physical NVMe behavior and boot success remain NOT TESTED.
+- `scripts/validate-live-storage.sh` has not yet been evidenced as successfully run on the physical laptop after the zero-capacity removable-reader fix. Physical NVMe behavior, complete installation, and successful boot remain NOT TESTED.
 
 ## PR #9 branch delta — 2026-11-07
 
@@ -45,7 +45,7 @@ The table below includes branch-only implementation not yet merged into main. Th
 | Storage execution boundary module | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` remains a mock-only boundary and does not open devices. The separate PR #9 installer holds Bash whole-disk/partition descriptors and passes inherited `/proc/self/fd` paths to disk tools; that path is exercised against a disposable loop device, not physical NVMe. |
 | Native block-device handle acquisition (Stage 8 first slice) | IMPLEMENTED (read-only prototype) | `native/storage-handle.c` opens a supplied `/dev/<name>` read-only with exclusive/no-follow/close-on-exec flags, checks descriptor type and partition status, reads geometry/read-only state by ioctl, reports major:minor and optional diskseq, and retains the FD until stdin EOF. Compile/CLI checks pass in CI; real block-device behavior, stable-ID correlation, NVMe/removable validation, and end-to-end Bash lifecycle remain NOT TESTED / PLANNED. No storage write or installer integration exists. |
 | Repository audit | IMPLEMENTED (report only) | `docs/15-REPOSITORY-AUDIT.md` is the current 2026-11-07 repository audit. It records the 58-file tree, current CI evidence, physical observation boundary, documentation corrections, and remaining readiness gates. |
-| Initial X280 Arch installer (PR #9 branch) | IMPLEMENTED; TESTED (CI fixtures + loop integration); NOT TESTED (hardware) | `scripts/install-arch-x280.sh` performs interactive X280/SSD identity checks, plan-bound confirmation, GPT/LUKS2/ext4/ESP creation, guarded base bootstrap, target user/locale/timezone/microcode/swapfile setup, and systemd-boot UKI generation. `scripts/configure-arch-x280.sh` is invoked inside arch-chroot. GitHub Actions run #94 passed syntax, ShellCheck, and all 15 tests including a disposable loop-device integration test. Physical NVMe/boot behavior is NOT TESTED. Caelestia/Hyprland/Quickshell, X280 tuning, resume, and BlackArch remain PLANNED. |
+| Initial X280 Arch installer (PR #9 branch) | IMPLEMENTED; TESTED (historical CI/loop integration); NOT TESTED (hardware) | `scripts/install-arch-x280.sh` performs target identity checks, plan-bound confirmation, GPT/LUKS2/ext4/ESP setup, base bootstrap, target configuration, and UKI generation. `scripts/configure-arch-x280.sh` is invoked in arch-chroot. Run #94 passed 15 tests including the loop integration test on its recorded head. Subsequent fixes must receive a fresh CI run. Physical NVMe/boot behavior is NOT TESTED. Desktop, tuning, resume, and BlackArch remain PLANNED. |
 | Static checks on main baseline | TESTED (CI) | GitHub Actions run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the canonical suite at main commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. |
 | Static checks on PR #9 head | TESTED (CI) | GitHub Actions run #94 (`42361056504`) passed Bash syntax for all shell files, ShellCheck on installer/config/test changes, and all 15 test scripts. The disposable loop test validated wipefs, sgdisk, partprobe, FAT formatting, LUKS2, ext4, and ESP mounting through inherited pinned descriptors. This is not physical X280 or boot validation. |
 | X280 raw Arch ISO observations | VERIFIED (limited, point-in-time) | User-provided terminal photographs document UEFI, live root, USB, NVMe identity/serial alias, partitions, visible mount tree, loop backing, and no active swap in captured snapshots. The project's live validator has not yet been run; installation and hibernation remain NOT TESTED. |
@@ -294,3 +294,12 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Reports remain local artifacts and are not committed automatically; inspect for environment-specific information before staging.
 - **IMPLEMENTED:** persistent evidence generation in the canonical test runner and corresponding test documentation.
 - **NOT TESTED:** the updated runner has not yet been executed locally or in CI. No test result is claimed by this change.
+
+
+### 2026-11-07 — Correct installer status and UKI boot contract
+- Reconciled the README and testing/status documentation with the actual PR #9 branch: the top-level `installer --preflight` remains diagnostic-only, while `scripts/install-arch-x280.sh` is a separate destructive initial installer.
+- Corrected the installer to use the approved systemd-based initramfs contract (`systemd` + `sd-encrypt` hooks and `rd.luks.name=`) instead of the older BusyBox `encrypt` + `cryptdevice=` path.
+- Corrected kernel command-line file generation so the file contains actual newline-delimited parameters, not a literal escaped newline.
+- Added postcondition checks for the generated UKI, fstab, swapfile fstab entry, hostname, locale, and timezone before the installer reports initial configuration completion.
+- Corrected the final installer status message: user, locale, timezone, hostname, Intel microcode, sudo, and swapfile configuration are invoked during this installer stage; desktop, hardware tuning, hibernation/resume, and BlackArch remain out of scope.
+- Validation of these new edits is PENDING until CI reruns on the resulting commit. No local test, VM installation, physical disk operation, or boot test is claimed.
