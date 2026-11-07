@@ -78,9 +78,16 @@ storage::plan_confirm_interactive plan confirmation || die "Konfirmasi dibatalka
 storage::plan_final_revalidate plan confirmation fresh_target fresh_prereq gate || die "Validasi final gagal; tidak ada perubahan disk."
 
 disk=${gate[target_device_path]}
-disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed 's/[[:space:]]\+$//')"
+disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed 's/[[:space:]]\\+$//')"
 [[ -n $disk_identity_before ]] || die "Identitas target tidak dapat dibaca ulang."
 storage::validate_target fresh_target || die "Target berubah sebelum operasi pertama."
+# Pin the whole-disk block inode and pass its inherited descriptor to child tools.
+exec {disk_fd}<>"$disk" || die "Tidak dapat membuka descriptor target untuk ditahan."
+disk_ref="/proc/self/fd/$disk_fd"
+[[ -b "/proc/$$/fd/$disk_fd" ]] || die "Descriptor target bukan block device."
+disk_fd_major_minor="$(lsblk -dnro MAJ:MIN "/proc/$$/fd/$disk_fd")"
+[[ $disk_fd_major_minor == "${gate[target_major_minor]}" ]] || die "Descriptor tidak cocok dengan major:minor target yang dikonfirmasi."
+[[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$$/fd/$disk_fd")" ]] || die "Path target berubah ketika descriptor dibuka."
 
 # The external disk utilities open the device pathname themselves. The
 # read-only identity checks immediately before each command reduce, but do not
@@ -93,7 +100,8 @@ assert_target() {
     k41::log_error "Identitas block device berubah; menghentikan proses."
     return 1
   }
-  [[ -b "$disk" ]] || return 1
+  [[ -b "/proc/$/fd/$disk_fd" ]] || return 1
+  [[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$/fd/$disk_fd")" ]] || return 1
 }
 run_step() {
   local label=$1; shift
@@ -103,11 +111,11 @@ run_step() {
 }
 
 # Do not disable unrelated swap devices or swapfiles on the live ISO.
-run_step "hapus signature lama" wipefs --all --force "$disk"
+run_step "hapus signature lama" wipefs --all --force "$disk_ref"
 run_step "buat tabel GPT dan partisi" sgdisk --zap-all --clear \
   --new=1:"${plan[esp_start_sector]}":"${plan[esp_end_sector]}" --typecode=1:ef00 --change-name=1:K41-ESP \
-  --new=2:"${plan[root_start_sector]}":"${plan[root_end_sector]}" --typecode=2:8309 --change-name=2:K41-ROOT "$disk"
-run_step "sinkronisasi tabel partisi" partprobe "$disk"
+  --new=2:"${plan[root_start_sector]}":"${plan[root_end_sector]}" --typecode=2:8309 --change-name=2:K41-ROOT "$disk_ref"
+run_step "sinkronisasi tabel partisi" partprobe "$disk_ref"
 run_step "tunggu node partisi" udevadm settle
 
 if [[ $disk == *nvme* || $disk == *mmcblk* ]]; then
@@ -116,12 +124,19 @@ else
   esp="${disk}1"; root_part="${disk}2"
 fi
 [[ -b $esp && -b $root_part ]] || die "Node partisi tidak muncul; hentikan dan periksa manual."
+exec {esp_fd}<>"$esp" || die "Tidak dapat menahan descriptor ESP."
+exec {root_fd}<>"$root_part" || die "Tidak dapat menahan descriptor root partition."
+esp_ref="/proc/self/fd/$esp_fd"
+root_ref="/proc/self/fd/$root_fd"
+[[ -b "/proc/$/fd/$esp_fd" && -b "/proc/$/fd/$root_fd" ]] || die "Descriptor partisi bukan block device."
+[[ "$(stat -Lc '%t:%T' "$esp")" == "$(stat -Lc '%t:%T' "/proc/$/fd/$esp_fd")" ]] || die "Path ESP berubah saat descriptor dibuka."
+[[ "$(stat -Lc '%t:%T' "$root_part")" == "$(stat -Lc '%t:%T' "/proc/$/fd/$root_fd")" ]] || die "Path root partition berubah saat descriptor dibuka."
 assert_target || die "Identitas disk berubah setelah partisi."
 
 printf '\nBuat passphrase LUKS2 untuk root (input tidak dicatat):\n' >&2
-run_step "format partisi root dengan LUKS2" cryptsetup luksFormat --type luks2 --verify-passphrase "$root_part"
-run_step "buka volume LUKS2" cryptsetup open "$root_part" cryptroot
-run_step "format ESP FAT32" mkfs.fat -F 32 -n K41_EFI "$esp"
+run_step "format partisi root dengan LUKS2" cryptsetup luksFormat --type luks2 --verify-passphrase "$root_ref"
+run_step "buka volume LUKS2" cryptsetup open "$root_ref" cryptroot
+run_step "format ESP FAT32" mkfs.fat -F 32 -n K41_EFI "$esp_ref"
 run_step "format root ext4" mkfs.ext4 -F -L K41_ROOT /dev/mapper/cryptroot
 
 mkdir -p /mnt
