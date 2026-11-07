@@ -23,3 +23,19 @@ Check boot/encryption configuration, filesystem/mount state, network, audio, des
 - [ ] Secrets excluded.
 - [ ] Interrupted runs inspect state instead of reformatting.
 - [ ] Report distinguishes verified, failed, and untested behavior.
+
+## Initial installer diagnostic logs
+
+`scripts/install-arch-x280.sh` captures its stdout and stderr to a timestamped run directory before running host preflight or any storage operation:
+
+```text
+/var/log/x280-installer/<UTC timestamp>/installer.log
+```
+
+The directory is created as root-owned mode 0700 and the log file as root-owned mode 0600. If `/var/log` cannot be used, the installer falls back to `/run/x280-installer/<UTC timestamp>/installer.log`; this fallback is temporary and disappears at reboot. The installer prints the exact log path at exit. Copy the log to persistent media before reboot if the fallback was used.
+
+The log records start/end time, kernel/architecture, checkout path and commit when available, stage markers, stdout/stderr, exit status, and the last stage reached. Storage final-revalidation and live-prerequisite modules report a non-sensitive failure-stage identifier (for example, `target_stable_identity_changed` or `target_topology_validation`) instead of returning only a generic failure.
+
+Shell xtrace is not enabled. LUKS passphrases and account passwords must be entered through their interactive terminal prompts; they are not command arguments and must never be copied into logs. Logs can still contain hardware identifiers and storage topology from the reviewed plan, so inspect and redact them before sharing. Root-only permissions reduce exposure but do not make a log safe to publish.
+
+A failure at `final-revalidation` occurs before the installer's first destructive `wipefs` operation in the current code path. A failure at or after a `disk-operation:` stage requires stopping and inspecting the actual disk and mount state; never rerun blindly. The log is diagnostic evidence, not independent proof of disk state.
