@@ -111,15 +111,15 @@ storage::topology_check_target() {
   [[ $# -eq 4 ]] || return 2
   local target_mm=$1 sys_root=$2 mountinfo=$3 swaps_file=$4
   [[ $target_mm =~ ^[0-9]+:[0-9]+$ ]] || return 2
-  [[ -d $sys_root/dev/block && -r $mountinfo && -r $swaps_file ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
-  command -v readlink >/dev/null 2>&1 || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
-  command -v stat >/dev/null 2>&1 || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+  [[ -d $sys_root/dev/block && -r $mountinfo && -r $swaps_file ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  command -v readlink >/dev/null 2>&1 || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  command -v stat >/dev/null 2>&1 || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
 
   local target_link target_real candidate candidate_real rel
   target_link=$sys_root/dev/block/$target_mm
-  [[ -L $target_link ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
-  target_real=$(readlink -f -- "$target_link") || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
-  [[ -d $target_real ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+  [[ -L $target_link ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  target_real=$(readlink -f -- "$target_link") || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  [[ -d $target_real ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
 
   local -A seen=()
   local -a queue=()
@@ -131,11 +131,11 @@ storage::topology_check_target() {
   # Also include holder/slave dependencies recursively (dm-crypt, RAID, etc.).
   shopt -s nullglob
   for entry in "$sys_root"/dev/block/*; do
-    [[ -L $entry ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
-    candidate_real=$(readlink -f -- "$entry") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
+    [[ -L $entry ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+    candidate_real=$(readlink -f -- "$entry") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
     if [[ $candidate_real == "$target_real/"* ]]; then
       mm=${entry##*/}
-      [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
+      [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       if [[ ! -v seen[$mm] ]]; then
         seen[$mm]=1
         queue+=("$candidate_real")
@@ -149,18 +149,18 @@ storage::topology_check_target() {
     node=${queue[index]}
     ((index += 1))
     for rel in holders slaves; do
-      [[ -d $node/$rel && -r $node/$rel ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+      [[ -d $node/$rel && -r $node/$rel ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       shopt -s nullglob
       for entry in "$node/$rel"/*; do
-        node_real=$(readlink -f -- "$entry") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
-        [[ -d $node_real ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
+        node_real=$(readlink -f -- "$entry") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+        [[ -d $node_real ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         mm=
         for candidate in "$sys_root"/dev/block/*; do
           [[ -L $candidate ]] || continue
-          candidate_real=$(readlink -f -- "$candidate") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
+          candidate_real=$(readlink -f -- "$candidate") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
           if [[ $candidate_real == "$node_real" ]]; then mm=${candidate##*/}; break; fi
         done
-        [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; }
+        [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         if [[ ! -v seen[$mm] ]]; then
           seen[$mm]=1
           queue+=("$node_real")
@@ -175,16 +175,16 @@ storage::topology_check_target() {
   local line rest mount_mm mount_point
   while IFS= read -r line; do
     [[ -n $line ]] || continue
-    storage::topology_parse_mount_record "$line" || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+    storage::topology_parse_mount_record "$line" || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
     mount_mm=$TOPOLOGY_MOUNT_MM
     mount_point=$TOPOLOGY_MOUNT_POINT
     case $TOPOLOGY_MOUNT_FSTYPE in
       overlay)
-        storage::topology_check_overlay_options "$TOPOLOGY_MOUNT_SUPER_OPTIONS" seen || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+        storage::topology_check_overlay_options "$TOPOLOGY_MOUNT_SUPER_OPTIONS" seen || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         ;;
       squashfs)
-        [[ $TOPOLOGY_MOUNT_SOURCE == /dev/loop* ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
-        storage::topology_check_loop_backing "$mount_mm" "$sys_root" seen || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+        [[ $TOPOLOGY_MOUNT_SOURCE == /dev/loop* ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+        storage::topology_check_loop_backing "$mount_mm" "$sys_root" seen || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         ;;
     esac
     if [[ -v seen[$mount_mm] ]]; then
@@ -201,17 +201,17 @@ storage::topology_check_target() {
     [[ -n $swap_source ]] || continue
     if (( first )); then first=0; continue; fi
     if [[ $swap_source == /dev/* ]]; then
-      [[ -e $swap_source ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+      [[ -e $swap_source ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       local dev_hex
-      dev_hex=$(stat -Lc '%t:%T' -- "$swap_source") || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
-      [[ $dev_hex =~ ^([0-9a-fA-F]+):([0-9a-fA-F]+)$ ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+      dev_hex=$(stat -Lc '%t:%T' -- "$swap_source") || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+      [[ $dev_hex =~ ^([0-9a-fA-F]+):([0-9a-fA-F]+)$ ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       major=$((16#${BASH_REMATCH[1]}))
       minor=$((16#${BASH_REMATCH[2]}))
       swap_mm=$major:$minor
     else
       best_len=-1; best_mm=
       while IFS= read -r line; do
-        storage::topology_parse_mount_record "$line" || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+        storage::topology_parse_mount_record "$line" || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         decoded=$TOPOLOGY_MOUNT_POINT
         if [[ $decoded == "/" && $swap_source == /* ]] || [[ $swap_source == "$decoded" || $swap_source == "$decoded/"* ]]; then
           if (( ${#decoded} > best_len )); then
@@ -219,7 +219,7 @@ storage::topology_check_target() {
           fi
         fi
       done < "$mountinfo"
-      [[ $best_len -ge 0 && $best_mm =~ ^[0-9]+:[0-9]+$ ]] || storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+      [[ $best_len -ge 0 && $best_mm =~ ^[0-9]+:[0-9]+$ ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       swap_mm=$best_mm
     fi
     if [[ -v seen[$swap_mm] ]]; then
