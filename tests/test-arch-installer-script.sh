@@ -17,6 +17,8 @@ for required in \
   'exec > >(tee -a "$installer_log_file") 2>&1' \
   'chmod 0600 "$installer_log_file"' \
   'installer::stage final-revalidation' \
+  'pre-operation-check:$label' \
+  'disk-operation:$label' \
   'Persistent diagnostic log:' \
   'WDC PC SN730' \
   '256060514304' \
