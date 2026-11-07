@@ -23,7 +23,9 @@ for required in \
   'esp_ref="/proc/self/fd/$esp_fd"' \
   'sgdisk --zap-all --clear' \
   'cryptsetup luksFormat --type luks2' \
-  'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \
+  'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \\
+  'install -D -m 0755 "$ROOT/scripts/x280-first-boot-check.sh" /mnt/usr/local/sbin/x280-first-boot-check' \\
+  '[[ -x /mnt/usr/local/sbin/x280-first-boot-check ]]' \\
   "PRESETS=('default')" \
   'default_uki="/efi/EFI/Linux/arch-linux.efi"' \
   'default_cmdline="/etc/kernel/cmdline"' \
