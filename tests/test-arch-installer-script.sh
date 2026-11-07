@@ -13,7 +13,7 @@ pass "installer passes bash -n"
 for required in \
   'preflight::check_target_inventory' \
   'installer::init_logging' \
-  'installer_log_dir="/var/log/x280-installer' \
+  'root=/var/log/x280-installer' \
   'exec > >(tee -a "$installer_log_file") 2>&1' \
   'chmod 0600 "$installer_log_file"' \
   'installer::stage final-revalidation' \
