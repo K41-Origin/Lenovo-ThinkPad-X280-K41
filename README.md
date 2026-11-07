@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status:** the entry point supports `--help` and diagnostic-only `--preflight`. Installer orchestration and installation logic are not implemented. Read-only storage discovery and target revalidation are implemented with fixture tests; destructive storage execution remains unimplemented. No real disk has been modified.
+> **Project status (2026-11-07):** the entry point supports `--help` and diagnostic-only `--preflight`; installation orchestration and destructive storage execution remain unimplemented. Read-only storage discovery/planning and mock execution controls have fixture-tested coverage. Stage 8 includes a read-only native block-device handle prototype with compile/CLI tests, but block-device runtime behavior is not tested. Physical X280 Arch ISO observations are recorded in `docs/11-TESTING-AND-ACCEPTANCE.md`; the project's live discovery/validation script has not yet been run on the laptop. No disk has been modified.
 
 ## AI-assisted development
 
@@ -26,7 +26,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-plan.sh`, `lib/storage-prerequisites.sh`, and `lib/storage-confirmation.sh` — target-bound storage planning, read-only prerequisite evidence, explicit confirmation, and final revalidation.
 - `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
-- `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — canonical Stage 8 design for a future native descriptor holder; implementation remains planned.
+- `native/storage-handle.c` and `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — Stage 8 read-only native descriptor-holder prototype and its canonical design/limitations; hardware behavior and executor integration remain unverified.
 - `lib/` — implemented read-only preflight, inventory, and storage-planning modules plus clearly marked PLANNED placeholders for base-system, bootloader, user, desktop, hardware, package, security, validation, and reporting work. Placeholder files contain no installation implementation.
 - `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
 - `scripts/live-validation.sh` — read-only live-host validation for Arch ISO / X280; saves timestamped evidence and `reports/live-validation/latest.md`.
@@ -68,7 +68,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. The storage modules perform no destructive operation. The Stage 8 native-handle design is documented, but its helper and tests are not implemented. A retained descriptor must be connected safely to every future operation; pathname-based tools are not assumed to use it.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. Storage modules do not perform destructive operations. The Stage 8 helper is a read-only prototype; only compile/CLI behavior is covered by tests. Real block-device behavior, stable-identity correlation, Bash lifecycle integration, and descriptor-safe operation execution remain unverified. A retained descriptor must be demonstrably used by every future operation; pathname-based tools are not assumed to use it.
 
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
@@ -81,7 +81,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 
 ## Live validation on the ThinkPad
 
-From the cloned repository root, run `bash scripts/live-validation.sh`. The script inventories the current host and storage topology, checks shell syntax, runs available ShellCheck/shfmt checks and the canonical test suite, and saves timestamped reports under `reports/live-validation/`. Reports are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--thinkpad-validation). The script performs no disk or system modifications.
+Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--thinkpad-validation).
 
 ## Development status
 See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
