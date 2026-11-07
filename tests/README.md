@@ -90,3 +90,11 @@ The destructive installer must not be run until the gate in [Stage 9 — Initial
 ## Physical first-boot evidence
 
 After the initial install boots successfully on the actual X280 and the regular user has logged in, run `sudo /usr/local/sbin/x280-first-boot-check`. The collector writes a timestamped report under `reports/first-boot/` containing `summary.md`, `diagnostics.log`, `boot-status.txt`, `system-status.txt`, and `hardware.txt`. It is read-only, retains a report on failure, and exits non-zero if an acceptance check fails. Review all files for sensitive data before staging only the intended report directory. See [X280 first-boot test](../docs/17-X280-FIRST-BOOT-TEST.md).
+
+## Destructive installer run logs
+
+The destructive installer creates \`/var/log/x280-installer/<UTC timestamp>/installer.log\` before host preflight or storage operations. The directory is root-only (0700) and the file root-only (0600). If \`/var/log\` is unavailable, it uses \`/run/x280-installer/\`; that fallback is volatile and must be copied to persistent media before reboot. The installer prints the exact log path on exit.
+
+The log contains stdout/stderr, stage markers, start/end metadata, exit status, and stage-specific storage validation diagnostics. It does not enable shell xtrace. Never enter secrets as command-line arguments; interactive prompts are intended to read them from the terminal. Hardware identifiers may appear in the log, so inspect and redact before sharing. See [Error Recovery and Reporting](../docs/10-ERROR-RECOVERY-AND-REPORTING.md).
+
+This logging does not change the destructive boundary: final read-only revalidation must pass before the first \`wipefs\` operation. A failed run must still be assessed against its last logged stage and the actual disk state; do not rerun blindly.
