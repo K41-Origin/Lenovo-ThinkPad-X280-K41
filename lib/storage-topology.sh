@@ -149,24 +149,48 @@ storage::topology_check_target() {
     node=${queue[index]}
     ((index += 1))
     for rel in holders slaves; do
-      [[ -d $node/$rel && -r $node/$rel ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
-      shopt -s nullglob
-      for entry in "$node/$rel"/*; do
-        node_real=$(readlink -f -- "$entry") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
-        [[ -d $node_real ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
-        mm=
-        for candidate in "$sys_root"/dev/block/*; do
-          [[ -L $candidate ]] || continue
-          candidate_real=$(readlink -f -- "$candidate") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
-          if [[ $candidate_real == "$node_real" ]]; then mm=${candidate##*/}; break; fi
+      # sysfs creates these relationship directories when links exist; a
+      # missing directory therefore means an empty relationship set. A
+      # dangling link or non-directory entry is still an unsafe state.
+      if [[ -e $node/$rel || -L $node/$rel ]]; then
+        [[ -d $node/$rel && -r $node/$rel ]] || {
+          storage::topology_fail "invalid sysfs $rel relationship directory for a block device"
+          return 1
+        }
+        shopt -s nullglob
+        for entry in "$node/$rel"/*; do
+          node_real=$(readlink -f -- "$entry") || {
+            shopt -u nullglob
+            storage::topology_fail "unresolvable sysfs $rel relationship entry"
+            return 1
+          }
+          [[ -d $node_real ]] || {
+            shopt -u nullglob
+            storage::topology_fail "sysfs $rel relationship does not resolve to a device directory"
+            return 1
+          }
+          mm=
+          for candidate in "$sys_root"/dev/block/*; do
+            [[ -L $candidate ]] || continue
+            candidate_real=$(readlink -f -- "$candidate") || {
+              shopt -u nullglob
+              storage::topology_fail "unresolvable sysfs block-device entry"
+              return 1
+            }
+            if [[ $candidate_real == "$node_real" ]]; then mm=${candidate##*/}; break; fi
+          done
+          [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || {
+            shopt -u nullglob
+            storage::topology_fail "sysfs relationship target has no block major:minor identity"
+            return 1
+          }
+          if [[ ! -v seen[$mm] ]]; then
+            seen[$mm]=1
+            queue+=("$node_real")
+          fi
         done
-        [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
-        if [[ ! -v seen[$mm] ]]; then
-          seen[$mm]=1
-          queue+=("$node_real")
-        fi
-      done
-      shopt -u nullglob
+        shopt -u nullglob
+      fi
     done
   done
 
