@@ -8,7 +8,7 @@ Run from the repository root:
 bash tests/run.sh
 ```
 
-The test list is defined only in `tests/run.sh` (19 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
+The test list is defined only in `tests/run.sh` (20 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
 
 ## What the suite covers
 
@@ -32,7 +32,7 @@ The test list is defined only in `tests/run.sh` (19 scripts at this revision). D
 | `test-preflight-gate.sh` | Mocked preflight gate and failure propagation |
 | `test-native-storage-handle.sh` | Native helper compile/CLI behavior; no real block device is opened |
 
-| `test-base-system-fstab.sh` | Fstab generation preserves existing unrelated entries, is idempotent, and rejects conflicting root/EFI entries. |\n\nThe suite does not run a complete installer transaction. The disposable loop test formats only its temporary loop-backed image; it is not a physical NVMe test. It is bounded utility-interface coverage only and must never be treated as a substitute for the required destructive full-SSD installation test on the actual X280. Fixture/static checks do not establish that the installer boots or that every target-device race is impossible.
+| `test-base-system-fstab.sh` | Fstab generation preserves existing unrelated entries, is idempotent, and rejects conflicting root/EFI entries. |\n| `test-resume-arch-installer.sh` | Static safety contract for the checkpoint-specific continuation path; asserts it does not partition, format, or rerun pacstrap. |\n\nThe suite does not run a complete installer transaction. The disposable loop test formats only its temporary loop-backed image; it is not a physical NVMe test. It is bounded utility-interface coverage only and must never be treated as a substitute for the required destructive full-SSD installation test on the actual X280. Fixture/static checks do not establish that the installer boots or that every target-device race is impossible.
 
 **Validation policy (REQ-INSTALL-006):** VM-based installer testing is explicitly out of scope and will not be performed. Keep automated coverage bounded to fixtures, mocks, static checks, and disposable loop-backed images. The destructive full-SSD replacement path must remain implemented; its end-to-end acceptance test is performed on the actual ThinkPad X280 only after the Stage 9 physical-test gate, recovery preparation, and explicit authorization. Loop-device tests are not substitutes for that physical test.
 
