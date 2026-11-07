@@ -13,7 +13,7 @@ The table below includes branch-only implementation not yet merged into main. Th
 
 - `scripts/install-arch-x280.sh` performs the initial destructive installation path after X280 inventory and exact SSD identity checks, plan review, exact confirmation, and live revalidation.
 - The installer opens and retains whole-disk and partition block descriptors, then passes inherited `/proc/self/fd/N` paths to disk utilities. The disposable loop-device integration test verifies the procfs descriptor interface for the selected utilities and ESP mounting.
-- `scripts/configure-arch-x280.sh` configures the initial user, sudo, locale, timezone, Intel microcode, and swapfile inside the target.
+- `scripts/configure-arch-x280.sh` configures the initial user, sudo, locale, timezone, swapfile inside the target.
 - The final target boot path uses systemd-boot and a default mkinitcpio UKI with `systemd` + `sd-encrypt` hooks and `rd.luks.name=<UUID>=cryptroot` kernel command line.
 - CI runs #130 and #131 passed on commit `2aae853df0c74c8ae9a46e702d457884f1d91fd8`. This is automated/loop-device evidence only. No physical X280 SSD has been modified by maintainers and no successful physical boot is verified.
 
@@ -302,7 +302,7 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Corrected the installer to use the approved systemd-based initramfs contract (`systemd` + `sd-encrypt` hooks and `rd.luks.name=`) instead of the older BusyBox `encrypt` + `cryptdevice=` path.
 - Corrected kernel command-line file generation so the file contains actual newline-delimited parameters, not a literal escaped newline.
 - Added postcondition checks for the generated UKI, fstab, swapfile fstab entry, hostname, locale, and timezone before the installer reports initial configuration completion.
-- Corrected the final installer status message: user, locale, timezone, hostname, Intel microcode, sudo, and swapfile configuration are invoked during this installer stage; desktop, hardware tuning, hibernation/resume, and BlackArch remain out of scope.
+- Corrected the final installer status message: user, locale, timezone, hostname, sudo and swapfile configuration are invoked during this installer stage; desktop, hardware tuning, hibernation/resume, and BlackArch remain out of scope.
 - Validation of these new edits is PENDING until CI reruns on the resulting commit. No local test, VM installation, physical disk operation, or boot test is claimed.
 
 
@@ -325,3 +325,9 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Preserve the real destructive SSD replacement/erasure workflow as a required physical validation stage on the actual ThinkPad X280, subject to successful read-only live validation, independent source/safety review, verified exact target identity, backup/recovery preparation, stop conditions, and explicit authorization.
 - Fixtures, mocks, static checks, and disposable loop-backed images remain permitted for bounded automated tests; they do not simulate or replace the full physical installation.
 - This decision changes the test strategy, not the approved disk layout or destructive installer scope. No disk operation was performed by this documentation update.
+
+
+### 2026-11-07 — CI formatting and approved microcode policy correction
+- Applied the repository's configured `shfmt -i 2` formatting to `tests/run.sh` based on the exact CI diff; the other two checked test files already matched the formatter.
+- Removed automatic `intel-ucode` installation from `scripts/configure-arch-x280.sh` to comply with approved REQ-HW-006. The target configuration test now asserts the report-only policy by ensuring the package-install command is absent.
+- CI validation is pending on the resulting branch; no physical X280 validation or destructive disk operation was performed.
