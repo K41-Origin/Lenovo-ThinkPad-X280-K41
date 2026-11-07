@@ -65,7 +65,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
 ## Storage safety boundary
-- The approved installation scope is a full replacement of the internal SSD; Windows and recovery partitions are not retained.
+- The approved installation scope is a full replacement of the internal SSD; Windows and recovery partitions are not retained. Full destructive installation validation is reserved for the actual ThinkPad X280; VM-based installation testing is excluded.
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
