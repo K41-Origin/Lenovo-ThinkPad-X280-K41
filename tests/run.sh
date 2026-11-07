@@ -9,6 +9,7 @@ cd "$ROOT"
 tests=(
   tests/test-common-preflight.sh
   tests/test-installer-entry.sh
+  tests/test-arch-installer-script.sh
   tests/test-inventory.sh
   tests/test-storage-discovery.sh
   tests/test-storage-plan.sh
