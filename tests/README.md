@@ -8,12 +8,13 @@ Run from the repository root:
 bash tests/run.sh
 ```
 
-The test list is defined only in `tests/run.sh` (17 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
+The test list is defined only in `tests/run.sh` (18 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
 
 ## What the suite covers
 
 | Test | Scope |
 |---|---|
+| `test-x280-first-boot-check.sh` | Mocked first-boot collector: PASS report, FAIL propagation, evidence files, and read-only contract. |
 | `test-bootstrap-archiso.sh` | Static source-review, commit identity, exact acknowledgement, and no-remote-pipe contract checks for the Arch ISO bootstrap. |
 | `test-common-preflight.sh` | Logging and read-only preflight helpers |
 | `test-installer-entry.sh` | Legacy `installer --help/--preflight` behavior and diagnostic-only boundary |
@@ -85,3 +86,7 @@ The destructive installer must not be run until the gate in [Stage 9 — Initial
 - No VM installation/boot test is planned or required; the physical X280 destructive installation and first boot are the required end-to-end acceptance evidence.
 - A non-empty UKI file does not prove firmware boot, LUKS unlock, or root mount.
 - Physical installation, first boot, hibernation/resume, Wi-Fi, audio, suspend, and other hardware behavior remain NOT TESTED until observed on the actual X280.
+
+## Physical first-boot evidence
+
+After the initial install boots successfully on the actual X280 and the regular user has logged in, run `sudo bash scripts/x280-first-boot-check.sh`. The collector writes a timestamped report under `reports/first-boot/` containing `summary.md`, `diagnostics.log`, `boot-status.txt`, `system-status.txt`, and `hardware.txt`. It is read-only, retains a report on failure, and exits non-zero if an acceptance check fails. Review all files for sensitive data before staging only the intended report directory. See [X280 first-boot test](../docs/17-X280-FIRST-BOOT-TEST.md).
