@@ -3,7 +3,14 @@
 set -Eeuo pipefail
 umask 077
 
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+if [[ -d "$script_dir/../.git" ]]; then
+  ROOT="$(cd -- "$script_dir/.." && pwd -P)"
+elif [[ -d "$PWD/.git" ]]; then
+  ROOT="$(pwd -P)"
+else
+  ROOT="$(pwd -P)"
+fi
 cd "$ROOT"
 
 sys_root="${K41_FIRST_BOOT_SYS_ROOT:-/sys}"
