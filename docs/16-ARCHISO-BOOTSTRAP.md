@@ -50,3 +50,18 @@ Passing the first gate is not permission to erase a disk. Do not confirm the sto
 - Physical destructive installation and first boot on the X280 remain NOT TESTED. Follow the physical-test gate in [Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
 
 `bash tests/test-bootstrap-archiso.sh` performs static contract checks only. It does not clone the repository, run the readiness gate, execute the installer, or touch a disk.
+
+
+## Interrupted Stage 9 installation: continue, do not bootstrap again
+
+The recorded physical attempt reached successful `pacstrap` package installation and stopped at fstab generation. The target SSD has already been partitioned, encrypted, formatted, and populated with the base packages. For this exact checkpoint, do not use the normal bootstrap or destructive installer path.
+
+After pulling the current recovery branch, run:
+
+```bash
+bash scripts/resume-arch-x280.sh
+```
+
+Run it as root from the official Arch ISO in UEFI mode. This dedicated continuation script does not run the broad readiness suite, partition or format the disk, or rerun pacstrap. It verifies the configured SSD identity and existing partition/LUKS2/ext4 state, unlocks and mounts the existing target, checks the installed base packages, completes fstab safely, then resumes target configuration and UKI setup. Any mismatch or partial target configuration causes a fail-closed stop.
+
+The previous successful readiness report is retained as historical evidence for the pre-installation disk snapshot. It must not be repeated as a blank-disk gate against the now-initialized target. The continuation script still performs narrowly scoped live checks necessary to avoid acting on the wrong disk or an unexpected filesystem state.
