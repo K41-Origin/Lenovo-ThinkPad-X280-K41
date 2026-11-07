@@ -48,7 +48,9 @@ After changing files:
 - Build AUR packages as an unprivileged user; do not run package build steps as root.
 - Never place passwords, LUKS passphrases, recovery keys, tokens, or other credentials in logs or reports.
 - Do not execute privileged operations, modify real system configuration, or make destructive changes merely to validate a proposed design.
-- Prefer isolated tests, mocks, and disposable virtual machines for dangerous workflows. Clearly state what remains untested on real hardware.
+- Do not use virtual machines for project validation; the user has explicitly ruled out VM testing.
+- Use deterministic fixtures, mocks, static checks, and disposable loop-backed devices only for bounded automated tests. These do not replace hardware validation.
+- Preserve the real destructive installer path: the required end-to-end installation/erase test is performed on the actual ThinkPad X280 SSD after all safety gates pass, with explicit authorization and verified target identity. Never replace this acceptance step with a VM test or remove destructive operations merely to avoid VM testing.
 
 ## Architecture and implementation
 
