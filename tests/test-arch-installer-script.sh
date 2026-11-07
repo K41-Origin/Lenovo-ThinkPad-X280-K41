@@ -9,6 +9,7 @@ pass() { printf 'PASS: %s\n' "$1"; }
 bash -n "$SCRIPT" || fail "Arch installer has a Bash syntax error"
 pass "installer passes bash -n"
 
+# shellcheck disable=SC2016
 for required in \
   'preflight::check_target_inventory' \
   'WDC PC SN730' \
