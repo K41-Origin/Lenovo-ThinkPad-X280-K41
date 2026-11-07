@@ -14,10 +14,21 @@ for required in \
   '/sys/firmware/efi' \
   'bash tests/run.sh' \
   'bash scripts/validate-live-storage.sh' \
-  'git rev-parse HEAD'; do
-  grep -Fq -- "$required" "$SCRIPT" || fail "required readiness check is missing: $required"
+  'git rev-parse HEAD' \
+  'reports/live-readiness' \
+  'summary.md' \
+  'diagnostics.log' \
+  'trap on_exit EXIT' \
+  'serial=)[^[:space:]]+' \
+  'Checks passed:' \
+  'Process exit code:'; do
+  grep -Fq -- "$required" "$SCRIPT" || fail "required readiness/report feature is missing: $required"
 done
-pass "readiness gate includes Arch, UEFI, commit identity, tests, and live storage validation"
+pass "readiness gate records checkout, environment, test/storage results, and a final report"
+
+grep -Fq 'Review both files before committing' "$SCRIPT" || fail "report review guidance is missing"
+grep -Fq 'This report records checks' "$SCRIPT" || fail "report safety interpretation is missing"
+pass "report includes review guidance and a clear safety boundary"
 
 if grep -Eq 'wipefs|sgdisk|cryptsetup[[:space:]]+(luksFormat|open)|mkfs\.|pacstrap|mount[[:space:]]' "$SCRIPT"; then
   fail "readiness gate contains a destructive or installation command"
