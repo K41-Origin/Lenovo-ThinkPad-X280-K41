@@ -26,7 +26,7 @@ sudo bash scripts/bootstrap-archiso.sh
 
 The Arch ISO root shell may already be root; in that case run `bash scripts/bootstrap-archiso.sh` without `sudo`.
 
-The bootstrap creates a private checkout under `/root/k41-archiso.XXXXXX/repository`. It then pages through README/agent instructions, storage/boot policy, the hardware profile, the destructive installer, target configuration, readiness/validation scripts, storage/preflight modules, the canonical test runner, and every tracked test script. Review each file. The commit SHA and checkout path are printed before the review. At the end, type exactly:
+The bootstrap creates a private checkout under `/root/k41-archiso.XXXXXX/repository`. It then pages through README/agent instructions, storage/boot policy, the hardware profile, the bootstrap itself, destructive installer, target configuration, readiness/validation scripts, storage/preflight modules, the canonical test runner, and every tracked test script. Review each file. The commit SHA and checkout path are printed before the review. At the end, type exactly:
 
 ```text
 REVIEWED <40-character-commit-SHA> AND AUTHORIZE READ-ONLY READINESS CHECK
