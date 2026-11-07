@@ -72,7 +72,7 @@ This continuation path is deliberately narrow and tied to the known failure chec
 
 ## Validation and acceptance boundaries
 
-- **TESTED:** current continuation code passed GitHub Actions run #367 (`42404161357`), including Bash syntax, ShellCheck, and 20 repository test scripts (20 passed, 0 failed, 0 skipped).
+- **TESTED:** current continuation code passed GitHub Actions run #375 (`42404369312`), including Bash syntax, ShellCheck, and 20 repository test scripts (20 passed, 0 failed, 0 skipped).
 - The prior successful read-only readiness report remains historical evidence for the pre-installation snapshot; it is not rerun against a disk that is now intentionally partitioned and encrypted.
 - The continuation script's own target identity, partition, LUKS2, filesystem, and package checks are required to bind the operation to the existing partial installation. These are not a repeat of the old blank-disk readiness gate.
 - No successful physical installation or first boot is claimed until the continuation completes and the X280 boots from the installed SSD.
