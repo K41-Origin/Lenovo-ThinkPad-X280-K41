@@ -151,5 +151,8 @@ if grep -Eq 'wipefs|sgdisk|mkfs\\.|cryptsetup[[:space:]]+(luksFormat|open)|pacst
   fail "first-boot collector contains a mutating installer/service command"
 fi
 pass "first-boot collector contains no disk, encryption, package, or service mutation command"
+grep -Fq 'chown -R "$SUDO_UID:$SUDO_GID" "$report_dir"' "$SCRIPT" || fail "sudo-generated report ownership is not returned to the invoking user"
+grep -Fq 'Run with `sudo /usr/local/sbin/x280-first-boot-check`' "$SCRIPT" || fail "collector summary does not print the installed invocation"
+pass "sudo-generated reports are made accessible to the invoking user and show the installed command"
 
 printf '%s\n' 'All X280 first-boot collector tests passed.'
