@@ -40,11 +40,11 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
 4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, and requires an exact SHA-bound acknowledgement before launching the installer.
 5. Run read-only live validation and the canonical test suite; inspect their reports.
-6. For the PR #9 branch only, review `scripts/install-arch-x280.sh` and all sourced modules before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
+6. Review `scripts/install-arch-x280.sh` and all sourced modules through the bootstrap's source-review gate before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
 7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
 8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
-**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` on PR #9 is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
+**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
 
 ## Documentation index
 1. [Project charter](docs/01-PROJECT-CHARTER.md)
@@ -72,7 +72,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. PR #9 adds a separate installer that uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. The initial installer uses retained Bash descriptors that uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
 
 ## Validation policy
 
