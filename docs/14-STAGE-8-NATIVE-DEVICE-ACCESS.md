@@ -4,7 +4,7 @@
 
 - Stage: 8, design and requirements capture.
 - This document: IMPLEMENTED as a design record.
-- Native C helper: PLANNED; no source, binary, or runtime behavior exists yet.
+- Native C helper: IMPLEMENTED (read-only prototype); block-device runtime behavior remains NOT TESTED.
 - Real storage execution: NOT IMPLEMENTED and out of scope.
 
 This document is the canonical record for native block-device handle acquisition, identity, and lifetime. It extends the Stage 7 mock-only boundary and does not authorize writes to any disk.
