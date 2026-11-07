@@ -146,20 +146,20 @@ These are requirement-level acceptance cases for **REQ-DISK-003** in `docs/02-RE
 
 ## Boot, encryption, and hibernation acceptance tests — PLANNED
 
-These tests validate the approved design direction. They must use disposable VM images/mocks first; no test may repartition a user's real disk. A VM pass does not establish ThinkPad X280 hardware compatibility.
+These automated tests validate the approved design direction using fixtures, mocks, and disposable loop-backed images where appropriate. The project will not use VM-based installation testing. The full destructive installation and disk-erasure workflow is intentionally reserved for a controlled test on the actual ThinkPad X280, after every documented safety gate is satisfied and the owner explicitly authorizes the exact target. No automated test may repartition a user's real disk.
 
 - **TC-BOOT-001 — UEFI/systemd-boot asset visibility:** verify the firmware is in UEFI mode, systemd-boot entries resolve to files on the ESP or supported XBOOTLDR partition, and no entry depends on reading kernel/initramfs from encrypted root.
 - **TC-BOOT-002 — Kernel update lifecycle:** install/update the official Arch `linux` package and verify the selected boot-asset mechanism regenerates/copies the required kernel, initramfs or UKI files and leaves a bootable entry. Verify fallback behavior and ESP free-space handling.
 - **TC-CRYPT-001 — Encrypted root unlock:** with LUKS2 + ext4 on the mapped root, verify the initramfs contains required modules/tools, prompts for the passphrase, unlocks the expected device, and mounts the intended root. Wrong passphrase, missing device, and malformed parameters must fail safely.
 - **TC-RESUME-001 — Swapfile mapping:** verify the swapfile is inside the unlocked ext4 mapper filesystem and the `resume=` parameter identifies that unlocked device, not the raw LUKS partition.
-- **TC-RESUME-002 — Offset correctness:** calculate the actual ext4 swapfile physical offset using the supported method and verify the generated `resume_offset=` matches it. Test recreated, resized, and relocated swapfiles; stale/missing offset must be detected and must not be reported as hibernation-ready.
+- **TC-RESUME-002 — Offset correctness:** calculate the actual ext4 swapfile physical offset using the supported method and verify the generated `resume_offset=` matches it. Test recreated, resized, and relocated swapfiles with fixtures or isolated filesystem-level methods that do not emulate a full VM-based installation testing; stale/missing offset must be detected and must not be reported as hibernation-ready.
 - **TC-RESUME-003 — Capacity policy:** test swap sizing against measured RAM, disk free space, and documented hibernation assumptions; insufficient capacity must block the hibernation-ready status rather than silently shrinking or overcommitting.
-- **TC-RESUME-004 — End-to-end hibernation:** manually hibernate and resume in a disposable VM where supported, then on the actual X280 with explicit authorization. Record VERIFIED/FAILED/NOT TESTED separately; do not infer successful resume from configuration alone.
+- **TC-RESUME-004 — End-to-end hibernation:** manually hibernate and resume on the actual X280 with explicit authorization. Record VERIFIED/FAILED/NOT TESTED separately; do not infer successful resume from configuration alone.
 - **TC-BOOT-003 — ESP integrity and limitation:** verify the installer reports that Secure Boot is disabled and that an unencrypted ESP is not authenticated against offline tampering by LUKS alone.
 
 ## UKI-specific acceptance tests — PLANNED
 
-The approved boot design uses a native mkinitcpio UKI on the ESP, with the source kernel/configuration on encrypted root. These tests must run against disposable VM disks or mocks first. They do not authorize testing on a user's real disk.
+The approved boot design uses a native mkinitcpio UKI on the ESP, with the source kernel/configuration on encrypted root. Automated contract tests must use fixtures, mocks, or disposable loop-backed images; no VM installation test is part of this project. These tests do not authorize testing on a user's real disk.
 
 - **TC-UKI-001 — Preset output:** verify the installed official `linux` package and mkinitcpio preset produce the expected default UKI under `/efi/EFI/Linux/`; verify the UKI contains the intended kernel, initramfs, and kernel command line.
 - **TC-UKI-002 — systemd-boot discovery:** verify systemd-boot discovers and boots the default UKI from the ESP in UEFI mode without reading kernel/initramfs from encrypted root.
@@ -171,7 +171,7 @@ The approved boot design uses a native mkinitcpio UKI on the ESP, with the sourc
 - **TC-UKI-008 — Recovery path:** verify the official Arch ISO USB can be used to recover/rebuild the UKI after a failed boot-artifact update. This is a recovery test, not proof that the installed system boots.
 
 ## Integration and hardware validation
-Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. Test on the actual X280 only with authorization and verified target. Check boot, encryption, filesystem, network, audio, desktop, and services. Actual hibernation must be tested manually.
+Do not use VM-based installation testing for this project. Use fixtures, mocks, and disposable loop-backed images for bounded automated checks. The complete destructive installer workflow, including SSD erasure, must be validated on the actual X280 only after the read-only validator, source/safety review, backup/recovery preparation, exact target identification, and explicit owner authorization. Check boot, encryption, filesystem, network, audio, desktop, and services. Actual hibernation must be tested manually.
 
 ## Acceptance gates
 A release candidate requires reviewed requirements and architecture, passing static checks, mocked safety/error paths, verified package/upstream dependencies, docs consistent with behavior, and evidence for hardware claims. Disclose known failures and untested items.
