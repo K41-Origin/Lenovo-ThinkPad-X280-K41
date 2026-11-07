@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          shfmt -d -i 2 tests/run.sh tests/helpers/storage-fixtures.sh
+          shfmt -d -i 2 scripts/live-validation.sh tests/run.sh tests/helpers/storage-fixtures.sh
 
       - name: Run repository test suite
         shell: bash
