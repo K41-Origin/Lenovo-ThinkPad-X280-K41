@@ -93,7 +93,6 @@ preflight::check_target_inventory || die "Host tidak lolos verifikasi profil Thi
 [[ ! -e /mnt/etc ]] || die "/mnt tampak sudah berisi sistem; unmount/periksa manual sebelum menjalankan installer."
 
 installer::stage disk-discovery "Mendeteksi disk NVMe internal dan identitas target"
-installer::stage disk-discovery "Mendeteksi disk NVMe internal dan identitas target"
 declare -A discovered=()
 storage::discover_candidates discovered || die "Gagal membaca inventaris disk."
 (( discovered[candidate_count] > 0 )) || die "Tidak ditemukan disk NVMe internal yang layak."
@@ -117,7 +116,6 @@ done
 [[ ${discovered[$selection.has_mounted_descendant]} == no && ${discovered[$selection.has_active_swap_descendant]} == no ]] || die "Target memiliki mount atau swap aktif."
 
 installer::stage storage-plan "Menghitung layout GPT dan ukuran swapfile"
-installer::stage storage-plan "Menghitung layout GPT dan ukuran swapfile"
 ram_bytes="$(awk '/MemTotal:/ {print $2 * 1024}' /proc/meminfo)"
 [[ $ram_bytes =~ ^[0-9]+$ ]] || die "Tidak dapat menentukan kapasitas RAM."
 swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
@@ -125,7 +123,6 @@ swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
 declare -A plan=() prereq=() confirmation=() fresh_target=() fresh_prereq=() gate=()
 storage::plan_gpt_layout plan "${target[size_bytes]}" "$(blockdev --getss "${target[device_path]}")" "$(blockdev --getpbsz "${target[device_path]}")" "$ram_bytes" "$swap_margin_bytes" || die "Perhitungan layout disk gagal."
 storage::plan_bind_target plan target || die "Binding identitas target gagal."
-installer::stage initial-revalidation "Mengumpulkan prasyarat read-only sebelum review"
 installer::stage initial-revalidation "Mengumpulkan prasyarat read-only sebelum review"
 storage::plan_collect_live_prerequisites plan fresh_target prereq || die "Pemeriksaan prasyarat awal gagal."
 storage::plan_render_review plan
@@ -135,7 +132,6 @@ storage::plan_confirm_interactive plan confirmation || die "Konfirmasi dibatalka
 installer::stage final-revalidation "Memeriksa ulang konfirmasi, identitas, topologi, dan prasyarat; belum ada operasi disk"
 storage::plan_final_revalidate plan confirmation fresh_target fresh_prereq gate || die "Validasi final gagal; tidak ada perubahan disk."
 
-installer::stage pin-target "Memastikan identitas block device dan menahan descriptor target"
 installer::stage pin-target "Memastikan identitas block device dan menahan descriptor target"
 disk=${gate[target_device_path]}
 disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed -E 's/[[:space:]]+$//')"
@@ -165,8 +161,9 @@ assert_target() {
 }
 run_step() {
   local label=$1; shift
-  current_stage="disk-operation:$label"
+  installer::stage "pre-operation-check:$label" "Memvalidasi ulang target sebelum operasi"
   assert_target || die "Revalidasi target gagal sebelum: $label"
+  installer::stage "disk-operation:$label" "Menjalankan operasi yang diminta"
   k41::log_info "Menjalankan tahap: $label"
   "$@" || die "Tahap gagal: $label"
 }
@@ -195,7 +192,6 @@ root_ref="/proc/self/fd/$root_fd"
 assert_target || die "Identitas disk berubah setelah partisi."
 
 installer::stage encryption "Meminta passphrase LUKS2 secara interaktif; input tidak dicatat"
-installer::stage encryption "Meminta passphrase LUKS2 secara interaktif; input tidak dicatat"
 printf '\nBuat passphrase LUKS2 untuk root (input tidak dicatat):\n' >&2
 run_step "format partisi root dengan LUKS2" cryptsetup luksFormat --type luks2 --verify-passphrase "$root_ref"
 run_step "buka volume LUKS2" cryptsetup open "$root_ref" cryptroot
@@ -214,7 +210,6 @@ rm -f -- /mnt/root/k41-configure-arch-x280.sh
 install -D -m 0755 "$ROOT/scripts/x280-first-boot-check.sh" /mnt/usr/local/sbin/x280-first-boot-check
 [[ -x /mnt/usr/local/sbin/x280-first-boot-check ]] || die "First-boot evidence collector was not installed into the target."
 
-installer::stage boot-configuration "Memasang systemd-boot dan membangun UKI"
 installer::stage boot-configuration "Memasang systemd-boot dan membangun UKI"
 # Minimal bootable configuration: systemd-boot + mkinitcpio UKI.
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
@@ -242,7 +237,6 @@ grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' /mnt/etc/fsta
 [[ -s /mnt/etc/locale.conf ]] || die "Locale target tidak terkonfigurasi."
 [[ -L /mnt/etc/localtime ]] || die "Timezone target tidak terkonfigurasi."
 
-installer::stage completion "Memvalidasi artefak hasil instalasi"
 installer::stage completion "Memvalidasi artefak hasil instalasi"
 k41::log_info "Konfigurasi awal base Arch selesai: user, sudo, locale, timezone, hostname, swapfile, NetworkManager, systemd-boot, dan UKI telah diproses."
 k41::log_warn "Caelestia/Hyprland/Quickshell, tuning hardware X280, hibernation/resume, dan BlackArch belum diimplementasikan pada tahap ini."
