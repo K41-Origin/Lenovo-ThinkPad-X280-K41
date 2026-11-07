@@ -49,3 +49,14 @@ The script is non-destructive: it does not partition, format, mount, install pac
 
 
 The native Stage 8 helper test compiles `native/storage-handle.c` with strict compiler warnings and checks help/argument rejection in a temporary directory. It does not open a block device; exclusive-open contention, descriptor ioctls, diskseq, descriptor lifetime, hot-unplug, and loop-device behavior remain NOT TESTED until isolated disposable-device tests are added.
+
+## Persistent test output
+
+Every invocation of `bash tests/run.sh` creates a unique directory under `reports/test-runs/` and preserves:
+- `summary.md` — branch, commit, host/kernel metadata and PASS/FAIL status for each test script.
+- `combined.log` — combined stdout/stderr from the test scripts.
+- `<test-name>.log` — individual stdout/stderr for each test script.
+
+The runner returns non-zero if a required dependency, test script, or test fails. Reports are generated locally and are not committed automatically. After a run, inspect the summary and logs, then stage the specific report directory together with any relevant code changes. Review reports for environment-specific information before pushing them. A passing fixture suite is not proof of a successful installation or safe disk erasure.
+
+The broader `scripts/live-validation.sh` also creates timestamped host-validation Markdown reports under `reports/live-validation/` and calls the canonical test runner; its report captures the test-run output and the runner separately preserves per-test logs under `reports/test-runs/`.
