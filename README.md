@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-07):** `main` contains the initial destructive X280 base installer at `scripts/install-arch-x280.sh`, target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
+> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and a reviewed Arch ISO bootstrap gate at `scripts/bootstrap-archiso.sh`, plus the destructive base installer at `scripts/install-arch-x280.sh` and target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
 
 ## AI-assisted development
 
@@ -19,7 +19,9 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Current repository structure
 
-- `installer` — diagnostic-only entry point with `--help` and `--preflight`; this is separate from the PR #9 destructive installer script.
+- `installer` — diagnostic-only entry point with `--help` and `--preflight`.
+- `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires source review, a passing read-only live-readiness gate, and a second exact acknowledgement before launching the destructive installer.
+- `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; physical X280 installation remains NOT TESTED.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
 - `lib/storage.sh` — read-only whole-disk discovery and fresh target validation; no partition/format/mount operations.
@@ -34,15 +36,14 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Intended workflow
 1. Boot the official Arch Linux ISO from USB.
-2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
-3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
-4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See [manual bootstrap review](docs/03-ARCHITECTURE-AND-MODULES.md#bootstrap-and-source-policy).
-5. Run read-only live validation and the canonical test suite; inspect their reports.
-6. For the PR #9 branch only, review `scripts/install-arch-x280.sh` and all sourced modules before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
+2. Connect to the network.
+3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
+4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, requires an exact SHA-bound acknowledgement, runs the read-only readiness gate, and requires a second exact acknowledgement before launching the installer.
+6. After readiness passes, inspect the installer’s target-specific storage plan, verify the exact internal SSD identity and your backup/recovery arrangements, and only then enter the exact plan-bound confirmation. This is the point at which the selected SSD is erased.
 7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
 8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
-**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` on PR #9 is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
+**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
 
 ## Documentation index
 1. [Project charter](docs/01-PROJECT-CHARTER.md)
@@ -61,6 +62,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 14. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
 15. [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
 16. [Current repository audit](docs/15-REPOSITORY-AUDIT.md)
+17. [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
@@ -69,7 +71,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. PR #9 adds a separate installer that uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. The initial installer uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
 
 ## Validation policy
 

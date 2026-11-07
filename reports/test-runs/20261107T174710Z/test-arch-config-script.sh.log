@@ -1,0 +1,5 @@
+PASS: target configuration script passes bash -n
+PASS: target configuration includes user, sudo, locale, timezone, and planned swapfile
+PASS: no static password is embedded
+PASS: Intel microcode follows the explicit report-only policy
+All target configuration script tests passed.
