@@ -257,3 +257,13 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Recorded the observed failure and explicit follow-up validation status in `docs/11-TESTING-AND-ACCEPTANCE.md`.
 - **TESTED:** GitHub Actions run #191 (`42356761102`) passed on commit `6e784d08927996b7bb9af3c144e9fd3dbc5555ac`, including Bash syntax, ShellCheck, configured shfmt, and all 12 repository test scripts. The added fixtures explicitly passed for zero-capacity removable skip, zero-capacity non-removable rejection, and unknown-size rejection. The physical X280 validator remains pending; the fix has not yet been verified on the laptop.
 - No disk-writing operation, package installation, or hardware configuration change was performed.
+
+
+### 2026-11-07 — Stage 9 base-system bootstrap first slice
+- Replaced the lib/base-system.sh placeholder with a guarded bootstrap module for an already-prepared target: it requires an ext4 root mounted from an unlocked /dev/mapper/* device and a separate vfat ESP mounted at ROOT/efi.
+- Added the minimal base package transaction using pacstrap -K and UUID-based genfstab -U generation. Existing non-empty target fstab files are preserved; incomplete generated fstab output is rejected.
+- The module does not partition, format, open LUKS, mount, configure boot, or run automatically from the installer entry point. It requires exact caller confirmation tokens and root privileges for package installation/fstab generation.
+- Added fixture coverage for module source safety, valid/invalid mount layouts, refusal to target the live root, and invalid confirmation.
+- IMPLEMENTED: module code and focused fixture tests committed on feature/base-system-bootstrap-2026-11-07.
+- NOT TESTED: no local shell execution or GitHub Actions run has yet validated this change. No pacstrap transaction or target filesystem write was performed.
+- Next: wire this stage into the interactive installer only after a safe storage preparation/mount workflow is available; complete boot configuration and end-to-end VM install remain outstanding.
