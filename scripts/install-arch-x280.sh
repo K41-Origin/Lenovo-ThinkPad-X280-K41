@@ -162,8 +162,19 @@ sed -i -e "s/^PRESETS=.*/PRESETS=('default')/" -e '/^fallback_/d' -e '/^default_
 printf '%s\\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' 'default_cmdline="/etc/kernel/cmdline"' >> /etc/mkinitcpio.d/linux.preset
 systemctl enable NetworkManager
 mkinitcpio -P
+[[ -s /efi/EFI/Linux/arch-linux.efi ]]
+[[ -s /etc/kernel/cmdline ]]
+grep -q '^rd.luks.name=' /etc/kernel/cmdline
+grep -q '^root=/dev/mapper/cryptroot' /etc/kernel/cmdline
 CHROOT
 
-k41::log_info "Base Arch berhasil dipasang ke /mnt. Bootloader systemd-boot dan initramfs dikonfigurasi."
-k41::log_warn "Tahap Caelestia/Hyprland, user non-root, locale, timezone, hostname, swapfile, dan optimasi X280 belum dijalankan."
-k41::log_info "Periksa /mnt, lalu chroot manual untuk menyelesaikan konfigurasi sebelum reboot."
+[[ -s /mnt/etc/fstab ]] || die "Target fstab tidak ditemukan atau kosong."
+[[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]] || die "UKI tidak berhasil dibuat."
+grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' /mnt/etc/fstab || die "Entri swapfile tidak ditemukan di fstab."
+[[ -s /mnt/etc/hostname ]] || die "Hostname target tidak terkonfigurasi."
+[[ -s /mnt/etc/locale.conf ]] || die "Locale target tidak terkonfigurasi."
+[[ -L /mnt/etc/localtime ]] || die "Timezone target tidak terkonfigurasi."
+
+k41::log_info "Konfigurasi awal base Arch selesai: user, sudo, locale, timezone, hostname, Intel microcode, swapfile, NetworkManager, systemd-boot, dan UKI telah diproses."
+k41::log_warn "Caelestia/Hyprland/Quickshell, tuning hardware X280, hibernation/resume, dan BlackArch belum diimplementasikan pada tahap ini."
+k41::log_info "Jangan reboot otomatis. Periksa hasil instalasi dan lakukan unmount/cryptsetup close secara manual setelah verifikasi."
