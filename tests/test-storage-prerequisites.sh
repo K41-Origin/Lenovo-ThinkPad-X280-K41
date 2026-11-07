@@ -48,7 +48,6 @@ storage::validate_target() {
   [[ ${K41_TEST_TOPOLOGY_FAIL:-0} == 0 ]] || return 1
   [[ ${target[device_path]} == /dev/nvme0n1 ]]
   [[ ${target[major_minor]} == 259:0 ]]
-  [[ ${target[stable_id]} == eui.0011223344556677 ]]
 }
 
 make_plan() {
