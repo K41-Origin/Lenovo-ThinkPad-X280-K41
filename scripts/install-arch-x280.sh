@@ -146,7 +146,7 @@ sed -i 's|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard k
 mkdir -p /efi/EFI/Linux /etc/kernel
 printf '%s\\n' 'cryptdevice=UUID=${root_uuid}:cryptroot root=/dev/mapper/cryptroot rw' > /etc/kernel/cmdline
 sed -i '/^default_uki=/d; /^default_image=/d' /etc/mkinitcpio.d/linux.preset
-printf '%s\\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' >> /etc/mkinitcpio.d/linux.preset
+printf '%s\\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' 'default_cmdline="/etc/kernel/cmdline"' >> /etc/mkinitcpio.d/linux.preset
 systemctl enable NetworkManager
 mkinitcpio -P
 CHROOT
