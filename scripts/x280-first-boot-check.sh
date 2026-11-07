@@ -280,6 +280,6 @@ run_check 'Regular user session context' "$diagnostics" check_login_context
 
 capture_boot_status
 capture_system_status
-capture_hardware
+capture_hardware >"$hardware"
 printf '\nEvidence collection complete. Review all files before pushing.\n'
 (( failed == 0 )) || exit 1
