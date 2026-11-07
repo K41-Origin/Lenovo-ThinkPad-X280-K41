@@ -190,6 +190,7 @@ storage::topology_check_target() {
     if [[ -v seen[$mount_mm] ]]; then
       printf 'storage: target topology is mounted at %s (device %s)\n' "$mount_point" "$mount_mm" >&2
       storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+      return 1
     fi
   done < "$mountinfo"
 
@@ -225,6 +226,7 @@ storage::topology_check_target() {
     if [[ -v seen[$swap_mm] ]]; then
       printf 'storage: target topology backs active swap %s (device %s)\n' "$swap_source" "$swap_mm" >&2
       storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
+      return 1
     fi
   done < "$swaps_file"
 
