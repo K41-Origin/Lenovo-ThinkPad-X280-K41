@@ -251,3 +251,29 @@ Safety interpretation:
 - The repository's `storage::discover_candidates` and `storage::validate_target` functions have not yet been executed on this physical host. The photographs validate raw system observations only, not the project's implementation.
 
 **Stage 8 result:** UEFI boot and device identity observations VERIFIED. Physical-disk topology exclusion, live candidate discovery, plan calculation, confirmation flow, and any destructive executor remain NOT TESTED. No permission to erase or repartition is implied by this record.
+
+
+## Stage 9 — Live storage topology observations
+
+**Date:** 2026-11-07 (user-provided terminal photograph; manually reviewed)  
+**Environment:** Physical ThinkPad X280, Arch Linux ISO 2026.11.01. All commands in this stage are observational/read-only.
+
+Observed results:
+
+| Check | Result | Status |
+|---|---|---|
+| USB installer | `/dev/sda`, 7.5G, USB, model Flash Disk; partitions `/dev/sda1` (1.1G) and `/dev/sda2` (109M) | VERIFIED |
+| Additional device | `/dev/sdb`, 0B, SD/MMC reader, removable=1 | VERIFIED; not the internal SSD |
+| Internal SSD | `/dev/nvme0n1`, 238.5G, WDC PC SN730 SDBQNTY-256G-1001, serial `193839803177`, NVMe; partitions p1 100M FAT, p2 16M, p3 237.8G NTFS, p4 530M NTFS | VERIFIED |
+| NVMe mountpoints | No mountpoints shown for the NVMe disk or its partitions in this `lsblk` snapshot | VERIFIED for this snapshot |
+| Mount tree | Root is `overlay` from `/run/archiso/airootfs`; visible system mounts are proc, sysfs, devtmpfs, tmpfs, and related virtual filesystems | VERIFIED from displayed `findmnt -R /` |
+| Loop device | `/dev/loop0` backs `/run/archiso/copytoram/airootfs.sfs` and is mounted at `/run/archiso/airootfs` as squashfs | VERIFIED |
+| Swap | `/proc/swaps` contains only its header; no active swap entries | VERIFIED for this snapshot |
+
+Topology assessment:
+- The displayed overlay upper/work paths are under `/run/archiso/cowspace`; `findmnt` shows `/run` backed by tmpfs. The displayed loop backing file is under `/run/archiso/copytoram`. These observations indicate the Live Environment's shown root/loop path is RAM-backed rather than located on the internal NVMe SSD.
+- No NVMe partition appears as a mount source in the displayed mount tree, and no active swap entry is shown.
+- These are point-in-time command observations from a photograph. They do not replace a complete programmatic dependency walk over mountinfo, sysfs block-device holders/slaves, loop backing files, and swap sources. Therefore the project's target-exclusion/topology validator has **NOT YET BEEN RUN** on this host, and SSD eligibility remains **NOT VERIFIED**.
+- The extra `/dev/sdb` SD/MMC reader is recorded to avoid confusing it with either the USB installer (`/dev/sda`) or internal NVMe (`/dev/nvme0n1`).
+
+**Stage 9 result:** Raw live topology observations recorded; no SSD mount or active swap was visible. Repository discovery/validation functions have not yet been executed on hardware. No disk mutation occurred and no destructive authorization is implied.
