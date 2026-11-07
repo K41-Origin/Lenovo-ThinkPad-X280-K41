@@ -97,7 +97,7 @@ sgdisk -i 1 "$disk" | grep -qi 'EF00' || die 'Partition 1 is not the expected EF
 sgdisk -i 2 "$disk" | grep -qi '8309' || die 'Partition 2 is not the expected Linux LUKS type.'
 [[ $(blkid -s TYPE -o value "$esp") == vfat ]] || die 'Partition 1 is not FAT/vfat.'
 cryptsetup isLuks "$root_part" || die 'Partition 2 is not a LUKS container.'
-cryptsetup luksDump "$root_part" | grep -qE '^[[:space:]]*Version:[[:space:]]+2
+cryptsetup luksDump "$root_part" | grep -q 'Version: 2' || die 'Root container is not LUKS2.'
 stage unlock 'Unlock existing LUKS2 root; no format operation is performed'
 cryptsetup open "$root_part" cryptroot || die 'Could not unlock the existing LUKS partition.'
 [[ $(blkid -s TYPE -o value "$MAPPER") == ext4 ]] || die 'Unlocked root filesystem is not ext4.'
