@@ -33,7 +33,7 @@ The installer installs systemd-boot and configures a mkinitcpio UKI using the sy
 - The separate native C helper in `native/storage-handle.c` is not called by this installer.
 - The loop integration test validates selected utility interfaces through inherited descriptor paths against a disposable loop image. It does not prove all kernel TOCTOU races impossible, physical NVMe hot-unplug behavior, or successful boot.
 - The earlier architecture plan assigned destructive storage ownership to `lib/storage.sh`; the current installer instead orchestrates destructive commands directly. This deviation is documented and remains an architectural item for review/refactor.
-- The installer does not configure resume/hibernation, recovery-key storage/registration, Caelestia/Hyprland/Quickshell, ThinkPad power/thermal tuning, or BlackArch.
+- The installer does not configure resume/hibernation, recovery-key storage/registration, Caelestia/Hyprland/Quickshell, ThinkPad power/thermal tuning, or BlackArch. It currently installs Intel microcode automatically, which conflicts with the approved policy in `docs/05-SECURITY-AND-AUTHENTICATION.md` and `docs/07-HARDWARE-POWER-AND-NETWORK.md`; this must be fixed or explicitly re-approved.
 - No complete transactional rollback or automatic safe resume after partial disk mutation is claimed. After a failure following the first destructive operation, stop and inspect the real disk state; do not rerun blindly.
 - A non-empty UKI file and generated configuration artifacts do not prove firmware boot, LUKS unlock, root mount, or successful first login.
 
