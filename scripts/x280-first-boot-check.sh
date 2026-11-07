@@ -24,6 +24,9 @@ started="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 branch="$(git branch --show-current 2>/dev/null || printf unknown)"
 commit="$(git rev-parse HEAD 2>/dev/null || printf unknown)"
 
+report_parent="$(dirname -- "$report_root")"
+report_parent_existed=false
+[[ -d $report_parent ]] && report_parent_existed=true
 mkdir -p -- "$report_root"
 report_dir="$report_root/$timestamp"
 suffix=0
@@ -269,7 +272,10 @@ finalize_report() {
   chmod 600 "$summary" "$diagnostics" "$boot_status" "$system_status" "$hardware"
   if (( EUID == 0 )) && [[ ${SUDO_UID:-} =~ ^[0-9]+$ && ${SUDO_GID:-} =~ ^[0-9]+$ ]]; then
     if [[ -z ${K41_FIRST_BOOT_REPORT_ROOT:-} ]]; then
-      chown "$SUDO_UID:$SUDO_GID" "$report_root" "$(dirname -- "$report_root")" 2>/dev/null || true
+      chown "$SUDO_UID:$SUDO_GID" "$report_root" 2>/dev/null || true
+      if [[ $report_parent_existed == false ]]; then
+        chown "$SUDO_UID:$SUDO_GID" "$report_parent" 2>/dev/null || true
+      fi
     fi
     chown -R "$SUDO_UID:$SUDO_GID" "$report_dir" 2>/dev/null || {
       printf 'WARNING: could not transfer report ownership to the invoking user.\\n' >&2
