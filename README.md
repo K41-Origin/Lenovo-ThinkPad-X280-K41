@@ -92,7 +92,7 @@ Run the consolidated safe gate from the official Arch ISO as root:
 bash scripts/x280-install-readiness.sh
 ```
 
-It checks the Arch/UEFI environment, validates shell syntax, runs the canonical tests, and invokes the target-specific read-only SSD validator. It never partitions, formats, opens LUKS, mounts, or installs packages. A PASS is a readiness result for the recorded checkout and live hardware snapshot, not permission to erase the SSD. The destructive installer remains a separate, manually invoked operation.
+The script always creates a timestamped, shareable report under `reports/live-readiness/<UTC timestamp>/` with `summary.md` and `diagnostics.log`, including on failure. The summary records the branch, commit SHA, working-tree state, kernel/architecture, each check result, and final exit status. Diagnostic output redacts detected `serial=` values. The canonical test runner also retains its detailed per-test logs under `reports/test-runs/`. Review the report before sharing; commit and push the specific readiness report directory so it can be reviewed from GitHub. The gate checks the Arch/UEFI environment, shell syntax, automated suite, and target-specific read-only SSD identity/topology. It never partitions, formats, opens LUKS, mounts, or installs packages. PASS is not permission to erase the SSD; the destructive installer remains separate and requires explicit authorization.
 
 ## Live validation on the ThinkPad
 
