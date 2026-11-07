@@ -135,6 +135,7 @@ run_step "instal sistem dasar Arch" base_system::bootstrap /mnt "BOOTSTRAP ARCH 
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
 root_uuid="$(blkid -s UUID -o value "$root_part")"
 [[ -n $root_uuid ]] || die "UUID LUKS tidak ditemukan."
+assert_target || die "Identitas disk berubah sebelum konfigurasi boot."
 arch-chroot /mnt /bin/bash -euo pipefail <<CHROOT
 sed -i 's|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt filesystems fsck)|' /etc/mkinitcpio.conf
 mkdir -p /efi/EFI/Linux /etc/kernel
