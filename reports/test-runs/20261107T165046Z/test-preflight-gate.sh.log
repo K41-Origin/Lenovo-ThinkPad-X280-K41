@@ -1,0 +1,6 @@
+PASS: resolved diagnostics still leave installation disabled
+PASS: inventory mismatch blocks preflight success
+PASS: unresolved boot mode blocks preflight success
+PASS: required-command failure blocks preflight success
+PASS: optional network diagnostic failure does not change required gate result
+All preflight-gate tests passed.
