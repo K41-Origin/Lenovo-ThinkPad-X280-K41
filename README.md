@@ -71,6 +71,10 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
 - These checks are a conservative safety gate, not proof that a disk is safe to erase. PR #9 adds a separate installer that uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
 
+## Validation policy
+
+VM-based installer testing is explicitly out of scope (REQ-INSTALL-006). Automated checks may use fixtures, mocks, and disposable loop-backed images for bounded component coverage. The destructive full-SSD replacement workflow is intentionally retained: end-to-end installation and first-boot validation must take place on the actual ThinkPad X280 after the physical-test gates, recovery preparation, and explicit authorization are complete. This policy does not authorize running the installer now.
+
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
 - Never bypass package signature or integrity verification.
