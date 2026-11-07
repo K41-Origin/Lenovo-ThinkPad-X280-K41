@@ -68,7 +68,9 @@ The physical X280 validator has previously failed because the removable SD/MMC r
 
 ## Arch ISO bootstrap
 
-The operator-facing bootstrap is `scripts/bootstrap-archiso.sh`. It fetches the latest `main` checkout, prints its commit SHA, opens the relevant source files for manual review, runs the read-only live-readiness gate, and requires a second exact acknowledgement before launching the destructive installer. A failed readiness check blocks launch. See [Arch ISO bootstrap and source-review gate](../docs/16-ARCHISO-BOOTSTRAP.md). The bootstrap test is static contract coverage only; it does not run the bootstrap or the destructive installer.\n\n## Installer distinction
+The operator-facing bootstrap is `scripts/bootstrap-archiso.sh`. It fetches the latest `main` checkout, prints its commit SHA, opens the relevant source files for manual review, runs the read-only live-readiness gate, and requires a second exact acknowledgement before launching the destructive installer. A failed readiness check blocks launch. See [Arch ISO bootstrap and source-review gate](../docs/16-ARCHISO-BOOTSTRAP.md). The bootstrap test is static contract coverage only; it does not run the bootstrap or the destructive installer.
+
+## Installer distinction
 
 - Top-level `installer --preflight`: read-only diagnostics only.
 - `scripts/install-arch-x280.sh` on main: initial destructive Arch base installer. Its static test does not execute the script. The pinned-device integration test covers selected utility interfaces against a disposable loop image only.
