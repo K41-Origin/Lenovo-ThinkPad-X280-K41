@@ -5,7 +5,7 @@
 - Source: `scripts/install-arch-x280.sh` and `scripts/configure-arch-x280.sh` on PR #9 branch `feature/base-system-bootstrap-2026-11-07`.
 - Implementation: IMPLEMENTED on the feature branch.
 - Automated evidence: TESTED on the specific commits/runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md); the loop integration covers selected utilities against a disposable loop image.
-- VM installation: NOT TESTED.
+- VM installation testing: OUT OF SCOPE by owner decision; no VM test will be performed.
 - Physical X280 installation and first boot: NOT TESTED.
 - Release/merge: not implied by branch implementation.
 
@@ -45,7 +45,7 @@ The canonical runner is:
 bash tests/run.sh
 ```
 
-It writes persistent summaries and logs under `reports/test-runs/`. Required suite dependencies are `bash`, `jq`, and `python3`; the native helper compile/CLI test is skipped only if `cc` is unavailable. Installer/configuration tests include static assertions; they do not execute the full installer. The pinned-device test uses a temporary loop-backed image, never the physical SSD.
+It writes persistent summaries and logs under `reports/test-runs/`. Required suite dependencies are `bash`, `jq`, and `python3`; the native helper compile/CLI test is skipped only if `cc` is unavailable. Installer/configuration tests include static assertions; they do not execute the full installer. The pinned-device test uses a temporary loop-backed image, never the physical SSD. This bounded test is not a VM installation and does not replace the required physical destructive test.
 
 See [tests/README.md](../tests/README.md) for the single authoritative test procedure and [11 — Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) for acceptance criteria and evidence boundaries.
 
@@ -58,4 +58,4 @@ See [tests/README.md](../tests/README.md) for the single authoritative test proc
 4. The operator confirms backup/recovery arrangements and the exact target identity from the live environment.
 5. The final test procedure and stop conditions are approved.
 
-No destructive physical test, successful VM installation, or successful X280 boot is claimed in this document.
+No destructive physical test or successful X280 boot is claimed in this document. VM-based installation testing is intentionally excluded. The destructive SSD replacement test remains required on the actual X280 after all gates above pass and explicit authorization is given.
