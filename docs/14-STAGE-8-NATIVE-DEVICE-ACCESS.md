@@ -14,7 +14,7 @@ This document owns the native C helper's design, identity, and lifecycle. It doe
 
 `native/storage-handle.c` is a narrow acquisition prototype. It accepts only a simple `/dev/<name>` path, opens it with `O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_EXCL | O_NONBLOCK`, verifies the opened object with `fstat`, rejects non-block objects and sysfs partitions, and queries capacity, logical/physical sector sizes, and read-only state through ioctls on the retained descriptor. It reports major/minor and diskseq (or JSON `null` when unavailable), then retains the descriptor until stdin reaches EOF. The helper has no command channel, invokes no subprocess, and contains no write operation.
 
-This is not yet a complete target-acquisition contract: stable WWN/serial correlation, actual removable-state parsing, NVMe/internal-device enforcement, expected-plan comparison, protocol integration with Bash, and robust lifecycle supervision remain PLANNED. `O_EXCL` behavior and all block-device paths remain NOT TESTED on disposable devices. The helper is not called by the installer or storage boundary.
+This is not yet a complete target-acquisition contract: stable WWN/serial correlation, actual removable-state parsing, NVMe/internal-device enforcement, expected-plan comparison, protocol integration with Bash, and robust lifecycle supervision remain PLANNED. The C helper's `O_EXCL` behavior, descriptor ioctls, and block-device lifecycle remain NOT TESTED on disposable or physical devices. The helper is not called by the installer or storage boundary.
 
 ## Problem statement
 
@@ -99,7 +99,7 @@ Mocks alone do not satisfy these criteria. Loop-device tests do not establish X2
 
 ## Explicit non-goals
 
-No partitioning, formatting, LUKS operations, filesystem creation, mounting, swap creation, package installation, or production storage executor. No claim that O_EXCL, an FD, diskseq, sysfs, or a stable serial alone proves a disk is safe to erase. No change to approved UEFI/GPT, ESP, LUKS2/ext4, UKI, swapfile, hibernation, or diagnostic-only installer decisions.
+No partitioning, formatting, LUKS operations, filesystem creation, mounting, swap creation, package installation, or production storage executor is added by this native helper. No claim that O_EXCL, an FD, diskseq, sysfs, or a stable serial alone proves a disk is safe to erase. The legacy top-level `installer --preflight` remains diagnostic-only; this document does not describe or change the separate PR #9 destructive installer.
 
 ## Next gate
 
