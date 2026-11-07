@@ -16,6 +16,10 @@ for required in \
   'storage::plan_gpt_layout' \
   'storage::plan_confirm_interactive' \
   'storage::plan_final_revalidate' \
+  'exec {disk_fd}<>"$disk"' \
+  'disk_ref="/proc/self/fd/$disk_fd"' \
+  'root_ref="/proc/self/fd/$root_fd"' \
+  'esp_ref="/proc/self/fd/$esp_fd"' \
   'sgdisk --zap-all --clear' \
   'cryptsetup luksFormat --type luks2' \
   'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \
