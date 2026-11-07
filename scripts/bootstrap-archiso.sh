@@ -50,6 +50,7 @@ review_files=(
   docs/04-INSTALLATION-AND-DISK.md
   docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md
   config/hardware/thinkpad-x280.conf
+  scripts/bootstrap-archiso.sh
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
   scripts/x280-install-readiness.sh
