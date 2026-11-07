@@ -108,20 +108,18 @@ base_system::generate_fstab() {
     else
       candidate=$efi_line
     fi
-    existing_line="$(awk -v mp="$mountpoint" '$0 !~ /^[[:space:]]*#/ && NF >= 2 && $2 == mp { print; count++ } END { if (count > 1) exit 2 }' "$tmp")"
-    case $? in
-      0) ;;
-      2)
-        rm -f -- "$generated" "$tmp"
+    if existing_line="$(awk -v mp="$mountpoint" '$0 !~ /^[[:space:]]*#/ && NF >= 2 && $2 == mp { print; count++ } END { if (count > 1) exit 2 }' "$tmp")"; then
+      :
+    else
+      local inspect_rc=$?
+      rm -f -- "$generated" "$tmp"
+      if (( inspect_rc == 2 )); then
         k41::log_error "Target fstab contains duplicate entries for $mountpoint."
-        return 1
-        ;;
-      *)
-        rm -f -- "$generated" "$tmp"
+      else
         k41::log_error "Could not inspect existing fstab entry for $mountpoint."
-        return 1
-        ;;
-    esac
+      fi
+      return 1
+    fi
     if [[ -n $existing_line ]]; then
       if [[ $existing_line != "$candidate" ]]; then
         rm -f -- "$generated" "$tmp"
