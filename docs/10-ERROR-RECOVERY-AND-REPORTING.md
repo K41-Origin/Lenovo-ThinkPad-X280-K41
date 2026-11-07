@@ -39,3 +39,10 @@ The log records start/end time, kernel/architecture, checkout path and commit wh
 Shell xtrace is not enabled. LUKS passphrases and account passwords must be entered through their interactive terminal prompts; they are not command arguments and must never be copied into logs. Logs can still contain hardware identifiers and storage topology from the reviewed plan, so inspect and redact them before sharing. Root-only permissions reduce exposure but do not make a log safe to publish.
 
 A failure at `final-revalidation` occurs before the installer's first destructive `wipefs` operation in the current code path. A failure at a `pre-operation-check:` stage means that particular operation was not invoked. A failure at or after a `disk-operation:` stage requires stopping and inspecting the actual disk and mount state; earlier disk-operation stages in the same run may already have changed the disk. Never rerun blindly. The log is diagnostic evidence, not independent proof of disk state.
+
+
+## Recorded X280 continuation checkpoint — 2026-11-08
+
+The physical attempt passed the storage confirmation gate, partitioned the configured internal SSD, formatted ESP and LUKS2/ext4 root, mounted both filesystems, and completed `pacstrap`. It then failed because the target `/etc/fstab` was already non-empty. The laptop was powered off afterward. The disk is not blank and the destructive installer must not be rerun.
+
+For this exact post-pacstrap/pre-configuration checkpoint, use `scripts/resume-arch-x280.sh` from the recovery branch. Do not rerun the broad blank-disk readiness gate or the Arch ISO bootstrap. The continuation script performs narrow identity/layout checks, read-only ext4 checking, verifies the expected installed package set, safely merges fstab, and continues configuration/UKI generation. It contains no partitioning, filesystem-formatting, LUKS-formatting, or pacstrap command. A mismatch or partial configuration is a hard stop requiring state inspection.
