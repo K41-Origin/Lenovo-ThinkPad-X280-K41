@@ -147,7 +147,7 @@ storage::validate_target() {
       [[ ${current[$i.major_minor]} == "${_target[major_minor]}" ]] || return 1
     fi
     if ! storage::topology_check_target "${current[$i.major_minor]}" /sys /proc/self/mountinfo /proc/swaps; then
-      printf 'storage: live topology revalidation rejected target %s (%s); inspect mount/swap dependency diagnostics above.\\n' \
+      printf 'storage: live topology revalidation rejected target %s (%s); inspect mount/swap dependency diagnostics above.\n' \
         "${current[$i.device_path]}" "${current[$i.major_minor]}" >&2
       return 1
     fi
