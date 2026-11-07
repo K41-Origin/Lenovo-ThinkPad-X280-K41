@@ -26,10 +26,14 @@ for required in \
   'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \
   "PRESETS=('default')" \
   'default_uki="/efi/EFI/Linux/arch-linux.efi"' \
-  'default_cmdline="/etc/kernel/cmdline"'; do
+  'default_cmdline="/etc/kernel/cmdline"' \
+  'HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)' \
+  'rd.luks.name=${root_uuid}=cryptroot root=/dev/mapper/cryptroot rw' \
+  '[[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]]' \
+  '[[ -s /mnt/etc/locale.conf ]]'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
 done
-pass "installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, and UKI setup"
+pass "installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
 
 if grep -Eq 'swapoff[[:space:]]+-a|pacstrap[[:space:]]+-K[[:space:]]+/mnt' "$SCRIPT"; then
   fail "installer bypasses guarded base bootstrap or disables unrelated swap"
