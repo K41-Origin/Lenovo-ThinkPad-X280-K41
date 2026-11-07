@@ -43,7 +43,8 @@ for ((i=0; i<disks[candidate_count]; i++)); do
   fi
 done
 
-(( matches == 1 )) || fail "expected exactly one $EXPECTED_MODEL SSD with serial $EXPECTED_SERIAL; found $matches"
+(( matches == 1 )) || fail "configured X280 SSD identity must match exactly one candidate; found $matches"
+printf 'PASS: configured X280 SSD model/serial identity matched exactly once.\\n'
 
 declare -A target=(
   [device_path]="${disks[$selected.device_path]}"
@@ -53,7 +54,7 @@ declare -A target=(
 )
 
 printf '\nValidating expected internal SSD: %s\n' "${target[device_path]}"
-storage::validate_target target || fail 'target identity or live topology validation failed'
+storage::validate_target target || fail 'target passed candidate matching but failed fresh identity or live-topology revalidation; no disk changes were made'
 
 printf '\nPASS: expected SSD identity and read-only topology checks passed.\n'
 printf 'No partitioning, formatting, encryption, mounting, or disk writes were performed.\n'
