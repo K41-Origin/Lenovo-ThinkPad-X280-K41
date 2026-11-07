@@ -65,7 +65,7 @@ static bool read_diskseq(const char *major_minor, uint64_t *value)
     char *end = NULL;
     errno = 0;
     unsigned long long parsed = strtoull(buffer, &end, 10);
-    if (errno != 0 || end == buffer || (*end != '\\n' && *end != '\\0'))
+    if (errno != 0 || end == buffer || (*end != '\n' && *end != '\0'))
         return false;
     *value = (uint64_t)parsed;
     return true;
