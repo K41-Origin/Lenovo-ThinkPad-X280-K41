@@ -5,7 +5,7 @@
 - Date: 2026-11-07
 - Scope: branch `feature/base-system-bootstrap-2026-11-07` and PR #9.
 - Method: inspect the GitHub tree, current source files, tests, documentation owners, and recorded GitHub Actions evidence.
-- No local repository checkout, VM installation, physical disk operation, or X280 boot test was performed as part of this documentation audit.
+- No local repository checkout, physical disk operation, or X280 boot test was performed as part of this documentation audit. Per owner decision, VM-based installation testing is out of scope and will not be performed.
 
 ## Executive summary
 
@@ -13,7 +13,7 @@ The repository contains two different installer paths that must never be conflat
 - Top-level `installer --preflight`: read-only diagnostic entry point.
 - `scripts/install-arch-x280.sh`: separate initial destructive Arch base installer on PR #9.
 
-The second path is implemented but is not a complete project installer and has not been tested end-to-end in a VM or on the physical X280. Current CI evidence covers static/fixture checks and selected storage utility interfaces on a disposable loop-backed image only.
+The second path is implemented but is not a complete project installer and has not been tested end-to-end on the physical X280. VM-based installation testing is excluded by owner decision. Current CI evidence covers static/fixture checks and selected storage utility interfaces on a disposable loop-backed image only.
 
 The documentation previously contained contradictory statements that the installer did not exist, that no destructive execution was implemented, and that a retained descriptor C helper was used by the installer. Those claims described earlier stages or confused separate implementations. They have been reconciled in the canonical documents listed below.
 
@@ -49,7 +49,7 @@ The documentation previously contained contradictory statements that the install
 - Earlier run #94 and the older main baseline run #185 are historical evidence for their own commits only.
 - User-provided Arch ISO terminal observations establish point-in-time UEFI, USB, internal NVMe, partition, mount/overlay, and swap facts. They do not prove the repository's live validator passed.
 - The zero-capacity removable SD/MMC discovery failure was addressed with regression fixtures. A successful rerun of `scripts/validate-live-storage.sh` on the physical X280 after that fix is still NOT TESTED.
-- VM installation, physical SSD installation, successful UKI boot, LUKS unlock/root mount, recovery workflow, and hibernation remain NOT TESTED.
+- Physical SSD installation, successful UKI boot, LUKS unlock/root mount, recovery workflow, and hibernation remain NOT TESTED. VM-based installation testing is OUT OF SCOPE by owner decision.
 
 ## Documentation synchronization result
 
@@ -77,9 +77,14 @@ Historical logs and timestamped reports are retained as immutable evidence. Fail
 3. Complete an independent source review of installer failure paths, cleanup, descriptor semantics, and post-destructive recovery before considering physical execution.
 4. Resolve the REQ-HW-006 deviation: current target configuration automatically installs Intel microcode despite the approved report-only policy.
 5. Resolve or formally accept the architecture deviation that destructive orchestration currently lives in the installer script rather than a dedicated storage executor module.
-6. Validate installation in a disposable VM before physical X280 testing where practical.
+6. Do not schedule VM-based installation testing. Prepare for the required physical X280 destructive installation test only after gates 1–5 are satisfied and the owner explicitly authorizes the exact target.
 7. Verify actual UKI boot, LUKS unlock, root mount, account login, and recovery behavior. Hibernation/resume remains a separate later stage.
 
 ## Conclusion
 
-The documentation set is now organized around explicit owners and a consistent distinction between approved design, implemented code, CI-tested behavior, and untested hardware behavior. This audit does not declare the installer ready for destructive laptop testing. The current gate is fresh CI plus successful read-only live validation and a final installer safety review.
+The documentation set is now organized around explicit owners and a consistent distinction between approved design, implemented code, CI-tested behavior, and untested hardware behavior. This audit does not declare the installer ready for destructive laptop testing. The current gate is fresh CI plus successful read-only live validation, a final installer safety review, backup/recovery preparation, and explicit authorization for the real-laptop destructive test.
+
+
+## Owner decision — installation test environment
+
+The project will not perform full installer testing in a VM. Fixtures, mocks, static checks, and disposable loop-backed images are retained for bounded automated coverage only. The destructive disk replacement/erasure workflow is deliberately preserved for a controlled test on the actual ThinkPad X280 after all safety gates pass. This is a required physical validation stage, not permission to execute it now.
