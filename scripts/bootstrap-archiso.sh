@@ -47,6 +47,9 @@ printf '%s\n' \
 review_files=(
   README.md
   AGENTS.md
+  docs/04-INSTALLATION-AND-DISK.md
+  docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md
+  config/hardware/thinkpad-x280.conf
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
   lib/common.sh
@@ -72,7 +75,7 @@ for relative_path in "${review_files[@]}"; do
   file="$repo_dir/$relative_path"
   [[ -f $file ]] || die "Required review file is missing: $relative_path"
   printf '\n===== SOURCE REVIEW: %s =====\n' "$relative_path" >&2
-  "${pager[@]}" -- "$file"
+  "${pager[@]}" "$file"
 done
 
 printf '\nResolved commit: %s\n' "$commit_sha" >&2
