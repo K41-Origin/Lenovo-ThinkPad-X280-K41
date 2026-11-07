@@ -72,7 +72,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. The initial installer uses retained Bash descriptors that uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. The initial installer uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
 
 ## Validation policy
 
