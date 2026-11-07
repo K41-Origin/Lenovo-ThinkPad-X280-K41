@@ -141,7 +141,7 @@ These are requirement-level acceptance cases for **REQ-DISK-003** in `docs/02-RE
 - Assert destructive-tool invocations explicitly, including an expected call count of **zero** whenever a prerequisite or safety gate fails, confirmation is cancelled, target identity is ambiguous or changed, the plan is incomplete, or a critical state is unknown.
 - Test that failed preflight or unresolved storage/boot-resume inputs prevent entry into any target-disk-dependent installation stage.
 - Keep fixtures deterministic and avoid relying on unstable device-path ordering or real hardware discovery in unit tests.
-- Do not treat a passing mock test as proof of correct real-disk behavior; validate integration separately in an isolated environment.
+- Do not treat a passing mock test as proof of correct real-disk behavior; validate component interfaces with mocks or disposable loop-backed devices; the full integration is validated on the physical X280 under the approved destructive-test gate.
 - If an implementation cannot expose a stage safely for testing, document the design limitation and resolve it before enabling destructive operations.
 
 ## Boot, encryption, and hibernation acceptance tests — PLANNED
