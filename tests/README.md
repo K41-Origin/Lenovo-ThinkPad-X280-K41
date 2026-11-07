@@ -97,4 +97,4 @@ The destructive installer creates `/var/log/x280-installer/<UTC timestamp>/insta
 
 The log contains stdout/stderr, stage markers, start/end metadata, exit status, and stage-specific storage validation diagnostics. It does not enable shell xtrace. Never enter secrets as command-line arguments; interactive prompts are intended to read them from the terminal. Hardware identifiers may appear in the log, so inspect and redact before sharing. See [Error Recovery and Reporting](../docs/10-ERROR-RECOVERY-AND-REPORTING.md).
 
-This logging does not change the destructive boundary: final read-only revalidation must pass before the first `wipefs` operation. A failed run must still be assessed against its last logged stage and the actual disk state; do not rerun blindly.
+This logging does not change the destructive boundary: final read-only revalidation must pass before the first `wipefs` operation. A `pre-operation-check:` failure means that particular operation was not invoked. A failure at or after a `disk-operation:` stage requires inspecting actual disk state because earlier operations may already have changed it; do not rerun blindly.
