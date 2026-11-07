@@ -36,7 +36,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 1. Boot the official Arch Linux ISO from USB.
 2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
 3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
-4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See [manual bootstrap review](docs/03-ARCHITECTURE-AND-MODULES.md#manual-bootstrap-and-pre-execution-review).
+4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See [manual bootstrap review](docs/03-ARCHITECTURE-AND-MODULES.md#bootstrap-and-source-policy).
 5. Run read-only live validation and the canonical test suite; inspect their reports.
 6. For the PR #9 branch only, review `scripts/install-arch-x280.sh` and all sourced modules before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
 7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
@@ -82,7 +82,7 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 
 ## Live validation on the ThinkPad
 
-Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--thinkpad-validation).
+Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--x280-validation).
 
 ## Documentation ownership
 Each topic has one canonical owner: requirements/decisions in `docs/02`, architecture/module boundaries in `docs/03`, storage and boot details in `docs/04`, test procedures in `tests/README.md`, acceptance/evidence boundaries in `docs/11`, and current implementation/CI status in `docs/12`. Stage records (`docs/14` and `docs/15-ARCH...`) document their specific implementation only. The repository audit (`docs/15-REPOSITORY-AUDIT.md`) is a concise cross-document review, not a second source of technical procedures.
