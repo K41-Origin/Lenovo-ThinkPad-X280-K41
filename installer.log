@@ -1,0 +1,94 @@
+X280 installer diagnostic log
+Started (UTC): 2026-11-07T18:22:18Z
+Kernel: Linux 7.2.11-arch1-1
+Architecture: x86_64
+Repository: /tmp/Lenovo-ThinkPad-X280-K41
+Commit: bdaaab022730a6706941a9b85c29d9f1549aac3d
+Log directory: /var/log/x280-installer/20261107T182218Z
+Permissions: directory 0700, file 0600
+
+[STAGE] preflight — Memeriksa profil X280, mode UEFI, dan prasyarat host
+INFO: Detected host inventory (read-only):
+cpu.vendor               GenuineIntel
+cpu.model                Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
+cpu.family               6
+cpu.model_id             142
+cpu.threads              8
+cpu.model_conflict       unknown/unavailable
+memory.total_bytes       8069148672
+dmi.sys_vendor           LENOVO
+dmi.product_name         20KESC2Y00
+dmi.product_version      ThinkPad X280
+dmi.bios_version         N20ET74W (1.59 )
+dmi.bios_date            08/26/2025
+OK: system vendor matches LENOVO.
+OK: target product matches 20KESC2Y00.
+OK: CPU matches Intel(R) Core(TM) i5-8250U.
+OK: memory is within the configured target range.
+INFO: Target hardware profile matches the detected host.
+
+[STAGE] disk-discovery — Mendeteksi disk NVMe internal dan identitas target
+
+Disk NVMe internal yang terdeteksi:
+ [0] /dev/sda             8053063680 bytes  Flash Disk                   serial=BA985181
+ [1] /dev/nvme0n1       256060514304 bytes  WDC PC SN730 SDBQNTY-256G-1001 wwn=eui.001b448b44f8a330
+
+Pilih indeks disk internal X280 yang akan DIHAPUS: 
+[STAGE] storage-plan — Menghitung layout GPT dan ukuran swapfile
+
+[STAGE] initial-revalidation — Mengumpulkan prasyarat read-only sebelum review
+INFO: All requested commands are available.
+INFO: Boot mode: UEFI (firmware interface directory detected).
+========== STORAGE PLAN REVIEW ==========
+Review digest:       7030c593a730ec3dadf3ab866e898a0f7acf5812af75fd32722c935629c092d0
+Target device:       /dev/nvme0n1
+Target model:        WDC PC SN730 SDBQNTY-256G-1001
+Target capacity:     256060514304 bytes
+Kernel identity:     wwn (eui.001b448b44f8a330)
+Kernel device ID:    259:0
+Partition table:     GPT
+Alignment:           1048576 bytes
+ESP:                 1073741824 bytes, FAT32, type c12a7328-f81f-11d2-ba4b-00a0c93ec93b, mount /efi
+Root partition:      sectors 2099200-500118158 (254985707008 bytes)
+Root storage:        luks2 + ext4, mount /
+Swapfile target:     10216632320 bytes
+Swap policy:         runtime_ram_plus_configured_margin
+Resume policy:       defer_until_swapfile_offset_verified
+Boot:                systemd-boot, uki, /efi/EFI/Linux/arch-linux.efi, kernel linux
+Secure Boot:         disabled
+Prerequisites:       UEFI=uefi tools=passed topology=passed unused=passed identity=passed
+=========================================
+
+PERINGATAN: SELURUH DATA PADA /dev/nvme0n1 AKAN DIHAPUS. Pastikan backup tersedia.
+
+[STAGE] operator-confirmation — Menampilkan rencana dan meminta konfirmasi target yang eksplisit
+========== STORAGE PLAN REVIEW ==========
+Review digest:       7030c593a730ec3dadf3ab866e898a0f7acf5812af75fd32722c935629c092d0
+Target device:       /dev/nvme0n1
+Target model:        WDC PC SN730 SDBQNTY-256G-1001
+Target capacity:     256060514304 bytes
+Kernel identity:     wwn (eui.001b448b44f8a330)
+Kernel device ID:    259:0
+Partition table:     GPT
+Alignment:           1048576 bytes
+ESP:                 1073741824 bytes, FAT32, type c12a7328-f81f-11d2-ba4b-00a0c93ec93b, mount /efi
+Root partition:      sectors 2099200-500118158 (254985707008 bytes)
+Root storage:        luks2 + ext4, mount /
+Swapfile target:     10216632320 bytes
+Swap policy:         runtime_ram_plus_configured_margin
+Resume policy:       defer_until_swapfile_offset_verified
+Boot:                systemd-boot, uki, /efi/EFI/Linux/arch-linux.efi, kernel linux
+Secure Boot:         disabled
+Prerequisites:       UEFI=uefi tools=passed topology=passed unused=passed identity=passed
+=========================================
+
+This action is intended to replace the selected disk and erase its contents.
+To confirm this exact target and plan, type: ERASE /dev/nvme0n1 7030c593a730
+> 
+[STAGE] final-revalidation — Memeriksa ulang konfirmasi, identitas, topologi, dan prasyarat; belum ada operasi disk
+ERROR: Validasi final gagal; tidak ada perubahan disk.
+ERROR: Installer berhenti (exit 1) pada tahap 'final-revalidation'. Jangan mengulang secara buta; periksa status disk dan /mnt.
+Finished (UTC): 2026-11-07T18:22:39Z
+Exit status: 1
+Last stage: final-revalidation
+Diagnostic log: /var/log/x280-installer/20261107T182218Z/installer.log
