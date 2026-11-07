@@ -70,5 +70,6 @@ if ! grep -qE '^[[:space:]]*/swapfile[[:space:]]' /etc/fstab; then
 fi
 
 systemctl enable NetworkManager
+info "Intel microcode (intel-ucode) is recommendation-only and is not installed automatically under REQ-HW-006."
 info "Initial target configuration completed."
 info "Hibernation/resume remains disabled until the swapfile resume offset is explicitly configured and verified."
