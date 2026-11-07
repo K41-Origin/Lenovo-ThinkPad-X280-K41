@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-07):** PR #9 contains an initial destructive X280 installer at `scripts/install-arch-x280.sh`, a target configuration script, guarded base bootstrap, and a disposable loop-device integration test. These are branch-only changes and are not part of `main` until merged. CI evidence covers syntax/static checks and loop-backed tool interfaces only; physical X280 installation and boot remain NOT TESTED. The separate top-level `installer --preflight` remains read-only diagnostics.
+> **Project status (2026-11-07):** `main` contains the initial destructive X280 base installer at `scripts/install-arch-x280.sh`, target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
 
 ## AI-assisted development
 
@@ -83,6 +83,16 @@ VM-based installer testing is explicitly out of scope (REQ-INSTALL-006). Automat
 - Never log passwords, encryption keys, tokens, or credentials.
 - Report untested behavior honestly.
 - Latest `main` execution is the chosen update policy, but it carries a supply-chain risk: show the resolved SHA and review retrieved code before production use.
+
+## Live validation and installation readiness on the ThinkPad
+
+Run the consolidated safe gate from the official Arch ISO as root:
+
+```bash
+bash scripts/x280-install-readiness.sh
+```
+
+It checks the Arch/UEFI environment, validates shell syntax, runs the canonical tests, and invokes the target-specific read-only SSD validator. It never partitions, formats, opens LUKS, mounts, or installs packages. A PASS is a readiness result for the recorded checkout and live hardware snapshot, not permission to erase the SSD. The destructive installer remains a separate, manually invoked operation.
 
 ## Live validation on the ThinkPad
 
