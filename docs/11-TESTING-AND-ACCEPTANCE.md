@@ -1,9 +1,9 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. As of 2026-11-07, the canonical test runner contains 12 test scripts. GitHub Actions run #185 (`42349907205`) passed Bash syntax validation, ShellCheck, the configured shfmt check, and the repository test suite at `main` commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. These CI tests use fixtures/mocks and compile/CLI checks; they are not proof of real block-device behavior or installation integration. Physical X280 Arch ISO observations are recorded below, but the project's own live storage discovery/validation script has not yet been run on the laptop.
+An initial interactive installer is IMPLEMENTED on PR #9 at branch `feature/base-system-bootstrap-2026-11-07`; it is not merged into `main` and has NOT been tested end to end on the physical X280. The separate top-level `installer --preflight` remains diagnostic-only. The PR #9 CI evidence (run #94, 15 test scripts including a disposable loop-device integration test) covers syntax/static checks and selected disk-tool interfaces only; it does not prove a complete installation or boot. The `main` baseline run #185 (`42349907205`) at `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a` is a different code state and must not be attributed to PR #9.
 
-The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
+The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. PR #9 adds a separate destructive installer path; the storage planning modules described in this historical section remain read-only.
 
 Stage 5 adds a dry-run operation manifest and deterministic failure-injection simulator. The manifest describes the intended order (GPT, partition creation/type assignment, LUKS2 format/open, ext4), while the simulator records attempted/completed steps and stops at an injected failure. It does not invoke an executor callback, shell command, block-device API, or privileged utility. A ready final gate must match the current plan's review digest and target identity; simulation consumes the gate. This is test infrastructure and architecture validation only, not a production storage executor.
 
@@ -311,3 +311,20 @@ The follow-up change now skips **only** a whole-disk record where `lsblk` report
 The original report is stored at `reports/x280-archiso-storage-test-20261107T082432Z.log`. It is preserved as evidence of the failed attempt; it is not rewritten to imply success.
 
 **Validation status:** GitHub Actions run #191 (`42356761102`) passed on commit `6e784d08927996b7bb9af3c144e9fd3dbc5555ac`: Bash syntax, ShellCheck, configured shfmt, and all 12 repository test scripts passed, including the new zero-capacity fixtures. The physical X280 validator has **not** yet been rerun after the fix. No disk mutation was performed or authorized.
+
+
+## Current installer implementation — PR #9 (2026-11-07)
+
+**IMPLEMENTED on feature branch; NOT TESTED on physical X280.** The current branch contains:
+- `scripts/install-arch-x280.sh`: target-specific X280/SSD identity guard, GPT/ESP/LUKS2/ext4 workflow, exact plan-bound confirmation, final read-only revalidation, guarded base bootstrap, target configuration, and systemd-boot UKI generation.
+- `scripts/configure-arch-x280.sh`: interactive hostname, user/password, timezone, locale, Intel microcode, sudoers, and swapfile configuration.
+- `lib/base-system.sh`: guarded `pacstrap -K` and UUID-based fstab generation for the already mounted root and ESP.
+- `tests/test-pinned-device-path.sh`: disposable loop-device integration coverage for selected storage utilities through inherited descriptor paths. It is not a full installer test and does not emulate NVMe controller failure or firmware boot.
+
+The installer boot configuration is aligned to the documented systemd initramfs design: `HOOKS` uses `systemd` + `sd-encrypt`, and the UKI command line uses `rd.luks.name=<LUKS-UUID>=cryptroot` plus `root=/dev/mapper/cryptroot`. The installer checks that the generated UKI, fstab, swapfile entry, hostname, locale, and timezone artifacts exist before reporting completion. These checks establish file presence/configuration only, not boot success.
+
+### Current validation boundary
+- **CI evidence:** PR #9 run #94 passed syntax, ShellCheck, and 15 test scripts, including the disposable loop-device test. This result applies to the recorded PR #9 head tested by that run; rerun CI after any subsequent edits.
+- **Physical validator:** the earlier X280 live-validator failure due to a zero-capacity removable SD/MMC reader was addressed in discovery logic and fixture tests, but the updated validator still needs to be rerun on the laptop.
+- **Installer integration:** no full VM installation, physical SSD installation, or successful first boot is VERIFIED.
+- **Safety:** after any failure following the first destructive storage command, stop and inspect the actual disk state. Never blindly rerun the installer.
