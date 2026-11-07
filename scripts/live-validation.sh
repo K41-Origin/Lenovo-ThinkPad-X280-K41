@@ -77,7 +77,7 @@ section "Host and boot environment"
 capture "Kernel" uname -a
 capture_optional "CPU inventory" lscpu lscpu
 capture_optional "Memory inventory" free free -h
-capture_optional "UEFI firmware indicator" test -d /sys/firmware/efi
+capture_optional "UEFI firmware indicator" test test -d /sys/firmware/efi
 capture_optional "DMI vendor" cat cat /sys/class/dmi/id/sys_vendor
 capture_optional "DMI product" cat cat /sys/class/dmi/id/product_name
 capture_optional "DMI product version" cat cat /sys/class/dmi/id/product_version
