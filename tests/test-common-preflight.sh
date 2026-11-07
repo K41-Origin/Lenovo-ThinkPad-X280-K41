@@ -107,4 +107,4 @@ if base_system::install_packages "$tmp/target" WRONG-CONFIRMATION >/dev/null 2>&
 fi
 pass 'base-system module validates encrypted ext4 root, separate vfat ESP, and explicit confirmation'
 
-printf '%s\\n' 'All common/preflight tests passed.'
+printf '%s\n' 'All common/preflight tests passed.'
