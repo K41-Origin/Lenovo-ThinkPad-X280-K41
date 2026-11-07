@@ -55,6 +55,7 @@ review_files=(
   scripts/x280-install-readiness.sh
   scripts/validate-live-storage.sh
   tests/run.sh
+  tests/helpers/storage-fixtures.sh
   lib/common.sh
   lib/preflight.sh
   lib/inventory.sh
@@ -67,7 +68,7 @@ review_files=(
 )
 
 mapfile -t test_files < <(git -C "$repo_dir" ls-files 'tests/*.sh')
-(("${#test_files[@]}" > 0)) || die "No tracked test scripts found for source review."
+(( ${#test_files[@]} > 0 )) || die "No tracked test scripts found for source review."
 review_files+=("${test_files[@]}")
 
 if command -v less >/dev/null 2>&1; then
