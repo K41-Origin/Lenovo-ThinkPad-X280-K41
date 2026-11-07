@@ -33,12 +33,14 @@ done
 combined="$run_dir/combined.log"
 summary="$run_dir/summary.md"
 : > "$combined"
-chmod 600 "$combined"
+: > "$summary"
+chmod 600 "$combined" "$summary"
 
 overall_rc=0
 passed=0
 failed=0
 skipped=0
+required_missing=()
 
 {
   printf '# Repository test run\n\n'
@@ -50,32 +52,38 @@ skipped=0
   printf -- '- Kernel: %s\n' "$(uname -sr 2>/dev/null || printf unknown)"
   printf '\n## Test results\n\n'
   printf '| Test | Result | Exit | Log |\n|---|---:|---:|---|\n'
-} > "$summary"
+} >> "$summary"
 
 printf 'Repository test run: %s\n' "$run_dir"
 
-for dependency in bash jq python3 cc; do
+# Only tools needed by the shell/fixture suite are global requirements.
+# The C compiler is optional and gates only the native helper test.
+for dependency in bash jq python3; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
-    printf 'FAIL: missing test dependency: %s\n' "$dependency" | tee -a "$combined"
-    printf '| Dependency: %s | FAIL | 2 | combined.log |\n' "$dependency" >> "$summary"
-    failed=$((failed + 1))
-    overall_rc=2
+    required_missing+=("$dependency")
+    printf 'FAIL: missing required test dependency: %s\n' "$dependency" | tee -a "$combined"
   fi
 done
 
 for test in "${tests[@]}"; do
+  test_log="$run_dir/${test##*/}.log"
   if [[ ! -f "$test" ]]; then
     printf 'FAIL: required test is missing: %s\n' "$test" | tee -a "$combined"
-    printf '| %s | FAIL | 1 | combined.log |\n' "$test" >> "$summary"
+    printf 'FAIL: missing test script: %s\n' "$test" > "$test_log"
+    printf '| %s | **FAIL** | 1 | %s |\n' "$test" "${test##*/}.log" >> "$summary"
     failed=$((failed + 1))
     overall_rc=1
-  fi
-done
-
-if (( overall_rc == 0 )); then
-  for test in "${tests[@]}"; do
-    test_log="$run_dir/${test##*/}.log"
-    printf '\n== %s ==\n' "$test"
+  elif (( ${#required_missing[@]} > 0 )); then
+    printf 'SKIP: required suite dependency is missing; see combined.log\n' > "$test_log"
+    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    skipped=$((skipped + 1))
+  elif [[ $test == tests/test-native-storage-handle.sh ]] && ! command -v cc >/dev/null 2>&1; then
+    printf 'SKIP: optional compiler cc is unavailable; install base-devel or a C compiler to run this native-helper test.\n' > "$test_log"
+    cat "$test_log" | tee -a "$combined"
+    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    skipped=$((skipped + 1))
+  else
+    printf '\n== %s ==\n' "$test" | tee -a "$combined"
     if bash "$test" >"$test_log" 2>&1; then
       rc=0
       result=PASS
@@ -89,7 +97,11 @@ if (( overall_rc == 0 )); then
     cat -- "$test_log" | tee -a "$combined"
     printf '%s: %s (exit %s) — %s\n' "$test" "$result" "$rc" "$test_log"
     printf '| %s | **%s** | %s | %s |\n' "$test" "$result" "$rc" "${test##*/}.log" >> "$summary"
-  done
+  fi
+done
+
+if (( ${#required_missing[@]} > 0 )); then
+  overall_rc=2
 fi
 
 {
@@ -105,12 +117,12 @@ fi
   printf -- '- Finished (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf '\n## Evidence files\n\n'
   printf -- '- `summary.md`: per-test result and run metadata\n'
-  printf -- '- `combined.log`: combined stdout/stderr from all test scripts\n'
-  printf -- '- `<test-name>.log`: individual stdout/stderr for each test script\n'
-  printf '\nReports are generated locally and are not committed automatically. Review them for environment-specific information before sharing. A passing fixture suite is not proof of a successful installation or safe disk erasure.\n'
+  printf -- '- `combined.log`: combined stdout/stderr from all executed tests and skip reasons\n'
+  printf -- '- `<test-name>.log`: individual stdout/stderr or explicit SKIP reason for every manifest entry\n'
+  printf '\nThe native helper test is skipped only when `cc` is unavailable. Missing required suite dependencies or any failed test returns non-zero. Reports are generated locally and are not committed automatically. Review reports for environment-specific information before sharing. A passing fixture suite is not proof of a successful installation or safe disk erasure.\n'
 } >> "$summary"
 
-chmod 600 "$summary" "$combined" "$run_dir"/*.log 2>/dev/null || true
+chmod 600 "$summary" "$combined" "$run_dir"/*.log
 printf '\nSummary: %s\nCombined log: %s\n' "$summary" "$combined"
-printf 'Test scripts passed: %s | failed: %s\n' "$passed" "$failed"
+printf 'Test scripts: %s passed | %s failed | %s skipped\n' "$passed" "$failed" "$skipped"
 exit "$overall_rc"
