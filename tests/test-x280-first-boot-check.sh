@@ -77,6 +77,10 @@ cat >"$mock_bin/lspci" <<'MOCK'
 #!/usr/bin/env bash
 printf '00:02.0 VGA compatible controller: Intel UHD Graphics 620\n'
 MOCK
+cat >"$mock_bin/journalctl" <<'MOCK'
+#!/usr/bin/env bash
+printf 'test event password=SHOULD_NOT_LEAK aa:bb:cc:dd:ee:ff\n'
+MOCK
 chmod +x "$mock_bin"/*
 
 run_dir="$tmp/run"
@@ -102,7 +106,14 @@ grep -Fq -- '- Result: **PASS**' "$report" || fail "healthy fixture did not prod
 grep -Fq 'Encrypted root mount' "$report" || fail "root encryption check is absent from summary"
 grep -Fq 'Network connected' "$report" || fail "network check is absent from summary"
 grep -Fq '20KESC2Y00' "$report_dir/hardware.txt" || fail "hardware profile evidence was not captured"
+if grep -R -Fq 'SHOULD_NOT_LEAK' "$report_dir"; then
+  fail "password-like journal content was not redacted"
+fi
+if grep -R -Fq 'aa:bb:cc:dd:ee:ff' "$report_dir"; then
+  fail "MAC address was not redacted"
+fi
 pass "healthy mocked first boot generates complete PASS report and evidence files"
+pass "password-like strings and MAC addresses are redacted from captured journal output"
 
 # A failed systemd unit must make the overall collector exit non-zero.
 cat >"$mock_bin/systemctl" <<'MOCK'
