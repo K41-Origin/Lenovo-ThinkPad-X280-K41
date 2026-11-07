@@ -20,7 +20,9 @@ for required in \
   'scripts/install-arch-x280.sh' \
   'scripts/configure-arch-x280.sh' \
   'config/hardware/thinkpad-x280.conf' \
-  'REVIEWED $commit_sha AND AUTHORIZE INSTALLER LAUNCH' \
+  'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \\
+  'bash scripts/x280-install-readiness.sh' \\
+  'READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH' \\
   'exec bash "$repo_dir/scripts/install-arch-x280.sh"'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required bootstrap review/safety control is missing: $required"
 done
