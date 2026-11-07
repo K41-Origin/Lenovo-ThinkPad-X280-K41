@@ -9,6 +9,7 @@ pass() { printf 'PASS: %s\\n' "$1"; }
 bash -n "$SCRIPT" || fail "target configuration script has a Bash syntax error"
 pass "target configuration script passes bash -n"
 
+ # shellcheck disable=SC2016
 for required in \
   '/etc/arch-release' \
   'passwd "$username"' \
