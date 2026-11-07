@@ -66,7 +66,7 @@ run_check() {
   fi
   # Hardware serials are useful for local diagnosis but should not be published
   # in a report that the operator is expected to commit and push.
-  sed -E 's/(serial=)[^[:space:]]+/\1[REDACTED]/g' "$raw" >>"$diagnostics"
+  sed -E 's/(serial[[:space:]]*=?[[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' "$raw" >>"$diagnostics"
   rm -f -- "$raw"
   return 0
 }
