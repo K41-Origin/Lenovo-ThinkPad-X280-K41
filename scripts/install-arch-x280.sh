@@ -22,6 +22,49 @@ source "$ROOT/lib/base-system.sh"
 
 die() { k41::log_error "$1"; exit 1; }
 need_root() { (( EUID == 0 )) || die "Jalankan dari Arch ISO sebagai root."; }
+current_stage=bootstrap
+installer_log_dir=
+installer_log_file=
+installer::stage() {
+  current_stage=$1
+  shift
+  printf '\n[STAGE] %s — %s\n' "$current_stage" "$*"
+}
+installer::init_logging() {
+  local root timestamp suffix=0
+  command -v tee >/dev/null 2>&1 || { printf 'FATAL: tee tidak tersedia; logging wajib tidak dapat diinisialisasi.\n' >&2; return 1; }
+  command -v install >/dev/null 2>&1 || { printf 'FATAL: install tidak tersedia; direktori log aman tidak dapat dibuat.\n' >&2; return 1; }
+  root=/var/log/x280-installer
+  if ! install -d -o root -g root -m 0700 "$root" 2>/dev/null; then
+    root=/run/x280-installer
+    install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: tidak dapat membuat direktori log root-only di /var/log maupun /run.\n' >&2; return 1; }
+    printf 'WARNING: /var/log tidak dapat digunakan; log disimpan sementara di /run.\n' >&2
+  fi
+  printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
+  installer_log_dir="$root/$timestamp"
+  while ! mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; do
+    suffix=$((suffix + 1))
+    installer_log_dir="$root/$timestamp-$suffix"
+  done
+  installer_log_file="$installer_log_dir/installer.log"
+  : >"$installer_log_file"
+  chmod 0600 "$installer_log_file" || return 1
+  # No xtrace is enabled. Interactive secrets are read from the controlling
+  # terminal and are never passed as command arguments.
+  exec > >(tee -a "$installer_log_file") 2>&1
+  printf 'X280 installer diagnostic log\n'
+  printf 'Started (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+  printf 'Kernel: %s\nArchitecture: %s\n' "$(uname -sr)" "$(uname -m)"
+  printf 'Repository: %s\n' "$ROOT"
+  if command -v git >/dev/null 2>&1; then printf 'Commit: %s\n' "$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || printf unknown)"; else printf 'Commit: unknown (git unavailable)\n'; fi
+  printf 'Log directory: %s\nPermissions: directory 0700, file 0600\n' "$installer_log_dir"
+}
+installer::on_error() {
+  local rc=$1 line=$2
+  trap - ERR
+  printf '[ERROR] Unhandled command failure: exit=%s line=%s stage=%s\n' "$rc" "$line" "$current_stage" >&2
+  exit "$rc"
+}
 need_commands() {
   local cmd
   for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt blockdev wipefs arch-chroot mount awk sed grep install; do
@@ -31,17 +74,25 @@ need_commands() {
 cleanup() {
   local rc=$?
   if (( rc != 0 )); then
-    k41::log_error "Installer berhenti (exit $rc). Jangan mengulang secara buta; periksa status disk dan /mnt."
+    k41::log_error "Installer berhenti (exit $rc) pada tahap '$current_stage'. Jangan mengulang secara buta; periksa status disk dan /mnt."
+  fi
+  if [[ -n $installer_log_file ]]; then
+    printf 'Finished (UTC): %s\nExit status: %s\nLast stage: %s\n' \
+      "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$rc" "$current_stage"
+    printf 'Persistent diagnostic log: %s\n' "$installer_log_file"
   fi
 }
-trap cleanup EXIT
-
 need_root
+installer::init_logging || exit 1
+trap cleanup EXIT
+trap 'installer::on_error "$?" "$LINENO"' ERR
 need_commands
+installer::stage preflight "Memeriksa profil X280, mode UEFI, dan prasyarat host"
 preflight::check_target_inventory || die "Host tidak lolos verifikasi profil ThinkPad X280."
 [[ -d /sys/firmware/efi ]] || die "Boot ISO dalam mode UEFI terlebih dahulu."
 [[ ! -e /mnt/etc ]] || die "/mnt tampak sudah berisi sistem; unmount/periksa manual sebelum menjalankan installer."
 
+installer::stage disk-discovery "Mendeteksi disk NVMe internal dan identitas target"
 declare -A discovered=()
 storage::discover_candidates discovered || die "Gagal membaca inventaris disk."
 (( discovered[candidate_count] > 0 )) || die "Tidak ditemukan disk NVMe internal yang layak."
@@ -64,6 +115,7 @@ done
 [[ ${target[stable_id_kind]} == wwn || ${target[stable_id_kind]} == serial ]] || die "Disk tidak memiliki identitas stabil WWN/serial."
 [[ ${discovered[$selection.has_mounted_descendant]} == no && ${discovered[$selection.has_active_swap_descendant]} == no ]] || die "Target memiliki mount atau swap aktif."
 
+installer::stage storage-plan "Menghitung layout GPT dan ukuran swapfile"
 ram_bytes="$(awk '/MemTotal:/ {print $2 * 1024}' /proc/meminfo)"
 [[ $ram_bytes =~ ^[0-9]+$ ]] || die "Tidak dapat menentukan kapasitas RAM."
 swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
@@ -71,12 +123,16 @@ swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
 declare -A plan=() prereq=() confirmation=() fresh_target=() fresh_prereq=() gate=()
 storage::plan_gpt_layout plan "${target[size_bytes]}" "$(blockdev --getss "${target[device_path]}")" "$(blockdev --getpbsz "${target[device_path]}")" "$ram_bytes" "$swap_margin_bytes" || die "Perhitungan layout disk gagal."
 storage::plan_bind_target plan target || die "Binding identitas target gagal."
+installer::stage initial-revalidation "Mengumpulkan prasyarat read-only sebelum review"
 storage::plan_collect_live_prerequisites plan fresh_target prereq || die "Pemeriksaan prasyarat awal gagal."
 storage::plan_render_review plan
 printf '\nPERINGATAN: SELURUH DATA PADA %s AKAN DIHAPUS. Pastikan backup tersedia.\n' "${target[device_path]}" >&2
+installer::stage operator-confirmation "Menampilkan rencana dan meminta konfirmasi target yang eksplisit"
 storage::plan_confirm_interactive plan confirmation || die "Konfirmasi dibatalkan."
+installer::stage final-revalidation "Memeriksa ulang konfirmasi, identitas, topologi, dan prasyarat; belum ada operasi disk"
 storage::plan_final_revalidate plan confirmation fresh_target fresh_prereq gate || die "Validasi final gagal; tidak ada perubahan disk."
 
+installer::stage pin-target "Memastikan identitas block device dan menahan descriptor target"
 disk=${gate[target_device_path]}
 disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed -E 's/[[:space:]]+$//')"
 [[ -n $disk_identity_before ]] || die "Identitas target tidak dapat dibaca ulang."
@@ -105,6 +161,7 @@ assert_target() {
 }
 run_step() {
   local label=$1; shift
+  current_stage="disk-operation:$label"
   assert_target || die "Revalidasi target gagal sebelum: $label"
   k41::log_info "Menjalankan tahap: $label"
   "$@" || die "Tahap gagal: $label"
@@ -133,6 +190,7 @@ root_ref="/proc/self/fd/$root_fd"
 [[ "$(stat -Lc '%t:%T' "$root_part")" == "$(stat -Lc '%t:%T' "/proc/$BASHPID/fd/$root_fd")" ]] || die "Path root partition berubah saat descriptor dibuka."
 assert_target || die "Identitas disk berubah setelah partisi."
 
+installer::stage encryption "Meminta passphrase LUKS2 secara interaktif; input tidak dicatat"
 printf '\nBuat passphrase LUKS2 untuk root (input tidak dicatat):\n' >&2
 run_step "format partisi root dengan LUKS2" cryptsetup luksFormat --type luks2 --verify-passphrase "$root_ref"
 run_step "buka volume LUKS2" cryptsetup open "$root_ref" cryptroot
@@ -149,6 +207,7 @@ install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" /mnt/root/k41-configure-a
 run_step "konfigurasi user, locale, timezone, microcode, dan swapfile" arch-chroot /mnt /root/k41-configure-arch-x280.sh "${plan[swapfile_target_bytes]}"
 rm -f -- /mnt/root/k41-configure-arch-x280.sh
 
+installer::stage boot-configuration "Memasang systemd-boot dan membangun UKI"
 # Minimal bootable configuration: systemd-boot + mkinitcpio UKI.
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
 root_uuid="$(blkid -s UUID -o value "$root_ref")"
@@ -175,6 +234,7 @@ grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' /mnt/etc/fsta
 [[ -s /mnt/etc/locale.conf ]] || die "Locale target tidak terkonfigurasi."
 [[ -L /mnt/etc/localtime ]] || die "Timezone target tidak terkonfigurasi."
 
+installer::stage completion "Memvalidasi artefak hasil instalasi"
 k41::log_info "Konfigurasi awal base Arch selesai: user, sudo, locale, timezone, hostname, swapfile, NetworkManager, systemd-boot, dan UKI telah diproses."
 k41::log_warn "Caelestia/Hyprland/Quickshell, tuning hardware X280, hibernation/resume, dan BlackArch belum diimplementasikan pada tahap ini."
 k41::log_info "Jangan reboot otomatis. Periksa hasil instalasi dan lakukan unmount/cryptsetup close secara manual setelah verifikasi."
