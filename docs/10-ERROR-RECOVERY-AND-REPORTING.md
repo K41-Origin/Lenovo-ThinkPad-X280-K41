@@ -32,7 +32,7 @@ Check boot/encryption configuration, filesystem/mount state, network, audio, des
 /var/log/x280-installer/<UTC timestamp>/installer.log
 ```
 
-The directory is root-owned mode 0700 and the log file root-owned mode 0600. If `/var/log` cannot be used, the installer falls back to `/run/x280-installer/<UTC timestamp>/installer.log`; this fallback is temporary and disappears at reboot. The installer prints the exact log path at exit. Copy the log to persistent media before reboot if the fallback was used.
+The directory is root-owned mode 0700 and the log file root-owned mode 0600. The installer falls back to `/run/x280-installer/<UTC timestamp>/installer.log` if `/var/log` cannot be used; that fallback is always temporary and disappears at reboot. The installer prints the exact log path at exit. Because the Arch ISO may keep `/var/log` on an ephemeral overlay too, copy the log to a mounted persistent medium before reboot regardless of which path was used.
 
 The log records start/end time, kernel/architecture, checkout path and commit when available, stage markers, stdout/stderr, exit status, and the last stage reached. Storage final-revalidation and live-prerequisite modules report a non-sensitive failure-stage identifier (for example, `target_stable_identity_changed` or `target_topology_validation`) instead of returning only a generic failure.
 
