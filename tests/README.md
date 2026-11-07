@@ -43,6 +43,8 @@ Each run creates a unique `reports/test-runs/<UTC timestamp>/` directory contain
 
 The runner does not automatically commit reports. Inspect logs and review them for host-specific or sensitive information before sharing or committing. Reports apply only to their recorded checkout and host snapshot.
 
+The consolidated physical readiness command `bash scripts/x280-install-readiness.sh` additionally creates `reports/live-readiness/<UTC timestamp>/summary.md` and `diagnostics.log`. It records each readiness check, checkout SHA, environment metadata, final result, and captured output; detected disk serial values are redacted from diagnostics. The script does not run `git add`, commit, or push. After reviewing the report, commit and push only the intended timestamped report directory. The test runner's `reports/test-runs/` remains available for deeper per-test logs.
+
 ## Live Arch ISO / X280 validation
 
 The broad read-only validation command is:

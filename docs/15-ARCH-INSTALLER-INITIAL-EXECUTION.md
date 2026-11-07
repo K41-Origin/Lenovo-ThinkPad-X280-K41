@@ -2,12 +2,12 @@
 
 ## Status and scope
 
-- Source: `scripts/install-arch-x280.sh` and `scripts/configure-arch-x280.sh` on PR #9 branch `feature/base-system-bootstrap-2026-11-07`.
-- Implementation: IMPLEMENTED on the feature branch.
+- Source: `scripts/install-arch-x280.sh` and `scripts/configure-arch-x280.sh` on `main`.
+- Implementation: IMPLEMENTED on `main`.
 - Automated evidence: TESTED on the specific commits/runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md); the loop integration covers selected utilities against a disposable loop image.
 - VM installation testing: OUT OF SCOPE by owner decision; no VM test will be performed.
 - Physical X280 installation and first boot: NOT TESTED.
-- Release/merge: not implied by branch implementation.
+- Release/merge: merged into `main`; this is not a released or physically validated installer.
 
 This is an initial destructive base-system installer, not the complete intended project installer. The legacy top-level `installer --preflight` remains read-only and is not its entry point.
 
@@ -23,7 +23,7 @@ The current target layout is:
 - ext4 directly on `/dev/mapper/cryptroot`.
 - ESP mounted at `/mnt/efi`, root at `/mnt`.
 
-The guarded `base_system::bootstrap` installs the minimal package set with `pacstrap -K` and generates UUID-based fstab. The target configuration script is copied into the target and run through `arch-chroot`; it prompts for hostname, username/password, timezone, and locale, installs Intel microcode, configures sudo wheel access, creates the swapfile, and enables NetworkManager.
+The guarded `base_system::bootstrap` installs the minimal package set with `pacstrap -K` and generates UUID-based fstab. The target configuration script is copied into the target and run through `arch-chroot`; it prompts for hostname, username/password, timezone, and locale, configures sudo wheel access, creates the swapfile, and enables NetworkManager. Intel microcode is not installed automatically under the approved report-only policy.
 
 The installer installs systemd-boot and configures a mkinitcpio UKI using the systemd-based `sd-encrypt` hook and `rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw` kernel command line. The default UKI target is `/efi/EFI/Linux/arch-linux.efi`. It checks for expected configuration artifacts and does not reboot automatically.
 
@@ -50,6 +50,8 @@ It writes persistent summaries and logs under `reports/test-runs/`. Required sui
 See [tests/README.md](../tests/README.md) for the single authoritative test procedure and [11 — Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) for acceptance criteria and evidence boundaries.
 
 ## Physical-test gate
+
+Run `bash scripts/x280-install-readiness.sh` from the official Arch ISO as root for a consolidated syntax, automated-test, and read-only physical SSD identity/topology check. It always writes `reports/live-readiness/<UTC timestamp>/summary.md` and `diagnostics.log`, including a per-check PASS/FAIL table, commit SHA, environment metadata, final exit status, and captured diagnostics with detected disk serial values redacted. The detailed test-run artifacts remain under `reports/test-runs/`. Review the report and then commit/push the specific readiness report directory; the script never stages, commits, or pushes files. This gate does not run the destructive installer.
 
 **Do not begin physical destructive testing based solely on this document.** The next physical test is blocked until:
 1. Current branch CI is green for the latest documentation/code commit.

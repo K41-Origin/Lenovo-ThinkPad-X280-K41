@@ -84,7 +84,7 @@ storage::topology_parse_mount_record() {
   case $TOPOLOGY_MOUNT_FSTYPE in
     ext2|ext3|ext4|xfs|vfat|fat|msdos|exfat|ntfs|ntfs3|f2fs|jfs|reiserfs|udf|iso9660)
       ;;
-    proc|sysfs|tmpfs|devtmpfs|devpts|cgroup|cgroup2|mqueue|securityfs|debugfs|tracefs|pstore|configfs|autofs|rpc_pipefs|hugetlbfs|binfmt_misc|efivarfs|bpf)
+    proc|sysfs|tmpfs|devtmpfs|devpts|cgroup|cgroup2|mqueue|securityfs|debugfs|tracefs|pstore|configfs|autofs|rpc_pipefs|hugetlbfs|binfmt_misc|efivarfs|bpf|fusectl)
       ;;
     overlay)
       TOPOLOGY_MOUNT_SUPER_OPTIONS=${fields[separator+3]}
@@ -102,19 +102,24 @@ storage::topology_parse_mount_record() {
 # Return success only when the target's sysfs dependency closure is known and
 # no mounted filesystem or active swap uses any device in that closure.
 # Args: target major:minor, sysfs root, mountinfo file, swaps file.
+storage::topology_fail() {
+  printf 'storage: topology: %s.\n' "$*" >&2
+  return 1
+}
+
 storage::topology_check_target() {
   [[ $# -eq 4 ]] || return 2
   local target_mm=$1 sys_root=$2 mountinfo=$3 swaps_file=$4
   [[ $target_mm =~ ^[0-9]+:[0-9]+$ ]] || return 2
-  [[ -d $sys_root/dev/block && -r $mountinfo && -r $swaps_file ]] || return 1
-  command -v readlink >/dev/null 2>&1 || return 1
-  command -v stat >/dev/null 2>&1 || return 1
+  [[ -d $sys_root/dev/block && -r $mountinfo && -r $swaps_file ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  command -v readlink >/dev/null 2>&1 || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  command -v stat >/dev/null 2>&1 || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
 
   local target_link target_real candidate candidate_real rel
   target_link=$sys_root/dev/block/$target_mm
-  [[ -L $target_link ]] || return 1
-  target_real=$(readlink -f -- "$target_link") || return 1
-  [[ -d $target_real ]] || return 1
+  [[ -L $target_link ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  target_real=$(readlink -f -- "$target_link") || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+  [[ -d $target_real ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
 
   local -A seen=()
   local -a queue=()
@@ -126,11 +131,11 @@ storage::topology_check_target() {
   # Also include holder/slave dependencies recursively (dm-crypt, RAID, etc.).
   shopt -s nullglob
   for entry in "$sys_root"/dev/block/*; do
-    [[ -L $entry ]] || { shopt -u nullglob; return 1; }
-    candidate_real=$(readlink -f -- "$entry") || { shopt -u nullglob; return 1; }
+    [[ -L $entry ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+    candidate_real=$(readlink -f -- "$entry") || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
     if [[ $candidate_real == "$target_real/"* ]]; then
       mm=${entry##*/}
-      [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; return 1; }
+      [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       if [[ ! -v seen[$mm] ]]; then
         seen[$mm]=1
         queue+=("$candidate_real")
@@ -144,24 +149,48 @@ storage::topology_check_target() {
     node=${queue[index]}
     ((index += 1))
     for rel in holders slaves; do
-      [[ -d $node/$rel && -r $node/$rel ]] || return 1
-      shopt -s nullglob
-      for entry in "$node/$rel"/*; do
-        node_real=$(readlink -f -- "$entry") || { shopt -u nullglob; return 1; }
-        [[ -d $node_real ]] || { shopt -u nullglob; return 1; }
-        mm=
-        for candidate in "$sys_root"/dev/block/*; do
-          [[ -L $candidate ]] || continue
-          candidate_real=$(readlink -f -- "$candidate") || { shopt -u nullglob; return 1; }
-          if [[ $candidate_real == "$node_real" ]]; then mm=${candidate##*/}; break; fi
+      # sysfs creates these relationship directories when links exist; a
+      # missing directory therefore means an empty relationship set. A
+      # dangling link or non-directory entry is still an unsafe state.
+      if [[ -e $node/$rel || -L $node/$rel ]]; then
+        [[ -d $node/$rel && -r $node/$rel ]] || {
+          storage::topology_fail "invalid sysfs $rel relationship directory for a block device"
+          return 1
+        }
+        shopt -s nullglob
+        for entry in "$node/$rel"/*; do
+          node_real=$(readlink -f -- "$entry") || {
+            shopt -u nullglob
+            storage::topology_fail "unresolvable sysfs $rel relationship entry"
+            return 1
+          }
+          [[ -d $node_real ]] || {
+            shopt -u nullglob
+            storage::topology_fail "sysfs $rel relationship does not resolve to a device directory"
+            return 1
+          }
+          mm=
+          for candidate in "$sys_root"/dev/block/*; do
+            [[ -L $candidate ]] || continue
+            candidate_real=$(readlink -f -- "$candidate") || {
+              shopt -u nullglob
+              storage::topology_fail "unresolvable sysfs block-device entry"
+              return 1
+            }
+            if [[ $candidate_real == "$node_real" ]]; then mm=${candidate##*/}; break; fi
+          done
+          [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || {
+            shopt -u nullglob
+            storage::topology_fail "sysfs relationship target has no block major:minor identity"
+            return 1
+          }
+          if [[ ! -v seen[$mm] ]]; then
+            seen[$mm]=1
+            queue+=("$node_real")
+          fi
         done
-        [[ $mm =~ ^[0-9]+:[0-9]+$ ]] || { shopt -u nullglob; return 1; }
-        if [[ ! -v seen[$mm] ]]; then
-          seen[$mm]=1
-          queue+=("$node_real")
-        fi
-      done
-      shopt -u nullglob
+        shopt -u nullglob
+      fi
     done
   done
 
@@ -170,20 +199,21 @@ storage::topology_check_target() {
   local line rest mount_mm mount_point
   while IFS= read -r line; do
     [[ -n $line ]] || continue
-    storage::topology_parse_mount_record "$line" || return 1
+    storage::topology_parse_mount_record "$line" || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
     mount_mm=$TOPOLOGY_MOUNT_MM
     mount_point=$TOPOLOGY_MOUNT_POINT
     case $TOPOLOGY_MOUNT_FSTYPE in
       overlay)
-        storage::topology_check_overlay_options "$TOPOLOGY_MOUNT_SUPER_OPTIONS" seen || return 1
+        storage::topology_check_overlay_options "$TOPOLOGY_MOUNT_SUPER_OPTIONS" seen || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         ;;
       squashfs)
-        [[ $TOPOLOGY_MOUNT_SOURCE == /dev/loop* ]] || return 1
-        storage::topology_check_loop_backing "$mount_mm" "$sys_root" seen || return 1
+        [[ $TOPOLOGY_MOUNT_SOURCE == /dev/loop* ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+        storage::topology_check_loop_backing "$mount_mm" "$sys_root" seen || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         ;;
     esac
     if [[ -v seen[$mount_mm] ]]; then
       printf 'storage: target topology is mounted at %s (device %s)\n' "$mount_point" "$mount_mm" >&2
+      storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
       return 1
     fi
   done < "$mountinfo"
@@ -196,17 +226,17 @@ storage::topology_check_target() {
     [[ -n $swap_source ]] || continue
     if (( first )); then first=0; continue; fi
     if [[ $swap_source == /dev/* ]]; then
-      [[ -e $swap_source ]] || return 1
+      [[ -e $swap_source ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       local dev_hex
-      dev_hex=$(stat -Lc '%t:%T' -- "$swap_source") || return 1
-      [[ $dev_hex =~ ^([0-9a-fA-F]+):([0-9a-fA-F]+)$ ]] || return 1
+      dev_hex=$(stat -Lc '%t:%T' -- "$swap_source") || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
+      [[ $dev_hex =~ ^([0-9a-fA-F]+):([0-9a-fA-F]+)$ ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       major=$((16#${BASH_REMATCH[1]}))
       minor=$((16#${BASH_REMATCH[2]}))
       swap_mm=$major:$minor
     else
       best_len=-1; best_mm=
       while IFS= read -r line; do
-        storage::topology_parse_mount_record "$line" || return 1
+        storage::topology_parse_mount_record "$line" || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
         decoded=$TOPOLOGY_MOUNT_POINT
         if [[ $decoded == "/" && $swap_source == /* ]] || [[ $swap_source == "$decoded" || $swap_source == "$decoded/"* ]]; then
           if (( ${#decoded} > best_len )); then
@@ -214,11 +244,12 @@ storage::topology_check_target() {
           fi
         fi
       done < "$mountinfo"
-      [[ $best_len -ge 0 && $best_mm =~ ^[0-9]+:[0-9]+$ ]] || return 1
+      [[ $best_len -ge 0 && $best_mm =~ ^[0-9]+:[0-9]+$ ]] || { storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"; return 1; }
       swap_mm=$best_mm
     fi
     if [[ -v seen[$swap_mm] ]]; then
       printf 'storage: target topology backs active swap %s (device %s)\n' "$swap_source" "$swap_mm" >&2
+      storage::topology_fail "topology validation rejected an unsafe or unresolvable state at function line ${LINENO}"
       return 1
     fi
   done < "$swaps_file"

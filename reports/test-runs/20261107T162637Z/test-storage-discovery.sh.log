@@ -1,0 +1,19 @@
+PASS: discovers disks and records identity and safety facts
+PASS: skips zero-capacity removable reader without exposing it as a candidate
+PASS: rejects zero-capacity non-removable disk
+jq: error (at <stdin>:1): invalid size
+PASS: rejects unknown disk size
+PASS: accepts unchanged internal NVMe with matching WWN and serial and invokes topology validation
+PASS: blocks target when topology validation fails
+PASS: rejects mounted descendants
+PASS: rejects active swap descendants
+PASS: rejects active swap device aliases
+PASS: rejects removable USB target
+PASS: rejects duplicate WWN
+PASS: rejects changed secondary identity
+jq: error (at <stdin>:1): unknown removable state
+PASS: rejects unknown safety state
+PASS: fails closed when swap discovery fails
+PASS: fails closed when lsblk fails
+PASS: rejects invalid output array
+All storage discovery tests passed.

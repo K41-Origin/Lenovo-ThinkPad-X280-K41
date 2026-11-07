@@ -1,0 +1,24 @@
+PASS: unrelated mounted disk does not block target
+storage: target topology is mounted at / (device 65000:3)
+PASS: rejects mounted LUKS/device-mapper dependent
+storage: target topology is mounted at /mnt/data (device 65000:2)
+PASS: rejects mounted target partition
+storage: target topology is mounted at / (device 65000:3)
+PASS: rejects swapfile on target-backed filesystem
+PASS: fails closed when swapfile backing mount is unresolved
+PASS: rejects malformed target identity
+storage: cannot prove backing-device topology for filesystem type btrfs
+PASS: fails closed on btrfs backing topology
+PASS: fails closed on overlay backing topology
+PASS: rejects malformed mountinfo
+PASS: resolves loop backing file on an unrelated filesystem
+PASS: rejects loop backing file on target dependency
+PASS: resolves overlay lower, upper, and work paths outside target dependency
+PASS: rejects overlay paths on target dependency
+PASS: fails closed on unresolved overlay backing path
+PASS: accepts squashfs loop mount backed by an unrelated filesystem
+PASS: complete topology check rejects squashfs loop backing on target
+PASS: accepts overlay mount backed by unrelated filesystem
+PASS: complete topology check rejects overlay path on target
+storage: target topology backs active swap /dev/null (device 1:3)
+PASS: complete topology check rejects active block swap dependency

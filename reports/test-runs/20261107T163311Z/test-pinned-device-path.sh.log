@@ -1,0 +1,6 @@
+Creating new GPT entries in memory.
+GPT data structures destroyed! You may now partition the disk using fdisk or
+other utilities.
+The operation has completed successfully.
+mke2fs 1.47.4 (6-Mar-2025)
+PASS: wipefs, sgdisk, partprobe, mkfs.fat, cryptsetup, and mkfs.ext4 operate through inherited pinned block descriptors.

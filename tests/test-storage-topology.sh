@@ -41,6 +41,25 @@ EOF_SWAP
 storage::topology_check_target "$target_mm" "$sys" "$tmp/mountinfo" "$tmp/swaps"
 echo 'PASS: unrelated mounted disk does not block target'
 
+# Plain block devices can legitimately have no holders/ or slaves/ entries:
+# sysfs exposes these relationship directories only when links are present.
+plain_sys=$tmp/plain-sys
+mkdir -p "$plain_sys/dev/block" "$plain_sys/devices/pci/block/nvme1n1"
+plain_mm=65001:0
+ln -s ../../devices/pci/block/nvme1n1 "$plain_sys/dev/block/$plain_mm"
+storage::topology_check_target "$plain_mm" "$plain_sys" "$tmp/mountinfo" "$tmp/swaps"
+echo 'PASS: accepts plain block device with no holders/slaves relationship directories'
+
+# fusectl is a kernel control filesystem, not a block-backed FUSE mount.
+# Its presence in the live Arch environment must not be mistaken for an
+# unresolved disk-backed filesystem; arbitrary FUSE mounts remain rejected.
+cat >"$tmp/mountinfo" <<EOF_MOUNT
+44 25 0:31 / /sys/fs/fuse/connections rw,nosuid,nodev,noexec,relatime - fusectl fusectl rw
+EOF_MOUNT
+storage::topology_check_target "$plain_mm" "$plain_sys" "$tmp/mountinfo" "$tmp/swaps"
+echo 'PASS: accepts kernel fusectl control filesystem outside block-device topology'
+
+
 cat >"$tmp/mountinfo" <<EOF_MOUNT
 36 25 $dm_mm / / rw,relatime - ext4 /dev/mapper/cryptroot rw
 EOF_MOUNT
