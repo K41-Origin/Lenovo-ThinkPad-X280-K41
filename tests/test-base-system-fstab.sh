@@ -4,6 +4,14 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 # shellcheck source=../lib/base-system.sh
 source "$ROOT/lib/base-system.sh"
 
+if (( EUID != 0 )); then
+  command -v sudo >/dev/null 2>&1 || {
+    printf 'FAIL: test requires root or passwordless sudo\\n' >&2
+    exit 1
+  }
+  exec sudo -- bash "$0"
+fi
+
 tmpdir="$(mktemp -d)"
 trap 'rm -rf -- "$tmpdir"' EXIT
 target="$tmpdir/target"
