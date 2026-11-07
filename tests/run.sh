@@ -12,7 +12,6 @@ tests=(
   tests/test-arch-installer-script.sh
   tests/test-arch-config-script.sh
   tests/test-pinned-device-path.sh
-  tests/test-pinned-device-path.sh
   tests/test-inventory.sh
   tests/test-storage-discovery.sh
   tests/test-storage-plan.sh
