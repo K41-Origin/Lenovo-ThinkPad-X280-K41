@@ -39,7 +39,6 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 2. Connect to the network.
 3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
 4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, requires an exact SHA-bound acknowledgement, runs the read-only readiness gate, and requires a second exact acknowledgement before launching the installer.
-5. Run read-only live validation and the canonical test suite; inspect their reports.
 6. Review `scripts/install-arch-x280.sh` and all sourced modules through the bootstrap's source-review gate before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
 7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
 8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
