@@ -19,7 +19,7 @@ for required in \
   'installer::stage final-revalidation' \
   'pre-operation-check:$label' \
   'disk-operation:$label' \
-  'Persistent diagnostic log:' \
+  'Diagnostic log:' \
   'WDC PC SN730' \
   '256060514304' \
   'storage::plan_gpt_layout' \
@@ -43,7 +43,7 @@ for required in \
   '[[ -s /mnt/etc/locale.conf ]]'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
 done
-pass "installer includes root-only persistent logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
+pass "installer includes root-only local logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
 if grep -Eq '^[[:space:]]*set[[:space:]]+-[^#]*x|^[[:space:]]*set[[:space:]]+-o[[:space:]]+xtrace' "$SCRIPT"; then
   fail "installer enables shell xtrace, which could expose sensitive command arguments"
 fi
