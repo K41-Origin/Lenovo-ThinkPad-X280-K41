@@ -84,10 +84,10 @@ storage::validate_target fresh_target || die "Target berubah sebelum operasi per
 # Pin the whole-disk block inode and pass its inherited descriptor to child tools.
 exec {disk_fd}<>"$disk" || die "Tidak dapat membuka descriptor target untuk ditahan."
 disk_ref="/proc/self/fd/$disk_fd"
-[[ -b "/proc/$$/fd/$disk_fd" ]] || die "Descriptor target bukan block device."
-disk_fd_major_minor="$(lsblk -dnro MAJ:MIN "/proc/$$/fd/$disk_fd")"
+[[ -b "/proc/$BASHPID/fd/$disk_fd" ]] || die "Descriptor target bukan block device."
+disk_fd_major_minor="$(lsblk -dnro MAJ:MIN "/proc/$BASHPID/fd/$disk_fd")"
 [[ $disk_fd_major_minor == "${gate[target_major_minor]}" ]] || die "Descriptor tidak cocok dengan major:minor target yang dikonfirmasi."
-[[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$$/fd/$disk_fd")" ]] || die "Path target berubah ketika descriptor dibuka."
+[[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$BASHPID/fd/$disk_fd")" ]] || die "Path target berubah ketika descriptor dibuka."
 
 # Disk and partition descriptors are held open by this Bash process. Child
 # utilities receive /proc/self/fd/N paths, which refer to the inherited open
