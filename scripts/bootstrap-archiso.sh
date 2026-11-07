@@ -54,6 +54,7 @@ review_files=(
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
   scripts/x280-install-readiness.sh
+  scripts/x280-first-boot-check.sh
   scripts/validate-live-storage.sh
   tests/run.sh
   tests/helpers/storage-fixtures.sh
