@@ -129,7 +129,9 @@ mkdir -p /mnt/efi
 run_step "mount ESP" mount "$esp" /mnt/efi
 
 run_step "instal sistem dasar Arch" base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"
-
+install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" /mnt/root/k41-configure-arch-x280.sh
+run_step "konfigurasi user, locale, timezone, microcode, dan swapfile" arch-chroot /mnt /root/k41-configure-arch-x280.sh "${plan[swapfile_target_bytes]}"
+rm -f -- /mnt/root/k41-configure-arch-x280.sh
 
 # Minimal bootable configuration: systemd-boot + mkinitcpio UKI.
 run_step "pasang systemd-boot" arch-chroot /mnt bootctl --esp-path=/efi install
