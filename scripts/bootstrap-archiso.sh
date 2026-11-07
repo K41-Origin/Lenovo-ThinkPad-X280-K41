@@ -52,6 +52,9 @@ review_files=(
   config/hardware/thinkpad-x280.conf
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
+  scripts/x280-install-readiness.sh
+  scripts/validate-live-storage.sh
+  tests/run.sh
   lib/common.sh
   lib/preflight.sh
   lib/inventory.sh
@@ -63,6 +66,10 @@ review_files=(
   lib/base-system.sh
 )
 
+mapfile -t test_files < <(git -C "$repo_dir" ls-files 'tests/*.sh')
+(("\${#test_files[@]}" > 0)) || die "No tracked test scripts found for source review."
+review_files+=("\${test_files[@]}")
+
 if command -v less >/dev/null 2>&1; then
   pager=(less -R)
 elif command -v more >/dev/null 2>&1; then
@@ -71,20 +78,31 @@ else
   die "A pager (less or more) is required for the mandatory source review."
 fi
 
-for relative_path in "${review_files[@]}"; do
+for relative_path in "\${review_files[@]}"; do
   file="$repo_dir/$relative_path"
   [[ -f $file ]] || die "Required review file is missing: $relative_path"
-  printf '\n===== SOURCE REVIEW: %s =====\n' "$relative_path" >&2
-  "${pager[@]}" "$file"
+  printf '\\n===== SOURCE REVIEW: %s =====\\n' "$relative_path" >&2
+  "\${pager[@]}" "$file"
 done
 
-printf '\nResolved commit: %s\n' "$commit_sha" >&2
-printf 'To launch the destructive installer, type exactly:\n' >&2
-printf 'REVIEWED %s AND AUTHORIZE INSTALLER LAUNCH\n> ' "$commit_sha" >&2
+printf '\\nResolved commit: %s\\n' "$commit_sha" >&2
+printf 'To run the read-only readiness gate, type exactly:\\n' >&2
+printf 'REVIEWED %s AND AUTHORIZE READ-ONLY READINESS CHECK\\n> ' "$commit_sha" >&2
 IFS= read -r acknowledgement </dev/tty
-[[ $acknowledgement == "REVIEWED $commit_sha AND AUTHORIZE INSTALLER LAUNCH" ]] ||
-  die "Source review acknowledgement did not match; installer was not launched."
+[[ $acknowledgement == "REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK" ]] ||
+  die "Source review acknowledgement did not match; readiness check was not launched."
 
-info "Source review acknowledged for commit $commit_sha."
-info "Launching the installer. A second, target-specific storage-plan confirmation is still required."
+info "Source review acknowledged for commit $commit_sha. Running the read-only readiness gate."
+if ! (cd "$repo_dir" && bash scripts/x280-install-readiness.sh); then
+  die "Read-only readiness failed. Review reports/live-readiness; the destructive installer was not launched."
+fi
+
+printf '\\nRead-only readiness PASSED for commit %s.\\n' "$commit_sha" >&2
+printf 'To launch the destructive installer, type exactly:\\n' >&2
+printf 'READINESS PASSED FOR %s AND AUTHORIZE INSTALLER LAUNCH\\n> ' "$commit_sha" >&2
+IFS= read -r acknowledgement </dev/tty
+[[ $acknowledgement == "READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH" ]] ||
+  die "Installer-launch acknowledgement did not match; no disk operation was started."
+
+info "Launching installer commit $commit_sha. A third, target-specific storage-plan confirmation is still required."
 exec bash "$repo_dir/scripts/install-arch-x280.sh"
