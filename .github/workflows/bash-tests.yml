@@ -29,7 +29,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           sudo apt-get update
-          sudo apt-get install --no-install-recommends -y jq python3 shellcheck shfmt
+          sudo apt-get install --no-install-recommends -y jq python3 gcc shellcheck shfmt
 
       - name: Validate Bash syntax
         shell: bash
