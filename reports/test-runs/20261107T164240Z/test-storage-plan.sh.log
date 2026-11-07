@@ -1,0 +1,20 @@
+PASS: calculates aligned GPT layout and RAM-plus-margin swap proposal
+PASS: supports 4Kn logical sectors with 1 MiB alignment
+PASS: rejects insufficient capacity
+PASS: rejects unsupported logical sector geometry
+PASS: rejects capacity not divisible by logical sector size
+PASS: rejects arithmetic input outside signed 64-bit range
+PASS: rejects malformed, missing, indexed, and readonly output variables before nameref creation
+PASS: rejects swap-size arithmetic overflow
+PASS: normalizes decimal inputs with leading zeros without octal interpretation
+PASS: binds target/profile and produces deterministic serialization and digest
+PASS: target identity and profile changes alter the plan digest
+PASS: refuses target without stable identity
+PASS: rejects ambiguous multiline serialization values
+PASS: accepts complete geometry, target, profile, and prerequisite state
+PASS: rejects failed prerequisites and inconsistent profile/partition geometry
+PASS: refuses missing prerequisite evidence and incomplete plans
+PASS: refuses non-UEFI prerequisite state
+PASS: prerequisite evidence changes alter the canonical plan digest
+PASS: rejects non-canonical numeric fields before arithmetic evaluation
+PASS: rejects ESP profile size inconsistent with planned partition geometry
