@@ -11,6 +11,7 @@ tests=(
   tests/test-installer-entry.sh
   tests/test-arch-installer-script.sh
   tests/test-arch-config-script.sh
+  tests/test-x280-install-readiness.sh
   tests/test-pinned-device-path.sh
   tests/test-inventory.sh
   tests/test-storage-discovery.sh
