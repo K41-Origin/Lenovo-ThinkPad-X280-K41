@@ -159,7 +159,7 @@ sed -i 's|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboar
 mkdir -p /efi/EFI/Linux /etc/kernel
 printf '%s\n' 'rd.luks.name=${root_uuid}=cryptroot root=/dev/mapper/cryptroot rw' > /etc/kernel/cmdline
 sed -i -e "s/^PRESETS=.*/PRESETS=('default')/" -e '/^fallback_/d' -e '/^default_uki=/d' -e '/^default_image=/d' -e '/^default_cmdline=/d' /etc/mkinitcpio.d/linux.preset
-printf '%s\\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' 'default_cmdline="/etc/kernel/cmdline"' >> /etc/mkinitcpio.d/linux.preset
+printf '%s\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' 'default_cmdline="/etc/kernel/cmdline"' >> /etc/mkinitcpio.d/linux.preset
 systemctl enable NetworkManager
 mkinitcpio -P
 [[ -s /efi/EFI/Linux/arch-linux.efi ]]
