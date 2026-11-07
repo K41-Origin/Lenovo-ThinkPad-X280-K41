@@ -23,13 +23,15 @@ static int fail(const char *message)
 
 static bool valid_candidate_path(const char *path)
 {
-    if (strncmp(path, "/dev/", 5) != 0 || strstr(path, "/../") != NULL ||
-        strcmp(path, "/dev/..") == 0)
+    if (strncmp(path, "/dev/", 5) != 0 || path[5] == '\0' ||
+        strchr(path + 5, '/') != NULL)
         return false;
-    for (const unsigned char *p = (const unsigned char *)path; *p; ++p) {
-        if (!( (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
-               (*p >= '0' && *p <= '9') || *p == '/' || *p == '_' ||
-               *p == '-' || *p == '.'))
+    if (strcmp(path + 5, ".") == 0 || strcmp(path + 5, "..") == 0)
+        return false;
+    for (const unsigned char *p = (const unsigned char *)path + 5; *p; ++p) {
+        if (!((*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+              (*p >= '0' && *p <= '9') || *p == '_' || *p == '-' ||
+              *p == '.'))
             return false;
     }
     return true;
@@ -135,11 +137,13 @@ int main(int argc, char **argv)
     uint64_t diskseq = 0;
     bool diskseq_available = read_diskseq(major_minor, &diskseq);
     bool removable_attribute_present = sysfs_attribute_exists(major_minor, "removable");
-    printf("\"size_bytes\":%" PRIu64 ",\"logical_sector_bytes\":%d,"
-           "\"physical_sector_bytes\":%d,\"read_only\":%s,"
-           "\"removable_attribute_present\":%s,\"diskseq_available\":%s,"
-           "\"diskseq\":",
-           size_bytes, logical_sector, physical_sector, read_only ? "true" : "false",
+    printf("{\\"protocol_version\\":1,\\"device_path\\":\\"%s\\","
+           "\\"major\\":%u,\\"minor\\":%u,\\"size_bytes\\":%" PRIu64 ","
+           "\\"logical_sector_bytes\\":%d,\\"physical_sector_bytes\\":%d,"
+           "\\"read_only\\":%s,\\"removable_attribute_present\\":%s,"
+           "\\"diskseq_available\\":%s,\\"diskseq\\":",
+           argv[1], major_number, minor_number, size_bytes, logical_sector,
+           physical_sector, read_only ? "true" : "false",
            removable_attribute_present ? "true" : "false",
            diskseq_available ? "true" : "false");
     if (diskseq_available)
