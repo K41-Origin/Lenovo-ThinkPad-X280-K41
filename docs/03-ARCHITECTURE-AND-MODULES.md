@@ -46,15 +46,15 @@ This is a factual description of code paths, not evidence that the complete work
 | `lib/storage-plan.sh` | Pure GPT layout and swap sizing calculations; plan serialization/binding | IMPLEMENTED; fixture-tested |
 | `lib/storage-prerequisites.sh`, `lib/storage-confirmation.sh` | Read-only prerequisite evidence, exact confirmation, final revalidation | IMPLEMENTED; fixture-tested |
 | `lib/storage-execution-dry-run.sh`, `lib/storage-execution-boundary.sh` | In-memory operation model and mock-only orchestration/recovery ledger | IMPLEMENTED; tests invoke mocks only |
-| `lib/base-system.sh` | Guarded package bootstrap and fstab generation for already-mounted target | IMPLEMENTED; invoked by PR #9 installer |
-| `scripts/install-arch-x280.sh` | Initial destructive installer orchestration | IMPLEMENTED on PR #9; destructive path NOT TESTED on hardware |
+| `lib/base-system.sh` | Guarded package bootstrap and fstab generation for already-mounted target | IMPLEMENTED; invoked by the initial installer on main |
+| `scripts/install-arch-x280.sh` | Initial destructive installer orchestration | IMPLEMENTED on main; destructive path NOT TESTED on hardware |
 | `scripts/configure-arch-x280.sh` | Interactive initial target-system configuration | IMPLEMENTED; invoked through arch-chroot; full integration NOT TESTED |
 | `native/storage-handle.c` | Standalone read-only native descriptor prototype | IMPLEMENTED; compile/CLI test only; not integrated with installer |
 | `lib/bootloader.sh`, `lib/user-setup.sh`, `lib/desktop.sh`, `lib/hardware.sh`, `lib/packages.sh`, `lib/security.sh`, `lib/validation.sh`, `lib/report.sh` | Future domain-specific reusable modules | PLANNED placeholders; do not imply they are called by the installer |
 
 ### Storage execution distinction
 
-The read-only storage modules and mock execution boundary do not own the PR #9 destructive implementation. The initial installer script currently orchestrates destructive commands directly, guarded by its target-plan confirmation and descriptor-pinned paths. This is an architectural deviation from the earlier planned rule that `lib/storage.sh` alone owns destructive operations. Do not describe that planned boundary as implemented. A future refactor must establish a tested executor contract before moving or expanding destructive behavior.
+The read-only storage modules and mock execution boundary do not own the initial destructive implementation. The initial installer script currently orchestrates destructive commands directly, guarded by its target-plan confirmation and descriptor-pinned paths. This is an architectural deviation from the earlier planned rule that `lib/storage.sh` alone owns destructive operations. Do not describe that planned boundary as implemented. A future refactor must establish a tested executor contract before moving or expanding destructive behavior.
 
 The Bash descriptor-pinned loop integration demonstrates that selected utilities accept the inherited `/proc/self/fd/N` paths in the tested disposable-loop scenario. It does not prove all kernel races impossible, establish exclusive kernel ownership, test physical NVMe hot-unplug, or validate the native C helper. The C helper remains separate and unused by the installer. See [Stage 8](14-STAGE-8-NATIVE-DEVICE-ACCESS.md) and [Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
 
