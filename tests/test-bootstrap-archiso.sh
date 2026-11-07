@@ -22,6 +22,7 @@ for required in \
   'config/hardware/thinkpad-x280.conf' \
   'scripts/bootstrap-archiso.sh' \
   'scripts/x280-install-readiness.sh' \
+  'scripts/x280-first-boot-check.sh' \
   'tests/helpers/storage-fixtures.sh' \
   'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \
   'bash scripts/x280-install-readiness.sh' \
