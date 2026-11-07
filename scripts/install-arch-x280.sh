@@ -175,6 +175,6 @@ grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' /mnt/etc/fsta
 [[ -s /mnt/etc/locale.conf ]] || die "Locale target tidak terkonfigurasi."
 [[ -L /mnt/etc/localtime ]] || die "Timezone target tidak terkonfigurasi."
 
-k41::log_info "Konfigurasi awal base Arch selesai: user, sudo, locale, timezone, hostname, Intel microcode, swapfile, NetworkManager, systemd-boot, dan UKI telah diproses."
+k41::log_info "Konfigurasi awal base Arch selesai: user, sudo, locale, timezone, hostname, swapfile, NetworkManager, systemd-boot, dan UKI telah diproses."
 k41::log_warn "Caelestia/Hyprland/Quickshell, tuning hardware X280, hibernation/resume, dan BlackArch belum diimplementasikan pada tahap ini."
 k41::log_info "Jangan reboot otomatis. Periksa hasil instalasi dan lakukan unmount/cryptsetup close secara manual setelah verifikasi."
