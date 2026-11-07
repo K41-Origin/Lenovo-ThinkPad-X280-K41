@@ -16,7 +16,7 @@ Use NetworkManager. Prefer encrypted DNS only with a verified implementation. On
 Audit enabled services before applying systemd restrictions. Apply restrictions only when compatibility is verified. Avoid duplicate daemons. USBGuard and AppArmor are not planned under the current decisions.
 
 ## Secure Boot and microcode
-Secure Boot is planned disabled; check actual mode and explain mismatches. Do not automatically install Intel microcode; report the recommendation.
+Secure Boot is planned disabled; check actual mode and explain mismatches. Approved policy is to report Intel microcode rather than install it automatically. **Known implementation deviation:** the current PR #9 target-configuration script installs `intel-ucode` automatically. This conflicts with the approved policy and must be resolved in code or explicitly re-approved before the installer can pass the security acceptance gate.
 
 ## Acceptance
 - [ ] Secrets absent from logs/reports.
