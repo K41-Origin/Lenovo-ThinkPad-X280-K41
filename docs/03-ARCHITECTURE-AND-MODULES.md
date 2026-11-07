@@ -34,7 +34,7 @@ The current script's observed sequence is:
 9. Install systemd-boot and generate a mkinitcpio UKI using systemd-based `sd-encrypt` hooks and `rd.luks.name=`.
 10. Check expected target configuration artifacts and stop without automatic reboot.
 
-This is a factual description of code paths, not evidence that the complete workflow succeeds on a VM or physical X280.
+This is a factual description of code paths, not evidence that the complete workflow succeeds on the physical X280. VM installation/testing is explicitly out of scope under REQ-INSTALL-006.
 
 ## Module ownership and boundaries
 
@@ -78,12 +78,12 @@ The current PR #9 branch installer is a manually invoked script; it is not autom
 
 The canonical test runner is `bash tests/run.sh`; see [tests/README.md](../tests/README.md). Static tests, fixture tests, and the disposable loop-device integration test provide bounded evidence. They do not prove full installation, UKI bootability, physical NVMe behavior, wireless/audio/power behavior, or hibernation.
 
-Before physical destructive testing, the project still needs an independent review of the installer and its failure/cleanup paths, successful current CI, successful read-only live validation on the actual X280, and a documented operator test gate. A VM installation is also not yet evidenced. Detailed acceptance cases and current evidence are owned by [Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md).
+Before physical destructive testing, the project still needs an independent review of the installer and its failure/cleanup paths, successful current CI, successful read-only live validation on the actual X280, and a documented operator test gate. The next end-to-end installation test is deliberately performed on the actual X280; no VM gate is required or planned. Detailed acceptance cases and current evidence are owned by [Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md).
 
 ## Deferred architecture
 
 - Full reusable storage executor with a proven descriptor/capability contract.
-- VM integration test and successful first boot.
+- Physical X280 destructive installation and successful first boot (required acceptance; NOT TESTED).
 - Resume-offset lifecycle and hibernation.
 - Hyprland, Caelestia Shell, Quickshell, portals, audio, and session integration.
 - Hardware/power/thermal tuning based on Linux-observed capabilities.
