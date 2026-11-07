@@ -28,4 +28,10 @@ if grep -Eiq 'password[[:space:]]*=[[:space:]]*[^[:space:]]+' "$SCRIPT"; then
   fail "script appears to embed a password"
 fi
 pass "no static password is embedded"
+
+if grep -Eq '(^|[[:space:]])(pacman|pacstrap)[[:space:]].*intel-ucode' "$SCRIPT"; then
+  fail "Intel microcode must not be installed automatically"
+fi
+grep -Fq 'intel-ucode' "$SCRIPT" || fail "report-only Intel microcode recommendation is missing"
+pass "Intel microcode follows the explicit report-only policy"
 printf '%s\n' 'All target configuration script tests passed.'
