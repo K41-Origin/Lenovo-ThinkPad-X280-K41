@@ -135,10 +135,6 @@ int main(int argc, char **argv)
     uint64_t diskseq = 0;
     bool diskseq_available = read_diskseq(major_minor, &diskseq);
     bool removable_attribute_present = sysfs_attribute_exists(major_minor, "removable");
-    printf("{\"protocol\":1,\"device_path\":\"%s\",\"major\":%u,"
-           "\"minor\":%u,\"size_bytes\":%\u,",
-           argv[1], major_number, minor_number, (unsigned int)size_bytes);
-    /* Use a dedicated format for the full-width size and disk sequence. */
     printf("\"size_bytes\":%" PRIu64 ",\"logical_sector_bytes\":%d,"
            "\"physical_sector_bytes\":%d,\"read_only\":%s,"
            "\"removable_attribute_present\":%s,\"diskseq_available\":%s,"
