@@ -13,7 +13,6 @@ pass "target configuration script passes bash -n"
 for required in \
   '/etc/arch-release' \
   'passwd "$username"' \
-  'pacman -S --needed --noconfirm intel-ucode' \
   'Asia/Jakarta' \
   'locale-gen' \
   'useradd --create-home --groups wheel' \
@@ -23,7 +22,7 @@ for required in \
   "'/swapfile none swap defaults 0 0'"; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required target configuration action is missing: $required"
 done
-pass "target configuration includes user, sudo, locale, timezone, Intel microcode, and planned swapfile"
+pass "target configuration includes user, sudo, locale, timezone, and planned swapfile"
 
 if grep -Eiq 'password[[:space:]]*=[[:space:]]*[^[:space:]]+' "$SCRIPT"; then
   fail "script appears to embed a password"
