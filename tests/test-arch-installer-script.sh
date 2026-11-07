@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SCRIPT="$ROOT/scripts/install-arch-x280.sh"
+fail() { printf 'FAIL: %s\\n' "$1" >&2; exit 1; }
+pass() { printf 'PASS: %s\\n' "$1"; }
+
+[[ -f $SCRIPT ]] || fail "Arch installer script is missing"
+bash -n "$SCRIPT" || fail "Arch installer has a Bash syntax error"
+pass "installer passes bash -n"
+
+for required in \
+  'preflight::check_target_inventory' \
+  'WDC PC SN730' \
+  '256052966400' \
+  'storage::plan_gpt_layout' \
+  'storage::plan_confirm_interactive' \
+  'storage::plan_final_revalidate' \
+  'sgdisk --zap-all --clear' \
+  'cryptsetup luksFormat --type luks2' \
+  'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \
+  'default_uki="/efi/EFI/Linux/arch-linux.efi"' \
+  'default_cmdline="/etc/kernel/cmdline"'; do
+  grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
+done
+pass "installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, and UKI setup"
+
+if grep -Eq 'swapoff[[:space:]]+-a|pacstrap[[:space:]]+-K[[:space:]]+/mnt' "$SCRIPT"; then
+  fail "installer bypasses guarded base bootstrap or disables unrelated swap"
+fi
+pass "installer does not disable all live-ISO swap or bypass base-system module"
+
+confirmation_line="$(grep -nF 'storage::plan_confirm_interactive plan confirmation' "$SCRIPT" | cut -d: -f1)"
+revalidate_line="$(grep -nF 'storage::plan_final_revalidate plan confirmation' "$SCRIPT" | cut -d: -f1)"
+erase_line="$(grep -nF 'wipefs --all --force' "$SCRIPT" | cut -d: -f1)"
+[[ -n $confirmation_line && -n $revalidate_line && -n $erase_line ]] || fail "confirmation, revalidation, or erase step is absent"
+(( confirmation_line < revalidate_line && revalidate_line < erase_line )) || fail "destructive step appears before confirmation/revalidation"
+pass "destructive signature erasure is ordered after confirmation and final revalidation"
+
+printf '%s\\n' 'All Arch installer script tests passed.'
