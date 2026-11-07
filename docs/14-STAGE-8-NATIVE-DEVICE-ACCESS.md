@@ -2,12 +2,13 @@
 
 ## Status
 
-- Stage: 8, design and requirements capture.
-- This document: IMPLEMENTED as a design record.
-- Native C helper: IMPLEMENTED (read-only prototype); block-device runtime behavior remains NOT TESTED.
-- Real storage execution: NOT IMPLEMENTED and out of scope.
+- Stage 8 design record: IMPLEMENTED.
+- Native C helper: IMPLEMENTED as a standalone read-only prototype; compile/CLI test coverage exists, but real block-device runtime remains NOT TESTED.
+- Installer's Bash descriptor path: separately IMPLEMENTED on PR #9 and exercised against a disposable loop-backed image by the pinned-device integration test.
+- Native C helper integration: NOT IMPLEMENTED; the initial installer does not call this helper.
+- Full storage executor safety and physical NVMe behavior: NOT TESTED.
 
-This document is the canonical record for native block-device handle acquisition, identity, and lifetime. It extends the Stage 7 mock-only boundary and does not authorize writes to any disk.
+This document owns the native C helper's design, identity, and lifecycle. It does not describe or authorize the separate Bash descriptor path in the initial installer. It does not authorize writes to any disk.
 
 ## Implemented first slice (read-only prototype)
 
@@ -19,7 +20,7 @@ This is not yet a complete target-acquisition contract: stable WWN/serial correl
 
 Stage 7 rechecks a mock target snapshot before each mock callback. It does not hold a kernel block-device reference. A pathname can be rebound after a check and before a later pathname-based operation. Pathname rechecks therefore do not close the kernel time-of-check/time-of-use window.
 
-Bash remains responsible for orchestration, review, and status. A small native C helper is the proposed owner of a retained block-device file descriptor and descriptor-based identity inspection.
+Bash remains responsible for orchestration, review, and status. The C helper is a prototype for retained-FD acquisition and descriptor-based identity inspection. Separately, the PR #9 installer opens whole-disk and partition descriptors in Bash and passes inherited /proc/self/fd paths to selected external tools. That path is not the C helper and must not be represented as C-helper integration.
 
 ## Verified Linux interface facts
 
@@ -56,7 +57,7 @@ Use a small, auditable native C helper for descriptor acquisition and identity i
 
 ## Critical unresolved compatibility boundary
 
-A retained FD alone does not make an external partitioning, LUKS, or filesystem utility descriptor-safe. Many tools accept a pathname and may open the device again. Passing /proc/self/fd/N is not an accepted shortcut: every selected utility/API must be checked to establish whether it uses the already-open file description or performs another open, and how that interacts with an exclusive claim.
+A retained FD alone does not make an external partitioning, LUKS, or filesystem utility descriptor-safe. Many tools accept a pathname and may open the device again. PR #9 passes inherited /proc/self/fd/N paths to a selected set of utilities; the disposable loop-device integration test demonstrates that those tools accept this interface in that test environment. It does not establish that each utility reuses the same open file description, that the kernel grants an exclusive capability to every operation, or that all races/hot-unplug cases are closed. Treat this as bounded interface evidence, not proof of race-free physical-device execution. A future executor still needs a reviewed, documented descriptor-to-operation contract and broader failure testing.
 
 Before designing a real executor, determine whether the selected partitioning and LUKS interfaces can operate through the retained descriptor or whether a dedicated helper must own the relevant library calls. If this cannot be demonstrated, do not proceed. Do not silently fall back to pathname checks, flock, or a second independent open.
 
