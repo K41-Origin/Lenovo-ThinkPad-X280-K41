@@ -1,22 +1,23 @@
 # Development and Bug Bounty
 
-## Goal
-Provide a minimal development and web-application-security environment without silently installing a large tool bundle.
+## Goal and boundary
 
-## Browser and credentials
-Firefox is the primary browser. Do not install extensions or alter default-app associations automatically. Bitwarden is preferred; verify its package source and let the user sign in manually. Never log credentials, tokens, cookies, or recovery material.
+Provide a minimal development and web-application-security environment after the base operating system and desktop are verified. Do not silently install a large tool bundle or launch security scans.
 
-## Requested development tools
-Verify current official package names and availability: Git and GitHub CLI with manual authentication; ShellCheck and shfmt; Python 3 and pip; Go; Node.js and npm with version verification; VS Code open-source build from official Arch repositories if available, without silent source substitution.
+## Package ownership
 
-## Optional services and excluded tools
-Podman and Podman Compose may be installed if trusted/verified but must not be configured automatically. Cockpit may be installed if trusted/verified but must not be enabled automatically; localhost-only binding requires verified configuration. Do not install Burp Suite Community, OWASP ZAP, or Docker by default. Do not automatically create ~/Projects, ~/BugBounty, or ~/Tools. Avoid excluded utilities listed in the package policy.
+The canonical package allowlist, package-source policy, AUR workflow, optional BlackArch integration, and excluded applications are owned by [Package and Software Management](08-PACKAGE-AND-SOFTWARE-MANAGEMENT.md). This document does not repeat package names or installation procedures.
+
+Firefox is the preferred browser and Bitwarden is the preferred password manager, subject to source verification and manual sign-in. Do not install browser extensions, change default-app associations, or create project/work directories without explicit approval.
 
 ## Authorized use
-Use security tools only on systems and applications the user owns or is explicitly authorized to test. The installer should not silently launch scans.
+
+Use security tools only on systems and applications the user owns or is explicitly authorized to test. The installer must not silently launch scans, exploit checks, or network probes against third-party targets.
 
 ## Acceptance
-- [ ] Sources and versions visible.
-- [ ] No credentials in logs.
+
+- [ ] Tool sources and versions follow the package policy.
+- [ ] Credentials, tokens, cookies, and recovery material are never logged.
 - [ ] Optional services remain disabled/unconfigured until approved.
-- [ ] No unrequested tools or directories created.
+- [ ] No unrequested tools, browser extensions, or project directories are created.
+- [ ] No scan or test is launched without an authorized target and explicit user intent.

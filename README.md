@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-07):** the entry point supports `--help` and diagnostic-only `--preflight`; installation orchestration and destructive storage execution remain unimplemented. Read-only storage discovery/planning and mock execution controls have fixture-tested coverage. Stage 8 includes a read-only native block-device handle prototype with compile/CLI tests, but block-device runtime behavior is not tested. Physical X280 Arch ISO observations are recorded in `docs/11-TESTING-AND-ACCEPTANCE.md`; the project's live discovery/validation script has not yet been run on the laptop. No disk has been modified.
+> **Project status (2026-11-07):** PR #9 contains an initial destructive X280 installer at `scripts/install-arch-x280.sh`, a target configuration script, guarded base bootstrap, and a disposable loop-device integration test. These are branch-only changes and are not part of `main` until merged. CI evidence covers syntax/static checks and loop-backed tool interfaces only; physical X280 installation and boot remain NOT TESTED. The separate top-level `installer --preflight` remains read-only diagnostics.
 
 ## AI-assisted development
 
@@ -19,7 +19,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Current repository structure
 
-- `installer` — diagnostic-only entry point with `--help` and `--preflight`; installation remains disabled.
+- `installer` — diagnostic-only entry point with `--help` and `--preflight`; this is separate from the PR #9 destructive installer script.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
 - `lib/storage.sh` — read-only whole-disk discovery and fresh target validation; no partition/format/mount operations.
@@ -27,7 +27,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
 - `native/storage-handle.c` and `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — Stage 8 read-only native descriptor-holder prototype and its canonical design/limitations; hardware behavior and executor integration remain unverified.
-- `lib/` — implemented read-only preflight, inventory, and storage-planning modules plus clearly marked PLANNED placeholders for base-system, bootloader, user, desktop, hardware, package, security, validation, and reporting work. Placeholder files contain no installation implementation.
+- `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Other desktop, hardware tuning, package/security policy, validation, and reporting modules remain PLANNED.
 - `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
 - `scripts/live-validation.sh` — read-only live-host validation for Arch ISO / X280; saves timestamped evidence and `reports/live-validation/latest.md`.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
@@ -36,13 +36,13 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 1. Boot the official Arch Linux ISO from USB.
 2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
 3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
-4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See [manual bootstrap review](docs/03-ARCHITECTURE-AND-MODULES.md#manual-bootstrap-and-pre-execution-review).
-5. Run diagnostic preflight checks. A complete installation plan is not implemented yet.
-6. Require explicit confirmation of the identified internal NVMe target before destructive storage operations.
-7. Install and configure the base system, desktop, and selected software in one interactive flow.
+4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See [manual bootstrap review](docs/03-ARCHITECTURE-AND-MODULES.md#bootstrap-and-source-policy).
+5. Run read-only live validation and the canonical test suite; inspect their reports.
+6. For the PR #9 branch only, review `scripts/install-arch-x280.sh` and all sourced modules before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
+7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
 8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
-**Important:** the current repository does not implement installation. `./installer --preflight` is read-only diagnostics only and deliberately does not return success; do not treat it as approval to install.
+**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` on PR #9 is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
 
 ## Documentation index
 1. [Project charter](docs/01-PROJECT-CHARTER.md)
@@ -59,16 +59,21 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 12. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md)
 13. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md)
 14. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
-15. [Repository audit](docs/15-REPOSITORY-AUDIT.md)
+15. [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
+16. [Current repository audit](docs/15-REPOSITORY-AUDIT.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
 ## Storage safety boundary
-- The approved installation scope is a full replacement of the internal SSD; Windows and recovery partitions are not retained.
+- The approved installation scope is a full replacement of the internal SSD; Windows and recovery partitions are not retained. Full destructive installation validation is reserved for the actual ThinkPad X280; VM-based installation testing is excluded.
 - The target must be an internal NVMe disk. Removable devices and non-NVMe devices are rejected by the current target validator.
 - Discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`. Missing commands, failed discovery, unknown removable/read-only/mount state, active swap descendants, mounted descendants, or duplicate WWN/serial values cause rejection.
 - The selected target is re-discovered before validation; its path, size, and every supplied stable identity field must still match.
-- These checks are a conservative safety gate, not proof that a disk is safe to erase. Storage modules do not perform destructive operations. The Stage 8 helper is a read-only prototype; only compile/CLI behavior is covered by tests. Real block-device behavior, stable-identity correlation, Bash lifecycle integration, and descriptor-safe operation execution remain unverified. A retained descriptor must be demonstrably used by every future operation; pathname-based tools are not assumed to use it.
+- These checks are a conservative safety gate, not proof that a disk is safe to erase. PR #9 adds a separate installer that uses retained Bash descriptors and inherited `/proc/self/fd` paths; its disposable loop test covers selected utility interfaces, not every kernel race or physical NVMe behavior. The Stage 8 C helper remains a separate read-only prototype and is not integrated with the installer.
+
+## Validation policy
+
+VM-based installer testing is explicitly out of scope (REQ-INSTALL-006). Automated checks may use fixtures, mocks, and disposable loop-backed images for bounded component coverage. The destructive full-SSD replacement workflow is intentionally retained: end-to-end installation and first-boot validation must take place on the actual ThinkPad X280 after the physical-test gates, recovery preparation, and explicit authorization are complete. This policy does not authorize running the installer now.
 
 ## Safety principles
 - Never perform destructive disk operations without explicit authorization and verified target identification.
@@ -81,7 +86,10 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 
 ## Live validation on the ThinkPad
 
-Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--thinkpad-validation).
+Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--x280-validation).
+
+## Documentation ownership
+Each topic has one canonical owner: requirements/decisions in `docs/02`, architecture/module boundaries in `docs/03`, storage and boot details in `docs/04`, test procedures in `tests/README.md`, acceptance/evidence boundaries in `docs/11`, and current implementation/CI status in `docs/12`. Stage records (`docs/14` and `docs/15-ARCH...`) document their specific implementation only. The repository audit (`docs/15-REPOSITORY-AUDIT.md`) is a concise cross-document review, not a second source of technical procedures.
 
 ## Development status
 See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).

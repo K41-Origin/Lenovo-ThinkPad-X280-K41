@@ -7,7 +7,7 @@ Prefer verified official Arch repositories. Show package names, versions, and or
 Verify current names and availability before installation: curl, wget, bind (for dig), whois; Git and GitHub CLI with manual authentication and no tokens in logs; ShellCheck and shfmt; Python 3 and pip; Go; Node.js and npm (verify version rather than assume LTS); VS Code open-source build from official Arch repository if available, without silent source substitution.
 
 ## Not installed by default
-fd, ripgrep, btop, Nano, mtr, httpie, Postman, pytest, pipx, and base-devel. Do not request OpenSSL as an extra application; allow it as a dependency when required.
+fd, ripgrep, btop, mtr, httpie, Postman, pytest, pipx, and base-devel. Nano is included in the current minimal base package list in `lib/base-system.sh`; it is not part of the optional developer-tool bundle. Do not request OpenSSL as an extra application; allow it as a dependency when required.
 
 ## AUR workflow
 Custom interactive CLI; no third-party AUR helper by default. Inspect PKGBUILD and related files and compare versions. Flag suspicious commands, network activity, privilege escalation, and system changes. Build as an unprivileged user, never root. If a separate root action is required, explain it and request confirmation. Review maintenance activity and warnings where available. On integrity failure, offer retry, diagnosis, or cancel; never install unverified artifacts.

@@ -1,0 +1,39 @@
+name: Repository validation
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "feature/**"
+      - "fix/**"
+
+permissions:
+  contents: read
+
+jobs:
+  shell-and-fixture-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install validation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes jq shellcheck gdisk parted cryptsetup dosfstools e2fsprogs
+
+      - name: Validate Bash syntax
+        shell: bash
+        run: |
+          while IFS= read -r -d '' file; do
+            bash -n "$file"
+          done < <(find . -type f -name '*.sh' -not -path './.git/*' -print0)
+          bash -n installer
+
+      - name: ShellCheck installer changes
+        run: |
+          shellcheck -e SC1091 scripts/install-arch-x280.sh scripts/configure-arch-x280.sh tests/test-arch-installer-script.sh tests/test-arch-config-script.sh tests/test-pinned-device-path.sh
+
+      - name: Run repository test suite
+        run: bash tests/run.sh

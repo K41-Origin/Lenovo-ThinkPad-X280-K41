@@ -1,98 +1,93 @@
 # Installation and Disk
 
-## Approved direction
+## Ownership and approved design
 
-- Boot the official, unmodified Arch Linux ISO from USB. The ISO does not automatically launch this project installer; the installer is started manually from the ISO environment.
-- Use UEFI boot with a GPT partition table. Stop before destructive operations if the machine is not booted in UEFI mode.
-- Replace the existing Windows installation. The user reports that no data needs to be retained; this does not waive the mandatory target-disk checks and final confirmation below.
-- Use one 1 GiB FAT32 EFI System Partition (ESP), mounted at `/efi`.
-- Use systemd-boot and a Unified Kernel Image (UKI) generated natively by mkinitcpio. The default UKI path is `/efi/EFI/Linux/arch-linux.efi`.
-- Keep the kernel package files and mkinitcpio configuration on the encrypted root filesystem under `/boot`. The ESP must be mounted when generating or updating the UKI.
-- Use the official Arch `linux` kernel; do not install an alternative kernel under the current decision.
-- Use one LUKS2 container for root, with ext4 directly on the unlocked mapper device. Do not introduce LVM.
-- Use a swapfile inside the encrypted ext4 root filesystem to prepare for hibernation. Determine its size only after inspecting actual RAM, available disk space, and the agreed hibernation policy.
-- Secure Boot is disabled under the current decision. The UKI is therefore not signed or authenticated by Secure Boot; the ESP remains exposed to offline modification.
-- Do not automatically install Intel microcode under the current decision; report the recommendation instead.
+This is the canonical technical document for target storage, encryption, boot, swap/resume, and disk recovery. Approved decisions are indexed in [02-REQUIREMENTS-AND-DECISIONS.md](02-REQUIREMENTS-AND-DECISIONS.md); implementation state and evidence are maintained in [12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
 
-These are approved architecture decisions, not proof that the installer implementation or resulting system has been tested. Exact mkinitcpio hook ordering, kernel command line, resume configuration, package behavior, and end-to-end boot must be verified before destructive installation is enabled.
+Approved target direction:
+- Boot an official, unmodified Arch Linux ISO from USB in UEFI mode; start the project script manually.
+- Replace the existing Windows installation. The owner reports no data needs to be retained; this does not waive identity, backup, and confirmation gates.
+- GPT with a 1 GiB FAT32 EFI System Partition (ESP), mounted at `/efi` inside the target.
+- One remaining-space Linux-LUKS partition (GPT type GUID `CA7D7CCB-63ED-4C53-861C-1742536059CC`), LUKS2, and ext4 directly on `/dev/mapper/cryptroot`; no LVM.
+- Official Arch `linux` kernel, systemd-boot, and a mkinitcpio-generated UKI at `/efi/EFI/Linux/arch-linux.efi`.
+- Swapfile inside encrypted ext4 root. Hibernation/resume remains disabled until the swapfile physical offset and complete boot lifecycle are implemented and verified.
+- Secure Boot is planned disabled. The UKI is not Secure-Boot-authenticated under this policy.
+- Do not automatically install an alternative kernel or introduce undocumented hardware-specific storage behavior.
+
+## Current implementation on PR #9
+
+`scripts/install-arch-x280.sh` is an initial destructive installer on the feature branch, separate from the diagnostic-only top-level `installer`. It currently:
+1. Requires root, UEFI, required commands, and matching X280 host inventory.
+2. Discovers whole-disk candidates and requires the configured internal WDC PC SN730 model, exact capacity, and stable serial identity.
+3. Calculates GPT geometry from actual disk capacity/sector sizes and swapfile target from runtime RAM plus a configured 2 GiB margin.
+4. Binds the selected target to the plan, collects live prerequisites, renders the plan, requests exact plan-bound confirmation, and performs final revalidation.
+5. Opens and retains Bash descriptors for the disk/partitions and passes inherited `/proc/self/fd/N` paths to selected disk utilities.
+6. Wipes old signatures, creates GPT/ESP/Linux-LUKS partitions, formats FAT32 and LUKS2/ext4, opens `cryptroot`, and mounts root at `/mnt` and ESP at `/mnt/efi`.
+7. Calls `base_system::bootstrap` for `pacstrap -K` and UUID-based fstab generation.
+8. Runs `scripts/configure-arch-x280.sh` in `arch-chroot` to configure hostname, user/password, timezone, locale, Intel microcode, sudo wheel access, swapfile, and NetworkManager.
+9. Installs systemd-boot and configures mkinitcpio with `HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)`; kernel command line uses `rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw`.
+10. Generates the default UKI, checks expected configuration artifacts, and does not reboot automatically.
+
+This describes the current source path only. It does not establish successful end-to-end execution, a bootable result, or physical-hardware safety. See [Stage 9 installer record](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
 
 ## Mandatory safety gates
 
-1. Detect and report firmware boot mode. Require UEFI for the approved layout.
-2. Inventory whole disks and show model, capacity, transport, and stable identifiers.
-3. Build a read-only block-device topology, including physical disks, partitions, device-mapper/LUKS devices, and their backing-device relationships.
-4. Correlate mounted filesystems and active swap with their backing physical disks. Reject a target if any descendant, holder, or backing relationship is used by the live root, an active EFI/system mount, any mounted filesystem, or active swap.
-5. If a device relationship cannot be resolved unambiguously, fail closed. Never infer that a disk is unused merely because its own lsblk row has no mountpoint.
-6. Display the complete partition, encryption, filesystem, mount, swap, and boot plan with rationale.
-7. Verify that the selected target matches the intended internal SSD using stable identifiers; do not rely on device names alone.
-8. Require explicit final confirmation immediately before destructive operations, after showing the complete target-specific plan.
-9. Stop if disk identity, topology, partitioning, encryption, boot, or resume compatibility is ambiguous.
-10. Never automatically repartition or reformat after interruption.
-11. Keep partitioning, formatting, and other destructive storage operations exclusively in `lib/storage.sh`.
-12. Never log encryption passphrases, recovery keys, or other key material.
+The implementation and future changes must preserve these requirements:
+- Require UEFI and an internal writable NVMe whole disk.
+- Require exact target identity using the approved model, capacity, and stable identifier; device path or model alone is insufficient.
+- Inspect mounted descendants, holders/slaves, live root/EFI dependencies, loop/overlay backing, and active swap. Unknown or unresolved topology fails closed.
+- Display the complete target-specific partition and configuration plan before confirmation.
+- Require explicit exact plan-bound confirmation, then freshly revalidate target identity and prerequisites before the first destructive operation.
+- Never disable unrelated live-ISO swap as a shortcut.
+- Never automatically retry or repeat destructive work after an interruption or partial failure.
+- Do not log passphrases, passwords, recovery keys, or tokens.
 
-Topology validation must use independent read-only evidence rather than only a nested lsblk display tree. The implementation design should compare kernel block-device major:minor identities and inspect both dependency directions (holders/slaves) so device-mapper and multi-device relationships are not silently missed. It must also resolve mount and swap sources to their backing block devices. A missing tool, malformed result, unresolved source, or inconsistent graph is a hard validation failure.
+**Architecture limitation:** the planned design assigns all destructive storage ownership to `lib/storage.sh`, but the current PR #9 script orchestrates destructive commands directly. This is an acknowledged implementation deviation, not a completed module boundary. The native C helper is a separate read-only prototype and is not integrated. The inherited descriptor-path loop test provides limited interface evidence; it does not prove all TOCTOU or hardware failure modes impossible.
 
-## Storage layout
+## Partition and filesystem layout
 
-The approved logical layout is a deliberately simple two-partition GPT layout:
+| Order | GPT type | Size | Format | Mount / purpose |
+|---|---|---:|---|---|
+| 1 | EFI System Partition `C12A7328-F81F-11D2-BA4B-00A0C93EC93B` | 1 GiB | FAT32 | `/efi` in target; systemd-boot and UKI |
+| 2 | Linux LUKS `CA7D7CCB-63ED-4C53-861C-1742536059CC` | Remaining usable space | LUKS2 container | Encrypted root |
+| Mapper | Not a GPT partition | Container payload | ext4 | `/`; kernel files, mkinitcpio configuration, swapfile |
 
-| Order | Partition type | Planned size | Filesystem / format | Mount / purpose |
-| --- | --- | --- | --- | --- |
-| 1 | EFI System Partition (GPT type GUID `C12A7328-F81F-11D2-BA4B-00A0C93EC93B`) | 1 GiB | FAT32 | `/efi`; systemd-boot and generated UKI |
-| 2 | Linux filesystem partition (GPT type GUID `0FC63DAF-8483-4772-8E79-3D69D8477DE4`) | Remaining usable space | LUKS2 container | Encrypted root |
-| Mapper opened from partition 2 | Not a GPT partition | Container size less metadata | ext4 | `/`; kernel files, mkinitcpio configuration, and swapfile |
+The layout uses 1 MiB alignment and actual logical-sector geometry. The plan module validates GPT bounds and reserves metadata; it does not itself write a partition table. The installer uses the target-specific plan and exact confirmation before writing.
 
-Partition 1 begins at the normal 1 MiB-aligned GPT boundary. Partition 2 begins at the next 1 MiB-aligned boundary after partition 1 and ends before the backup GPT metadata. The implementation must calculate exact sector boundaries from the actual logical sector size and device capacity, reserve GPT metadata correctly, and show the exact result. These values are a plan, not permission to write a partition table.
+## Encryption and boot contract
 
-No separate swap partition, LVM layer, or unencrypted data partition is planned. The swapfile resides inside encrypted ext4 root. The current X280 baseline reports a 256 GB-class WDC NVMe SSD and 8 GiB RAM, but the runtime inventory—not the profile—must supply the disk's actual capacity and RAM. A missing or mismatched disk model/identity must stop target selection.
-
-The initial swapfile sizing proposal for an 8 GiB machine is 9 GiB (RAM plus a 1 GiB planning margin), subject to runtime RAM, free-space, filesystem, and hibernation-policy checks. This is a planning value, not a hardcoded size or guarantee that hibernation will work. The installer must calculate and display the proposed size and refuse to create it if safe free-space headroom is insufficient.
-
-The installer must calculate and present exact partition boundaries and sizes from the detected target before asking for confirmation. Do not assume the remaining disk space is available without inspecting the actual device.
-
-The ESP must be mounted at `/efi` before UKI generation. If it is missing or not the expected ESP, kernel/UKI update operations must fail visibly. They must not silently create or update files in an ordinary `/efi` directory on the root filesystem. A failed UKI build or copy must not overwrite or remove the last known-good UKI.
-
-The default UKI is required. A separate fallback UKI is not required for the initial installation; the official Arch ISO USB is the recovery medium. Reconsider a fallback only after measuring the actual UKI size and available ESP headroom.
-
-## Encryption and recovery
-
-- Use LUKS2 for the root container and ext4 directly on the unlocked mapper device.
-- Explain external recovery-key storage and verify recovery-key slot registration without exposing key material. If external storage or registration cannot be confirmed, report that honestly and stop where the recovery policy requires it.
-- Use the systemd-based mkinitcpio `sd-encrypt` approach as the current implementation candidate. Verify the exact hook order, crypt device identification, kernel command line, and generated UKI contents against current Arch documentation before enabling destructive installation.
-- Verify that the generated boot configuration unlocks the intended LUKS device and mounts the correct root filesystem.
+- LUKS2 is created on the Linux-LUKS partition; ext4 is created on the opened mapper.
+- The current initramfs contract is systemd-based `sd-encrypt`, not the BusyBox `encrypt` hook.
+- The UKI kernel command line uses `rd.luks.name=<UUID>=cryptroot` and `root=/dev/mapper/cryptroot`.
+- The ESP must be mounted at the expected target path before UKI generation or future updates. A missing or incorrect ESP must stop the operation rather than writing into an ordinary root-directory mountpoint.
+- The current installer checks that the generated UKI and command-line/preset artifacts exist. This file-presence check is not proof that firmware/systemd-boot can boot the UKI or unlock the intended root.
+- The current installer does not establish external recovery-key storage or verify recovery-key slot registration. This remains an unresolved recovery requirement; do not claim recovery-key readiness.
 
 ## Swap and hibernation
 
-- Create the swapfile inside the encrypted ext4 root filesystem.
-- Choose swapfile size only after checking actual RAM, available space, and hibernation requirements; do not hardcode a size based only on the reported 8 GiB RAM and 256 GB SSD.
-- Configure resume to use the unlocked mapper device and the correct physical swapfile offset.
-- For an ext4 swapfile, calculate the physical offset using a suitable supported method after creation. Recalculate and update the resume configuration whenever the swapfile is created, resized, replaced, or relocated.
-- Verify initramfs/UKI resume configuration and the resulting boot entry before claiming hibernation readiness.
+The current plan computes swapfile target size as measured runtime RAM plus a configured 2 GiB margin. The X280's reported 8 GiB RAM is planning context only; runtime values control the plan. The target configuration creates `/swapfile`, mode 0600, initializes it, and adds it to fstab.
 
-Hibernation readiness does not prove that suspend-to-disk works. A real hibernate-and-resume cycle must be tested on the target hardware; until then, actual hibernation remains NOT TESTED.
+Resume is deliberately not configured. For ext4 swapfile resume, a future implementation must:
+1. Calculate the physical swapfile offset using a supported method after creation.
+2. Configure the correct unlocked mapper as resume device and the verified offset.
+3. Recalculate/update configuration whenever the swapfile is recreated, resized, or relocated.
+4. Rebuild and inspect the UKI and prove kernel-update lifecycle preserves correct resume settings.
 
-## Bootstrap and recovery
+Hibernation readiness is distinct from a successful hibernate/resume cycle. Actual hardware hibernation remains NOT TESTED.
 
-- Retrieve the project at the latest `main` revision for each installation attempt and display the resolved commit SHA.
-- Retrieve and review project code before execution. Do not pipe remote scripts directly into a shell, especially with elevated privileges.
-- Document integrity verification and safe manual launch from the official Arch ISO.
-- After interruption, inspect the actual disk and filesystem state and show the last recorded stage. Never assume it is safe to wipe or resume automatically.
-- The Arch ISO USB remains the recovery medium; do not claim that a fallback UKI exists unless one has actually been implemented and verified.
+## Recovery and interrupted runs
 
-## Acceptance
+The Arch ISO USB is the recovery medium; no fallback UKI is currently promised. If an operation fails after the first destructive command, stop. Do not rerun the installer or issue cleanup commands blindly. Inspect the actual partition table, LUKS state, mapper, mounts, and filesystem state in a fresh session, preserve logs without secrets, and require human review before any further write.
 
-- [ ] Installer confirms UEFI mode and GPT target identity before proposing changes.
-- [ ] Read-only topology resolves physical disk, partitions, mapper holders/slaves, mounted sources, root, EFI, and active swap by kernel device identity.
-- [ ] Target is rejected if any mounted filesystem or active swap maps back to it, or if topology cannot be resolved completely.
-- [ ] The generated two-partition plan uses the correct GPT type GUIDs, 1 MiB alignment, and exact device-sector boundaries.
-- [ ] Swapfile sizing is computed from runtime RAM and available space; the 9 GiB X280 proposal is not a hardcoded assumption.
-- [ ] Exact partition boundaries, sizes, encryption, filesystem, mount, swap, and boot plan are displayed before final confirmation.
-- [ ] ESP is FAT32, 1 GiB, and mounted at `/efi`.
-- [ ] Root uses LUKS2 with ext4 directly on the unlocked mapper device.
-- [ ] systemd-boot and the native mkinitcpio UKI path are verified.
-- [ ] Kernel/UKI updates fail visibly if the expected ESP is not mounted and preserve the last known-good UKI on failure.
-- [ ] Encryption and boot configuration are checked; recovery-key slot registration is checked without logging key material.
-- [ ] Swapfile size and physical resume offset are calculated from the actual installation state.
-- [ ] Hibernation readiness is distinguished from a successful hardware hibernation test.
-- [ ] Critical failures stop safely; interrupted runs never trigger automatic repartitioning or formatting.
+The current installer does not provide a complete transactional rollback or automatic resume workflow. Its final cleanup/unmount and post-failure recovery path require further review before physical testing.
+
+## Acceptance status
+
+Detailed test cases live in [11-TESTING-AND-ACCEPTANCE.md](11-TESTING-AND-ACCEPTANCE.md). Current state:
+- IMPLEMENTED: target discovery/validation, plan calculation/binding, confirmation/final revalidation, initial destructive installer, base bootstrap, target configuration, and initial UKI generation on PR #9.
+- TESTED (bounded): fixture/static tests and selected descriptor-pinned utilities against a disposable loop-backed image on the CI-tested commit.
+- NOT TESTED: successful physical live validator on X280 after its fix, physical SSD installation, first boot, UKI unlock/root mount, recovery-key registration, and hibernation/resume.
+- OUT OF SCOPE BY OWNER DECISION: VM-based installer testing. Disposable loop-image tests remain permitted for bounded utility-interface coverage; they do not replace the required real-laptop destructive test.
+- PLANNED: tested recovery/cleanup lifecycle, reusable storage executor boundary, resume-offset workflow, and subsequent desktop/hardware setup.
+
+A passing CI run or the presence of a UKI file is not authorization to erase a disk and is not proof of a successful boot.

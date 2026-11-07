@@ -1,11 +1,21 @@
 # Implementation Status and Changelog
 
-## Current verified baseline — 2026-11-07
+## Current verified baseline — 2026-11-07 (repository branch audit)
 
-- Repository head inspected: `main` at `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`.
-- GitHub Actions run #185 (`42349907205`) completed successfully on that exact commit. Bash syntax, ShellCheck, configured shfmt checks, and the canonical 12-script test suite passed.
+- `main` baseline inspected: `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`; run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the 12-script suite on that exact main commit.
+- PR #9 branch `feature/base-system-bootstrap-2026-11-07` contains the separate initial destructive installer and target-configuration scripts. CI runs #130 and #131 (`42362113267`, `42362119357`) passed on commit `2aae853df0c74c8ae9a46e702d457884f1d91fd8` with syntax, lint, and the 15-script suite including a disposable loop-device integration test. These runs predate the documentation-only commits in this current branch head; they are not CI evidence for the latest head. Earlier run #94 is historical and not the latest PR evidence.
 - Physical X280 observations from user-provided terminal photographs are documented in `docs/11-TESTING-AND-ACCEPTANCE.md` (Stages 8–9). They establish point-in-time raw system facts, not a successful run of the project's live validator.
-- `scripts/validate-live-storage.sh` has not yet been run on the physical laptop. Native block-device behavior remains NOT TESTED; no real storage executor or installer workflow exists.
+- `scripts/validate-live-storage.sh` has not yet been evidenced as successfully run on the physical laptop after the zero-capacity removable-reader fix. Physical NVMe behavior, complete installation, and successful boot remain NOT TESTED. VM-based installation testing is OUT OF SCOPE by owner decision; full destructive installation testing is reserved for the actual X280 after the safety gate.
+
+## PR #9 branch delta — 2026-11-07
+
+The table below includes branch-only implementation not yet merged into main. The legacy top-level `installer` command remains diagnostic-only; the new destructive path is a separate explicit script.
+
+- `scripts/install-arch-x280.sh` performs the initial destructive installation path after X280 inventory and exact SSD identity checks, plan review, exact confirmation, and live revalidation.
+- The installer opens and retains whole-disk and partition block descriptors, then passes inherited `/proc/self/fd/N` paths to disk utilities. The disposable loop-device integration test verifies the procfs descriptor interface for the selected utilities and ESP mounting.
+- `scripts/configure-arch-x280.sh` configures the initial user, sudo, locale, timezone, Intel microcode, and swapfile inside the target.
+- The final target boot path uses systemd-boot and a default mkinitcpio UKI with `systemd` + `sd-encrypt` hooks and `rd.luks.name=<UUID>=cryptroot` kernel command line.
+- CI runs #130 and #131 passed on commit `2aae853df0c74c8ae9a46e702d457884f1d91fd8`. This is automated/loop-device evidence only. No physical X280 SSD has been modified by maintainers and no successful physical boot is verified.
 
 ## Status
 
@@ -20,26 +30,36 @@
 | Documentation split | IMPLEMENTED | Domain documents are present on main. |
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
 | Diagnostic-only installer entry point | TESTED (mocked gate) | `installer --help` and `installer --preflight` are implemented; preflight now includes read-only host inventory and X280 profile comparison. Mocked gate covers inventory failure and keeps installation disabled; fixture test exercises the actual inventory adapter. Preflight always returns nonzero because installation is disabled. |
-| Planned module placeholders | PLANNED | Nine domain files under `lib/` contain comments only; no base-system, bootloader, user, desktop, hardware, package, security, validation, or reporting implementation exists in them. |
+| Remaining module placeholders | PLANNED | Desktop, hardware tuning, package/security policy, validation, and reporting modules remain incomplete; `lib/base-system.sh` is now implemented for the base bootstrap stage. |
 | Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
 | Test plan and focused test harnesses | IMPLEMENTED | Fixture-based tests cover the currently implemented diagnostic and storage-planning slices. `tests/run.sh` is the canonical test entry point; CI and developer instructions use it. No end-to-end installer or hardware test is implied. |
-| Approved UEFI/LUKS2/ext4/hibernation design direction | IMPLEMENTED | Architecture direction recorded; systemd-boot asset placement, exact initramfs parameters, swap sizing, resume-offset lifecycle, VM and X280 validation remain PLANNED/NOT TESTED. |
-| Native mkinitcpio UKI boot design | IMPLEMENTED | Decision documented: default UKI on 1 GiB ESP at `/efi/EFI/Linux/`, source kernel/configuration on encrypted root, systemd-boot discovery, no initial fallback UKI. Generation/update lifecycle and boot behavior remain PLANNED / NOT TESTED. |
-| Read-only storage discovery and target validation | TESTED (mocked CI) | `lib/storage.sh` uses `lsblk`, `jq`, `swapon`, `readlink`, and `base64` to discover whole disks, require internal NVMe, compare supplied WWN/serial identities, reject duplicate IDs, removable/read-only disks, mounted descendants, and active swap descendants (including symlink aliases). GitHub Actions run #21 (commit `fdeb517d5fc552bcbba6532280d1eba5f5a3669d`) passed all fixture tests and Bash syntax checks. Real X280/disk behavior remains NOT TESTED; no destructive storage operations exist. |
-| Storage module contract documentation | IMPLEMENTED | Proposed stage interface and requirement/test traceability are documented in `lib/storage.sh` comments and `docs/03-ARCHITECTURE-AND-MODULES.md`; this does not mean storage behavior is implemented. |
+| Approved UEFI/LUKS2/ext4/hibernation design direction | IMPLEMENTED; initial boot path on PR #9 | PR #9 implements systemd-boot + mkinitcpio UKI with systemd-based `sd-encrypt` and `rd.luks.name=`. Swapfile resume-offset lifecycle, physical boot validation, kernel-update lifecycle, and recovery remain PLANNED/NOT TESTED. VM validation is OUT OF SCOPE by REQ-INSTALL-006. |
+| Native mkinitcpio UKI boot design | IMPLEMENTED (initial generation path) | Decision documented and initial preset generation implemented on PR #9: default UKI on 1 GiB ESP at `/efi/EFI/Linux/`, kernel/configuration on encrypted root, systemd-boot discovery, no fallback preset. Physical boot, kernel-update lifecycle, and recovery behavior remain NOT TESTED. |
+| Read-only storage discovery and target validation | TESTED (fixture CI) | `lib/storage.sh` uses `lsblk`, `jq`, `swapon`, `readlink`, and `base64` to discover whole disks, require internal NVMe, compare supplied WWN/serial identities, reject duplicate IDs, removable/read-only disks, mounted descendants, and active swap descendants. This read-only module is used by the separate installer; physical X280 validation remains NOT TESTED. |
+| Storage module responsibility | PARTIAL / ARCHITECTURE DEVIATION | `lib/storage.sh` owns read-only discovery/validation only. The PR #9 script currently orchestrates destructive operations directly, contrary to the earlier planned sole-owner boundary. See `docs/03-ARCHITECTURE-AND-MODULES.md`. |
 | Read-only storage topology validation | TESTED (fixture CI) | `lib/storage-topology.sh` is integrated into `storage::validate_target`; it walks partition and holder/slave dependencies, checks mounted devices and swap, and resolves loop-backed squashfs plus overlay lower/upper/work paths by backing filesystem major:minor. Synthetic fixtures and mocked integration pass in CI. Real Arch ISO/X280 sysfs behavior remains NOT TESTED. |
 | Read-only GPT storage plan calculator | TESTED (fixture CI) | `lib/storage-plan.sh` calculates 1 MiB-aligned ESP/root sector boundaries from disk bytes and logical/physical sector sizes, reserves GPT metadata for 128 entries, and proposes RAM-plus-margin swap size with minimum root headroom. Geometry, capacity, overflow, and decimal-input fixtures pass CI. No disk commands are invoked. |
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
 | Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
-| Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #148 passed at audit baseline commit `719f537341b6d410ce2980144fee86237da01b42`. The gate binds path, major:minor, capacity, stable-ID kind/value, WWN, serial, transport, removable, and read-only attributes. It opens no device handle and does not close the real kernel TOCTOU window. |
-| Native block-device handle acquisition (Stage 8 first slice) | IMPLEMENTED (read-only prototype) | `native/storage-handle.c` opens a supplied `/dev/<name>` read-only with exclusive/no-follow/close-on-exec flags, checks descriptor type and partition status, reads geometry/read-only state by ioctl, reports major:minor and optional diskseq, and retains the FD until stdin EOF. Compile/CLI checks pass in CI; real block-device behavior, stable-ID correlation, NVMe/removable validation, and end-to-end Bash lifecycle remain NOT TESTED / PLANNED. No storage write or installer integration exists. |
-| Repository audit | IMPLEMENTED (report only) | `docs/15-REPOSITORY-AUDIT.md` is the current 2026-11-07 repository audit. It records the 58-file tree, current CI evidence, physical observation boundary, documentation corrections, and remaining readiness gates. |
-| Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED (CI) | GitHub Actions run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the canonical test suite at `main` commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. This does not establish physical hardware behavior. |
-| X280 raw Arch ISO observations | VERIFIED (limited, point-in-time) | User-provided terminal photographs document UEFI, live root, USB, NVMe identity/serial alias, partitions, visible mount tree, loop backing, and no active swap in captured snapshots. The project's live validator has not yet been run; installation and hibernation remain NOT TESTED. |
+| Storage execution boundary module | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` remains a mock-only boundary and does not open devices. The separate PR #9 installer holds Bash whole-disk/partition descriptors and passes inherited `/proc/self/fd` paths to disk tools; that path is exercised against a disposable loop device, not physical NVMe. |
+| Native block-device handle acquisition (Stage 8 first slice) | IMPLEMENTED (read-only prototype) | `native/storage-handle.c` is standalone and unused by the installer. Compile/CLI checks exist; real block-device behavior, stable-ID correlation, NVMe/removable validation, and end-to-end lifecycle remain NOT TESTED / PLANNED. The PR #9 installer separately uses Bash descriptors and inherited `/proc/self/fd/N` paths. |
+| Repository audit | IMPLEMENTED (report only) | `docs/15-REPOSITORY-AUDIT.md` is the current branch-level audit summary and links to canonical architecture, testing, storage, and status records. It does not duplicate detailed procedures. |
+| Intel microcode policy compliance | BLOCKED / POLICY DEVIATION | Approved requirements and security/hardware docs say report the recommendation only; `scripts/configure-arch-x280.sh` currently installs `intel-ucode` automatically. Resolve in code or obtain explicit decision change before readiness. |
+| Initial X280 Arch installer (PR #9 branch) | IMPLEMENTED; TESTED (CI/loop integration on recorded commit); NOT TESTED (physical hardware) | `scripts/install-arch-x280.sh` performs target identity checks, plan-bound confirmation, GPT/LUKS2/ext4/ESP setup, base bootstrap, target configuration, and UKI generation. Runs #130/#131 passed 15 tests on `2aae853df0c74c8ae9a46e702d457884f1d91fd8`; the latest docs-only commits need their own CI evidence. Physical NVMe/boot behavior is NOT TESTED; VM-based installer testing is explicitly out of scope. Desktop, tuning, resume, and BlackArch remain PLANNED. |
+| Static checks on main baseline | TESTED (CI) | GitHub Actions run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the canonical suite at main commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. |
+| Static checks on PR #9 branch | TESTED (CI, earlier commit) | Runs #130/#131 (`42362113267`, `42362119357`) passed Bash syntax, ShellCheck, and all 15 tests on commit `2aae853df0c74c8ae9a46e702d457884f1d91fd8`. The loop test covers selected storage utilities on a disposable image. Latest documentation commits require fresh CI. This is not physical X280 or boot validation. |
+| X280 raw Arch ISO observations | VERIFIED (limited, point-in-time) | User-provided terminal photographs document UEFI, live root, USB, NVMe identity/serial alias, partitions, visible mount tree, loop backing, and no active swap in captured snapshots. The fixed project live validator has not yet been evidenced as passing on the laptop; installation and hibernation remain NOT TESTED. |
 
 ## Changelog
+
+### 2026-11-07 — Initial interactive X280 Arch installer and pinned-descriptor integration
+- Added `scripts/install-arch-x280.sh` with host inventory and exact verified SSD identity guards, plan-bound destructive confirmation, live prerequisite revalidation, GPT/ESP/Linux-LUKS partitioning, LUKS2/ext4/FAT32 formatting, guarded base bootstrap, and systemd-boot UKI setup.
+- Added retained whole-disk and partition block descriptors; disk utilities and ESP mounting receive inherited `/proc/self/fd` paths. A disposable loop-device integration test verified wipefs, sgdisk, partprobe, mkfs.fat, cryptsetup, mkfs.ext4, and ESP mount behavior through this interface.
+- Added `scripts/configure-arch-x280.sh` for interactive hostname/user/password/timezone/locale setup, Intel microcode, sudo wheel access, and the planned swapfile. Resume/hibernation remains disabled.
+- Added GitHub Actions validation and static installer/configuration tests. **TESTED:** run #94 (`42361056504`) passed Bash syntax, ShellCheck, and all 15 test scripts (0 failed, 0 skipped).
+- **NOT TESTED:** physical NVMe hot-unplug/controller behavior, full X280 installation, and successful boot. No physical disk was modified by maintainers. Caelestia/Hyprland/Quickshell, X280 tuning, resume, and optional BlackArch remain PLANNED.
+
 
 ### 2026-11-03 — Repository-wide structural and documentation audit
 - Audited the current `main` tree at baseline commit `719f537341b6d410ce2980144fee86237da01b42`: 51 tracked files, 17 Markdown files, 30 `.sh` files plus the `installer` Bash entry point, one GitHub Actions workflow, and one hardware profile.
@@ -54,7 +74,7 @@
 - Recorded documented Linux interface facts and their limits: block-device O_EXCL behavior, fstat/st_rdev, descriptor-based ioctls, diskseq correlation, and the distinction between kernel-internal APIs and userspace interfaces.
 - Explicitly documented the unresolved descriptor-to-tool boundary: retaining an FD does not make a pathname-based partitioning/LUKS/filesystem utility descriptor-bound. No /proc/self/fd shortcut or fallback to pathname rechecks is accepted without proof.
 - Defined lifecycle, identity fields, fail-closed behavior, privilege/protocol boundaries, recovery requirements, and disposable-loop/VM acceptance tests.
-- Documentation/design only. No C helper, device open, exclusive lock, loop-device test, destructive utility, or hardware test was performed. The installer remains diagnostic-only and destructive storage execution remains unimplemented.
+- Historical snapshot: documentation/design only. At that time no C helper or destructive executor existed and the top-level installer was diagnostic-only. Superseded by the later Stage 8 prototype and PR #9 initial installer implementation.
 
 
 ### 2026-11-02 — Restrict storage target validation to internal NVMe and detect active swap
@@ -241,7 +261,7 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Added native/storage-handle.c, a read-only prototype for opening a candidate block device with O_RDONLY | O_EXCL | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK, checking the descriptor with fstat, rejecting partition devices, and reading geometry/read-only state via descriptor ioctls.
 - The helper reports major:minor and optional diskseq, and retains the descriptor until stdin EOF. It exposes no command channel and does not invoke storage utilities.
 - Added isolated compile/CLI validation to the canonical test manifest and CI compiler dependency.
-- Not implemented: stable WWN/serial correlation, actual removable-state value, internal NVMe enforcement, expected-plan matching, Bash protocol supervision, disposable loop-device tests, and real executor integration. No real block device was opened during this change; installer remains diagnostic-only.
+- Historical Stage 8 prototype boundary: stable WWN/serial correlation, actual removable-state value, internal NVMe enforcement, expected-plan matching, Bash protocol supervision, and C-helper integration remain unimplemented. The later PR #9 installer uses a separate Bash descriptor path and is documented in the current installer section.
 
 
 ### 2026-11-07 — Documentation synchronization after repository audit
@@ -257,3 +277,51 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Recorded the observed failure and explicit follow-up validation status in `docs/11-TESTING-AND-ACCEPTANCE.md`.
 - **TESTED:** GitHub Actions run #191 (`42356761102`) passed on commit `6e784d08927996b7bb9af3c144e9fd3dbc5555ac`, including Bash syntax, ShellCheck, configured shfmt, and all 12 repository test scripts. The added fixtures explicitly passed for zero-capacity removable skip, zero-capacity non-removable rejection, and unknown-size rejection. The physical X280 validator remains pending; the fix has not yet been verified on the laptop.
 - No disk-writing operation, package installation, or hardware configuration change was performed.
+
+
+### 2026-11-07 — Stage 9 base-system bootstrap first slice
+- Replaced the lib/base-system.sh placeholder with a guarded bootstrap module for an already-prepared target: it requires an ext4 root mounted from an unlocked /dev/mapper/* device and a separate vfat ESP mounted at ROOT/efi.
+- Added the minimal base package transaction using pacstrap -K and UUID-based genfstab -U generation. Existing non-empty target fstab files are preserved; incomplete generated fstab output is rejected.
+- The module does not partition, format, open LUKS, mount, configure boot, or run automatically from the installer entry point. It requires exact caller confirmation tokens and root privileges for package installation/fstab generation.
+- Added fixture coverage for module source safety, valid/invalid mount layouts, refusal to target the live root, and invalid confirmation.
+- IMPLEMENTED: module code and focused fixture tests committed on feature/base-system-bootstrap-2026-11-07.
+- NOT TESTED: no local shell execution or GitHub Actions run has yet validated this change. No pacstrap transaction or target filesystem write was performed.
+- This next action was superseded by the later Stage 9 interactive installer implementation recorded below. Physical and VM installation validation remain outstanding.
+
+
+### 2026-11-07 — Persistent test evidence
+- Updated `tests/run.sh` to create a unique `reports/test-runs/<UTC timestamp>/` directory for each run.
+- Each test script receives its own stdout/stderr log; the run also writes `combined.log` and `summary.md` with checkout metadata and per-test exit status.
+- Reports remain local artifacts and are not committed automatically; inspect for environment-specific information before staging.
+- **IMPLEMENTED:** persistent evidence generation in the canonical test runner and corresponding test documentation.
+- **NOT TESTED:** the updated runner has not yet been executed locally or in CI. No test result is claimed by this change.
+
+
+### 2026-11-07 — Correct installer status and UKI boot contract
+- Reconciled the README and testing/status documentation with the actual PR #9 branch: the top-level `installer --preflight` remains diagnostic-only, while `scripts/install-arch-x280.sh` is a separate destructive initial installer.
+- Corrected the installer to use the approved systemd-based initramfs contract (`systemd` + `sd-encrypt` hooks and `rd.luks.name=`) instead of the older BusyBox `encrypt` + `cryptdevice=` path.
+- Corrected kernel command-line file generation so the file contains actual newline-delimited parameters, not a literal escaped newline.
+- Added postcondition checks for the generated UKI, fstab, swapfile fstab entry, hostname, locale, and timezone before the installer reports initial configuration completion.
+- Corrected the final installer status message: user, locale, timezone, hostname, Intel microcode, sudo, and swapfile configuration are invoked during this installer stage; desktop, hardware tuning, hibernation/resume, and BlackArch remain out of scope.
+- Validation of these new edits is PENDING until CI reruns on the resulting commit. No local test, VM installation, physical disk operation, or boot test is claimed.
+
+
+### 2026-11-07 — Repository documentation integration and deduplication
+- Reworked the architecture and storage documents to describe the actual two-entry-point model, current PR #9 installer sequence, implemented boot contract, module ownership, and known deviation between the planned storage-module boundary and the current script.
+- Marked pre-installer audit findings in the testing document as historical, retained point-in-time hardware observations, and centralized current test/installer evidence in the owning documents.
+- Distinguished the standalone native C descriptor prototype from the separate Bash descriptor path used by the initial installer.
+- Consolidated the initial installer procedure and physical-test gate in docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md; test execution instructions remain owned by tests/README.md.
+- Updated status evidence to separate the latest successful CI-tested code commit from later documentation-only commits. No CI result is attributed to a commit it did not test.
+- Documentation writes were fetched again for verification. No shell tests, VM installation, physical disk operation, or boot test were performed by this documentation-only change.
+
+### 2026-11-07 — Record approved Intel microcode policy deviation
+- Cross-checked the target configuration script against the security/hardware policy documents and found that it installs `intel-ucode` automatically despite the approved report-only policy.
+- Added REQ-HW-006 to the requirements index and marked this mismatch as a blocker in the implementation matrix and installer limitations.
+- Documentation records the mismatch; no code change or policy override was made in this documentation task.
+
+
+### 2026-11-07 — Owner decision: no VM installation testing
+- Confirmed that this project will not perform installer testing through a virtual machine.
+- Preserve the real destructive SSD replacement/erasure workflow as a required physical validation stage on the actual ThinkPad X280, subject to successful read-only live validation, independent source/safety review, verified exact target identity, backup/recovery preparation, stop conditions, and explicit authorization.
+- Fixtures, mocks, static checks, and disposable loop-backed images remain permitted for bounded automated tests; they do not simulate or replace the full physical installation.
+- This decision changes the test strategy, not the approved disk layout or destructive installer scope. No disk operation was performed by this documentation update.

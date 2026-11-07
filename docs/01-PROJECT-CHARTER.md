@@ -13,6 +13,8 @@ Build a reliable, modular, secure, reproducible Arch Linux installation and setu
 1. Inspect repository state before modifying it.
 2. Separate installation, post-install setup, optional components, hardware tuning, tests, and docs.
 3. Require explicit authorization and verified disk identity before destructive operations.
+4. Do not use virtual machines for project validation. Automated tests may use fixtures, mocks, and disposable loop-backed images; the required end-to-end destructive installation test is performed on the actual ThinkPad X280 after the physical-test gates pass.
+5. Preserve the destructive full-SSD replacement workflow as an intentional project requirement; safety gates control when it may run, not whether destructive installation is removed.
 4. Never bypass package signature checks or install unverified packages.
 5. Never pipe remote scripts directly into a shell; never build AUR packages as root.
 6. Never log secrets.

@@ -1,20 +1,17 @@
 #!/usr/bin/env bash
-# Canonical test manifest for local runs and CI.
+# Canonical test manifest. Every run preserves per-test logs and a summary report.
 set -Eeuo pipefail
+umask 077
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
-for dependency in bash jq python3 cc; do
-  if ! command -v "$dependency" >/dev/null 2>&1; then
-    printf 'Missing test dependency: %s\n' "$dependency" >&2
-    exit 2
-  fi
-done
-
 tests=(
   tests/test-common-preflight.sh
   tests/test-installer-entry.sh
+  tests/test-arch-installer-script.sh
+  tests/test-arch-config-script.sh
+  tests/test-pinned-device-path.sh
   tests/test-inventory.sh
   tests/test-storage-discovery.sh
   tests/test-storage-plan.sh
@@ -27,16 +24,108 @@ tests=(
   tests/test-native-storage-handle.sh
 )
 
-for test in "${tests[@]}"; do
-  if [[ ! -f "$test" ]]; then
-    printf 'Required test is missing: %s\n' "$test" >&2
-    exit 1
+timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+report_root="$ROOT/reports/test-runs"
+mkdir -p -- "$report_root"
+run_dir="$report_root/$timestamp"
+suffix=0
+while ! mkdir -- "$run_dir" 2>/dev/null; do
+  suffix=$((suffix + 1))
+  run_dir="$report_root/$timestamp-$suffix"
+done
+combined="$run_dir/combined.log"
+summary="$run_dir/summary.md"
+: > "$combined"
+: > "$summary"
+chmod 600 "$combined" "$summary"
+
+overall_rc=0
+passed=0
+failed=0
+skipped=0
+required_missing=()
+
+{
+  printf '# Repository test run\n\n'
+  printf -- '- Started (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+  printf -- '- Repository: %s\n' "$ROOT"
+  printf -- '- Branch: %s\n' "$(git branch --show-current 2>/dev/null || printf unknown)"
+  printf -- '- Commit: %s\n' "$(git rev-parse HEAD 2>/dev/null || printf unknown)"
+  printf -- '- Host: %s\n' "$(hostname 2>/dev/null || printf unknown)"
+  printf -- '- Kernel: %s\n' "$(uname -sr 2>/dev/null || printf unknown)"
+  printf '\n## Test results\n\n'
+  printf '| Test | Result | Exit | Log |\n|---|---:|---:|---|\n'
+} >> "$summary"
+
+printf 'Repository test run: %s\n' "$run_dir"
+
+# Only tools needed by the shell/fixture suite are global requirements.
+# The C compiler is optional and gates only the native helper test.
+for dependency in bash jq python3; do
+  if ! command -v "$dependency" >/dev/null 2>&1; then
+    required_missing+=("$dependency")
+    printf 'FAIL: missing required test dependency: %s\n' "$dependency" | tee -a "$combined"
   fi
 done
 
 for test in "${tests[@]}"; do
-  printf '\n== %s ==\n' "$test"
-  bash "$test"
+  test_log="$run_dir/${test##*/}.log"
+  if [[ ! -f "$test" ]]; then
+    printf 'FAIL: required test is missing: %s\n' "$test" | tee -a "$combined"
+    printf 'FAIL: missing test script: %s\n' "$test" > "$test_log"
+    printf '| %s | **FAIL** | 1 | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    failed=$((failed + 1))
+    overall_rc=1
+  elif (( ${#required_missing[@]} > 0 )); then
+    printf 'SKIP: required suite dependency is missing; see combined.log\n' > "$test_log"
+    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    skipped=$((skipped + 1))
+  elif [[ $test == tests/test-native-storage-handle.sh ]] && ! command -v cc >/dev/null 2>&1; then
+    printf 'SKIP: optional compiler cc is unavailable; install base-devel or a C compiler to run this native-helper test.\n' > "$test_log"
+    cat "$test_log" | tee -a "$combined"
+    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    skipped=$((skipped + 1))
+  else
+    printf '\n== %s ==\n' "$test" | tee -a "$combined"
+    if bash "$test" >"$test_log" 2>&1; then
+      rc=0
+      result=PASS
+      passed=$((passed + 1))
+    else
+      rc=$?
+      result=FAIL
+      failed=$((failed + 1))
+      overall_rc=1
+    fi
+    cat -- "$test_log" | tee -a "$combined"
+    printf '%s: %s (exit %s) — %s\n' "$test" "$result" "$rc" "$test_log"
+    printf '| %s | **%s** | %s | %s |\n' "$test" "$result" "$rc" "${test##*/}.log" >> "$summary"
+  fi
 done
 
-printf '\nAll %d repository test scripts passed.\n' "${#tests[@]}"
+if (( ${#required_missing[@]} > 0 )); then
+  overall_rc=2
+fi
+
+{
+  printf '\n## Summary\n\n'
+  printf -- '- Passed test scripts: %s\n' "$passed"
+  printf -- '- Failed checks: %s\n' "$failed"
+  printf -- '- Skipped test scripts: %s\n' "$skipped"
+  if (( overall_rc == 0 )); then
+    printf -- '- Overall result: **PASS**\n'
+  else
+    printf -- '- Overall result: **FAIL**\n'
+  fi
+  printf -- '- Finished (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+  printf '\n## Evidence files\n\n'
+  printf -- '- `summary.md`: per-test result and run metadata\n'
+  printf -- '- `combined.log`: combined stdout/stderr from all executed tests and skip reasons\n'
+  printf -- '- `<test-name>.log`: individual stdout/stderr or explicit SKIP reason for every manifest entry\n'
+  printf '\nThe native helper test is skipped only when `cc` is unavailable. Missing required suite dependencies or any failed test returns non-zero. Reports are generated locally and are not committed automatically. Review reports for environment-specific information before sharing. A passing fixture suite is not proof of a successful installation or safe disk erasure.\n'
+} >> "$summary"
+
+chmod 600 "$summary" "$combined" "$run_dir"/*.log
+printf '\nSummary: %s\nCombined log: %s\n' "$summary" "$combined"
+printf 'Test scripts: %s passed | %s failed | %s skipped\n' "$passed" "$failed" "$skipped"
+exit "$overall_rc"

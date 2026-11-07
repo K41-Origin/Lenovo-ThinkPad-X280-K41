@@ -1,51 +1,80 @@
-# Tests
+# Test Guide
 
-The repository currently has twelve test scripts covering common/preflight behavior, installer entry handling, host inventory, storage discovery/topology, storage-plan arithmetic, live prerequisite collection, explicit confirmation/final revalidation, the storage dry-run model, and the mock-only execution boundary. These tests do not constitute end-to-end installation or real-hardware validation. The topology fixture now allocates synthetic major:minor IDs separately from the host temporary-filesystem ID to avoid environment-dependent collisions.
+## Canonical command and manifest
 
-Run the complete test suite from the repository root:
+Run from the repository root:
 
 ```bash
 bash tests/run.sh
 ```
 
-`tests/run.sh` is the canonical manifest used by both local development and GitHub Actions. It checks for `bash`, `jq`, `python3`, and a C compiler (`cc`) before running all required scripts; missing scripts or dependencies fail the run. Install `jq`, `python3`, and a C compiler using the package manager for the environment before running locally.
+The test list is defined only in `tests/run.sh` (15 scripts at this revision). Do not maintain a second editable manifest in documentation. The runner requires `bash`, `jq`, and `python3`. The native C helper compile/CLI test is skipped only when `cc` is unavailable; all other missing dependencies, missing scripts, or test failures make the run exit non-zero.
 
+## What the suite covers
 
-Storage-discovery tests mock `lsblk` and `swapon` and use JSON fixtures. The topology module is called by `storage::validate_target` using the selected disk's kernel major:minor and live `/sys`, `/proc/self/mountinfo`, and `/proc/swaps`. The discovery test stubs that integration boundary; the topology test builds a synthetic sysfs graph and mountinfo/swaps fixtures. Coverage includes partition descendants, device-mapper holder/slave relationships, mounted dependencies, swapfiles, active block swap, loop-backed squashfs, overlay lower/upper/work directories, unresolved paths, malformed mountinfo, and unsupported filesystem types. Backing paths are mapped using their actual `st_dev` major:minor; no mounts or block-device writes are created.
+| Test | Scope |
+|---|---|
+| `test-common-preflight.sh` | Logging and read-only preflight helpers |
+| `test-installer-entry.sh` | Legacy `installer --help/--preflight` behavior and diagnostic-only boundary |
+| `test-arch-installer-script.sh` | Static syntax/contract checks for the separate PR #9 destructive installer; does not execute it |
+| `test-arch-config-script.sh` | Static checks for target configuration; does not run it inside a real target |
+| `test-pinned-device-path.sh` | Selected disk utilities against a disposable loop-backed image through inherited descriptor paths |
+| `test-inventory.sh` | Host inventory and profile parsing using fixtures |
+| `test-storage-discovery.sh` | Disk discovery using mocked `lsblk`/`swapon` data |
+| `test-storage-plan.sh` | GPT geometry, alignment, capacity, overflow, and RAM-plus-margin swap arithmetic |
+| `test-storage-prerequisites.sh` | Live prerequisite collector with mocked inputs/failure paths |
+| `test-storage-confirmation.sh` | Plan review digest, exact confirmation, cancellation, and final revalidation |
+| `test-storage-execution-dry-run.sh` | In-memory operation manifest and injected failure behavior |
+| `test-storage-execution-boundary.sh` | Mock-only probes, gate consistency, stop behavior, and recovery ledger |
+| `test-storage-topology.sh` | Synthetic sysfs, mountinfo, loop/overlay dependencies, and swap topology |
+| `test-preflight-gate.sh` | Mocked preflight gate and failure propagation |
+| `test-native-storage-handle.sh` | Native helper compile/CLI behavior; no real block device is opened |
 
-The storage-plan test checks GPT bounds, 1 MiB alignment, 512-byte and 4Kn logical sectors, capacity rejection, RAM-plus-margin swap sizing, overflow, and decimal normalization. Prerequisite tests mock live collection and fail-closed paths. Confirmation tests cover exact confirmation, cancellation, modified plans, changed identity, and topology failure. The dry-run test checks the eight-step operation manifest, gate binding, stale-plan rejection, one-shot gate consumption, and injected failure stop behavior. The mock execution-boundary test re-probes path/major:minor/capacity/stable-ID kind/value/WWN/serial/transport/removable/read-only attributes before every mock step, rejects target changes, failed probes, and tampered gate metadata, and records partial failure/recovery state. Neither test executes storage commands or closes real TOCTOU races.
+The suite does not run a complete installer transaction. The disposable loop test formats only its temporary loop-backed image; it is not a physical NVMe test. It is bounded utility-interface coverage only and must never be treated as a substitute for the required destructive full-SSD installation test on the actual X280. Fixture/static checks do not establish that the installer boots or that every target-device race is impossible.
 
-The installer entry point remains diagnostic-only and does not invoke storage selection or installation. Tests use fixtures/mocks and do not inspect or modify host disks. Storage discovery requires `lsblk`, `jq`, `swapon`, `readlink`, and `base64`.
+**Validation policy (REQ-INSTALL-006):** VM-based installer testing is explicitly out of scope and will not be performed. Keep automated coverage bounded to fixtures, mocks, static checks, and disposable loop-backed images. The destructive full-SSD replacement path must remain implemented; its end-to-end acceptance test is performed on the actual ThinkPad X280 only after the Stage 9 physical-test gate, recovery preparation, and explicit authorization. Loop-device tests are not substitutes for that physical test.
 
-Inventory tests use temporary procfs/sysfs-shaped fixtures; they do not inspect actual hardware or require root. The mocked preflight gate verifies inventory failure blocks preflight success and that no installation/destructive marker is invoked.
+## Persistent test evidence
 
-Initial and future test layers:
-- Bash syntax checks for all shell files.
-- ShellCheck and shfmt when available; neither is currently included in CI.
-- Unit tests with mocked commands for preflight, stage tracking, and error handling.
-- Storage tests using mocks and, later, disposable loop devices only in isolated environments; never target a real disk.
-- Integration tests in a disposable VM before any controlled ThinkPad X280 installation.
-- Hardware-only checks (Wi-Fi, audio, suspend, hibernate/resume, lid behavior) remain NOT TESTED until run on the actual device.
+Each run creates a unique `reports/test-runs/<UTC timestamp>/` directory containing:
+- `summary.md`: branch, commit, host/kernel metadata and per-test result.
+- `combined.log`: combined stdout/stderr and skip reasons.
+- `<test-name>.log`: individual test output.
 
-Never treat a successful syntax check or mocked test as proof that installation works.
+The runner does not automatically commit reports. Inspect logs and review them for host-specific or sensitive information before sharing or committing. Reports apply only to their recorded checkout and host snapshot.
 
-## Live Arch ISO / ThinkPad validation
+## Live Arch ISO / X280 validation
 
-From the repository root on the target machine, run:
+The broad read-only validation command is:
 
 ```bash
 bash scripts/live-validation.sh
 ```
 
-The script performs read-only host/boot/storage/network inventory, validates Bash syntax, runs ShellCheck and shfmt when installed, executes the canonical `bash tests/run.sh` suite, and records installer help/preflight output. Missing optional inventory/lint tools are recorded as SKIPPED; failures in syntax, available static checks, or the canonical suite make the script exit non-zero.
+It gathers host/boot/storage/network diagnostics, runs local quality checks when available, executes the canonical suite, and records output under `reports/live-validation/`. The report is local evidence, not automatically committed. It must be reviewed for sensitive details before sharing.
 
-Evidence is saved automatically under `reports/live-validation/`:
-- `YYYYMMDDTHHMMSSZ.md` — timestamped report; existing reports are never overwritten.
-- `latest.md` — convenience copy of the most recent report.
+The target-specific read-only storage validator is:
 
-Reports are local working-tree artifacts, not automatically committed or uploaded. Review them for sensitive environment details before sharing or committing. Keep timestamped reports as historical evidence and consult `latest.md` before repeating checks. A report applies only to its recorded checkout/commit and host snapshot; it does not prove installation works or authorize disk changes. Re-run after changing code, booting a different environment, changing hardware/storage state, or when fresh evidence is required.
+```bash
+bash scripts/validate-live-storage.sh
+```
 
-The script is non-destructive: it does not partition, format, mount, install packages, alter services, or change firmware. The installer preflight's non-zero exit is recorded as informational because installation remains intentionally disabled.
+It requires UEFI, matches the configured X280 internal SSD identity, discovers whole disks, and invokes the live topology validator. It performs no partitioning, formatting, encryption, mounting, or disk writes. A successful result is evidence only for that live snapshot; it is not authorization to erase a disk.
 
+The physical X280 validator has previously failed because the removable SD/MMC reader reported zero capacity. Discovery was changed to skip only numeric-zero whole-disk records with `RM=true`; zero-sized non-removable and unknown-size records remain fail-closed. The updated validator still requires a successful physical rerun after this fix.
 
-The native Stage 8 helper test compiles `native/storage-handle.c` with strict compiler warnings and checks help/argument rejection in a temporary directory. It does not open a block device; exclusive-open contention, descriptor ioctls, diskseq, descriptor lifetime, hot-unplug, and loop-device behavior remain NOT TESTED until isolated disposable-device tests are added.
+## Installer distinction
+
+- Top-level `installer --preflight`: read-only diagnostics only.
+- `scripts/install-arch-x280.sh` on PR #9: separate destructive initial Arch base installer. Its static test does not execute the script. The pinned-device integration test covers selected utility interfaces against a disposable loop image only.
+
+The destructive installer must not be run until the gate in [Stage 9 — Initial Interactive Arch Installer](../docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md) is satisfied. Its scope, boot contract, and limitations are documented in [Installation and Disk](../docs/04-INSTALLATION-AND-DISK.md). Current CI evidence and commit references are maintained only in [Implementation Status](../docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
+
+## Evidence interpretation
+
+- PASS means the listed test passed for the recorded commit and environment.
+- SKIP means an optional test dependency was unavailable; it is not a pass.
+- A passing fixture suite does not prove physical hardware behavior.
+- No VM installation/boot test is planned or required; the physical X280 destructive installation and first boot are the required end-to-end acceptance evidence.
+- A non-empty UKI file does not prove firmware boot, LUKS unlock, or root mount.
+- Physical installation, first boot, hibernation/resume, Wi-Fi, audio, suspend, and other hardware behavior remain NOT TESTED until observed on the actual X280.

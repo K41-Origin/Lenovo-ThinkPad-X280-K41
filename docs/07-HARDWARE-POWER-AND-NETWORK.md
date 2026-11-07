@@ -4,7 +4,7 @@
 The owner-reported Windows hardware baseline and evidence limitations are recorded in [X280 Hardware Baseline](13-X280-HARDWARE-BASELINE.md). Treat it as a planning reference, not runtime detection. Verify actual hardware from the Arch ISO/Linux system and discover Wi-Fi/Bluetooth devices before device-specific changes. Do not hard-code the baseline into installer behavior.
 
 ## Firmware and thermals
-Install official firmware only when required for detected hardware and basic functionality. Do not automatically install Intel microcode under the current decision; report recommendation. Use firmware/kernel thermal and fan control; no third-party fan controller. Monitor sensors only if supported and avoid undocumented tweaks.
+Install official firmware only when required for detected hardware and basic functionality. REQ-HW-006 owns the approved policy: report Intel microcode rather than install it automatically. **Known implementation deviation:** the current PR #9 target-configuration script installs `intel-ucode` automatically; this remains a policy-compliance blocker until code is changed or the decision is explicitly revised. Use firmware/kernel thermal and fan control; no third-party fan controller. Monitor sensors only if supported and avoid undocumented tweaks.
 
 ## Power policy
 Target a fixed Balanced profile without automatic AC/battery switching. Use power-profiles-daemon only if compatible. Avoid competing power managers and use one verified source of truth for suspend, hibernate, and lid actions.
@@ -23,3 +23,4 @@ Short-break target: suspend; longer-idle target: hibernate only when configured 
 - [ ] Wi-Fi/Bluetooth defaults match the plan.
 - [ ] No unsupported fan controller.
 - [ ] Power and hibernation claims have evidence.
+- [ ] Intel microcode is recommendation-only as required by REQ-HW-006.
