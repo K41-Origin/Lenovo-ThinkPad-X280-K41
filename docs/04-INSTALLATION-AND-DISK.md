@@ -86,7 +86,8 @@ The current installer does not provide a complete transactional rollback or auto
 Detailed test cases live in [11-TESTING-AND-ACCEPTANCE.md](11-TESTING-AND-ACCEPTANCE.md). Current state:
 - IMPLEMENTED: target discovery/validation, plan calculation/binding, confirmation/final revalidation, initial destructive installer, base bootstrap, target configuration, and initial UKI generation on PR #9.
 - TESTED (bounded): fixture/static tests and selected descriptor-pinned utilities against a disposable loop-backed image on the CI-tested commit.
-- NOT TESTED: successful physical live validator on X280 after its fix, complete VM installation, physical SSD installation, first boot, UKI unlock/root mount, recovery-key registration, and hibernation/resume.
+- NOT TESTED: successful physical live validator on X280 after its fix, physical SSD installation, first boot, UKI unlock/root mount, recovery-key registration, and hibernation/resume.
+- OUT OF SCOPE BY OWNER DECISION: VM-based installer testing. Disposable loop-image tests remain permitted for bounded utility-interface coverage; they do not replace the required real-laptop destructive test.
 - PLANNED: tested recovery/cleanup lifecycle, reusable storage executor boundary, resume-offset workflow, and subsequent desktop/hardware setup.
 
 A passing CI run or the presence of a UKI file is not authorization to erase a disk and is not proof of a successful boot.
