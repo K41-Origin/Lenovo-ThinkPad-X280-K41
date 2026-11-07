@@ -32,6 +32,8 @@ The test list is defined only in `tests/run.sh` (15 scripts at this revision). D
 
 The suite does not run a complete installer transaction. The disposable loop test formats only its temporary loop-backed image; it is not a physical NVMe test. Fixture/static checks do not establish that the installer boots or that every target-device race is impossible.
 
+**Validation policy (REQ-INSTALL-006):** VM-based installer testing is explicitly out of scope and will not be performed. Keep automated coverage bounded to fixtures, mocks, static checks, and disposable loop-backed images. The destructive full-SSD replacement path must remain implemented; its end-to-end acceptance test is performed on the actual ThinkPad X280 only after the Stage 9 physical-test gate, recovery preparation, and explicit authorization. Loop-device tests are not substitutes for that physical test.
+
 ## Persistent test evidence
 
 Each run creates a unique `reports/test-runs/<UTC timestamp>/` directory containing:
@@ -73,5 +75,6 @@ The destructive installer must not be run until the gate in [Stage 9 — Initial
 - PASS means the listed test passed for the recorded commit and environment.
 - SKIP means an optional test dependency was unavailable; it is not a pass.
 - A passing fixture suite does not prove physical hardware behavior.
+- No VM installation/boot test is planned or required; the physical X280 destructive installation and first boot are the required end-to-end acceptance evidence.
 - A non-empty UKI file does not prove firmware boot, LUKS unlock, or root mount.
 - Physical installation, first boot, hibernation/resume, Wi-Fi, audio, suspend, and other hardware behavior remain NOT TESTED until observed on the actual X280.
