@@ -35,6 +35,12 @@ for required in \
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
 done
 pass "installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
+grep -Fq "printf '%s\\\\n' 'default_uki=" "$SCRIPT" || fail "mkinitcpio preset entries must be newline-delimited"
+pass "mkinitcpio preset formatter uses real newline delimiters"
+if grep -Eq 'user non-root, locale, timezone, hostname, swapfile.*belum dijalankan|chroot manual untuk menyelesaikan konfigurasi' "$SCRIPT"; then
+  fail "installer completion message contradicts the target configuration stage"
+fi
+pass "installer completion message matches the configuration stage actually run"
 
 if grep -Eq 'swapoff[[:space:]]+-a|pacstrap[[:space:]]+-K[[:space:]]+/mnt' "$SCRIPT"; then
   fail "installer bypasses guarded base bootstrap or disables unrelated swap"
