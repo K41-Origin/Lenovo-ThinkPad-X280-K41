@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-07):** `main` contains the initial destructive X280 base installer at `scripts/install-arch-x280.sh`, target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
+> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and a reviewed Arch ISO bootstrap gate at `scripts/install-arch-x280.sh`, target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
 
 ## AI-assisted development
 
@@ -34,9 +34,9 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Intended workflow
 1. Boot the official Arch Linux ISO from USB.
-2. Connect to the network and run the documented bootstrap procedure from the ISO shell.
-3. Retrieve the repository's latest `main` branch using Git and display the resolved commit SHA.
-4. Review the resolved commit and all relevant shell code before executing any project code; stop if its source, integrity, or effects cannot be understood. See [manual bootstrap review](docs/03-ARCHITECTURE-AND-MODULES.md#bootstrap-and-source-policy).
+2. Connect to the network.
+3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
+4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, and requires an exact SHA-bound acknowledgement before launching the installer.
 5. Run read-only live validation and the canonical test suite; inspect their reports.
 6. For the PR #9 branch only, review `scripts/install-arch-x280.sh` and all sourced modules before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
 7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
@@ -61,6 +61,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 14. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
 15. [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
 16. [Current repository audit](docs/15-REPOSITORY-AUDIT.md)
+17. [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
