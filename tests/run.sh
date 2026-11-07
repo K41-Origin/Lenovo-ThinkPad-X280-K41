@@ -5,7 +5,7 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
-for dependency in bash jq python3; do
+for dependency in bash jq python3 cc; do
   if ! command -v "$dependency" >/dev/null 2>&1; then
     printf 'Missing test dependency: %s\n' "$dependency" >&2
     exit 2
@@ -24,6 +24,7 @@ tests=(
   tests/test-storage-execution-boundary.sh
   tests/test-storage-topology.sh
   tests/test-preflight-gate.sh
+  tests/test-native-storage-handle.sh
 )
 
 for test in "${tests[@]}"; do
