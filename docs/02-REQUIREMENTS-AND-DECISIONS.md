@@ -40,6 +40,7 @@ These decisions define the approved direction, not a finalized target-specific p
 - REQ-HW-003 — APPROVED: One compatible power-management approach.
 - REQ-HW-004 — APPROVED: Firmware/kernel thermal control; no third-party fan controller.
 - REQ-HW-005 — APPROVED: Suspend for short breaks and hibernate for longer idle, subject to safe verification.
+- REQ-HW-006 — APPROVED: Do not automatically install Intel microcode; report the recommendation and leave installation to an explicit user decision.
 
 ## Packages and optional components
 - REQ-PKG-001 — APPROVED: Weekly update checks and notifications only; no automatic installation.
