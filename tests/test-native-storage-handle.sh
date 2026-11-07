@@ -19,7 +19,7 @@ if "$tmp/storage-handle" /tmp/not-a-device >/dev/null 2>&1; then
 fi
 for invalid_path in '/dev/../../tmp/not-a-device' '/dev/disk/../sda' '/dev/.' '/dev/..'; do
   if "$tmp/storage-handle" "$invalid_path" >/dev/null 2>&1; then
-    printf 'FAIL: invalid path was accepted: %s\\n' "$invalid_path" >&2
+    printf 'FAIL: invalid path was accepted: %s\n' "$invalid_path" >&2
     exit 1
   fi
 done
