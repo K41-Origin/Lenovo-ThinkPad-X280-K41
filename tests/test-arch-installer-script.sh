@@ -27,6 +27,7 @@ for required in \
   "PRESETS=('default')" \
   'default_uki="/efi/EFI/Linux/arch-linux.efi"' \
   'default_cmdline="/etc/kernel/cmdline"' \
+  "printf '%s\\\\n' 'default_uki=\\\"/efi/EFI/Linux/arch-linux.efi\\\"' 'default_cmdline=\\\"/etc/kernel/cmdline\\\"'" \
   'HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)' \
   'rd.luks.name=${root_uuid}=cryptroot root=/dev/mapper/cryptroot rw' \
   '[[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]]' \
