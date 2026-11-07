@@ -331,3 +331,10 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Applied the repository's configured `shfmt -i 2` formatting to `tests/run.sh` based on the exact CI diff; the other two checked test files already matched the formatter.
 - Removed automatic `intel-ucode` installation from `scripts/configure-arch-x280.sh` to comply with approved REQ-HW-006. The target configuration test now asserts the report-only policy by ensuring the package-install command is absent.
 - CI validation is pending on the resulting branch; no physical X280 validation or destructive disk operation was performed.
+
+### 2026-11-07 — Reconcile installer SSD capacity with live X280 evidence
+- The successful read-only live-readiness report `reports/live-readiness/20261107T165046Z/summary.md` records the identified WDC PC SN730 as `256060514304` bytes.
+- The installer and hardware profile still expected `256052966400` bytes, so the destructive installer would reject the exact SSD that had just passed live identity/topology validation. This is a confirmed configuration mismatch, not a storage-topology failure.
+- Updated the profile, installer guard, and installer regression fixture to use the observed capacity. Model and stable serial checks remain required; no identity checks were relaxed.
+- Added an explicit report-only Intel microcode notice and a regression assertion that the target configuration does not invoke pacman/pacstrap to install `intel-ucode`; synchronized the stale hardware/Stage 9 documentation.
+- Validation is pending CI. No destructive operation or physical installation was performed.
