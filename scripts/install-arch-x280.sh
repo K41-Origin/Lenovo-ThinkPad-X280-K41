@@ -79,7 +79,7 @@ cleanup() {
   if [[ -n $installer_log_file ]]; then
     printf 'Finished (UTC): %s\nExit status: %s\nLast stage: %s\n' \
       "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$rc" "$current_stage"
-    printf 'Persistent diagnostic log: %s\n' "$installer_log_file"
+    printf 'Diagnostic log: %s\n' "$installer_log_file"
   fi
 }
 need_root
