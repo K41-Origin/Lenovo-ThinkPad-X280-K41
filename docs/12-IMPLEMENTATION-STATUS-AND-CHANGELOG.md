@@ -5,7 +5,17 @@
 - Repository head inspected: `main` at `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`.
 - GitHub Actions run #185 (`42349907205`) completed successfully on that exact commit. Bash syntax, ShellCheck, configured shfmt checks, and the canonical 12-script test suite passed.
 - Physical X280 observations from user-provided terminal photographs are documented in `docs/11-TESTING-AND-ACCEPTANCE.md` (Stages 8–9). They establish point-in-time raw system facts, not a successful run of the project's live validator.
-- `scripts/validate-live-storage.sh` has not yet been run on the physical laptop. Native block-device behavior remains NOT TESTED; no real storage executor or installer workflow exists.
+- `scripts/validate-live-storage.sh` has not yet been run on the physical laptop. The initial installer exists only on PR #9's feature branch; physical NVMe behavior and boot success remain NOT TESTED.
+
+## PR #9 branch delta — 2026-11-07
+
+The table below includes branch-only implementation not yet merged into main. The legacy top-level `installer` command remains diagnostic-only; the new destructive path is a separate explicit script.
+
+- `scripts/install-arch-x280.sh` performs the initial destructive installation path after X280 inventory and exact SSD identity checks, plan review, exact confirmation, and live revalidation.
+- The installer opens and retains whole-disk and partition block descriptors, then passes inherited `/proc/self/fd/N` paths to disk utilities. The disposable loop-device integration test verifies the procfs descriptor interface for the selected utilities and ESP mounting.
+- `scripts/configure-arch-x280.sh` configures the initial user, sudo, locale, timezone, Intel microcode, and swapfile inside the target.
+- The final target uses systemd-boot and a default mkinitcpio UKI with the LUKS UUID kernel command line.
+- CI run #94 passed syntax, ShellCheck, and 15 test scripts. This is automated/loop-device evidence only. No physical X280 SSD has been modified by maintainers and no successful physical boot is verified.
 
 ## Status
 
@@ -20,7 +30,7 @@
 | Documentation split | IMPLEMENTED | Domain documents are present on main. |
 | Single interactive architecture | IMPLEMENTED | Decision and module responsibilities documented in this branch. |
 | Diagnostic-only installer entry point | TESTED (mocked gate) | `installer --help` and `installer --preflight` are implemented; preflight now includes read-only host inventory and X280 profile comparison. Mocked gate covers inventory failure and keeps installation disabled; fixture test exercises the actual inventory adapter. Preflight always returns nonzero because installation is disabled. |
-| Planned module placeholders | PLANNED | Nine domain files under `lib/` contain comments only; no base-system, bootloader, user, desktop, hardware, package, security, validation, or reporting implementation exists in them. |
+| Remaining module placeholders | PLANNED | Desktop, hardware tuning, package/security policy, validation, and reporting modules remain incomplete; `lib/base-system.sh` is now implemented for the base bootstrap stage. |
 | Common logging helpers | TESTED | `lib/common.sh` provides argument-checked stderr logging. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file. |
 | Read-only preflight helpers | TESTED | `lib/preflight.sh` provides root-status, boot-mode, required-command, and network-link diagnostics. First-slice tests passed against a temporary local copy whose Git blob hash matched the committed file; no system changes are performed by these checks. |
 | Test plan and focused test harnesses | IMPLEMENTED | Fixture-based tests cover the currently implemented diagnostic and storage-planning slices. `tests/run.sh` is the canonical test entry point; CI and developer instructions use it. No end-to-end installer or hardware test is implied. |
@@ -32,14 +42,22 @@
 | Read-only GPT storage plan calculator | TESTED (fixture CI) | `lib/storage-plan.sh` calculates 1 MiB-aligned ESP/root sector boundaries from disk bytes and logical/physical sector sizes, reserves GPT metadata for 128 entries, and proposes RAM-plus-margin swap size with minimum root headroom. Geometry, capacity, overflow, and decimal-input fixtures pass CI. No disk commands are invoked. |
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
 | Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
-| Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #148 passed at audit baseline commit `719f537341b6d410ce2980144fee86237da01b42`. The gate binds path, major:minor, capacity, stable-ID kind/value, WWN, serial, transport, removable, and read-only attributes. It opens no device handle and does not close the real kernel TOCTOU window. |
+| Storage execution boundary module | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` remains a mock-only boundary and does not open devices. The separate PR #9 installer holds Bash whole-disk/partition descriptors and passes inherited `/proc/self/fd` paths to disk tools; that path is exercised against a disposable loop device, not physical NVMe. |
 | Native block-device handle acquisition (Stage 8 first slice) | IMPLEMENTED (read-only prototype) | `native/storage-handle.c` opens a supplied `/dev/<name>` read-only with exclusive/no-follow/close-on-exec flags, checks descriptor type and partition status, reads geometry/read-only state by ioctl, reports major:minor and optional diskseq, and retains the FD until stdin EOF. Compile/CLI checks pass in CI; real block-device behavior, stable-ID correlation, NVMe/removable validation, and end-to-end Bash lifecycle remain NOT TESTED / PLANNED. No storage write or installer integration exists. |
 | Repository audit | IMPLEMENTED (report only) | `docs/15-REPOSITORY-AUDIT.md` is the current 2026-11-07 repository audit. It records the 58-file tree, current CI evidence, physical observation boundary, documentation corrections, and remaining readiness gates. |
-| Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED (CI) | GitHub Actions run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the canonical test suite at `main` commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. This does not establish physical hardware behavior. |
+| Initial X280 Arch installer (PR #9 branch) | IMPLEMENTED; TESTED (CI fixtures + loop integration); NOT TESTED (hardware) | `scripts/install-arch-x280.sh` performs interactive X280/SSD identity checks, plan-bound confirmation, GPT/LUKS2/ext4/ESP creation, guarded base bootstrap, target user/locale/timezone/microcode/swapfile setup, and systemd-boot UKI generation. `scripts/configure-arch-x280.sh` is invoked inside arch-chroot. GitHub Actions run #94 passed syntax, ShellCheck, and all 15 tests including a disposable loop-device integration test. Physical NVMe/boot behavior is NOT TESTED. Caelestia/Hyprland/Quickshell, X280 tuning, resume, and BlackArch remain PLANNED. |
+| Static checks on main baseline | TESTED (CI) | GitHub Actions run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the canonical suite at main commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. |\n| Static checks on PR #9 head | TESTED (CI) | GitHub Actions run #94 (`42361056504`) passed Bash syntax for all shell files, ShellCheck on installer/config/test changes, and all 15 test scripts. The disposable loop test validated wipefs, sgdisk, partprobe, FAT formatting, LUKS2, ext4, and ESP mounting through inherited pinned descriptors. This is not physical X280 or boot validation. |
 | X280 raw Arch ISO observations | VERIFIED (limited, point-in-time) | User-provided terminal photographs document UEFI, live root, USB, NVMe identity/serial alias, partitions, visible mount tree, loop backing, and no active swap in captured snapshots. The project's live validator has not yet been run; installation and hibernation remain NOT TESTED. |
 
 ## Changelog
+
+### 2026-11-07 — Initial interactive X280 Arch installer and pinned-descriptor integration
+- Added `scripts/install-arch-x280.sh` with host inventory and exact verified SSD identity guards, plan-bound destructive confirmation, live prerequisite revalidation, GPT/ESP/Linux-LUKS partitioning, LUKS2/ext4/FAT32 formatting, guarded base bootstrap, and systemd-boot UKI setup.
+- Added retained whole-disk and partition block descriptors; disk utilities and ESP mounting receive inherited `/proc/self/fd` paths. A disposable loop-device integration test verified wipefs, sgdisk, partprobe, mkfs.fat, cryptsetup, mkfs.ext4, and ESP mount behavior through this interface.
+- Added `scripts/configure-arch-x280.sh` for interactive hostname/user/password/timezone/locale setup, Intel microcode, sudo wheel access, and the planned swapfile. Resume/hibernation remains disabled.
+- Added GitHub Actions validation and static installer/configuration tests. **TESTED:** run #94 (`42361056504`) passed Bash syntax, ShellCheck, and all 15 test scripts (0 failed, 0 skipped).
+- **NOT TESTED:** physical NVMe hot-unplug/controller behavior, full X280 installation, and successful boot. No physical disk was modified by maintainers. Caelestia/Hyprland/Quickshell, X280 tuning, resume, and optional BlackArch remain PLANNED.
+
 
 ### 2026-11-03 — Repository-wide structural and documentation audit
 - Audited the current `main` tree at baseline commit `719f537341b6d410ce2980144fee86237da01b42`: 51 tracked files, 17 Markdown files, 30 `.sh` files plus the `installer` Bash entry point, one GitHub Actions workflow, and one hardware profile.
