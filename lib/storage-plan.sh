@@ -161,7 +161,7 @@ storage::plan_bind_target() {
   _plan[profile_esp_type_guid]=c12a7328-f81f-11d2-ba4b-00a0c93ec93b
   _plan[profile_esp_filesystem]=vfat
   _plan[profile_esp_mountpoint]=/efi
-  _plan[profile_root_type_guid]=0fc63daf-8483-4772-8e79-3d69d8477de4
+  _plan[profile_root_type_guid]=ca7d7ccb-63ed-4c53-861c-1742536059cc
   _plan[profile_root_encryption]=luks2
   _plan[profile_root_filesystem]=ext4
   _plan[profile_root_mountpoint]=/
@@ -281,7 +281,7 @@ storage::plan_validate() {
   [[ ${_plan[profile_esp_size_bytes]-} == 1073741824 ]] || return 1
   [[ ${_plan[profile_esp_type_guid]-} == c12a7328-f81f-11d2-ba4b-00a0c93ec93b ]] || return 1
   [[ ${_plan[profile_esp_filesystem]-} == vfat && ${_plan[profile_esp_mountpoint]-} == /efi ]] || return 1
-  [[ ${_plan[profile_root_type_guid]-} == 0fc63daf-8483-4772-8e79-3d69d8477de4 ]] || return 1
+  [[ ${_plan[profile_root_type_guid]-} == ca7d7ccb-63ed-4c53-861c-1742536059cc ]] || return 1
   [[ ${_plan[profile_root_encryption]-} == luks2 && ${_plan[profile_root_filesystem]-} == ext4 ]] || return 1
   [[ ${_plan[profile_root_mountpoint]-} == / ]] || return 1
   [[ ${_plan[profile_swap_type]-} == swapfile && ${_plan[profile_swap_policy]-} == runtime_ram_plus_configured_margin ]] || return 1
