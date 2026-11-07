@@ -2,8 +2,8 @@
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/configure-arch-x280.sh"
-fail() { printf 'FAIL: %s\\n' "$1" >&2; exit 1; }
-pass() { printf 'PASS: %s\\n' "$1"; }
+fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
+pass() { printf 'PASS: %s\n' "$1"; }
 
 [[ -f $SCRIPT ]] || fail "target configuration script is missing"
 bash -n "$SCRIPT" || fail "target configuration script has a Bash syntax error"
@@ -29,4 +29,4 @@ if grep -Eiq 'password[[:space:]]*=[[:space:]]*[^[:space:]]+' "$SCRIPT"; then
   fail "script appears to embed a password"
 fi
 pass "no static password is embedded"
-printf '%s\\n' 'All target configuration script tests passed.'
+printf '%s\n' 'All target configuration script tests passed.'
