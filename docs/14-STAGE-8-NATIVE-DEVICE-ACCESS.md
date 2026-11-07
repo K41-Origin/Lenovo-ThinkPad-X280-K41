@@ -9,7 +9,7 @@
 
 This document is the canonical record for native block-device handle acquisition, identity, and lifetime. It extends the Stage 7 mock-only boundary and does not authorize writes to any disk.
 
-## Problem statement
+## Implemented first slice (read-only prototype)\n\n`native/storage-handle.c` is a narrow acquisition prototype. It accepts only a simple `/dev/<name>` path, opens it with `O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_EXCL | O_NONBLOCK`, verifies the opened object with `fstat`, rejects non-block objects and sysfs partitions, and queries capacity, logical/physical sector sizes, and read-only state through ioctls on the retained descriptor. It reports major/minor and diskseq (or JSON `null` when unavailable), then retains the descriptor until stdin reaches EOF. The helper has no command channel, invokes no subprocess, and contains no write operation.\n\nThis is not yet a complete target-acquisition contract: stable WWN/serial correlation, actual removable-state parsing, NVMe/internal-device enforcement, expected-plan comparison, protocol integration with Bash, and robust lifecycle supervision remain PLANNED. `O_EXCL` behavior and all block-device paths remain NOT TESTED on disposable devices. The helper is not called by the installer or storage boundary.\n\n## Problem statement
 
 Stage 7 rechecks a mock target snapshot before each mock callback. It does not hold a kernel block-device reference. A pathname can be rebound after a check and before a later pathname-based operation. Pathname rechecks therefore do not close the kernel time-of-check/time-of-use window.
 
