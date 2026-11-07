@@ -10,6 +10,8 @@ sys_root="${K41_FIRST_BOOT_SYS_ROOT:-/sys}"
 etc_root="${K41_FIRST_BOOT_ETC_ROOT:-/etc}"
 proc_root="${K41_FIRST_BOOT_PROC_ROOT:-/proc}"
 report_root="${K41_FIRST_BOOT_REPORT_ROOT:-$ROOT/reports/first-boot}"
+efi_root="${K41_FIRST_BOOT_ESP_ROOT:-/efi}"
+boot_root="${K41_FIRST_BOOT_BOOT_ROOT:-/boot}"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 started="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 branch="$(git branch --show-current 2>/dev/null || printf unknown)"
@@ -124,7 +126,7 @@ check_systemd_boot() {
 }
 check_uki() {
   local dir file count=0
-  for dir in /efi/EFI/Linux /boot/EFI/Linux; do
+  for dir in "$efi_root/EFI/Linux" "$boot_root/EFI/Linux"; do
     [[ -d $dir ]] || continue
     for file in "$dir"/*.efi; do
       [[ -f $file ]] || continue
@@ -213,7 +215,7 @@ capture_hardware() {
 capture_boot_status() {
   capture_optional 'systemd-boot status' "$boot_status" bootctl status --no-pager
   capture_optional 'EFI boot entries' "$boot_status" bootctl list --no-pager
-  capture_optional 'EFI UKI filenames' "$boot_status" bash -c 'for f in /efi/EFI/Linux/*.efi /boot/EFI/Linux/*.efi; do [[ -f $f ]] && basename "$f"; done'
+  capture_optional 'EFI UKI filenames' "$boot_status" bash -c 'for f in "$efi_root"/EFI/Linux/*.efi "$boot_root"/EFI/Linux/*.efi; do [[ -f $f ]] && basename "$f"; done'
   capture_optional 'Kernel command line (sensitive identifiers redacted)' "$boot_status" cat "$proc_root/cmdline"
 }
 capture_system_status() {
@@ -224,6 +226,7 @@ capture_system_status() {
   capture_optional 'EFI mount' "$system_status" findmnt -nro TARGET,SOURCE,FSTYPE /efi
   capture_optional 'NetworkManager state' "$system_status" nmcli -t -f STATE general
   capture_optional 'Active cryptroot mapping' "$system_status" cryptsetup status cryptroot
+  capture_optional 'Current boot error journal' "$diagnostics" journalctl -b -p err --no-pager -o short-iso
 }
 
 finalize_report() {
@@ -279,3 +282,4 @@ capture_boot_status
 capture_system_status
 capture_hardware
 printf '\nEvidence collection complete. Review all files before pushing.\n'
+(( failed == 0 )) || exit 1
