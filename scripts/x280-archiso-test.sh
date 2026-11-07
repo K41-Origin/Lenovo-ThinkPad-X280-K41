@@ -44,9 +44,15 @@ fail() {
 
 vendor="$(< /sys/class/dmi/id/sys_vendor)"
 product="$(< /sys/class/dmi/id/product_name)"
+product_version=''
+if [[ -r /sys/class/dmi/id/product_version ]]; then
+  product_version="$(< /sys/class/dmi/id/product_version)"
+fi
 [[ "$vendor" == *Lenovo* ]] || fail "unexpected system vendor: $vendor"
-[[ "$product" == *"ThinkPad X280"* ]] ||
-  fail "expected ThinkPad X280 DMI product; detected: $product"
+# Lenovo firmware may expose the MTM (for example, 20KESC2Y00) as
+# product_name and the marketing model as product_version.
+[[ "$product $product_version" == *"ThinkPad X280"* ]] ||
+  fail "expected ThinkPad X280 DMI identity; detected product_name='$product', product_version='$product_version'"
 
 for cmd in bash date lsblk findmnt swapon; do
   command -v "$cmd" >/dev/null 2>&1 || fail "missing required command: $cmd"
@@ -69,7 +75,7 @@ exec > >(tee -a "$report") 2>&1
 printf '%s\n' 'ThinkPad X280 — Arch ISO read-only storage test'
 printf 'Started (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 printf 'Repository: %s\n' "$ROOT"
-printf 'Vendor: %s\nProduct: %s\n' "$vendor" "$product"
+printf 'Vendor: %s\nProduct name: %s\nProduct version: %s\n' "$vendor" "$product" "$product_version"
 printf 'Kernel: %s\n' "$(uname -srmo)"
 printf 'UEFI: yes\n'
 printf '\n%s\n' '--- Block devices (read-only inventory) ---'
