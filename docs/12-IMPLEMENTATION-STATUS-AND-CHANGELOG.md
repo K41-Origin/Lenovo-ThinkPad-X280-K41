@@ -249,3 +249,11 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Updated testing/status records to cite CI run #185 at the exact `main` commit and to distinguish raw physical observations from execution of the project's live validator.
 - Preserved the X280 SSD model and serial in the hardware validation path because they are deliberate target-specific identity evidence for this single-laptop project. The repository is currently public; publication of a device-unique serial is an explicit exposure trade-off, not a claim that it is non-sensitive.
 - No installer, storage, native helper, hardware profile, or destructive behavior was changed in this documentation synchronization.
+
+### 2026-11-07 — Live storage discovery: zero-capacity removable reader
+- Fixed `storage::discover_candidates` to skip a whole-disk record only when its capacity is explicitly numeric zero and `RM=true`. Zero-capacity non-removable disks and missing/invalid sizes remain fatal; the target validation rules are unchanged.
+- Added discovery fixtures for zero-capacity removable readers, zero-capacity non-removable disks, and unknown sizes. Reset the output associative array between repeated discovery calls so the fixtures exercise the intended code paths.
+- Moved the original failed X280 Arch ISO report from the malformed top-level path ` reports` to `reports/x280-archiso-storage-test-20261107T082432Z.log`; the report contents were preserved.
+- Recorded the observed failure and explicit follow-up validation status in `docs/11-TESTING-AND-ACCEPTANCE.md`.
+- **TESTED:** GitHub Actions run #191 (`42356761102`) passed on commit `6e784d08927996b7bb9af3c144e9fd3dbc5555ac`, including Bash syntax, ShellCheck, configured shfmt, and all 12 repository test scripts. The added fixtures explicitly passed for zero-capacity removable skip, zero-capacity non-removable rejection, and unknown-size rejection. The physical X280 validator remains pending; the fix has not yet been verified on the laptop.
+- No disk-writing operation, package installation, or hardware configuration change was performed.

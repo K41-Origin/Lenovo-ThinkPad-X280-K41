@@ -299,3 +299,15 @@ The script requires UEFI boot and the expected X280 internal SSD identity (model
 - **Project live validator NOT TESTED on hardware:** `scripts/validate-live-storage.sh` has not yet been run on the laptop. In particular, its complete programmatic mount/sysfs/loop/swap dependency walk has not been evidenced on the X280.
 - **Native helper NOT TESTED on a real block device:** CI validates compilation and CLI behavior; exclusive-open behavior, ioctl behavior, hot-unplug, and descriptor lifecycle against disposable/physical block devices remain outstanding.
 - **Destructive execution NOT IMPLEMENTED:** no partitioning, formatting, LUKS operation, filesystem creation, mounting, or real executor is available or authorized by these tests.
+
+## 2026-11-07 — Physical Arch ISO live-validator attempt
+
+The first run of `scripts/x280-archiso-test.sh` on the physical X280 passed the Arch ISO, UEFI, Lenovo vendor, and ThinkPad X280 DMI checks. The raw inventory showed the internal NVMe and Windows partitions, the installer USB, and an SD/MMC reader reported as a removable whole disk with zero capacity. No active swap was listed.
+
+The project validator then failed during `storage::discover_candidates` with `jq: invalid size`. The failure was traced to treating every whole-disk record with a zero capacity as a fatal discovery error. The SD/MMC reader is not a usable storage candidate, but its presence should not prevent discovery of the actual SSD.
+
+The follow-up change now skips **only** a whole-disk record where `lsblk` reports a numeric size of zero and `RM=true`. A zero-sized non-removable disk, negative/unknown/non-numeric size, or unknown removable state remains a fail-closed error. Regression fixtures cover the removable-zero case, non-removable-zero rejection, and unknown-size rejection.
+
+The original report is stored at `reports/x280-archiso-storage-test-20261107T082432Z.log`. It is preserved as evidence of the failed attempt; it is not rewritten to imply success.
+
+**Validation status:** GitHub Actions run #191 (`42356761102`) passed on commit `6e784d08927996b7bb9af3c144e9fd3dbc5555ac`: Bash syntax, ShellCheck, configured shfmt, and all 12 repository test scripts passed, including the new zero-capacity fixtures. The physical X280 validator has **not** yet been rerun after the fix. No disk mutation was performed or authorized.

@@ -50,12 +50,19 @@ storage::discover_candidates() {
     path="$(jq -er '.name | strings | select(length > 0)' <<<"$object")" || return 1
     major_minor="$(jq -er '.["maj:min"] | strings | select(test("^[0-9]+:[0-9]+$"))' <<<"$object")" || return 1
     type="$(jq -er '.type | strings | select(length > 0)' <<<"$object")" || return 1
-    size="$(jq -er 'if (.size|type) == "number" and .size > 0 then (.size|tostring) else error("invalid size") end' <<<"$object")" || return 1
+    removable="$(jq -er 'if .rm == true then "true" elif .rm == false then "false" else error("unknown removable state") end' <<<"$object")" || return 1
+    size="$(jq -er 'if (.size|type) == "number" and .size >= 0 then (.size|tostring) else error("invalid size") end' <<<"$object")" || return 1
+    # Some card readers enumerate as removable whole disks with zero capacity.
+    # They are not usable storage candidates; skip only this explicit case.
+    # A zero-sized non-removable disk or an unknown/invalid size remains fatal.
+    if [[ "$size" == 0 ]]; then
+      [[ "$removable" == true ]] || return 1
+      continue
+    fi
     model="$(jq -r '.model // "" | strings' <<<"$object")" || return 1
     transport="$(jq -r '.tran // "" | strings' <<<"$object")" || return 1
     wwn="$(jq -r '.wwn // "" | strings' <<<"$object")" || return 1
     serial="$(jq -r '.serial // "" | strings' <<<"$object")" || return 1
-    removable="$(jq -er 'if .rm == true then "true" elif .rm == false then "false" else error("unknown removable state") end' <<<"$object")" || return 1
     read_only="$(jq -er 'if .ro == true then "true" elif .ro == false then "false" else error("unknown read-only state") end' <<<"$object")" || return 1
     mounted="$(jq -er 'if .mounted == true then "yes" elif .mounted == false then "no" else error("unknown mount state") end' <<<"$object")" || return 1
     [[ "$path" == /dev/* && "$type" == disk && "$size" =~ ^[0-9]+$ ]] || return 1

@@ -54,6 +54,54 @@ storage::discover_candidates found || { echo 'FAIL: discovery'; exit 1; }
 [[ ${found[1.removable]} == true ]]
 echo 'PASS: discovers disks and records identity and safety facts'
 
+# A removable SD/MMC reader may enumerate with zero capacity. Skip it rather
+# than aborting discovery or treating it as an installable candidate.
+python3 - "$K41_LSBLK_FIXTURE" <<'PY'
+import json,sys
+p=sys.argv[1]
+with open(p) as f: d=json.load(f)
+d["blockdevices"].append({
+    "name":"/dev/sdb","maj:min":"8:16","type":"disk","size":0,
+    "model":"SD/MMC","tran":"usb","wwn":None,"serial":"READER001",
+    "rm":True,"ro":False,"mountpoints":[None],"children":[]
+})
+with open(p,"w") as f: json.dump(d,f)
+PY
+found=()
+storage::discover_candidates found || { echo 'FAIL: zero-capacity removable reader aborted discovery'; exit 1; }
+[[ ${found[candidate_count]} == 2 ]]
+echo 'PASS: skips zero-capacity removable reader without exposing it as a candidate'
+
+# A zero-capacity non-removable disk is ambiguous and must fail closed.
+python3 - "$K41_LSBLK_FIXTURE" <<'PY'
+import json,sys
+p=sys.argv[1]
+with open(p) as f: d=json.load(f)
+d["blockdevices"].append({
+    "name":"/dev/nvme1n1","maj:min":"259:16","type":"disk","size":0,
+    "model":"Unknown","tran":"nvme","wwn":"eui.zero","serial":"ZERO001",
+    "rm":False,"ro":False,"mountpoints":[None],"children":[]
+})
+with open(p,"w") as f: json.dump(d,f)
+PY
+found=()
+if storage::discover_candidates found; then echo 'FAIL: zero-capacity non-removable disk accepted'; exit 1; fi
+echo 'PASS: rejects zero-capacity non-removable disk'
+write_safe_fixture
+
+# Missing/invalid size remains a discovery error even for removable devices.
+python3 - "$K41_LSBLK_FIXTURE" <<'PY'
+import json,sys
+p=sys.argv[1]
+with open(p) as f: d=json.load(f)
+d["blockdevices"][1]["size"]=None
+with open(p,"w") as f: json.dump(d,f)
+PY
+found=()
+if storage::discover_candidates found; then echo 'FAIL: unknown disk size accepted'; exit 1; fi
+echo 'PASS: rejects unknown disk size'
+write_safe_fixture
+
 declare -A target=([device_path]=/dev/nvme0n1 [size_bytes]=256000000000 [wwn]=eui.001 [serial]=SN001)
 storage::validate_target target || { echo 'FAIL: valid internal NVMe rejected'; exit 1; }
 echo 'PASS: accepts unchanged internal NVMe with matching WWN and serial and invokes topology validation'
@@ -92,6 +140,7 @@ d=json.load(open(p))
 d["blockdevices"].append(dict(d["blockdevices"][0], name="/dev/nvme1n1"))
 json.dump(d,open(p,"w"))
 PY
+found=()
 if storage::discover_candidates found; then echo 'FAIL: duplicate WWN accepted'; exit 1; fi
 echo 'PASS: rejects duplicate WWN'
 write_safe_fixture
@@ -108,14 +157,17 @@ p=sys.argv[1]
 d=json.load(open(p)); del d["blockdevices"][0]["rm"]
 json.dump(d,open(p,"w"))
 PY
+found=()
 if storage::discover_candidates found; then echo 'FAIL: unknown removable state accepted'; exit 1; fi
 echo 'PASS: rejects unknown safety state'
 write_safe_fixture
 export K41_SWAPON_FAIL=1
+found=()
 if storage::discover_candidates found; then echo 'FAIL: swapon failure accepted'; exit 1; fi
 unset K41_SWAPON_FAIL
 echo 'PASS: fails closed when swap discovery fails'
 export K41_LSBLK_FAIL=1
+found=()
 if storage::discover_candidates found; then echo 'FAIL: lsblk failure accepted'; exit 1; fi
 unset K41_LSBLK_FAIL
 echo 'PASS: fails closed when lsblk fails'
