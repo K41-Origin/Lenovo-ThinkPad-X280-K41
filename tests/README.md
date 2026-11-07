@@ -1,6 +1,6 @@
 # Tests
 
-The repository currently has fifteen test scripts covering common/preflight behavior, installer entry handling, the X280 Arch installer, target-configuration, and post-install configuration static safety contracts, host inventory, storage discovery/topology, storage-plan arithmetic, live prerequisite collection, explicit confirmation/final revalidation, the storage dry-run model, the mock-only execution boundary, and descriptor-pinned disk-tool integration on a disposable loop device. These tests do not constitute end-to-end installation or real-hardware validation. The topology fixture now allocates synthetic major:minor IDs separately from the host temporary-filesystem ID to avoid environment-dependent collisions.
+The canonical runner currently lists fifteen test scripts covering common/preflight behavior, installer entry handling, the X280 Arch installer, target-configuration, and post-install configuration static safety contracts, host inventory, storage discovery/topology, storage-plan arithmetic, live prerequisite collection, explicit confirmation/final revalidation, the storage dry-run model, the mock-only execution boundary, and descriptor-pinned disk-tool integration on a disposable loop device. These tests do not constitute end-to-end installation or real-hardware validation. The topology fixture now allocates synthetic major:minor IDs separately from the host temporary-filesystem ID to avoid environment-dependent collisions.
 
 Run the complete test suite from the repository root:
 
@@ -21,7 +21,7 @@ Inventory tests use temporary procfs/sysfs-shaped fixtures; they do not inspect 
 
 Initial and future test layers:
 - Bash syntax checks for all shell files.
-- ShellCheck runs in GitHub Actions for the installer/configuration scripts; shfmt runs in live-validation when installed and is not currently part of CI.
+- ShellCheck runs in GitHub Actions for the installer/configuration scripts; shfmt is part of the current CI workflow where configured; consult the workflow and the run record for the exact commit tested.
 - Unit tests with mocked commands for preflight, stage tracking, and error handling.
 - Storage tests use mocks; the descriptor-pinned tool integration uses only a disposable loop-backed image in CI. It never targets a physical disk.
 - Integration tests in a disposable VM before any controlled ThinkPad X280 installation.
@@ -45,7 +45,7 @@ Evidence is saved automatically under `reports/live-validation/`:
 
 Reports are local working-tree artifacts, not automatically committed or uploaded. Review them for sensitive environment details before sharing or committing. Keep timestamped reports as historical evidence and consult `latest.md` before repeating checks. A report applies only to its recorded checkout/commit and host snapshot; it does not prove installation works or authorize disk changes. Re-run after changing code, booting a different environment, changing hardware/storage state, or when fresh evidence is required.
 
-The script is non-destructive: it does not partition, format, mount, install packages, alter services, or change firmware. The installer preflight's non-zero exit is recorded as informational because installation remains intentionally disabled.
+The script is non-destructive: it does not partition, format, mount, install packages, alter services, or change firmware. The legacy installer preflight's non-zero exit is recorded as informational because that entry point remains diagnostic-only; it is separate from the PR #9 destructive script.
 
 
 The native Stage 8 helper test compiles `native/storage-handle.c` with strict compiler warnings and checks help/argument rejection in a temporary directory. The native C helper test itself does not open a block device; its exclusive-open contention, descriptor ioctls, diskseq, and hot-unplug behavior remain NOT TESTED. A separate Bash descriptor-pinned integration test does exercise the external utility interface on a disposable loop device.
@@ -64,9 +64,9 @@ The broader `scripts/live-validation.sh` also creates timestamped host-validatio
 
 ## Initial X280 Arch installer
 
-The initial destructive installer is `scripts/install-arch-x280.sh`. It must be run only from the official Arch ISO in UEFI mode, as root, after reviewing the exact SSD identity and backing up all data. It requires the host inventory to match the ThinkPad X280 profile and requires the selected disk to match the verified WDC PC SN730 model, capacity, and serial. The script requires an exact plan-bound confirmation before the first write. It creates GPT, a 1 GiB EFI System Partition, a LUKS2 root partition, ext4 root, installs the minimal Arch base, generates UUID-based fstab, and configures a systemd-boot UKI.
+The initial destructive installer on PR #9 is `scripts/install-arch-x280.sh`. It is NOT approved for physical execution until the gate in `docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md` is satisfied. It is intended to run only from the official Arch ISO in UEFI mode, as root, after reviewing the exact SSD identity and backing up all data. It requires the host inventory to match the ThinkPad X280 profile and requires the selected disk to match the verified WDC PC SN730 model, capacity, and serial. The script requires an exact plan-bound confirmation before the first write. It creates GPT, a 1 GiB EFI System Partition, a LUKS2 root partition, ext4 root, installs the minimal Arch base, generates UUID-based fstab, and configures a systemd-boot UKI.
 
-The installer invokes `scripts/configure-arch-x280.sh` inside `arch-chroot` to configure a regular user/password, sudo wheel access, locale, timezone, hostname, Intel microcode, and the planned ext4 swapfile. It does not configure hibernation/resume, Caelestia/Hyprland/Quickshell, X280 power/thermal tuning, or BlackArch. It preserves unrelated live-ISO swap. Disk and partition descriptors are retained by Bash and passed to destructive utilities through inherited `/proc/self/fd/N` paths; a separate loop-device test validates these utility interfaces on a temporary image. Physical NVMe hot-unplug/controller behavior and successful boot remain unverified. Do not use the installer on irreplaceable data or regard its first run as routine deployment.
+The installer invokes `scripts/configure-arch-x280.sh` inside `arch-chroot` to configure a regular user/password, sudo wheel access, locale, timezone, hostname, Intel microcode, and the planned ext4 swapfile. It does not configure hibernation/resume, Caelestia/Hyprland/Quickshell, X280 power/thermal tuning, or BlackArch. It preserves unrelated live-ISO swap. Disk and partition descriptors are retained by Bash and passed to selected utilities through inherited `/proc/self/fd/N` paths; the loop-device test validates selected interfaces on a temporary image, not all races or physical NVMe behavior. The separate native C helper is not integrated. Physical NVMe hot-unplug/controller behavior and successful boot remain unverified. Do not use the installer on irreplaceable data or regard its first run as routine deployment.
 
 
 The target configuration stage `scripts/configure-arch-x280.sh` runs inside the installed system through `arch-chroot`. It interactively configures hostname, initial administrator username/password, timezone, locale, Intel microcode, sudo wheel access, and the planned swapfile. Password input is interactive and is not written to the report. Resume/hibernation is deliberately not enabled because the swapfile resume offset has not yet been derived and verified.
