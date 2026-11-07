@@ -91,6 +91,11 @@ storage::plan_confirm_interactive() {
 
 # A successful return means only that confirmation and fresh read-only
 # prerequisites match. This function does not execute any disk operation.
+storage::final_revalidate_fail() {
+  printf 'storage: final revalidation failed at stage: %s\n' "$1" >&2
+  return 1
+}
+
 storage::plan_final_revalidate() {
   [[ $# -eq 5 ]] || return 2
   local plan_name=$1 confirmation_name=$2 target_name=$3 prereq_name=$4 gate_name=$5
@@ -103,33 +108,33 @@ storage::plan_final_revalidate() {
   local -n _confirmation="$confirmation_name" _target_out="$target_name"
   local -n _prereq_out="$prereq_name" _gate_out="$gate_name"
   (( ${#_target_out[@]} == 0 && ${#_prereq_out[@]} == 0 && ${#_gate_out[@]} == 0 )) || return 2
-  [[ ${_confirmation[state]-} == confirmed ]] || return 1
+  [[ ${_confirmation[state]-} == confirmed ]] || { storage::final_revalidate_fail confirmation_state; return 1; }
 
   # Consume before checks: failures require a new review and confirmation.
   _confirmation[state]=consumed
-  storage::plan_validate "$plan_name" || return 1
+  storage::plan_validate "$plan_name" || { storage::final_revalidate_fail reviewed_plan_validation; return 1; }
 
   local -n _final_plan="$plan_name"
   local digest
-  digest=$(storage::plan_review_digest "$plan_name") || return 1
-  [[ $digest == "${_confirmation[review_digest]-}" ]] || return 1
-  [[ ${_final_plan[target_device_path]} == "${_confirmation[target_device_path]-}" ]] || return 1
-  [[ ${_final_plan[target_major_minor]} == "${_confirmation[target_major_minor]-}" ]] || return 1
-  [[ ${_final_plan[target_size_bytes]} == "${_confirmation[target_size_bytes]-}" ]] || return 1
-  [[ ${_final_plan[target_stable_id_kind]} == "${_confirmation[target_stable_id_kind]-}" ]] || return 1
-  [[ ${_final_plan[target_stable_id]} == "${_confirmation[target_stable_id]-}" ]] || return 1
+  digest=$(storage::plan_review_digest "$plan_name") || { storage::final_revalidate_fail reviewed_plan_digest; return 1; }
+  [[ $digest == "${_confirmation[review_digest]-}" ]] || { storage::final_revalidate_fail reviewed_plan_digest_mismatch; return 1; }
+  [[ ${_final_plan[target_device_path]} == "${_confirmation[target_device_path]-}" ]] || { storage::final_revalidate_fail confirmed_target_path_mismatch; return 1; }
+  [[ ${_final_plan[target_major_minor]} == "${_confirmation[target_major_minor]-}" ]] || { storage::final_revalidate_fail confirmed_target_device_id_mismatch; return 1; }
+  [[ ${_final_plan[target_size_bytes]} == "${_confirmation[target_size_bytes]-}" ]] || { storage::final_revalidate_fail confirmed_target_capacity_mismatch; return 1; }
+  [[ ${_final_plan[target_stable_id_kind]} == "${_confirmation[target_stable_id_kind]-}" ]] || { storage::final_revalidate_fail confirmed_target_identity_kind_mismatch; return 1; }
+  [[ ${_final_plan[target_stable_id]} == "${_confirmation[target_stable_id]-}" ]] || { storage::final_revalidate_fail confirmed_target_identity_mismatch; return 1; }
 
-  storage::plan_collect_live_prerequisites "$plan_name" "$target_name" "$prereq_name" || return 1
-  storage::plan_validate "$plan_name" || return 1
+  storage::plan_collect_live_prerequisites "$plan_name" "$target_name" "$prereq_name" || { storage::final_revalidate_fail live_prerequisites; return 1; }
+  storage::plan_validate "$plan_name" || { storage::final_revalidate_fail refreshed_plan_validation; return 1; }
   local fresh_digest
-  fresh_digest=$(storage::plan_review_digest "$plan_name") || return 1
-  [[ $fresh_digest == "${_confirmation[review_digest]}" ]] || return 1
-  [[ ${_target_out[device_path]-} == "${_confirmation[target_device_path]}" ]] || return 1
-  [[ ${_target_out[major_minor]-} == "${_confirmation[target_major_minor]}" ]] || return 1
-  [[ ${_target_out[size_bytes]-} == "${_confirmation[target_size_bytes]}" ]] || return 1
-  [[ ${_target_out[stable_id_kind]-} == "${_confirmation[target_stable_id_kind]}" ]] || return 1
-  [[ ${_target_out[stable_id]-} == "${_confirmation[target_stable_id]}" ]] || return 1
-  [[ -n ${_prereq_out[evidence_id]-} ]] || return 1
+  fresh_digest=$(storage::plan_review_digest "$plan_name") || { storage::final_revalidate_fail refreshed_plan_digest; return 1; }
+  [[ $fresh_digest == "${_confirmation[review_digest]}" ]] || { storage::final_revalidate_fail refreshed_plan_digest_mismatch; return 1; }
+  [[ ${_target_out[device_path]-} == "${_confirmation[target_device_path]}" ]] || { storage::final_revalidate_fail refreshed_target_path_mismatch; return 1; }
+  [[ ${_target_out[major_minor]-} == "${_confirmation[target_major_minor]}" ]] || { storage::final_revalidate_fail refreshed_target_device_id_mismatch; return 1; }
+  [[ ${_target_out[size_bytes]-} == "${_confirmation[target_size_bytes]}" ]] || { storage::final_revalidate_fail refreshed_target_capacity_mismatch; return 1; }
+  [[ ${_target_out[stable_id_kind]-} == "${_confirmation[target_stable_id_kind]}" ]] || { storage::final_revalidate_fail refreshed_target_identity_kind_mismatch; return 1; }
+  [[ ${_target_out[stable_id]-} == "${_confirmation[target_stable_id]}" ]] || { storage::final_revalidate_fail refreshed_target_identity_mismatch; return 1; }
+  [[ -n ${_prereq_out[evidence_id]-} ]] || { storage::final_revalidate_fail prerequisite_evidence_missing; return 1; }
 
   _gate_out=()
   _gate_out[state]=ready
