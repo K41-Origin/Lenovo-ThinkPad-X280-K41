@@ -132,14 +132,14 @@ storage::validate_target() {
     [[ -n ${_target[$required]-} ]] || return 2
   done
   [[ -n ${_target[wwn]-} || -n ${_target[serial]-} ]] || {
-    printf 'storage: target revalidation failed: no stable WWN or serial was supplied.\\n' >&2
+    printf 'storage: target revalidation failed: no stable WWN or serial was supplied.\n' >&2
     return 1
   }
   [[ ${_target[device_path]} == /dev/* && ${_target[size_bytes]} =~ ^[0-9]+$ ]] || return 2
 
   local -A current=()
   storage::discover_candidates current || {
-    printf 'storage: target revalidation failed: fresh disk discovery failed.\\n' >&2
+    printf 'storage: target revalidation failed: fresh disk discovery failed.\n' >&2
     return 1
   }
   local i found=0
@@ -147,50 +147,50 @@ storage::validate_target() {
     [[ ${current[$i.device_path]} == "${_target[device_path]}" ]] || continue
     found=1
     [[ ${current[$i.size_bytes]} == "${_target[size_bytes]}" ]] || {
-      printf 'storage: target revalidation failed: disk capacity changed.\\n' >&2
+      printf 'storage: target revalidation failed: disk capacity changed.\n' >&2
       return 1
     }
     [[ ${current[$i.removable]} == false && ${current[$i.read_only]} == false ]] || {
-      printf 'storage: target revalidation failed: target is removable or read-only.\\n' >&2
+      printf 'storage: target revalidation failed: target is removable or read-only.\n' >&2
       return 1
     }
     [[ ${current[$i.transport]} == nvme ]] || {
-      printf 'storage: target revalidation failed: target transport is not NVMe.\\n' >&2
+      printf 'storage: target revalidation failed: target transport is not NVMe.\n' >&2
       return 1
     }
     [[ ${current[$i.major_minor]} =~ ^[0-9]+:[0-9]+$ ]] || {
-      printf 'storage: target revalidation failed: kernel device identity is invalid.\\n' >&2
+      printf 'storage: target revalidation failed: kernel device identity is invalid.\n' >&2
       return 1
     }
     if [[ -n ${_target[major_minor]-} && ${current[$i.major_minor]} != "${_target[major_minor]}" ]]; then
-      printf 'storage: target revalidation failed: kernel major:minor identity changed.\\n' >&2
+      printf 'storage: target revalidation failed: kernel major:minor identity changed.\n' >&2
       return 1
     fi
     if ! storage::topology_check_target "${current[$i.major_minor]}" /sys /proc/self/mountinfo /proc/swaps; then
-      printf 'storage: target revalidation failed: live mount/swap/sysfs topology check rejected the disk (%s, %s).\\n' \
+      printf 'storage: target revalidation failed: live mount/swap/sysfs topology check rejected the disk (%s, %s).\n' \
         "${current[$i.device_path]}" "${current[$i.major_minor]}" >&2
       return 1
     fi
     [[ ${current[$i.has_mounted_descendant]} == no ]] || {
-      printf 'storage: target revalidation failed: target has a mounted descendant.\\n' >&2
+      printf 'storage: target revalidation failed: target has a mounted descendant.\n' >&2
       return 1
     }
     [[ ${current[$i.has_active_swap_descendant]} == no ]] || {
-      printf 'storage: target revalidation failed: target has an active swap descendant.\\n' >&2
+      printf 'storage: target revalidation failed: target has an active swap descendant.\n' >&2
       return 1
     }
     if [[ -n ${_target[wwn]-} && ${current[$i.wwn]} != "${_target[wwn]}" ]]; then
-      printf 'storage: target revalidation failed: stable WWN identity changed.\\n' >&2
+      printf 'storage: target revalidation failed: stable WWN identity changed.\n' >&2
       return 1
     fi
     if [[ -n ${_target[serial]-} && ${current[$i.serial]} != "${_target[serial]}" ]]; then
-      printf 'storage: target revalidation failed: stable serial identity changed.\\n' >&2
+      printf 'storage: target revalidation failed: stable serial identity changed.\n' >&2
       return 1
     fi
     return 0
   done
   if (( found == 0 )); then
-    printf 'storage: target revalidation failed: selected device path is no longer present.\\n' >&2
+    printf 'storage: target revalidation failed: selected device path is no longer present.\n' >&2
   fi
   return 1
 }
