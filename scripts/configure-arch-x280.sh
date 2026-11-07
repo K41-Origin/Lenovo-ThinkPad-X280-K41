@@ -3,8 +3,8 @@
 set -Eeuo pipefail
 umask 077
 
-die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
-info() { printf 'INFO: %s\\n' "$*" >&2; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*" >&2; }
 prompt() {
   local __result=$1 label=$2 default=$3 answer
   [[ -r /dev/tty && -w /dev/tty ]] || die "Interactive terminal is required."
@@ -40,10 +40,10 @@ pacman -S --needed --noconfirm intel-ucode
 info "Configuring locale, timezone, and hostname."
 sed -i -E "s/^[#[:space:]]*${locale}[[:space:]]+UTF-8/${locale} UTF-8/" /etc/locale.gen
 locale-gen
-printf 'LANG=%s\\n' "$locale" > /etc/locale.conf
+printf 'LANG=%s\n' "$locale" > /etc/locale.conf
 ln -sfn "/usr/share/zoneinfo/$timezone" /etc/localtime
 hwclock --systohc
-printf '%s\\n' "$hostname" > /etc/hostname
+printf '%s\n' "$hostname" > /etc/hostname
 cat > /etc/hosts <<EOF_HOSTS
 127.0.0.1 localhost
 ::1       localhost
@@ -53,7 +53,7 @@ EOF_HOSTS
 info "Creating the initial administrator account."
 useradd --create-home --groups wheel --shell /bin/bash "$username"
 visudo -cf /etc/sudoers >/dev/null
-printf '%s\\n' '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/10-k41-wheel
+printf '%s\n' '%wheel ALL=(ALL:ALL) ALL' > /etc/sudoers.d/10-k41-wheel
 chmod 0440 /etc/sudoers.d/10-k41-wheel
 visudo -cf /etc/sudoers.d/10-k41-wheel >/dev/null
 info "Set the password for $username (password input is not logged)."
@@ -69,7 +69,7 @@ mkswap "$swap_tmp"
 mv -- "$swap_tmp" /swapfile
 trap - EXIT
 if ! grep -qE '^[[:space:]]*/swapfile[[:space:]]' /etc/fstab; then
-  printf '%s\\n' '/swapfile none swap defaults 0 0' >> /etc/fstab
+  printf '%s\n' '/swapfile none swap defaults 0 0' >> /etc/fstab
 fi
 
 systemctl enable NetworkManager
