@@ -48,7 +48,8 @@ product_version=''
 if [[ -r /sys/class/dmi/id/product_version ]]; then
   product_version="$(< /sys/class/dmi/id/product_version)"
 fi
-[[ "$vendor" == *Lenovo* ]] || fail "unexpected system vendor: $vendor"
+vendor_lower="${vendor,,}"
+[[ "$vendor_lower" == *lenovo* ]] || fail "unexpected system vendor: $vendor"
 # Lenovo firmware may expose the MTM (for example, 20KESC2Y00) as
 # product_name and the marketing model as product_version.
 [[ "$product $product_version" == *"ThinkPad X280"* ]] ||
