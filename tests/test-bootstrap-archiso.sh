@@ -20,6 +20,7 @@ for required in \
   'scripts/install-arch-x280.sh' \
   'scripts/configure-arch-x280.sh' \
   'config/hardware/thinkpad-x280.conf' \
+  'scripts/bootstrap-archiso.sh' \
   'scripts/x280-install-readiness.sh' \
   'tests/helpers/storage-fixtures.sh' \
   'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \
