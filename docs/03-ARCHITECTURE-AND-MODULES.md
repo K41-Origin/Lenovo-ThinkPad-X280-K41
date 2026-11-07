@@ -15,7 +15,7 @@ The project charter in [01](01-PROJECT-CHARTER.md) owns status definitions. The 
 The repository contains two distinct entry paths:
 
 1. `installer` is the original diagnostic entry point. It supports `--help` and read-only `--preflight`; it does not install Arch.
-2. `scripts/install-arch-x280.sh` is a separate initial destructive installer on PR #9's feature branch. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. It is IMPLEMENTED, but physical installation and first boot are NOT TESTED.
+2. `scripts/bootstrap-archiso.sh` retrieves the latest `main` revision, displays its commit SHA, and gates launch on manual source review. `scripts/install-arch-x280.sh` is the initial destructive installer on `main`. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. It is IMPLEMENTED, but physical installation and first boot are NOT TESTED.
 
 Do not conflate these paths. The PR branch is not equivalent to merged/released code. See the status document for exact commit and CI evidence.
 
@@ -62,7 +62,7 @@ The Bash descriptor-pinned loop integration demonstrates that selected utilities
 
 The intended operator workflow retrieves a reviewed repository revision and displays its resolved commit SHA before executing project code. A commit SHA provides traceability, not proof of safety. Review the entry point, every sourced module, all invoked scripts, privilege transitions, remote-code behavior, package verification, and destructive paths. Never pipe remote scripts directly into a shell.
 
-The current PR #9 branch installer is a manually invoked script; it is not automatically launched by the Arch ISO and is not invoked by the top-level `installer --preflight`.
+The initial destructive installer is manually invoked through `scripts/bootstrap-archiso.sh`; it is not invoked by the top-level `installer --preflight`. The bootstrap's commit/source-review gate is documented in [16](16-ARCHISO-BOOTSTRAP.md).
 
 ## Failure and privilege rules
 
