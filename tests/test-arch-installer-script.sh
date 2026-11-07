@@ -24,6 +24,7 @@ for required in \
   'sgdisk --zap-all --clear' \
   'cryptsetup luksFormat --type luks2' \
   'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \
+  "PRESETS=('default')" \
   'default_uki="/efi/EFI/Linux/arch-linux.efi"' \
   'default_cmdline="/etc/kernel/cmdline"'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
