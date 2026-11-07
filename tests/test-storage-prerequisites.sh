@@ -11,6 +11,13 @@ source "$ROOT/lib/storage-prerequisites.sh"
 
 diagnostic_file="$(mktemp)"
 trap 'rm -f "$diagnostic_file"' EXIT
+test::on_error() {
+  local rc=$? line=$1
+  trap - ERR
+  printf 'FAIL: storage prerequisite test aborted at line %s (exit %s)\n' "$line" "$rc" >&2
+  exit "$rc"
+}
+trap 'test::on_error "$LINENO"' ERR
 
 preflight::check_commands() {
   [[ ${K41_TEST_TOOLS_FAIL:-0} == 0 ]]
