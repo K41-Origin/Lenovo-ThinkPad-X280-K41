@@ -5,7 +5,7 @@ script="$ROOT/scripts/resume-arch-x280.sh"
 [[ -s $script ]]
 bash -n "$script"
 # This recovery entry point must never repeat any destructive/bootstrap phase.
-if grep -Eq '^[[:space:]]*(run_step[[:space:]].*[[:space:]])?(wipefs|pacstrap|mkfs\\.fat|mkfs\\.ext4|cryptsetup[[:space:]]+luksFormat|sgdisk[[:space:]]+--zap-all)([[:space:]]|$)' "$script"; then
+if grep -Eq '^[[:space:]]*(run_step[[:space:]].*[[:space:]])?(wipefs|pacstrap|mkfs\.fat|mkfs\.ext4|cryptsetup[[:space:]]+luksFormat|sgdisk[[:space:]]+--zap-all)([[:space:]]|$)' "$script"; then
   printf 'FAIL: resume script contains a destructive/bootstrap command\\n' >&2
   exit 1
 fi
