@@ -39,3 +39,44 @@ The script is destructive. It must only be run from the Arch ISO after confirmin
 ## Automated checks
 
 `tests/test-arch-installer-script.sh` and `tests/test-arch-config-script.sh` perform `bash -n` and static checks for the X280 hardware guard, confirmation/revalidation ordering, LUKS2 setup, guarded base bootstrap, user/sudo configuration, swapfile setup, and UKI settings. `tests/test-pinned-device-path.sh` additionally runs disk tools against a temporary loop-backed image using inherited pinned descriptors; it never targets a physical disk. These tests do not prove bootability or physical NVMe hot-unplug behavior. The complete suite includes this test through `bash tests/run.sh`.
+
+
+## First physical X280 test
+
+1. Boot the official Arch ISO in UEFI mode, connect to the network, and ensure the target laptop is the ThinkPad X280 whose internal SSD identity is recorded in the project profile.
+2. Fetch this feature branch (PR #9), not main:
+
+```bash
+git clone --branch feature/base-system-bootstrap-2026-11-07 https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git
+cd Lenovo-ThinkPad-X280-K41
+```
+
+3. Ensure `jq` and `python3` are available, then run the complete test suite:
+
+```bash
+bash tests/run.sh
+```
+
+Do not proceed if any required test fails. The native C helper test may be SKIP if `cc` is unavailable; all other tests must pass. Inspect `reports/test-runs/<timestamp>/summary.md` and `combined.log`.
+
+4. Run the installer as root:
+
+```bash
+bash scripts/install-arch-x280.sh
+```
+
+The script is destructive. Confirm that the displayed target is the expected WDC PC SN730, 256052966400-byte SSD, and that its serial matches the verified value already present in the hardware profile. Do not continue if any identity field differs. The script will require the exact plan-bound confirmation phrase, a LUKS2 passphrase, and interactive hostname/user/timezone/locale/password inputs.
+
+5. Before reboot, verify that `/mnt/etc/fstab` exists, `/mnt/efi/EFI/Linux/arch-linux.efi` is non-empty, and the root/ESP mounts are correct. If any check fails, stop and capture the logs; do not reboot or rerun blindly.
+6. If all checks are correct, sync and cleanly unmount before reboot:
+
+```bash
+sync
+umount -R /mnt
+cryptsetup close cryptroot
+reboot
+```
+
+After the first boot, record whether the LUKS unlock prompt appears, whether the UKI starts, whether the root filesystem mounts, and whether the initial user can log in and use sudo. Run `bash scripts/live-validation.sh` from the installed system when practical. Preserve and review the generated reports, then push the test-run and live-validation report directories for analysis.
+
+Do not enable hibernation or proceed to desktop/hardware tuning during this first storage/base-system validation. Those are separate stages.
