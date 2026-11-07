@@ -7,6 +7,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
 tests=(
+  tests/test-x280-first-boot-check.sh
   tests/test-bootstrap-archiso.sh
   tests/test-common-preflight.sh
   tests/test-installer-entry.sh
