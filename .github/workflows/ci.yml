@@ -21,7 +21,7 @@ jobs:
       - name: Install validation dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install --yes jq shellcheck
+          sudo apt-get install --yes jq shellcheck gdisk parted cryptsetup dosfstools e2fsprogs
 
       - name: Validate Bash syntax
         shell: bash
