@@ -20,13 +20,15 @@ for required in \
   'scripts/install-arch-x280.sh' \
   'scripts/configure-arch-x280.sh' \
   'config/hardware/thinkpad-x280.conf' \
-  'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \\
-  'bash scripts/x280-install-readiness.sh' \\
-  'READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH' \\
+  'scripts/x280-install-readiness.sh' \
+  'tests/helpers/storage-fixtures.sh' \
+  'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \
+  'bash scripts/x280-install-readiness.sh' \
+  'READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH' \
   'exec bash "$repo_dir/scripts/install-arch-x280.sh"'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required bootstrap review/safety control is missing: $required"
 done
-pass "bootstrap pins and displays the fetched commit, verifies origin/clean checkout, reviews source, and requires exact acknowledgement"
+pass "bootstrap pins and displays the fetched commit, verifies origin/clean checkout, reviews source, runs live readiness, and requires two exact acknowledgements"
 
 if grep -Eq 'curl[^|]*\|[[:space:]]*(ba)?sh|wget[^|]*\|[[:space:]]*(ba)?sh' "$SCRIPT"; then
   fail "bootstrap pipes remote content directly into a shell"
