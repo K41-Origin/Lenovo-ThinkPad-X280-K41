@@ -60,7 +60,7 @@ for key in device_path major_minor size_bytes model transport removable read_onl
   target[$key]=${discovered[$selection.$key]}
 done
 [[ ${target[transport]} == nvme && ${target[removable]} == false && ${target[read_only]} == false ]] || die "Target bukan NVMe internal writable."
-[[ ${target[model]} == "WDC PC SN730" && ${target[size_bytes]} == 256052966400 ]] || die "Target tidak cocok dengan model dan kapasitas SSD X280 yang telah diverifikasi."
+[[ ${target[model]} == *"WDC PC SN730"* && ${target[size_bytes]} == 256052966400 && ${target[serial]} == 193839803177 ]] || die "Target tidak cocok dengan model, kapasitas, dan identitas SSD X280 yang telah diverifikasi."
 [[ ${target[stable_id_kind]} == wwn || ${target[stable_id_kind]} == serial ]] || die "Disk tidak memiliki identitas stabil WWN/serial."
 [[ ${discovered[$selection.has_mounted_descendant]} == no && ${discovered[$selection.has_active_swap_descendant]} == no ]] || die "Target memiliki mount atau swap aktif."
 
