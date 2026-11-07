@@ -25,7 +25,7 @@ reports/first-boot/<UTC timestamp>/
 └── hardware.txt
 ```
 
-All files are created with owner-only permissions (directory 0700, files 0600). The summary contains PASS/FAIL/SKIP counts and the result of each acceptance check. The collector returns exit code 1 when any acceptance check fails; the report is retained in that case. SKIP is not a pass, and the report may still need manual review.
+All files are created with owner-only permissions (directory 0700, files 0600). When run through sudo, the collector transfers the report directory and files to the invoking user's UID/GID so the report can be reviewed and committed without running Git as root. The summary contains PASS/FAIL/SKIP counts and the result of each acceptance check. The collector returns exit code 1 when any acceptance check fails; the report is retained in that case. SKIP is not a pass, and the report may still need manual review.
 
 ## Acceptance checks
 
