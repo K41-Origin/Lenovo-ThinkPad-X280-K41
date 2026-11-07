@@ -118,7 +118,7 @@ fi
 
 section "Static analysis"
 capture_optional "ShellCheck (severity error)" shellcheck shellcheck --severity=error "${shell_files[@]}"
-capture_optional "shfmt formatting check (runner and shared fixture helper)" shfmt shfmt -d -i 2 tests/run.sh tests/helpers/storage-fixtures.sh
+capture_optional "shfmt formatting check (runner and shared fixture helper)" shfmt shfmt -d -i 2 scripts/live-validation.sh tests/run.sh tests/helpers/storage-fixtures.sh
 
 section "Canonical repository test suite"
 capture "bash tests/run.sh" bash tests/run.sh
