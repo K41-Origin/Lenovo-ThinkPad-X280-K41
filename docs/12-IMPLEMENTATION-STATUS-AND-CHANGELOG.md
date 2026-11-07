@@ -396,3 +396,11 @@ Historical entries above that said validation was pending describe the state at 
 - The bootstrap does not perform disk operations; the installer retains its separate target-specific plan confirmation and final revalidation.
 - Added a static contract test and documented the Arch ISO bootstrap workflow. This test does not execute the bootstrap or installer.
 - **IMPLEMENTED:** bootstrap and static test source added on feature branch. **TESTED:** CI passed on commit `d7e239e9d67e352df8af3b54b3c10df6c6aacd5d` (runs `42395513751` and `42395513754`). **NOT TESTED:** bootstrap execution on a live Arch ISO, physical installation, and first boot.
+
+## Installer diagnostics — 2026-11-08 (feature branch)
+
+- **IMPLEMENTED on `fix/installer-diagnostics-2026-11-08`:** timestamped root-only installer stdout/stderr capture under `/var/log/x280-installer/`, with a volatile `/run` fallback, start/end metadata, stage markers, exit status, and last-stage reporting.
+- **IMPLEMENTED:** `lib/storage-confirmation.sh` and `lib/storage-prerequisites.sh` emit stage-specific, non-sensitive diagnostics when final confirmation/revalidation or live prerequisite checks fail. The installer log is initialized before host preflight and before any destructive operation; xtrace is not enabled.
+- **IMPLEMENTED:** regression tests assert the logger contract, initialization ordering, and representative validation failure-stage messages. Documentation describes log retrieval, volatility, permissions, privacy review, and stop conditions.
+- **Owner-reported trial context:** the physical installer stopped with “validasi final gagal”. In the current installer source, `wipefs` is ordered after successful `storage::plan_final_revalidate`; therefore that reported failure path should stop before the first destructive command. This is a source-order inference, not an independent inspection of the SSD.
+- **TESTED:** pending CI for this feature branch. No local test execution, new physical installer run, or disk operation is claimed by this change. The actual cause of the owner's previous failure remains unconfirmed until the new diagnostic output is reviewed.
