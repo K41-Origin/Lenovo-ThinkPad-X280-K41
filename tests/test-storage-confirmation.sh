@@ -10,6 +10,9 @@ source "$ROOT/lib/storage-plan.sh"
 source "$ROOT/lib/storage-prerequisites.sh"
 source "$ROOT/lib/storage-confirmation.sh"
 
+diagnostic_file="$(mktemp)"
+trap 'rm -f "$diagnostic_file"' EXIT
+
 K41_TEST_IDENTITY=eui.0011223344556677
 K41_TEST_TOPOLOGY_FAIL=0
 
@@ -86,9 +89,10 @@ digest=$(storage::plan_review_digest changed_plan)
 phrase="ERASE /dev/nvme0n1 ${digest:0:12}"
 storage::plan_confirm_interactive changed_plan changed_confirmation <<<"$phrase" >/dev/null 2>&1
 changed_plan[target_model]="Different disk"
-if storage::plan_final_revalidate changed_plan changed_confirmation changed_target changed_prereq changed_gate; then
+if storage::plan_final_revalidate changed_plan changed_confirmation changed_target changed_prereq changed_gate 2>"$diagnostic_file"; then
   echo 'FAIL: modified plan retained confirmation' >&2; exit 1
 fi
+grep -Fq 'stage: reviewed_plan_digest_mismatch' "$diagnostic_file"
 [[ ${changed_confirmation[state]} == consumed ]]
 [[ ${#changed_gate[@]} == 0 ]]
 echo 'PASS: modified plan invalidates confirmation and fails closed'
@@ -100,9 +104,10 @@ digest=$(storage::plan_review_digest identity_plan)
 phrase="ERASE /dev/nvme0n1 ${digest:0:12}"
 storage::plan_confirm_interactive identity_plan identity_confirmation <<<"$phrase" >/dev/null 2>&1
 K41_TEST_IDENTITY=DIFFERENT-WWN
-if storage::plan_final_revalidate identity_plan identity_confirmation identity_target identity_prereq identity_gate; then
+if storage::plan_final_revalidate identity_plan identity_confirmation identity_target identity_prereq identity_gate 2>"$diagnostic_file"; then
   echo 'FAIL: changed target identity passed final gate' >&2; exit 1
 fi
+grep -Fq 'stage: target_stable_identity_changed' "$diagnostic_file"
 [[ ${#identity_gate[@]} == 0 ]]
 echo 'PASS: changed target identity fails final revalidation'
 
@@ -113,8 +118,9 @@ digest=$(storage::plan_review_digest topology_plan)
 phrase="ERASE /dev/nvme0n1 ${digest:0:12}"
 storage::plan_confirm_interactive topology_plan topology_confirmation <<<"$phrase" >/dev/null 2>&1
 K41_TEST_TOPOLOGY_FAIL=1
-if storage::plan_final_revalidate topology_plan topology_confirmation topology_target topology_prereq topology_gate; then
+if storage::plan_final_revalidate topology_plan topology_confirmation topology_target topology_prereq topology_gate 2>"$diagnostic_file"; then
   echo 'FAIL: topology failure passed final gate' >&2; exit 1
 fi
+grep -Fq 'stage: target_topology_validation' "$diagnostic_file"
 [[ ${#topology_gate[@]} == 0 ]]
 echo 'PASS: topology failure leaves the final gate closed'
