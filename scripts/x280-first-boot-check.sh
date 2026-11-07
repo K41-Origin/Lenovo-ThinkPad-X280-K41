@@ -120,9 +120,12 @@ check_efi_mount() {
   [[ $target == /efi && $fstype == vfat ]] || return 1
 }
 check_systemd_boot() {
-  command -v bootctl >/dev/null 2>&1 || { printf 'bootctl is unavailable.\n'; return 2; }
-  bootctl status --no-pager || { printf 'systemd-boot status query failed.\n'; return 1; }
-  printf 'systemd-boot status query succeeded.\n'
+  command -v bootctl >/dev/null 2>&1 || { printf 'bootctl is unavailable.\\n'; return 2; }
+  local status
+  status="$(bootctl status --no-pager 2>&1)" || { printf '%s\\n' "$status"; printf 'systemd-boot status query failed.\\n'; return 1; }
+  printf '%s\\n' "$status"
+  grep -qi 'systemd-boot' <<<"$status" || { printf 'Current bootloader is not identified as systemd-boot.\\n'; return 1; }
+  printf 'systemd-boot identified as the current bootloader.\\n'
 }
 check_uki() {
   local dir file count=0
