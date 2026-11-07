@@ -89,7 +89,7 @@ section "Storage and mount topology (read-only)"
 capture_optional "Block-device inventory" lsblk lsblk -e7 -o NAME,PATH,TYPE,SIZE,MODEL,TRAN,RM,RO,FSTYPE,MOUNTPOINTS
 capture_optional "Filesystem mounts" findmnt findmnt
 capture_optional "Active swap" swapon swapon --show
-capture_optional "Kernel block-device inventory" ls find /sys/block -maxdepth 1 -mindepth 1 -printf '%f\n'
+capture_optional "Kernel block-device inventory" find find /sys/block -maxdepth 1 -mindepth 1 -printf '%f\n'
 
 section "Network diagnostics (no connectivity test)"
 capture_optional "Network link state" ip ip -brief link
