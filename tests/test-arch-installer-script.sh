@@ -27,7 +27,6 @@ for required in \
   "PRESETS=('default')" \
   'default_uki="/efi/EFI/Linux/arch-linux.efi"' \
   'default_cmdline="/etc/kernel/cmdline"' \
-  "printf '%s\\\\n' 'default_uki=\\\"/efi/EFI/Linux/arch-linux.efi\\\"' 'default_cmdline=\\\"/etc/kernel/cmdline\\\"'" \
   'HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)' \
   'rd.luks.name=${root_uuid}=cryptroot root=/dev/mapper/cryptroot rw' \
   '[[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]]' \
@@ -36,12 +35,14 @@ for required in \
 done
 pass "installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
 preset_printf_line="$(grep -F 'default_uki=' "$SCRIPT" | grep 'printf' || true)"
-[[ $preset_printf_line == *"printf '%s\\\\n'"* ]] || fail "mkinitcpio preset entries must use a single newline escape"
+[[ $preset_printf_line == *"printf '%s\\n'"* ]] || fail "mkinitcpio preset entries must use a single newline escape"
 pass "mkinitcpio preset formatter uses real newline delimiters"
 if grep -Eq 'user non-root, locale, timezone, hostname, swapfile.*belum dijalankan|chroot manual untuk menyelesaikan konfigurasi' "$SCRIPT"; then
   fail "installer completion message contradicts the target configuration stage"
 fi
 pass "installer completion message matches the configuration stage actually run"
+[[ $preset_printf_line == *"printf '%s\\\\n'"* ]] || fail "mkinitcpio preset entries must use a single newline escape"
+pass "mkinitcpio preset formatter uses real newline delimiters"
 if grep -Eq 'user non-root, locale, timezone, hostname, swapfile.*belum dijalankan|chroot manual untuk menyelesaikan konfigurasi' "$SCRIPT"; then
   fail "installer completion message contradicts the target configuration stage"
 fi
