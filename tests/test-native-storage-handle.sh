@@ -17,10 +17,12 @@ if "$tmp/storage-handle" /tmp/not-a-device >/dev/null 2>&1; then
   echo "FAIL: non-/dev path was accepted" >&2
   exit 1
 fi
-if "$tmp/storage-handle" '/dev/../../tmp/not-a-device' >/dev/null 2>&1; then
-  echo "FAIL: traversal path was accepted" >&2
-  exit 1
-fi
+for invalid_path in '/dev/../../tmp/not-a-device' '/dev/disk/../sda' '/dev/.' '/dev/..'; do
+  if "$tmp/storage-handle" "$invalid_path" >/dev/null 2>&1; then
+    printf 'FAIL: invalid path was accepted: %s\\n' "$invalid_path" >&2
+    exit 1
+  fi
+done
 if "$tmp/storage-handle" '/dev/name with spaces' >/dev/null 2>&1; then
   echo "FAIL: unsafe path characters were accepted" >&2
   exit 1
