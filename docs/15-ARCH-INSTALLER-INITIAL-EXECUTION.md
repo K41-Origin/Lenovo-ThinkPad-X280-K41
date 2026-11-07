@@ -17,7 +17,7 @@ Run from the official Arch ISO booted in UEFI mode. The script requires root and
 3. Review target identity, layout, encryption, filesystem, and boot policy.
 4. Require exact confirmation and refresh read-only prerequisites.
 5. Recheck the selected disk identity before each external storage command.
-6. Disable active swap, erase old signatures, create GPT + ESP + Linux-LUKS-type root partitions.
+6. Preserve unrelated live-ISO swap, erase old signatures, create GPT + ESP + Linux-LUKS-type root partitions.
 7. Format FAT32/ext4, open LUKS, mount at `/mnt` and `/mnt/efi`.
 8. Use the guarded `base_system::bootstrap` module to install the approved minimal Arch package set and generate UUID-based fstab; install systemd-boot, configure a mkinitcpio UKI with the LUKS UUID kernel command line, and enable NetworkManager.
 
