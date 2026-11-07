@@ -8,6 +8,14 @@
 - **IMPLEMENTED on PR #13:** bootstrap source retrieval, origin/clean-checkout validation, commit display, manual source review, read-only live-readiness gate, and second exact launch acknowledgement. **TESTED:** static contract test and CI on the exact head above. **NOT TESTED:** running bootstrap on a live Arch ISO, physical X280 installation, or first boot.
 - The existing installer remains destructive and base-system-only. Caelestia/Hyprland/Quickshell, hibernation/resume, recovery-key handling, ThinkPad power/thermal tuning, and selective BlackArch remain NOT IMPLEMENTED.
 
+## First-boot evidence collector — 2026-11-08
+
+- **IMPLEMENTED on branch `feat/x280-first-boot-reporting-2026-11-08`:** `scripts/x280-first-boot-check.sh` collects read-only first-boot checks and writes timestamped `reports/first-boot/` evidence files (`summary.md`, `diagnostics.log`, `boot-status.txt`, `system-status.txt`, and `hardware.txt`). It records PASS/FAIL/SKIP, retains reports on failure, and exits non-zero when any acceptance check fails.
+- **IMPLEMENTED:** `tests/test-x280-first-boot-check.sh` uses command mocks and temporary fixtures to cover healthy and failed systemd states. The test is registered in the canonical runner (18 scripts).
+- **IMPLEMENTED:** operator instructions and privacy/safety limitations are documented in `docs/17-X280-FIRST-BOOT-TEST.md`.
+- **NOT YET TESTED:** CI has not yet run for this branch at the time of this entry. No real first-boot evidence exists. The mock test cannot prove UEFI firmware, UKI loading, LUKS unlock, or physical X280 behavior.
+- Reports are local only. The collector never stages, commits, or pushes them. Review all evidence files for secrets before sharing.
+
 ## Historical baseline snapshot — 2026-11-07 (repository branch audit)
 
 - `main` baseline inspected: `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`; run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the 12-script suite on that exact main commit.
