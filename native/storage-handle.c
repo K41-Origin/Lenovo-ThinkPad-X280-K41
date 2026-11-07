@@ -15,16 +15,24 @@
 #include <sys/sysmacros.h>
 #include <unistd.h>
 
-/*
- * Read-only Stage 8 acquisition prototype.
- * It never writes to the device and never invokes another program.
- * The descriptor remains open until stdin reaches EOF.
- */
-
 static int fail(const char *message)
 {
     fprintf(stderr, "storage-handle: %s: %s\n", message, strerror(errno));
     return 1;
+}
+
+static bool valid_candidate_path(const char *path)
+{
+    if (strncmp(path, "/dev/", 5) != 0 || strstr(path, "/../") != NULL ||
+        strcmp(path, "/dev/..") == 0)
+        return false;
+    for (const unsigned char *p = (const unsigned char *)path; *p; ++p) {
+        if (!( (*p >= 'a' && *p <= 'z') || (*p >= 'A' && *p <= 'Z') ||
+               (*p >= '0' && *p <= '9') || *p == '/' || *p == '_' ||
+               *p == '-' || *p == '.'))
+            return false;
+    }
+    return true;
 }
 
 static bool sysfs_attribute_exists(const char *major_minor, const char *attribute)
@@ -45,20 +53,15 @@ static bool read_diskseq(const char *major_minor, uint64_t *value)
                           major_minor);
     if (length < 0 || (size_t)length >= sizeof(path))
         return false;
-
     FILE *file = fopen(path, "re");
     if (file == NULL)
         return false;
-
     char buffer[64];
     bool valid = fgets(buffer, sizeof(buffer), file) != NULL;
-    int saved_errno = errno;
     if (fclose(file) != 0)
         valid = false;
-    errno = saved_errno;
     if (!valid)
         return false;
-
     char *end = NULL;
     errno = 0;
     unsigned long long parsed = strtoull(buffer, &end, 10);
@@ -70,12 +73,13 @@ static bool read_diskseq(const char *major_minor, uint64_t *value)
 
 int main(int argc, char **argv)
 {
-    if (argc != 2 || strcmp(argv[1], "--help") == 0) {
-        fprintf(argc == 2 ? stdout : stderr,
-                "Usage: storage-handle <whole-disk-device-path>\n"
-                "Opens read-only with O_EXCL|O_CLOEXEC|O_NOFOLLOW, reports "
-                "descriptor facts, then holds the descriptor until stdin EOF.\n");
-        return argc == 2 ? 0 : 2;
+    if (argc == 2 && strcmp(argv[1], "--help") == 0) {
+        puts("Usage: storage-handle /dev/<whole-disk-name>");
+        return 0;
+    }
+    if (argc != 2 || !valid_candidate_path(argv[1])) {
+        fprintf(stderr, "storage-handle: expected a simple /dev device path\n");
+        return 2;
     }
 
     int fd = open(argv[1], O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_EXCL | O_NONBLOCK);
@@ -103,8 +107,6 @@ int main(int argc, char **argv)
         close(fd);
         return 1;
     }
-
-    /* A partition exposes this sysfs attribute; reject it explicitly. */
     if (sysfs_attribute_exists(major_minor, "partition")) {
         fprintf(stderr, "storage-handle: candidate is a partition, not a whole disk\n");
         close(fd);
@@ -132,34 +134,40 @@ int main(int argc, char **argv)
 
     uint64_t diskseq = 0;
     bool diskseq_available = read_diskseq(major_minor, &diskseq);
-    bool removable = sysfs_attribute_exists(major_minor, "removable");
-
-    printf("{\"protocol\":1,\"device_path\":\"%s\","
-           "\"major\":%u,\"minor\":%u,\"size_bytes\":%" PRIu64 ","
-           "\"logical_sector_bytes\":%d,\"physical_sector_bytes\":%d,"
-           "\"read_only\":%s,\"removable_attribute_present\":%s,"
-           "\"diskseq_available\":%s,\"diskseq\":",
-           argv[1], major_number, minor_number, size_bytes, logical_sector,
-           physical_sector, read_only ? "true" : "false",
-           removable ? "true" : "false", diskseq_available ? "true" : "false");
+    bool removable_attribute_present = sysfs_attribute_exists(major_minor, "removable");
+    printf("{\"protocol\":1,\"device_path\":\"%s\",\"major\":%u,"
+           "\"minor\":%u,\"size_bytes\":%\u,",
+           argv[1], major_number, minor_number, (unsigned int)size_bytes);
+    /* Use a dedicated format for the full-width size and disk sequence. */
+    printf("\"size_bytes\":%" PRIu64 ",\"logical_sector_bytes\":%d,"
+           "\"physical_sector_bytes\":%d,\"read_only\":%s,"
+           "\"removable_attribute_present\":%s,\"diskseq_available\":%s,"
+           "\"diskseq\":",
+           size_bytes, logical_sector, physical_sector, read_only ? "true" : "false",
+           removable_attribute_present ? "true" : "false",
+           diskseq_available ? "true" : "false");
     if (diskseq_available)
         printf("%" PRIu64, diskseq);
     else
         printf("null");
-    printf("}\n");
+    puts("}");
     if (fflush(stdout) != 0) {
         close(fd);
         return fail("stdout flush failed");
     }
 
-    /* No command channel: stdin EOF is the only normal release mechanism. */
-    char byte;
-    while (read(STDIN_FILENO, &byte, 1) < 0) {
-        if (errno == EINTR)
+    char buffer[256];
+    for (;;) {
+        ssize_t count = read(STDIN_FILENO, buffer, sizeof(buffer));
+        if (count == 0)
+            break;
+        if (count < 0 && errno == EINTR)
             continue;
-        int result = fail("stdin read failed");
-        close(fd);
-        return result;
+        if (count < 0) {
+            int result = fail("stdin read failed");
+            close(fd);
+            return result;
+        }
     }
     close(fd);
     return 0;
