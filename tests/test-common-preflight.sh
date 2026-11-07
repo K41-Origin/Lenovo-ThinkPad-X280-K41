@@ -70,4 +70,41 @@ fi
 grep -q 'state unknown' "$tmp/network-unknown.log" || fail 'unavailable ip tool was not reported as unknown'
 pass 'network check reports unavailable diagnostics as unknown'
 
-printf '%s\n' 'All common/preflight tests passed.'
+
+# Base-system module is source-safe and validates exact encrypted-root/ESP mounts.
+before_options="$(set +o)"
+before_traps="$(trap -p)"
+source "$repo_root/lib/base-system.sh" >"$tmp/base-source.out" 2>"$tmp/base-source.err" || fail 'base-system module sourcing failed'
+[[ ! -s "$tmp/base-source.out" && ! -s "$tmp/base-source.err" ]] || fail 'base-system sourcing emitted output'
+[[ "$(set +o)" == "$before_options" ]] || fail 'base-system sourcing changed shell options'
+[[ "$(trap -p)" == "$before_traps" ]] || fail 'base-system sourcing changed traps'
+mkdir -p "$tmp/target/efi" "$tmp/bin"
+cat >"$tmp/bin/findmnt" <<'MOCK_FINDMNT'
+#!/usr/bin/env bash
+mountpoint=
+while (($#)); do
+  case $1 in
+    --mountpoint) mountpoint=$2; shift 2 ;;
+    *) shift ;;
+  esac
+done
+case $mountpoint in
+  */efi) printf '%s /dev/nvme0n1p1 vfat\n' "$mountpoint" ;;
+  *) printf '%s /dev/mapper/cryptroot %s\n' "$mountpoint" "${K41_TEST_ROOT_FSTYPE:-ext4}" ;;
+esac
+MOCK_FINDMNT
+chmod +x "$tmp/bin/findmnt"
+PATH="$tmp/bin:$PATH" base_system::validate_mounts "$tmp/target" 2>"$tmp/base-mounts.log" || fail 'valid encrypted-root and ESP mount fixture rejected'
+grep -q 'Mounted target accepted' "$tmp/base-mounts.log" || fail 'valid mount fixture was not reported'
+if PATH="$tmp/bin:$PATH" K41_TEST_ROOT_FSTYPE=btrfs base_system::validate_mounts "$tmp/target" >/dev/null 2>&1; then
+  fail 'non-ext4 target root was accepted'
+fi
+if base_system::validate_mounts / >/dev/null 2>&1; then
+  fail 'live root filesystem was accepted as installation target'
+fi
+if base_system::install_packages "$tmp/target" WRONG-CONFIRMATION >/dev/null 2>&1; then
+  fail 'base package stage accepted an incorrect confirmation'
+fi
+pass 'base-system module validates encrypted ext4 root, separate vfat ESP, and explicit confirmation'
+
+printf '%s\\n' 'All common/preflight tests passed.'
