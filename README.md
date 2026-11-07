@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and a reviewed Arch ISO bootstrap gate at `scripts/install-arch-x280.sh`, target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
+> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and a reviewed Arch ISO bootstrap gate at `scripts/bootstrap-archiso.sh`, plus the destructive base installer at `scripts/install-arch-x280.sh` and target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
 
 ## AI-assisted development
 
@@ -19,7 +19,9 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Current repository structure
 
-- `installer` — diagnostic-only entry point with `--help` and `--preflight`; this is separate from the PR #9 destructive installer script.
+- `installer` — diagnostic-only entry point with `--help` and `--preflight`.
+- `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires exact manual acknowledgement before launching the destructive installer.
+- `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; physical X280 installation remains NOT TESTED.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
 - `lib/storage.sh` — read-only whole-disk discovery and fresh target validation; no partition/format/mount operations.
