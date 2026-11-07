@@ -2,8 +2,8 @@
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/install-arch-x280.sh"
-fail() { printf 'FAIL: %s\\n' "$1" >&2; exit 1; }
-pass() { printf 'PASS: %s\\n' "$1"; }
+fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
+pass() { printf 'PASS: %s\n' "$1"; }
 
 [[ -f $SCRIPT ]] || fail "Arch installer script is missing"
 bash -n "$SCRIPT" || fail "Arch installer has a Bash syntax error"
@@ -41,4 +41,4 @@ erase_line="$(grep -nF 'wipefs --all --force' "$SCRIPT" | cut -d: -f1)"
 (( confirmation_line < revalidate_line && revalidate_line < erase_line )) || fail "destructive step appears before confirmation/revalidation"
 pass "destructive signature erasure is ordered after confirmation and final revalidation"
 
-printf '%s\\n' 'All Arch installer script tests passed.'
+printf '%s\n' 'All Arch installer script tests passed.'
