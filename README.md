@@ -28,7 +28,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
 - `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — canonical Stage 8 design for a future native descriptor holder; implementation remains planned.
 - `lib/` — implemented read-only preflight, inventory, and storage-planning modules plus clearly marked PLANNED placeholders for base-system, bootloader, user, desktop, hardware, package, security, validation, and reporting work. Placeholder files contain no installation implementation.
-- `tests/run.sh` — canonical test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
+- `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
+- `scripts/live-validation.sh` — read-only live-host validation for Arch ISO / X280; saves timestamped evidence and `reports/live-validation/latest.md`.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
 
 ## Intended workflow
@@ -77,6 +78,10 @@ Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Ru
 - Never log passwords, encryption keys, tokens, or credentials.
 - Report untested behavior honestly.
 - Latest `main` execution is the chosen update policy, but it carries a supply-chain risk: show the resolved SHA and review retrieved code before production use.
+
+## Live validation on the ThinkPad
+
+From the cloned repository root, run `bash scripts/live-validation.sh`. The script inventories the current host and storage topology, checks shell syntax, runs available ShellCheck/shfmt checks and the canonical test suite, and saves timestamped reports under `reports/live-validation/`. Reports are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--thinkpad-validation). The script performs no disk or system modifications.
 
 ## Development status
 See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
