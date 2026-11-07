@@ -54,15 +54,19 @@ The documentation previously contained contradictory statements that the install
 ## Documentation synchronization result
 
 Updated in this documentation pass:
-- `README.md`: index and ownership links now include both Stage 9 installer and current audit.
+- `README.md`: index and ownership links now include both Stage 9 installer and current audit; renamed anchors were checked and repaired.
 - `AGENTS.md`: explicit canonical document ownership map.
+- `docs/02-REQUIREMENTS-AND-DECISIONS.md`: indexed the approved report-only Intel microcode policy as REQ-HW-006.
+- `docs/05-SECURITY-AND-AUTHENTICATION.md` and `docs/07-HARDWARE-POWER-AND-NETWORK.md`: linked security/hardware policy ownership and explicitly recorded the implementation deviation.
+- `docs/08-PACKAGE-AND-SOFTWARE-MANAGEMENT.md`: clarified that Nano is in the current base package list, not the optional application bundle.
+- `docs/09-DEVELOPMENT-AND-BUG-BOUNTY.md`: removed duplicated package/tool policy and linked to its owner.
 - `docs/03-ARCHITECTURE-AND-MODULES.md`: actual two-entry-point model, module ownership, installer sequence, and architecture deviation.
 - `docs/04-INSTALLATION-AND-DISK.md`: actual partition type, encryption/UKI parameters, swap/resume boundary, and recovery limitations.
 - `docs/11-TESTING-AND-ACCEPTANCE.md`: old pre-installer audit findings marked historical; current evidence references centralized.
 - `docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md`: status matrix and CI evidence corrected to distinguish tested commits from later edits.
 - `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md`: native C helper separated from Bash descriptor-path implementation.
 - `docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md`: consolidated implementation scope, limitations, automated evidence, and physical-test gate.
-- `tests/README.md`: stale live-validation and installer wording corrected.
+- `tests/README.md`: consolidated the test manifest/procedures, removed repeated installer and live-validation instructions, and linked to canonical installer/storage/status documents.
 
 Historical logs and timestamped reports are retained as immutable evidence. Failed reports are not edited to imply success. Detailed historical changelog entries remain historical; they are not current status.
 
@@ -71,9 +75,10 @@ Historical logs and timestamped reports are retained as immutable evidence. Fail
 1. Obtain a fresh green CI run on the latest documentation commit.
 2. Re-run the fixed read-only live storage validator on the physical X280 and preserve its report.
 3. Complete an independent source review of installer failure paths, cleanup, descriptor semantics, and post-destructive recovery before considering physical execution.
-4. Resolve or formally accept the architecture deviation that destructive orchestration currently lives in the installer script rather than a dedicated storage executor module.
-5. Validate installation in a disposable VM before physical X280 testing where practical.
-6. Verify actual UKI boot, LUKS unlock, root mount, account login, and recovery behavior. Hibernation/resume remains a separate later stage.
+4. Resolve the REQ-HW-006 deviation: current target configuration automatically installs Intel microcode despite the approved report-only policy.
+5. Resolve or formally accept the architecture deviation that destructive orchestration currently lives in the installer script rather than a dedicated storage executor module.
+6. Validate installation in a disposable VM before physical X280 testing where practical.
+7. Verify actual UKI boot, LUKS unlock, root mount, account login, and recovery behavior. Hibernation/resume remains a separate later stage.
 
 ## Conclusion
 
