@@ -98,6 +98,133 @@ sgdisk -i 2 "$disk" | grep -qi '8309' || die 'Partition 2 is not the expected Li
 [[ $(blkid -s TYPE -o value "$esp") == vfat ]] || die 'Partition 1 is not FAT/vfat.'
 cryptsetup isLuks "$root_part" || die 'Partition 2 is not a LUKS container.'
 cryptsetup luksDump "$root_part" | grep -qE '^[[:space:]]*Version:[[:space:]]+2
+stage unlock 'Unlock existing LUKS2 root; no format operation is performed'
+cryptsetup open "$root_part" cryptroot || die 'Could not unlock the existing LUKS partition.'
+[[ $(blkid -s TYPE -o value "$MAPPER") == ext4 ]] || die 'Unlocked root filesystem is not ext4.'
+
+stage filesystem-check 'Run a read-only ext4 consistency check before mounting'
+if ! e2fsck -fn "$MAPPER"; then
+  die 'Read-only ext4 check reported errors. Do not mount read-write; recovery is required.'
+fi
+
+stage mount-target 'Mount existing root and EFI filesystems'
+mkdir -p "$ROOT_MOUNT"
+mount "$MAPPER" "$ROOT_MOUNT"
+mkdir -p "$ESP_MOUNT"
+mount "$esp" "$ESP_MOUNT"
+base_system::validate_mounts "$ROOT_MOUNT" || die 'Mounted root/EFI layout does not match the expected encrypted ext4 + vfat structure.'
+
+stage verify-pacstrap 'Confirm pacstrap completed; do not rerun pacstrap'
+[[ -f "$ROOT_MOUNT/etc/arch-release" ]] || die 'Target does not contain /etc/arch-release.'
+pacman --root "$ROOT_MOUNT" -Q base linux linux-firmware cryptsetup networkmanager sudo e2fsprogs dosfstools || die 'Required base packages are incomplete; stop for separate recovery review.'
+[[ ! -e "$ROOT_MOUNT/swapfile" && ! -e "$ROOT_MOUNT/swapfile.k41.tmp" ]] || die 'A swapfile already exists; this is not the expected pre-configuration checkpoint.'
+[[ ! -s "$ROOT_MOUNT/etc/hostname" && ! -s "$ROOT_MOUNT/etc/locale.conf" ]] || die 'Target configuration appears to have started already; do not repeat interactive configuration.'
+[[ ! -s "$ESP_MOUNT/EFI/Linux/arch-linux.efi" ]] || die 'A UKI already exists; this target appears further along than the recorded failure checkpoint.'
+
+stage fstab 'Merge UUID-based root and EFI entries without replacing existing unrelated data'
+base_system::generate_fstab "$ROOT_MOUNT" 'WRITE FSTAB' || die 'Safe fstab generation failed.'
+
+stage target-configuration 'Continue the initial target configuration (interactive prompts)'
+ram_kib="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
+[[ $ram_kib =~ ^[0-9]+$ ]] || die 'Could not determine live RAM size for the planned swapfile.'
+swap_bytes=$((ram_kib * 1024 + 2 * 1024 * 1024 * 1024))
+install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
+arch-chroot "$ROOT_MOUNT" /root/k41-configure-arch-x280.sh "$swap_bytes" || die 'Interactive target configuration failed; inspect partial configuration before retrying.'
+rm -f -- "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
+install -D -m 0755 "$ROOT/scripts/x280-first-boot-check.sh" "$ROOT_MOUNT/usr/local/sbin/x280-first-boot-check"
+[[ -x "$ROOT_MOUNT/usr/local/sbin/x280-first-boot-check" ]] || die 'First-boot evidence collector was not installed.'
+
+stage boot-configuration 'Install systemd-boot and build the encrypted-root UKI'
+arch-chroot "$ROOT_MOUNT" bootctl --esp-path=/efi install
+root_uuid="$(blkid -s UUID -o value "$root_part")"
+[[ -n $root_uuid ]] || die 'LUKS UUID could not be read.'
+arch-chroot "$ROOT_MOUNT" /bin/bash -euo pipefail <<CHROOT
+sed -i 's|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)|' /etc/mkinitcpio.conf
+mkdir -p /efi/EFI/Linux /etc/kernel
+printf '%s\n' 'rd.luks.name=$root_uuid=cryptroot root=/dev/mapper/cryptroot rw' > /etc/kernel/cmdline
+sed -i -e "s/^PRESETS=.*/PRESETS=('default')/" -e '/^fallback_/d' -e '/^default_uki=/d' -e '/^default_image=/d' -e '/^default_cmdline=/d' /etc/mkinitcpio.d/linux.preset
+printf '%s\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' 'default_cmdline="/etc/kernel/cmdline"' >> /etc/mkinitcpio.d/linux.preset
+systemctl enable NetworkManager
+mkinitcpio -P
+[[ -s /efi/EFI/Linux/arch-linux.efi ]]
+[[ -s /etc/kernel/cmdline ]]
+grep -q '^rd.luks.name=' /etc/kernel/cmdline
+grep -q '^root=/dev/mapper/cryptroot' /etc/kernel/cmdline
+CHROOT
+
+stage completion 'Validate the resumed base Arch installation'
+[[ -s "$ROOT_MOUNT/etc/fstab" ]] || die 'Target fstab is missing.'
+grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' "$ROOT_MOUNT/etc/fstab" || die 'Swapfile entry is missing from fstab.'
+[[ -s "$ESP_MOUNT/EFI/Linux/arch-linux.efi" ]] || die 'UKI was not created.'
+[[ -s "$ROOT_MOUNT/etc/hostname" && -s "$ROOT_MOUNT/etc/locale.conf" && -L "$ROOT_MOUNT/etc/localtime" ]] || die 'Hostname, locale, or timezone configuration is incomplete.'
+k41::log_info 'Initial encrypted Arch base installation has reached the completion checkpoint.'
+k41::log_warn 'No reboot was performed. Inspect the result, then unmount /mnt/efi and /mnt and close cryptroot manually.'
+k41::log_warn 'Desktop integration, X280 tuning, hibernation/resume, recovery-key handling, and selective BlackArch remain unimplemented.'
+ || die 'Root container is not LUKS2.'
+
+stage unlock 'Unlock existing LUKS2 root; no format operation is performed'
+cryptsetup open "$root_part" cryptroot || die 'Could not unlock the existing LUKS partition.'
+[[ $(blkid -s TYPE -o value "$MAPPER") == ext4 ]] || die 'Unlocked root filesystem is not ext4.'
+
+stage filesystem-check 'Run a read-only ext4 consistency check before mounting'
+if ! e2fsck -fn "$MAPPER"; then
+  die 'Read-only ext4 check reported errors. Do not mount read-write; recovery is required.'
+fi
+
+stage mount-target 'Mount existing root and EFI filesystems'
+mkdir -p "$ROOT_MOUNT"
+mount "$MAPPER" "$ROOT_MOUNT"
+mkdir -p "$ESP_MOUNT"
+mount "$esp" "$ESP_MOUNT"
+base_system::validate_mounts "$ROOT_MOUNT" || die 'Mounted root/EFI layout does not match the expected encrypted ext4 + vfat structure.'
+
+stage verify-pacstrap 'Confirm pacstrap completed; do not rerun pacstrap'
+[[ -f "$ROOT_MOUNT/etc/arch-release" ]] || die 'Target does not contain /etc/arch-release.'
+pacman --root "$ROOT_MOUNT" -Q base linux linux-firmware cryptsetup networkmanager sudo e2fsprogs dosfstools || die 'Required base packages are incomplete; stop for separate recovery review.'
+[[ ! -e "$ROOT_MOUNT/swapfile" && ! -e "$ROOT_MOUNT/swapfile.k41.tmp" ]] || die 'A swapfile already exists; this is not the expected pre-configuration checkpoint.'
+[[ ! -s "$ROOT_MOUNT/etc/hostname" && ! -s "$ROOT_MOUNT/etc/locale.conf" ]] || die 'Target configuration appears to have started already; do not repeat interactive configuration.'
+[[ ! -s "$ESP_MOUNT/EFI/Linux/arch-linux.efi" ]] || die 'A UKI already exists; this target appears further along than the recorded failure checkpoint.'
+
+stage fstab 'Merge UUID-based root and EFI entries without replacing existing unrelated data'
+base_system::generate_fstab "$ROOT_MOUNT" 'WRITE FSTAB' || die 'Safe fstab generation failed.'
+
+stage target-configuration 'Continue the initial target configuration (interactive prompts)'
+ram_kib="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
+[[ $ram_kib =~ ^[0-9]+$ ]] || die 'Could not determine live RAM size for the planned swapfile.'
+swap_bytes=$((ram_kib * 1024 + 2 * 1024 * 1024 * 1024))
+install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
+arch-chroot "$ROOT_MOUNT" /root/k41-configure-arch-x280.sh "$swap_bytes" || die 'Interactive target configuration failed; inspect partial configuration before retrying.'
+rm -f -- "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
+install -D -m 0755 "$ROOT/scripts/x280-first-boot-check.sh" "$ROOT_MOUNT/usr/local/sbin/x280-first-boot-check"
+[[ -x "$ROOT_MOUNT/usr/local/sbin/x280-first-boot-check" ]] || die 'First-boot evidence collector was not installed.'
+
+stage boot-configuration 'Install systemd-boot and build the encrypted-root UKI'
+arch-chroot "$ROOT_MOUNT" bootctl --esp-path=/efi install
+root_uuid="$(blkid -s UUID -o value "$root_part")"
+[[ -n $root_uuid ]] || die 'LUKS UUID could not be read.'
+arch-chroot "$ROOT_MOUNT" /bin/bash -euo pipefail <<CHROOT
+sed -i 's|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)|' /etc/mkinitcpio.conf
+mkdir -p /efi/EFI/Linux /etc/kernel
+printf '%s\n' 'rd.luks.name=$root_uuid=cryptroot root=/dev/mapper/cryptroot rw' > /etc/kernel/cmdline
+sed -i -e "s/^PRESETS=.*/PRESETS=('default')/" -e '/^fallback_/d' -e '/^default_uki=/d' -e '/^default_image=/d' -e '/^default_cmdline=/d' /etc/mkinitcpio.d/linux.preset
+printf '%s\n' 'default_uki="/efi/EFI/Linux/arch-linux.efi"' 'default_cmdline="/etc/kernel/cmdline"' >> /etc/mkinitcpio.d/linux.preset
+systemctl enable NetworkManager
+mkinitcpio -P
+[[ -s /efi/EFI/Linux/arch-linux.efi ]]
+[[ -s /etc/kernel/cmdline ]]
+grep -q '^rd.luks.name=' /etc/kernel/cmdline
+grep -q '^root=/dev/mapper/cryptroot' /etc/kernel/cmdline
+CHROOT
+
+stage completion 'Validate the resumed base Arch installation'
+[[ -s "$ROOT_MOUNT/etc/fstab" ]] || die 'Target fstab is missing.'
+grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' "$ROOT_MOUNT/etc/fstab" || die 'Swapfile entry is missing from fstab.'
+[[ -s "$ESP_MOUNT/EFI/Linux/arch-linux.efi" ]] || die 'UKI was not created.'
+[[ -s "$ROOT_MOUNT/etc/hostname" && -s "$ROOT_MOUNT/etc/locale.conf" && -L "$ROOT_MOUNT/etc/localtime" ]] || die 'Hostname, locale, or timezone configuration is incomplete.'
+k41::log_info 'Initial encrypted Arch base installation has reached the completion checkpoint.'
+k41::log_warn 'No reboot was performed. Inspect the result, then unmount /mnt/efi and /mnt and close cryptroot manually.'
+k41::log_warn 'Desktop integration, X280 tuning, hibernation/resume, recovery-key handling, and selective BlackArch remain unimplemented.'
+ || die 'Root container is not LUKS2.'
 
 stage unlock 'Unlock existing LUKS2 root; no format operation is performed'
 cryptsetup open "$root_part" cryptroot || die 'Could not unlock the existing LUKS partition.'
