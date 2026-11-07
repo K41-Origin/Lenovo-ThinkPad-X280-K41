@@ -1,5 +1,12 @@
 # Implementation Status and Changelog
 
+## Current verified baseline — 2026-11-07
+
+- Repository head inspected: `main` at `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`.
+- GitHub Actions run #185 (`42349907205`) completed successfully on that exact commit. Bash syntax, ShellCheck, configured shfmt checks, and the canonical 12-script test suite passed.
+- Physical X280 observations from user-provided terminal photographs are documented in `docs/11-TESTING-AND-ACCEPTANCE.md` (Stages 8–9). They establish point-in-time raw system facts, not a successful run of the project's live validator.
+- `scripts/validate-live-storage.sh` has not yet been run on the physical laptop. Native block-device behavior remains NOT TESTED; no real storage executor or installer workflow exists.
+
 ## Status
 
 | Area | Status | Evidence / next action |
@@ -26,11 +33,11 @@
 | Storage review, confirmation, and final revalidation | TESTED (fixture CI) | `lib/storage-confirmation.sh` renders the plan, binds typed confirmation to a stable review digest and target, consumes confirmation, and revalidates live prerequisites before producing an in-process ready gate. Run #107 passed the ten-script suite. |
 | Storage execution dry-run model | TESTED (fixture CI) | `lib/storage-execution-dry-run.sh` builds an eight-step in-memory manifest and simulates stop-on-failure behavior. Run #108 passed on its own commit. This is not a production executor or a security boundary. |
 | Storage execution boundary | TESTED (mock-only CI) | `lib/storage-execution-boundary.sh` re-probes target path, major:minor, capacity, and stable ID before each injected mock operation; rejects changed identity; and records partial-failure recovery state. Run #148 passed at audit baseline commit `719f537341b6d410ce2980144fee86237da01b42`. The gate binds path, major:minor, capacity, stable-ID kind/value, WWN, serial, transport, removable, and read-only attributes. It opens no device handle and does not close the real kernel TOCTOU window. |
-| Native block-device handle acquisition (Stage 8 first slice) | IMPLEMENTED (read-only prototype) | `native/storage-handle.c` opens a supplied `/dev/<name>` read-only with exclusive/no-follow/close-on-exec flags, checks descriptor type and partition status, reads geometry/read-only state by ioctl, reports major:minor and optional diskseq, and retains the FD until stdin EOF. Compile/CLI checks are in `tests/test-native-storage-handle.sh`; real block-device behavior, stable-ID correlation, NVMe/removable validation, and end-to-end Bash lifecycle remain NOT TESTED / PLANNED. No storage write or installer integration exists. |
-| Repository audit baseline | IMPLEMENTED (report only) | `docs/15-REPOSITORY-AUDIT.md` records the 51-file tree inventory, structural checks, duplication findings, documentation defects, CI evidence, and prioritized cleanup plan. No source modules or tests were changed in the audit. |
+| Native block-device handle acquisition (Stage 8 first slice) | IMPLEMENTED (read-only prototype) | `native/storage-handle.c` opens a supplied `/dev/<name>` read-only with exclusive/no-follow/close-on-exec flags, checks descriptor type and partition status, reads geometry/read-only state by ioctl, reports major:minor and optional diskseq, and retains the FD until stdin EOF. Compile/CLI checks pass in CI; real block-device behavior, stable-ID correlation, NVMe/removable validation, and end-to-end Bash lifecycle remain NOT TESTED / PLANNED. No storage write or installer integration exists. |
+| Repository audit | IMPLEMENTED (report only) | `docs/15-REPOSITORY-AUDIT.md` is the current 2026-11-07 repository audit. It records the 58-file tree, current CI evidence, physical observation boundary, documentation corrections, and remaining readiness gates. |
 | Installer functionality | PLANNED | No actual installation/configuration logic implemented. |
-| Static checks | TESTED (CI) | The latest verified `main` baseline is run #149 at commit `fd91ddb5d863226ebf469c2c3084d7f5132602c3`; this cleanup branch is pending its own CI result. The updated workflow adds explicit test dependencies and ShellCheck/shfmt checks; report its result only after the PR run completes. |
-| X280 installation / hibernation | NOT TESTED | Requires controlled VM and actual hardware testing. |
+| Static checks | TESTED (CI) | GitHub Actions run #185 (`42349907205`) passed Bash syntax, ShellCheck, configured shfmt, and the canonical test suite at `main` commit `8aa3a447ca1b5fa7cae52dd94759d83fab8aaf9a`. This does not establish physical hardware behavior. |
+| X280 raw Arch ISO observations | VERIFIED (limited, point-in-time) | User-provided terminal photographs document UEFI, live root, USB, NVMe identity/serial alias, partitions, visible mount tree, loop backing, and no active swap in captured snapshots. The project's live validator has not yet been run; installation and hibernation remain NOT TESTED. |
 
 ## Changelog
 
@@ -235,3 +242,10 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - The helper reports major:minor and optional diskseq, and retains the descriptor until stdin EOF. It exposes no command channel and does not invoke storage utilities.
 - Added isolated compile/CLI validation to the canonical test manifest and CI compiler dependency.
 - Not implemented: stable WWN/serial correlation, actual removable-state value, internal NVMe enforcement, expected-plan matching, Bash protocol supervision, disposable loop-device tests, and real executor integration. No real block device was opened during this change; installer remains diagnostic-only.
+
+
+### 2026-11-07 — Documentation synchronization after repository audit
+- Updated README and architecture status to distinguish the implemented Stage 8 read-only native prototype from untested block-device runtime behavior and the absent real executor.
+- Updated testing/status records to cite CI run #185 at the exact `main` commit and to distinguish raw physical observations from execution of the project's live validator.
+- Preserved the X280 SSD model and serial in the hardware validation path because they are deliberate target-specific identity evidence for this single-laptop project. The repository is currently public; publication of a device-unique serial is an explicit exposure trade-off, not a claim that it is non-sensitive.
+- No installer, storage, native helper, hardware profile, or destructive behavior was changed in this documentation synchronization.

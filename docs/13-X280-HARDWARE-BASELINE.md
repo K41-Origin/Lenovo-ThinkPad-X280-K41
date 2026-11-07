@@ -19,7 +19,7 @@ This document records the user-reported hardware baseline for the physical Lenov
 | BIOS/UEFI | `N20ET49W (1.34)` | WMIC and battery report |
 | BIOS date | 2019-11-13 | Windows battery report |
 
-Do not record or display the battery serial number or other device-unique identifiers in routine logs.
+Do not record or display the battery serial number or unrelated device-unique identifiers in routine logs. Exception for this owner-specific installation target: the internal SSD serial is intentionally retained in `scripts/validate-live-storage.sh` and the live-validation evidence because it is part of the explicit target identity check. Do not generalize this identifier to other machines.
 
 ## Core hardware
 
@@ -97,4 +97,4 @@ The battery serial number is intentionally omitted. Capacity and cycle count can
 
 ## Data handling
 
-This document intentionally excludes the Windows computer name, battery serial number, MAC addresses, Windows user path, and other unnecessary identifiers. Update this baseline only when new evidence is available; preserve the distinction between owner-reported facts, Windows observations, Linux observations, and assumptions.
+This document intentionally excludes the Windows computer name, battery serial number, MAC addresses, Windows user path, and unrelated identifiers. The target SSD serial is deliberately retained in the project-specific validation script and Stage 8–9 evidence because it is needed to distinguish this laptop's intended internal SSD from removable/other devices. The GitHub repository is currently public, so that serial is publicly visible; retaining it is an owner-directed project choice and an acknowledged privacy exposure. Update this baseline only when new evidence is available; preserve the distinction between owner-reported facts, Windows observations, Linux observations, and assumptions.

@@ -1,7 +1,7 @@
 # Architecture and Modules
 
 ## Status
-The repository contains tested first-slice logging/read-only preflight helpers and a diagnostic-only entry point. Nine future-domain module files are placeholders marked PLANNED; installer orchestration and installation behavior are not implemented end to end.
+The repository contains fixture-tested logging, read-only preflight/inventory and storage-planning modules; a mock-only storage execution boundary; and a Stage 8 native C block-device handle prototype with compile/CLI tests. Nine future-domain module files remain placeholders marked PLANNED. The entry point is diagnostic-only; installer orchestration, real storage execution, and end-to-end installation are not implemented.
 
 ## Architecture decision
 Use one project-owned interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB. The same interactive flow coordinates base Arch installation, desktop configuration, selected packages, validation, and reporting. Modules remain separate internally to keep responsibilities testable and failures easier to isolate.
@@ -10,7 +10,7 @@ Use one project-owned interactive installer launched from the shell of an offici
 
 The approved storage and boot decisions are indexed in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. The canonical detailed design, layout, safety gates, encryption, UKI, swap, hibernation, recovery, and acceptance requirements are owned by [Installation and Disk](04-INSTALLATION-AND-DISK.md). This architecture document does not duplicate those decisions.
 
-Current implementation remains limited to read-only discovery, topology analysis, planning, confirmation, and mock-only execution modeling. No real storage executor or native device handle is implemented; see [Stage 8 design](14-STAGE-8-NATIVE-DEVICE-ACCESS.md).
+Current implementation includes read-only discovery, topology analysis, planning, confirmation, mock-only execution modeling, and a read-only native descriptor-acquisition prototype. The native helper has not been exercised against a real block device and is not integrated with Bash or an executor. No real storage executor exists; see [Stage 8 design](14-STAGE-8-NATIVE-DEVICE-ACCESS.md).
 ## Repository layout
 ```text
 .
