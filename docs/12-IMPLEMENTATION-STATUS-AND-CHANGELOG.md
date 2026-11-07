@@ -74,7 +74,7 @@ The table below includes branch-only implementation not yet merged into main. Th
 - Recorded documented Linux interface facts and their limits: block-device O_EXCL behavior, fstat/st_rdev, descriptor-based ioctls, diskseq correlation, and the distinction between kernel-internal APIs and userspace interfaces.
 - Explicitly documented the unresolved descriptor-to-tool boundary: retaining an FD does not make a pathname-based partitioning/LUKS/filesystem utility descriptor-bound. No /proc/self/fd shortcut or fallback to pathname rechecks is accepted without proof.
 - Defined lifecycle, identity fields, fail-closed behavior, privilege/protocol boundaries, recovery requirements, and disposable-loop/VM acceptance tests.
-- Documentation/design only. No C helper, device open, exclusive lock, loop-device test, destructive utility, or hardware test was performed. The installer remains diagnostic-only and destructive storage execution remains unimplemented.
+- Historical snapshot: documentation/design only. At that time no C helper or destructive executor existed and the top-level installer was diagnostic-only. Superseded by the later Stage 8 prototype and PR #9 initial installer implementation.
 
 
 ### 2026-11-02 — Restrict storage target validation to internal NVMe and detect active swap
@@ -261,7 +261,7 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Added native/storage-handle.c, a read-only prototype for opening a candidate block device with O_RDONLY | O_EXCL | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK, checking the descriptor with fstat, rejecting partition devices, and reading geometry/read-only state via descriptor ioctls.
 - The helper reports major:minor and optional diskseq, and retains the descriptor until stdin EOF. It exposes no command channel and does not invoke storage utilities.
 - Added isolated compile/CLI validation to the canonical test manifest and CI compiler dependency.
-- Not implemented: stable WWN/serial correlation, actual removable-state value, internal NVMe enforcement, expected-plan matching, Bash protocol supervision, disposable loop-device tests, and real executor integration. No real block device was opened during this change; installer remains diagnostic-only.
+- Historical Stage 8 prototype boundary: stable WWN/serial correlation, actual removable-state value, internal NVMe enforcement, expected-plan matching, Bash protocol supervision, and C-helper integration remain unimplemented. The later PR #9 installer uses a separate Bash descriptor path and is documented in the current installer section.
 
 
 ### 2026-11-07 — Documentation synchronization after repository audit
@@ -313,3 +313,8 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - Consolidated the initial installer procedure and physical-test gate in docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md; test execution instructions remain owned by tests/README.md.
 - Updated status evidence to separate the latest successful CI-tested code commit from later documentation-only commits. No CI result is attributed to a commit it did not test.
 - Documentation writes were fetched again for verification. No shell tests, VM installation, physical disk operation, or boot test were performed by this documentation-only change.
+
+### 2026-11-07 — Record approved Intel microcode policy deviation
+- Cross-checked the target configuration script against the security/hardware policy documents and found that it installs `intel-ucode` automatically despite the approved report-only policy.
+- Added REQ-HW-006 to the requirements index and marked this mismatch as a blocker in the implementation matrix and installer limitations.
+- Documentation records the mismatch; no code change or policy override was made in this documentation task.
