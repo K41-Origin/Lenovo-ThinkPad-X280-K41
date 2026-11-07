@@ -277,3 +277,16 @@ Topology assessment:
 - The extra `/dev/sdb` SD/MMC reader is recorded to avoid confusing it with either the USB installer (`/dev/sda`) or internal NVMe (`/dev/nvme0n1`).
 
 **Stage 9 result:** Raw live topology observations recorded; no SSD mount or active swap was visible. Repository discovery/validation functions have not yet been executed on hardware. No disk mutation occurred and no destructive authorization is implied.
+
+
+## Stage 10 — One-command live storage validation
+
+The read-only hardware check is packaged as `scripts/validate-live-storage.sh` so operators do not need to type or maintain a long inline Bash block. Run it from any directory after cloning the project:
+
+```bash
+bash scripts/validate-live-storage.sh
+```
+
+The script requires UEFI boot and the expected X280 internal SSD identity (model family `WDC PC SN730`, serial `193839803177`). It discovers all whole disks, prints their safety-relevant properties, requires exactly one identity match, and calls the repository's live target/topology validator. It fails closed if dependencies, identity, or topology cannot be verified. It performs no partitioning, formatting, encryption, mounting, or disk writes. Do not treat a successful read-only check as authorization to erase the disk or as proof that a future destructive executor is safe.
+
+**Status:** IMPLEMENTED in the repository. Syntax, ShellCheck, and physical-device execution are NOT YET VERIFIED for this new entry point. The operator must run it on the X280 Arch Live environment and preserve its complete output as hardware-validation evidence.
