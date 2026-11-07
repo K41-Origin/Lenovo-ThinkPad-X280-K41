@@ -34,9 +34,6 @@ prompt locale "Locale" "en_US.UTF-8"
 [[ $locale =~ ^[A-Za-z0-9_@.-]+\.UTF-8$ ]] || die "Invalid locale name."
 grep -Eq "^[#[:space:]]*${locale}[[:space:]]+UTF-8([[:space:]]|$)" /etc/locale.gen || die "Locale is not present in /etc/locale.gen: $locale"
 
-info "Installing Intel microcode."
-pacman -S --needed --noconfirm intel-ucode
-
 info "Configuring locale, timezone, and hostname."
 sed -i -E "s/^[#[:space:]]*${locale}[[:space:]]+UTF-8/${locale} UTF-8/" /etc/locale.gen
 locale-gen
