@@ -68,7 +68,7 @@ ram_bytes="$(awk '/MemTotal:/ {print $2 * 1024}' /proc/meminfo)"
 [[ $ram_bytes =~ ^[0-9]+$ ]] || die "Tidak dapat menentukan kapasitas RAM."
 swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
 # shellcheck disable=SC2034 # output arrays are populated/read through nameref parameters
- declare -A plan=() confirmation=() fresh_target=() fresh_prereq=() gate=()
+ declare -A plan=() prereq=() confirmation=() fresh_target=() fresh_prereq=() gate=()
 storage::plan_gpt_layout plan "${target[size_bytes]}" "$(blockdev --getss "${target[device_path]}")" "$(blockdev --getpbsz "${target[device_path]}")" "$ram_bytes" "$swap_margin_bytes" || die "Perhitungan layout disk gagal."
 storage::plan_bind_target plan target || die "Binding identitas target gagal."
 storage::plan_collect_live_prerequisites plan fresh_target prereq || die "Pemeriksaan prasyarat awal gagal."
@@ -78,7 +78,7 @@ storage::plan_confirm_interactive plan confirmation || die "Konfirmasi dibatalka
 storage::plan_final_revalidate plan confirmation fresh_target fresh_prereq gate || die "Validasi final gagal; tidak ada perubahan disk."
 
 disk=${gate[target_device_path]}
-disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed 's/[[:space:]]\\+$//')"
+disk_identity_before="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed -E 's/[[:space:]]+$//')"
 [[ -n $disk_identity_before ]] || die "Identitas target tidak dapat dibaca ulang."
 storage::validate_target fresh_target || die "Target berubah sebelum operasi pertama."
 # Pin the whole-disk block inode and pass its inherited descriptor to child tools.
