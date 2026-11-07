@@ -67,6 +67,7 @@ d["blockdevices"].append({
 })
 with open(p,"w") as f: json.dump(d,f)
 PY
+found=()
 storage::discover_candidates found || { echo 'FAIL: zero-capacity removable reader aborted discovery'; exit 1; }
 [[ ${found[candidate_count]} == 2 ]]
 echo 'PASS: skips zero-capacity removable reader without exposing it as a candidate'
@@ -83,6 +84,7 @@ d["blockdevices"].append({
 })
 with open(p,"w") as f: json.dump(d,f)
 PY
+found=()
 if storage::discover_candidates found; then echo 'FAIL: zero-capacity non-removable disk accepted'; exit 1; fi
 echo 'PASS: rejects zero-capacity non-removable disk'
 write_safe_fixture
@@ -95,6 +97,7 @@ with open(p) as f: d=json.load(f)
 d["blockdevices"][1]["size"]=None
 with open(p,"w") as f: json.dump(d,f)
 PY
+found=()
 if storage::discover_candidates found; then echo 'FAIL: unknown disk size accepted'; exit 1; fi
 echo 'PASS: rejects unknown disk size'
 write_safe_fixture
@@ -137,6 +140,7 @@ d=json.load(open(p))
 d["blockdevices"].append(dict(d["blockdevices"][0], name="/dev/nvme1n1"))
 json.dump(d,open(p,"w"))
 PY
+found=()
 if storage::discover_candidates found; then echo 'FAIL: duplicate WWN accepted'; exit 1; fi
 echo 'PASS: rejects duplicate WWN'
 write_safe_fixture
@@ -153,14 +157,17 @@ p=sys.argv[1]
 d=json.load(open(p)); del d["blockdevices"][0]["rm"]
 json.dump(d,open(p,"w"))
 PY
+found=()
 if storage::discover_candidates found; then echo 'FAIL: unknown removable state accepted'; exit 1; fi
 echo 'PASS: rejects unknown safety state'
 write_safe_fixture
 export K41_SWAPON_FAIL=1
+found=()
 if storage::discover_candidates found; then echo 'FAIL: swapon failure accepted'; exit 1; fi
 unset K41_SWAPON_FAIL
 echo 'PASS: fails closed when swap discovery fails'
 export K41_LSBLK_FAIL=1
+found=()
 if storage::discover_candidates found; then echo 'FAIL: lsblk failure accepted'; exit 1; fi
 unset K41_LSBLK_FAIL
 echo 'PASS: fails closed when lsblk fails'
