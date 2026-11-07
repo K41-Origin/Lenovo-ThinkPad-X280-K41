@@ -1,7 +1,7 @@
 # Testing and Acceptance
 
 ## Current status
-The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. Run #148 (`41619926870`) passed both steps at audit baseline commit `719f537341b6d410ce2980144fee86237da01b42`. This validates the repository state before the audit-report documentation commit. This is fixture-based CI, not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
+The installer remains PLANNED and has not been tested end to end. The GitHub Actions workflow validates Bash syntax and runs eleven repository test scripts. The latest verified `main` baseline is GitHub Actions run #149 at commit `fd91ddb5d863226ebf469c2c3084d7f5132602c3`. This cleanup branch requires its own pull-request CI run. All CI tests are fixture-based; they are not hardware validation. Passing these checks does not verify installation integration or behavior on the ThinkPad's physical storage device.
 
 The storage foundation is IMPLEMENTED through read-only discovery/topology checks, target-bound GPT layout planning, live prerequisite collection, explicit human confirmation, and one-shot final revalidation. The approved profile describes GPT, a 1 GiB EFI System Partition, LUKS2, ext4, a swapfile, systemd-boot, and a UKI. Resume readiness remains deferred until the swapfile offset is verified. No partitioning, formatting, encryption, mounting, or other disk mutation is implemented.
 
@@ -176,13 +176,11 @@ Use isolated VMs where suitable; VM tests do not fully validate X280 hardware. T
 ## Acceptance gates
 A release candidate requires reviewed requirements and architecture, passing static checks, mocked safety/error paths, verified package/upstream dependencies, docs consistent with behavior, and evidence for hardware claims. Disclose known failures and untested items.
 
-## Results
-On 2026-11-03, GitHub Actions run `41613718273` passed Bash syntax validation and all seven repository test scripts at commit `7779aa99943982d85033f8157a8d001998c2a7ad`. The storage-plan tests additionally verified completeness checks for geometry/profile/prerequisites, rejection of failed or missing prerequisites, prerequisite-evidence digest binding, canonical decimal validation, and ESP profile-size consistency. This validates the pure data/validation layer only; prerequisite values are still caller-supplied assertions and have not yet been integrated with live host discovery or a confirmation/execution gate.
+## Test execution evidence
 
-On 2026-11-03, GitHub Actions run `41613051552` passed Bash syntax validation and all seven repository test scripts at commit `6ce3e9334f360ab59e78b865325360f3d76fa456`. The storage-plan tests confirmed target/profile binding, deterministic serialization and digest behavior, digest changes after target/profile mutation, rejection of missing stable identity, and rejection of multiline values. No real disk or system configuration was modified. The installer remains PLANNED; this CI result is not an end-to-end installation or hardware test.
+Chronological GitHub Actions run identifiers and commit-to-run mappings are maintained in [Implementation Status and Changelog](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md). This document owns test strategy, coverage, acceptance criteria, and limitations—not the historical CI ledger.
 
-The first-slice test command `bash tests/test-common-preflight.sh` passed with six test groups against temporary local copies whose blob hashes matched the committed files. `bash -n` also passed for both modules and the test script. ShellCheck and shfmt were unavailable. These results do not constitute an end-to-end installer test; no real disk, package, service, or network configuration was changed.
-
+For a new change, use `bash tests/run.sh` and inspect the GitHub Actions result for the exact commit. A previous successful run does not validate a later commit. Fixture tests do not establish live X280 hardware behavior.
 
 ## Live storage prerequisite integration — IMPLEMENTED and CI TESTED
 
@@ -224,3 +222,71 @@ On 2026-11-03, GitHub Actions run `41617706958` (#107) passed Bash syntax valida
 
 
 On 2026-11-03, GitHub Actions run #136 (`41618734278`) passed Bash syntax validation and all eleven test scripts at commit `3fcc970f58d76e5f62d6b76f767a4075cbe0a95b`. The mock execution-boundary cases passed, including successful eight-step execution, stable-identity change abort, read-only safety-attribute change abort, zero mock calls after an initial probe failure, partial-failure recovery marking, and callback rejection, and rejection of tampered gate metadata before gate consumption. The full topology suite also passed after its synthetic major:minor IDs were isolated from the host filesystem device ID. No real block-device handle was opened and no disk was modified.
+
+
+## Stage 8 — ThinkPad X280 Arch ISO live-environment observations
+
+**Date:** 2026-11-07 (user-provided terminal photographs; manually reviewed)  
+**Environment:** Arch Linux ISO `2026.11.01`, running on the physical ThinkPad X280.
+
+Observed read-only results:
+
+| Check | Observed result | Evidence / status |
+|---|---|---|
+| Firmware boot mode | UEFI | `/sys/firmware/efi` exists and the terminal printed `UEFI MODE`. VERIFIED |
+| Live root | `/dev/loop0` / `archiso` overlay | `findmnt /` shows an overlay root with archiso lower/upper/work paths. VERIFIED |
+| Active swap | None listed | `swapon --show` returned no rows. VERIFIED for this snapshot |
+| Installer USB | `/dev/sda`, 7.5G, model `Flash Disk`, removable=1, read-only=1 | `lsblk` output. VERIFIED |
+| Internal SSD | `/dev/nvme0n1`, 238.5G, model `WDC PC SN730 SDBQNTY-256G-1001`, transport NVMe, removable=0, read-only=0 | `lsblk` output. VERIFIED |
+| Internal SSD serial alias | `nvme-WDC_PC_SN730_SDBQNTY-256G-1001_193839803177` | `/dev/disk/by-id/` symlink resolves to `../../nvme0n1`. VERIFIED |
+| Additional SSD aliases | Partition aliases `...-part1` through `...-part4`; an NVMe EUI alias is also present | `/dev/disk/by-id/` output. VERIFIED; full EUI string not transcribed because the photograph is not sufficiently clear |
+| Existing SSD partition table | Four partitions: 100M EFI/FAT, 16M reserved (no filesystem shown), 237.8G NTFS, 530M NTFS | `lsblk` output. VERIFIED as observed |
+
+Safety interpretation:
+- The kernel names observed in this boot are `/dev/sda` for the removable Arch USB and `/dev/nvme0n1` for the internal WDC NVMe. These names are runtime observations, not permanent identifiers.
+- The WDC model and serial-based by-id alias agree across the two terminal snapshots. This is strong identification evidence, but target selection must still bind to fresh kernel major:minor, capacity, transport, WWN/serial, removable/read-only state, and topology at execution time.
+- The SSD is reported writable (`RO=0`) and still contains the Windows partition layout. No partition, filesystem, encryption, mount, or package mutation was performed during these observations.
+- An empty `swapon --show` is expected in this live session; it does not establish that the target disk is unused.
+- The live root is an overlay. The target-safety decision is **NOT YET VERIFIED**: the complete mount dependency graph, loop backing relationship, overlay lower/upper/work backing devices, and active swap relationship must pass the repository topology validator before a target may be considered eligible.
+- The repository's `storage::discover_candidates` and `storage::validate_target` functions have not yet been executed on this physical host. The photographs validate raw system observations only, not the project's implementation.
+
+**Stage 8 result:** UEFI boot and device identity observations VERIFIED. Physical-disk topology exclusion, live candidate discovery, plan calculation, confirmation flow, and any destructive executor remain NOT TESTED. No permission to erase or repartition is implied by this record.
+
+
+## Stage 9 — Live storage topology observations
+
+**Date:** 2026-11-07 (user-provided terminal photograph; manually reviewed)  
+**Environment:** Physical ThinkPad X280, Arch Linux ISO 2026.11.01. All commands in this stage are observational/read-only.
+
+Observed results:
+
+| Check | Result | Status |
+|---|---|---|
+| USB installer | `/dev/sda`, 7.5G, USB, model Flash Disk; partitions `/dev/sda1` (1.1G) and `/dev/sda2` (109M) | VERIFIED |
+| Additional device | `/dev/sdb`, 0B, SD/MMC reader, removable=1 | VERIFIED; not the internal SSD |
+| Internal SSD | `/dev/nvme0n1`, 238.5G, WDC PC SN730 SDBQNTY-256G-1001, serial `193839803177`, NVMe; partitions p1 100M FAT, p2 16M, p3 237.8G NTFS, p4 530M NTFS | VERIFIED |
+| NVMe mountpoints | No mountpoints shown for the NVMe disk or its partitions in this `lsblk` snapshot | VERIFIED for this snapshot |
+| Mount tree | Root is `overlay` from `/run/archiso/airootfs`; visible system mounts are proc, sysfs, devtmpfs, tmpfs, and related virtual filesystems | VERIFIED from displayed `findmnt -R /` |
+| Loop device | `/dev/loop0` backs `/run/archiso/copytoram/airootfs.sfs` and is mounted at `/run/archiso/airootfs` as squashfs | VERIFIED |
+| Swap | `/proc/swaps` contains only its header; no active swap entries | VERIFIED for this snapshot |
+
+Topology assessment:
+- The displayed overlay upper/work paths are under `/run/archiso/cowspace`; `findmnt` shows `/run` backed by tmpfs. The displayed loop backing file is under `/run/archiso/copytoram`. These observations indicate the Live Environment's shown root/loop path is RAM-backed rather than located on the internal NVMe SSD.
+- No NVMe partition appears as a mount source in the displayed mount tree, and no active swap entry is shown.
+- These are point-in-time command observations from a photograph. They do not replace a complete programmatic dependency walk over mountinfo, sysfs block-device holders/slaves, loop backing files, and swap sources. Therefore the project's target-exclusion/topology validator has **NOT YET BEEN RUN** on this host, and SSD eligibility remains **NOT VERIFIED**.
+- The extra `/dev/sdb` SD/MMC reader is recorded to avoid confusing it with either the USB installer (`/dev/sda`) or internal NVMe (`/dev/nvme0n1`).
+
+**Stage 9 result:** Raw live topology observations recorded; no SSD mount or active swap was visible. Repository discovery/validation functions have not yet been executed on hardware. No disk mutation occurred and no destructive authorization is implied.
+
+
+## Stage 10 — One-command live storage validation
+
+The read-only hardware check is packaged as `scripts/validate-live-storage.sh` so operators do not need to type or maintain a long inline Bash block. Run it from any directory after cloning the project:
+
+```bash
+bash scripts/validate-live-storage.sh
+```
+
+The script requires UEFI boot and the expected X280 internal SSD identity (model family `WDC PC SN730`, serial `193839803177`). It discovers all whole disks, prints their safety-relevant properties, requires exactly one identity match, and calls the repository's live target/topology validator. It fails closed if dependencies, identity, or topology cannot be verified. It performs no partitioning, formatting, encryption, mounting, or disk writes. Do not treat a successful read-only check as authorization to erase the disk or as proof that a future destructive executor is safe.
+
+**Status:** IMPLEMENTED in the repository. Syntax, ShellCheck, and physical-device execution are NOT YET VERIFIED for this new entry point. The operator must run it on the X280 Arch Live environment and preserve its complete output as hardware-validation evidence.

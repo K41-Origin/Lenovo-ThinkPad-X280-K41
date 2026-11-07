@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2079 # Output namerefs are associative arrays; ShellCheck cannot infer their declaration type.
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+source "$ROOT/tests/helpers/storage-fixtures.sh"
 source "$ROOT/lib/common.sh"
 source "$ROOT/lib/preflight.sh"
 source "$ROOT/lib/storage.sh"
@@ -17,19 +19,19 @@ storage::discover_candidates() {
   local -n out="$1"
   [[ ${K41_TEST_DISCOVERY_FAIL:-0} == 0 ]] || return 1
   out[candidate_count]=1
-  out[0.device_path]=/dev/nvme0n1
-  out[0.major_minor]=259:0
-  out[0.size_bytes]=274877906944
-  out[0.transport]=nvme
-  out[0.removable]=false
-  out[0.read_only]=false
-  out[0.stable_id_kind]=wwn
-  out[0.stable_id]=eui.0011223344556677
-  out[0.wwn]=eui.0011223344556677
-  out[0.serial]=SN-X280
-  out[0.model]="WDC PC SN730"
-  out[0.has_mounted_descendant]=no
-  out[0.has_active_swap_descendant]=no
+  out["0.device_path"]=/dev/nvme0n1
+  out["0.major_minor"]=259:0
+  out["0.size_bytes"]=274877906944
+  out["0.transport"]=nvme
+  out["0.removable"]=false
+  out["0.read_only"]=false
+  out["0.stable_id_kind"]=wwn
+  out["0.stable_id"]=eui.0011223344556677
+  out["0.wwn"]=eui.0011223344556677
+  out["0.serial"]=SN-X280
+  out["0.model"]="WDC PC SN730"
+  out["0.has_mounted_descendant"]=no
+  out["0.has_active_swap_descendant"]=no
 }
 storage::validate_target() {
   local -n target="$1"
@@ -40,13 +42,8 @@ storage::validate_target() {
 }
 
 make_plan() {
-  local -A target=(
-    [device_path]=/dev/nvme0n1 [major_minor]=259:0
-    [size_bytes]=274877906944 [transport]=nvme
-    [removable]=false [read_only]=false
-    [stable_id_kind]=wwn [stable_id]=eui.0011223344556677
-    [wwn]=eui.0011223344556677 [serial]=SN-X280 [model]="WDC PC SN730"
-  )
+  local -A target=()
+  storage_test::make_x280_target target "eui.0011223344556677" "SN-X280"
   storage::plan_gpt_layout "$1" 274877906944 512 4096 8589934592 1073741824
   storage::plan_bind_target "$1" target
 }
@@ -87,19 +84,19 @@ make_plan changed_plan
 storage::discover_candidates() {
   local -n out="$1"
   out[candidate_count]=1
-  out[0.device_path]=/dev/nvme0n1
-  out[0.major_minor]=259:0
-  out[0.size_bytes]=274877906944
-  out[0.transport]=nvme
-  out[0.removable]=false
-  out[0.read_only]=false
-  out[0.stable_id_kind]=wwn
-  out[0.stable_id]=DIFFERENT-WWN
-  out[0.wwn]=DIFFERENT-WWN
-  out[0.serial]=SN-X280
-  out[0.model]="WDC PC SN730"
-  out[0.has_mounted_descendant]=no
-  out[0.has_active_swap_descendant]=no
+  out["0.device_path"]=/dev/nvme0n1
+  out["0.major_minor"]=259:0
+  out["0.size_bytes"]=274877906944
+  out["0.transport"]=nvme
+  out["0.removable"]=false
+  out["0.read_only"]=false
+  out["0.stable_id_kind"]=wwn
+  out["0.stable_id"]=DIFFERENT-WWN
+  out["0.wwn"]=DIFFERENT-WWN
+  out["0.serial"]=SN-X280
+  out["0.model"]="WDC PC SN730"
+  out["0.has_mounted_descendant"]=no
+  out["0.has_active_swap_descendant"]=no
 }
 if storage::plan_collect_live_prerequisites changed_plan changed_target changed_prereq; then
   echo 'FAIL: changed stable identity accepted' >&2; exit 1

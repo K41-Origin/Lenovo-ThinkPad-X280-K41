@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+source "$ROOT/tests/helpers/storage-fixtures.sh"
 source "$ROOT/lib/storage-plan.sh"
 
 declare -A plan=()
@@ -44,6 +45,23 @@ if storage::plan_gpt_layout overflow 9223372036854775808 512 4096 8589934592 107
 fi
 echo 'PASS: rejects arithmetic input outside signed 64-bit range'
 
+# Public planner output validation must fail cleanly before nameref creation.
+if storage::plan_gpt_layout 'bad-name' 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: malformed output variable name accepted' >&2; exit 1
+fi
+if storage::plan_gpt_layout missing_plan 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: missing output variable accepted' >&2; exit 1
+fi
+declare -a indexed_plan=()
+if storage::plan_gpt_layout indexed_plan 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: indexed output array accepted' >&2; exit 1
+fi
+declare -Ar readonly_plan=()
+if storage::plan_gpt_layout readonly_plan 274877906944 512 4096 8589934592 1073741824; then
+  echo 'FAIL: readonly associative output accepted' >&2; exit 1
+fi
+echo 'PASS: rejects malformed, missing, indexed, and readonly output variables before nameref creation'
+
 declare -A swap_overflow=()
 if storage::plan_gpt_layout swap_overflow 274877906944 512 4096 9223372036854775807 1; then
   echo 'FAIL: swap-size addition overflow accepted' >&2; exit 1
@@ -57,13 +75,8 @@ storage::plan_gpt_layout leading_zero 0274877906944 0512 04096 08589934592 01073
 echo 'PASS: normalizes decimal inputs with leading zeros without octal interpretation'
 
 # Bind the calculated geometry to a stable target and approved profile.
-declare -A target=(
-  [device_path]=/dev/nvme0n1 [major_minor]=259:0
-  [size_bytes]=274877906944 [transport]=nvme
-  [removable]=false [read_only]=false
-  [stable_id_kind]=wwn [stable_id]=eui.0011223344556677
-  [wwn]=eui.0011223344556677 [serial]=SERIAL-X280 [model]="WDC PC SN730"
-)
+declare -A target=()
+storage_test::make_x280_target target eui.0011223344556677 SERIAL-X280
 declare -A bound=()
 storage::plan_gpt_layout bound 274877906944 512 4096 8589934592 1073741824
 storage::plan_bind_target bound target

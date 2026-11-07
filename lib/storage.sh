@@ -25,7 +25,7 @@ storage::discover_candidates() {
   command -v base64 >/dev/null 2>&1 || return 1
   command -v readlink >/dev/null 2>&1 || return 1
 
-  local json swaps encoded index=0 object path major_minor type size model transport wwn serial removable readonly mounted active_swap
+  local json swaps encoded index=0 object path major_minor type size model transport wwn serial removable read_only mounted active_swap
   json="$(lsblk --json --bytes --paths --output NAME,MAJ:MIN,TYPE,SIZE,MODEL,TRAN,WWN,SERIAL,RM,RO,MOUNTPOINTS)" || return 1
   jq -e '.blockdevices | type == "array"' >/dev/null 2>&1 <<<"$json" || return 1
   swaps="$(swapon --show --noheadings --raw --output NAME)" || return 1
@@ -56,7 +56,7 @@ storage::discover_candidates() {
     wwn="$(jq -r '.wwn // "" | strings' <<<"$object")" || return 1
     serial="$(jq -r '.serial // "" | strings' <<<"$object")" || return 1
     removable="$(jq -er 'if .rm == true then "true" elif .rm == false then "false" else error("unknown removable state") end' <<<"$object")" || return 1
-    readonly="$(jq -er 'if .ro == true then "true" elif .ro == false then "false" else error("unknown read-only state") end' <<<"$object")" || return 1
+    read_only="$(jq -er 'if .ro == true then "true" elif .ro == false then "false" else error("unknown read-only state") end' <<<"$object")" || return 1
     mounted="$(jq -er 'if .mounted == true then "yes" elif .mounted == false then "no" else error("unknown mount state") end' <<<"$object")" || return 1
     [[ "$path" == /dev/* && "$type" == disk && "$size" =~ ^[0-9]+$ ]] || return 1
 
@@ -91,7 +91,7 @@ storage::discover_candidates() {
     _out["$index.wwn"]="$wwn"
     _out["$index.serial"]="$serial"
     _out["$index.removable"]="$removable"
-    _out["$index.read_only"]="$readonly"
+    _out["$index.read_only"]="$read_only"
     _out["$index.has_mounted_descendant"]="$mounted"
     _out["$index.has_active_swap_descendant"]="$active_swap"
     _out["$index.stable_id_kind"]="$stable_kind"

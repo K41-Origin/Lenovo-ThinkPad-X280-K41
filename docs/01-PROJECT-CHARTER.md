@@ -28,7 +28,8 @@ This charter owns the project-status definitions used across the repository:
 - PLANNED: proposed, not implemented.
 - APPROVED: user-approved requirement or decision.
 - IMPLEMENTED: code or documentation exists.
-- TESTED: a specified test was run.
+- TESTED: a specified test was run; record its scope and result.
+- NOT TESTED: the behavior has not been exercised with the evidence required for its claim, or testing has not yet occurred. Use this explicitly for hardware-only and end-to-end behavior until those tests run.
 - VERIFIED: behavior was confirmed with evidence.
 - RELEASED: included in a designated release.
 

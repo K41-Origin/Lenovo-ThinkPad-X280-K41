@@ -35,7 +35,7 @@ After changing files:
 
 - Never invent repository contents, upstream facts, command results, test results, or successful operations.
 - Distinguish proposals and assumptions from approved decisions and verified facts.
-- Use the project status vocabulary consistently: `PLANNED`, `APPROVED`, `IMPLEMENTED`, `TESTED`, `VERIFIED`, and `RELEASED`.
+- Use the status vocabulary defined in `docs/01-PROJECT-CHARTER.md`, including `NOT TESTED`; do not create competing definitions.
 - A file existing does not prove its behavior works. Syntax checks do not prove runtime correctness; simulated tests do not prove hardware compatibility.
 - Never mark a requirement or feature tested, verified, or released without appropriate evidence.
 

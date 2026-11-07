@@ -1,30 +1,16 @@
 # Architecture and Modules
 
 ## Status
-The repository contains tested first-slice logging/read-only preflight helpers and a diagnostic-only entry point. Installer orchestration and installation behavior are not implemented end to end.
+The repository contains tested first-slice logging/read-only preflight helpers and a diagnostic-only entry point. Nine future-domain module files are placeholders marked PLANNED; installer orchestration and installation behavior are not implemented end to end.
 
 ## Architecture decision
 Use one project-owned interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB. The same interactive flow coordinates base Arch installation, desktop configuration, selected packages, validation, and reporting. Modules remain separate internally to keep responsibilities testable and failures easier to isolate.
 
-## Approved storage and boot design
+## Storage and boot architecture reference
 
-The following design is approved for the X280 project. It is not yet implemented, hardware-verified, or a finalized target-specific partition plan.
+The approved storage and boot decisions are indexed in `docs/02-REQUIREMENTS-AND-DECISIONS.md`. The canonical detailed design, layout, safety gates, encryption, UKI, swap, hibernation, recovery, and acceptance requirements are owned by [Installation and Disk](04-INSTALLATION-AND-DISK.md). This architecture document does not duplicate those decisions.
 
-- **Firmware and partitioning:** UEFI with GPT. Detect the actual boot mode on every run; do not assume the machine was booted in UEFI mode.
-- **EFI System Partition:** FAT32, **1 GiB**, mounted at `/efi`. Keep sufficient free space for the required default UKI and safe kernel updates. The final storage plan must still verify that the selected disk and partition layout can support this size.
-- **Boot manager:** systemd-boot. It discovers EFI boot applications under `/efi/EFI/Linux/`; it must not depend on reading kernel or initramfs files from the encrypted root.
-- **Kernel/initramfs placement:** use the official Arch `linux` package and mkinitcpio to build a **native UKI**. Store the required default UKI under `/efi/EFI/Linux/` (for example, `arch-linux.efi`). Keep the source kernel and mkinitcpio configuration under `/boot` on the encrypted ext4 root. systemd-boot boots the UKI from the ESP; it does not load the kernel/initramfs from encrypted root.
-- **UKI policy:** one default UKI is mandatory. A separate fallback UKI is **not** part of the initial installation profile; reconsider only after measuring actual UKI sizes and confirming adequate ESP capacity/update headroom. The official Arch ISO USB is the initial recovery environment.
-- **UKI update lifecycle:** configure the mkinitcpio preset so the official `linux` package's kernel update regenerates the UKI at the ESP destination. The ESP must be mounted at `/efi` during generation. The implementation must fail visibly and preserve the last known-good boot artifact if generation fails; it must never silently report a successful kernel update with a stale UKI. This behavior is a design requirement and remains unimplemented/unverified until tested.
-- **Generation tooling:** use mkinitcpio's native UKI generation. Do not introduce a separate `kernel-install`/`systemd-ukify` generation layer in the initial implementation unless a verified upstream requirement later makes it necessary.
-- **Encryption and root:** one LUKS2 container on the main Linux partition, with ext4 directly on the unlocked mapper device. No LVM is planned because the approved initial layout needs only one root filesystem and a swapfile.
-- **Early root unlock:** mkinitcpio with the systemd-based `sd-encrypt` path is the approved direction. Exact hook ordering, kernel command line, crypt device identification, and required initramfs contents must be verified against current Arch documentation before implementation.
-- **Swap and hibernation:** swapfile located inside encrypted ext4 root. The supplied hardware data is 8 GiB RAM and 256 GB SSD; use these as planning inputs, not as a reason to assume the final usable capacity or a guaranteed hibernation outcome. Determine swapfile sizing from measured memory, available space after the full partition plan, and the chosen hibernation policy. Resume must target the unlocked mapper device; ext4's actual physical swapfile offset must be calculated and kept synchronized with boot configuration whenever the swapfile is created, resized, replaced, or relocated.
-- **No separate unencrypted swap partition, separate swap LUKS container, or LVM layer** is planned in this initial design.
-- **Secure Boot** remains disabled according to REQ-SEC-006. LUKS protects data at rest but does not authenticate the boot chain; the unencrypted ESP remains exposed to offline modification. Explain this limitation in installer review and documentation.
-
-**Mandatory verification before destructive implementation:** verify actual UEFI mode and disk identity; confirm current mkinitcpio UKI preset semantics and systemd-boot discovery; test UKI generation and kernel update integration with the ESP mounted and unmounted; verify failure handling preserves a known-good UKI; verify LUKS2 + `sd-encrypt` root unlock; verify ext4 swapfile resume parameters and offset lifecycle; establish a safe swap-size policy; test in a disposable VM, then perform authorized X280 hardware validation. Any unresolved critical check blocks destructive storage execution.
-
+Current implementation remains limited to read-only discovery, topology analysis, planning, confirmation, and mock-only execution modeling. No real storage executor or native device handle is implemented; see [Stage 8 design](14-STAGE-8-NATIVE-DEVICE-ACCESS.md).
 ## Repository layout
 ```text
 .
@@ -201,7 +187,7 @@ These contracts define the first implementation slice. They are read-only founda
 - Ambiguous/missing identity, incomplete plan, failed prerequisite, changed target, cancellation, or unknown critical state must fail closed.
 - Return statuses must distinguish success from safe abort/cancellation and critical failure. Missing output or unset state must never count as success.
 - Never pass or log passphrases, recovery keys, or credentials. Keep privilege elevation limited to the stage that requires it.
-- The approved architecture is UEFI/GPT, a 1 GiB FAT32 ESP at `/efi`, systemd-boot, a native mkinitcpio UKI, LUKS2 with ext4 directly on the unlocked root mapper, and an encrypted-root swapfile. This contract does not define a finalized target-specific partition table or authorize destructive operations. Exact device mapping, mkinitcpio hooks/kernel command line, UKI update behavior, swap sizing, and resume offset remain implementation and compatibility checks; unresolved critical checks block execution.
+- The approved storage and boot decisions are indexed in `docs/02-REQUIREMENTS-AND-DECISIONS.md`; their detailed technical owner is `docs/04-INSTALLATION-AND-DISK.md`. This contract does not define a finalized target-specific partition table or authorize destructive operations.
 - Every abort path must be testable with mocks and assert zero destructive-tool invocations. Do not run automated tests against real disks.
 
 **Stage ordering:** preflight success → discover candidates → build complete plan → render plan → validate target → explicit confirmation → immediate target/precondition revalidation → execute → verify result. Any failed gate exits before execution. Recovery after interruption must inspect current state and must not automatically repeat destructive work.
