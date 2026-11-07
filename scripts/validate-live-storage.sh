@@ -44,7 +44,7 @@ for ((i=0; i<disks[candidate_count]; i++)); do
 done
 
 (( matches == 1 )) || fail "configured X280 SSD identity must match exactly one candidate; found $matches"
-printf 'PASS: configured X280 SSD model/serial identity matched exactly once.\\n'
+printf 'PASS: configured X280 SSD model/serial identity matched exactly once.\n'
 
 declare -A target=(
   [device_path]="${disks[$selected.device_path]}"
