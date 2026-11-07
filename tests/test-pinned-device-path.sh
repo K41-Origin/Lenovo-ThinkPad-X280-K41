@@ -67,13 +67,13 @@ mkfs.fat -F 32 "$esp_ref" >/dev/null
 # Verify the filesystem before mounting so a descriptor/path problem is not
 # obscured by mount(8) filesystem auto-probing and its final probe error.
 blkid -p "$esp_ref" | grep -q 'TYPE="vfat"' || {
-  printf 'FAIL: mkfs.fat did not produce a detectable vfat filesystem on the pinned ESP.\\n' >&2
+  printf 'FAIL: mkfs.fat did not produce a detectable vfat filesystem on the pinned ESP.\n' >&2
   exit 1
 }
 mkdir "$tmp/esp-mount"
 mount -t vfat "$esp_ref" "$tmp/esp-mount"
 esp_source="$(findmnt --noheadings --raw --mountpoint "$tmp/esp-mount" --output SOURCE)"
-[[ $esp_source == /dev/* ]] || { printf 'FAIL: pinned ESP mount did not resolve to a block-device source.\\n' >&2; exit 1; }
+[[ $esp_source == /dev/* ]] || { printf 'FAIL: pinned ESP mount did not resolve to a block-device source.\n' >&2; exit 1; }
 umount "$tmp/esp-mount"
 cryptsetup luksFormat --batch-mode --type luks2 --key-file "$tmp/key" "$root_ref"
 mapper=k41-ci-pinned-test
