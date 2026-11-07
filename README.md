@@ -20,7 +20,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 ## Current repository structure
 
 - `installer` — diagnostic-only entry point with `--help` and `--preflight`.
-- `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires exact manual acknowledgement before launching the destructive installer.
+- `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires source review, a passing read-only live-readiness gate, and a second exact acknowledgement before launching the destructive installer.
 - `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; physical X280 installation remains NOT TESTED.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
@@ -38,7 +38,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 1. Boot the official Arch Linux ISO from USB.
 2. Connect to the network.
 3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
-4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, and requires an exact SHA-bound acknowledgement before launching the installer.
+4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, requires an exact SHA-bound acknowledgement, runs the read-only readiness gate, and requires a second exact acknowledgement before launching the installer.
 5. Run read-only live validation and the canonical test suite; inspect their reports.
 6. Review `scripts/install-arch-x280.sh` and all sourced modules through the bootstrap's source-review gate before considering the destructive installer. It requires exact target-bound confirmation and erases the selected SSD.
 7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
