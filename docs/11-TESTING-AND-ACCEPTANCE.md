@@ -75,7 +75,7 @@ These planned tests verify the architecture's bootstrap review gate before any f
 
 ## Diagnostic entry-point tests
 
-The diagnostic-only entry point supports `--help` and `--preflight`. It sources only the common/preflight modules, uses a repository-relative module path, and never treats diagnostics as installation approval. `--preflight` intentionally returns nonzero because no installation workflow exists. The focused entry test covers help from another working directory, invalid arguments, non-success from preflight, explicit disabled status, and a static check that the entry point does not source installation modules or name common destructive/system-changing commands. Static checks are supplementary and do not prove the absence of every possible side effect.
+The diagnostic-only entry point supports `--help` and `--preflight`. It sources only the common/preflight modules, uses a repository-relative module path, and never treats diagnostics as installation approval. `--preflight` intentionally returns nonzero because this legacy entry point has no installation workflow; the separate PR #9 script is documented elsewhere. The focused entry test covers help from another working directory, invalid arguments, non-success from preflight, explicit disabled status, and a static check that the entry point does not source installation modules or name common destructive/system-changing commands. Static checks are supplementary and do not prove the absence of every possible side effect.
 
 Run with `bash tests/test-installer-entry.sh`.
 
