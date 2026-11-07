@@ -13,7 +13,7 @@ pass "installer passes bash -n"
 for required in \
   'preflight::check_target_inventory' \
   'WDC PC SN730' \
-  '256052966400' \
+  '256060514304' \
   'storage::plan_gpt_layout' \
   'storage::plan_confirm_interactive' \
   'storage::plan_final_revalidate' \
