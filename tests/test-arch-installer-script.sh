@@ -12,6 +12,12 @@ pass "installer passes bash -n"
 # shellcheck disable=SC2016
 for required in \
   'preflight::check_target_inventory' \
+  'installer::init_logging' \
+  'installer_log_dir="/var/log/x280-installer' \
+  'exec > >(tee -a "$installer_log_file") 2>&1' \
+  'chmod 0600 "$installer_log_file"' \
+  'installer::stage final-revalidation' \
+  'Persistent diagnostic log:' \
   'WDC PC SN730' \
   '256060514304' \
   'storage::plan_gpt_layout' \
@@ -33,7 +39,16 @@ for required in \
   '[[ -s /mnt/etc/locale.conf ]]'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
 done
-pass "installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
+pass "installer includes root-only persistent logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
+if grep -Eq '^[[:space:]]*set[[:space:]]+-[^#]*x|^[[:space:]]*set[[:space:]]+-o[[:space:]]+xtrace' "$SCRIPT"; then
+  fail "installer enables shell xtrace, which could expose sensitive command arguments"
+fi
+pass "installer does not enable shell xtrace"
+log_init_line="$(grep -nF 'installer::init_logging || exit 1' "$SCRIPT" | cut -d: -f1)"
+erase_line_for_log="$(grep -nF 'wipefs --all --force' "$SCRIPT" | cut -d: -f1)"
+[[ -n $log_init_line && -n $erase_line_for_log ]] || fail "logging initialization or destructive step is absent"
+(( log_init_line < erase_line_for_log )) || fail "logging is initialized after the first destructive operation"
+pass "logging is initialized before any destructive disk operation"
 preset_printf_line="$(grep -F 'default_uki=' "$SCRIPT" | grep 'printf' || true)"
 [[ $preset_printf_line == *"printf '%s\\n'"* ]] || fail "mkinitcpio preset entries must use a single newline escape"
 pass "mkinitcpio preset formatter uses real newline delimiters"
