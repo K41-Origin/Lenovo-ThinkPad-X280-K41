@@ -1,6 +1,6 @@
 # Tests
 
-The repository currently has fourteen test scripts covering common/preflight behavior, installer entry handling, the X280 Arch installer and target-configuration static safety contracts, host inventory, storage discovery/topology, storage-plan arithmetic, live prerequisite collection, explicit confirmation/final revalidation, the storage dry-run model, and the mock-only execution boundary. These tests do not constitute end-to-end installation or real-hardware validation. The topology fixture now allocates synthetic major:minor IDs separately from the host temporary-filesystem ID to avoid environment-dependent collisions.
+The repository currently has fifteen test scripts covering common/preflight behavior, installer entry handling, the X280 Arch installer, target-configuration, and post-install configuration static safety contracts, host inventory, storage discovery/topology, storage-plan arithmetic, live prerequisite collection, explicit confirmation/final revalidation, the storage dry-run model, and the mock-only execution boundary. These tests do not constitute end-to-end installation or real-hardware validation. The topology fixture now allocates synthetic major:minor IDs separately from the host temporary-filesystem ID to avoid environment-dependent collisions.
 
 Run the complete test suite from the repository root:
 
@@ -70,3 +70,5 @@ The installer currently does **not** configure a regular user, locale, timezone,
 
 
 The target configuration stage `scripts/configure-arch-x280.sh` runs inside the installed system through `arch-chroot`. It interactively configures hostname, initial administrator username/password, timezone, locale, Intel microcode, sudo wheel access, and the planned swapfile. Password input is interactive and is not written to the report. Resume/hibernation is deliberately not enabled because the swapfile resume offset has not yet been derived and verified.
+
+The target configuration stage prompts for hostname, initial username/password, timezone, and locale; installs Intel microcode; configures sudo for the wheel group; and creates the swapfile in a temporary path before atomically renaming it into place. Hibernation remains disabled until a tested resume-offset workflow is implemented.
