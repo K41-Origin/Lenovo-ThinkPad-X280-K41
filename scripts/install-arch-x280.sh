@@ -24,7 +24,7 @@ die() { k41::log_error "$1"; exit 1; }
 need_root() { (( EUID == 0 )) || die "Jalankan dari Arch ISO sebagai root."; }
 need_commands() {
   local cmd
-  for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt blockdev wipefs arch-chroot; do
+  for cmd in lsblk jq swapon base64 readlink stat sha256sum date sgdisk partprobe udevadm cryptsetup mkfs.fat mkfs.ext4 pacstrap genfstab blkid findmnt blockdev wipefs arch-chroot mount awk sed grep install; do
     command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak ditemukan: $cmd"
   done
 }
@@ -60,13 +60,14 @@ for key in device_path major_minor size_bytes model transport removable read_onl
   target[$key]=${discovered[$selection.$key]}
 done
 [[ ${target[transport]} == nvme && ${target[removable]} == false && ${target[read_only]} == false ]] || die "Target bukan NVMe internal writable."
+[[ ${target[model]} == "WDC PC SN730" && ${target[size_bytes]} == 256052966400 ]] || die "Target tidak cocok dengan model dan kapasitas SSD X280 yang telah diverifikasi."
 [[ ${target[stable_id_kind]} == wwn || ${target[stable_id_kind]} == serial ]] || die "Disk tidak memiliki identitas stabil WWN/serial."
 [[ ${discovered[$selection.has_mounted_descendant]} == no && ${discovered[$selection.has_active_swap_descendant]} == no ]] || die "Target memiliki mount atau swap aktif."
 
 ram_bytes="$(awk '/MemTotal:/ {print $2 * 1024}' /proc/meminfo)"
 [[ $ram_bytes =~ ^[0-9]+$ ]] || die "Tidak dapat menentukan kapasitas RAM."
 swap_margin_bytes=$((2 * 1024 * 1024 * 1024))
-declare -A plan=() prereq=() confirmation=() fresh_target=() fresh_prereq=() gate=()
+declare -A plan=() confirmation=() fresh_target=() fresh_prereq=() gate=()
 storage::plan_gpt_layout plan "${target[size_bytes]}" "$(blockdev --getss "${target[device_path]}")" "$(blockdev --getpbsz "${target[device_path]}")" "$ram_bytes" "$swap_margin_bytes" || die "Perhitungan layout disk gagal."
 storage::plan_bind_target plan target || die "Binding identitas target gagal."
 storage::plan_collect_live_prerequisites plan fresh_target prereq || die "Pemeriksaan prasyarat awal gagal."
