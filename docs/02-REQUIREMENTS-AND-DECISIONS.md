@@ -8,6 +8,7 @@ This document indexes approved planning decisions. Domain details live in the re
 - REQ-INSTALL-003 — APPROVED: Retrieve the latest repository code from `main` for each installation attempt. Display the resolved commit SHA so the version used is identifiable.
 - REQ-INSTALL-004 — APPROVED: Do not pipe remote scripts directly into a shell. Bootstrap must retrieve code with Git and invoke the project entry point explicitly.
 - REQ-INSTALL-005 — APPROVED: Read-only preflight, disk discovery, and storage-plan preparation/review may run before confirmation. No installation step that depends on the target disk, and no destructive storage action, may proceed until prerequisites pass, the complete plan for the identified target is displayed, and the user explicitly confirms that target and plan.
+- REQ-INSTALL-006 — APPROVED: Virtual-machine installation/testing is not part of this project validation strategy. Fixture tests, mocks, static checks, and disposable loop-backed integration tests remain permitted for bounded software checks. End-to-end destructive installation and first-boot acceptance must be tested on the actual ThinkPad X280, with explicit authorization, verified SSD identity, reviewed safety gates, and recovery preparation. The destructive SSD replacement workflow must be retained; VM avoidance is not a reason to remove or neutralize it.
 
 ## Installation and storage
 - REQ-DISK-001 — APPROVED: Replace Windows; the user reports no data to retain. This does not waive target identification or explicit confirmation.
