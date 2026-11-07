@@ -10,10 +10,10 @@
 
 ## First-boot evidence collector — 2026-11-08
 
-- **IMPLEMENTED on branch `feat/x280-first-boot-reporting-2026-11-08`:** `scripts/x280-first-boot-check.sh` collects read-only first-boot checks and writes timestamped `reports/first-boot/` evidence files (`summary.md`, `diagnostics.log`, `boot-status.txt`, `system-status.txt`, and `hardware.txt`). It records PASS/FAIL/SKIP, retains reports on failure, and exits non-zero when any acceptance check fails.
+- **IMPLEMENTED on PR #13 branch:** the destructive installer now copies the collector into the target as `/usr/local/sbin/x280-first-boot-check`, and the bootstrap includes it in mandatory source review. The installer regression test checks this deployment contract.\n- **IMPLEMENTED on branch `feat/x280-first-boot-reporting-2026-11-08`:** `scripts/x280-first-boot-check.sh` collects read-only first-boot checks and writes timestamped `reports/first-boot/` evidence files (`summary.md`, `diagnostics.log`, `boot-status.txt`, `system-status.txt`, and `hardware.txt`). It records PASS/FAIL/SKIP, retains reports on failure, and exits non-zero when any acceptance check fails.
 - **IMPLEMENTED:** `tests/test-x280-first-boot-check.sh` uses command mocks and temporary fixtures to cover healthy and failed systemd states. The test is registered in the canonical runner (18 scripts).
 - **IMPLEMENTED:** operator instructions and privacy/safety limitations are documented in `docs/17-X280-FIRST-BOOT-TEST.md`.
-- **NOT YET TESTED:** CI has not yet run for this branch at the time of this entry. No real first-boot evidence exists. The mock test cannot prove UEFI firmware, UKI loading, LUKS unlock, or physical X280 behavior.
+- **TESTED:** GitHub Actions on the initial collector commit passed the canonical suite (18 PASS, 0 FAIL, 0 SKIP), Bash syntax, ShellCheck, and repository validation. Subsequent installer-copy integration changes are awaiting a fresh CI run. No real first-boot evidence exists. Mock tests cannot prove UEFI firmware, UKI loading, LUKS unlock, or physical X280 behavior.
 - Reports are local only. The collector never stages, commits, or pushes them. Review all evidence files for secrets before sharing.
 
 ## Historical baseline snapshot — 2026-11-07 (repository branch audit)
