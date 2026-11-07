@@ -89,10 +89,10 @@ disk_fd_major_minor="$(lsblk -dnro MAJ:MIN "/proc/$$/fd/$disk_fd")"
 [[ $disk_fd_major_minor == "${gate[target_major_minor]}" ]] || die "Descriptor tidak cocok dengan major:minor target yang dikonfirmasi."
 [[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$$/fd/$disk_fd")" ]] || die "Path target berubah ketika descriptor dibuka."
 
-# The external disk utilities open the device pathname themselves. The
-# read-only identity checks immediately before each command reduce, but do not
-# eliminate, the kernel device-rebinding/TOCTOU window. This is not descriptor-
-# bound execution and must not be represented as race-proof.
+# Disk and partition descriptors are held open by this Bash process. Child
+# utilities receive /proc/self/fd/N paths, which refer to the inherited open
+# block-device objects rather than re-resolving the original /dev pathname.
+# This design is validated by the isolated loop-device integration test.
 assert_target() {
   local now
   now="$(lsblk -dnro MAJ:MIN,SIZE,SERIAL,WWN,TRAN,RM,RO "$disk" | sed 's/[[:space:]]\+$//')" || return 1
@@ -100,8 +100,8 @@ assert_target() {
     k41::log_error "Identitas block device berubah; menghentikan proses."
     return 1
   }
-  [[ -b "/proc/$/fd/$disk_fd" ]] || return 1
-  [[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$/fd/$disk_fd")" ]] || return 1
+  [[ -b "/proc/$BASHPID/fd/$disk_fd" ]] || return 1
+  [[ "$(stat -Lc '%t:%T' "$disk")" == "$(stat -Lc '%t:%T' "/proc/$BASHPID/fd/$disk_fd")" ]] || return 1
 }
 run_step() {
   local label=$1; shift
@@ -128,9 +128,9 @@ exec {esp_fd}<>"$esp" || die "Tidak dapat menahan descriptor ESP."
 exec {root_fd}<>"$root_part" || die "Tidak dapat menahan descriptor root partition."
 esp_ref="/proc/self/fd/$esp_fd"
 root_ref="/proc/self/fd/$root_fd"
-[[ -b "/proc/$/fd/$esp_fd" && -b "/proc/$/fd/$root_fd" ]] || die "Descriptor partisi bukan block device."
-[[ "$(stat -Lc '%t:%T' "$esp")" == "$(stat -Lc '%t:%T' "/proc/$/fd/$esp_fd")" ]] || die "Path ESP berubah saat descriptor dibuka."
-[[ "$(stat -Lc '%t:%T' "$root_part")" == "$(stat -Lc '%t:%T' "/proc/$/fd/$root_fd")" ]] || die "Path root partition berubah saat descriptor dibuka."
+[[ -b "/proc/$BASHPID/fd/$esp_fd" && -b "/proc/$BASHPID/fd/$root_fd" ]] || die "Descriptor partisi bukan block device."
+[[ "$(stat -Lc '%t:%T' "$esp")" == "$(stat -Lc '%t:%T' "/proc/$BASHPID/fd/$esp_fd")" ]] || die "Path ESP berubah saat descriptor dibuka."
+[[ "$(stat -Lc '%t:%T' "$root_part")" == "$(stat -Lc '%t:%T' "/proc/$BASHPID/fd/$root_fd")" ]] || die "Path root partition berubah saat descriptor dibuka."
 assert_target || die "Identitas disk berubah setelah partisi."
 
 printf '\nBuat passphrase LUKS2 untuk root (input tidak dicatat):\n' >&2
