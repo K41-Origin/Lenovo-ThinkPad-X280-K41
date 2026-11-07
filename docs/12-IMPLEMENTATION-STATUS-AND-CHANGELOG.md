@@ -267,3 +267,11 @@ For each test, record the exact test/command, date, outcome, and limitations. Wr
 - IMPLEMENTED: module code and focused fixture tests committed on feature/base-system-bootstrap-2026-11-07.
 - NOT TESTED: no local shell execution or GitHub Actions run has yet validated this change. No pacstrap transaction or target filesystem write was performed.
 - Next: wire this stage into the interactive installer only after a safe storage preparation/mount workflow is available; complete boot configuration and end-to-end VM install remain outstanding.
+
+
+### 2026-11-07 — Persistent test evidence
+- Updated `tests/run.sh` to create a unique `reports/test-runs/<UTC timestamp>/` directory for each run.
+- Each test script receives its own stdout/stderr log; the run also writes `combined.log` and `summary.md` with checkout metadata and per-test exit status.
+- Reports remain local artifacts and are not committed automatically; inspect for environment-specific information before staging.
+- **IMPLEMENTED:** persistent evidence generation in the canonical test runner and corresponding test documentation.
+- **NOT TESTED:** the updated runner has not yet been executed locally or in CI. No test result is claimed by this change.
