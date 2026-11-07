@@ -17,7 +17,7 @@ The test list is defined only in `tests/run.sh` (17 scripts at this revision). D
 | `test-bootstrap-archiso.sh` | Static source-review, commit identity, exact acknowledgement, and no-remote-pipe contract checks for the Arch ISO bootstrap. |
 | `test-common-preflight.sh` | Logging and read-only preflight helpers |
 | `test-installer-entry.sh` | Legacy `installer --help/--preflight` behavior and diagnostic-only boundary |
-| `test-arch-installer-script.sh` | Static syntax/contract checks for the separate PR #9 destructive installer; does not execute it |
+| `test-arch-installer-script.sh` | Static syntax/contract checks for the initial destructive installer on main; does not execute it |
 | `test-arch-config-script.sh` | Static checks for target configuration; does not run it inside a real target |
 | `test-pinned-device-path.sh` | Selected disk utilities against a disposable loop-backed image through inherited descriptor paths |
 | `test-inventory.sh` | Host inventory and profile parsing using fixtures |
