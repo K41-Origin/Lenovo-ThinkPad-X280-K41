@@ -35,8 +35,8 @@ while ! mkdir -- "$run_dir" 2>/dev/null; do
 done
 combined="$run_dir/combined.log"
 summary="$run_dir/summary.md"
-: > "$combined"
-: > "$summary"
+: >"$combined"
+: >"$summary"
 chmod 600 "$combined" "$summary"
 
 overall_rc=0
@@ -55,7 +55,7 @@ required_missing=()
   printf -- '- Kernel: %s\n' "$(uname -sr 2>/dev/null || printf unknown)"
   printf '\n## Test results\n\n'
   printf '| Test | Result | Exit | Log |\n|---|---:|---:|---|\n'
-} >> "$summary"
+} >>"$summary"
 
 printf 'Repository test run: %s\n' "$run_dir"
 
@@ -72,18 +72,18 @@ for test in "${tests[@]}"; do
   test_log="$run_dir/${test##*/}.log"
   if [[ ! -f "$test" ]]; then
     printf 'FAIL: required test is missing: %s\n' "$test" | tee -a "$combined"
-    printf 'FAIL: missing test script: %s\n' "$test" > "$test_log"
-    printf '| %s | **FAIL** | 1 | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    printf 'FAIL: missing test script: %s\n' "$test" >"$test_log"
+    printf '| %s | **FAIL** | 1 | %s |\n' "$test" "${test##*/}.log" >>"$summary"
     failed=$((failed + 1))
     overall_rc=1
-  elif (( ${#required_missing[@]} > 0 )); then
-    printf 'SKIP: required suite dependency is missing; see combined.log\n' > "$test_log"
-    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+  elif ((${#required_missing[@]} > 0)); then
+    printf 'SKIP: required suite dependency is missing; see combined.log\n' >"$test_log"
+    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >>"$summary"
     skipped=$((skipped + 1))
   elif [[ $test == tests/test-native-storage-handle.sh ]] && ! command -v cc >/dev/null 2>&1; then
-    printf 'SKIP: optional compiler cc is unavailable; install base-devel or a C compiler to run this native-helper test.\n' > "$test_log"
+    printf 'SKIP: optional compiler cc is unavailable; install base-devel or a C compiler to run this native-helper test.\n' >"$test_log"
     cat "$test_log" | tee -a "$combined"
-    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >> "$summary"
+    printf '| %s | **SKIP** | - | %s |\n' "$test" "${test##*/}.log" >>"$summary"
     skipped=$((skipped + 1))
   else
     printf '\n== %s ==\n' "$test" | tee -a "$combined"
@@ -99,11 +99,11 @@ for test in "${tests[@]}"; do
     fi
     cat -- "$test_log" | tee -a "$combined"
     printf '%s: %s (exit %s) — %s\n' "$test" "$result" "$rc" "$test_log"
-    printf '| %s | **%s** | %s | %s |\n' "$test" "$result" "$rc" "${test##*/}.log" >> "$summary"
+    printf '| %s | **%s** | %s | %s |\n' "$test" "$result" "$rc" "${test##*/}.log" >>"$summary"
   fi
 done
 
-if (( ${#required_missing[@]} > 0 )); then
+if ((${#required_missing[@]} > 0)); then
   overall_rc=2
 fi
 
@@ -112,7 +112,7 @@ fi
   printf -- '- Passed test scripts: %s\n' "$passed"
   printf -- '- Failed checks: %s\n' "$failed"
   printf -- '- Skipped test scripts: %s\n' "$skipped"
-  if (( overall_rc == 0 )); then
+  if ((overall_rc == 0)); then
     printf -- '- Overall result: **PASS**\n'
   else
     printf -- '- Overall result: **FAIL**\n'
@@ -123,7 +123,7 @@ fi
   printf -- '- `combined.log`: combined stdout/stderr from all executed tests and skip reasons\n'
   printf -- '- `<test-name>.log`: individual stdout/stderr or explicit SKIP reason for every manifest entry\n'
   printf '\nThe native helper test is skipped only when `cc` is unavailable. Missing required suite dependencies or any failed test returns non-zero. Reports are generated locally and are not committed automatically. Review reports for environment-specific information before sharing. A passing fixture suite is not proof of a successful installation or safe disk erasure.\n'
-} >> "$summary"
+} >>"$summary"
 
 chmod 600 "$summary" "$combined" "$run_dir"/*.log
 printf '\nSummary: %s\nCombined log: %s\n' "$summary" "$combined"
