@@ -51,7 +51,7 @@ See [tests/README.md](../tests/README.md) for the single authoritative test proc
 
 ## Physical-test gate
 
-Run `bash scripts/x280-install-readiness.sh` from the official Arch ISO as root for a consolidated syntax, automated-test, and read-only physical SSD identity/topology check. This gate does not run the destructive installer.
+Run `bash scripts/x280-install-readiness.sh` from the official Arch ISO as root for a consolidated syntax, automated-test, and read-only physical SSD identity/topology check. It always writes `reports/live-readiness/<UTC timestamp>/summary.md` and `diagnostics.log`, including a per-check PASS/FAIL table, commit SHA, environment metadata, final exit status, and captured diagnostics with detected disk serial values redacted. The detailed test-run artifacts remain under `reports/test-runs/`. Review the report and then commit/push the specific readiness report directory; the script never stages, commits, or pushes files. This gate does not run the destructive installer.
 
 **Do not begin physical destructive testing based solely on this document.** The next physical test is blocked until:
 1. Current branch CI is green for the latest documentation/code commit.
