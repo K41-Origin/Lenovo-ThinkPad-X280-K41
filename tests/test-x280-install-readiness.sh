@@ -19,7 +19,7 @@ for required in \
   'summary.md' \
   'diagnostics.log' \
   'trap on_exit EXIT' \
-  'serial=)[^[:space:]]+' \
+  'serial[[:space:]]*=?[[:space:]]*' \
   'Checks passed:' \
   'Process exit code:'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required readiness/report feature is missing: $required"
