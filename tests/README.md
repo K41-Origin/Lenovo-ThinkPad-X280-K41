@@ -93,7 +93,7 @@ After the initial install boots successfully on the actual X280 and the regular 
 
 ## Destructive installer run logs
 
-The destructive installer creates `/var/log/x280-installer/<UTC timestamp>/installer.log` before host preflight or storage operations. The directory is root-only (0700) and the file root-only (0600). If `/var/log` is unavailable, it uses `/run/x280-installer/`; that fallback is volatile and must be copied to persistent media before reboot. The installer prints the exact log path on exit.
+The destructive installer creates `/var/log/x280-installer/<UTC timestamp>/installer.log` before host preflight or storage operations. The directory is root-only (0700) and the file root-only (0600). If `/var/log` is unavailable, it uses `/run/x280-installer/`; that fallback is volatile. The Arch ISO may also keep `/var/log` on an ephemeral overlay, so copy the log to persistent media before reboot regardless of path. The installer prints the exact log path on exit.
 
 The log contains stdout/stderr, stage markers, start/end metadata, exit status, and stage-specific storage validation diagnostics. It does not enable shell xtrace. Never enter secrets as command-line arguments; interactive prompts are intended to read them from the terminal. Hardware identifiers may appear in the log, so inspect and redact before sharing. See [Error Recovery and Reporting](../docs/10-ERROR-RECOVERY-AND-REPORTING.md).
 
