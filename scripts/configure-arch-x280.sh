@@ -23,10 +23,11 @@ root_fs="$(findmnt -nro FSTYPE /)"
 prompt hostname "Hostname" "thinkpad-x280"
 [[ $hostname =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{0,62}$ ]] || die "Invalid hostname."
 prompt username "Initial username" "kai"
-[[ $username =~ ^[a-z_][a-z0-9_-]{0,30}\$?$ ]] || die "Invalid username."
+[[ $username =~ ^[a-z_][a-z0-9_-]{0,31}$ ]] || die "Invalid username."
 if id "$username" >/dev/null 2>&1; then die "User already exists: $username"; fi
 
 prompt timezone "Timezone" "Asia/Jakarta"
+[[ $timezone =~ ^[A-Za-z0-9_+.-]+(/[A-Za-z0-9_+.-]+)*$ && $timezone != *..* ]] || die "Invalid timezone path."
 [[ -f "/usr/share/zoneinfo/$timezone" ]] || die "Unknown timezone: $timezone"
 prompt locale "Locale" "en_US.UTF-8"
 [[ $locale =~ ^[A-Za-z0-9_@.-]+\.UTF-8$ ]] || die "Invalid locale name."
@@ -57,11 +58,15 @@ visudo -cf /etc/sudoers.d/10-k41-wheel >/dev/null
 info "Set the password for $username (password input is not logged)."
 passwd "$username"
 
-if [[ -e /swapfile ]]; then die "/swapfile already exists; refusing to overwrite."; fi
+if [[ -e /swapfile || -e /swapfile.k41.tmp ]]; then die "Swapfile path already exists; refusing to overwrite."; fi
 info "Creating planned swapfile ($swap_bytes bytes)."
-fallocate -l "$swap_bytes" /swapfile
-chmod 0600 /swapfile
-mkswap /swapfile
+swap_tmp=/swapfile.k41.tmp
+trap 'rm -f -- "$swap_tmp"' EXIT
+fallocate -l "$swap_bytes" "$swap_tmp"
+chmod 0600 "$swap_tmp"
+mkswap "$swap_tmp"
+mv -- "$swap_tmp" /swapfile
+trap - EXIT
 if ! grep -qE '^[[:space:]]*/swapfile[[:space:]]' /etc/fstab; then
   printf '%s\\n' '/swapfile none swap defaults 0 0' >> /etc/fstab
 fi
