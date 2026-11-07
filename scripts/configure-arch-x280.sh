@@ -17,7 +17,7 @@ prompt() {
 [[ $# -eq 1 && $1 =~ ^[0-9]+$ && $1 -gt 0 ]] || die "Expected swapfile size in bytes."
 
 swap_bytes=$1
-hostname= username= timezone= locale=
+hostname='' username='' timezone='' locale=''
 root_fs="$(findmnt -nro FSTYPE /)"
 [[ $root_fs == ext4 ]] || die "Expected ext4 root filesystem, found: $root_fs"
 
