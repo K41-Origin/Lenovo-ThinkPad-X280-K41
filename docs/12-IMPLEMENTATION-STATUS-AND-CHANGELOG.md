@@ -76,12 +76,13 @@ These CI results apply only to the named commits. They do not prove that moving 
 
 Installer trial recovery and desktop setup retries are different workflows. A failed destructive Arch installer trial requires the documented fresh-install recovery process and explicit target revalidation. A desktop setup retry is a post-install operation and does not justify reinstalling Arch.
 
-## Outstanding acceptance gates
+## Current priority and deferred stages
 
-1. Perform one targeted Caelestia restart and confirm cache creation/no new permission errors. Do not repeat full installation or broad diagnostics for this issue.
-2. Complete the manual Caelestia/Hyprland UI checklist.
-3. Test the hardware functions that matter on the physical X280: display, keyboard, touchpad/TrackPoint, audio, Wi-Fi, Bluetooth if required, brightness, suspend/resume, battery and thermal behavior.
-4. Keep hardware tuning, hibernation, and optional BlackArch PLANNED until their requirements and evidence are established.
+1. **CURRENT — Desktop functional validation.** Complete the manual Hyprland/Caelestia UI and hardware-interaction checklist, including display, input, audio, Wi-Fi, portals, locking, logout, and TTY recovery. Bluetooth remains NOT TESTED until its availability/requirement is resolved. Setup-script exit and process detection do not constitute desktop acceptance.
+2. **NEXT — Optional software integration.** After desktop acceptance, review and implement only optional components explicitly selected by the owner. Selective BlackArch remains PLANNED and opt-in.
+3. **FINAL STAGE — Hardware and system customization.** Defer CPU/GPU/performance tuning, thermal optimization, power/battery tuning, suspend/hibernate/resume testing, and extended system-stability/regression testing until stages 1 and 2 are accepted.
+
+The hardware and power audit collectors remain implemented evidence-gathering tools. The explicit power-profile selector remains implemented, but no power-saver A/B campaign or battery optimization is currently required. Do not enable competing power managers or apply device-specific tuning ahead of the final stage.
 
 ## Status vocabulary
 
