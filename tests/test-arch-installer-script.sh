@@ -66,6 +66,21 @@ if grep -Fq 'umask 077' "$SCRIPT"; then
   fail "installer must not propagate a restrictive log umask into the installed system"
 fi
 pass "installer uses a normal system umask while securing diagnostic files explicitly"
+grep -Fq '$1 == "/swapfile" && $2 == "none" && $3 == "swap"' "$SCRIPT" || fail "installer must validate swapfile source, target, and type using fstab columns"
+pass "installer validates the swapfile fstab entry using the correct source/target/type columns"
+
+fstab_sample="$(mktemp)"
+trap 'rm -f -- "$fstab_sample"' EXIT
+printf '%s\n' 'UUID=root / ext4 defaults 0 1' '/swapfile none swap defaults 0 0' >"$fstab_sample"
+swap_count="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 3 && $1 == "/swapfile" && $2 == "none" && $3 == "swap" { count++ } END { print count + 0 }' "$fstab_sample")"
+[[ $swap_count == 1 ]] || fail "valid /swapfile none swap entry must be detected"
+printf '%s\n' 'UUID=root / ext4 defaults 0 1' >"$fstab_sample"
+swap_count="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 3 && $1 == "/swapfile" && $2 == "none" && $3 == "swap" { count++ } END { print count + 0 }' "$fstab_sample")"
+[[ $swap_count == 0 ]] || fail "missing swap entry must be rejected"
+printf '%s\n' '/swapfile none swap defaults 0 0' '/swapfile none swap defaults 0 0' >"$fstab_sample"
+swap_count="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 3 && $1 == "/swapfile" && $2 == "none" && $3 == "swap" { count++ } END { print count + 0 }' "$fstab_sample")"
+[[ $swap_count == 2 ]] || fail "duplicate swap entries must be detected"
+pass "swap fstab postcondition detects valid, missing, and duplicate entries"
 log_init_line="$(grep -nF 'installer::init_logging || exit 1' "$SCRIPT" | cut -d: -f1)"
 erase_line_for_log="$(grep -nF 'wipefs --all --force' "$SCRIPT" | cut -d: -f1)"
 [[ -n $log_init_line && -n $erase_line_for_log ]] || fail "logging initialization or destructive step is absent"
