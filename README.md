@@ -46,20 +46,28 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 **Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
 
 ## Documentation index
-1. [Project charter](docs/01-PROJECT-CHARTER.md)
-2. [Requirements and decisions](docs/02-REQUIREMENTS-AND-DECISIONS.md)
-3. [Architecture and modules](docs/03-ARCHITECTURE-AND-MODULES.md)
-4. [Installation and disk](docs/04-INSTALLATION-AND-DISK.md)
-5. [Platform, security, and software policy](docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md)
-6. [Error recovery and reporting](docs/10-ERROR-RECOVERY-AND-REPORTING.md)
-7. [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md)
-8. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md)
-9. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md)
-10. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
-11. [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
-12. [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
-13. [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
-14. [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)
+
+### Project design and policy
+- [Project charter](docs/01-PROJECT-CHARTER.md)
+- [Requirements and decisions](docs/02-REQUIREMENTS-AND-DECISIONS.md)
+- [Architecture and modules](docs/03-ARCHITECTURE-AND-MODULES.md)
+- [Installation and disk](docs/04-INSTALLATION-AND-DISK.md)
+- [Platform, security, and software policy](docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md)
+
+### Operations and verification
+- [Error recovery and reporting](docs/10-ERROR-RECOVERY-AND-REPORTING.md)
+- [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md)
+- [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md)
+- [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md)
+
+### Implementation and operator references
+- [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
+- [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
+- [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
+- [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
+
+### Historical record
+- [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
