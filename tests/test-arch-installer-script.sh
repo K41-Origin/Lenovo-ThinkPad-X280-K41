@@ -35,6 +35,9 @@ for required in \
   'sgdisk --zap-all --clear' \
   'cryptsetup luksFormat --type luks2' \
   'base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"' \
+  'mount -o fmask=0177,dmask=0077 "$esp_ref" /mnt/efi' \
+  'fmask=0177' \
+  'dmask=0077' \
   'install -D -m 0755 "$ROOT/scripts/x280-first-boot-check.sh" /mnt/usr/local/sbin/x280-first-boot-check' \
   '[[ -x /mnt/usr/local/sbin/x280-first-boot-check ]]' \
   "PRESETS=('default')" \
