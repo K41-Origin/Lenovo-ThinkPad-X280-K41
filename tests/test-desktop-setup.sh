@@ -15,6 +15,59 @@ tokens=(
   'packages+=(base-devel git ddcutil libnotify dart-sass gpu-screen-recorder fuzzel)'
   'for package_name in quickshell-git caelestia-cli caelestia-shell; do'
   'makepkg --syncdeps --install'
+  'check_aur_dependencies() {'
+  'pacman -T "$dependency"'
+  'quickshell-git
+  'Approve this exact $package_name recipe and dependency metadata'
+  'pacman -Q quickshell-git caelestia-cli caelestia-shell'
+  'exec-once = caelestia shell -d'
+  'Build the AUR dependency chain explicitly'
+  'refusing to overwrite it'
+  'No graphical session was started'
+  'org.freedesktop.impl.portal.ScreenCast=hyprland'
+  'report_root='
+  'tee -a'
+  'trap on_setup_exit EXIT'
+  'on_setup_error() {'
+  'packages-before.txt'
+  'packages-after.txt'
+  'summary.md'
+)
+for token in "${tokens[@]}"; do
+  grep -Fq -- "$token" "$SCRIPT" || fail "missing desktop safety/implementation contract: $token"
+done
+if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
+  fail 'desktop setup must not enable a display manager or autologin'
+fi
+pass 'desktop setup logging, package snapshots, reviewed unprivileged AUR build, overwrite protection, and manual session start are present'
+printf '%s\n' 'Desktop setup tests passed.'
+
+  'caelestia-cli
+  'Approve this exact $package_name recipe and dependency metadata'
+  'pacman -Q quickshell-git caelestia-cli caelestia-shell'
+  'exec-once = caelestia shell -d'
+  'Build the AUR dependency chain explicitly'
+  'refusing to overwrite it'
+  'No graphical session was started'
+  'org.freedesktop.impl.portal.ScreenCast=hyprland'
+  'report_root='
+  'tee -a'
+  'trap on_setup_exit EXIT'
+  'on_setup_error() {'
+  'packages-before.txt'
+  'packages-after.txt'
+  'summary.md'
+)
+for token in "${tokens[@]}"; do
+  grep -Fq -- "$token" "$SCRIPT" || fail "missing desktop safety/implementation contract: $token"
+done
+if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
+  fail 'desktop setup must not enable a display manager or autologin'
+fi
+pass 'desktop setup logging, package snapshots, reviewed unprivileged AUR build, overwrite protection, and manual session start are present'
+printf '%s\n' 'Desktop setup tests passed.'
+
+  "printf '%s\\n' '- Log: setup.log'"
   'Approve this exact $package_name recipe and dependency metadata'
   'pacman -Q quickshell-git caelestia-cli caelestia-shell'
   'exec-once = caelestia shell -d'
