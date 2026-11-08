@@ -169,3 +169,8 @@ If the shell starts and the cache paths are created without new permission error
 - Bluetooth/BlueZ functionality: NOT TESTED; BlueZ components were unavailable in the captured environment.
 
 A completed diagnostic collection or successful setup-script exit is not a substitute for manual UI acceptance.
+
+
+## Project sequencing
+
+Desktop functional validation is the current active stage. Complete the manual desktop checklist and required functional checks before moving to optional software integration. Hardware/performance optimization, power/battery tuning, thermal customization, suspend/hibernate/resume testing, and extended system-stability testing are explicitly deferred to the final project stage. Do not interpret the presence of hardware audit or power-profile tools as a request to run those deferred activities now.
