@@ -234,7 +234,7 @@ mkinitcpio -P
 [[ -s /efi/EFI/Linux/arch-linux.efi ]]
 [[ -s /etc/kernel/cmdline ]]
 grep -q '^rd.luks.name=' /etc/kernel/cmdline
-grep -q '^root=/dev/mapper/cryptroot' /etc/kernel/cmdline
+grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' /etc/kernel/cmdline
 CHROOT
 
 [[ -s /mnt/etc/fstab ]] || die "Target fstab tidak ditemukan atau kosong."
