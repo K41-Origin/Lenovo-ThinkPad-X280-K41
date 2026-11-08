@@ -13,7 +13,7 @@ pass "installer passes bash -n"
 for required in \
   'preflight::check_target_inventory' \
   'installer::init_logging' \
-  'root="$ROOT/reports/installer"' \\
+  'root="$ROOT/reports/installer"' \
   'findmnt -nro FSTYPE -T "$ROOT"' \
   'exec > >(tee -a "$installer_log_file") 2>&1' \
   'chmod 0600 "$installer_log_file"' \
