@@ -7,7 +7,7 @@ This is the canonical technical document for target storage, encryption, boot, s
 Approved target direction:
 - Boot an official, unmodified Arch Linux ISO from USB in UEFI mode; start the project script manually.
 - Replace the existing Windows installation. The owner reports no data needs to be retained; this does not waive identity, backup, and confirmation gates.
-- GPT with a 1 GiB FAT32 EFI System Partition (ESP), mounted at `/efi` inside the target.
+- GPT with a 1 GiB FAT32 EFI System Partition (ESP), mounted at `/efi` inside the target using `fmask=0177,dmask=0077` so effective regular-file/directory permissions are 0600/0700.
 - One remaining-space Linux-LUKS partition (GPT type GUID `CA7D7CCB-63ED-4C53-861C-1742536059CC`), LUKS2, and ext4 directly on `/dev/mapper/cryptroot`; no LVM.
 - Official Arch `linux` kernel, systemd-boot, and a mkinitcpio-generated UKI at `/efi/EFI/Linux/arch-linux.efi`.
 - Swapfile inside encrypted ext4 root. Hibernation/resume remains disabled until the swapfile physical offset and complete boot lifecycle are implemented and verified.
@@ -23,7 +23,7 @@ Approved target direction:
 4. Binds the selected target to the plan, collects live prerequisites, renders the plan, requests exact plan-bound confirmation, and performs final revalidation.
 5. Opens and retains Bash descriptors for the disk/partitions and passes inherited `/proc/self/fd/N` paths to selected disk utilities.
 6. Wipes old signatures, creates GPT/ESP/Linux-LUKS partitions, formats FAT32 and LUKS2/ext4, opens `cryptroot`, and mounts root at `/mnt` and ESP at `/mnt/efi`.
-7. Calls `base_system::bootstrap` for `pacstrap -K` and UUID-based fstab generation.
+7. Mounts the ESP with `fmask=0177,dmask=0077`, then calls `base_system::bootstrap` for `pacstrap -K` and UUID-based fstab generation. The fstab writer independently normalizes the `/efi` entry to these owner-only masks, preserving other mount options and removing conflicting `fmask`, `dmask`, or `umask` values.
 8. Runs `scripts/configure-arch-x280.sh` in `arch-chroot` to configure hostname, user/password, timezone, locale, sudo wheel access, swapfile, and NetworkManager. Intel microcode is recommendation-only and is not installed automatically by the current configuration script.
 9. Installs systemd-boot and configures mkinitcpio with `HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)`; kernel command line uses `rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw`.
 10. Generates the default UKI, checks expected configuration artifacts, and does not reboot automatically.
@@ -54,7 +54,7 @@ The implementation and future changes must preserve these requirements:
 
 The layout uses 1 MiB alignment and actual logical-sector geometry. The plan module validates GPT bounds and reserves metadata; it does not itself write a partition table. The installer uses the target-specific plan and exact confirmation before writing.
 
-## Encryption and boot contract
+## EFI System Partition permissions\n\nThe installer mounts the FAT32 ESP with `fmask=0177,dmask=0077`. `base_system::generate_fstab` also normalizes the generated `/efi` entry to those exact masks, even if `genfstab` reports permissive masks from the active mount. The resulting effective modes are 0600 for regular files and 0700 for directories (including `/efi` and `/efi/loader`). This protects systemd-boot's random-seed file from group/other access. The First Boot collector independently checks effective permissions; a failed check must block acceptance.\n\n## Encryption and boot contract
 
 - LUKS2 is created on the Linux-LUKS partition; ext4 is created on the opened mapper.
 - The current initramfs contract is systemd-based `sd-encrypt`, not the BusyBox `encrypt` hook.
