@@ -1,0 +1,64 @@
+
+===== Encrypted root mount (ext4 on cryptroot) [PASS, exit 0] =====
+Root source: /dev/mapper/cryptroot
+Root filesystem: ext4
+
+===== Active LUKS cryptroot mapping [PASS, exit 0] =====
+/dev/mapper/cryptroot is active and is in use.
+  type:    LUKS2
+  cipher:  aes-xts-plain64
+  keysize: 512 [bits]
+  key location: keyring
+  device:  /dev/nvme0n1p2
+  sector size:  512 [bytes]
+  offset:  32768 [512-byte units] (16777216 [bytes])
+  size:    497986191 [512-byte units] (254968929792 [bytes])
+  mode:    read/write
+cryptroot mapping is active.
+
+===== EFI system partition mount [PASS, exit 0] =====
+EFI mount: /efi (vfat)
+
+===== systemd reached running state [PASS, exit 0] =====
+systemd state: running
+
+===== No failed systemd units [PASS, exit 0] =====
+No failed systemd units reported.
+
+===== Default systemd target active [PASS, exit 0] =====
+Default target: graphical.target (active)
+
+===== NetworkManager active [PASS, exit 0] =====
+NetworkManager is active.
+
+===== Network connected [PASS, exit 0] =====
+NetworkManager state: connected
+
+===== systemd state =====
+running
+
+===== Default target =====
+graphical.target
+
+===== Failed units =====
+
+===== Root mount =====
+/ /dev/mapper/cryptroot ext4
+
+===== EFI mount =====
+/efi /dev/nvme0n1p1 vfat
+
+===== NetworkManager state =====
+connected
+
+===== Active cryptroot mapping =====
+/dev/mapper/cryptroot is active and is in use.
+  type:    LUKS2
+  cipher:  aes-xts-plain64
+  keysize: 512 [bits]
+  key location: keyring
+  device:  /dev/nvme0n1p2
+  sector size:  512 [bytes]
+  offset:  32768 [512-byte units] (16777216 [bytes])
+  size:    497986191 [512-byte units] (254968929792 [bytes])
+  mode:    read/write
