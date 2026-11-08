@@ -27,8 +27,9 @@ while ! mkdir -- "$run_dir" 2>/dev/null; do
 done
 chmod 0700 "$run_dir"
 setup_log="$run_dir/setup.log"
-exec > >(tee -a "$setup_log") 2>&1
+ : >"$setup_log"
 chmod 0600 "$setup_log"
+exec > >(tee -a "$setup_log") 2>&1
 
 write_system_snapshot() {
   {
@@ -65,7 +66,7 @@ printf 'Desktop setup attempt started: %s\n' "$run_dir"
 printf 'Setup log: %s\n' "$setup_log"
 
 on_setup_error() {
-  local rc=$? line=$1 command=$2
+  local rc=$1 line=$2 command=$3
   printf 'ERROR: command failed (exit %s) at line %s: %s\n' "$rc" "$line" "$command" >&2
   exit "$rc"
 }
