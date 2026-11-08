@@ -100,6 +100,8 @@ read_sysfs() {
 } >>"$diagnostics"
 capture 'Power Profiles daemon active profile' powerprofilesctl get
 capture 'Power Profiles daemon available profiles' powerprofilesctl list
+capture 'Power Profiles daemon D-Bus interface discovery' busctl --system introspect net.hadess.PowerProfiles /net/hadess/PowerProfiles
+capture 'Power Profiles daemon active profile via D-Bus' busctl --system get-property net.hadess.PowerProfiles /net/hadess/PowerProfiles net.hadess.PowerProfiles ActiveProfile
 capture 'TLP status (if installed)' tlp-stat -s
 capture 'UPower device inventory' upower -e
 chmod 0600 "$summary" "$diagnostics"
