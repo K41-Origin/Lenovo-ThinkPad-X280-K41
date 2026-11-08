@@ -1,0 +1,211 @@
+===== CPU frequency policy =====
+
+[policy0]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 1689579 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy1]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 1001801 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy2]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 1000088 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy3]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 899882 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy4]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 899976 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy5]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 400000 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy6]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 400000 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy7]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 899938 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+===== Intel pstate =====
+status: active 
+mode: UNAVAILABLE
+no_turbo: 0 
+min_perf_pct: 11 
+max_perf_pct: 100 
+
+===== ACPI platform profile =====
+platform_profile: UNAVAILABLE
+platform_profile_choices: UNAVAILABLE
+
+===== CPU idle driver =====
+cpuidle_current_driver: intel_idle 
+cpuidle_current_governor: menu 
+
+===== AC adapter and battery state =====
+[AC] type=Mains
+online: 0 
+[BAT0] type=Battery
+status: Discharging 
+capacity: 94 
+energy_now: 41030000 
+energy_full: 43660000 
+energy_full_design: 47880000 
+power_now: 2403000 
+charge_control_start_threshold: 0 
+charge_control_end_threshold: 100 
+[ucsi-source-psy-USBC000:001] type=USB
+online: 0 
+[ucsi-source-psy-USBC000:002] type=USB
+online: 0 
+
+===== Power-management services =====
+[power-profiles-daemon.service]
+LoadState=loaded
+ActiveState=active
+UnitFileState=disabled
+[tlp.service]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+[tuned.service]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+[thermald.service]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+[systemd-logind.service]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+===== Power Profiles daemon active profile =====
+COMMAND: powerprofilesctl get
+Traceback (most recent call last):
+  File "/usr/bin/powerprofilesctl", line 8, in <module>
+    from gi.repository import Gio, GLib
+ModuleNotFoundError: No module named 'gi.repository'
+COMMAND EXIT: 1 (collection continues)
+
+===== Power Profiles daemon available profiles =====
+COMMAND: powerprofilesctl list
+Traceback (most recent call last):
+  File "/usr/bin/powerprofilesctl", line 8, in <module>
+    from gi.repository import Gio, GLib
+ModuleNotFoundError: No module named 'gi.repository'
+COMMAND EXIT: 1 (collection continues)
+
+===== Power Profiles daemon D-Bus interface discovery =====
+COMMAND: busctl --system introspect net.hadess.PowerProfiles /net/hadess/PowerProfiles
+NAME                                TYPE      SIGNATURE RESULT/VALUE                                                                                         FLAGS
+net.hadess.PowerProfiles            interface -         -                                                                                                    -
+.HoldProfile                        method    sss       u                                                                                                    -
+.ReleaseProfile                     method    u         -                                                                                                    -
+.Actions                            property  as        1 "trickle_charge"                                                                                   emits-change
+.ActiveProfile                      property  s         "balanced"                                                                                           emits-change writable
+.ActiveProfileHolds                 property  aa{sv}    0                                                                                                    emits-change
+.PerformanceDegraded                property  s         ""                                                                                                   emits-change
+.PerformanceInhibited               property  s         ""                                                                                                   emits-change
+.Profiles                           property  aa{sv}    3 4 "Profile" s "power-saver" "CpuDriver" s "intel_pstate" "PlatformDriver" s "placeholder" "Driver… emits-change
+.Version                            property  s         "0.30"                                                                                               emits-change
+.ProfileReleased                    signal    u         -                                                                                                    -
+org.freedesktop.DBus.Introspectable interface -         -                                                                                                    -
+.Introspect                         method    -         s                                                                                                    -
+org.freedesktop.DBus.Peer           interface -         -                                                                                                    -
+.GetMachineId                       method    -         s                                                                                                    -
+.Ping                               method    -         -                                                                                                    -
+org.freedesktop.DBus.Properties     interface -         -                                                                                                    -
+.Get                                method    ss        v                                                                                                    -
+.GetAll                             method    s         a{sv}                                                                                                -
+.Set                                method    ssv       -                                                                                                    -
+.PropertiesChanged                  signal    sa{sv}as  -                                                                                                    -
+COMMAND EXIT: 0
+
+===== Power Profiles daemon active profile via D-Bus =====
+COMMAND: busctl --system get-property net.hadess.PowerProfiles /net/hadess/PowerProfiles net.hadess.PowerProfiles ActiveProfile
+s "balanced"
+COMMAND EXIT: 0
+
+===== TLP status (if installed) =====
+COMMAND: tlp-stat -s
+SKIPPED: command not installed (tlp-stat)
+
+===== UPower device inventory =====
+COMMAND: upower -e
+/org/freedesktop/UPower/devices/battery_BAT0
+/org/freedesktop/UPower/devices/line_power_AC
+/org/freedesktop/UPower/devices/line_power_ucsi_source_psy_USBC000o001
+/org/freedesktop/UPower/devices/line_power_ucsi_source_psy_USBC000o002
+/org/freedesktop/UPower/devices/DisplayDevice
+COMMAND EXIT: 0
