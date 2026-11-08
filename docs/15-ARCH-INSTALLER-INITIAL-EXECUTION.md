@@ -40,7 +40,7 @@ The installer installs systemd-boot and configures a mkinitcpio UKI using the sy
 
 ## Installer diagnostics
 
-The installer captures stdout/stderr and stage-specific validation failures in a root-only timestamped log at `/var/log/x280-installer/<UTC timestamp>/installer.log`, falling back to volatile `/run/x280-installer/` only when necessary. It prints the exact path on exit. Logging is initialized before host preflight and all storage operations; inability to initialize a secure log stops execution. The log does not use shell xtrace and must be reviewed for hardware identifiers before sharing. See [Error Recovery and Reporting](10-ERROR-RECOVERY-AND-REPORTING.md).
+The initial installer and checkpoint continuation capture stdout/stderr and stage-specific failures inside the checkout under `reports/installer/<UTC timestamp>/installer.log` and `reports/installer/resume-<UTC timestamp>/resume.log`. Run directories are root-owned mode 0700 and log files mode 0600. Logging requires the official Arch ISO and a checkout on `overlay` or `tmpfs`; it fails closed rather than writing outside the repository. Logging is initialized before preflight or storage operations. Logs do not use shell xtrace and must be reviewed for hardware identifiers before sharing. Copy the report directory to persistent storage before reboot. See [Error Recovery and Reporting](10-ERROR-RECOVERY-AND-REPORTING.md).
 
 ## Automated validation
 
