@@ -49,6 +49,7 @@ done
 if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$SCRIPT"; then
   fail "installer logs must remain inside the repository checkout"
 fi
+# shellcheck disable=SC2016
 grep -Fq '[[ -e $installer_log_dir ]] ||' "$SCRIPT" || fail "installer log creation must stop on non-collision mkdir errors"
 grep -Fq ': >"$installer_log_file" || return 1' "$SCRIPT" || fail "installer must stop if its repository log cannot be created"
 grep -Fq 'chmod 0600 "$installer_log_file" || return 1' "$SCRIPT" || fail "installer must stop if log permissions cannot be secured"
