@@ -38,6 +38,10 @@ tokens=(
 for token in "${tokens[@]}"; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing desktop safety/implementation contract: $token"
 done
+[[ $(grep -Fc '# K41 minimal ThinkPad X280 Hyprland test configuration.' "$SCRIPT") -eq 1 ]] || fail 'desktop script contains duplicated Hyprland configuration blocks'
+[[ $(grep -Fc 'AUR package review: %s' "$SCRIPT") -eq 1 ]] || fail 'desktop script contains duplicated AUR build blocks'
+grep -Fq "printf '%s\\n' '- Log: setup.log'" "$SCRIPT" || fail 'desktop summary log entry formatting is invalid'
+grep -Fq "command -v caelestia" "$SCRIPT" || fail 'Caelestia autostart lacks CLI validation'
 if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
   fail 'desktop setup must not enable a display manager or autologin'
 fi
