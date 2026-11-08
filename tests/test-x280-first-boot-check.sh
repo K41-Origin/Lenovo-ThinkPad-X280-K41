@@ -43,7 +43,7 @@ MOCK
 cat >"$mock_bin/bootctl" <<'MOCK'
 #!/usr/bin/env bash
 case "$1" in
-  status) printf 'Systemd Boot Loader: systemd-boot\n' ;;
+  status) printf 'Systemd Boot Loader: systemd-boot\nPARTUUID=12345678-1234-1234-1234-123456789abc\n' ;;
   list) printf 'arch-linux.conf\n' ;;
   *) exit 1 ;;
 esac
@@ -117,6 +117,9 @@ if grep -R -Fq 'SHOULD_NOT_LEAK' "$report_dir"; then
 fi
 if grep -R -Fq 'aa:bb:cc:dd:ee:ff' "$report_dir"; then
   fail "MAC address was not redacted"
+fi
+if grep -R -Fq '12345678-1234-1234-1234-123456789abc' "$report_dir"; then
+  fail "UUID-shaped identifier was not redacted"
 fi
 pass "healthy mocked first boot generates complete PASS report and evidence files"
 pass "password-like strings and MAC addresses are redacted from captured journal output"
