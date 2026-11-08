@@ -2,6 +2,8 @@
 
 ## Purpose and authority
 
+For the repository-wide file-to-document-to-test cross-reference and evidence hierarchy, see the [Repository Map](00-REPOSITORY-MAP-AND-SOURCE-OF-TRUTH.md). This architecture document remains the owner of module boundaries and runtime flow; the map is navigation only.
+
 This document defines the implemented repository architecture and module ownership. It must remain consistent with:
 - [Requirements and Decisions](02-REQUIREMENTS-AND-DECISIONS.md) — approved requirements and decisions.
 - [Installation and Disk](04-INSTALLATION-AND-DISK.md) — canonical storage, encryption, boot, and recovery design.
