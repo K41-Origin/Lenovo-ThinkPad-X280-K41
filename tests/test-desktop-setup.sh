@@ -19,7 +19,6 @@ tokens=(
   'packages+=(base-devel git ddcutil libnotify dart-sass gpu-screen-recorder fuzzel)'
   'packages+=(quickshell)'
   'resolve_and_build_aur_dependency'
-  'makepkg --syncdeps --install'
   'exec-once = caelestia shell -d'
   'refusing to overwrite it'
   'No graphical session was started'
