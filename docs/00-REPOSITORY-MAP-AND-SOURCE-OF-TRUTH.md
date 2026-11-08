@@ -74,10 +74,8 @@ The installer sources libraries as functions; sourcing is not equivalent to exec
 | `lib/storage-plan.sh` | Pure storage geometry/planning and plan identity/digest binding | 04 |
 | `lib/storage-prerequisites.sh` | Collects read-only prerequisite evidence bound to a plan | 04 |
 | `lib/storage-confirmation.sh` | Displays/requires explicit plan-bound operator confirmation | 04 |
-| `lib/storage-execution-dry-run.sh` | In-memory operation manifest and failure simulation | 03, 11 |
 | `lib/storage-execution-boundary.sh` | Mock-oriented execution orchestration, per-operation identity probes and partial-failure ledger; not a real block-device executor | 03, 14 |
 | `lib/storage-execution-dry-run.sh` | Dry-run boundary; must not be confused with real disk writes | 03, 11 |
-| `lib/storage-handle` (not present) | No Bash module by this name; native prototype is under `native/` | 14 |
 | `lib/base-system.sh` | Guarded base package installation and fstab handling for an already mounted target | 04, 15 |
 | `lib/bootloader.sh` | Bootloader/UKI configuration helpers; verify actual callers before claiming integration | 04, 15 |
 | `lib/packages.sh` | Package policy/installation module; currently deferred unless status says otherwise | 05, 12 |
