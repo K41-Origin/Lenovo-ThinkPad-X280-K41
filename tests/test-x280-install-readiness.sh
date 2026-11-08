@@ -1,37 +1,47 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/scripts/x280-install-readiness.sh"
+CANONICAL="$ROOT/scripts/k41-live-validation.sh"
+READINESS_WRAPPER="$ROOT/scripts/x280-install-readiness.sh"
+DIAGNOSTICS_WRAPPER="$ROOT/scripts/live-validation.sh"
+
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$1"; }
 
-[[ -f $SCRIPT ]] || fail "readiness script is missing"
-bash -n "$SCRIPT" || fail "readiness script has a Bash syntax error"
-pass "readiness script passes bash -n"
+for script in "$CANONICAL" "$READINESS_WRAPPER" "$DIAGNOSTICS_WRAPPER"; do
+  [[ -f $script ]] || fail "required live-validation script is missing: $script"
+  bash -n "$script" || fail "Bash syntax error: $script"
+done
+pass "canonical validator and both compatibility entry points pass bash -n"
 
 for required in \
+  '--readiness' \
+  '--diagnostics-only' \
   '/etc/arch-release' \
   '/sys/firmware/efi' \
+  'ThinkPad X280 DMI identity' \
   'bash tests/run.sh' \
   'bash scripts/validate-live-storage.sh' \
-  'git rev-parse HEAD' \
   'reports/live-readiness' \
+  'reports/live-validation' \
   'summary.md' \
   'diagnostics.log' \
-  'trap on_exit EXIT' \
+  'ShellCheck (severity error)' \
+  'shfmt formatting check' \
+  'installer --help' \
+  'installer --preflight' \
   'serial[[:space:]]*=?[[:space:]]*' \
-  'Checks passed:' \
   'Process exit code:'; do
-  grep -Fq -- "$required" "$SCRIPT" || fail "required readiness/report feature is missing: $required"
+  grep -Fq -- "$required" "$CANONICAL" || fail "required live-validation feature is missing: $required"
 done
-pass "readiness gate records checkout, environment, test/storage results, and a final report"
+pass "canonical validator retains readiness, host diagnostics, static analysis, tests, installer diagnostics, and both reports"
 
-grep -Fq 'Review both files before committing' "$SCRIPT" || fail "report review guidance is missing"
-grep -Fq 'This report records checks' "$SCRIPT" || fail "report safety interpretation is missing"
-pass "report includes review guidance and a clear safety boundary"
+grep -Fq 'k41-live-validation.sh" --readiness' "$READINESS_WRAPPER" || fail "readiness compatibility wrapper does not delegate to canonical validator"
+grep -Fq 'k41-live-validation.sh" --diagnostics-only' "$DIAGNOSTICS_WRAPPER" || fail "diagnostics compatibility wrapper does not delegate to canonical validator"
+pass "legacy entry points delegate without maintaining duplicate implementations"
 
-if grep -Eq 'wipefs|sgdisk|cryptsetup[[:space:]]+(luksFormat|open)|mkfs\.|pacstrap|mount[[:space:]]' "$SCRIPT"; then
-  fail "readiness gate contains a destructive or installation command"
+if grep -Eq 'wipefs|sgdisk|cryptsetup[[:space:]]+(luksFormat|open)|mkfs\.|pacstrap|mount[[:space:]]' "$CANONICAL"; then
+  fail "canonical live validator contains disk mutation or installation commands"
 fi
-pass "readiness gate contains no disk mutation or installation commands"
-printf '%s\n' 'All X280 readiness script tests passed.'
+pass "canonical live validator contains no disk mutation or installation commands"
+printf '%s\n' 'All K41 live-validation tests passed.'
