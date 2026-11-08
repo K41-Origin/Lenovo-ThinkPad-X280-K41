@@ -56,7 +56,7 @@ Passing the first gate is not permission to erase a disk. Do not confirm the sto
 
 The recorded physical attempt reached successful `pacstrap` package installation and stopped at fstab generation. The target SSD has already been partitioned, encrypted, formatted, and populated with the base packages. For this exact checkpoint, do not use the normal bootstrap or destructive installer path.
 
-After pulling the current recovery branch, run:
+After obtaining and reviewing the current `main` checkout, run:
 
 ```bash
 bash scripts/resume-arch-x280.sh
