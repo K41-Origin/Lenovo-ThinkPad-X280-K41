@@ -16,6 +16,7 @@ if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$script"; then
   printf 'FAIL: continuation logs must remain inside the repository checkout\\n' >&2
   exit 1
 fi
+grep -Fq '[[ -e $log_dir ]] ||' "$script"
 grep -Fq 'e2fsck -fn "$MAPPER"' "$script"
 grep -Fq "base_system::generate_fstab" "$script"
 grep -Fq 'pacman --root "$ROOT_MOUNT" -Q base linux linux-firmware' "$script"
