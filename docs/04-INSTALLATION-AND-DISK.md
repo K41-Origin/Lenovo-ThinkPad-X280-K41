@@ -42,7 +42,7 @@ The implementation and future changes must preserve these requirements:
 - Never automatically retry or repeat destructive work after an interruption or partial failure.
 - Do not log passphrases, passwords, recovery keys, or tokens.
 
-**Architecture limitation:** the planned design assigns all destructive storage ownership to `lib/storage.sh`, but the current PR #9 script orchestrates destructive commands directly. This is an acknowledged implementation deviation, not a completed module boundary. The native C helper is a separate read-only prototype and is not integrated. The inherited descriptor-path loop test provides limited interface evidence; it does not prove all TOCTOU or hardware failure modes impossible.
+**Architecture limitation:** the planned design assigns all destructive storage ownership to `lib/storage.sh`, but the current installer script orchestrates destructive commands directly. This is an acknowledged implementation deviation, not a completed module boundary. The native C helper is a separate read-only prototype and is not integrated. The inherited descriptor-path loop test provides limited interface evidence; it does not prove all TOCTOU or hardware failure modes impossible.
 
 ## Partition and filesystem layout
 
@@ -84,7 +84,7 @@ The current installer does not provide a complete transactional rollback or auto
 ## Acceptance status
 
 Detailed test cases live in [11-TESTING-AND-ACCEPTANCE.md](11-TESTING-AND-ACCEPTANCE.md). Current state:
-- IMPLEMENTED: target discovery/validation, plan calculation/binding, confirmation/final revalidation, initial destructive installer, base bootstrap, target configuration, and initial UKI generation on PR #9.
+- IMPLEMENTED: target discovery/validation, plan calculation/binding, confirmation/final revalidation, initial destructive installer, base bootstrap, target configuration, and initial UKI generation on `main`.
 - TESTED (bounded): fixture/static tests and selected descriptor-pinned utilities against a disposable loop-backed image on the CI-tested commit.
 - NOT TESTED: successful physical live validator on X280 after its fix, physical SSD installation, first boot, UKI unlock/root mount, recovery-key registration, and hibernation/resume.
 - OUT OF SCOPE BY OWNER DECISION: VM-based installer testing. Disposable loop-image tests remain permitted for bounded utility-interface coverage; they do not replace the required real-laptop destructive test.
