@@ -20,7 +20,7 @@ The current Caelestia upstream describes Hyprland and Quickshell as its core com
 - The AUR recipe is displayed before approval. The build runs as the regular user, never root. Declining AUR leaves the official Hyprland/Quickshell foundation installed.
 - Existing Hyprland and Caelestia configuration is not overwritten.
 - No display manager, autologin, automatic graphical target, Bluetooth service, firewall, power manager, hibernation, or hardware-specific tuning is enabled.
-- The initial session is manual: sign in on TTY1 and run `Hyprland`. This preserves a reliable TTY recovery path during physical testing.
+- The initial session is manual: sign in on TTY1 and run `start-hyprland`. This preserves a reliable TTY recovery path during physical testing.
 
 ## First physical test
 
