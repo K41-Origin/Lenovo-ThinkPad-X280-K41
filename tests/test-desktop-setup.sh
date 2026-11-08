@@ -80,6 +80,10 @@ aur_metadata_matches "$fixture_dir/.SRCINFO" legacy-demo || fail 'provides metad
 aur_metadata_supports_x86_64 "$fixture_dir/.SRCINFO" || fail 'x86_64 metadata support check failed'
 [[ $(aur_metadata_dependencies "$fixture_dir/.SRCINFO" | paste -sd ' ' -) == 'cmake libcava>=1.0' ]] ||
   fail 'depends/makedepends extraction failed'
+printf 'arch = aarch64\n' >"$fixture_dir/arm-only.SRCINFO"
+if aur_metadata_supports_x86_64 "$fixture_dir/arm-only.SRCINFO"; then
+  fail 'non-x86_64 AUR package was accepted'
+fi
 
 pass 'AUR metadata parsing, provider matching, and dependency normalization pass fixtures'
 pass 'desktop setup logging, recursive resolution, reviewed unprivileged builds, overwrite protection, and manual session start are present'
