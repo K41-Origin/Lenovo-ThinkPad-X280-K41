@@ -31,15 +31,18 @@ installer::stage() {
   printf '\n[STAGE] %s — %s\n' "$current_stage" "$*"
 }
 installer::init_logging() {
-  local root timestamp suffix=0
+  local root timestamp suffix=0 fs_type
   command -v tee >/dev/null 2>&1 || { printf 'FATAL: tee tidak tersedia; logging wajib tidak dapat diinisialisasi.\n' >&2; return 1; }
   command -v install >/dev/null 2>&1 || { printf 'FATAL: install tidak tersedia; direktori log aman tidak dapat dibuat.\n' >&2; return 1; }
-  root=/var/log/x280-installer
-  if ! install -d -o root -g root -m 0700 "$root" 2>/dev/null; then
-    root=/run/x280-installer
-    install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: tidak dapat membuat direktori log root-only di /var/log maupun /run.\n' >&2; return 1; }
-    printf 'WARNING: /var/log tidak dapat digunakan; log disimpan sementara di /run.\n' >&2
-  fi
+  command -v findmnt >/dev/null 2>&1 || { printf 'FATAL: findmnt tidak tersedia; filesystem checkout tidak dapat diverifikasi.\n' >&2; return 1; }
+  [[ -d /run/archiso ]] || { printf 'FATAL: installer hanya boleh berjalan dari Arch Linux ISO.\n' >&2; return 1; }
+  fs_type="$(findmnt -nro FSTYPE -T "$ROOT")" || { printf 'FATAL: filesystem checkout tidak dapat diidentifikasi.\n' >&2; return 1; }
+  case "$fs_type" in
+    overlay|tmpfs) ;;
+    *) printf 'FATAL: checkout harus berada pada overlay/tmpfs Arch ISO, ditemukan: %s.\n' "$fs_type" >&2; return 1 ;;
+  esac
+  root="$ROOT/reports/installer"
+  install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: direktori log root-only di dalam repositori tidak dapat dibuat.\n' >&2; return 1; }
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   installer_log_dir="$root/$timestamp"
   while ! mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; do
