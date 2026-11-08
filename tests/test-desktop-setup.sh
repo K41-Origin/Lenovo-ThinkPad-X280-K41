@@ -20,7 +20,7 @@ tokens=(
   'depends = quickshell-git'
   'depends = caelestia-cli'
   'depends = python-materialyoucolor'
-  'pkgver = 3\\.'
+  'pkgver = 3\.'
   'Approve this exact'
   'pacman -Q quickshell-git caelestia-cli caelestia-shell'
   'exec-once = caelestia shell -d'
