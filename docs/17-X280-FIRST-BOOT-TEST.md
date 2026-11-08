@@ -10,10 +10,10 @@ The script does not repair or configure the system. It does not partition, forma
 
 ## Run after the first successful login
 
-The installer copies the collector into the installed target at `/usr/local/sbin/x280-first-boot-check`, so the collector itself is available after reboot without network access. To have the report land directly in the Git checkout, first `cd` to the repository root (clone it when networking is available). The collector uses the current working directory as the report root when invoked from the installed copy. If no checkout is available yet, run it from a writable working directory; the report is saved there and can be copied into the repository later. After the first regular-user login, open a terminal and run:
+The installer copies an initial collector into the installed target at `/usr/local/sbin/x280-first-boot-check`. For repeat diagnostics after pulling repository updates, run the repository copy so the latest audit code is used. From the repository root, run:
 
 ```bash
-sudo /usr/local/sbin/x280-first-boot-check
+sudo bash scripts/x280-first-boot-check.sh
 ```
 
 The script creates a timestamped directory:
