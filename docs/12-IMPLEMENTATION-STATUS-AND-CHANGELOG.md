@@ -3,7 +3,7 @@
 ## Current repository snapshot
 
 **Snapshot date:** 2026-11-08  
-**Integration source:** `fix/installer-repository-logs` (PR #18; pending merge at this snapshot)  
+**Integrated change:** PR #18 merged into `main` as `704b967f9e2f97909bbebbe0eb1fbf531e668dd2`  
 **Default branch:** `main`
 
 This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
