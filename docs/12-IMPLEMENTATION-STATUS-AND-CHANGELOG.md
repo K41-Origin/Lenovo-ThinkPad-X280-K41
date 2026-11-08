@@ -3,7 +3,7 @@
 ## Current repository snapshot
 
 **Snapshot date:** 2026-11-08  
-**Inspected `main` HEAD:** `0e7825ae6a7f05ba5940c8e9e31d778cd408b004`  
+**Inspected `main` HEAD:** `94494dce70a6dd01cacc5d77883d24f3a4c3b3cc`  
 **Default branch:** `main`
 
 This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
@@ -21,12 +21,18 @@ This document records the latest inspected repository state and physical install
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
 | Desktop setup foundation and attempt evidence | IMPLEMENTED (PR #23 and #25 merged) | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
-| Caelestia AUR dependency handling | IN PROGRESS | First physical attempt failed because `base-devel` tools (`debugedit`, `fakeroot`) were absent. The captured shell `.SRCINFO` also declares AUR dependencies `quickshell-git` and `caelestia-cli`; the correction installs these first and preflights unresolved dependencies. Pending CI/review. |
+| Caelestia AUR dependency handling | IMPLEMENTED (PR #26 merged; CI PASS) | Installs `base-devel` and official CLI runtime dependencies, omits conflicting official `quickshell` when Caelestia is selected, builds reviewed AUR dependencies in order, and fails closed on unresolvable dependency metadata. Physical AUR build and desktop session remain NOT TESTED. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
 
 ## Current validation evidence
+
+Latest desktop setup correction:
+- PR #26 merged to `main` as `94494dce70a6dd01cacc5d77883d24f3a4c3b3cc`.
+- Exact PR head `8260604d70e50df191c522cd6b7b9f8c5431e738`: GitHub Actions **Repository validation** run `42468208174` SUCCESS and **Bash validation** run `42468208092` SUCCESS.
+- These CI checks cover Bash syntax, ShellCheck, formatting, and repository fixture tests. They do not execute AUR builds or validate a physical Hyprland/Caelestia session.
+
 
 For source commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb` (a historical inspected `main` HEAD; newer PR-specific checks must be evaluated against their exact head SHA):
 
@@ -70,7 +76,7 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 ## Other outstanding gates
 
 - First Boot from the internal SSD and first-boot evidence collection: **VERIFIED for report `20261108T083237Z` (14 PASS)**.
-- Desktop setup foundation and logging: **IMPLEMENTED on `main` (PR #23 and #25 merged); first physical attempt FAIL (missing AUR build tools); dependency-chain correction pending CI/review; physical session NOT TESTED**.
+- Desktop setup foundation, logging, and Caelestia AUR dependency handling: **IMPLEMENTED on `main` (PR #23, #25, and #26 merged); CI PASS for PR #26 head `8260604d70e50df191c522cd6b7b9f8c5431e738`; first physical attempt FAIL (missing AUR build tools); corrected physical AUR build and desktop session NOT TESTED**.
 - X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
 - VM installation testing: **OUT OF SCOPE** by owner decision.
 - No release is claimed.
