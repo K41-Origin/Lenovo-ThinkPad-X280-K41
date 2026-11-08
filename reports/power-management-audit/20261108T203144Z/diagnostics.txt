@@ -1,0 +1,180 @@
+===== CPU frequency policy =====
+
+[policy0]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 900160 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy1]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 899971 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy2]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 900099 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy3]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 899137 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy4]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 900007 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy5]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 900184 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy6]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 901448 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+[policy7]
+scaling_driver: intel_pstate 
+scaling_governor: powersave 
+scaling_available_governors: performance powersave 
+scaling_min_freq: 400000 
+scaling_max_freq: 3400000 
+scaling_cur_freq: 400000 
+cpuinfo_min_freq: 400000 
+cpuinfo_max_freq: 3400000 
+energy_performance_preference: balance_power 
+energy_performance_available_preferences: default performance balance_performance balance_power power  
+
+===== Intel pstate =====
+status: active 
+mode: UNAVAILABLE
+no_turbo: 0 
+min_perf_pct: 11 
+max_perf_pct: 100 
+
+===== ACPI platform profile =====
+platform_profile: UNAVAILABLE
+platform_profile_choices: UNAVAILABLE
+
+===== CPU idle driver =====
+cpuidle_current_driver: intel_idle 
+cpuidle_current_governor: menu 
+
+===== AC adapter and battery state =====
+[AC] type=Mains
+online: 0 
+[BAT0] type=Battery
+status: Discharging 
+capacity: 94 
+energy_now: 41170000 
+energy_full: 43660000 
+energy_full_design: 47880000 
+power_now: 2840000 
+charge_control_start_threshold: 0 
+charge_control_end_threshold: 100 
+[ucsi-source-psy-USBC000:001] type=USB
+online: 0 
+[ucsi-source-psy-USBC000:002] type=USB
+online: 0 
+
+===== Power-management services =====
+[power-profiles-daemon.service]
+LoadState=loaded
+ActiveState=active
+UnitFileState=disabled
+[tlp.service]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+[tuned.service]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+[thermald.service]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+[systemd-logind.service]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+===== Power Profiles daemon active profile =====
+COMMAND: powerprofilesctl get
+Traceback (most recent call last):
+  File "/usr/bin/powerprofilesctl", line 8, in <module>
+    from gi.repository import Gio, GLib
+ModuleNotFoundError: No module named 'gi.repository'
+COMMAND EXIT: 1 (collection continues)
+
+===== Power Profiles daemon available profiles =====
+COMMAND: powerprofilesctl list
+Traceback (most recent call last):
+  File "/usr/bin/powerprofilesctl", line 8, in <module>
+    from gi.repository import Gio, GLib
+ModuleNotFoundError: No module named 'gi.repository'
+COMMAND EXIT: 1 (collection continues)
+
+===== TLP status (if installed) =====
+COMMAND: tlp-stat -s
+SKIPPED: command not installed (tlp-stat)
+
+===== UPower device inventory =====
+COMMAND: upower -e
+/org/freedesktop/UPower/devices/battery_BAT0
+/org/freedesktop/UPower/devices/line_power_AC
+/org/freedesktop/UPower/devices/line_power_ucsi_source_psy_USBC000o001
+/org/freedesktop/UPower/devices/line_power_ucsi_source_psy_USBC000o002
+/org/freedesktop/UPower/devices/DisplayDevice
+COMMAND EXIT: 0
