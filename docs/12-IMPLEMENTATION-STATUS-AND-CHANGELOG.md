@@ -79,8 +79,9 @@ Installer trial recovery and desktop setup retries are different workflows. A fa
 ## Current priority and deferred stages
 
 1. **CURRENT — Desktop functional validation.** Complete the manual Hyprland/Caelestia UI and hardware-interaction checklist, including display, input, audio, Wi-Fi, portals, locking, logout, and TTY recovery. Bluetooth remains NOT TESTED until its availability/requirement is resolved. Setup-script exit and process detection do not constitute desktop acceptance.
-2. **NEXT — Optional software integration.** After desktop acceptance, review and implement only optional components explicitly selected by the owner. Selective BlackArch remains PLANNED and opt-in.
-3. **FINAL STAGE — Hardware and system customization.** Defer CPU/GPU/performance tuning, thermal optimization, power/battery tuning, suspend/hibernate/resume testing, and extended system-stability/regression testing until stages 1 and 2 are accepted.
+2. **NEXT — Desktop customization.** After functional acceptance, implement the premium, minimal, monochromatic visual design. Detailed scope and acceptance are in `docs/22-X280-DESKTOP-CUSTOMIZATION.md`.
+3. **THEN — Optional software integration.** Review and implement only optional components explicitly selected by the owner. Selective BlackArch remains PLANNED and opt-in.
+4. **FINAL STAGE — Hardware and system customization.** Defer CPU/GPU/performance tuning, thermal optimization, power/battery tuning, suspend/hibernate/resume testing, and extended system-stability/regression testing until stages 1–3 are accepted.
 
 The hardware and power audit collectors remain implemented evidence-gathering tools. The explicit power-profile selector remains implemented, but no power-saver A/B campaign or battery optimization is currently required. Do not enable competing power managers or apply device-specific tuning ahead of the final stage.
 
