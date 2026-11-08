@@ -33,7 +33,7 @@ jobs:
 
       - name: ShellCheck installer changes
         run: |
-          shellcheck -e SC1091 scripts/install-arch-x280.sh scripts/configure-arch-x280.sh tests/test-arch-installer-script.sh tests/test-arch-config-script.sh tests/test-pinned-device-path.sh tests/test-desktop-setup.sh scripts/setup-desktop-x280.sh scripts/test-desktop-x280.sh
+          shellcheck -e SC1091 scripts/install-arch-x280.sh scripts/configure-arch-x280.sh tests/test-arch-installer-script.sh tests/test-arch-config-script.sh tests/test-pinned-device-path.sh tests/test-desktop-setup.sh scripts/setup-desktop-x280.sh scripts/test-desktop-x280.sh scripts/test-caelestia-x280.sh
 
       - name: Run repository test suite
         run: bash tests/run.sh
