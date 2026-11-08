@@ -26,11 +26,10 @@ Check boot/encryption configuration, filesystem/mount state, network, audio, des
 
 ## Initial installer diagnostic logs
 
-Both `scripts/install-arch-x280.sh` and `scripts/resume-arch-x280.sh` capture stdout/stderr inside the repository checkout:
+The full destructive installer `scripts/install-arch-x280.sh` captures stdout/stderr inside the repository checkout:
 
 ```text
 reports/installer/<UTC timestamp>/installer.log
-reports/installer/resume-<UTC timestamp>/resume.log
 ```
 
 The run directory is root-owned mode 0700 and the log file root-owned mode 0600. Logging fails closed unless the script is running from the official Arch ISO and the repository checkout resolves to an `overlay` or `tmpfs` filesystem. There is no fallback to `/var/log` or `/run`; failure to create the repository-local log stops execution before preflight or storage operations. The script prints the exact log path at exit. Copy the report directory to persistent storage before reboot if the ISO session is ephemeral.
