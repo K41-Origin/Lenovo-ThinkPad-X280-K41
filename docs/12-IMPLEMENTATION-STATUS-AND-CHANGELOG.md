@@ -21,7 +21,7 @@ This document records the latest inspected repository state and physical install
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
 | Desktop setup foundation and attempt evidence | IMPLEMENTED (PR #23 and #25 merged) | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
-| Caelestia AUR dependency handling | IMPLEMENTED (PR #26 and #28 merged; follow-up correction in review) | PR #28 added a v3 version guard but used the legacy AUR package name. Upstream documents v3 as `python-materialyoucolor3`, while the current `caelestia-cli` `.SRCINFO` still requires `python-materialyoucolor`. PR #30 changes to the v3 package and requires its AUR metadata to provide the legacy dependency name; post-install `pacman -T` verifies compatibility before proceeding. CI and physical retest are pending. |
+| Caelestia AUR dependency handling | IMPLEMENTED (PR #26, #28, and #30 merged; CI PASS) | Builds the reviewed AUR chain `quickshell-git` → `python-materialyoucolor3` v3 → `caelestia-cli` → `caelestia-shell`. Requires the v3 `.SRCINFO` to provide `python-materialyoucolor` for compatibility with the current CLI dependency and verifies it with `pacman -T` before proceeding. Exact PR #30 head passed both CI workflows. Physical AUR build and desktop session remain NOT TESTED. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
@@ -35,8 +35,10 @@ Latest desktop setup correction:
 - These CI checks cover Bash syntax, ShellCheck, formatting, and repository fixture tests. They do not execute AUR builds or validate a physical Hyprland/Caelestia session.
 - PR #28 merged as `351122b29a5d0e2a242843ffbcbbc66546cdddcf`.
 - Exact PR #28 head `34c944967f517d878da4fcad5bd42f52eb319c94`: GitHub Actions **Repository validation** run `42471094388` SUCCESS and **Bash validation** run `42471094373` SUCCESS.
-- PR #28 added the `python-materialyoucolor` AUR package name with a v3 version check. A follow-up review found that upstream distinguishes the v3 AUR package as `python-materialyoucolor3`; the v2 package name is legacy. PR #30 corrects this and requires the v3 package to provide the old dependency name declared by `caelestia-cli`.
-- PR #30 also checks `pacman -T python-materialyoucolor` immediately after the v3 package install, so an incompatible package cannot proceed to the CLI build. Exact CI and physical AUR build/session validation are pending.
+- PR #28 added a v3 version guard to the legacy AUR package name. Follow-up review found upstream documents `python-materialyoucolor3` as the v3 package and `python-materialyoucolor` as legacy v2. PR #30 corrects the build order to use `python-materialyoucolor3`.
+- PR #30 requires the v3 `.SRCINFO` to declare `provides = python-materialyoucolor` and checks `pacman -T python-materialyoucolor` immediately after installation. It fails closed if the v3 package cannot satisfy the current `caelestia-cli` dependency.
+- PR #30 merged as `b395930e28097b44d127a1b6ba1f8f701d60c157`. Exact PR #30 head `446be34832b16494d700fd61a27da71f5e644350`: GitHub Actions **Repository validation** run `42471524866` SUCCESS and **Bash validation** run `42471524877` SUCCESS.
+- CI does not build the moving AUR recipes or validate the physical desktop session. Physical AUR build and desktop acceptance remain NOT TESTED.
 
 
 For source commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb` (a historical inspected `main` HEAD; newer PR-specific checks must be evaluated against their exact head SHA):
