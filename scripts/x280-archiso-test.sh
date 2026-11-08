@@ -54,8 +54,10 @@ done
 report_fs="$(findmnt -T "$ROOT" -n -o FSTYPE 2>/dev/null)" ||
   fail 'cannot determine repository filesystem; refusing to write the report'
 case "$report_fs" in
-  overlay|tmpfs) ;;
-  *) fail "repository checkout is on filesystem $report_fs; move it to the Arch ISO live filesystem first" ;;
+  overlay | tmpfs) ;;
+  *)
+    fail "repository checkout is on filesystem $report_fs; move it to the Arch ISO live filesystem first"
+    ;;
 esac
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
