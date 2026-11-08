@@ -319,7 +319,7 @@ finalize_report() {
     printf -- '- `diagnostics.log`: captured check output and errors\n'
     printf '\n## Interpretation and safety\n\n'
     printf 'This is a read-only snapshot of the running installed system. PASS applies only to the listed check and this boot. SKIP means evidence could not be collected; it is not a pass. A report containing FAIL must be reviewed before any repair. The collector does not change boot configuration, services, networking, encryption, partitions, or files outside its report directory. Review every report file before committing; automated redaction is best-effort and is not a substitute for human review.\n'
-    printf '\nRun with `sudo /usr/local/sbin/x280-first-boot-check` from the installed system. Reports are local and are never committed or pushed automatically.\n'
+    printf '\nRun from the repository root with `sudo bash scripts/x280-first-boot-check.sh` to use the current repository version. Reports are local and are never committed or pushed automatically.\n'
   } >"$summary"
   rm -f -- "$check_rows" "$report_dir/.check-output"
   chmod 600 "$summary" "$diagnostics" "$boot_status" "$system_status" "$hardware"
