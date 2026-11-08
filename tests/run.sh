@@ -8,6 +8,7 @@ cd "$ROOT"
 
 tests=(
   tests/test-x280-first-boot-check.sh
+  tests/test-desktop-setup.sh
   tests/test-bootstrap-archiso.sh
   tests/test-common-preflight.sh
   tests/test-installer-entry.sh
