@@ -60,7 +60,8 @@ redact_stream() {
     -e 's/(pass(word|phrase)?|token|secret|psk|private[_ -]?key)([=:][[:space:]]*|[[:space:]]+)[^[:space:]]+/\1\3[REDACTED]/Ig' \
     -e 's/(serial([[:space:]_-]*number)?[=:[:space:]]*)[^[:space:]]+/\1[REDACTED]/Ig' \
     -e 's/([[:space:]]|^)([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}([[:space:]]|$)/\1[MAC-REDACTED]\3/g' \
-    -e 's#(/home/)[^/[:space:]]+#\1[REDACTED]#g'
+    -e 's#(/home/)[^/[:space:]]+#\1[REDACTED]#g' \
+    -e 's/[[:xdigit:]]{8}-([[:xdigit:]]{4}-){3}[[:xdigit:]]{12}/[UUID-REDACTED]/Ig'
 }
 
 record_check() {
@@ -128,6 +129,33 @@ check_efi_mount() {
   read -r target fstype <<<"$info"
   printf 'EFI mount: %s (%s)\n' "$target" "$fstype"
   [[ $target == /efi && $fstype == vfat ]] || return 1
+}
+check_efi_permissions() {
+  command -v stat >/dev/null 2>&1 || { printf 'stat is unavailable.\n'; return 2; }
+  local seed="$efi_root/loader/random-seed"
+  local esp_mode loader_mode seed_mode mount_options mode
+  [[ -d $efi_root && -d "$efi_root/loader" && -f $seed ]] || {
+    printf 'ESP, loader directory, or systemd-boot random-seed file is unavailable.\n'
+    return 2
+  }
+  esp_mode="$(stat -c '%a' "$efi_root")" || return 1
+  loader_mode="$(stat -c '%a' "$efi_root/loader")" || return 1
+  seed_mode="$(stat -c '%a' "$seed")" || return 1
+  mount_options="$(findmnt -nro OPTIONS /efi 2>/dev/null || true)"
+  printf 'EFI mount options: %s\n' "${mount_options:-unavailable}"
+  printf 'Effective modes (octal): /efi=%s /efi/loader=%s random-seed=%s\n' \
+    "$esp_mode" "$loader_mode" "$seed_mode"
+  for mode in "$esp_mode" "$loader_mode" "$seed_mode"; do
+    [[ $mode =~ ^[0-7]{3,4}$ ]] || {
+      printf 'Could not parse effective permission mode: %s\n' "$mode"
+      return 1
+    }
+    (( (8#$mode & 0077) == 0 )) || {
+      printf 'EFI path is accessible by group or other users; expected no group/other permission bits.\n'
+      return 1
+    }
+  done
+  printf 'EFI mountpoint, loader directory, and random seed deny group/other access.\n'
 }
 check_systemd_boot() {
   command -v bootctl >/dev/null 2>&1 || { printf 'bootctl is unavailable.\\n'; return 2; }
@@ -294,6 +322,7 @@ run_check 'UEFI boot' "$boot_status" check_uefi
 run_check 'Encrypted root mount (ext4 on cryptroot)' "$system_status" check_root_mount
 run_check 'Active LUKS cryptroot mapping' "$system_status" check_luks
 run_check 'EFI system partition mount' "$system_status" check_efi_mount
+run_check 'EFI random-seed permission security' "$boot_status" check_efi_permissions
 run_check 'systemd-boot status' "$boot_status" check_systemd_boot
 run_check 'Unified Kernel Image present' "$boot_status" check_uki
 run_check 'systemd reached running state' "$system_status" check_system_running

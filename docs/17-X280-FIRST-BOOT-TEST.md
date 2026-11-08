@@ -4,14 +4,16 @@
 
 `scripts/x280-first-boot-check.sh` is a read-only evidence collector to run after the initial Arch installation has booted from the internal SSD. It checks the expected UEFI, systemd-boot, UKI, LUKS2 mapper, ext4 root, EFI mount, systemd, NetworkManager, and user-session context. It also records hardware inventory and current-boot error journal output.
 
+The EFI permission audit reports effective modes and current mount options. For VFAT, effective permissions are determined by mount options such as `fmask=0177,dmask=0077`; per-file chmod is not a reliable persistent control. A failed audit is diagnostic only: the collector does not edit fstab or remount the ESP.
+
 The script does not repair or configure the system. It does not partition, format, mount, unlock, change boot entries, enable/disable/start/stop services, install packages, or alter network settings. A FAIL is evidence for diagnosis, not an instruction to make an automatic repair.
 
 ## Run after the first successful login
 
-The installer copies the collector into the installed target at `/usr/local/sbin/x280-first-boot-check`, so the collector itself is available after reboot without network access. To have the report land directly in the Git checkout, first `cd` to the repository root (clone it when networking is available). The collector uses the current working directory as the report root when invoked from the installed copy. If no checkout is available yet, run it from a writable working directory; the report is saved there and can be copied into the repository later. After the first regular-user login, open a terminal and run:
+The installer copies an initial collector into the installed target at `/usr/local/sbin/x280-first-boot-check`. For repeat diagnostics after pulling repository updates, run the repository copy so the latest audit code is used. From the repository root, run:
 
 ```bash
-sudo /usr/local/sbin/x280-first-boot-check
+sudo bash scripts/x280-first-boot-check.sh
 ```
 
 The script creates a timestamped directory:
@@ -34,6 +36,7 @@ All files are created with owner-only permissions (directory 0700, files 0600). 
 - Root is ext4 mounted from `/dev/mapper/cryptroot`.
 - The `cryptroot` device-mapper mapping is active.
 - EFI system partition is mounted as vfat at `/efi`.
+- The ESP mountpoint, `/efi/loader`, and `/efi/loader/random-seed` have no group/other permission bits (effective modes are checked, not inferred from fstab alone).
 - systemd-boot status is queryable and a UKI exists under the expected ESP paths.
 - systemd is running, no failed units are reported, and the default target is active.
 - NetworkManager is active and NetworkManager reports a connected state.
@@ -43,7 +46,7 @@ This collector does not prove that a person successfully authenticated by passwo
 
 ## Privacy and pushing the report
 
-The collector intentionally omits disk serials, filesystem UUIDs, hostnames, account names, IP addresses, and MAC addresses from its hardware inventory. It applies best-effort redaction to captured command output and journal messages. This cannot guarantee that all sensitive data is removed.
+The collector intentionally omits disk serials, hostnames, account names, IP addresses, and MAC addresses from its hardware inventory. It also redacts UUID-shaped identifiers from captured command output and journal messages. Redaction is best-effort and cannot guarantee that all sensitive data is removed.
 
 **Review every file before committing.** In particular inspect `diagnostics.log`, `system-status.txt`, and `boot-status.txt` for passphrases, tokens, private data, or unexpected identifiers. Do not push a report until it is safe to publish.
 
