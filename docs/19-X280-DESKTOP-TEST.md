@@ -159,3 +159,27 @@ It runs as the regular user (never with `sudo`) and creates `reports/caelestia-p
 The collector is read-only. It does not create or repair the inspected cache/state paths, change ownership or permissions, install packages, start/stop services, or invoke privileged commands. Missing optional commands or unavailable paths are recorded as diagnostic results; collection continues.
 
 Review the report for private host/user details before committing and pushing it. Do not run broad recursive permission changes. Once the report is available, inspect the exact owner, group, mode, parent-directory traversal and ACL evidence before deciding on any narrowly scoped repair. A completed collection is not a pass for Caelestia or Bluetooth functionality.
+
+
+### Narrow cache ownership repair
+
+The uploaded permissions report for `reports/caelestia-permissions-diagnostics/20261108T194132Z/` verified that `~/.cache` was owned by `root:root` with mode `755`, while the home directory and Caelestia state directory were owned by the regular user. This explains the observed inability to create Mesa, Caelestia image-cache, and ddcutil cache paths. The repair is deliberately limited to the `~/.cache` directory itself.
+
+Review and run the guarded repair as the regular user:
+
+```bash
+git pull --ff-only
+bash scripts/fix-caelestia-cache-permissions-x280.sh --check
+bash scripts/fix-caelestia-cache-permissions-x280.sh --apply
+```
+
+The default/ `--check` mode is a dry-run. `--apply` requires sudo and changes ownership only when the target is a real, non-symlink `~/.cache` directory currently owned by `root:root`. It sets owner/group to the invoking user's UID/GID, performs no recursive operation, and does not change mode bits, contents, packages, services, or any other path. It refuses root invocation, a missing or symlink target, and any unexpected current owner. The script verifies ownership after the change.
+
+After a successful repair, run the read-only permissions collector and focused runtime collector again from the active Hyprland session:
+
+```bash
+bash scripts/test-caelestia-permissions-x280.sh
+bash scripts/test-caelestia-x280.sh
+```
+
+Inspect and push the new reports after redacting private host/user details. Then complete the manual UI checklist. This repair does not address the separate missing BlueZ service/CLI or determine whether the absent `scheme.json` is expected.
