@@ -51,7 +51,8 @@ grep -Fq 'k41-live-validation.sh" --readiness' "$READINESS_WRAPPER" || fail "rea
 grep -Fq 'k41-live-validation.sh" --diagnostics-only' "$DIAGNOSTICS_WRAPPER" || fail "diagnostics compatibility wrapper does not delegate to canonical validator"
 pass "legacy entry points delegate without maintaining duplicate implementations"
 
-grep -Fq 'k41-live-validation.sh" --readiness' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not delegate readiness to canonical validator"
+grep -Fq 'scripts/k41-live-validation.sh' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not reference canonical validator"
+grep -Fq 'bash "$VALIDATOR" --readiness' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not delegate readiness to canonical validator"
 grep -Fq '/run/x280-archiso-storage-test-' "$SUPPLEMENTAL" || fail "supplemental RAM-only report behavior was lost"
 grep -Fq 'WWN,SERIAL,RM,RO,FSTYPE,MOUNTPOINTS' "$SUPPLEMENTAL" || fail "supplemental detailed block-device inventory was lost"
 if grep -Fq 'scripts/validate-live-storage.sh' "$SUPPLEMENTAL"; then
