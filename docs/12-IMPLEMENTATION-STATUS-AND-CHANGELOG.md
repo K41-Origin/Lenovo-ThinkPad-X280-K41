@@ -3,10 +3,10 @@
 ## Current canonical repository state — 2026-11-08
 
 - Default branch: `main`.
-- Current HEAD: `46ca7dbb36abaef8c7e096f129b2f2b2ebfff4b1`.
+- Current HEAD: `debd882a2d6627650f0a274a690c4717a52a7e72` (documentation consolidation commit).
 - PR #16 integration is merged. Its merge commit incorporates the reviewed Arch ISO bootstrap, installer policy, X280 readiness, first-boot reporting, installer diagnostics, fstab correction, and checkpoint-specific continuation.
 - The six feature/fix branches that were reviewed are already ancestors of or otherwise superseded by the current integrated `main`; do not merge their historical heads again.
-- Latest observed main-branch Bash validation workflow: run #248, conclusion `success`, on the HEAD above.
+- The pre-cleanup main commit `46ca7dbb36abaef8c7e096f129b2f2b2ebfff4b1` passed Bash validation run #248. Validation for the documentation-consolidation HEAD is running; its result is not yet known.
 - CI success is automated evidence only. Physical continuation on the X280 and successful first boot remain NOT TESTED.
 - The active recovery entry point is `scripts/resume-arch-x280.sh` on `main`; do not instruct operators to check out a deleted or historical feature branch.
 - Desktop integration (Caelestia/Hyprland/Quickshell), hibernation/resume configuration, recovery-key lifecycle, ThinkPad power/thermal tuning, and selective BlackArch integration remain NOT IMPLEMENTED unless separately recorded below.
@@ -36,7 +36,7 @@ At the time of this audit, GitHub reported seven branches: `main` plus six featu
 The sections below retain prior implementation notes and test evidence as a historical changelog. Commit hashes, PR states, branch names, and workflow results in those entries describe their recorded dates and must not be interpreted as current repository state.
 
 
-## Latest repository state — 2026-11-08
+### Superseded status snapshot — 2026-11-08 (before PR #16 integration)
 
 - `main` is at `32a4366db2543ced6c59d09946559cfb20c6f04f`; PR #11 and PR #12 are merged.
 - PR #13, `Add reviewed Arch ISO bootstrap and readiness gate`, is OPEN on branch `feat/archiso-bootstrap-review-gate-2026-11-08`, head `d7e239e9d67e352df8af3b54b3c10df6c6aacd5d`. It has not been merged.
