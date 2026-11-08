@@ -79,7 +79,7 @@ Hibernation readiness is distinct from a successful hibernate/resume cycle. Actu
 
 The Arch ISO USB is the recovery medium; no fallback UKI is currently promised. If an operation fails after the first destructive command, stop. Do not rerun the installer or issue cleanup commands blindly. Inspect the actual partition table, LUKS state, mapper, mounts, and filesystem state in a fresh session, preserve logs without secrets, and require human review before any further write.
 
-The current installer does not provide a complete transactional rollback or automatic resume workflow. Its final cleanup/unmount and post-failure recovery path require further review before physical testing.
+The current installer does not provide a complete transactional rollback or automatic resume workflow. Its final cleanup/unmount and post-failure recovery path require further review before any further destructive physical trial.
 
 ## Acceptance status
 
