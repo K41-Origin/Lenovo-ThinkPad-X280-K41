@@ -94,3 +94,6 @@ When a decision changes, update its ID and owning domain document together, reco
 - **Rationale:** Establish a functionally accepted desktop and complete required software integration before changing device-specific performance, power, thermal, sleep, or recovery behavior. This reduces overlapping variables and makes later regression testing attributable.
 - **Current next stage:** Desktop functional validation, as defined in [X280 Desktop Environment Physical Test](19-X280-DESKTOP-TEST.md).
 - **Acceptance boundary:** A completed desktop setup script or runtime process detection does not satisfy manual desktop acceptance. Final-stage hardware and sleep/stability work remains PLANNED until its own evidence is collected.
+
+
+- **DECISION-PROJECT-002 — APPROVED:** After Desktop Functional Validation, perform a dedicated Desktop Customization stage before optional software integration. Target a visually polished, attractive, minimal, premium-feeling monochromatic desktop. The canonical design scope and acceptance criteria are in [X280 Desktop Customization](22-X280-DESKTOP-CUSTOMIZATION.md). Hardware/performance, thermal, power/battery, suspend/hibernate/resume, and extended stability work remain deferred to the final stage.
