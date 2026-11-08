@@ -79,7 +79,7 @@ base_system::secure_efi_fstab_entry() {
         }
       }
       safe = safe (safe == "" ? "" : ",") "fmask=0177,dmask=0077"
-      printf "%s %s %s %s %s %s\\n", $1, $2, $3, safe, $5, $6
+      printf "%s %s %s %s %s %s\n", $1, $2, $3, safe, $5, $6
     }
   ' <<<"$1"
 }
