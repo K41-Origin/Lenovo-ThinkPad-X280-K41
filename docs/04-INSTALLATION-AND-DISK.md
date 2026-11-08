@@ -14,9 +14,9 @@ Approved target direction:
 - Secure Boot is planned disabled. The UKI is not Secure-Boot-authenticated under this policy.
 - Do not automatically install an alternative kernel or introduce undocumented hardware-specific storage behavior.
 
-## Current implementation on PR #9
+## Current implementation on `main`
 
-`scripts/install-arch-x280.sh` is an initial destructive installer on the feature branch, separate from the diagnostic-only top-level `installer`. It currently:
+`scripts/install-arch-x280.sh` is an initial destructive installer on `main`, separate from the diagnostic-only top-level `installer`. It currently:
 1. Requires root, UEFI, required commands, and matching X280 host inventory.
 2. Discovers whole-disk candidates and requires the configured internal WDC PC SN730 model, exact capacity, and stable serial identity.
 3. Calculates GPT geometry from actual disk capacity/sector sizes and swapfile target from runtime RAM plus a configured 2 GiB margin.
