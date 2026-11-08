@@ -104,7 +104,7 @@ id "$SUDO_USER" >/dev/null 2>&1 || die 'SUDO_USER does not identify an existing 
 id -nG "$SUDO_USER" | tr ' ' '\n' | grep -qx wheel || die 'The desktop account must belong to wheel.'
 if [[ -n ${WAYLAND_DISPLAY:-} || -n ${DISPLAY:-} ]]; then die 'Run from a TTY, not from inside an active graphical session.'; fi
 
-proceed='' install_caelestia=''
+proceed='' install_caelestia='' approve_aur=''
 desktop_user=$SUDO_USER
 desktop_home=$(getent passwd "$desktop_user" | cut -d: -f6)
 [[ -n $desktop_home && -d $desktop_home ]] || die 'Could not resolve the desktop user home directory.'
@@ -176,6 +176,7 @@ if [[ $install_caelestia == yes ]]; then
     check_aur_dependencies "$package_name" "$aur_dir"
     prompt_yes_no approve_aur "Approve this exact $package_name recipe and dependency metadata"
     [[ $approve_aur == yes ]] || die "AUR package $package_name was not approved; stopping before its build."
+    # shellcheck disable=SC2016 # The nested login shell must expand $1 after runuser.
     runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --syncdeps --install' _ "$aur_dir"
   }
 
