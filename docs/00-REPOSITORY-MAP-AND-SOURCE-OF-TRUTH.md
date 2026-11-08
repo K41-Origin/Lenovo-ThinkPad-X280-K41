@@ -7,7 +7,7 @@ This is the navigation and traceability layer for the repository. It connects pr
 **Repository:** `K41-Origin/Lenovo-ThinkPad-X280-K41`  
 **Default branch:** `main`  
 **Last tree inspection:** 2026-11-08  
-**Observed tree:** 253 tracked files; recursive Git tree response was not truncated.
+**Observed tree:** 254 tracked files; recursive Git tree response was not truncated.
 
 ## Source-of-truth hierarchy
 
