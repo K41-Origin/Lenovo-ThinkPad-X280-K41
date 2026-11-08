@@ -1,0 +1,10 @@
+Captured (UTC): 2026-11-08T17:54:40Z
+Repository: /home/kai/Lenovo-ThinkPad-X280-K41
+Commit: 0740b6e742089a9af42b1e6b5d81e23674247221
+Working tree: ?? reports/desktop/20261108T175440Z/
+Hostname: unknown
+Kernel: Linux 7.2.14-arch1-1
+Architecture: x86_64
+Arch release: 
+Invoker: kai
+Script: /home/kai/Lenovo-ThinkPad-X280-K41/scripts/setup-desktop-x280.sh
