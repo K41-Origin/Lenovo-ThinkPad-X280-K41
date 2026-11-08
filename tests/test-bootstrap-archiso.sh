@@ -21,11 +21,12 @@ for required in \
   'scripts/configure-arch-x280.sh' \
   'config/hardware/thinkpad-x280.conf' \
   'scripts/bootstrap-archiso.sh' \
+  'scripts/k41-live-validation.sh' \
   'scripts/x280-install-readiness.sh' \
   'scripts/x280-first-boot-check.sh' \
   'tests/helpers/storage-fixtures.sh' \
   'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \
-  'bash scripts/x280-install-readiness.sh' \
+  'bash scripts/k41-live-validation.sh --readiness' \
   'READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH' \
   'exec bash "$repo_dir/scripts/install-arch-x280.sh"'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required bootstrap review/safety control is missing: $required"
