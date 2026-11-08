@@ -17,7 +17,7 @@ The test list is defined only in `tests/run.sh` (20 scripts at this revision). D
 | `test-x280-first-boot-check.sh` | Mocked first-boot collector: PASS report, FAIL propagation, evidence files, and read-only contract. |
 | `test-bootstrap-archiso.sh` | Static source-review, commit identity, exact acknowledgement, and no-remote-pipe contract checks for the Arch ISO bootstrap. |
 | `test-common-preflight.sh` | Logging and read-only preflight helpers |
-| `test-x280-install-readiness.sh` | Read-only readiness gate and report behavior using controlled test fixtures. |
+| `test-x280-install-readiness.sh` | Static contract checks for canonical Live Validation features and compatibility-wrapper delegation. |
 | `test-installer-entry.sh` | Legacy `installer --help/--preflight` behavior and diagnostic-only boundary |
 | `test-arch-installer-script.sh` | Static syntax/contract checks for the initial destructive installer on main; does not execute it |
 | `test-arch-config-script.sh` | Static checks for target configuration; does not run it inside a real target |
