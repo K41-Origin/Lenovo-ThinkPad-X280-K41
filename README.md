@@ -31,7 +31,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `native/storage-handle.c` and `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — Stage 8 read-only native descriptor-holder prototype and its canonical design/limitations; hardware behavior and executor integration remain unverified.
 - `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Other desktop, hardware tuning, package/security policy, validation, and reporting modules remain PLANNED.
 - `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
-- `scripts/live-validation.sh` — read-only live-host validation for Arch ISO / X280; saves timestamped evidence and `reports/live-validation/latest.md`.
+- `scripts/k41-live-validation.sh` — canonical read-only Live Validation entry point; combines strict Arch ISO/X280 readiness, host diagnostics, static analysis, tests, SSD identity/topology validation, installer diagnostics, and timestamped evidence.\n- `scripts/x280-install-readiness.sh` and `scripts/live-validation.sh` — backward-compatible wrappers; both delegate to the canonical validator without duplicate implementations.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
 
 ## Intended workflow
@@ -97,17 +97,20 @@ VM-based installer testing is explicitly out of scope (REQ-INSTALL-006). Automat
 
 ## Live validation and installation readiness on the ThinkPad
 
-Run the consolidated safe gate from the official Arch ISO as root:
+Run the canonical strict gate from the official Arch ISO as root:
 
 ```bash
-bash scripts/x280-install-readiness.sh
+bash scripts/k41-live-validation.sh --readiness
 ```
 
-The script always creates a timestamped, shareable report under `reports/live-readiness/<UTC timestamp>/` with `summary.md` and `diagnostics.log`, including on failure. The summary records the branch, commit SHA, working-tree state, kernel/architecture, each check result, and final exit status. Diagnostic output redacts detected `serial=` values. The canonical test runner also retains its detailed per-test logs under `reports/test-runs/`. Review the report before sharing; commit and push the specific readiness report directory so it can be reviewed from GitHub. The gate checks the Arch/UEFI environment, shell syntax, automated suite, and target-specific read-only SSD identity/topology. It never partitions, formats, opens LUKS, mounts, or installs packages. PASS is not permission to erase the SSD; the destructive installer remains separate and requires explicit authorization.
+The canonical validator creates a timestamped readiness report under `reports/live-readiness/<UTC timestamp>/` (`summary.md` and serial-redacted `diagnostics.log`) and a detailed host report under `reports/live-validation/<UTC timestamp>.md`, updating `reports/live-validation/latest.md`. It records repository identity, host/boot/DMI/storage/network diagnostics, Bash syntax, ShellCheck and shfmt when installed, the canonical test suite, target-specific read-only SSD identity/topology, and installer diagnostics. The readiness gate checks root, Arch Linux, UEFI, ThinkPad X280 DMI identity, and required commands. Reports are local evidence; review them before sharing or committing. Neither PASS nor a report authorizes disk erasure.
 
-## Live validation on the ThinkPad
+The previous entry points remain available as compatibility wrappers:
+- `bash scripts/x280-install-readiness.sh` delegates to `--readiness`.
+- `bash scripts/live-validation.sh` delegates to `--diagnostics-only`, preserving broad diagnostics on a checked-out host without requiring the Arch ISO readiness conditions.
+- `bash scripts/validate-live-storage.sh` remains the focused read-only SSD identity/topology validator used by strict readiness.
 
-Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--x280-validation).
+All paths are read-only. They do not partition, format, open LUKS, mount, install packages, change services/firmware, or write to block devices. See [test documentation](tests/README.md#live-arch-iso--x280-validation).
 
 ## Documentation ownership
 Each topic has one canonical owner: requirements/decisions in `docs/02`, architecture/module boundaries in `docs/03`, storage and boot details in `docs/04`, platform/security/software policy in `docs/05`, test procedures in `tests/README.md`, acceptance/evidence boundaries in `docs/11`, and current implementation/CI status in `docs/12`. Stage records (`docs/14` and `docs/15-ARCH...`) document their specific implementation only. The historical repository audit (`docs/18-REPOSITORY-AUDIT-HISTORICAL.md`) records a dated review snapshot; it is not current status or a second source of technical procedures.
