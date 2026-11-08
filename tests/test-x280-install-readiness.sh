@@ -3,16 +3,16 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 CANONICAL="$ROOT/scripts/k41-live-validation.sh"
 READINESS_WRAPPER="$ROOT/scripts/x280-install-readiness.sh"
-DIAGNOSTICS_WRAPPER="$ROOT/scripts/live-validation.sh"
+DIAGNOSTICS_WRAPPER="$ROOT/scripts/live-validation.sh"\nSUPPLEMENTAL="$ROOT/scripts/x280-archiso-test.sh"
 
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$1"; }
 
-for script in "$CANONICAL" "$READINESS_WRAPPER" "$DIAGNOSTICS_WRAPPER"; do
+for script in "$CANONICAL" "$READINESS_WRAPPER" "$DIAGNOSTICS_WRAPPER" "$SUPPLEMENTAL"; do
   [[ -f $script ]] || fail "required live-validation script is missing: $script"
   bash -n "$script" || fail "Bash syntax error: $script"
 done
-pass "canonical validator and both compatibility entry points pass bash -n"
+pass "canonical validator, compatibility entry points, and supplemental collector pass bash -n"
 
 for required in \
   '--readiness' \
