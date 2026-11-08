@@ -2,8 +2,8 @@
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/setup-desktop-x280.sh"
-fail() { printf 'FAIL: %s\\n' "$*" >&2; exit 1; }
-pass() { printf 'PASS: %s\\n' "$*"; }
+fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
+pass() { printf 'PASS: %s\n' "$*"; }
 [[ -f $SCRIPT ]] || fail 'desktop setup script missing'
 bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
 pass 'desktop setup script passes bash -n'
@@ -42,4 +42,4 @@ if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogi
   fail 'desktop setup must not enable a display manager or autologin'
 fi
 pass 'desktop setup logging, dependency preflight, reviewed unprivileged AUR builds, overwrite protection, and manual session start are present'
-printf '%s\\n' 'Desktop setup tests passed.'
+printf '%s\n' 'Desktop setup tests passed.'
