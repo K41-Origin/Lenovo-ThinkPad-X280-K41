@@ -3,53 +3,75 @@
 ## Current repository snapshot
 
 **Snapshot date:** 2026-11-08  
-**Default branch:** `main`  
-**Implementation evidence snapshot:** `d88827627e800c67989bef1749fb52803ea8235e` (code/test status baseline; later commits in this documentation integration task are documentation-only)
+**Integration source:** `fix/installer-repository-logs` (PR #18; pending merge at this snapshot)  
+**Default branch:** `main`
 
-This is the concise current-state record. Detailed dated implementation notes and earlier status snapshots are preserved in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md). Historical branch names, PR states, and CI outcomes in that archive are not current status.
+This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
 
 ## Current implementation matrix
 
 | Area | Status | Current boundary |
 |---|---|---|
-| Arch ISO bootstrap and manual source-review gate | IMPLEMENTED | Fetches the reviewed `main` source, displays the resolved SHA, requires source review and a passing read-only readiness gate before launch. Static tests do not prove live ISO execution. |
-| Initial encrypted Arch installer | IMPLEMENTED | Destructive base-system installer exists. It is not safe to run without the documented source review, live readiness, target-plan confirmation, recovery preparation, and explicit authorization. |
-| Checkpoint-specific continuation | IMPLEMENTED | `scripts/resume-arch-x280.sh` supports the previously reported partial-install checkpoint; it avoids repartitioning, formatting, and rerunning pacstrap. Physical execution remains NOT TESTED. |
-| First-boot evidence collector | IMPLEMENTED | Read-only collector and mocked tests exist. No successful physical first-boot report is recorded. |
+| Arch ISO bootstrap and manual source-review gate | IMPLEMENTED | Fetches reviewed `main` source, displays resolved SHA, and requires source review plus a passing read-only readiness gate before launch. |
+| Initial encrypted Arch installer | IMPLEMENTED | Destructive base-system installer exists. It must only run after documented source review, live readiness, target-plan confirmation, recovery preparation, and explicit operator authorization. |
+| Fresh-trial recovery workflow | IMPLEMENTED (documented) | Every failed physical trial is restarted from the official Arch ISO using the full installer from its first stage. The legacy continuation utility is not part of this workflow. |
+| Installer diagnostic logging | IMPLEMENTED | Full logs are stored in timestamped repository-local report directories with root-only permissions; installer refuses unsupported runtime/checkouts. Preserve logs before reboot. |
+| First-boot evidence collector | IMPLEMENTED | Read-only collector and automated tests exist. No physical first-boot result is recorded yet. |
 | Host inventory and storage discovery/planning/revalidation | IMPLEMENTED | Read-only discovery, topology, planning, prerequisite, confirmation, and revalidation modules exist; automated tests use fixtures/mocks. |
-| Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup and idempotent fstab merge logic have automated coverage. |
-| Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; it is not integrated into the installer and does not establish physical device-handle safety. |
-| Desktop: Hyprland, Caelestia Shell, Quickshell | PLANNED | Upstream dependency and compatibility verification and implementation remain outstanding. |
+| Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup and idempotent fstab logic have automated coverage. |
+| Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
+| Desktop: Hyprland, Caelestia Shell, Quickshell | PLANNED | Upstream dependency/compatibility verification and implementation remain outstanding. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
 
 ## Current validation evidence
 
-The last inspected implementation baseline (`d88827627e800c67989bef1749fb52803ea8235e`) had:
+For source commit `8d1e0bd1b3ec8cbaca39da106160290f18111850`:
 
-- **Repository validation #403: SUCCESS** on that exact commit.
-- **Bash validation #270: PENDING** at the time of inspection.
-- Earlier successful tests and physical read-only observations are historical, commit-bound evidence. They do not validate later commits or prove a complete installation.
+- GitHub Actions check **Syntax, lint, and test suite: SUCCESS**.
+- GitHub Actions check **shell-and-fixture-tests: SUCCESS** (two runs reported for this SHA).
+- These results apply only to that exact commit. A later documentation commit requires its own checks.
+- The combined legacy commit status endpoint returned no status contexts; use the check-runs endpoint for the actual Actions results.
 
-After this documentation change, CI must run again on the new HEAD. Do not carry forward the results above as validation of a later commit.
+Automated success does not establish successful physical boot or validate every hardware behavior.
 
-## Physical X280 checkpoint and outstanding gates
+## Physical X280 installer trials — 2026-11-08
 
-The latest owner-provided installer log recorded that the initial installation had passed final target revalidation, performed disk/partition/LUKS2/filesystem operations, mounted the target, and completed pacstrap, but stopped during fstab generation. The follow-up fstab correction and checkpoint-specific continuation path have since been implemented and covered by automated tests.
+Four full destructive installer trials are preserved in `reports/installer/`:
 
-This does **not** establish the laptop's present boot state or prove that continuation works on hardware. The following remain **NOT TESTED**:
+| Trial | Log | Result | Failure / outcome |
+|---|---|---|---|
+| 1 | `20261108T060151Z/installer.log` | FAIL | Kernel command-line postcondition incorrectly expected `root=` at the beginning of a line, although it is a whitespace-delimited token on the same line as `rd.luks.name=`. |
+| 2 | `20261108T062317Z/installer.log` | FAIL | Swapfile fstab postcondition searched for `/swapfile` in the mountpoint column instead of the source column. |
+| 3 | `20261108T064010Z/installer.log` | FAIL | Username validation rejected the default/input `kai`; validation was corrected. |
+| 4 | `20261108T065251Z/installer.log` | SUCCESS | Installer reached `completion`, generated the UKI, and recorded `Exit status: 0`. |
 
-- Running the checkpoint-specific continuation on the actual X280.
-- Successful firmware boot, UKI discovery, LUKS unlock, and first login.
-- First-boot collector results from the physical system.
-- Suspend/resume, hibernation, battery endurance, thermal behavior, Wi-Fi/audio, and desktop integration.
+Trial 4 records successful completion of target storage preparation, LUKS2/ext4/ESP setup, base package installation, fstab generation, user/locale/timezone/hostname configuration, swapfile creation, NetworkManager enablement, systemd-boot configuration, and UKI generation. The final log reports the UKI at `/efi/EFI/Linux/arch-linux.efi`.
 
-Do not rerun the initial destructive installer, bootstrap, or broad pre-install readiness flow against a disk that may already contain the partial installation. Follow the checkpoint-specific operator procedure and inspect the current physical state before any action. Never assume the target is blank.
+Warnings in the successful log include missing `/etc/vconsole.conf` (mkinitcpio used defaults) and possibly missing `qat_6xxx` firmware. UKI generation still succeeded; these warnings are not evidence of a successful firmware boot.
 
-## Branch inventory
+**Acceptance boundary:** installer execution is TESTED/SUCCESS for trial 4. Physical firmware boot, UKI discovery by firmware, LUKS unlock, root mount, system startup, and first login remain **NOT VERIFIED** until the actual laptop boots from the internal SSD and the first-boot evidence collector is run.
 
-At the repository inspection on 2026-11-08, GitHub listed only `main`. The historical branch `feat/x280-live-install-readiness-2026-11-07` was no longer present. Treat `main` as the sole current source of truth; do not recreate or re-merge its already-integrated work.
+## Required trial-and-error policy
+
+After any failed physical installation or first-boot attempt:
+
+1. Preserve the diagnostic log and relevant evidence.
+2. Reboot into the official Arch Linux ISO in UEFI mode.
+3. Obtain and review the latest installer source and resolved commit.
+4. Reconfirm target SSD identity and that no target partition is mounted or active as swap.
+5. Run the full destructive installer from its first stage after exact plan-bound confirmation.
+6. Review the new report before another trial.
+
+Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases/recreates the selected SSD; preserve anything required before proceeding.
+
+## Other outstanding gates
+
+- First Boot from the internal SSD and first-boot evidence collection: **NOT VERIFIED**.
+- Desktop integration, X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
+- VM installation testing: **OUT OF SCOPE** by owner decision.
+- No release is claimed.
 
 ## Status vocabulary
 
@@ -58,14 +80,13 @@ At the repository inspection on 2026-11-08, GitHub listed only `main`. The histo
 - **TESTED:** an identified test was executed for a stated commit/environment.
 - **VERIFIED:** behavior was confirmed with appropriate evidence.
 - **RELEASED:** incorporated into a designated release.
-- **NOT TESTED:** no adequate evidence exists for the stated behavior.
+- **NOT VERIFIED:** available evidence does not establish the stated behavior.
 
 ## Current operator references
 
 - [Installation and disk safety contract](04-INSTALLATION-AND-DISK.md)
 - [Arch ISO bootstrap and source-review gate](16-ARCHISO-BOOTSTRAP.md)
-- [Initial installer procedure and physical-test gate](15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
-- [Checkpoint-specific first-boot test and evidence](17-X280-FIRST-BOOT-TEST.md)
+- [Initial installer procedure and physical-trial record](15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
+- [X280 first-boot test and evidence](17-X280-FIRST-BOOT-TEST.md)
 - [Test commands and evidence handling](../tests/README.md)
 - [Acceptance criteria](11-TESTING-AND-ACCEPTANCE.md)
-
