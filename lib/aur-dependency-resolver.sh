@@ -21,6 +21,14 @@ aur_metadata_matches() {
   ' "$metadata"
 }
 
+aur_metadata_supports_x86_64() {
+  local metadata=$1
+  awk '
+    $1 == "arch" && $2 == "=" && ($3 == "x86_64" || $3 == "any") { supported = 1 }
+    END { exit !supported }
+  ' "$metadata"
+}
+
 aur_metadata_dependencies() {
   local metadata=$1
   awk -F ' = ' '
