@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Supplemental Arch ISO evidence collector; canonical readiness logic lives in
-# scripts/k41-live-validation.sh. Detailed inventory and this RAM-only log are
-# retained for physical-hardware investigation.
+# scripts/k41-live-validation.sh. Detailed inventory and this repository-local
+# report are retained for physical-hardware investigation.
 set -Eeuo pipefail
 umask 077
 
@@ -14,13 +14,15 @@ Usage: bash scripts/x280-archiso-test.sh
 
 Run from a checkout on the ThinkPad X280 booted into the official Arch ISO.
 This supplemental collector records detailed block-device, mount, swap, DMI,
-and kernel observations in a private /run report, then delegates all readiness,
+and kernel observations in a private repository report, then delegates all readiness,
 DMI identity, dependency, test-suite, and SSD topology checks to
 scripts/k41-live-validation.sh.
 
 It does NOT partition, format, encrypt, mount, install packages, change
 services/firmware, or write to the selected installation target. The report
-is stored in the live ISO RAM filesystem.
+is stored under reports/x280-archiso-test/<UTC timestamp>/ inside this checkout.
+On the Arch ISO, the checkout must resolve to overlay or tmpfs; otherwise the
+collector stops before writing.
 USAGE
 }
 
@@ -105,5 +107,5 @@ fi
 
 printf '\nResult: %s\n' "$result"
 printf 'Finished (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-printf 'Supplemental report (RAM only): %s\n' "$report"
+printf 'Supplemental report (repository): %s\n' "$report"
 printf '%s\n' 'No disk-writing operation was requested or performed against the installation target.'
