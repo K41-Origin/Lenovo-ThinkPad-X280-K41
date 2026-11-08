@@ -28,6 +28,7 @@ This file is the canonical current status summary. Detailed historical trial log
 | Cache creation after Caelestia restart | NOT TESTED | Latest runtime collector found Caelestia already running and did not restart it. Its captured log may contain pre-repair warnings. One targeted restart/inspection is the only remaining cache check. |
 | Bluetooth/BlueZ | NOT TESTED | Latest permissions report found no bluetooth.service, bluetoothctl, or available org.bluez D-Bus service. Bluetooth functionality was not validated. |
 | Manual desktop UI acceptance | NOT TESTED | Panel, launcher, dashboard, notifications, widgets, wallpaper/theme, indicators, and visual stability checklist remains unfilled. |
+| Read-only X280 hardware audit | IMPLEMENTED | `scripts/audit-x280-hardware.sh` collects CPU, memory, DMI non-unique identity, PCI/USB, storage topology without serials/UUIDs, graphics, network state, battery, thermal, and power-service inventory. First physical collection and report review are pending. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical tests. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and physical suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
