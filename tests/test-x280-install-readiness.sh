@@ -42,7 +42,10 @@ for required in \
   'installer --help' \
   'installer --preflight' \
   'serial[[:space:]]*=?[[:space:]]*' \
-  'Process exit code:'; do
+  'Process exit code:' \
+  'local candidate="$root/$timestamp" suffix=0' \
+  'findmnt -T "$ROOT" -n -o FSTYPE' \
+  'overlay|tmpfs'; do
   grep -Fq -- "$required" "$CANONICAL" || fail "required live-validation feature is missing: $required"
 done
 pass "canonical validator retains readiness, host diagnostics, static analysis, tests, installer diagnostics, and both reports"
@@ -53,12 +56,16 @@ pass "legacy entry points delegate without maintaining duplicate implementations
 
 grep -Fq 'scripts/k41-live-validation.sh' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not reference canonical validator"
 grep -Fq 'bash "$VALIDATOR" --readiness' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not delegate readiness to canonical validator"
-grep -Fq '/run/x280-archiso-storage-test-' "$SUPPLEMENTAL" || fail "supplemental RAM-only report behavior was lost"
+grep -Fq 'reports/x280-archiso-test' "$SUPPLEMENTAL" || fail "supplemental report is not stored inside the repository"
+if grep -Fq '/run/x280-archiso-storage-test-' "$SUPPLEMENTAL"; then
+  fail "supplemental report must not be written outside the repository"
+fi
+grep -Fq 'findmnt -T "$ROOT"' "$SUPPLEMENTAL" || fail "supplemental collector does not protect persistent filesystems"
 grep -Fq 'WWN,SERIAL,RM,RO,FSTYPE,MOUNTPOINTS' "$SUPPLEMENTAL" || fail "supplemental detailed block-device inventory was lost"
 if grep -Fq 'scripts/validate-live-storage.sh' "$SUPPLEMENTAL"; then
   fail "supplemental collector duplicates the canonical storage-validator call"
 fi
-pass "supplemental collector retains detailed RAM-only evidence and delegates readiness/storage checks"
+pass "supplemental collector stores detailed evidence in repository reports and delegates readiness/storage checks"
 
 if grep -Eq 'wipefs|sgdisk|cryptsetup[[:space:]]+(luksFormat|open)|mkfs\.|pacstrap|mount[[:space:]]' "$CANONICAL"; then
   fail "canonical live validator contains disk mutation or installation commands"
