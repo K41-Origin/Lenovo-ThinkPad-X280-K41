@@ -51,9 +51,9 @@ init_logging() {
     log_dir="$base/resume-$timestamp-$suffix"
   done
   LOG_FILE="$log_dir/resume.log"
-  : >"$LOG_FILE"
-  chmod 0600 "$LOG_FILE"
-  exec > >(tee -a "$LOG_FILE") 2>&1
+  : >"$LOG_FILE" || return 1
+  chmod 0600 "$LOG_FILE" || return 1
+  exec > >(tee -a "$LOG_FILE") 2>&1 || return 1
   printf 'X280 installer continuation log\nStarted (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf 'Repository: %s\nCommit: %s\n' "$ROOT" "$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || printf unknown)"
 }
