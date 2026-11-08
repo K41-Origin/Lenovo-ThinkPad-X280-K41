@@ -7,21 +7,25 @@ pass() { printf 'PASS: %s\n' "$*"; }
 [[ -f $SCRIPT ]] || fail 'desktop setup script missing'
 bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
 pass 'desktop setup script passes bash -n'
-for token in \
-  'pacman -Syu --needed' \
-  'hyprland quickshell xdg-desktop-portal' \
-  'pipewire pipewire-audio pipewire-pulse wireplumber' \
-  'makepkg --syncdeps --install' \
-  'Do you approve this exact AUR recipe' \
-  'refusing to overwrite it' \
-  'No graphical session was started' \
-  'org.freedesktop.impl.portal.ScreenCast=hyprland' \
-  'report_root=' \\
-  'trap on_setup_exit EXIT' \
-  'on_setup_error() {' \
-  'packages-before.txt' \
-  'packages-after.txt' \
-  'summary.md'; do
+
+tokens=(
+  'pacman -Syu --needed'
+  'hyprland quickshell xdg-desktop-portal'
+  'pipewire pipewire-audio pipewire-pulse wireplumber'
+  'makepkg --syncdeps --install'
+  'Do you approve this exact AUR recipe'
+  'refusing to overwrite it'
+  'No graphical session was started'
+  'org.freedesktop.impl.portal.ScreenCast=hyprland'
+  'report_root='
+  'tee -a'
+  'trap on_setup_exit EXIT'
+  'on_setup_error() {'
+  'packages-before.txt'
+  'packages-after.txt'
+  'summary.md'
+)
+for token in "${tokens[@]}"; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing desktop safety/implementation contract: $token"
 done
 if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
