@@ -6,7 +6,7 @@ This is the navigation and traceability layer for the repository. It connects pr
 
 **Repository:** `K41-Origin/Lenovo-ThinkPad-X280-K41`  
 **Default branch:** `main`  
-**Last tree inspection:** 2026-11-08  
+**Last tree inspection:** 2026-11-09  
 **Observed tree:** 254 tracked files; recursive Git tree response was not truncated.
 
 ## Source-of-truth hierarchy
@@ -39,9 +39,9 @@ A file's existence does not prove execution. A PASS in a mock/fixture test is no
 | Native device-handle prototype only | [14 Stage 8](14-STAGE-8-NATIVE-DEVICE-ACCESS.md) | `native/storage-handle.c`, `tests/test-native-storage-handle.sh` |
 | Initial destructive installer and physical-trial procedure | [15 Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md) | `scripts/install-arch-x280.sh`; legacy-only `scripts/resume-arch-x280.sh` is excluded from the active workflow |
 | ISO bootstrap and source-review gate | [16 Arch ISO Bootstrap](16-ARCHISO-BOOTSTRAP.md) | `scripts/bootstrap-archiso.sh`, readiness script |
-| First boot evidence procedure | [17 X280 First Boot](17-X280-FIRST-BOOT-TEST.md) | `scripts/x280-first-boot-check.sh` |
+| First boot evidence procedure | [17 X280 First Boot](17-X280-FIRST-BOOT-TEST.md) | `scripts/x280-first-boot-check.sh` and dated physical report |
 | Dated repository audit | [18 Historical Audit](18-REPOSITORY-AUDIT-HISTORICAL.md) | historical only |
-| Prior acceptance/changelog snapshots | [Archive](archive/) | historical only |
+| Desktop functional validation and physical checklist | [19 X280 Desktop Test](19-X280-DESKTOP-TEST.md) | `scripts/test-desktop-x280.sh`, `scripts/test-caelestia-x280.sh`, desktop reports |\n| Hardware audit procedure | [20 X280 Hardware Audit](20-X280-HARDWARE-AUDIT.md) | `scripts/audit-x280-hardware.sh` |\n| Power-management baseline procedure | [21 X280 Power Audit](21-X280-POWER-MANAGEMENT-AUDIT.md) | audit and explicit profile-selector scripts; tuning deferred |\n| Desktop visual customization specification | [22 X280 Desktop Customization](22-X280-DESKTOP-CUSTOMIZATION.md) | planned visual configuration and acceptance |\n| Prior acceptance/changelog snapshots | [Archive](archive/) | historical only |
 
 ## Implementation file map
 
@@ -82,7 +82,7 @@ The installer sources libraries as functions; sourcing is not equivalent to exec
 | `lib/packages.sh` | Package policy/installation module; currently deferred unless status says otherwise | 05, 12 |
 | `lib/user-setup.sh` | User/account setup helpers; check caller integration and current status | 05, 12 |
 | `lib/security.sh` | Security configuration helpers; check caller integration and current status | 05, 12 |
-| `lib/desktop.sh` | Desktop configuration module; Hyprland/Caelestia/Quickshell integration remains PLANNED | 05, 12 |
+| `lib/desktop.sh` | Reusable desktop library placeholder; current post-install desktop implementation is in `scripts/setup-desktop-x280.sh` and its AUR resolver | 05, 12, 19 |
 | `lib/hardware.sh` | Hardware configuration module; X280 tuning remains PLANNED pending real inventory and tests | 05, 13 |
 | `lib/validation.sh` | Post-configuration validation helpers; distinguish implemented checks from unimplemented final acceptance | 10, 11 |
 | `lib/report.sh` | Report-generation helpers; verify actual call sites before claiming final report workflow complete | 10, 12 |
@@ -110,7 +110,7 @@ The installer sources libraries as functions; sourcing is not equivalent to exec
 | `reports/live-validation/` | Live validation snapshots | Dated host evidence; not necessarily current |
 | `reports/x280-archiso-test/` | Supplemental X280 Arch ISO evidence logs | Repository-local, private hardware inventory; review before sharing |
 | `reports/test-runs/` | Canonical test-run logs and summaries | Repository-local test evidence; review before sharing |
-| `reports/first-boot/` | Expected destination for first-boot evidence | No physical first-boot report was present in the inspected tree |
+| `reports/first-boot/` | Physical first-boot evidence | Report `20261108T083237Z` records 14 PASS, 0 FAIL, 0 SKIP for the collector's defined checks; see 12 and 17 |
 | `reports/x280-archiso-storage-test-*.log` | Output of the physical Arch ISO storage test | Historical evidence; must be tied to exact environment and reviewed |
 | `docs/archive/` | Historical document snapshots | Never treat as current requirements, CI state, or procedure |
 
@@ -123,7 +123,7 @@ Generated reports are evidence artifacts, not canonical specifications. Do not c
 - The checkpoint continuation is specific to the recorded partial installation; inspect the physical disk before selecting any path.
 - Native C descriptor prototype is not the installer's storage executor.
 - The repository contains modules for desktop, hardware, package, security, user setup, validation, and reporting; module presence alone does not establish end-to-end integration.
-- Hyprland/Caelestia/Quickshell, hardware tuning, hibernation lifecycle, selective BlackArch, and physical first-boot acceptance must remain PLANNED/NOT TESTED until implementation and evidence exist.
+- Desktop setup code and runtime discovery are implemented/tested to the limited scope in docs 12 and 19; complete manual desktop UI acceptance remains NOT TESTED. Hardware tuning, hibernation/resume lifecycle, selective BlackArch, and extended stability remain PLANNED.
 
 ## How to update this map
 
