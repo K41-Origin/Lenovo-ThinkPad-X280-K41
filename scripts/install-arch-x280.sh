@@ -49,7 +49,7 @@ installer::init_logging() {
     if mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; then
       break
     fi
-    [[ -e $installer_log_dir ]] || { printf 'FATAL: direktori log tidak dapat dibuat: %s\\n' "$installer_log_dir" >&2; return 1; }
+    [[ -e $installer_log_dir ]] || { printf 'FATAL: direktori log tidak dapat dibuat: %s\n' "$installer_log_dir" >&2; return 1; }
     suffix=$((suffix + 1))
     installer_log_dir="$root/$timestamp-$suffix"
   done
