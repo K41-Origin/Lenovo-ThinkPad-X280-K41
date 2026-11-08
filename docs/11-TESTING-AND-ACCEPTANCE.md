@@ -66,7 +66,8 @@ See the [Test Guide](../tests/README.md) for prerequisites, suite composition, r
 Project acceptance follows the approved sequence in [Requirements and Decisions](02-REQUIREMENTS-AND-DECISIONS.md):
 
 1. **Desktop functional validation — current priority.** Complete the physical X280 checklist for Hyprland/Caelestia interaction, display, keyboard, touchpad/TrackPoint, audio, Wi-Fi, required Bluetooth behavior, portals, lock/logout, and TTY recovery. Mark unavailable or untested functions honestly; setup-script success alone is insufficient.
-2. **Optional software integration.** Validate only the optional components actually selected by the owner. BlackArch remains optional and must be limited to individually reviewed tools.
-3. **Final hardware/system customization — deferred.** Only after stages 1 and 2 are accepted, conduct hardware/performance tuning, CPU/GPU/thermal and power/battery evaluation, suspend/hibernate/resume testing, and extended stability/regression testing.
+2. **Desktop customization.** After stage 1 is accepted, implement and manually accept the monochromatic, minimal, premium visual design in [Desktop Customization](22-X280-DESKTOP-CUSTOMIZATION.md). Check consistency, legibility, usability, reload/restart behavior, and absence of critical regressions.
+3. **Optional software integration.** Validate only the optional components actually selected by the owner. BlackArch remains optional and must be limited to individually reviewed tools.
+4. **Final hardware/system customization — deferred.** Only after stages 1–3 are accepted, conduct hardware/performance tuning, CPU/GPU/thermal and power/battery evaluation, suspend/hibernate/resume testing, and extended stability/regression testing.
 
 The final-stage work must use a documented baseline and change one variable at a time. Capture before/after evidence, retain rollback instructions, and distinguish short functional checks from sustained stability tests. No hardware tuning, battery optimization, or suspend/resume campaign is part of the current stage. This ordering can change only through an explicit project decision.
