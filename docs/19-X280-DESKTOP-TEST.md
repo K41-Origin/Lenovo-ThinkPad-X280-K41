@@ -84,3 +84,23 @@ Before the fifth physical desktop attempt:
 5. If setup completes, start `start-hyprland` manually and execute the physical acceptance checks above.
 
 The fix addresses the observed fourth-attempt failure mechanism. It does not prove the next AUR build, Caelestia startup, or physical desktop session will succeed.
+
+## Read-only desktop diagnostic collection
+
+After starting Hyprland manually, open a terminal inside the running desktop and execute:
+
+```bash
+git pull --ff-only
+bash scripts/test-desktop-x280.sh
+```
+
+The collector runs as the regular user (never with `sudo`) and writes a private report directory under `reports/desktop-diagnostics/<UTC timestamp>/` containing:
+
+- `summary.md` — repository/kernel/session metadata and collection status.
+- `diagnostics.txt` — installed desktop package versions, executable availability, Hyprland runtime information (when run inside Hyprland), audio, network device state, PCI/USB inventory, battery/thermal sysfs snapshot, and recent journal errors.
+- `manual-checklist.md` — physical acceptance checklist to fill in with PASS, FAIL, or NOT TESTED.
+
+The collector is read-only: it does not install packages, start/stop services, edit configuration, change network state, or invoke privileged commands. If run outside Hyprland, the report explicitly says the compositor runtime checks were not run; run it again from a terminal inside the active session for those checks. A command marked unavailable or returning non-zero is diagnostic evidence, not automatically a desktop failure (for example, an optional tool may not be installed).
+
+Before committing the report, inspect all three files. Journal output and hardware inventory can contain machine-specific details; redact anything private. Then commit and push the report directory so it can be reviewed. Do not upload passwords, tokens, private keys, Wi-Fi credentials, or unrelated personal logs. The collection result only means the script completed; the manual checklist and diagnostic evidence determine physical acceptance.
+
