@@ -103,3 +103,8 @@ The destructive installer and checkpoint continuation write logs inside the repo
 The log contains stdout/stderr, stage markers, start/end metadata, exit status, and stage-specific storage validation diagnostics. It does not enable shell xtrace. Never enter secrets as command-line arguments; interactive prompts are intended to read them from the terminal. Hardware identifiers may appear in the log, so inspect and redact before sharing. See [Error Recovery and Reporting](../docs/10-ERROR-RECOVERY-AND-REPORTING.md).
 
 This logging does not change the destructive boundary: final read-only revalidation must pass before the first `wipefs` operation. A `pre-operation-check:` failure means that particular operation was not invoked. A failure at or after a `disk-operation:` stage requires inspecting actual disk state because earlier operations may already have changed it; do not rerun blindly.
+
+
+## Desktop setup attempt evidence
+
+The desktop setup script is being extended on branch `fix/desktop-setup-logging` to create `reports/desktop/<UTC timestamp>/` for every invocation. The proposed report includes combined `setup.log`, `summary.md`, `system-info.txt`, and before/after `pacman -Q` snapshots. Reports are root-only (directory 0700, files 0600), local-only, and not committed automatically. After the change is merged, inspect a run with `sudo less reports/desktop/<timestamp>/setup.log`. A script PASS is not physical desktop acceptance.
