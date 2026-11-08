@@ -14,7 +14,7 @@ for token in \
   'makepkg --syncdeps --install' \
   'Do you approve this exact AUR recipe' \
   'refusing to overwrite it' \
-  'No graphical session was started'; do
+  'No graphical session was started' \\\n  'org.freedesktop.impl.portal.ScreenCast=hyprland'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing desktop safety/implementation contract: $token"
 done
 if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
