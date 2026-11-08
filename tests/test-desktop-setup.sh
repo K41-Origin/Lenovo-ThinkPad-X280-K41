@@ -18,7 +18,7 @@ tokens=(
   'pipewire pipewire-audio pipewire-pulse wireplumber'
   'packages+=(base-devel git ddcutil libnotify dart-sass gpu-screen-recorder fuzzel)'
   'packages+=(quickshell)'
-  'resolve_and_build_aur_dependency "$package_name"'
+  'resolve_and_build_aur_dependency'
   'makepkg --syncdeps --install'
   'exec-once = caelestia shell -d'
   'refusing to overwrite it'
