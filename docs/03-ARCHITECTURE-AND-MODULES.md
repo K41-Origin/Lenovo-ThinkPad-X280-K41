@@ -80,7 +80,7 @@ The initial destructive installer is manually invoked through `scripts/bootstrap
 
 The canonical test runner is `bash tests/run.sh`; see [tests/README.md](../tests/README.md). Static tests, fixture tests, and the disposable loop-device integration test provide bounded evidence. They do not prove full installation, UKI bootability, physical NVMe behavior, wireless/audio/power behavior, or hibernation.
 
-Before physical destructive testing, the project still needs an independent review of the installer and its failure/cleanup paths, successful current CI, successful read-only live validation on the actual X280, and a documented operator test gate. The next end-to-end installation test is deliberately performed on the actual X280; no VM gate is required or planned. Detailed acceptance cases and current evidence are owned by [Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md).
+The initial physical installer process has completed successfully in trial 4. Before any further destructive physical trial, re-review the installer and its failure/cleanup paths, confirm passing CI for the exact source commit, repeat successful read-only live validation on the actual X280, and follow the documented operator test gate. Any further end-to-end destructive installation remains on the actual X280; no VM gate is required or planned. Detailed acceptance cases and current evidence are owned by [Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md).
 
 ## Deferred architecture
 
