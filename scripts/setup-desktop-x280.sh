@@ -15,6 +15,7 @@ prompt_yes_no() {
 # Every invocation gets a private, timestamped report, including preflight failures.
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+source "$repo_root/lib/aur-dependency-resolver.sh"
 report_root="$repo_root/reports/desktop"
 started_utc="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
@@ -142,58 +143,15 @@ fi
 info 'Installing packages only from configured, signature-verified Arch repositories.'
 pacman -Syu --needed "${packages[@]}"
 
-# Build the AUR dependency chain explicitly. makepkg --syncdeps resolves
-# dependencies from configured pacman repositories; it does not build AUR packages.
+# Resolve the complete required/make dependency graph from current .SRCINFO metadata.
+# Official repository dependencies are satisfied by the pacman transaction above;
+# every missing AUR dependency is cloned, reviewed, and built before its parent.
 if [[ $install_caelestia == yes ]]; then
   aur_root="$desktop_home/.cache/k41-aur/$timestamp"
   install -d -m 0700 -o "$desktop_user" -g "$(id -gn "$desktop_user")" "$aur_root"
 
-  check_aur_dependencies() {
-    local package_name=$1 aur_dir=$2 dependency
-    while IFS= read -r dependency; do
-      dependency=${dependency%%[<=>]*}
-      [[ -n $dependency ]] || continue
-      if ! pacman -T "$dependency" >/dev/null 2>&1 && ! pacman -Si "$dependency" >/dev/null 2>&1; then
-        die "AUR package $package_name has unresolved dependency '$dependency'; it is neither installed nor available from configured official repositories. Extend and review the AUR dependency order before proceeding."
-      fi
-    done < <(awk -F ' = ' '/^[[:space:]]*(depends|makedepends)(_[[:alnum:]_]+)? = / { print $2 }' "$aur_dir/.SRCINFO" | sort -u)
-  }
-
-  build_aur_package() {
-    local package_name=$1 aur_dir="$aur_root/$1" commit
-    runuser -u "$desktop_user" -- git clone "https://aur.archlinux.org/${package_name}.git" "$aur_dir"
-    [[ -f $aur_dir/PKGBUILD && -f $aur_dir/.SRCINFO ]] || die "AUR checkout for $package_name is missing PKGBUILD or .SRCINFO."
-    if [[ $package_name == python-materialyoucolor3 ]]; then
-      grep -Eq '^[[:space:]]*pkgname = python-materialyoucolor3$' "$aur_dir/.SRCINFO" || die 'Material You v3 AUR metadata changed: expected python-materialyoucolor3 package name.'
-      grep -Eq '^[[:space:]]*pkgver = 3\.' "$aur_dir/.SRCINFO" || die 'Caelestia CLI requires Material You color v3; python-materialyoucolor3 AUR metadata is not version 3.x.'
-      grep -Eq '^[[:space:]]*provides = python-materialyoucolor([<=>].*)?$' "$aur_dir/.SRCINFO" || die 'python-materialyoucolor3 must provide the legacy python-materialyoucolor dependency required by the current caelestia-cli AUR metadata.'
-    fi
-    if [[ $package_name == caelestia-cli ]]; then
-      grep -Eq '^[[:space:]]*depends = python-materialyoucolor$' "$aur_dir/.SRCINFO" || die 'caelestia-cli AUR dependency metadata changed: python-materialyoucolor is not declared; review/update the build order before proceeding.'
-    fi
-    if [[ $package_name == caelestia-shell ]]; then
-      grep -Eq '^[[:space:]]*depends = quickshell-git$' "$aur_dir/.SRCINFO" || die 'caelestia-shell AUR dependency metadata changed: quickshell-git is not declared; review/update the build order before proceeding.'
-      grep -Eq '^[[:space:]]*depends = caelestia-cli$' "$aur_dir/.SRCINFO" || die 'caelestia-shell AUR dependency metadata changed: caelestia-cli is not declared; review/update the build order before proceeding.'
-    fi
-    commit=$(git -C "$aur_dir" rev-parse HEAD)
-    printf '\n===== AUR package review: %s (commit %s) =====\n' "$package_name" "$commit"
-    printf '\n===== PKGBUILD: %s =====\n' "$package_name"
-    cat "$aur_dir/PKGBUILD"
-    printf '\n===== .SRCINFO: %s =====\n' "$package_name"
-    cat "$aur_dir/.SRCINFO"
-    check_aur_dependencies "$package_name" "$aur_dir"
-    prompt_yes_no approve_aur "Approve this exact $package_name recipe and dependency metadata"
-    [[ $approve_aur == yes ]] || die "AUR package $package_name was not approved; stopping before its build."
-    # shellcheck disable=SC2016 # The nested login shell must expand $1 after runuser.
-    runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --syncdeps --install' _ "$aur_dir"
-    if [[ $package_name == python-materialyoucolor3 ]]; then
-      pacman -T python-materialyoucolor >/dev/null 2>&1 || die 'python-materialyoucolor3 did not satisfy the python-materialyoucolor dependency declared by caelestia-cli.'
-    fi
-  }
-
-  # Refuse an unexpected dependency graph rather than silently omitting an AUR provider.
   for package_name in quickshell-git python-materialyoucolor3 caelestia-cli caelestia-shell; do
-    build_aur_package "$package_name"
+    resolve_and_build_aur_dependency "$package_name"
   done
   pacman -Q quickshell-git python-materialyoucolor3 caelestia-cli caelestia-shell
 else
