@@ -45,7 +45,11 @@ installer::init_logging() {
   install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: direktori log root-only di dalam repositori tidak dapat dibuat.\n' >&2; return 1; }
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   installer_log_dir="$root/$timestamp"
-  while ! mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; do
+  while :; do
+    if mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; then
+      break
+    fi
+    [[ -e $installer_log_dir ]] || { printf 'FATAL: direktori log tidak dapat dibuat: %s\\n' "$installer_log_dir" >&2; return 1; }
     suffix=$((suffix + 1))
     installer_log_dir="$root/$timestamp-$suffix"
   done
