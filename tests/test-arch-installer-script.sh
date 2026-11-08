@@ -13,7 +13,8 @@ pass "installer passes bash -n"
 for required in \
   'preflight::check_target_inventory' \
   'installer::init_logging' \
-  'root=/var/log/x280-installer' \
+  'root="$ROOT/reports/installer"' \\
+  'findmnt -nro FSTYPE -T "$ROOT"' \
   'exec > >(tee -a "$installer_log_file") 2>&1' \
   'chmod 0600 "$installer_log_file"' \
   'installer::stage final-revalidation' \
@@ -45,7 +46,10 @@ for required in \
   '[[ -s /mnt/etc/locale.conf ]]'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
 done
-pass "installer includes root-only local logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
+if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$SCRIPT"; then
+  fail "installer logs must remain inside the repository checkout"
+fi
+pass "installer includes repository-local root-only logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
 if grep -Eq '^[[:space:]]*set[[:space:]]+-[^#]*x|^[[:space:]]*set[[:space:]]+-o[[:space:]]+xtrace' "$SCRIPT"; then
   fail "installer enables shell xtrace, which could expose sensitive command arguments"
 fi
