@@ -23,7 +23,7 @@ Build a reliable, modular, secure, reproducible Arch Linux installation and setu
 ## Scope
 The approved initial direction is one interactive installer launched from the shell of an official Arch Linux ISO; see `docs/02-REQUIREMENTS-AND-DECISIONS.md` and `docs/03-ARCHITECTURE-AND-MODULES.md` for the authoritative decision and design details.
 
-Whether to provide a separate post-install setup tool remains an open scope question and is not required by the current decision. A post-install script alone cannot install Arch onto a blank disk.
+The repository implements two separate operational paths: a destructive Arch ISO base-system installer and a post-install desktop setup tool for an already installed Arch system. The top-level `installer --preflight` remains diagnostic-only. Their responsibilities and safety boundaries are documented in [Architecture and Modules](03-ARCHITECTURE-AND-MODULES.md), [Installation and Disk](04-INSTALLATION-AND-DISK.md), and [Desktop Physical Test](19-X280-DESKTOP-TEST.md). A post-install setup tool alone cannot install Arch onto a blank disk.
 
 ## Status vocabulary
 This charter owns the project-status definitions used across the repository:
