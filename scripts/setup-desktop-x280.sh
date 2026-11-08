@@ -164,7 +164,10 @@ if [[ $install_caelestia == yes ]]; then
     runuser -u "$desktop_user" -- git clone "https://aur.archlinux.org/${package_name}.git" "$aur_dir"
     [[ -f $aur_dir/PKGBUILD && -f $aur_dir/.SRCINFO ]] || die "AUR checkout for $package_name is missing PKGBUILD or .SRCINFO."
     if [[ $package_name == caelestia-shell ]]; then
-      grep -Eq '^[[:space:]]*depends = quickshell-git$(git -C "$aur_dir" rev-parse HEAD)
+      grep -Eq '^[[:space:]]*depends = quickshell-git$' "$aur_dir/.SRCINFO" || die 'caelestia-shell AUR dependency metadata changed: quickshell-git is not declared; review/update the build order before proceeding.'
+      grep -Eq '^[[:space:]]*depends = caelestia-cli$' "$aur_dir/.SRCINFO" || die 'caelestia-shell AUR dependency metadata changed: caelestia-cli is not declared; review/update the build order before proceeding.'
+    fi
+    commit=$(git -C "$aur_dir" rev-parse HEAD)
     printf '\n===== AUR package review: %s (commit %s) =====\n' "$package_name" "$commit"
     printf '\n===== PKGBUILD: %s =====\n' "$package_name"
     cat "$aur_dir/PKGBUILD"
