@@ -47,9 +47,25 @@ for cmd in bash date lsblk findmnt swapon tee; do
   command -v "$cmd" >/dev/null 2>&1 || fail "missing required command: $cmd"
 done
 
+# Keep every diagnostic artifact inside this checkout. On an Arch ISO,
+# refuse to write if the checkout is on a persistent filesystem.
+report_fs="$(findmnt -T "$ROOT" -n -o FSTYPE 2>/dev/null)" ||
+  fail 'cannot determine repository filesystem; refusing to write the report'
+case "$report_fs" in
+  overlay|tmpfs) ;;
+  *) fail "repository checkout is on filesystem $report_fs; move it to the Arch ISO live filesystem first" ;;
+esac
+
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report="/run/x280-archiso-storage-test-$timestamp.log"
-[[ ! -e "$report" ]] || fail "report already exists: $report"
+report_root="$ROOT/reports/x280-archiso-test"
+mkdir -p -- "$report_root"
+report_dir="$report_root/$timestamp"
+suffix=0
+while ! mkdir -- "$report_dir" 2>/dev/null; do
+  suffix=$((suffix + 1))
+  report_dir="$report_root/$timestamp-$suffix"
+done
+report="$report_dir/x280-archiso-test.log"
 : >"$report"
 chmod 600 "$report"
 exec > >(tee -a "$report") 2>&1
@@ -83,7 +99,7 @@ else
   result=FAIL
   printf 'Canonical validator exit code: %s\n' "$rc"
   printf '\nResult: %s\n' "$result"
-  printf 'Supplemental report (RAM only): %s\n' "$report"
+  printf 'Supplemental report (repository): %s\n' "$report"
   exit "$rc"
 fi
 
