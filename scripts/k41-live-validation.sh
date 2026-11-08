@@ -136,7 +136,8 @@ check_root() {
 }
 check_arch() {
   [[ -f /etc/arch-release ]] || { printf 'Not an Arch Linux environment.\n'; return 1; }
-  printf 'Arch Linux release marker found.\n'
+  [[ -d /run/archiso ]] || { printf 'Arch ISO runtime marker /run/archiso not found. Boot the official Arch Linux ISO.\n'; return 1; }
+  printf 'Arch Linux release and live ISO runtime markers found.\n'
 }
 check_uefi() {
   [[ -d /sys/firmware/efi ]] || { printf 'Boot the Arch ISO in UEFI mode.\n'; return 1; }
