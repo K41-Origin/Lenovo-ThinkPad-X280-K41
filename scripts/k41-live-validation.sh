@@ -17,7 +17,7 @@ Both modes run repository syntax checks, available static analysis, and the
 canonical test suite. Readiness mode additionally checks root, Arch ISO,
 UEFI, X280 DMI identity, required tools, and target SSD identity/topology.
 No mode partitions, formats, opens LUKS, mounts, installs packages, or writes
-to a block device.
+to the selected installation target. Reports are written under the repository checkout.
 USAGE
 }
 
@@ -207,9 +207,9 @@ finalize_report() {
     printf '\n## Evidence files\n\n'
     printf -- '- `summary.md`: result, checkout identity, environment, and check table\n'
     printf -- '- `diagnostics.log`: captured command output with serial values redacted\n'
-    printf -- '- `../live-validation/%s.md`: broad host, storage, network, and repository diagnostics\n' "$timestamp"
+    printf -- '- `../../live-validation/%s.md`: broad host, storage, network, and repository diagnostics\n' "$timestamp"
     printf '\n## Safety boundary\n\n'
-    printf 'This is read-only validation. PASS applies only to the recorded checkout and host snapshot. It does not prove a successful installation or authorize disk erasure. No partitioning, formatting, LUKS opening, mounting, package installation, service changes, firmware changes, or block-device writes are performed. Review reports before sharing.\n'
+    printf 'This is read-only validation. PASS applies only to the recorded checkout and host snapshot. It does not prove a successful installation or authorize disk erasure. No partitioning, formatting, LUKS opening, mounting, package installation, service changes, firmware changes, or writes to the selected installation target are performed. Reports are written under the repository checkout. Review reports before sharing.\n'
   } >"$summary"
   {
     printf '\n## Result summary\n\n'
