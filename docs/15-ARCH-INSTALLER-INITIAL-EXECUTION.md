@@ -8,7 +8,7 @@
 - Automated validation: TESTED on the exact commit and GitHub Actions runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
 - VM installation testing: OUT OF SCOPE by owner decision.
 - Physical installer trial 4: installer completed with exit status 0; see the timestamped log below.
-- Physical first boot from the internal SSD: NOT VERIFIED.
+- Physical first boot from the internal SSD: NOT TESTED.
 
 This is an initial destructive base-system installer, not the complete intended project installer. The legacy top-level `installer --preflight` remains read-only and is not its entry point.
 
@@ -101,8 +101,8 @@ The full installer deliberately re-creates the partition table and formats the s
 
 ## Validation and acceptance boundaries
 
-- **TESTED:** GitHub Actions syntax/lint/test and shell/fixture checks passed on commit `8d1e0bd1b3ec8cbaca39da106160290f18111850`; see [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md). Later commits must be validated independently.
+- **TESTED:** GitHub Actions syntax/lint/test and shell/fixture checks passed on main commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb`; see [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md). This documentation branch requires independent checks after commit.
 - **TESTED:** physical installer trial 4 exited 0 and recorded successful UKI generation.
-- **NOT VERIFIED:** actual boot from internal SSD, firmware/UKI discovery, LUKS unlock, root mount, and first login.
+- **NOT TESTED:** actual boot from internal SSD, firmware/UKI discovery, LUKS unlock, root mount, and first login.
 - The old read-only readiness report is historical evidence for its earlier pre-installation snapshot; it is not evidence of the current disk state.
 - VM installation testing remains OUT OF SCOPE by owner decision.

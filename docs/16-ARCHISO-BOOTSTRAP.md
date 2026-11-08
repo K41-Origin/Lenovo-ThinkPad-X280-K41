@@ -47,21 +47,22 @@ Passing the first gate is not permission to erase a disk. Do not confirm the sto
 - The bootstrap does not perform a cryptographic signature verification of the commit.
 - Manual source review remains mandatory; do not acknowledge a revision you have not reviewed.
 - The installer still only implements the initial encrypted Arch base system. Desktop integration, hibernation/resume, recovery-key handling, ThinkPad tuning, and selective BlackArch integration remain unimplemented.
-- Physical destructive installation and first boot on the X280 remain NOT TESTED. Follow the physical-test gate in [Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
+- The physical installer process completed trial 4 with exit status 0 and successful UKI generation. Successful boot from the internal SSD and First Boot acceptance remain NOT TESTED. Follow the physical-test gate in [Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
 
 `bash tests/test-bootstrap-archiso.sh` performs static contract checks only. It does not clone the repository, run the readiness gate, execute the installer, or touch a disk.
 
 
-## Interrupted Stage 9 installation: continue, do not bootstrap again
+## Legacy continuation utility — excluded from the active workflow
 
-The recorded physical attempt reached successful `pacstrap` package installation and stopped at fstab generation. The target SSD has already been partitioned, encrypted, formatted, and populated with the base packages. For this exact checkpoint, do not use the normal bootstrap or destructive installer path.
+`scripts/resume-arch-x280.sh` is retained only as a legacy compatibility artifact. It is not an approved recovery path and must not be invoked for any current physical installer or First Boot trial.
 
-After obtaining and reviewing the current `main` checkout, run:
+The earlier post-`pacstrap`/fstab-failure checkpoint described in historical records is superseded and does not establish the current disk state. For every failed or interrupted physical trial:
 
-```bash
-bash scripts/resume-arch-x280.sh
-```
+1. Preserve the diagnostic log and relevant evidence.
+2. Reboot into the official Arch Linux ISO in UEFI mode.
+3. Re-run read-only live validation and verify the exact internal SSD identity/topology.
+4. Review the latest installer source and resolved commit.
+5. Inspect the complete storage plan and obtain fresh, exact plan-bound authorization.
+6. Run the complete `scripts/install-arch-x280.sh` workflow from its first stage.
 
-Run it as root from the official Arch ISO in UEFI mode. This dedicated continuation script does not run the broad readiness suite, partition or format the disk, or rerun pacstrap. It verifies the configured SSD identity and existing partition/LUKS2/ext4 state, unlocks and mounts the existing target, checks the installed base packages, completes fstab safely, then resumes target configuration and UKI setup. Any mismatch or partial target configuration causes a fail-closed stop.
-
-The previous successful readiness report is retained as historical evidence for the pre-installation disk snapshot. It must not be repeated as a blank-disk gate against the now-initialized target. The continuation script still performs narrowly scoped live checks necessary to avoid acting on the wrong disk or an unexpected filesystem state.
+Never resume from a checkpoint, automatically wipe/retry, or assume a previous readiness report describes the current disk. If disk state or identity is uncertain, stop for manual inspection before any write.

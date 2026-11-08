@@ -27,12 +27,12 @@ This document records the latest inspected repository state and physical install
 
 ## Current validation evidence
 
-For source commit `8d1e0bd1b3ec8cbaca39da106160290f18111850`:
+For source commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb` (the inspected `main` HEAD at the time of this snapshot):
 
-- GitHub Actions check **Syntax, lint, and test suite: SUCCESS**.
-- GitHub Actions check **shell-and-fixture-tests: SUCCESS** (two runs reported for this SHA).
-- These results apply only to that exact commit. A later documentation commit requires its own checks.
-- The combined legacy commit status endpoint returned no status contexts; use the check-runs endpoint for the actual Actions results.
+- GitHub Actions check **Syntax, lint, and test suite: SUCCESS** (completed 2026-11-08T07:23:14Z).
+- GitHub Actions check **shell-and-fixture-tests: SUCCESS** (completed 2026-11-08T07:22:47Z).
+- Both check runs report this exact `head_sha`; these results apply only to that commit. The documentation changes in this branch require their own checks after they are committed.
+- These are GitHub Actions check-run results, not physical hardware evidence.
 
 Automated success does not establish successful physical boot or validate every hardware behavior.
 
@@ -51,7 +51,7 @@ Trial 4 records successful completion of target storage preparation, LUKS2/ext4/
 
 Warnings in the successful log include missing `/etc/vconsole.conf` (mkinitcpio used defaults) and possibly missing `qat_6xxx` firmware. UKI generation still succeeded; these warnings are not evidence of a successful firmware boot.
 
-**Acceptance boundary:** installer execution is TESTED/SUCCESS for trial 4. Physical firmware boot, UKI discovery by firmware, LUKS unlock, root mount, system startup, and first login remain **NOT VERIFIED** until the actual laptop boots from the internal SSD and the first-boot evidence collector is run.
+**Acceptance boundary:** installer execution is TESTED/SUCCESS for trial 4. Physical firmware boot, UKI discovery by firmware, LUKS unlock, root mount, system startup, and first login remain **NOT TESTED** until the actual laptop boots from the internal SSD and the first-boot evidence collector is run.
 
 ## Required trial-and-error policy
 
@@ -68,7 +68,7 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 
 ## Other outstanding gates
 
-- First Boot from the internal SSD and first-boot evidence collection: **NOT VERIFIED**.
+- First Boot from the internal SSD and first-boot evidence collection: **NOT TESTED**.
 - Desktop integration, X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
 - VM installation testing: **OUT OF SCOPE** by owner decision.
 - No release is claimed.
@@ -80,7 +80,7 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 - **TESTED:** an identified test was executed for a stated commit/environment.
 - **VERIFIED:** behavior was confirmed with appropriate evidence.
 - **RELEASED:** incorporated into a designated release.
-- **NOT VERIFIED:** available evidence does not establish the stated behavior.
+- **NOT TESTED:** the behavior has not been exercised with the evidence required for its claim, or testing has not yet occurred.
 
 ## Current operator references
 

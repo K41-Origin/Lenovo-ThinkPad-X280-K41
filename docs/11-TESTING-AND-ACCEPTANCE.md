@@ -48,7 +48,7 @@ A release candidate requires:
 - Documented limitations, failure handling, and operator recovery instructions.
 - No unresolved critical safety failure.
 
-Physical X280 installation, successful first boot, LUKS recovery, suspend/resume/hibernation, and desktop/hardware integration remain NOT TESTED until observed and recorded on the actual laptop.
+Physical installer execution is TESTED: trial 4 completed with exit status 0 and generated the UKI. Successful boot from the internal SSD, firmware UKI discovery, LUKS unlock/root mount, First Boot/first login, LUKS recovery, suspend/resume/hibernation, and desktop/hardware integration remain NOT TESTED until observed and recorded on the actual laptop.
 
 ## How to run tests
 

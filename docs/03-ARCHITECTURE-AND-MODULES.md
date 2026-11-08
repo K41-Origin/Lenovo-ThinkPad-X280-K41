@@ -17,7 +17,7 @@ The project charter in [01](01-PROJECT-CHARTER.md) owns status definitions. The 
 The repository contains two distinct entry paths:
 
 1. `installer` is the original diagnostic entry point. It supports `--help` and read-only `--preflight`; it does not install Arch.
-2. `scripts/bootstrap-archiso.sh` retrieves the latest `main` revision, displays its commit SHA, and gates launch on manual source review. `scripts/install-arch-x280.sh` is the initial destructive installer on `main`. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. It is IMPLEMENTED, but physical installation and first boot are NOT TESTED.
+2. `scripts/bootstrap-archiso.sh` retrieves the latest `main` revision, displays its commit SHA, and gates launch on manual source review. `scripts/install-arch-x280.sh` is the initial destructive installer on `main`. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. Installer execution is TESTED (physical trial 4 exited 0 and generated the UKI); successful boot from the SSD and separate First Boot acceptance remain NOT TESTED.
 
 Do not conflate these paths: the top-level entry point is diagnostic-only, while the bootstrap launches the separate destructive installer after source review. See the status document for exact commit and CI evidence.
 
@@ -32,7 +32,7 @@ The current script's observed sequence is:
 5. Retain Bash file descriptors for the selected whole disk and partitions; pass inherited `/proc/self/fd/N` paths to selected storage utilities.
 6. Create GPT/ESP/Linux-LUKS partition layout, format FAT32 and LUKS2/ext4, open the mapper, and mount root/ESP.
 7. Call `base_system::bootstrap` for guarded `pacstrap -K` and UUID-based fstab generation.
-8. Run `scripts/configure-arch-x280.sh` inside `arch-chroot` for hostname, user/password, timezone, locale, Intel microcode, sudo wheel access, swapfile, and NetworkManager.
+8. Run `scripts/configure-arch-x280.sh` inside `arch-chroot` for hostname, user/password, timezone, locale, sudo wheel access, swapfile, and NetworkManager. Intel microcode is recommendation-only and is not installed by this script.
 9. Install systemd-boot and generate a mkinitcpio UKI using systemd-based `sd-encrypt` hooks and `rd.luks.name=`.
 10. Check expected target configuration artifacts and stop without automatic reboot.
 
@@ -49,7 +49,7 @@ This is a factual description of code paths, not evidence that the complete work
 | `lib/storage-prerequisites.sh`, `lib/storage-confirmation.sh` | Read-only prerequisite evidence, exact confirmation, final revalidation | IMPLEMENTED; fixture-tested |
 | `lib/storage-execution-dry-run.sh`, `lib/storage-execution-boundary.sh` | In-memory operation model and mock-only orchestration/recovery ledger | IMPLEMENTED; tests invoke mocks only |
 | `lib/base-system.sh` | Guarded package bootstrap and fstab generation for already-mounted target | IMPLEMENTED; invoked by the initial installer on main |
-| `scripts/install-arch-x280.sh` | Initial destructive installer orchestration | IMPLEMENTED on main; destructive path NOT TESTED on hardware |
+| `scripts/install-arch-x280.sh` | Initial destructive installer orchestration | IMPLEMENTED; physical installer execution TESTED in trial 4; successful SSD boot NOT TESTED |
 | `scripts/configure-arch-x280.sh` | Interactive initial target-system configuration | IMPLEMENTED; invoked through arch-chroot; full integration NOT TESTED |
 | `native/storage-handle.c` | Standalone read-only native descriptor prototype | IMPLEMENTED; compile/CLI test only; not integrated with installer |
 | `lib/bootloader.sh`, `lib/user-setup.sh`, `lib/desktop.sh`, `lib/hardware.sh`, `lib/packages.sh`, `lib/security.sh`, `lib/validation.sh`, `lib/report.sh` | Future domain-specific reusable modules | PLANNED placeholders; do not imply they are called by the installer |
@@ -80,12 +80,12 @@ The initial destructive installer is manually invoked through `scripts/bootstrap
 
 The canonical test runner is `bash tests/run.sh`; see [tests/README.md](../tests/README.md). Static tests, fixture tests, and the disposable loop-device integration test provide bounded evidence. They do not prove full installation, UKI bootability, physical NVMe behavior, wireless/audio/power behavior, or hibernation.
 
-Before physical destructive testing, the project still needs an independent review of the installer and its failure/cleanup paths, successful current CI, successful read-only live validation on the actual X280, and a documented operator test gate. The next end-to-end installation test is deliberately performed on the actual X280; no VM gate is required or planned. Detailed acceptance cases and current evidence are owned by [Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md).
+The initial physical installer process has completed successfully in trial 4. Before any further destructive physical trial, re-review the installer and its failure/cleanup paths, confirm passing CI for the exact source commit, repeat successful read-only live validation on the actual X280, and follow the documented operator test gate. Any further end-to-end destructive installation remains on the actual X280; no VM gate is required or planned. Detailed acceptance cases and current evidence are owned by [Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md).
 
 ## Deferred architecture
 
 - Full reusable storage executor with a proven descriptor/capability contract.
-- Physical X280 destructive installation and successful first boot (required acceptance; NOT TESTED).
+- Successful boot from the installed SSD and First Boot acceptance on the physical X280 (NOT TESTED). The installer process itself completed in physical trial 4.
 - Resume-offset lifecycle and hibernation.
 - Hyprland, Caelestia Shell, Quickshell, portals, audio, and session integration.
 - Hardware/power/thermal tuning based on Linux-observed capabilities.

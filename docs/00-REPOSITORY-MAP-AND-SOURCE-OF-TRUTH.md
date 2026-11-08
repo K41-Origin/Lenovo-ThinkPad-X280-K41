@@ -30,14 +30,14 @@ A file's existence does not prove execution. A PASS in a mock/fixture test is no
 | Project purpose, scope, status vocabulary | [01 Project Charter](01-PROJECT-CHARTER.md) | README |
 | Approved requirements and decisions | [02 Requirements and Decisions](02-REQUIREMENTS-AND-DECISIONS.md) | Requirement IDs referenced by domain docs/tests |
 | Architecture, runtime flow, module contracts | [03 Architecture and Modules](03-ARCHITECTURE-AND-MODULES.md) | `installer`, `scripts/`, `lib/`, `native/` |
-| Disk identity, partitioning, encryption, boot, swap/resume, recovery | [04 Installation and Disk](04-INSTALLATION-AND-DISK.md) | `scripts/install-arch-x280.sh`, `scripts/resume-arch-x280.sh`, storage/base-system/bootloader libraries |
+| Disk identity, partitioning, encryption, boot, swap/resume, recovery | [04 Installation and Disk](04-INSTALLATION-AND-DISK.md) | `scripts/install-arch-x280.sh`, legacy-only `scripts/resume-arch-x280.sh` (not for active recovery), storage/base-system/bootloader libraries |
 | Security, account, network, desktop, hardware/power, packages, AUR, BlackArch policy | [05 Platform, Security, and Software](05-PLATFORM-SECURITY-AND-SOFTWARE.md) | `lib/security.sh`, `lib/desktop.sh`, `lib/hardware.sh`, `lib/packages.sh`, hardware config |
 | Failure handling, logs, interrupted-run recovery | [10 Error Recovery and Reporting](10-ERROR-RECOVERY-AND-REPORTING.md) | installer/resume/report scripts and libraries |
 | Project acceptance and evidence thresholds | [11 Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) | [Test Guide](../tests/README.md) |
 | Current implementation, CI, outstanding gates | [12 Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md) | exact commit-bound GitHub Actions and physical reports |
 | Owner-reported X280 hardware baseline | [13 X280 Hardware Baseline](13-X280-HARDWARE-BASELINE.md) | `config/hardware/thinkpad-x280.conf`; runtime inventory |
 | Native device-handle prototype only | [14 Stage 8](14-STAGE-8-NATIVE-DEVICE-ACCESS.md) | `native/storage-handle.c`, `tests/test-native-storage-handle.sh` |
-| Initial destructive installer and checkpoint | [15 Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md) | `scripts/install-arch-x280.sh`, `scripts/resume-arch-x280.sh` |
+| Initial destructive installer and physical-trial procedure | [15 Stage 9](15-ARCH-INSTALLER-INITIAL-EXECUTION.md) | `scripts/install-arch-x280.sh`; legacy-only `scripts/resume-arch-x280.sh` is excluded from the active workflow |
 | ISO bootstrap and source-review gate | [16 Arch ISO Bootstrap](16-ARCHISO-BOOTSTRAP.md) | `scripts/bootstrap-archiso.sh`, readiness script |
 | First boot evidence procedure | [17 X280 First Boot](17-X280-FIRST-BOOT-TEST.md) | `scripts/x280-first-boot-check.sh` |
 | Dated repository audit | [18 Historical Audit](18-REPOSITORY-AUDIT-HISTORICAL.md) | historical only |
@@ -55,7 +55,7 @@ A file's existence does not prove execution. A PASS in a mock/fixture test is no
 | `scripts/x280-install-readiness.sh` | Compatibility wrapper for canonical strict readiness mode | 11, tests guide |
 | `scripts/live-validation.sh` | Compatibility wrapper for canonical diagnostics-only mode | 11, tests guide |
 | `scripts/install-arch-x280.sh` | Initial destructive encrypted Arch base installer; exact target/plan confirmation required | 04, 15, 11 |
-| `scripts/resume-arch-x280.sh` | Narrow continuation for the recorded post-pacstrap/pre-configuration checkpoint; no repartition/format/pacstrap | 10, 15, 17 |
+| `scripts/resume-arch-x280.sh` | Legacy continuation utility retained for historical compatibility; prohibited for all current physical trial/recovery workflows | 10, 15 |
 | `scripts/configure-arch-x280.sh` | Configures the already-installed target's initial user/locale/timezone/base settings and boot artifacts | 04, 05, 15 |
 | `scripts/validate-live-storage.sh` | Read-only X280 target identity and live topology validation | 04, 11, 13 |
 | `scripts/x280-archiso-test.sh` | Supplemental Arch ISO evidence collector; delegates readiness and storage validation to the canonical Live Validation entry point | 04, 11, tests guide |
