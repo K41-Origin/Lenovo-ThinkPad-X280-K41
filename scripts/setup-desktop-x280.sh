@@ -27,6 +27,7 @@ desktop_home=$(getent passwd "$desktop_user" | cut -d: -f6)
 [[ -n $desktop_home && -d $desktop_home ]] || die 'Could not resolve the desktop user home directory.'
 [[ ! -e $desktop_home/.config/hypr/hyprland.conf ]] || die 'Existing Hyprland config found; refusing to overwrite it.'
 [[ ! -e $desktop_home/.config/quickshell/caelestia ]] || die 'Existing Caelestia config found; refusing to overwrite it.'
+[[ ! -e $desktop_home/.config/xdg-desktop-portal/hyprland-portals.conf ]] || die 'Existing Hyprland portal preference found; refusing to overwrite it.'
 
 cat <<'NOTICE'
 This setup installs a minimal Wayland desktop on the CURRENT installed system.
@@ -148,5 +149,17 @@ for binary in start-hyprland Hyprland qs foot thunar; do
 done
 [[ -s $desktop_home/.config/hypr/hyprland.conf ]] || die 'Hyprland configuration was not written.'
 chown -R "$desktop_user:$(id -gn "$desktop_user")" "$desktop_home/.config/hypr"
+portal_dir="$desktop_home/.config/xdg-desktop-portal"
+install -d -m 0755 -o "$desktop_user" -g "$(id -gn "$desktop_user")" "$portal_dir"
+portal_tmp=$(mktemp "$portal_dir/.hyprland-portals.conf.k41.XXXXXX")
+cat >"$portal_tmp" <<'PORTALS'
+[preferred]
+default=gtk
+org.freedesktop.impl.portal.Screenshot=hyprland
+org.freedesktop.impl.portal.ScreenCast=hyprland
+PORTALS
+chmod 0644 "$portal_tmp"
+chown "$desktop_user:$(id -gn "$desktop_user")" "$portal_tmp"
+mv -- "$portal_tmp" "$portal_dir/hyprland-portals.conf"
 info 'Desktop setup completed. No graphical session was started and no automatic TTY launch was configured.'
 info 'Log out to TTY1, sign in as the regular user, then run: start-hyprland'
