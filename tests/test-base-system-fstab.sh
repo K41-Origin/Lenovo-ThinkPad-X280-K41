@@ -24,7 +24,7 @@ k41::log_info() { printf 'INFO: %s\n' "$*"; }
 genfstab() {
   cat <<'EOF'
 UUID=root-uuid / ext4 rw,relatime 0 1
-UUID=efi-uuid /efi vfat rw,relatime,fmask=0022,dmask=0022 0 2
+UUID=efi-uuid /efi vfat rw,relatime,fmask=0022,dmask=0022,umask=0000,codepage=437 0 2
 EOF
 }
 
@@ -36,7 +36,8 @@ EOF
 base_system::generate_fstab "$target" 'WRITE FSTAB'
 grep -Fxq 'tmpfs /tmp tmpfs nosuid,nodev 0 0' "$target/etc/fstab"
 grep -Fxq 'UUID=root-uuid / ext4 rw,relatime 0 1' "$target/etc/fstab"
-grep -Fxq 'UUID=efi-uuid /efi vfat rw,relatime,fmask=0022,dmask=0022 0 2' "$target/etc/fstab"
+grep -Fxq 'UUID=efi-uuid /efi vfat rw,relatime,codepage=437,fmask=0177,dmask=0077 0 2' "$target/etc/fstab"
+! grep -Eq '(^|,)(fmask|dmask|umask)=0022|(^|,)umask=0000' "$target/etc/fstab"
 [[ "$(grep -cE '^[^#[:space:]]+[[:space:]]+/$' "$target/etc/fstab" || true)" -eq 0 ]]
 
 # Re-running is idempotent: it must not duplicate the two generated mountpoints.
