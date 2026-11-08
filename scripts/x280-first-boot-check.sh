@@ -141,10 +141,35 @@ check_efi_permissions() {
   esp_mode="$(stat -c '%a' "$efi_root")" || return 1
   loader_mode="$(stat -c '%a' "$efi_root/loader")" || return 1
   seed_mode="$(stat -c '%a' "$seed")" || return 1
-  mount_options="$(findmnt -nro OPTIONS /efi 2>/dev/null || true)"
+  printf '===== /etc/fstab ESP entry =====\n'
+  if [[ -r "$etc_root/fstab" ]]; then
+    awk '$2 == "/efi" { printf "line %d: %s\n", NR, $0; found=1 }
+      END { if (!found) print "No /efi entry found in fstab." }' "$etc_root/fstab"
+  else
+    printf '/etc/fstab is unavailable or unreadable.\n'
+  fi
+
+  printf '\n===== Active ESP mount =====\n'
+  mount_info="$(findmnt -nro SOURCE,FSTYPE,OPTIONS /efi 2>&1)" || mount_rc=$?
+  if [[ ${mount_rc:-0} -eq 0 && -n $mount_info ]]; then
+    printf '%s\n' "$mount_info"
+    mount_options="${mount_info##* }"
+  else
+    printf 'findmnt query failed (exit %s): %s\n' "${mount_rc:-unknown}" "$mount_info"
+    mount_options=unavailable
+  fi
   printf 'EFI mount options: %s\n' "${mount_options:-unavailable}"
   printf 'Effective modes (octal): /efi=%s /efi/loader=%s random-seed=%s\n' \
     "$esp_mode" "$loader_mode" "$seed_mode"
+
+  printf '\n===== efi.mount unit status (read-only) =====\n'
+  if command -v systemctl >/dev/null 2>&1; then
+    local unit_status_rc=0
+    systemctl status efi.mount --no-pager 2>&1 || unit_status_rc=$?
+    printf 'systemctl status exit code: %s\n' "$unit_status_rc"
+  else
+    printf 'systemctl is unavailable.\n'
+  fi
   for mode in "$esp_mode" "$loader_mode" "$seed_mode"; do
     [[ $mode =~ ^[0-7]{3,4}$ ]] || {
       printf 'Could not parse effective permission mode: %s\n' "$mode"
@@ -294,7 +319,7 @@ finalize_report() {
     printf -- '- `diagnostics.log`: captured check output and errors\n'
     printf '\n## Interpretation and safety\n\n'
     printf 'This is a read-only snapshot of the running installed system. PASS applies only to the listed check and this boot. SKIP means evidence could not be collected; it is not a pass. A report containing FAIL must be reviewed before any repair. The collector does not change boot configuration, services, networking, encryption, partitions, or files outside its report directory. Review every report file before committing; automated redaction is best-effort and is not a substitute for human review.\n'
-    printf '\nRun with `sudo /usr/local/sbin/x280-first-boot-check` from the installed system. Reports are local and are never committed or pushed automatically.\n'
+    printf '\nRun from the repository root with `sudo bash scripts/x280-first-boot-check.sh` to use the current repository version. Reports are local and are never committed or pushed automatically.\n'
   } >"$summary"
   rm -f -- "$check_rows" "$report_dir/.check-output"
   chmod 600 "$summary" "$diagnostics" "$boot_status" "$system_status" "$hardware"

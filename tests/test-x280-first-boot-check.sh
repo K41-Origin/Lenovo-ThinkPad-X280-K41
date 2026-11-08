@@ -18,6 +18,9 @@ report_root="$tmp/reports"
 efi_root="$tmp/efi"
 mkdir -p "$mock_bin" "$sys_root/firmware/efi" "$sys_root/class/dmi/id" "$etc_root" "$efi_root/EFI/Linux"
 : >"$etc_root/arch-release"
+cat >"$etc_root/fstab" <<'FSTAB'
+UUID=TEST-ESP /efi vfat rw,fmask=0177,dmask=0077 0 2
+FSTAB
 printf 'LENOVO\n' >"$sys_root/class/dmi/id/sys_vendor"
 printf '20KESC2Y00\n' >"$sys_root/class/dmi/id/product_name"
 printf 'N20ET49W\n' >"$sys_root/class/dmi/id/bios_version"
@@ -30,6 +33,7 @@ chmod 600 "$efi_root/loader/random-seed"
 cat >"$mock_bin/findmnt" <<'MOCK'
 #!/usr/bin/env bash
 case " $* " in
+  *"SOURCE,FSTYPE,OPTIONS /efi"*) printf '/dev/nvme0n1p1 vfat rw,relatime,fmask=0177,dmask=0077\n' ;;
   *" /efi "*) printf '/efi vfat\n' ;;
   *" / "*) printf '/dev/mapper/cryptroot ext4\n' ;;
   *) exit 1 ;;
@@ -51,6 +55,7 @@ MOCK
 cat >"$mock_bin/systemctl" <<'MOCK'
 #!/usr/bin/env bash
 case "$1" in
+  status) [[ "${2:-}" == "efi.mount" ]] && { printf 'efi.mount - /efi\n   Active: active (mounted)\n'; exit 0; } ;;
   is-system-running) printf 'running\n' ;;
   --failed) exit 0 ;;
   get-default) printf 'multi-user.target\n' ;;
@@ -111,6 +116,9 @@ grep -Fq 'Encrypted root mount' "$report" || fail "root encryption check is abse
 grep -Fq 'Network connected' "$report" || fail "network check is absent from summary"
 grep -Fq 'EFI random-seed permission security' "$report" || fail "EFI permission audit is absent from summary"
 grep -Fq 'EFI mountpoint, loader directory, and random seed deny group/other access' "$report_dir/boot-status.txt" || fail "secure EFI permission fixture was not accepted"
+grep -Fq 'UUID=TEST-ESP /efi vfat rw,fmask=0177,dmask=0077 0 2' "$report_dir/boot-status.txt" || fail "ESP fstab entry was not captured"
+grep -Fq 'fmask=0177,dmask=0077' "$report_dir/boot-status.txt" || fail "active ESP mount options were not captured"
+grep -Fq 'efi.mount - /efi' "$report_dir/boot-status.txt" || fail "efi.mount unit status was not captured"
 grep -Fq '20KESC2Y00' "$report_dir/hardware.txt" || fail "hardware profile evidence was not captured"
 if grep -R -Fq 'SHOULD_NOT_LEAK' "$report_dir"; then
   fail "password-like journal content was not redacted"
@@ -184,7 +192,7 @@ if grep -Eq 'wipefs|sgdisk|mkfs\\.|cryptsetup[[:space:]]+(luksFormat|open)|pacst
 fi
 pass "first-boot collector contains no disk, encryption, package, or service mutation command"
 grep -Fq 'chown -R "$SUDO_UID:$SUDO_GID" "$report_dir"' "$SCRIPT" || fail "sudo-generated report ownership is not returned to the invoking user"
-grep -Fq 'Run with `sudo /usr/local/sbin/x280-first-boot-check`' "$SCRIPT" || fail "collector summary does not print the installed invocation"
+grep -Fq 'Run from the repository root with `sudo bash scripts/x280-first-boot-check.sh`' "$SCRIPT" || fail "collector summary does not print the installed invocation"
 pass "sudo-generated reports are made accessible to the invoking user and show the installed command"
 
 printf '%s\n' 'All X280 first-boot collector tests passed.'
