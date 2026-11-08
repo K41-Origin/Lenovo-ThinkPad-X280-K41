@@ -4,7 +4,7 @@
 
 - Initial destructive entry point: `scripts/install-arch-x280.sh`.
 - Legacy continuation utility: `scripts/resume-arch-x280.sh` is retained for compatibility but is **not used** in the agreed trial-and-error workflow.
-- Implementation: IMPLEMENTED on the integration branch pending merge into `main`.
+- Implementation: IMPLEMENTED and merged into `main` via PR #18.
 - Automated validation: TESTED on the exact commit and GitHub Actions runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
 - VM installation testing: OUT OF SCOPE by owner decision.
 - Physical installer trial 4: installer completed with exit status 0; see the timestamped log below.
