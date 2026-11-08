@@ -39,9 +39,9 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 2. Connect to the network.
 3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
 4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, requires an exact SHA-bound acknowledgement, runs the read-only readiness gate, and requires a second exact acknowledgement before launching the installer.
-6. After readiness passes, inspect the installer’s target-specific storage plan, verify the exact internal SSD identity and your backup/recovery arrangements, and only then enter the exact plan-bound confirmation. This is the point at which the selected SSD is erased.
-7. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
-8. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
+5. After readiness passes, inspect the installer’s target-specific storage plan, verify the exact internal SSD identity and your backup/recovery arrangements, and only then enter the exact plan-bound confirmation. This is the point at which the selected SSD is erased.
+6. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
+7. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
 **Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
 
@@ -51,15 +51,15 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 3. [Architecture and modules](docs/03-ARCHITECTURE-AND-MODULES.md)
 4. [Installation and disk](docs/04-INSTALLATION-AND-DISK.md)
 5. [Platform, security, and software policy](docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md)
-10. [Error recovery and reporting](docs/10-ERROR-RECOVERY-AND-REPORTING.md)
-11. [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md)
-12. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md)
-13. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md)
-14. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
-15. [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
-16. [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
-17. [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
-18. [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)
+6. [Error recovery and reporting](docs/10-ERROR-RECOVERY-AND-REPORTING.md)
+7. [Testing and acceptance](docs/11-TESTING-AND-ACCEPTANCE.md)
+8. [Implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md)
+9. [X280 hardware baseline](docs/13-X280-HARDWARE-BASELINE.md)
+10. [Stage 8 — native block-device access design](docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md)
+11. [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
+12. [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
+13. [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
+14. [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
@@ -98,7 +98,7 @@ The script always creates a timestamped, shareable report under `reports/live-re
 Two distinct read-only checks are available. `bash scripts/live-validation.sh` collects broad host/storage diagnostics and runs local quality checks plus the canonical test suite. `bash scripts/validate-live-storage.sh` verifies UEFI mode, matches the configured X280 SSD model/serial, and runs the repository's live storage target/topology validator. Both are intended to be read-only; neither authorizes disk erasure. The second script has not yet been executed on the physical X280, and its success must not be inferred from screenshots of raw system commands. Reports from `live-validation.sh` are local evidence, are not automatically committed, and must be reviewed before sharing. See [test documentation](tests/README.md#live-arch-iso--x280-validation).
 
 ## Documentation ownership
-Each topic has one canonical owner: requirements/decisions in `docs/02`, architecture/module boundaries in `docs/03`, storage and boot details in `docs/04`, test procedures in `tests/README.md`, acceptance/evidence boundaries in `docs/11`, and current implementation/CI status in `docs/12`. Stage records (`docs/14` and `docs/15-ARCH...`) document their specific implementation only. The historical repository audit (`docs/18-REPOSITORY-AUDIT-HISTORICAL.md`) records a dated review snapshot; it is not current status or a second source of technical procedures.
+Each topic has one canonical owner: requirements/decisions in `docs/02`, architecture/module boundaries in `docs/03`, storage and boot details in `docs/04`, platform/security/software policy in `docs/05`, test procedures in `tests/README.md`, acceptance/evidence boundaries in `docs/11`, and current implementation/CI status in `docs/12`. Stage records (`docs/14` and `docs/15-ARCH...`) document their specific implementation only. The historical repository audit (`docs/18-REPOSITORY-AUDIT-HISTORICAL.md`) records a dated review snapshot; it is not current status or a second source of technical procedures.
 
 ## Development status
 See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
