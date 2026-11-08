@@ -98,8 +98,9 @@ The initial physical installer process has completed successfully in trial 4. Be
 
 The implementation architecture is staged to avoid mixing desktop acceptance with later device tuning:
 
-1. **Desktop functional validation (next):** validate the running Hyprland/Caelestia session and its user-visible functions on the physical X280. Use the checklist and focused diagnostics in [Desktop Test](19-X280-DESKTOP-TEST.md).
-2. **Optional software integration:** implement only selected optional software components after desktop acceptance; BlackArch remains opt-in and selective.
-3. **Final hardware and system customization:** only after the preceding stages, plan and validate CPU/GPU/performance configuration, thermal behavior, power and battery behavior, suspend/hibernate/resume, and extended stability.
+1. **Desktop functional validation (current):** validate the running Hyprland/Caelestia session and its user-visible functions on the physical X280. Use [Desktop Test](19-X280-DESKTOP-TEST.md).
+2. **Desktop customization:** after functional acceptance, implement the refined monochromatic, minimal, premium visual design specified in [Desktop Customization](22-X280-DESKTOP-CUSTOMIZATION.md).
+3. **Optional software integration:** implement only selected optional components after desktop customization; BlackArch remains opt-in and selective.
+4. **Final hardware and system customization:** only after the preceding stages, plan and validate CPU/GPU/performance configuration, thermal behavior, power and battery behavior, suspend/hibernate/resume, and extended stability.
 
-The final stage is deliberately deferred. Existing read-only hardware and power-management collectors are inventory/evidence tools; their existence does not authorize or imply active tuning. The power-profile selector is an implemented controlled interface, not a requirement to run battery A/B tests now. Do not add competing power-management services or apply device tuning before the final-stage review.
+Desktop customization is a separate stage; do not conflate visual styling with functional validation. The final hardware/system stage is deliberately deferred. Existing read-only hardware and power-management collectors are inventory/evidence tools; their existence does not authorize or imply active tuning. The power-profile selector is an implemented controlled interface, not a requirement to run battery A/B tests now. Do not add competing power-management services or apply device tuning before the final-stage review.
