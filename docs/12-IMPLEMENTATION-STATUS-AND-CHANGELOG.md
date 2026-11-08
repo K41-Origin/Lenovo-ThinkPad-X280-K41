@@ -28,12 +28,12 @@ This file is the canonical current status summary. Detailed historical trial log
 | Cache creation after Caelestia restart | NOT TESTED | Latest runtime collector found Caelestia already running and did not restart it. Its captured log may contain pre-repair warnings. One targeted restart/inspection is the only remaining cache check. |
 | Bluetooth/BlueZ | NOT TESTED | Latest permissions report found no bluetooth.service, bluetoothctl, or available org.bluez D-Bus service. Bluetooth functionality was not validated. |
 | Manual desktop UI acceptance | NOT TESTED | Panel, launcher, dashboard, notifications, widgets, wallpaper/theme, indicators, and visual stability checklist remains unfilled. |
-| Read-only X280 hardware audit | IMPLEMENTED | `scripts/audit-x280-hardware.sh` collects CPU, memory, DMI non-unique identity, PCI/USB, storage topology without serials/UUIDs, graphics, network state, battery, thermal, and power-service inventory. First physical collection and report review are pending. |
-| X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical tests. |
+| Read-only X280 hardware audit | IMPLEMENTED | `scripts/audit-x280-hardware.sh` collects CPU, memory, DMI non-unique identity, PCI/USB, storage topology without serials/UUIDs, graphics, network state, battery, thermal, and power-service inventory. Physical report `958dc3b9f53f9f7ac0a6960e0d58e31c004fb27c` has been reviewed; USB/renderer/Vulkan details were incomplete because optional tools were absent. |
+| Read-only X280 power-management baseline collector | IMPLEMENTED | `scripts/audit-x280-power-management.sh` reads CPU frequency/governor/EPP, Intel pstate, ACPI platform profile, AC/battery state, and power-service/profile state. Physical execution remains pending. |\n| X280 power, battery, thermal, and device tuning | PLANNED | Hardware report reviewed; detailed CPU policy/EPP/platform-profile baseline and physical acceptance tests remain necessary before selecting changes. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and physical suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
 
-## Latest desktop setup and evidence
+## Hardware audit review\n\nThe physical hardware report committed in `958dc3b9f53f9f7ac0a6960e0d58e31c004fb27c` identifies an i5-8250U/X280 with UHD 620/i915, 8 GB RAM, WD SN730 NVMe, Intel 8265 Wi-Fi, and LGC 01AV470 battery. Captured full-charge capacity was 43.66 Wh against 47.88 Wh design capacity (approximately 91.2%); this sysfs snapshot is not a calibrated battery-health test. The power-profiles-daemon service was active, so no competing manager should be enabled without further investigation. A focused CPU/EPP/platform-profile baseline collector is now implemented; its physical run remains pending.\n\n## Latest desktop setup and evidence
 
 The fifth physical desktop setup attempt is recorded in `reports/desktop/20261108T190308Z/`:
 
