@@ -40,7 +40,7 @@ prompt_yes_no proceed 'Install Hyprland, Quickshell, audio, portal, and desktop 
 packages=(
   hyprland quickshell xdg-desktop-portal xdg-desktop-portal-hyprland
   xdg-desktop-portal-gtk pipewire pipewire-audio pipewire-pulse wireplumber
-  polkit hyprpolkitagent foot thunar firefox
+  polkit hyprpolkitagent hyprlock wofi foot thunar firefox
   grim slurp wl-clipboard cliphist swappy brightnessctl playerctl
   pavucontrol xdg-user-dirs xorg-xwayland mesa vulkan-intel
   noto-fonts noto-fonts-emoji ttf-dejavu
@@ -95,7 +95,7 @@ bind = $mainMod, Q, killactive
 bind = $mainMod, M, exit
 bind = $mainMod, F, fullscreen
 bind = $mainMod, V, togglefloating
-bind = $mainMod, SPACE, exec, caelestia shell drawers
+bind = $mainMod, SPACE, exec, wofi --show drun
 bind = $mainMod, L, exec, hyprlock
 bind = $mainMod, 1, workspace, 1
 bind = $mainMod, 2, workspace, 2
@@ -110,9 +110,7 @@ bind = $mainMod, down, movefocus, d
 
 # Start the shell only when its package is installed.
 exec-once = systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
-exec-once = /usr/lib/polkit-kde-authentication-agent-1
 exec-once = hyprpolkitagent
-exec-once = qs -c caelestia
 HYPR
 chmod 0644 "$config_tmp"
 chown "$desktop_user:$(id -gn "$desktop_user")" "$config_tmp"
@@ -137,6 +135,10 @@ if [[ $install_caelestia == yes ]]; then
   runuser -u "$desktop_user" -- bash -lc "cd '$aur_dir' && makepkg --syncdeps --install"
 else
   info 'Caelestia AUR installation skipped by choice; Hyprland + Quickshell remain available for validation.'
+fi
+
+if pacman -Qq caelestia-shell >/dev/null 2>&1; then
+  printf '%s\n' 'exec-once = qs -c caelestia' >>"$desktop_home/.config/hypr/hyprland.conf"
 fi
 
 # Validate files and binaries without starting a graphical session or changing the login target.
