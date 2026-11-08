@@ -27,7 +27,7 @@ while ! mkdir -- "$run_dir" 2>/dev/null; do
 done
 chmod 0700 "$run_dir"
 setup_log="$run_dir/setup.log"
- : >"$setup_log"
+: >"$setup_log"
 chmod 0600 "$setup_log"
 exec > >(tee -a "$setup_log") 2>&1
 
