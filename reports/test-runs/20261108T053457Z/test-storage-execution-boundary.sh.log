@@ -1,0 +1,7 @@
+PASS: mock boundary re-probes full target identity immediately before all eight operations
+PASS: changed identity blocks the next mock operation and records partial-state recovery
+PASS: changed read-only safety attribute blocks the next operation
+PASS: failed initial identity probe produces zero mock executor calls
+PASS: partial executor failure is recorded and recovery is required without automatic rollback
+PASS: non-mock executor callback is rejected before execution
+PASS: gate/plan target-attribute mismatch blocks before gate consumption and mock execution

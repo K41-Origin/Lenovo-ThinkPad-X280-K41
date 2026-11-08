@@ -1,32 +1,32 @@
 # K41 live validation diagnostics
 
-- Generated (UTC): 2026-11-08T05:25:55Z
+- Generated (UTC): 2026-11-08T05:35:27Z
 - Repository: /tmp/Lenovo-ThinkPad-X280-K41
 - Host: unknown
 - Kernel: Linux 7.2.11-arch1-1 x86_64 GNU/Linux
-- Branch: refactor/live-validation-dedup
-- Commit: 0b58b05183f00019bbd8fccb017733bfaa034f0b
+- Branch: main
+- Commit: 859cf56e89906ec705fc49c9a6505959054d3869
 
 > Read-only diagnostics and repository tests. This report may contain hardware identifiers and network metadata; review before sharing.
 
 == Git repository status ==
 PASS
-## refactor/live-validation-dedup...origin/refactor/live-validation-dedup
+## main...origin/main
  M reports/live-validation/latest.md
-?? reports/live-readiness/20261108T052522Z/
-?? reports/live-readiness/20261108T052555Z/
-?? reports/live-validation/20261108T052522Z.md
-?? reports/live-validation/20261108T052555Z.md
-?? reports/test-runs/20261108T052524Z/
-?? reports/x280-archiso-test/
+?? reports/live-readiness/20261108T053455Z/
+?? reports/live-readiness/20261108T053527Z/
+?? reports/live-validation/20261108T053455Z.md
+?? reports/live-validation/20261108T053527Z.md
+?? reports/test-runs/20261108T053457Z/
+?? reports/x280-archiso-test/20261108T053455Z/
 
 == Current commit ==
 PASS
-0b58b05183f00019bbd8fccb017733bfaa034f0b
+859cf56e89906ec705fc49c9a6505959054d3869
 
 == Current branch ==
 PASS
-refactor/live-validation-dedup
+main
 
 == Tracked file inventory ==
 PASS
@@ -86,7 +86,13 @@ reports/live-readiness/20261107T165046Z/diagnostics.log
 reports/live-readiness/20261107T165046Z/summary.md
 reports/live-readiness/20261107T174710Z/diagnostics.log
 reports/live-readiness/20261107T174710Z/summary.md
+reports/live-readiness/20261108T052522Z/diagnostics.log
+reports/live-readiness/20261108T052522Z/summary.md
+reports/live-readiness/20261108T052555Z/diagnostics.log
+reports/live-readiness/20261108T052555Z/summary.md
 reports/live-validation/20261107T090959Z.md
+reports/live-validation/20261108T052522Z.md
+reports/live-validation/20261108T052555Z.md
 reports/live-validation/latest.md
 reports/test-runs/20261107T090947Z/combined.log
 reports/test-runs/20261107T090947Z/summary.md
@@ -251,7 +257,52 @@ reports/test-runs/20261107T174710Z/test-storage-prerequisites.sh.log
 reports/test-runs/20261107T174710Z/test-storage-topology.sh.log
 reports/test-runs/20261107T174710Z/test-x280-first-boot-check.sh.log
 reports/test-runs/20261107T174710Z/test-x280-install-readiness.sh.log
+reports/test-runs/20261108T052524Z/combined.log
+reports/test-runs/20261108T052524Z/summary.md
+reports/test-runs/20261108T052524Z/test-arch-config-script.sh.log
+reports/test-runs/20261108T052524Z/test-arch-installer-script.sh.log
+reports/test-runs/20261108T052524Z/test-base-system-fstab.sh.log
+reports/test-runs/20261108T052524Z/test-bootstrap-archiso.sh.log
+reports/test-runs/20261108T052524Z/test-common-preflight.sh.log
+reports/test-runs/20261108T052524Z/test-installer-entry.sh.log
+reports/test-runs/20261108T052524Z/test-inventory.sh.log
+reports/test-runs/20261108T052524Z/test-native-storage-handle.sh.log
+reports/test-runs/20261108T052524Z/test-pinned-device-path.sh.log
+reports/test-runs/20261108T052524Z/test-preflight-gate.sh.log
+reports/test-runs/20261108T052524Z/test-resume-arch-installer.sh.log
+reports/test-runs/20261108T052524Z/test-storage-confirmation.sh.log
+reports/test-runs/20261108T052524Z/test-storage-discovery.sh.log
+reports/test-runs/20261108T052524Z/test-storage-execution-boundary.sh.log
+reports/test-runs/20261108T052524Z/test-storage-execution-dry-run.sh.log
+reports/test-runs/20261108T052524Z/test-storage-plan.sh.log
+reports/test-runs/20261108T052524Z/test-storage-prerequisites.sh.log
+reports/test-runs/20261108T052524Z/test-storage-topology.sh.log
+reports/test-runs/20261108T052524Z/test-x280-first-boot-check.sh.log
+reports/test-runs/20261108T052524Z/test-x280-install-readiness.sh.log
+reports/test-runs/20261108T052558Z/combined.log
+reports/test-runs/20261108T052558Z/summary.md
+reports/test-runs/20261108T052558Z/test-arch-config-script.sh.log
+reports/test-runs/20261108T052558Z/test-arch-installer-script.sh.log
+reports/test-runs/20261108T052558Z/test-base-system-fstab.sh.log
+reports/test-runs/20261108T052558Z/test-bootstrap-archiso.sh.log
+reports/test-runs/20261108T052558Z/test-common-preflight.sh.log
+reports/test-runs/20261108T052558Z/test-installer-entry.sh.log
+reports/test-runs/20261108T052558Z/test-inventory.sh.log
+reports/test-runs/20261108T052558Z/test-native-storage-handle.sh.log
+reports/test-runs/20261108T052558Z/test-pinned-device-path.sh.log
+reports/test-runs/20261108T052558Z/test-preflight-gate.sh.log
+reports/test-runs/20261108T052558Z/test-resume-arch-installer.sh.log
+reports/test-runs/20261108T052558Z/test-storage-confirmation.sh.log
+reports/test-runs/20261108T052558Z/test-storage-discovery.sh.log
+reports/test-runs/20261108T052558Z/test-storage-execution-boundary.sh.log
+reports/test-runs/20261108T052558Z/test-storage-execution-dry-run.sh.log
+reports/test-runs/20261108T052558Z/test-storage-plan.sh.log
+reports/test-runs/20261108T052558Z/test-storage-prerequisites.sh.log
+reports/test-runs/20261108T052558Z/test-storage-topology.sh.log
+reports/test-runs/20261108T052558Z/test-x280-first-boot-check.sh.log
+reports/test-runs/20261108T052558Z/test-x280-install-readiness.sh.log
 reports/x280-archiso-storage-test-20261107T082432Z.log
+reports/x280-archiso-test/20261108T052522Z/x280-archiso-test.log
 scripts/bootstrap-archiso.sh
 scripts/configure-arch-x280.sh
 scripts/install-arch-x280.sh
@@ -289,42 +340,42 @@ x280-archiso-storage-test-20261108T051325Z.log
 
 == Working-tree diff summary ==
 PASS
- reports/live-validation/latest.md | 692 +++++++++++++++++++++++++++++++-------
- 1 file changed, 572 insertions(+), 120 deletions(-)
+ reports/live-validation/latest.md | 158 +++++++++++++++++++++-----------------
+ 1 file changed, 89 insertions(+), 69 deletions(-)
 
 == Untracked file inventory ==
 PASS
-reports/live-readiness/20261108T052522Z/diagnostics.log
-reports/live-readiness/20261108T052522Z/summary.md
-reports/live-readiness/20261108T052555Z/.check-output
-reports/live-readiness/20261108T052555Z/.check-rows
-reports/live-readiness/20261108T052555Z/diagnostics.log
-reports/live-readiness/20261108T052555Z/summary.md
-reports/live-validation/20261108T052522Z.md
-reports/live-validation/20261108T052555Z.md
-reports/test-runs/20261108T052524Z/combined.log
-reports/test-runs/20261108T052524Z/summary.md
-reports/test-runs/20261108T052524Z/test-arch-config-script.sh.log
-reports/test-runs/20261108T052524Z/test-arch-installer-script.sh.log
-reports/test-runs/20261108T052524Z/test-base-system-fstab.sh.log
-reports/test-runs/20261108T052524Z/test-bootstrap-archiso.sh.log
-reports/test-runs/20261108T052524Z/test-common-preflight.sh.log
-reports/test-runs/20261108T052524Z/test-installer-entry.sh.log
-reports/test-runs/20261108T052524Z/test-inventory.sh.log
-reports/test-runs/20261108T052524Z/test-native-storage-handle.sh.log
-reports/test-runs/20261108T052524Z/test-pinned-device-path.sh.log
-reports/test-runs/20261108T052524Z/test-preflight-gate.sh.log
-reports/test-runs/20261108T052524Z/test-resume-arch-installer.sh.log
-reports/test-runs/20261108T052524Z/test-storage-confirmation.sh.log
-reports/test-runs/20261108T052524Z/test-storage-discovery.sh.log
-reports/test-runs/20261108T052524Z/test-storage-execution-boundary.sh.log
-reports/test-runs/20261108T052524Z/test-storage-execution-dry-run.sh.log
-reports/test-runs/20261108T052524Z/test-storage-plan.sh.log
-reports/test-runs/20261108T052524Z/test-storage-prerequisites.sh.log
-reports/test-runs/20261108T052524Z/test-storage-topology.sh.log
-reports/test-runs/20261108T052524Z/test-x280-first-boot-check.sh.log
-reports/test-runs/20261108T052524Z/test-x280-install-readiness.sh.log
-reports/x280-archiso-test/20261108T052522Z/x280-archiso-test.log
+reports/live-readiness/20261108T053455Z/diagnostics.log
+reports/live-readiness/20261108T053455Z/summary.md
+reports/live-readiness/20261108T053527Z/.check-output
+reports/live-readiness/20261108T053527Z/.check-rows
+reports/live-readiness/20261108T053527Z/diagnostics.log
+reports/live-readiness/20261108T053527Z/summary.md
+reports/live-validation/20261108T053455Z.md
+reports/live-validation/20261108T053527Z.md
+reports/test-runs/20261108T053457Z/combined.log
+reports/test-runs/20261108T053457Z/summary.md
+reports/test-runs/20261108T053457Z/test-arch-config-script.sh.log
+reports/test-runs/20261108T053457Z/test-arch-installer-script.sh.log
+reports/test-runs/20261108T053457Z/test-base-system-fstab.sh.log
+reports/test-runs/20261108T053457Z/test-bootstrap-archiso.sh.log
+reports/test-runs/20261108T053457Z/test-common-preflight.sh.log
+reports/test-runs/20261108T053457Z/test-installer-entry.sh.log
+reports/test-runs/20261108T053457Z/test-inventory.sh.log
+reports/test-runs/20261108T053457Z/test-native-storage-handle.sh.log
+reports/test-runs/20261108T053457Z/test-pinned-device-path.sh.log
+reports/test-runs/20261108T053457Z/test-preflight-gate.sh.log
+reports/test-runs/20261108T053457Z/test-resume-arch-installer.sh.log
+reports/test-runs/20261108T053457Z/test-storage-confirmation.sh.log
+reports/test-runs/20261108T053457Z/test-storage-discovery.sh.log
+reports/test-runs/20261108T053457Z/test-storage-execution-boundary.sh.log
+reports/test-runs/20261108T053457Z/test-storage-execution-dry-run.sh.log
+reports/test-runs/20261108T053457Z/test-storage-plan.sh.log
+reports/test-runs/20261108T053457Z/test-storage-prerequisites.sh.log
+reports/test-runs/20261108T053457Z/test-storage-topology.sh.log
+reports/test-runs/20261108T053457Z/test-x280-first-boot-check.sh.log
+reports/test-runs/20261108T053457Z/test-x280-install-readiness.sh.log
+reports/x280-archiso-test/20261108T053455Z/x280-archiso-test.log
 
 == Root privileges ==
 PASS
@@ -369,7 +420,7 @@ Core(s) per socket:                      4
 Socket(s):                               1
 Stepping:                                10
 Microcode version:                       0xf6
-CPU(s) scaling MHz:                      62%
+CPU(s) scaling MHz:                      26%
 CPU max MHz:                             3400.0000
 CPU min MHz:                             400.0000
 BogoMIPS:                                3600.00
@@ -539,7 +590,7 @@ PASS
 
 == Canonical repository test suite ==
 PASS
-Repository test run: /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z
+Repository test run: /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z
 
 == tests/test-x280-first-boot-check.sh ==
 PASS: first-boot collector passes bash -n
@@ -549,14 +600,14 @@ PASS: failed systemd unit produces a retained FAIL report and non-zero exit
 PASS: first-boot collector contains no disk, encryption, package, or service mutation command
 PASS: sudo-generated reports are made accessible to the invoking user and show the installed command
 All X280 first-boot collector tests passed.
-tests/test-x280-first-boot-check.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-x280-first-boot-check.sh.log
+tests/test-x280-first-boot-check.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-x280-first-boot-check.sh.log
 
 == tests/test-bootstrap-archiso.sh ==
 PASS: bootstrap passes bash -n
 PASS: bootstrap pins and displays the fetched commit, verifies origin/clean checkout, reviews source, runs live readiness, and requires two exact acknowledgements
 PASS: bootstrap does not pipe remote content into a shell
 PASS: bootstrap delegates storage operations only to the separately reviewed installer
-tests/test-bootstrap-archiso.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-bootstrap-archiso.sh.log
+tests/test-bootstrap-archiso.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-bootstrap-archiso.sh.log
 
 == tests/test-common-preflight.sh ==
 PASS: module sourcing has no output or shell-option/trap changes
@@ -567,7 +618,7 @@ PASS: network check reports link state without claiming internet access
 PASS: network check reports unavailable diagnostics as unknown
 PASS: base-system module validates encrypted ext4 root, separate vfat ESP, and explicit confirmation
 All common/preflight tests passed.
-tests/test-common-preflight.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-common-preflight.sh.log
+tests/test-common-preflight.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-common-preflight.sh.log
 
 == tests/test-installer-entry.sh ==
 PASS: entry point resolves modules relative to itself and documents its limits
@@ -575,7 +626,7 @@ PASS: unsupported arguments fail closed
 PASS: preflight cannot return success or claim installation approval
 PASS: entry point has no storage/install module or privileged/system-changing command path
 All installer-entry tests passed.
-tests/test-installer-entry.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-installer-entry.sh.log
+tests/test-installer-entry.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-installer-entry.sh.log
 
 == tests/test-arch-installer-script.sh ==
 PASS: installer passes bash -n
@@ -588,7 +639,7 @@ PASS: installer does not disable all live-ISO swap or bypass base-system module
 PASS: destructive signature erasure is ordered after confirmation and final revalidation
 PASS: initial and final revalidation use separate target snapshots, leaving final output arrays empty
 All Arch installer script tests passed.
-tests/test-arch-installer-script.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-arch-installer-script.sh.log
+tests/test-arch-installer-script.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-arch-installer-script.sh.log
 
 == tests/test-arch-config-script.sh ==
 PASS: target configuration script passes bash -n
@@ -596,7 +647,7 @@ PASS: target configuration includes user, sudo, locale, timezone, and planned sw
 PASS: no static password is embedded
 PASS: Intel microcode follows the explicit report-only policy
 All target configuration script tests passed.
-tests/test-arch-config-script.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-arch-config-script.sh.log
+tests/test-arch-config-script.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-arch-config-script.sh.log
 
 == tests/test-x280-install-readiness.sh ==
 PASS: canonical validator, compatibility entry points, and supplemental collector pass bash -n
@@ -606,7 +657,7 @@ PASS: legacy entry points delegate without maintaining duplicate implementations
 PASS: supplemental collector stores detailed evidence in repository reports and delegates readiness/storage checks
 PASS: canonical live validator contains no disk mutation or installation commands
 All K41 live-validation tests passed.
-tests/test-x280-install-readiness.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-x280-install-readiness.sh.log
+tests/test-x280-install-readiness.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-x280-install-readiness.sh.log
 
 == tests/test-pinned-device-path.sh ==
 Creating new GPT entries in memory.
@@ -615,11 +666,11 @@ other utilities.
 The operation has completed successfully.
 mke2fs 1.47.4 (6-Mar-2025)
 PASS: wipefs, sgdisk, partprobe, mkfs.fat, cryptsetup, and mkfs.ext4 operate through inherited pinned block descriptors.
-tests/test-pinned-device-path.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-pinned-device-path.sh.log
+tests/test-pinned-device-path.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-pinned-device-path.sh.log
 
 == tests/test-inventory.sh ==
 inventory tests: PASS
-tests/test-inventory.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-inventory.sh.log
+tests/test-inventory.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-inventory.sh.log
 
 == tests/test-storage-discovery.sh ==
 PASS: discovers disks and records identity and safety facts
@@ -647,7 +698,7 @@ PASS: fails closed when swap discovery fails
 PASS: fails closed when lsblk fails
 PASS: rejects invalid output array
 All storage discovery tests passed.
-tests/test-storage-discovery.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-discovery.sh.log
+tests/test-storage-discovery.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-discovery.sh.log
 
 == tests/test-storage-plan.sh ==
 PASS: calculates aligned GPT layout and RAM-plus-margin swap proposal
@@ -670,13 +721,13 @@ PASS: refuses non-UEFI prerequisite state
 PASS: prerequisite evidence changes alter the canonical plan digest
 PASS: rejects non-canonical numeric fields before arithmetic evaluation
 PASS: rejects ESP profile size inconsistent with planned partition geometry
-tests/test-storage-plan.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-plan.sh.log
+tests/test-storage-plan.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-plan.sh.log
 
 == tests/test-storage-prerequisites.sh ==
 PASS: live UEFI, tool, target identity, unused-state, and topology evidence is bound to the plan
 PASS: failed live checks never produce a passed prerequisite snapshot
 PASS: changed stable identity cannot bind live prerequisites
-tests/test-storage-prerequisites.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-prerequisites.sh.log
+tests/test-storage-prerequisites.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-prerequisites.sh.log
 
 == tests/test-storage-confirmation.sh ==
 PASS: cancellation and incorrect confirmation are rejected
@@ -686,7 +737,7 @@ PASS: confirmation cannot be reused
 PASS: modified plan invalidates confirmation and fails closed
 PASS: changed target identity fails final revalidation
 PASS: topology failure leaves the final gate closed
-tests/test-storage-confirmation.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-confirmation.sh.log
+tests/test-storage-confirmation.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-confirmation.sh.log
 
 == tests/test-storage-execution-dry-run.sh ==
 PASS: manifest has deterministic GPT, partition, LUKS2, ext4 ordering
@@ -695,7 +746,7 @@ PASS: execution planning is blocked without a ready gate
 PASS: simulated failure halts subsequent operations and consumes the gate
 PASS: consumed gate cannot be reused
 PASS: complete dry-run simulation records all operations without system execution
-tests/test-storage-execution-dry-run.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-execution-dry-run.sh.log
+tests/test-storage-execution-dry-run.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-execution-dry-run.sh.log
 
 == tests/test-storage-execution-boundary.sh ==
 PASS: mock boundary re-probes full target identity immediately before all eight operations
@@ -705,7 +756,7 @@ PASS: failed initial identity probe produces zero mock executor calls
 PASS: partial executor failure is recorded and recovery is required without automatic rollback
 PASS: non-mock executor callback is rejected before execution
 PASS: gate/plan target-attribute mismatch blocks before gate consumption and mock execution
-tests/test-storage-execution-boundary.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-execution-boundary.sh.log
+tests/test-storage-execution-boundary.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-execution-boundary.sh.log
 
 == tests/test-storage-topology.sh ==
 PASS: unrelated mounted disk does not block target
@@ -744,7 +795,7 @@ PASS: complete topology check rejects overlay path on target
 storage: target topology backs active swap /dev/null (device 1:3)
 storage: topology: topology validation rejected an unsafe or unresolvable state at function line 252.
 PASS: complete topology check rejects active block swap dependency
-tests/test-storage-topology.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-storage-topology.sh.log
+tests/test-storage-topology.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-storage-topology.sh.log
 
 == tests/test-preflight-gate.sh ==
 PASS: resolved diagnostics still leave installation disabled
@@ -753,7 +804,7 @@ PASS: unresolved boot mode blocks preflight success
 PASS: required-command failure blocks preflight success
 PASS: optional network diagnostic failure does not change required gate result
 All preflight-gate tests passed.
-tests/test-preflight-gate.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-preflight-gate.sh.log
+tests/test-preflight-gate.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-preflight-gate.sh.log
 SKIP: optional compiler cc is unavailable; install base-devel or a C compiler to run this native-helper test.
 
 == tests/test-base-system-fstab.sh ==
@@ -761,14 +812,14 @@ INFO: Target fstab validated/updated using filesystem UUIDs; existing unrelated 
 INFO: Target fstab validated/updated using filesystem UUIDs; existing unrelated entries were preserved.
 ERROR: Target fstab contains duplicate entries for /.
 PASS: fstab generation preserves unrelated entries, is idempotent, and rejects conflicting mountpoints
-tests/test-base-system-fstab.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-base-system-fstab.sh.log
+tests/test-base-system-fstab.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-base-system-fstab.sh.log
 
 == tests/test-resume-arch-installer.sh ==
 PASS: resume entry point validates existing target and continues after pacstrap/fstab without repartitioning, formatting, or rerunning pacstrap
-tests/test-resume-arch-installer.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/test-resume-arch-installer.sh.log
+tests/test-resume-arch-installer.sh: PASS (exit 0) — /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/test-resume-arch-installer.sh.log
 
-Summary: /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/summary.md
-Combined log: /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T052558Z/combined.log
+Summary: /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/summary.md
+Combined log: /tmp/Lenovo-ThinkPad-X280-K41/reports/test-runs/20261108T053529Z/combined.log
 Test scripts: 19 passed | 0 failed | 1 skipped
 
 == X280 SSD identity and live topology (read-only) ==
