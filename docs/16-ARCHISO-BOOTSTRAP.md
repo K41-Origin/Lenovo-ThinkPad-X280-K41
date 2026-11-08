@@ -32,7 +32,7 @@ The bootstrap creates a private checkout under `/root/k41-archiso.XXXXXX/reposit
 REVIEWED <40-character-commit-SHA> AND AUTHORIZE READ-ONLY READINESS CHECK
 ```
 
-The placeholder must be replaced by the SHA printed by the script. Any other input stops without running readiness. The bootstrap then runs `bash scripts/k41-live-validation.sh --readiness`. This gate must pass; it records a report under `reports/live-readiness/`. If any check fails, the bootstrap stops without launching the installer. After a PASS, type exactly `READINESS PASSED FOR <40-character-commit-SHA> AND AUTHORIZE INSTALLER LAUNCH` to launch the installer.
+The placeholder must be replaced by the SHA printed by the script. Any other input stops without running readiness. The bootstrap then runs `bash scripts/k41-live-validation.sh --readiness`. This gate must pass; it records reports under `reports/live-readiness/` and `reports/live-validation/`. The supplemental `x280-archiso-test.sh` evidence is stored under `reports/x280-archiso-test/`. On an Arch ISO, both report-producing scripts verify that the checkout resides on an `overlay` or `tmpfs` filesystem and stop before writing if it resolves to a persistent filesystem. Keep the checkout on the ISO live environment (for example, under `/root` or `/tmp`); do not place it on the target SSD. If any check fails, the bootstrap stops without launching the installer. After a PASS, type exactly `READINESS PASSED FOR <40-character-commit-SHA> AND AUTHORIZE INSTALLER LAUNCH` to launch the installer.
 
 ## Two distinct authorization gates
 
