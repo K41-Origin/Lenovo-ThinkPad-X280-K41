@@ -24,7 +24,7 @@ Approved target direction:
 5. Opens and retains Bash descriptors for the disk/partitions and passes inherited `/proc/self/fd/N` paths to selected disk utilities.
 6. Wipes old signatures, creates GPT/ESP/Linux-LUKS partitions, formats FAT32 and LUKS2/ext4, opens `cryptroot`, and mounts root at `/mnt` and ESP at `/mnt/efi`.
 7. Calls `base_system::bootstrap` for `pacstrap -K` and UUID-based fstab generation.
-8. Runs `scripts/configure-arch-x280.sh` in `arch-chroot` to configure hostname, user/password, timezone, locale, Intel microcode, sudo wheel access, swapfile, and NetworkManager.
+8. Runs `scripts/configure-arch-x280.sh` in `arch-chroot` to configure hostname, user/password, timezone, locale, sudo wheel access, swapfile, and NetworkManager. Intel microcode is recommendation-only and is not installed automatically by the current configuration script.
 9. Installs systemd-boot and configures mkinitcpio with `HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)`; kernel command line uses `rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw`.
 10. Generates the default UKI, checks expected configuration artifacts, and does not reboot automatically.
 
@@ -86,7 +86,7 @@ The current installer does not provide a complete transactional rollback or auto
 Detailed test cases live in [11-TESTING-AND-ACCEPTANCE.md](11-TESTING-AND-ACCEPTANCE.md). Current state:
 - IMPLEMENTED: target discovery/validation, plan calculation/binding, confirmation/final revalidation, initial destructive installer, base bootstrap, target configuration, and initial UKI generation on `main`.
 - TESTED (bounded): fixture/static tests and selected descriptor-pinned utilities against a disposable loop-backed image on the CI-tested commit.
-- NOT TESTED: successful physical live validator on X280 after its fix, physical SSD installation, first boot, UKI unlock/root mount, recovery-key registration, and hibernation/resume.
+- TESTED: physical installer process completed in trial 4 with exit status 0 and UKI generation. NOT TESTED: successful boot from the installed SSD, firmware UKI discovery, LUKS unlock/root mount, First Boot/first login, recovery-key registration, and hibernation/resume.
 - OUT OF SCOPE BY OWNER DECISION: VM-based installer testing. Disposable loop-image tests remain permitted for bounded utility-interface coverage; they do not replace the required real-laptop destructive test.
 - PLANNED: tested recovery/cleanup lifecycle, reusable storage executor boundary, resume-offset workflow, and subsequent desktop/hardware setup.
 
