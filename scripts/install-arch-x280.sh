@@ -54,11 +54,11 @@ installer::init_logging() {
     installer_log_dir="$root/$timestamp-$suffix"
   done
   installer_log_file="$installer_log_dir/installer.log"
-  : >"$installer_log_file"
+  : >"$installer_log_file" || return 1
   chmod 0600 "$installer_log_file" || return 1
   # No xtrace is enabled. Interactive secrets are read from the controlling
   # terminal and are never passed as command arguments.
-  exec > >(tee -a "$installer_log_file") 2>&1
+  exec > >(tee -a "$installer_log_file") 2>&1 || return 1
   printf 'X280 installer diagnostic log\n'
   printf 'Started (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf 'Kernel: %s\nArchitecture: %s\n' "$(uname -sr)" "$(uname -m)"
