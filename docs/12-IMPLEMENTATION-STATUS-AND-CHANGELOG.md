@@ -119,3 +119,12 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 - [X280 first-boot test and evidence](17-X280-FIRST-BOOT-TEST.md)
 - [Test commands and evidence handling](../tests/README.md)
 - [Acceptance criteria](11-TESTING-AND-ACCEPTANCE.md)
+
+
+## Desktop trial 4 failure analysis and trial 5 gate — 2026-11-09
+
+- **Observed:** fourth desktop attempt exited 8 during `libcava` build dependency installation. pacman listed `meson` and `autoconf-archive`, then received the literal input `libpipewire` at its confirmation prompt.
+- **Root cause:** recursive AUR resolution executed nested build commands while the parent `while read` loop's process-substitution stream remained connected to stdin. The next dependency line could therefore be consumed as interactive pacman input.
+- **Implemented fix:** materialize each metadata dependency list with `mapfile` before recursion; iterate the array; use `/dev/null` for `makepkg --printsrcinfo`; attach interactive `makepkg --syncdeps --install` to `/dev/tty`.
+- **Validation status:** regression guards added to the desktop fixture test. CI and local physical execution of this new fix must be recorded separately; no fifth physical trial is claimed here.
+- **Next gate:** run desktop fixture and canonical repository tests on the new commit, then perform the fifth physical desktop attempt. The prior fourth-attempt packages already installed remain installed; the setup uses `pacman -Syu --needed` and should reuse them.
