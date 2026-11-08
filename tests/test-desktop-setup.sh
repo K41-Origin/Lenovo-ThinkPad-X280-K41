@@ -66,6 +66,7 @@ pkgver = 1.0
 pkgrel = 1
 depends = libcava>=1.0
 makedepends_x86_64 = cmake
+depends_aarch64 = ignored-arm-only-dependency
 pkgname = fixture-demo
 provides = legacy-demo
 SRCINFO
