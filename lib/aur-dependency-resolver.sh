@@ -24,7 +24,7 @@ aur_metadata_matches() {
 aur_metadata_dependencies() {
   local metadata=$1
   awk -F ' = ' '
-    /^[[:space:]]*(depends|makedepends)(_[[:alnum:]_]+)? = / { print $2 }
+    /^[[:space:]]*(depends|makedepends)(_x86_64)? = / { print $2 }
   ' "$metadata" | sort -u
 }
 
