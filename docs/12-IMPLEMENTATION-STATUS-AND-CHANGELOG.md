@@ -16,18 +16,19 @@ This document records the latest inspected repository state and physical install
 | Initial encrypted Arch installer | IMPLEMENTED | Destructive base-system installer exists. It must only run after documented source review, live readiness, target-plan confirmation, recovery preparation, and explicit operator authorization. |
 | Fresh-trial recovery workflow | IMPLEMENTED (documented) | Every failed physical trial is restarted from the official Arch ISO using the full installer from its first stage. The legacy continuation utility is not part of this workflow. |
 | Installer diagnostic logging | IMPLEMENTED | Full logs are stored in timestamped repository-local report directories with root-only permissions; installer refuses unsupported runtime/checkouts. Preserve logs before reboot. |
-| First-boot evidence collector | IMPLEMENTED / TESTED | Read-only collector and automated tests exist. Latest physical First Boot report `20261108T083237Z`: 14 PASS, 0 FAIL, 0 SKIP; secure ESP masks and effective modes were confirmed. |
+| First-boot evidence collector | IMPLEMENTED / VERIFIED | Read-only collector and automated tests exist. Physical First Boot report `20261108T083237Z`: 14 PASS, 0 FAIL, 0 SKIP; secure ESP masks and effective modes were confirmed. |
 | Host inventory and storage discovery/planning/revalidation | IMPLEMENTED | Read-only discovery, topology, planning, prerequisite, confirmation, and revalidation modules exist; automated tests use fixtures/mocks. |
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
-| Desktop setup foundation and attempt evidence | IMPLEMENTED (PR #23 and #25 merged) | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |\n| Caelestia AUR dependency handling | IN PROGRESS | First physical attempt failed during AUR build because `base-devel` tools (`debugedit`, `fakeroot`) were absent. The captured shell `.SRCINFO` also declares AUR dependencies `quickshell-git` and `caelestia-cli`; the correction builds them first. Pending CI/review. |\n| Desktop setup attempt evidence | PROPOSED in `fix/desktop-setup-logging` | Adds per-invocation timestamped logs, failure status, host/source metadata, and before/after package snapshots. Pending review, CI, and merge; not yet available on `main`. |
+| Desktop setup foundation and attempt evidence | IMPLEMENTED (PR #23 and #25 merged) | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
+| Caelestia AUR dependency handling | IN PROGRESS | First physical attempt failed because `base-devel` tools (`debugedit`, `fakeroot`) were absent. The captured shell `.SRCINFO` also declares AUR dependencies `quickshell-git` and `caelestia-cli`; the correction installs these first and preflights unresolved dependencies. Pending CI/review. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
 
 ## Current validation evidence
 
-For source commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb` (the inspected `main` HEAD at the time of this snapshot):
+For source commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb` (a historical inspected `main` HEAD; newer PR-specific checks must be evaluated against their exact head SHA):
 
 - GitHub Actions check **Syntax, lint, and test suite: SUCCESS** (completed 2026-11-08T07:23:14Z).
 - GitHub Actions check **shell-and-fixture-tests: SUCCESS** (completed 2026-11-08T07:22:47Z).
