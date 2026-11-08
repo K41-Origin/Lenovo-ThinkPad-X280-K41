@@ -82,9 +82,9 @@ on_setup_exit() {
     if ((rc == 0)); then printf -- '- Result: **PASS**\n'; else printf -- '- Result: **FAIL**\n'; fi
     printf -- '- Repository commit: '
     git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf 'unknown\n'
-    printf -- "- Log: `setup.log`\\n"
-    printf -- "- System snapshot: `system-info.txt`\\n"
-    printf -- "- Package snapshots: `packages-before.txt`, `packages-after.txt`\\n"
+    printf '%s\\n' '- Log: `setup.log`'
+    printf '%s\\n' '- System snapshot: `system-info.txt`'
+    printf '%s\\n' '- Package snapshots: `packages-before.txt`, `packages-after.txt`'
     printf '\nA successful setup-script exit confirms only that this script completed. It does not prove a physical Hyprland session or hardware behavior. Review and redact reports before sharing.\n'
   } >"$run_dir/summary.md"
   chmod 0600 "$run_dir/summary.md"
