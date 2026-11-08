@@ -33,6 +33,7 @@ chmod 600 "$efi_root/loader/random-seed"
 cat >"$mock_bin/findmnt" <<'MOCK'
 #!/usr/bin/env bash
 case " $* " in
+  *"SOURCE,FSTYPE,OPTIONS /efi"*) printf '/dev/nvme0n1p1 vfat rw,relatime,fmask=0177,dmask=0077\n' ;;
   *" /efi "*) printf '/efi vfat\n' ;;
   *" / "*) printf '/dev/mapper/cryptroot ext4\n' ;;
   *) exit 1 ;;
@@ -54,7 +55,7 @@ MOCK
 cat >"$mock_bin/systemctl" <<'MOCK'
 #!/usr/bin/env bash
 case "$1" in
-  status) [[ "${2:-}" == "efi.mount" ]] && { printf 'efi.mount - /efi\\n   Active: active (mounted)\\n'; exit 0; } ;;
+  status) [[ "${2:-}" == "efi.mount" ]] && { printf 'efi.mount - /efi\n   Active: active (mounted)\n'; exit 0; } ;;
   is-system-running) printf 'running\n' ;;
   --failed) exit 0 ;;
   get-default) printf 'multi-user.target\n' ;;
