@@ -163,6 +163,13 @@ if [[ $install_caelestia == yes ]]; then
     local package_name=$1 aur_dir="$aur_root/$1" commit
     runuser -u "$desktop_user" -- git clone "https://aur.archlinux.org/${package_name}.git" "$aur_dir"
     [[ -f $aur_dir/PKGBUILD && -f $aur_dir/.SRCINFO ]] || die "AUR checkout for $package_name is missing PKGBUILD or .SRCINFO."
+    if [[ $package_name == python-materialyoucolor ]]; then
+      grep -Eq '^[[:space:]]*pkgname = python-materialyoucolor$' "$aur_dir/.SRCINFO" || die 'Material You AUR metadata changed: expected python-materialyoucolor package name.'
+      grep -Eq '^[[:space:]]*pkgver = 3\.' "$aur_dir/.SRCINFO" || die 'Caelestia CLI requires Material You color v3; python-materialyoucolor AUR metadata is not version 3.x.'
+    fi
+    if [[ $package_name == caelestia-cli ]]; then
+      grep -Eq '^[[:space:]]*depends = python-materialyoucolor$' "$aur_dir/.SRCINFO" || die 'caelestia-cli AUR dependency metadata changed: python-materialyoucolor is not declared; review/update the build order before proceeding.'
+    fi
     if [[ $package_name == caelestia-shell ]]; then
       grep -Eq '^[[:space:]]*depends = quickshell-git$' "$aur_dir/.SRCINFO" || die 'caelestia-shell AUR dependency metadata changed: quickshell-git is not declared; review/update the build order before proceeding.'
       grep -Eq '^[[:space:]]*depends = caelestia-cli$' "$aur_dir/.SRCINFO" || die 'caelestia-shell AUR dependency metadata changed: caelestia-cli is not declared; review/update the build order before proceeding.'
@@ -181,10 +188,10 @@ if [[ $install_caelestia == yes ]]; then
   }
 
   # Refuse an unexpected dependency graph rather than silently omitting an AUR provider.
-  for package_name in quickshell-git caelestia-cli caelestia-shell; do
+  for package_name in quickshell-git python-materialyoucolor caelestia-cli caelestia-shell; do
     build_aur_package "$package_name"
   done
-  pacman -Q quickshell-git caelestia-cli caelestia-shell
+  pacman -Q quickshell-git python-materialyoucolor caelestia-cli caelestia-shell
 else
   info 'Caelestia AUR installation skipped; the official Quickshell package will be used.'
 fi

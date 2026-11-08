@@ -3,7 +3,7 @@
 ## Current repository snapshot
 
 **Snapshot date:** 2026-11-08  
-**Inspected `main` HEAD:** `94494dce70a6dd01cacc5d77883d24f3a4c3b3cc`  
+**Inspected `main` HEAD:** `e8b112bc4019957d7cc133a9d63810b6872841b0`  
 **Default branch:** `main`
 
 This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
@@ -21,7 +21,7 @@ This document records the latest inspected repository state and physical install
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
 | Desktop setup foundation and attempt evidence | IMPLEMENTED (PR #23 and #25 merged) | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
-| Caelestia AUR dependency handling | IMPLEMENTED (PR #26 merged; CI PASS) | Installs `base-devel` and official CLI runtime dependencies, omits conflicting official `quickshell` when Caelestia is selected, builds reviewed AUR dependencies in order, and fails closed on unresolvable dependency metadata. Physical AUR build and desktop session remain NOT TESTED. |
+| Caelestia AUR dependency handling | IMPLEMENTED (initial chain; correction in review) | The second physical desktop attempt built and installed `quickshell-git` but failed before building `caelestia-cli`: its `.SRCINFO` declares `python-materialyoucolor`, which is an AUR dependency and was absent from the build chain. The current branch adds it before `caelestia-cli` and asserts the metadata contract; CI and physical retest are pending. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
@@ -30,8 +30,10 @@ This document records the latest inspected repository state and physical install
 
 Latest desktop setup correction:
 - PR #26 merged to `main` as `94494dce70a6dd01cacc5d77883d24f3a4c3b3cc`.
+- Second physical desktop attempt report `reports/desktop/20261108T095950Z/`: FAIL (exit 1). `quickshell-git` built and installed; `caelestia-cli` preflight failed because `python-materialyoucolor` was not installed or available in official repositories. This is a separate AUR package dependency, not an official-repository package.
 - Exact PR head `8260604d70e50df191c522cd6b7b9f8c5431e738`: GitHub Actions **Repository validation** run `42468208174` SUCCESS and **Bash validation** run `42468208092` SUCCESS.
 - These CI checks cover Bash syntax, ShellCheck, formatting, and repository fixture tests. They do not execute AUR builds or validate a physical Hyprland/Caelestia session.
+- The follow-up correction adds `python-materialyoucolor` to the explicit AUR dependency order before `caelestia-cli`; it must pass CI and still requires a physical build/session test.
 
 
 For source commit `2aafbdbbec5da671adb05c023c9f28bd1fcba0bb` (a historical inspected `main` HEAD; newer PR-specific checks must be evaluated against their exact head SHA):
