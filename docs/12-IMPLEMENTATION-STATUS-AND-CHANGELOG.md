@@ -1,5 +1,41 @@
 # Implementation Status and Changelog
 
+## Current canonical repository state — 2026-11-08
+
+- Default branch: `main`.
+- Current HEAD: `46ca7dbb36abaef8c7e096f129b2f2b2ebfff4b1`.
+- PR #16 integration is merged. Its merge commit incorporates the reviewed Arch ISO bootstrap, installer policy, X280 readiness, first-boot reporting, installer diagnostics, fstab correction, and checkpoint-specific continuation.
+- The six feature/fix branches that were reviewed are already ancestors of or otherwise superseded by the current integrated `main`; do not merge their historical heads again.
+- Latest observed main-branch Bash validation workflow: run #248, conclusion `success`, on the HEAD above.
+- CI success is automated evidence only. Physical continuation on the X280 and successful first boot remain NOT TESTED.
+- The active recovery entry point is `scripts/resume-arch-x280.sh` on `main`; do not instruct operators to check out a deleted or historical feature branch.
+- Desktop integration (Caelestia/Hyprland/Quickshell), hibernation/resume configuration, recovery-key lifecycle, ThinkPad power/thermal tuning, and selective BlackArch integration remain NOT IMPLEMENTED unless separately recorded below.
+
+### Current branch inventory
+
+At the time of this audit, GitHub reported seven branches: `main` plus six feature/fix branches. The six non-main branches are no longer required as active development lines because their reviewed work is represented in current `main`. The available GitHub connector in this session supports branch listing and ref updates but does not expose branch deletion; their deletion is therefore pending an owner/admin GitHub operation.
+
+### Status vocabulary
+
+- **PLANNED:** not implemented.
+- **IMPLEMENTED:** code or documentation exists in the repository.
+- **TESTED:** an identified automated/manual test was executed.
+- **VERIFIED:** behavior confirmed with appropriate evidence.
+- **RELEASED:** incorporated into a designated release.
+
+### Current validation boundary
+
+- **TESTED:** GitHub Actions Bash validation run #248 succeeded on current `main`.
+- **NOT TESTED:** real continuation execution on the already-modified physical X280, successful firmware boot, first login, suspend/resume, battery endurance, thermal behavior, and desktop stack.
+- No CI result authorizes destructive disk operations. Follow the source-review, readiness, exact target-plan confirmation, and physical recovery requirements in the canonical installer documentation.
+
+---
+
+## Historical implementation record
+
+The sections below retain prior implementation notes and test evidence as a historical changelog. Commit hashes, PR states, branch names, and workflow results in those entries describe their recorded dates and must not be interpreted as current repository state.
+
+
 ## Latest repository state — 2026-11-08
 
 - `main` is at `32a4366db2543ced6c59d09946559cfb20c6f04f`; PR #11 and PR #12 are merged.
