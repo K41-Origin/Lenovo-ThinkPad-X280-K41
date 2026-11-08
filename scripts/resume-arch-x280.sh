@@ -97,6 +97,9 @@ readonly_flag="$(lsblk -dnro RO "$disk" | sed 's/[[:space:]]*$//')"
 size_bytes="$(blockdev --getsize64 "$disk")"
 [[ $model == "$EXPECTED_MODEL" && $serial == "$EXPECTED_SERIAL" && $size_bytes == "$EXPECTED_CAPACITY" ]] || die 'SSD model, serial, or exact byte capacity does not match the configured X280 target.'
 [[ $transport == nvme && $removable == 0 && $readonly_flag == 0 ]] || die 'Target is not a writable, non-removable NVMe device.'
+mounted_paths="$(lsblk -nrpo MOUNTPOINTS "$disk")" || die 'Could not inspect target disk mount state.'
+[[ -z ${mounted_paths//[[:space:]]/} ]] || die "Target disk or one of its partitions is mounted: $mounted_paths"
+! mountpoint -q "$ESP_MOUNT" || die 'EFI mountpoint is already mounted; inspect it manually.'
 [[ $(blkid -s PTTYPE -o value "$disk") == gpt ]] || die 'Target does not contain the expected GPT partition table.'
 
 disk_name="$(basename "$disk")"
