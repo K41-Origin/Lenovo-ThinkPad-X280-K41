@@ -67,3 +67,20 @@ Before starting the fourth physical desktop setup attempt:
 5. Start Hyprland manually from TTY only after setup exits successfully, then perform the physical acceptance checks above.
 
 The resolver's exact-name AUR lookup and the explicit Material You provider alias are intentionally conservative. It verifies the reviewed .SRCINFO against the approved PKGBUILD-generated metadata and rejects package metadata that does not declare x86_64 or any support. Arbitrary virtual AUR provides, split-package base discovery, and live AUR metadata availability are not generalized; unresolved or mismatched metadata must stop the setup rather than be guessed. A successful setup-script exit still does not constitute physical desktop acceptance.
+
+
+## Fifth desktop trial gate — 2026-11-09
+
+The fourth physical attempt built and installed `quickshell-git`, `python-materialyoucolor3`, and `caelestia-cli), then failed while building `libcava`. The captured terminal output shows pacman was asked to install the official build dependencies `meson` and `autoconf-archive`, but the next metadata dependency string (`libpipewire`) was consumed at pacman's confirmation prompt. This was caused by recursive dependency traversal running inside a `while read ... < <(...)` loop: nested build commands inherited the parent's process-substitution stream as stdin.
+
+The resolver now materializes each package's dependency list with `mapfile` before recursing, iterates the resulting array, sends non-interactive metadata generation `/dev/null`, and attaches interactive `makepkg --syncdeps --install` to the controlling TTY. This prevents dependency names from being interpreted as pacman answers while preserving interactive confirmation.
+
+Before the fifth physical desktop attempt:
+
+1. Update to the latest reviewed `main` commit.
+2. Run `bash tests/test-desktop-setup.sh` and `bash tests/run.sh`; stop on any failure.
+3. Run `sudo bash scripts/setup-desktop-x280.sh` from a TTY on the already installed Arch system.
+4. Review each displayed AUR recipe. In particular, when `libcava` is built, verify that pacman can display and complete its official dependency transaction for `meson` and `autoconf-archive`; do not type package names at the pacman confirmation prompt.
+5. If setup completes, start `start-hyprland` manually and execute the physical acceptance checks above.
+
+The fix addresses the observed fourth-attempt failure mechanism. It does not prove the next AUR build, Caelestia startup, or physical desktop session will succeed.
