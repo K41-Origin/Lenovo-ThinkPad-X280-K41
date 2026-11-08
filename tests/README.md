@@ -33,7 +33,7 @@ The test list is defined only in `tests/run.sh` (20 scripts at this revision). D
 | `test-preflight-gate.sh` | Mocked preflight gate and failure propagation |
 | `test-native-storage-handle.sh` | Native helper compile/CLI behavior; no real block device is opened. |
 | `test-base-system-fstab.sh` | Fstab generation preserves existing unrelated entries, is idempotent, and rejects conflicting root/EFI entries. |
-| `test-resume-arch-installer.sh` | Static safety contract for the checkpoint-specific continuation path; asserts it does not partition, format, or rerun pacstrap. |
+| `test-resume-arch-installer.sh` | Static safety contract for the checkpoint-specific continuation path; asserts it does not partition, format, or rerun pacstrap, and refuses already-mounted target partitions. |
 
 The suite does not run a complete installer transaction. The disposable loop test formats only its temporary loop-backed image; it is not a physical NVMe test. It is bounded utility-interface coverage only and must never be treated as a substitute for the required destructive full-SSD installation test on the actual X280. Fixture/static checks do not establish that the installer boots or that every target-device race is impossible.
 
