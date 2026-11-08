@@ -2,7 +2,9 @@
 # Interactive Arch Linux installation for the Lenovo ThinkPad X280.
 # DESTRUCTIVE: erases the selected whole NVMe disk after an exact plan confirmation.
 set -Eeuo pipefail
-umask 077
+# Keep normal system directory modes for pacstrap and target configuration.
+# Diagnostic files/directories are secured explicitly in installer::init_logging.
+umask 022
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 # shellcheck source=lib/common.sh
