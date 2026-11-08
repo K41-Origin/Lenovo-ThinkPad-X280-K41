@@ -99,4 +99,4 @@ cmdline_sample='rd.luks.name=01234567-89ab-cdef-0123-456789abcdef=cryptroot root
 grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' <<<"$cmdline_sample" || fail "root= token must be found after rd.luks.name on the same kernel command line"
 pass "UKI kernel command-line root token is validated as a whitespace-delimited argument"
 
-printf '%s\\n' 'All Arch installer script tests passed.'
+printf '%s\n' 'All Arch installer script tests passed.'
