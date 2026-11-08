@@ -28,15 +28,18 @@ set_stage() {
 }
 
 init_logging() {
-  local base timestamp suffix=0
+  local base timestamp suffix=0 fs_type
   command -v tee >/dev/null 2>&1 || return 1
   command -v install >/dev/null 2>&1 || return 1
-  base=/var/log/x280-installer
-  if ! install -d -o root -g root -m 0700 "$base" 2>/dev/null; then
-    base=/run/x280-installer
-    install -d -o root -g root -m 0700 "$base" || return 1
-    printf 'WARNING: log is in volatile /run.\n' >&2
-  fi
+  command -v findmnt >/dev/null 2>&1 || return 1
+  [[ -d /run/archiso ]] || { printf 'FATAL: continuation is allowed only from the official Arch Linux ISO.\n' >&2; return 1; }
+  fs_type="$(findmnt -nro FSTYPE -T "$ROOT")" || return 1
+  case "$fs_type" in
+    overlay|tmpfs) ;;
+    *) printf 'FATAL: repository checkout must be on Arch ISO overlay/tmpfs; found: %s.\n' "$fs_type" >&2; return 1 ;;
+  esac
+  base="$ROOT/reports/installer"
+  install -d -o root -g root -m 0700 "$base" || return 1
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   local log_dir="$base/resume-$timestamp"
   while ! mkdir -m 0700 -- "$log_dir" 2>/dev/null; do
