@@ -78,6 +78,8 @@ resolve_and_build_aur_dependency() {
     die "AUR checkout for $package_name is missing PKGBUILD or .SRCINFO."
   aur_metadata_matches "$aur_dir/.SRCINFO" "$package_name" ||
     die "AUR metadata for $package_name does not declare that package or a matching provider."
+  aur_metadata_supports_x86_64 "$aur_dir/.SRCINFO" ||
+    die "AUR package $package_name does not declare support for x86_64 or any architecture."
   if [[ $requested == python-materialyoucolor ]]; then
     grep -Eq '^[[:space:]]*pkgname = python-materialyoucolor3$' "$aur_dir/.SRCINFO" ||
       die 'Material You compatibility provider must be package python-materialyoucolor3.'
@@ -101,6 +103,18 @@ resolve_and_build_aur_dependency() {
   prompt_yes_no approve_aur "Approve this exact $package_name recipe and dependency metadata"
   [[ $approve_aur == yes ]] ||
     die "AUR package $package_name was not approved; stopping before its build."
+
+  # Recompute .SRCINFO from the reviewed PKGBUILD only after explicit approval.
+  # PKGBUILD parsing runs as the unprivileged builder, never as root.
+  local generated_srcinfo
+  generated_srcinfo=$(mktemp "$aur_dir/.SRCINFO.generated.XXXXXX")
+  runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --printsrcinfo' _ "$aur_dir" >"$generated_srcinfo"
+  if ! cmp -s "$aur_dir/.SRCINFO" "$generated_srcinfo"; then
+    diff -u "$aur_dir/.SRCINFO" "$generated_srcinfo" || true
+    rm -f -- "$generated_srcinfo"
+    die "Generated .SRCINFO does not match the reviewed metadata for $package_name; refusing to build."
+  fi
+  rm -f -- "$generated_srcinfo"
 
   # Build as the regular user. --syncdeps may install official repo dependencies;
   # all discovered AUR dependencies have already been built by the recursion.
