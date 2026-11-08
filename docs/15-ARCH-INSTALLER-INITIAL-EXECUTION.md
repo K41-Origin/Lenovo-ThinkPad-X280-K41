@@ -3,7 +3,7 @@
 ## Status and scope
 
 - Initial destructive entry point: `scripts/install-arch-x280.sh`.
-- Interrupted-run continuation: `scripts/resume-arch-x280.sh` on `main`; it is restricted to the recorded post-pacstrap/pre-configuration checkpoint.
+- Legacy continuation utility: `scripts/resume-arch-x280.sh` is retained for historical compatibility but is **not used** in the current trial-and-error workflow.
 - Implementation: IMPLEMENTED on `main`.
 - Automated evidence: TESTED on the specific commits/runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md); the loop integration covers selected utilities against a disposable loop image.
 - VM installation testing: OUT OF SCOPE by owner decision; no VM test will be performed.
@@ -30,7 +30,7 @@ The installer installs systemd-boot and configures a mkinitcpio UKI using the sy
 
 ## Important boundaries and risks
 
-- The installer is destructive and replaces the selected SSD. Its existence or passing CI is not authorization to run it.
+- The installer is destructive and replaces the selected SSD. Its existence or passing CI is not authorization to run it. In the agreed trial-and-error workflow, every failed physical attempt is followed by a reboot into the official Arch ISO and a fresh run of this full installer from its first stage; the continuation utility is not used.
 - The separate native C helper in `native/storage-handle.c` is not called by this installer.
 - The loop integration test validates selected utility interfaces through inherited descriptor paths against a disposable loop image. It does not prove all kernel TOCTOU races impossible, physical NVMe hot-unplug behavior, or successful boot.
 - The earlier architecture plan assigned destructive storage ownership to `lib/storage.sh`; the current installer instead orchestrates destructive commands directly. This deviation is documented and remains an architectural item for review/refactor.
@@ -54,21 +54,40 @@ It writes persistent summaries and logs under `reports/test-runs/`. Required sui
 
 See [tests/README.md](../tests/README.md) for the single authoritative test procedure and [11 — Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) for acceptance criteria and evidence boundaries.
 
-## Recorded physical attempt and continuation path — 2026-11-08
+## Recorded physical trial and current failure — 2026-11-08
 
-The first physical installer attempt on the actual X280 passed the destructive storage plan gate and completed the following operations: disk signature removal, GPT/partition creation, LUKS2 formatting/opening, ESP FAT32 formatting, root ext4 formatting, mounting, and `pacstrap` package installation. It then stopped in `base_system::generate_fstab` because the package-created `/etc/fstab` was non-empty. The target disk was therefore already modified; this was not a preflight-only failure.
+The pushed diagnostic log at `reports/installer/20261108T060151Z/installer.log` records a full destructive run from commit `97f826713a61645f5946aec32529eb4940d250fc`. It confirms that the installer:
 
-The fstab implementation has since been corrected to preserve comments and unrelated entries, add only missing root/`/efi` entries, reject conflicts/duplicates, and operate idempotently. CI includes regression coverage for these behaviors.
+- Passed X280 hardware identification, UEFI, disk discovery, storage-plan confirmation, and final revalidation.
+- Replaced the GPT layout, created the LUKS2 root container, formatted the ESP as FAT32 and root as ext4, and mounted both filesystems.
+- Completed `pacstrap`, generated/validated fstab, configured hostname/locale/timezone/user/password/swapfile, and enabled NetworkManager.
+- Installed systemd-boot and successfully generated the UKI at `/efi/EFI/Linux/arch-linux.efi`.
+- Exited with status 1 during the final kernel-command-line assertions.
 
-The laptop was powered off after that failure. The intended next operation is **continuation**, not a fresh installation:
+### Root cause identified
 
-1. Obtain the latest reviewed `main` checkout from the official Arch ISO workflow and inspect `scripts/resume-arch-x280.sh` at the displayed commit SHA before execution. The continuation script is part of `main`; no separate recovery branch is required.
-2. Do **not** run `scripts/bootstrap-archiso.sh`, `scripts/x280-install-readiness.sh`, `scripts/validate-live-storage.sh`, or `scripts/install-arch-x280.sh` for this already-partitioned target. The old blank-disk readiness gate is not applicable after the disk has been initialized, and the original installer would erase it again.
-3. Run `bash scripts/resume-arch-x280.sh` as root from the official Arch ISO in UEFI mode.
-4. The continuation script performs a narrow, read-only identity/layout/filesystem check for the exact configured SSD and existing GPT/ESP/LUKS2/ext4 layout, and refuses to continue if the target disk or any partition is already mounted. It does not repeat the broad readiness suite, partition, format, or run pacstrap. It unlocks the existing LUKS volume, checks ext4 read-only, mounts the existing filesystems, verifies the base packages, safely completes fstab, then proceeds with target configuration and UKI boot setup.
-5. If any checkpoint differs from the recorded state, the script stops. Do not fall back to the destructive installer. Push its timestamped log/report for inspection.
+The installer wrote both kernel parameters on one line:
 
-This continuation path is deliberately narrow and tied to the known failure checkpoint. It is not a general-purpose resume engine for arbitrary partial installations. If the interactive target-configuration stage itself fails after making partial changes, stop and inspect state rather than rerunning the continuation script blindly.
+```text
+rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw
+```
+
+But it validated the root parameter using an anchored expression, `^root=/dev/mapper/cryptroot`, which incorrectly assumes `root=` starts a new line. Kernel command-line arguments are whitespace-separated tokens on the same line. The assertion therefore returned false even though the UKI generation succeeded.
+
+The correction changes the check to recognize `root=/dev/mapper/cryptroot` as a whitespace-delimited token anywhere on that line and adds a regression test using the same argument ordering. This is a validation bug, not evidence that the UKI generation itself failed. A successful UKI build still does not prove that firmware can boot it or that LUKS unlock and root mounting work.
+
+### Required trial-and-error procedure
+
+After any failed physical attempt:
+
+1. Preserve and push the repository-local diagnostic log and relevant evidence.
+2. Reboot into the official Arch Linux ISO in UEFI mode.
+3. Obtain the latest reviewed installer branch/commit and inspect the changes.
+4. Confirm the target SSD identity and that no target partition is mounted or active as swap.
+5. Run `bash scripts/install-arch-x280.sh` from the beginning.
+6. Review the new timestamped log and fix the next reproducible failure before another full attempt.
+
+The installer deliberately re-creates the partition table and formats the target SSD after explicit plan-bound confirmation. Therefore every new trial is a fresh destructive installation, not a continuation. Never run it against a disk containing data that must be retained. The legacy continuation script is not part of this workflow.
 
 ## Validation and acceptance boundaries
 
