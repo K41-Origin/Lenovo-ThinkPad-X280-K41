@@ -18,7 +18,8 @@ for token in \
   'org.freedesktop.impl.portal.ScreenCast=hyprland' \
   'report_root="$repo_root/reports/desktop"' \
   'exec > >(tee -a "$setup_log") 2>&1' \
-  'trap on_setup_exit EXIT' \
+  'trap on_setup_exit EXIT' \\
+  'trap \'on_setup_error' 
   'packages-before.txt' \
   'packages-after.txt' \
   'summary.md'; do
