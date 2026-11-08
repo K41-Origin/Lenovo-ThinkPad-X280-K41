@@ -207,7 +207,7 @@ finalize_report() {
     printf '\n## Evidence files\n\n'
     printf -- '- `summary.md`: result, checkout identity, environment, and check table\n'
     printf -- '- `diagnostics.log`: captured command output with serial values redacted\n'
-    printf -- '- `../../live-validation/%s.md`: broad host, storage, network, and repository diagnostics\n' "$timestamp"
+    printf -- '- `../../live-validation/%s.md`: broad host, storage, network, and repository diagnostics\n' "$live_stamp"
     printf '\n## Safety boundary\n\n'
     printf 'This is read-only validation. PASS applies only to the recorded checkout and host snapshot. It does not prove a successful installation or authorize disk erasure. No partitioning, formatting, LUKS opening, mounting, package installation, service changes, firmware changes, or writes to the selected installation target are performed. Reports are written under the repository checkout. Review reports before sharing.\n'
   } >"$summary"
