@@ -57,11 +57,19 @@ make_report_dir() {
 }
 
 readiness_dir="$(make_report_dir "$ROOT/reports/live-readiness")"
-live_dir="$(make_report_dir "$ROOT/reports/live-validation")"
+live_root="$ROOT/reports/live-validation"
+mkdir -p -- "$live_root"
+live_stamp="$timestamp"
+live_report="$live_root/$live_stamp.md"
+suffix=0
+while [[ -e "$live_report" ]]; do
+  suffix=$((suffix + 1))
+  live_stamp="$timestamp-$suffix"
+  live_report="$live_root/$live_stamp.md"
+done
 summary="$readiness_dir/summary.md"
 diagnostics="$readiness_dir/diagnostics.log"
-live_report="$live_dir/$timestamp.md"
-latest="$live_dir/latest.md"
+latest="$live_root/latest.md"
 rows="$readiness_dir/.check-rows"
 : >"$summary"
 : >"$diagnostics"
@@ -170,14 +178,6 @@ check_shfmt() {
   shfmt -d -i 2 scripts/k41-live-validation.sh scripts/live-validation.sh \
     scripts/x280-install-readiness.sh tests/run.sh tests/helpers/storage-fixtures.sh
 }
-check_installer_preflight() {
-  local rc=0
-  printf 'Expected behavior: non-zero while installation is disabled.\n'
-  if ./installer --preflight; then rc=0; else rc=$?; fi
-  printf 'Observed preflight exit code: %s\n' "$rc"
-  (( rc != 0 ))
-}
-
 finalize_report() {
   local rc="$1" result finished
   (( finalized == 0 )) || return 0
