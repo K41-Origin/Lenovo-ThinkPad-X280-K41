@@ -16,8 +16,7 @@ for token in \
   'refusing to overwrite it' \
   'No graphical session was started' \
   'org.freedesktop.impl.portal.ScreenCast=hyprland' \
-  "report_root=\"\\$repo_root/reports/desktop\"" \
-  "exec > >(tee -a \"\\$setup_log\") 2>&1" \
+  'report_root=' \\
   'trap on_setup_exit EXIT' \
   'on_setup_error() {' \
   'packages-before.txt' \
