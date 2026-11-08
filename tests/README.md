@@ -50,7 +50,7 @@ The runner does not automatically commit reports. Inspect logs and review them f
 
 The canonical Live Validation command is `bash scripts/k41-live-validation.sh --readiness`. It combines strict Arch ISO/X280 readiness and the broad read-only diagnostics previously provided by separate scripts. It creates `reports/live-readiness/<UTC timestamp>/summary.md` and serial-redacted `diagnostics.log`, plus `reports/live-validation/<UTC timestamp>.md` and `latest.md`. It records checkout identity, environment, hardware/storage/network observations, Bash syntax, ShellCheck/shfmt when available, the canonical test suite, target SSD identity/topology, and installer diagnostics. It does not run `git add`, commit, or push. Review both reports before sharing; the detailed host report may contain hardware identifiers. The test runner's `reports/test-runs/` remains available for per-test logs.
 
-Backward-compatible wrappers remain: `scripts/x280-install-readiness.sh` delegates to strict readiness mode; `scripts/live-validation.sh` delegates to `--diagnostics-only` for broad host diagnostics without requiring Arch ISO/root/X280 readiness. These wrappers contain no separate validation implementation.
+Backward-compatible wrappers remain: `scripts/x280-install-readiness.sh` delegates to strict readiness mode; `scripts/live-validation.sh` delegates to `--diagnostics-only` for broad host diagnostics without requiring Arch ISO/root/X280 readiness. These wrappers contain no separate validation implementation. The optional `scripts/x280-archiso-test.sh` collector retains a detailed `lsblk`/mount/swap snapshot and a private `/run` log, but delegates shared readiness and target-storage validation to the canonical script.
 
 ## Live Arch ISO / X280 validation
 
