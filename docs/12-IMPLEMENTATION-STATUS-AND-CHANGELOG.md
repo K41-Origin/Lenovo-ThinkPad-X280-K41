@@ -3,7 +3,7 @@
 ## Current repository snapshot
 
 **Snapshot date:** 2026-11-09  
-**Inspected implementation HEAD:** `ce6a300b25e887be543c892dcb7287c2895f2b8a`  
+**Inspected implementation HEAD:** `2e1943996a549c67fb72e873d341fa9658bd0fad`  
 **Default branch:** `main`
 
 This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
@@ -21,7 +21,7 @@ This document records the latest inspected repository state and physical install
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
 | Desktop setup foundation and attempt evidence | IMPLEMENTED | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
-| Caelestia AUR dependency handling | IMPLEMENTED (recursive resolver; CI pending for current change) | `lib/aur-dependency-resolver.sh` recursively reads required/make dependencies from `.SRCINFO`, checks installed and official packages, clones missing exact-name AUR packages, detects cycles, validates package/provider identity, and builds dependencies before parents after per-recipe approval. The Material You v3 compatibility alias remains explicit and verified. Arbitrary AUR virtual-provider discovery is not generalized. Physical AUR build and desktop session remain NOT TESTED. |
+| Caelestia AUR dependency handling | IMPLEMENTED (recursive resolver; repository validation PASS) | `lib/aur-dependency-resolver.sh` recursively reads required/make dependencies from `.SRCINFO`, checks installed and official packages, clones missing exact-name AUR packages, filters dependencies to x86_64, rejects unsupported architecture metadata, detects cycles, validates package/provider identity, and builds dependencies before parents after per-recipe approval. After approval, it regenerates `.SRCINFO` from the reviewed PKGBUILD as the unprivileged builder and requires an exact metadata match. The Material You v3 compatibility alias remains explicit and verified. Arbitrary AUR virtual-provider discovery is not generalized. Physical AUR build and desktop session remain NOT TESTED. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
@@ -32,10 +32,10 @@ The fourth desktop trial is gated on the recursive AUR dependency resolver repla
 
 - `lib/aur-dependency-resolver.sh` — IMPLEMENTED. Parses `.SRCINFO` required/make dependencies, checks installed packages and exact official repository package names, recursively clones missing AUR package bases, detects dependency cycles, checks package/provider identity, and builds dependencies before their parents.
 - `scripts/setup-desktop-x280.sh` — IMPLEMENTED. Sources the resolver and invokes it for the four Caelestia roots; existing manual approval and unprivileged `makepkg --syncdeps --install` behavior is retained.
-- `tests/test-desktop-setup.sh` — UPDATED. Adds syntax checks and fixture coverage for versioned dependency normalization, `.SRCINFO` package/provider matching, and dependency/makedepends extraction.
+- `tests/test-desktop-setup.sh` — UPDATED. Adds syntax checks and fixture coverage for versioned dependency normalization, `.SRCINFO` package/provider matching, dependency/makedepends extraction, and x86_64 architecture acceptance/rejection.
 - `docs/19-X280-DESKTOP-TEST.md` and `README.md` — UPDATED to describe the resolver boundary and fourth-trial procedure.
-- Implementation commits: resolver `eba9239`; setup integration `716c57a`; fixture tests `7cd3284`; metadata validation hardening `ce6a300`.
-- The latest implementation commit is `ce6a300b25e887be543c892dcb7287c2895f2b8a`. GitHub Actions results for this change must be checked before the physical trial.
+- Implementation commits: resolver `eba9239`; setup integration `716c57a`; fixture tests `7cd3284`; metadata validation hardening `ce6a300`; architecture and approved PKGBUILD/.SRCINFO consistency checks `2e19439`.
+- The latest implementation commit is `2e1943996a549c67fb72e873d341fa9658bd0fad`. GitHub Actions **Repository validation** run `42506874266` completed SUCCESS for this exact commit. The separate Bash validation run for this commit was cancelled when the following documentation commit was pushed; its replacement workflow must complete before the physical trial.
 - No AUR package was built in CI or by this development session. The physical desktop setup and Hyprland/Caelestia session remain NOT TESTED.
 
 Resolver limitations are deliberate: dependency package names are looked up as exact AUR package bases, except the explicitly mapped Material You v3 provider. Generic AUR RPC search for arbitrary virtual providers and split-package base discovery are not implemented. Unresolved or mismatched metadata stops the setup rather than being guessed.
