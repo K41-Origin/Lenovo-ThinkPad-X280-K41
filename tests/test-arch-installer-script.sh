@@ -49,6 +49,7 @@ done
 if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$SCRIPT"; then
   fail "installer logs must remain inside the repository checkout"
 fi
+grep -Fq '[[ -e $installer_log_dir ]] ||' "$SCRIPT" || fail "installer log creation must stop on non-collision mkdir errors"
 pass "installer includes repository-local root-only logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
 if grep -Eq '^[[:space:]]*set[[:space:]]+-[^#]*x|^[[:space:]]*set[[:space:]]+-o[[:space:]]+xtrace' "$SCRIPT"; then
   fail "installer enables shell xtrace, which could expose sensitive command arguments"
