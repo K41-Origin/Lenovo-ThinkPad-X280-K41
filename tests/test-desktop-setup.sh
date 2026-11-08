@@ -53,14 +53,17 @@ done
 
 # Regression guard: recursive dependency traversal must not leave the parent's
 # process-substitution stream on stdin for makepkg/pacman interactive prompts.
-grep -Fq 'mapfile -t dependencies < <(aur_metadata_dependencies "$aur_dir/.SRCINFO")' "$RESOLVER" ||
+# shellcheck disable=SC2016
+ grep -Fq 'mapfile -t dependencies < <(aur_metadata_dependencies "$aur_dir/.SRCINFO")' "$RESOLVER" ||
   fail 'resolver must materialize dependency metadata before recursive builds'
-grep -Fq 'for dependency in "${dependencies[@]}"; do' "$RESOLVER" ||
+# shellcheck disable=SC2016
+ grep -Fq 'for dependency in "${dependencies[@]}"; do' "$RESOLVER" ||
   fail 'resolver must iterate the materialized dependency array'
 grep -Fq 'makepkg --syncdeps --install' "$RESOLVER" ||
   fail 'resolver must retain makepkg dependency installation'
 grep -Fq '</dev/tty' "$RESOLVER" ||
   fail 'interactive makepkg build must read confirmations from the controlling TTY'
+# shellcheck disable=SC2016
 if grep -Fq 'done < <(aur_metadata_dependencies "$aur_dir/.SRCINFO")' "$RESOLVER"; then
   fail 'recursive dependency loop still leaks its process-substitution stdin'
 fi
