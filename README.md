@@ -47,6 +47,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Documentation index
 
+- [Repository map and source-of-truth guide](docs/00-REPOSITORY-MAP-AND-SOURCE-OF-TRUTH.md) — connects requirements, canonical docs, scripts, libraries, tests, CI, and evidence artifacts.
+
 ### Project design and policy
 - [Project charter](docs/01-PROJECT-CHARTER.md)
 - [Requirements and decisions](docs/02-REQUIREMENTS-AND-DECISIONS.md)
