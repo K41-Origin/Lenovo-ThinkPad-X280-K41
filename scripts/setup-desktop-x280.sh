@@ -105,7 +105,7 @@ id "$SUDO_USER" >/dev/null 2>&1 || die 'SUDO_USER does not identify an existing 
 id -nG "$SUDO_USER" | tr ' ' '\n' | grep -qx wheel || die 'The desktop account must belong to wheel.'
 if [[ -n ${WAYLAND_DISPLAY:-} || -n ${DISPLAY:-} ]]; then die 'Run from a TTY, not from inside an active graphical session.'; fi
 
-proceed='' install_caelestia=''
+proceed='' install_caelestia=''\n# shellcheck disable=SC2034\napprove_aur=''
 desktop_user=$SUDO_USER
 desktop_home=$(getent passwd "$desktop_user" | cut -d: -f6)
 [[ -n $desktop_home && -d $desktop_home ]] || die 'Could not resolve the desktop user home directory.'
