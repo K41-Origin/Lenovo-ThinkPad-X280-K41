@@ -48,7 +48,6 @@ capture() {
   else
     rc=$?
     printf 'COMMAND EXIT: %s\n' "$rc" >>"$log"
-    return "$rc"
   fi
 }
 
@@ -106,10 +105,10 @@ fi
 } >>"$log"
 
 capture 'Installed Caelestia and Quickshell packages' pacman -Q caelestia-shell caelestia-cli quickshell quickshell-git
-capture 'Caelestia CLI version/help' caelestia --version
+capture 'Caelestia CLI help/version' caelestia --help
 capture 'Quickshell CLI version' qs --version
 capture 'Caelestia shell IPC command discovery' caelestia shell -s
-capture 'Quickshell configuration inventory' qs list
+capture 'Quickshell CLI help' qs --help
 capture 'Caelestia process list' pgrep -af '[q]uickshell.*caelestia|[q]s.*caelestia|[c]aelestia shell'
 capture 'Caelestia shell runtime log' qs -c caelestia log
 capture 'Recent user journal errors' journalctl --user -b -p err --no-pager -n 80
