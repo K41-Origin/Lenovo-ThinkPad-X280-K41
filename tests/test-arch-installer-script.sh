@@ -66,6 +66,7 @@ if grep -Fq 'umask 077' "$SCRIPT"; then
   fail "installer must not propagate a restrictive log umask into the installed system"
 fi
 pass "installer uses a normal system umask while securing diagnostic files explicitly"
+# shellcheck disable=SC2016
 grep -Fq '$1 == "/swapfile" && $2 == "none" && $3 == "swap"' "$SCRIPT" || fail "installer must validate swapfile source, target, and type using fstab columns"
 pass "installer validates the swapfile fstab entry using the correct source/target/type columns"
 
