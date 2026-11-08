@@ -66,6 +66,7 @@ After changing files:
 - Give each topic one owning document. The owning document is the canonical location for the complete, authoritative treatment of that topic.
 - Use this ownership map:
   - `AGENTS.md`: AI workflow, repository-editing rules, safety boundaries, and reporting requirements.
+  - `docs/00-REPOSITORY-MAP-AND-SOURCE-OF-TRUTH.md`: repository-wide navigation, file-to-document/test/evidence cross-reference, and evidence hierarchy; index only, not a technical authority.
   - `docs/01-PROJECT-CHARTER.md`: project purpose, scope, goals, and guiding principles.
   - `docs/02-REQUIREMENTS-AND-DECISIONS.md`: requirement IDs and approved project decisions.
   - `docs/03-ARCHITECTURE-AND-MODULES.md`: current system architecture, module boundaries, and interfaces, consistent with approved requirements and decisions.
