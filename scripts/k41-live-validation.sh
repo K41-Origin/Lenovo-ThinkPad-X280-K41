@@ -339,7 +339,7 @@ run_check "installer --help" ./installer --help
   printf 'Expected project behavior: non-zero while installation is disabled. Actual output and exit code follow.\n\n'
   if ./installer --preflight >>"$live_report" 2>&1; then preflight_rc=0; else preflight_rc=$?; fi
   printf '\nPreflight exit code: %s\n' "$preflight_rc" >>"$live_report"
-} 
+}
 
 if ((checks_failed > 0)); then exit 1; fi
 exit 0
