@@ -17,7 +17,7 @@ The project charter in [01](01-PROJECT-CHARTER.md) owns status definitions. The 
 The repository contains two distinct entry paths:
 
 1. `installer` is the original diagnostic entry point. It supports `--help` and read-only `--preflight`; it does not install Arch.
-2. `scripts/bootstrap-archiso.sh` retrieves the latest `main` revision, displays its commit SHA, and gates launch on manual source review. `scripts/install-arch-x280.sh` is the initial destructive installer on `main`. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. Installer execution is TESTED (physical trial 4 exited 0 and generated the UKI); successful boot from the SSD and separate First Boot acceptance remain NOT TESTED.
+2. `scripts/bootstrap-archiso.sh` retrieves the latest `main` revision, displays its commit SHA, and gates launch on manual source review. `scripts/install-arch-x280.sh` is the initial destructive installer on `main`. It performs target-specific storage operations, installs a minimal Arch base, runs target configuration, and generates a systemd-boot UKI. Installer execution is TESTED (physical trial 4 exited 0 and generated the UKI); SSD boot and First Boot acceptance are VERIFIED by physical report `20261108T083237Z` (14 PASS).
 
 Do not conflate these paths: the top-level entry point is diagnostic-only, while the bootstrap launches the separate destructive installer after source review. See the status document for exact commit and CI evidence.
 
@@ -50,7 +50,7 @@ This is a factual description of code paths, not evidence that the complete work
 | `lib/storage-execution-dry-run.sh`, `lib/storage-execution-boundary.sh` | In-memory operation model and mock-only orchestration/recovery ledger | IMPLEMENTED; tests invoke mocks only |
 | `lib/base-system.sh` | Guarded package bootstrap and fstab generation for already-mounted target | IMPLEMENTED; invoked by the initial installer on main |
 | `scripts/install-arch-x280.sh` | Initial destructive installer orchestration | IMPLEMENTED; physical installer execution TESTED in trial 4; successful SSD boot NOT TESTED |
-| `scripts/configure-arch-x280.sh` | Interactive initial target-system configuration | IMPLEMENTED; invoked through arch-chroot; full integration NOT TESTED |\n| `scripts/setup-desktop-x280.sh` | Separate post-install desktop setup, manual session preparation, and per-attempt evidence | Existing setup is IMPLEMENTED; per-attempt report logging is PROPOSED on `fix/desktop-setup-logging` pending CI/review/merge; physical session and AUR recipe remain subject to operator review/testing |
+| `scripts/configure-arch-x280.sh` | Interactive initial target-system configuration | IMPLEMENTED; invoked through arch-chroot; full integration NOT TESTED |\n| `scripts/setup-desktop-x280.sh` | Separate post-install desktop setup, manual session preparation, and per-attempt evidence | Setup/logging IMPLEMENTED on `main`; Caelestia AUR dependency-chain correction is under review; physical session remains NOT TESTED |
 | `native/storage-handle.c` | Standalone read-only native descriptor prototype | IMPLEMENTED; compile/CLI test only; not integrated with installer |
 | `lib/bootloader.sh`, `lib/user-setup.sh`, `lib/desktop.sh`, `lib/hardware.sh`, `lib/packages.sh`, `lib/security.sh`, `lib/validation.sh`, `lib/report.sh` | Future domain-specific reusable modules | PLANNED placeholders; do not imply they are called by the installer |
 
@@ -85,7 +85,7 @@ The initial physical installer process has completed successfully in trial 4. Be
 ## Deferred architecture
 
 - Full reusable storage executor with a proven descriptor/capability contract.
-- Successful boot from the installed SSD and First Boot acceptance on the physical X280 (NOT TESTED). The installer process itself completed in physical trial 4.
+- Successful boot from the installed SSD and First Boot acceptance on the physical X280: VERIFIED by report `20261108T083237Z` (14 PASS). The installer process itself completed in physical trial 4.
 - Resume-offset lifecycle and hibernation.
 - Physical validation of Hyprland, Caelestia Shell, Quickshell, portals, audio, and session integration.
 - Hardware/power/thermal tuning based on Linux-observed capabilities.

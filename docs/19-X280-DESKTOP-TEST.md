@@ -6,18 +6,21 @@ This stage installs a manually-started Wayland desktop on an already installed a
 
 Target stack:
 - Hyprland compositor from the official Arch repository.
-- Quickshell from the official Arch repository.
-- Caelestia Shell from the stable AUR package, only after showing and approving the checked-out PKGBUILD and .SRCINFO.
+- Quickshell from the official Arch repository when Caelestia is skipped.
+- `quickshell-git` from the AUR when Caelestia is selected, because the inspected stable `caelestia-shell` AUR metadata declares it as a dependency and it conflicts with the official `quickshell` package.
+- Caelestia CLI and Shell from the AUR, after separately displaying and approving each checked-out PKGBUILD and .SRCINFO.
 - PipeWire, WirePlumber, XDG Desktop Portal, Hyprland portal backend, GTK portal, and a minimal set of Wayland utilities.
 
-The current Caelestia upstream describes Hyprland and Quickshell as its core components, recommends the stable `caelestia-shell` AUR package over the bleeding-edge `-git` package, and documents additional runtime dependencies. Re-check upstream instructions and the AUR recipe at each installation; this project does not pin or certify a moving AUR recipe.
+The current Caelestia upstream recommends the stable `caelestia-shell` package. The first physical setup log captured its `.SRCINFO` declaring `caelestia-cli` and `quickshell-git` as dependencies. `makepkg --syncdeps` resolves dependencies from configured pacman repositories; it does not build AUR dependencies. The setup therefore builds the AUR chain in order: `quickshell-git`, `caelestia-cli`, then `caelestia-shell`. Each package is cloned into a unique per-attempt directory and independently reviewed/approved. The recipes are moving AUR sources, not pinned project dependencies; re-review each exact checkout.
 
 ## Safety and behavior
 
 - Run `sudo bash scripts/setup-desktop-x280.sh` from the installed system as the regular wheel user.
 - The script refuses root invocation without a real `SUDO_USER`, active graphical sessions, non-Arch systems, and pre-existing Hyprland/Caelestia configuration paths.
 - Official packages are installed with pacman's normal signature verification. No repository or signature policy is changed.
-- The AUR recipe is displayed before approval. The build runs as the regular user, never root. Declining AUR leaves the official Hyprland/Quickshell foundation installed.
+- When Caelestia is selected, `base-devel` and the documented CLI runtime dependencies are installed from configured official repositories first. This supplies `debugedit` and `fakeroot`, the missing tools from the first failed trial.
+- When Caelestia is selected, the official `quickshell` package is deliberately omitted because `quickshell-git` conflicts with it. When Caelestia is skipped, the official `quickshell` package is installed.
+- AUR packages are built as the regular user, never root. `makepkg --syncdeps --install` is used only after each exact PKGBUILD/.SRCINFO has been shown and explicitly approved. It installs repository dependencies but does not resolve AUR dependencies; the script handles the known Caelestia AUR dependency chain explicitly.
 - Existing Hyprland and Caelestia configuration is not overwritten.
 - Portal routing explicitly selects GTK as the default and Hyprland for Screenshot/ScreenCast; existing portal preference files are never overwritten.
 - No display manager, autologin, automatic graphical target, Bluetooth service, firewall, power manager, hibernation, or hardware-specific tuning is enabled.
@@ -41,7 +44,7 @@ A setup-script `PASS` means only that the setup script exited successfully. It d
 1. Confirm the latest First Boot report is PASS and the system has working network access.
 2. Review the script and the exact resolved repository commit.
 3. Run `sudo bash scripts/setup-desktop-x280.sh`.
-4. Review the AUR PKGBUILD and .SRCINFO. Decline if unexpected commands, sources, dependencies, or privilege behavior appear.
+4. If selecting Caelestia, review and approve each displayed AUR recipe in this order: `quickshell-git`, `caelestia-cli`, `caelestia-shell`. Decline any recipe with unexpected commands, sources, dependencies, or privilege behavior.
 5. Log out to TTY1, sign in as the regular user, and run `start-hyprland`.
 6. Test display, keyboard, touchpad, terminal, file manager, audio output/input, Wi-Fi, notifications, screenshot/portal behavior, screen sharing, lock, logout, and return to TTY.
 7. Capture diagnostics and logs before making repairs. Do not configure automatic session launch until manual session stability is demonstrated.
