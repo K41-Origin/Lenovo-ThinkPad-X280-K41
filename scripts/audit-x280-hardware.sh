@@ -175,7 +175,7 @@ capture 'Root filesystem mount' findmnt -n -o TARGET,FSTYPE,OPTIONS /
 
 capture_file 'Kernel module: i915' /sys/module/i915/version
 capture 'Loaded relevant kernel modules' lsmod
-capture 'Kernel command line (review before sharing)' bash -c 'sed -E "s/(rd\.luks\.name=)[^ ]+/\1[REDACTED]/g; s/(cryptdevice=)[^ ]+/\1[REDACTED]/g" /proc/cmdline'
+capture 'Kernel command line (review before sharing)' bash -c 'sed -E "s/(rd\.luks\.name=)[^ ]+/\1[REDACTED]/g; s/(cryptdevice=)[^ ]+/\1[REDACTED]/g; s/(UUID=)[^ ]+/\1[REDACTED]/g; s/(PARTUUID=)[^ ]+/\1[REDACTED]/g" /proc/cmdline'
 
 chmod 0600 "$summary" "$diagnostics"
 printf 'Hardware audit report created: %s\n' "$run_dir"
