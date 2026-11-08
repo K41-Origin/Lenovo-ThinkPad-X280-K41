@@ -9,7 +9,7 @@ bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
 pass 'desktop setup script passes bash -n'
 for token in \
   'pacman -Syu --needed' \
-  'hyprland quickshell xdg-desktop-portal-hyprland' \
+  'hyprland quickshell xdg-desktop-portal' \
   'pipewire pipewire-audio pipewire-pulse wireplumber' \
   'makepkg --syncdeps --install' \
   'Do you approve this exact AUR recipe' \
