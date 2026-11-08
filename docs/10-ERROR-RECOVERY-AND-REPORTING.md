@@ -26,13 +26,14 @@ Check boot/encryption configuration, filesystem/mount state, network, audio, des
 
 ## Initial installer diagnostic logs
 
-`scripts/install-arch-x280.sh` captures stdout and stderr to a timestamped run directory before host preflight or storage operations:
+Both `scripts/install-arch-x280.sh` and `scripts/resume-arch-x280.sh` capture stdout/stderr inside the repository checkout:
 
 ```text
-/var/log/x280-installer/<UTC timestamp>/installer.log
+reports/installer/<UTC timestamp>/installer.log
+reports/installer/resume-<UTC timestamp>/resume.log
 ```
 
-The directory is root-owned mode 0700 and the log file root-owned mode 0600. The installer falls back to `/run/x280-installer/<UTC timestamp>/installer.log` if `/var/log` cannot be used; that fallback is always temporary and disappears at reboot. The installer prints the exact log path at exit. Because the Arch ISO may keep `/var/log` on an ephemeral overlay too, copy the log to a mounted persistent medium before reboot regardless of which path was used.
+The run directory is root-owned mode 0700 and the log file root-owned mode 0600. Logging fails closed unless the script is running from the official Arch ISO and the repository checkout resolves to an `overlay` or `tmpfs` filesystem. There is no fallback to `/var/log` or `/run`; failure to create the repository-local log stops execution before preflight or storage operations. The script prints the exact log path at exit. Copy the report directory to persistent storage before reboot if the ISO session is ephemeral.
 
 The log records start/end time, kernel/architecture, checkout path and commit when available, stage markers, stdout/stderr, exit status, and the last stage reached. Storage final-revalidation and live-prerequisite modules report a non-sensitive failure-stage identifier (for example, `target_stable_identity_changed` or `target_topology_validation`) instead of returning only a generic failure.
 
