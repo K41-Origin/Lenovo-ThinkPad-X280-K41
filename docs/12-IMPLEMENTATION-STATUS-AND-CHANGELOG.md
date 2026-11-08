@@ -69,7 +69,8 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 ## Other outstanding gates
 
 - First Boot from the internal SSD and first-boot evidence collection: **VERIFIED for report `20261108T083237Z` (14 PASS)**.
-- Desktop setup foundation: **IMPLEMENTED on PR #23 branch; CI/merge pending; physical session NOT TESTED**.\n- X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
+- Desktop setup foundation: **IMPLEMENTED on PR #23 branch; CI/merge pending; physical session NOT TESTED**.
+- X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
 - VM installation testing: **OUT OF SCOPE** by owner decision.
 - No release is claimed.
 
