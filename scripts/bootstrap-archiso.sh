@@ -53,7 +53,9 @@ review_files=(
   scripts/bootstrap-archiso.sh
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
+  scripts/k41-live-validation.sh
   scripts/x280-install-readiness.sh
+  scripts/live-validation.sh
   scripts/x280-first-boot-check.sh
   scripts/validate-live-storage.sh
   tests/run.sh
@@ -96,8 +98,8 @@ IFS= read -r acknowledgement </dev/tty
   die "Source review acknowledgement did not match; readiness check was not launched."
 
 info "Source review acknowledged for commit $commit_sha. Running the read-only readiness gate."
-if ! (cd "$repo_dir" && bash scripts/x280-install-readiness.sh); then
-  die "Read-only readiness failed. Review reports/live-readiness; the destructive installer was not launched."
+if ! (cd "$repo_dir" && bash scripts/k41-live-validation.sh --readiness); then
+  die "Read-only readiness failed. Review reports/live-readiness and reports/live-validation; the destructive installer was not launched."
 fi
 
 printf '\nRead-only readiness PASSED for commit %s.\n' "$commit_sha" >&2
