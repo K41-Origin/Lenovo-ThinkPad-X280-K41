@@ -10,7 +10,7 @@ pass 'power-management audit collector passes bash -n'
 help_output="$(bash "$SCRIPT" --help)" || fail 'help command failed'
 grep -Fq 'read-only' <<<"$help_output" || fail 'help must describe read-only behavior'
 if bash "$SCRIPT" --invalid >/dev/null 2>&1; then fail 'unknown arguments must be rejected'; fi
-for token in 'EUID == 0' 'umask 077' 'chmod 0700 "$run_dir"' 'chmod 0600 "$summary" "$diagnostics"' 'scaling_governor' 'energy_performance_preference' 'intel_pstate' 'platform_profile' 'power-profiles-daemon.service' 'charge_control_start_threshold'; do
+for token in 'EUID == 0' 'umask 077' 'chmod 0700 "$run_dir"' 'chmod 0600 "$summary" "$diagnostics"' 'scaling_governor' 'energy_performance_preference' 'intel_pstate' 'platform_profile' 'power-profiles-daemon.service' 'charge_control_start_threshold' 'busctl --system introspect' 'ActiveProfile'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing baseline/safety contract: $token"
 done
 if grep -Eq 'pacman[[:space:]]+-S|systemctl[[:space:]]+(enable|disable|start|stop|restart)|tee[[:space:]]+(/sys/|/etc/)|>[[:space:]]*/sys/|chown[[:space:]]|chmod[[:space:]]+-R|modprobe[[:space:]]+-r' "$SCRIPT"; then
