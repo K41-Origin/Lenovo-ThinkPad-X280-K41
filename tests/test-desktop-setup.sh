@@ -2,11 +2,14 @@
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/setup-desktop-x280.sh"
+RESOLVER="$ROOT/lib/aur-dependency-resolver.sh"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$*"; }
 [[ -f $SCRIPT ]] || fail 'desktop setup script missing'
+[[ -f $RESOLVER ]] || fail 'AUR dependency resolver missing'
 bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
-pass 'desktop setup script passes bash -n'
+bash -n "$RESOLVER" || fail 'AUR dependency resolver syntax invalid'
+pass 'desktop setup script and AUR resolver pass bash -n'
 
 tokens=(
   'pacman -Syu --needed'
@@ -50,5 +53,23 @@ grep -Fq "command -v caelestia" "$SCRIPT" || fail 'Caelestia autostart lacks CLI
 if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
   fail 'desktop setup must not enable a display manager or autologin'
 fi
-pass 'desktop setup logging, dependency preflight, reviewed unprivileged AUR builds, overwrite protection, and manual session start are present'
+fixture_dir=$(mktemp -d)
+trap 'rm -rf "$fixture_dir"' EXIT
+cat >"$fixture_dir/.SRCINFO" <<'SRCINFO'
+pkgbase = fixture-demo
+pkgver = 1.0
+pkgrel = 1
+depends = libcava>=1.0
+makedepends_x86_64 = cmake
+pkgname = fixture-demo
+provides = legacy-demo
+SRCINFO
+# shellcheck source=../lib/aur-dependency-resolver.sh
+source "$RESOLVER"
+[[ $(aur_dependency_name 'libcava>=1.0') == libcava ]] || fail 'versioned dependency normalization failed'
+aur_metadata_matches "$fixture_dir/.SRCINFO" fixture-demo || fail 'pkgname metadata matching failed'
+aur_metadata_matches "$fixture_dir/.SRCINFO" legacy-demo || fail 'provides metadata matching failed'
+[[ $(aur_metadata_dependencies "$fixture_dir/.SRCINFO" | paste -sd ' ' -) == 'cmake libcava>=1.0' ]] || fail 'depends/makedepends extraction failed'
+pass 'AUR metadata parsing, package/provider matching, and versioned dependency normalization pass fixture tests'
+pass 'desktop setup logging, recursive dependency resolution, reviewed unprivileged AUR builds, overwrite protection, and manual session start are present'
 printf '%s\n' 'Desktop setup tests passed.'
