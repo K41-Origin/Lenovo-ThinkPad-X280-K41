@@ -7,7 +7,11 @@
 
 Run as the regular user, without sudo. Reports are private under reports/power-management-audit/.
 
-## Controlled Power Profiles comparison
+## Optional controlled Power Profiles comparison (deferred)
+
+The selector is implemented, but power-profile A/B measurement is not part of the current project stage. Per the approved project sequence, all power/battery experimentation is deferred to the final hardware/system customization stage after desktop functional validation, desktop customization, and optional software integration have been accepted. Use this section only during that final stage, with a recorded baseline and explicit owner approval.
+
+
 
 The X280 report confirmed a working D-Bus ActiveProfile property and current profile balanced. The powerprofilesctl frontend fails due to a Python GI import error, while busctl D-Bus queries work.
 
