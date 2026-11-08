@@ -140,3 +140,22 @@ qs -c caelestia kill
 ```
 
 Upstream usage references: the Caelestia shell README documents `caelestia shell -d` as the preferred start command, and the upstream discussion documents `caelestia shell --kill` / Quickshell kill as stop methods.
+
+
+## Caelestia cache/state and Bluetooth diagnostics
+
+The previous runtime report recorded permission errors while creating Mesa, Caelestia image-cache, and ddcutil cache paths, plus a BlueZ D-Bus warning. Do not apply recursive `chmod` or `chown` fixes based only on those messages. First update the checkout and run the read-only collector from a terminal inside the active Hyprland session:
+
+```bash
+git pull --ff-only
+bash scripts/test-caelestia-permissions-x280.sh
+```
+
+It runs as the regular user (never with `sudo`) and creates `reports/caelestia-permissions-diagnostics/<UTC timestamp>/` containing:
+
+- `summary.md` — capture time, source commit, kernel, and collection status.
+- `diagnostics.txt` — user identity and relevant XDG cache/state paths; ownership, mode, path traversal and optional ACL metadata; Caelestia package state; Bluetooth service, controller and BlueZ D-Bus status; recent user journal errors.
+
+The collector is read-only. It does not create or repair the inspected cache/state paths, change ownership or permissions, install packages, start/stop services, or invoke privileged commands. Missing optional commands or unavailable paths are recorded as diagnostic results; collection continues.
+
+Review the report for private host/user details before committing and pushing it. Do not run broad recursive permission changes. Once the report is available, inspect the exact owner, group, mode, parent-directory traversal and ACL evidence before deciding on any narrowly scoped repair. A completed collection is not a pass for Caelestia or Bluetooth functionality.
