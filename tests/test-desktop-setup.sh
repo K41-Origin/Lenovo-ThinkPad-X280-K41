@@ -51,7 +51,7 @@ done
   fail 'desktop script contains duplicated Hyprland configuration blocks'
 [[ $(grep -Fc 'AUR package review: %s' "$RESOLVER") -eq 1 ]] ||
   fail 'resolver contains duplicated AUR review blocks'
-grep -Fq "printf '%s\\\n' '- Log: setup.log'" "$SCRIPT" ||
+grep -Fq "printf '%s\\n' '- Log: setup.log'" "$SCRIPT" ||
   fail 'desktop summary log entry formatting is invalid'
 grep -Fq 'command -v caelestia' "$SCRIPT" || fail 'Caelestia autostart lacks CLI validation'
 if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
