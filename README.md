@@ -30,7 +30,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
 - `native/storage-handle.c` and `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — Stage 8 read-only native descriptor-holder prototype and its canonical design/limitations; hardware behavior and executor integration remain unverified.
-- `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Desktop, hardware tuning, package/security policy, validation, and reporting modules remain PLANNED.
+- `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Desktop setup, validation, and reporting are implemented in separate modules. Hardware tuning remains PLANNED.
 - `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
 - `scripts/k41-live-validation.sh` — canonical read-only Live Validation entry point; combines strict Arch ISO/X280 readiness, host diagnostics, static analysis, tests, SSD identity/topology validation, installer diagnostics, and timestamped evidence.
 - `scripts/x280-install-readiness.sh` and `scripts/live-validation.sh` — backward-compatible wrappers; both delegate to the canonical validator without duplicate implementations.
