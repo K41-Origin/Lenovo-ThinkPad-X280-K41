@@ -60,6 +60,10 @@ grep -Fq 'reports/x280-archiso-test' "$SUPPLEMENTAL" || fail "supplemental repor
 if grep -Fq '/run/x280-archiso-storage-test-' "$SUPPLEMENTAL"; then
   fail "supplemental report must not be written outside the repository"
 fi
+if grep -Eq 'RAM-only|/run report|RAM only' "$SUPPLEMENTAL"; then
+  fail "supplemental collector documentation must not describe its repository report as RAM-only or /run-based"
+fi
+grep -Fq 'Supplemental report (repository):' "$SUPPLEMENTAL" || fail "supplemental collector does not print the repository report path"
 grep -Fq 'findmnt -T "$ROOT"' "$SUPPLEMENTAL" || fail "supplemental collector does not protect persistent filesystems"
 grep -Fq 'WWN,SERIAL,RM,RO,FSTYPE,MOUNTPOINTS' "$SUPPLEMENTAL" || fail "supplemental detailed block-device inventory was lost"
 if grep -Fq 'scripts/validate-live-storage.sh' "$SUPPLEMENTAL"; then
