@@ -39,16 +39,6 @@ checks_failed=0
 checks_passed=0
 finalized=0
 
-record_check() {
-  local name="$1" status="$2" rc="$3"
-  printf '| %s | **%s** | %s |\n' "$name" "$status" "$rc" >>"$summary"
-  if [[ "$status" == PASS ]]; then
-    checks_passed=$((checks_passed + 1))
-  else
-    checks_failed=$((checks_failed + 1))
-  fi
-}
-
 run_check() {
   local name="$1"
   shift
