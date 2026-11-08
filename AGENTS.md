@@ -74,7 +74,6 @@ After changing files:
   - `docs/11-TESTING-AND-ACCEPTANCE.md`: acceptance criteria and historical/current evidence boundaries.
   - `docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md`: current implementation matrix, exact CI evidence, and chronological change record.
   - `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` and `docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md`: stage-specific design/implementation records, not competing architecture or status sources.
-  - `docs/15-REPOSITORY-AUDIT.md`: concise cross-document audit and unresolved inconsistencies; it must link to canonical owners rather than duplicate procedures.
   - `docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md`: canonical security, desktop, hardware/power/network, package, developer-tool, and authorized security-testing policies.
 - Other documents may include a brief summary when useful, but must link to or name the owning document instead of duplicating its full requirements, decisions, or procedures. Keep indexes and cross-references concise.
 - This map assigns ownership by subject; it is not a blanket rule that one document overrides every other document. Approved decisions in the requirements-and-decisions document constrain the architecture. Architecture and domain documents must remain consistent with them.
