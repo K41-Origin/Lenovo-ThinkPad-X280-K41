@@ -54,36 +54,13 @@ A setup-script `PASS` means only that the setup script exited successfully. It d
 Automated shell tests can validate script syntax and safety guards. They cannot prove that Hyprland, GPU acceleration, Caelestia, audio, portals, touchpad gestures, suspend/resume, or battery behavior work on the physical X280. Those remain NOT TESTED until the laptop owner runs the physical test and uploads the evidence.
 
 
-## Fourth desktop trial gate — 2026-11-09
+## Physical desktop setup attempts — historical record
 
-The previous third desktop attempt failed while checking the Caelestia Shell AUR dependency `libcava`. The implementation has been changed from a hard-coded four-package build list to recursive required/make dependency traversal in `lib/aur-dependency-resolver.sh`. This removes the known failure mode where an additional AUR dependency is neither installed nor in an official repository and is simply rejected without attempting to resolve its AUR package.
+- Earlier attempts exposed missing AUR dependencies, including libcava. The fixed package list was replaced with the recursive resolver described above.
+- Desktop attempt 4 failed during libcava dependency installation because a nested build consumed the parent's process-substitution input as pacman prompt input. The resolver was corrected to materialize dependency lists with mapfile, use /dev/null for non-interactive metadata generation, and connect interactive makepkg to /dev/tty.
+- Desktop attempt 5 completed successfully: report reports/desktop/20261108T190308Z/ records exit status 0 and a 16m16s run. This verifies setup-script completion only; it does not establish that every AUR package remains reproducible or that the graphical desktop is accepted.
 
-Before starting the fourth physical desktop setup attempt:
-
-1. Update the repository checkout to the reviewed latest `main` commit and inspect the exact resolver, setup script, and AUR recipes presented at runtime.
-2. Run the automated desktop resolver fixture test through `bash tests/test-desktop-setup.sh` (and the canonical `bash tests/run.sh` suite).
-3. Run `sudo bash scripts/setup-desktop-x280.sh` from a TTY on the already installed Arch system; this is a post-install desktop operation and does not repartition or erase the SSD.
-4. Select Caelestia and review every discovered AUR package in the order presented. Decline unexpected or untrusted PKGBUILDs; preserve the generated timestamped report if any step fails.
-5. Start Hyprland manually from TTY only after setup exits successfully, then perform the physical acceptance checks above.
-
-The resolver's exact-name AUR lookup and the explicit Material You provider alias are intentionally conservative. It verifies the reviewed .SRCINFO against the approved PKGBUILD-generated metadata and rejects package metadata that does not declare x86_64 or any support. Arbitrary virtual AUR provides, split-package base discovery, and live AUR metadata availability are not generalized; unresolved or mismatched metadata must stop the setup rather than be guessed. A successful setup-script exit still does not constitute physical desktop acceptance.
-
-
-## Fifth desktop trial gate — 2026-11-09
-
-The fourth physical attempt built and installed `quickshell-git`, `python-materialyoucolor3`, and `caelestia-cli), then failed while building `libcava`. The captured terminal output shows pacman was asked to install the official build dependencies `meson` and `autoconf-archive`, but the next metadata dependency string (`libpipewire`) was consumed at pacman's confirmation prompt. This was caused by recursive dependency traversal running inside a `while read ... < <(...)` loop: nested build commands inherited the parent's process-substitution stream as stdin.
-
-The resolver now materializes each package's dependency list with `mapfile` before recursing, iterates the resulting array, sends non-interactive metadata generation `/dev/null`, and attaches interactive `makepkg --syncdeps --install` to the controlling TTY. This prevents dependency names from being interpreted as pacman answers while preserving interactive confirmation.
-
-Before the fifth physical desktop attempt:
-
-1. Update to the latest reviewed `main` commit.
-2. Run `bash tests/test-desktop-setup.sh` and `bash tests/run.sh`; stop on any failure.
-3. Run `sudo bash scripts/setup-desktop-x280.sh` from a TTY on the already installed Arch system.
-4. Review each displayed AUR recipe. In particular, when `libcava` is built, verify that pacman can display and complete its official dependency transaction for `meson` and `autoconf-archive`; do not type package names at the pacman confirmation prompt.
-5. If setup completes, start `start-hyprland` manually and execute the physical acceptance checks above.
-
-The fix addresses the observed fourth-attempt failure mechanism. It does not prove the next AUR build, Caelestia startup, or physical desktop session will succeed.
+Do not repeat the full desktop setup merely to re-check the cache ownership issue. Desktop setup is a post-install operation and does not require a fresh Arch installation. Preserve the attempt reports as historical evidence; use the latest status below for current acceptance.
 
 ## Read-only desktop diagnostic collection
 
@@ -161,25 +138,40 @@ The collector is read-only. It does not create or repair the inspected cache/sta
 Review the report for private host/user details before committing and pushing it. Do not run broad recursive permission changes. Once the report is available, inspect the exact owner, group, mode, parent-directory traversal and ACL evidence before deciding on any narrowly scoped repair. A completed collection is not a pass for Caelestia or Bluetooth functionality.
 
 
-### Narrow cache ownership repair
+### Cache ownership repair — current status
 
-The uploaded permissions report for `reports/caelestia-permissions-diagnostics/20261108T194132Z/` verified that `~/.cache` was owned by `root:root` with mode `755`, while the home directory and Caelestia state directory were owned by the regular user. This explains the observed inability to create Mesa, Caelestia image-cache, and ddcutil cache paths. The repair is deliberately limited to the `~/.cache` directory itself.
+The permissions report reports/caelestia-permissions-diagnostics/20261108T194132Z/ established that ~/.cache was root:root, preventing the regular user from creating cache entries. The guarded repair script scripts/fix-caelestia-cache-permissions-x280.sh was added with dry-run by default and an explicit --apply mode. It only changes ownership of the real ~/.cache directory itself from root:root to the invoking user's UID:GID; it does not recurse or change permissions.
 
-Review and run the guarded repair as the regular user:
+The latest permissions report reports/caelestia-permissions-diagnostics/20261108T194621Z/ verifies ~/.cache is now owned by kai:kai (UID/GID 1000), mode 755. This ownership correction is VERIFIED. The same capture found that the expected application cache subdirectories did not yet exist. The latest Caelestia runtime report reports/caelestia-diagnostics/20261108T194633Z/ found Caelestia already running and deliberately left it untouched. Its log includes cache permission warnings, but those messages may predate the ownership repair; therefore cache creation after a restart is NOT TESTED.
 
-```bash
-git pull --ff-only
-bash scripts/fix-caelestia-cache-permissions-x280.sh --check
-bash scripts/fix-caelestia-cache-permissions-x280.sh --apply
-```
+The missing scheme.json remains an observed warning with unknown significance. BlueZ service, bluetoothctl, and org.bluez were unavailable in the captured environment; this is separate from the cache ownership issue. Do not install or enable Bluetooth solely to silence a warning unless Bluetooth functionality is required and hardware is confirmed.
 
-The default/ `--check` mode is a dry-run. `--apply` requires sudo and changes ownership only when the target is a real, non-symlink `~/.cache` directory currently owned by `root:root`. It sets owner/group to the invoking user's UID/GID, performs no recursive operation, and does not change mode bits, contents, packages, services, or any other path. It refuses root invocation, a missing or symlink target, and any unexpected current owner. The script verifies ownership after the change.
+### One final targeted cache verification
 
-After a successful repair, run the read-only permissions collector and focused runtime collector again from the active Hyprland session:
+No sixth full desktop setup attempt or repeated full diagnostics cycle is warranted. From a terminal inside the active Hyprland session, close only the Caelestia Quickshell instance and start it again:
 
 ```bash
-bash scripts/test-caelestia-permissions-x280.sh
-bash scripts/test-caelestia-x280.sh
+qs -c caelestia kill
+caelestia shell -d
 ```
 
-Inspect and push the new reports after redacting private host/user details. Then complete the manual UI checklist. This repair does not address the separate missing BlueZ service/CLI or determine whether the absent `scheme.json` is expected.
+The Quickshell help captured in the latest runtime report documents the kill subcommand; the Caelestia CLI's normal shell start form is `caelestia shell -d`. Then inspect whether the application creates its cache paths and whether new log entries contain permission errors:
+
+```bash
+stat ~/.cache/caelestia ~/.cache/caelestia/imagecache ~/.cache/ddcutil 2>&1
+qs -c caelestia log
+```
+
+If the shell starts and the cache paths are created without new permission errors, mark cache runtime verification PASS and close this issue. If an optional path remains absent but no relevant error occurs, do not treat absence alone as failure. If a new permission error persists, capture only the relevant fresh log and path metadata before considering another change. Do not rerun the desktop installer, recursively change ownership, or repeat the entire diagnostic suite for this issue.
+
+### Current physical acceptance
+
+- Setup script exit: PASS (report 20261108T190308Z).
+- Hyprland session and Caelestia/Quickshell process: detected in the latest desktop diagnostics.
+- Caelestia IPC discovery: completed successfully.
+- ~/.cache ownership: VERIFIED corrected.
+- Cache creation after Caelestia restart: NOT TESTED.
+- Manual panel, launcher, dashboard, notification, widget, wallpaper, indicator, and visual stability checks: NOT TESTED (latest checklist remains unfilled).
+- Bluetooth/BlueZ functionality: NOT TESTED; BlueZ components were unavailable in the captured environment.
+
+A completed diagnostic collection or successful setup-script exit is not a substitute for manual UI acceptance.
