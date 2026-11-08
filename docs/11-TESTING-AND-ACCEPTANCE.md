@@ -48,7 +48,7 @@ A release candidate requires:
 - Documented limitations, failure handling, and operator recovery instructions.
 - No unresolved critical safety failure.
 
-Physical installer execution is TESTED: trial 4 completed with exit status 0 and generated the UKI. Successful boot from the internal SSD, firmware UKI discovery, LUKS unlock/root mount, First Boot/first login, LUKS recovery, suspend/resume/hibernation, and desktop/hardware integration remain NOT TESTED until observed and recorded on the actual laptop.
+Physical installer execution is TESTED: trial 4 completed with exit status 0 and generated the UKI. A subsequent physical First Boot collector report (`reports/first-boot/20261108T083237Z/`) records 14 PASS, 0 FAIL, and 0 SKIP for the checks defined by that collector. This supports the observed boot/system checks within that report's scope; it does not establish manual UI acceptance, LUKS recovery-key lifecycle, suspend/resume/hibernation, audio, Bluetooth, battery endurance, thermal behavior, or broader hardware acceptance. Those remain NOT TESTED until separately observed and recorded.
 
 ## How to run tests
 
