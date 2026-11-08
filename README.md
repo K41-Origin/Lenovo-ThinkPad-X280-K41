@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. Four physical installer trials are recorded; the fourth completed all installer stages, generated the UKI, and exited 0. Actual boot from the internal SSD and the separate First Boot acceptance test remain NOT TESTED. Desktop, hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
+> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. Four physical installer trials are recorded; the fourth completed all installer stages, generated the UKI, and exited 0. Actual SSD boot succeeded; First Boot diagnostic recorded 13 PASS and 1 FAIL due to permissive ESP VFAT masks. A source fix now enforces owner-only ESP permissions and awaits CI/physical reinstall validation. Desktop, hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
 
 ## AI-assisted development
 
