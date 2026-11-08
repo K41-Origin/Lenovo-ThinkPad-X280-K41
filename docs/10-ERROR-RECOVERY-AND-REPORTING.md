@@ -23,3 +23,26 @@ Check boot/encryption configuration, filesystem/mount state, network, audio, des
 - [ ] Secrets excluded.
 - [ ] Interrupted runs inspect state instead of reformatting.
 - [ ] Report distinguishes verified, failed, and untested behavior.
+
+## Initial installer diagnostic logs
+
+`scripts/install-arch-x280.sh` captures stdout and stderr to a timestamped run directory before host preflight or storage operations:
+
+```text
+/var/log/x280-installer/<UTC timestamp>/installer.log
+```
+
+The directory is root-owned mode 0700 and the log file root-owned mode 0600. The installer falls back to `/run/x280-installer/<UTC timestamp>/installer.log` if `/var/log` cannot be used; that fallback is always temporary and disappears at reboot. The installer prints the exact log path at exit. Because the Arch ISO may keep `/var/log` on an ephemeral overlay too, copy the log to a mounted persistent medium before reboot regardless of which path was used.
+
+The log records start/end time, kernel/architecture, checkout path and commit when available, stage markers, stdout/stderr, exit status, and the last stage reached. Storage final-revalidation and live-prerequisite modules report a non-sensitive failure-stage identifier (for example, `target_stable_identity_changed` or `target_topology_validation`) instead of returning only a generic failure.
+
+Shell xtrace is not enabled. LUKS passphrases and account passwords must be entered through their interactive terminal prompts; they are not command arguments and must never be copied into logs. Logs can still contain hardware identifiers and storage topology from the reviewed plan, so inspect and redact them before sharing. Root-only permissions reduce exposure but do not make a log safe to publish.
+
+A failure at `final-revalidation` occurs before the installer's first destructive `wipefs` operation in the current code path. A failure at a `pre-operation-check:` stage means that particular operation was not invoked. A failure at or after a `disk-operation:` stage requires stopping and inspecting the actual disk and mount state; earlier disk-operation stages in the same run may already have changed the disk. Never rerun blindly. The log is diagnostic evidence, not independent proof of disk state.
+
+
+## Recorded X280 continuation checkpoint — 2026-11-08
+
+The physical attempt passed the storage confirmation gate, partitioned the configured internal SSD, formatted ESP and LUKS2/ext4 root, mounted both filesystems, and completed `pacstrap`. It then failed because the target `/etc/fstab` was already non-empty. The laptop was powered off afterward. The disk is not blank and the destructive installer must not be rerun.
+
+For this exact post-pacstrap/pre-configuration checkpoint, use `scripts/resume-arch-x280.sh` from the recovery branch. Do not rerun the broad blank-disk readiness gate or the Arch ISO bootstrap. The continuation script performs narrow identity/layout checks, read-only ext4 checking, verifies the expected installed package set, safely merges fstab, and continues configuration/UKI generation. It contains no partitioning, filesystem-formatting, LUKS-formatting, or pacstrap command. A mismatch or partial configuration is a hard stop requiring state inspection.

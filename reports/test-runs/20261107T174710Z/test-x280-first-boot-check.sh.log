@@ -1,0 +1,7 @@
+PASS: first-boot collector passes bash -n
+PASS: healthy mocked first boot generates complete PASS report and evidence files
+PASS: password-like strings and MAC addresses are redacted from captured journal output
+PASS: failed systemd unit produces a retained FAIL report and non-zero exit
+PASS: first-boot collector contains no disk, encryption, package, or service mutation command
+PASS: sudo-generated reports are made accessible to the invoking user and show the installed command
+All X280 first-boot collector tests passed.

@@ -2,7 +2,8 @@
 
 ## Status and scope
 
-- Source: `scripts/install-arch-x280.sh` and `scripts/configure-arch-x280.sh` on `main`.
+- Initial destructive entry point: `scripts/install-arch-x280.sh`.
+- Interrupted-run continuation: `scripts/resume-arch-x280.sh` on the recovery branch; it is restricted to the recorded post-pacstrap/pre-configuration checkpoint.
 - Implementation: IMPLEMENTED on `main`.
 - Automated evidence: TESTED on the specific commits/runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md); the loop integration covers selected utilities against a disposable loop image.
 - VM installation testing: OUT OF SCOPE by owner decision; no VM test will be performed.
@@ -37,6 +38,10 @@ The installer installs systemd-boot and configures a mkinitcpio UKI using the sy
 - No complete transactional rollback or automatic safe resume after partial disk mutation is claimed. After a failure following the first destructive operation, stop and inspect the real disk state; do not rerun blindly.
 - A non-empty UKI file and generated configuration artifacts do not prove firmware boot, LUKS unlock, root mount, or successful first login.
 
+## Installer diagnostics
+
+The installer captures stdout/stderr and stage-specific validation failures in a root-only timestamped log at `/var/log/x280-installer/<UTC timestamp>/installer.log`, falling back to volatile `/run/x280-installer/` only when necessary. It prints the exact path on exit. Logging is initialized before host preflight and all storage operations; inability to initialize a secure log stops execution. The log does not use shell xtrace and must be reviewed for hardware identifiers before sharing. See [Error Recovery and Reporting](10-ERROR-RECOVERY-AND-REPORTING.md).
+
 ## Automated validation
 
 The canonical runner is:
@@ -49,15 +54,26 @@ It writes persistent summaries and logs under `reports/test-runs/`. Required sui
 
 See [tests/README.md](../tests/README.md) for the single authoritative test procedure and [11 — Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) for acceptance criteria and evidence boundaries.
 
-## Physical-test gate
+## Recorded physical attempt and continuation path — 2026-11-08
 
-Run `bash scripts/x280-install-readiness.sh` from the official Arch ISO as root for a consolidated syntax, automated-test, and read-only physical SSD identity/topology check. It always writes `reports/live-readiness/<UTC timestamp>/summary.md` and `diagnostics.log`, including a per-check PASS/FAIL table, commit SHA, environment metadata, final exit status, and captured diagnostics with detected disk serial values redacted. The detailed test-run artifacts remain under `reports/test-runs/`. Review the report and then commit/push the specific readiness report directory; the script never stages, commits, or pushes files. This gate does not run the destructive installer.
+The first physical installer attempt on the actual X280 passed the destructive storage plan gate and completed the following operations: disk signature removal, GPT/partition creation, LUKS2 formatting/opening, ESP FAT32 formatting, root ext4 formatting, mounting, and `pacstrap` package installation. It then stopped in `base_system::generate_fstab` because the package-created `/etc/fstab` was non-empty. The target disk was therefore already modified; this was not a preflight-only failure.
 
-**Do not begin physical destructive testing based solely on this document.** The next physical test is blocked until:
-1. Current branch CI is green for the latest documentation/code commit.
-2. The read-only `scripts/validate-live-storage.sh` has been run successfully on the actual X280 Arch ISO after the zero-capacity removable-reader fix, with its report reviewed.
-3. The installer, target identity, plan, destructive command ordering, descriptor behavior, and all failure/cleanup paths receive a final independent review.
-4. The operator confirms backup/recovery arrangements and the exact target identity from the live environment.
-5. The final test procedure and stop conditions are approved.
+The fstab implementation has since been corrected to preserve comments and unrelated entries, add only missing root/`/efi` entries, reject conflicts/duplicates, and operate idempotently. CI includes regression coverage for these behaviors.
 
-No destructive physical test or successful X280 boot is claimed in this document. VM-based installation testing is intentionally excluded. The destructive SSD replacement test remains required on the actual X280 after all gates above pass and explicit authorization is given.
+The laptop was powered off after that failure. The intended next operation is **continuation**, not a fresh installation:
+
+1. Pull branch `fix/installer-diagnostics-stacked-2026-11-08` at the latest reviewed commit.
+2. Do **not** run `scripts/bootstrap-archiso.sh`, `scripts/x280-install-readiness.sh`, `scripts/validate-live-storage.sh`, or `scripts/install-arch-x280.sh` for this already-partitioned target. The old blank-disk readiness gate is not applicable after the disk has been initialized, and the original installer would erase it again.
+3. Run `bash scripts/resume-arch-x280.sh` as root from the official Arch ISO in UEFI mode.
+4. The continuation script performs a narrow, read-only identity/layout/filesystem check for the exact configured SSD and existing GPT/ESP/LUKS2/ext4 layout. It does not repeat the broad readiness suite, partition, format, or run pacstrap. It unlocks the existing LUKS volume, checks ext4 read-only, mounts the existing filesystems, verifies the base packages, safely completes fstab, then proceeds with target configuration and UKI boot setup.
+5. If any checkpoint differs from the recorded state, the script stops. Do not fall back to the destructive installer. Push its timestamped log/report for inspection.
+
+This continuation path is deliberately narrow and tied to the known failure checkpoint. It is not a general-purpose resume engine for arbitrary partial installations. If the interactive target-configuration stage itself fails after making partial changes, stop and inspect state rather than rerunning the continuation script blindly.
+
+## Validation and acceptance boundaries
+
+- **TESTED:** current continuation code passed GitHub Actions run #375 (`42404369312`), including Bash syntax, ShellCheck, and 20 repository test scripts (20 passed, 0 failed, 0 skipped).
+- The prior successful read-only readiness report remains historical evidence for the pre-installation snapshot; it is not rerun against a disk that is now intentionally partitioned and encrypted.
+- The continuation script's own target identity, partition, LUKS2, filesystem, and package checks are required to bind the operation to the existing partial installation. These are not a repeat of the old blank-disk readiness gate.
+- No successful physical installation or first boot is claimed until the continuation completes and the X280 boots from the installed SSD.
+- VM installation testing remains OUT OF SCOPE by owner decision.

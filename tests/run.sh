@@ -7,6 +7,8 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
 tests=(
+  tests/test-x280-first-boot-check.sh
+  tests/test-bootstrap-archiso.sh
   tests/test-common-preflight.sh
   tests/test-installer-entry.sh
   tests/test-arch-installer-script.sh
@@ -23,6 +25,8 @@ tests=(
   tests/test-storage-topology.sh
   tests/test-preflight-gate.sh
   tests/test-native-storage-handle.sh
+  tests/test-base-system-fstab.sh
+  tests/test-resume-arch-installer.sh
 )
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"

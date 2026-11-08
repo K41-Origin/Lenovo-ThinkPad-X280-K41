@@ -9,6 +9,16 @@ source "$ROOT/lib/storage.sh"
 source "$ROOT/lib/storage-plan.sh"
 source "$ROOT/lib/storage-prerequisites.sh"
 
+diagnostic_file="$(mktemp)"
+trap 'rm -f "$diagnostic_file"' EXIT
+test::on_error() {
+  local rc=$? line=$1
+  trap - ERR
+  printf 'FAIL: storage prerequisite test aborted at line %s (exit %s)\n' "$line" "$rc" >&2
+  exit "$rc"
+}
+trap 'test::on_error "$LINENO"' ERR
+
 preflight::check_commands() {
   [[ ${K41_TEST_TOOLS_FAIL:-0} == 0 ]]
 }
@@ -38,7 +48,6 @@ storage::validate_target() {
   [[ ${K41_TEST_TOPOLOGY_FAIL:-0} == 0 ]] || return 1
   [[ ${target[device_path]} == /dev/nvme0n1 ]]
   [[ ${target[major_minor]} == 259:0 ]]
-  [[ ${target[stable_id]} == eui.0011223344556677 ]]
 }
 
 make_plan() {
@@ -71,9 +80,15 @@ for failure in tools uefi discovery topology; do
     discovery) export K41_TEST_DISCOVERY_FAIL=1 ;;
     topology) export K41_TEST_TOPOLOGY_FAIL=1 ;;
   esac
-  if storage::plan_collect_live_prerequisites failed_plan failed_target failed_prereq; then
+  if storage::plan_collect_live_prerequisites failed_plan failed_target failed_prereq 2>"$diagnostic_file"; then
     echo "FAIL: $failure failure accepted" >&2; exit 1
   fi
+  case $failure in
+    tools) grep -Fq 'stage: required_tools' "$diagnostic_file" ;;
+    uefi) grep -Fq 'stage: uefi_mode' "$diagnostic_file" ;;
+    discovery) grep -Fq 'stage: disk_discovery' "$diagnostic_file" ;;
+    topology) grep -Fq 'stage: target_topology_validation' "$diagnostic_file" ;;
+  esac
   [[ ! -v failed_plan[prereq_evidence_id] ]]
   unset K41_TEST_TOOLS_FAIL K41_TEST_UEFI_FAIL K41_TEST_DISCOVERY_FAIL K41_TEST_TOPOLOGY_FAIL
 done
@@ -98,7 +113,8 @@ storage::discover_candidates() {
   out["0.has_mounted_descendant"]=no
   out["0.has_active_swap_descendant"]=no
 }
-if storage::plan_collect_live_prerequisites changed_plan changed_target changed_prereq; then
+if storage::plan_collect_live_prerequisites changed_plan changed_target changed_prereq 2>"$diagnostic_file"; then
   echo 'FAIL: changed stable identity accepted' >&2; exit 1
 fi
+grep -Fq 'stage: target_stable_identity_changed' "$diagnostic_file"
 echo 'PASS: changed stable identity cannot bind live prerequisites'
