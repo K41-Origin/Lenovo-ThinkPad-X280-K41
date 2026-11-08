@@ -22,6 +22,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `installer` — diagnostic-only entry point with `--help` and `--preflight`.
 - `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires source review, a passing read-only live-readiness gate, and a second exact acknowledgement before launching the destructive installer.
 - `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; physical installer and First Boot acceptance are recorded separately.
+- `scripts/audit-x280-hardware.sh` — read-only hardware, battery, thermal, graphics, network, and power-service inventory; reports are private and must be reviewed before sharing.
 - `scripts/setup-desktop-x280.sh` — separate post-install Hyprland/Quickshell setup; delegates recursive Caelestia AUR dependency resolution to `lib/aur-dependency-resolver.sh` and requires per-recipe approval; setup exit is PASS; physical UI acceptance remains incomplete.
 - `lib/aur-dependency-resolver.sh` — recursive required/make dependency traversal from AUR `.SRCINFO`, cycle detection, package/provider identity checks, explicit Material You v3 compatibility mapping, and unprivileged reviewed builds.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
@@ -73,6 +74,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
 - [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
 - [X280 desktop environment physical test](docs/19-X280-DESKTOP-TEST.md)
+- [X280 hardware audit procedure](docs/20-X280-HARDWARE-AUDIT.md)
 
 ### Historical record
 - [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)
