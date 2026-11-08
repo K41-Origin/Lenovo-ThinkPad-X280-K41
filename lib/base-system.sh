@@ -64,6 +64,26 @@ base_system::install_packages() {
   pacstrap -K "$root" "${packages[@]}"
 }
 
+# Normalize VFAT permissions independently of the live mount's inherited masks.
+# fmask=0177 gives regular files mode 0600; dmask=0077 gives directories mode 0700.
+base_system::secure_efi_fstab_entry() {
+  [[ $# -eq 1 && -n $1 ]] || return 2
+  awk '
+    NF < 6 { exit 1 }
+    {
+      count = split($4, options, ",")
+      safe = ""
+      for (i = 1; i <= count; i++) {
+        if (options[i] !~ /^(fmask|dmask|umask)=/) {
+          safe = safe (safe == "" ? "" : ",") options[i]
+        }
+      }
+      safe = safe (safe == "" ? "" : ",") "fmask=0177,dmask=0077"
+      printf "%s %s %s %s %s %s\n", $1, $2, $3, safe, $5, $6
+    }
+  ' <<<"$1"
+}
+
 base_system::generate_fstab() {
   [[ $# -eq 2 && -n $1 && $2 == 'WRITE FSTAB' ]] || {
     k41::log_error 'Expected ROOT and exact confirmation: WRITE FSTAB.'
@@ -89,6 +109,11 @@ base_system::generate_fstab() {
   efi_line="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 2 && $2 == "/efi" { print; count++ } END { if (count != 1) exit 1 }' "$generated")" || {
     rm -f -- "$generated"
     k41::log_error 'Generated fstab must contain exactly one /efi entry.'
+    return 1
+  }
+  efi_line="$(base_system::secure_efi_fstab_entry "$efi_line")" || {
+    rm -f -- "$generated"
+    k41::log_error 'Could not enforce secure VFAT permission masks in the generated /efi entry.'
     return 1
   }
 
