@@ -44,7 +44,7 @@ A setup-script `PASS` means only that the setup script exited successfully. It d
 1. Confirm the latest First Boot report is PASS and the system has working network access.
 2. Review the script and the exact resolved repository commit.
 3. Run `sudo bash scripts/setup-desktop-x280.sh`.
-4. If selecting Caelestia, review and approve each displayed AUR recipe in this order: `quickshell-git`, `caelestia-cli`, `caelestia-shell`. Decline any recipe with unexpected commands, sources, dependencies, or privilege behavior.
+4. If selecting Caelestia, review and approve each displayed AUR recipe in this exact order: `quickshell-git`, `python-materialyoucolor3`, `caelestia-cli`, `caelestia-shell`. The script requires the v3 package metadata to provide the legacy `python-materialyoucolor` dependency name and verifies that pacman considers the dependency satisfied before it proceeds to build `caelestia-cli`. Decline any recipe with unexpected commands, sources, dependencies, or privilege behavior.
 5. Log out to TTY1, sign in as the regular user, and run `start-hyprland`.
 6. Test display, keyboard, touchpad, terminal, file manager, audio output/input, Wi-Fi, notifications, screenshot/portal behavior, screen sharing, lock, logout, and return to TTY.
 7. Capture diagnostics and logs before making repairs. Do not configure automatic session launch until manual session stability is demonstrated.
