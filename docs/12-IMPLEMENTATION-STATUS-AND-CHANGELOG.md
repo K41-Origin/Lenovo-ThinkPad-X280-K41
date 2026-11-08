@@ -4,7 +4,7 @@
 
 **Snapshot date:** 2026-11-08  
 **Default branch:** `main`  
-**HEAD at last inspection:** `d88827627e800c67989bef1749fb52803ea8235e`
+**Implementation evidence snapshot:** `d88827627e800c67989bef1749fb52803ea8235e` (code/test status baseline; later commits in this documentation integration task are documentation-only)
 
 This is the concise current-state record. Detailed dated implementation notes and earlier status snapshots are preserved in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md). Historical branch names, PR states, and CI outcomes in that archive are not current status.
 
@@ -26,7 +26,7 @@ This is the concise current-state record. Detailed dated implementation notes an
 
 ## Current validation evidence
 
-The last inspected `main` HEAD (`d88827627e800c67989bef1749fb52803ea8235e`) had:
+The last inspected implementation baseline (`d88827627e800c67989bef1749fb52803ea8235e`) had:
 
 - **Repository validation #403: SUCCESS** on that exact commit.
 - **Bash validation #270: PENDING** at the time of inspection.
@@ -49,7 +49,7 @@ Do not rerun the initial destructive installer, bootstrap, or broad pre-install 
 
 ## Branch inventory
 
-At the last GitHub inspection, the repository had `main` and one remaining historical branch, `feat/x280-live-install-readiness-2026-11-07`. Treat `main` as the source of truth; do not re-merge historical branch work that is already integrated.
+At the repository inspection on 2026-11-08, GitHub listed only `main`. The historical branch `feat/x280-live-install-readiness-2026-11-07` was no longer present. Treat `main` as the sole current source of truth; do not recreate or re-merge its already-integrated work.
 
 ## Status vocabulary
 
