@@ -76,6 +76,8 @@ But it validated the root parameter using an anchored expression, `^root=/dev/ma
 
 The correction changes the check to recognize `root=/dev/mapper/cryptroot` as a whitespace-delimited token anywhere on that line and adds a regression test using the same argument ordering. This is a validation bug, not evidence that the UKI generation itself failed. A successful UKI build still does not prove that firmware can boot it or that LUKS unlock and root mounting work.
 
+The same log exposed a second issue: the installer set a process-wide `umask 077`, which was inherited by `pacstrap`. Pacman reported target directories such as `/mnt/etc`, `/mnt/var`, and `/mnt/var/lib` as mode 0700 where package metadata expected 0755. The installer now uses `umask 022` for normal system creation while setting log directories/files explicitly to 0700/0600. The package set also explicitly includes `iptables` and `mkinitcpio` to select the providers that were interactively requested during the trial. A regression test now checks those package selections.
+
 ### Required trial-and-error procedure
 
 After any failed physical attempt:
