@@ -303,7 +303,7 @@ run_check "installer --help" ./installer --help
 # This legacy preflight is informational: its documented non-zero result while
 # installation is disabled must not fail the overall validation.
 {
-  printf '\n## Installer diagnostics\n\n### installer --preflight (informational)\n\n'
+  printf '\n## Installer diagnostics\n\n### installer --preflight (informational)\n\n' >>"$live_report"
   printf 'Expected project behavior: non-zero while installation is disabled. Actual output and exit code follow.\n\n'
   if ./installer --preflight >>"$live_report" 2>&1; then preflight_rc=0; else preflight_rc=$?; fi
   printf '\nPreflight exit code: %s\n' "$preflight_rc" >>"$live_report"
