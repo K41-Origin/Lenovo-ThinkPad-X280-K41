@@ -1,7 +1,0 @@
-PASS: cancellation and incorrect confirmation are rejected
-PASS: explicit confirmation is bound to the exact plan digest and target
-PASS: final live revalidation creates a one-shot ready gate
-PASS: confirmation cannot be reused
-PASS: modified plan invalidates confirmation and fails closed
-PASS: changed target identity fails final revalidation
-PASS: topology failure leaves the final gate closed

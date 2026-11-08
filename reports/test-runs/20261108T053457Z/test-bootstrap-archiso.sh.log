@@ -1,4 +1,0 @@
-PASS: bootstrap passes bash -n
-PASS: bootstrap pins and displays the fetched commit, verifies origin/clean checkout, reviews source, runs live readiness, and requires two exact acknowledgements
-PASS: bootstrap does not pipe remote content into a shell
-PASS: bootstrap delegates storage operations only to the separately reviewed installer

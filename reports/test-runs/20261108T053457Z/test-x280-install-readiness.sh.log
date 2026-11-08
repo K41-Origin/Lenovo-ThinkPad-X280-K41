@@ -1,7 +1,0 @@
-PASS: canonical validator, compatibility entry points, and supplemental collector pass bash -n
-PASS: canonical validator help and argument rejection behavior are correct
-PASS: canonical validator retains readiness, host diagnostics, static analysis, tests, installer diagnostics, and both reports
-PASS: legacy entry points delegate without maintaining duplicate implementations
-PASS: supplemental collector stores detailed evidence in repository reports and delegates readiness/storage checks
-PASS: canonical live validator contains no disk mutation or installation commands
-All K41 live-validation tests passed.

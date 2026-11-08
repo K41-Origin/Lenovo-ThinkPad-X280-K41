@@ -1,6 +1,0 @@
-PASS: manifest has deterministic GPT, partition, LUKS2, ext4 ordering
-PASS: stale plan is rejected before manifest creation
-PASS: execution planning is blocked without a ready gate
-PASS: simulated failure halts subsequent operations and consumes the gate
-PASS: consumed gate cannot be reused
-PASS: complete dry-run simulation records all operations without system execution

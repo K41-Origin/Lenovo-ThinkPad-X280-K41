@@ -1,4 +1,0 @@
-INFO: Target fstab validated/updated using filesystem UUIDs; existing unrelated entries were preserved.
-INFO: Target fstab validated/updated using filesystem UUIDs; existing unrelated entries were preserved.
-ERROR: Target fstab contains duplicate entries for /.
-PASS: fstab generation preserves unrelated entries, is idempotent, and rejects conflicting mountpoints

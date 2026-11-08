@@ -1,5 +1,0 @@
-PASS: readiness script passes bash -n
-PASS: readiness gate records checkout, environment, test/storage results, and a final report
-PASS: report includes review guidance and a clear safety boundary
-PASS: readiness gate contains no disk mutation or installation commands
-All X280 readiness script tests passed.

@@ -1,6 +1,0 @@
-Creating new GPT entries in memory.
-GPT data structures destroyed! You may now partition the disk using fdisk or
-other utilities.
-The operation has completed successfully.
-mount: /tmp/tmp.Ts6yPy8uzo/esp-mount: fsconfig() failed: Can't find a SQUASHFS superblock on loop1p1.
-       dmesg(1) may have more information after failed mount system call.

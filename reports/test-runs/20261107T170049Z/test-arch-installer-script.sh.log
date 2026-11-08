@@ -1,7 +1,0 @@
-PASS: installer passes bash -n
-PASS: installer includes X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks
-PASS: mkinitcpio preset formatter uses real newline delimiters
-PASS: installer completion message matches the configuration stage actually run
-PASS: installer does not disable all live-ISO swap or bypass base-system module
-PASS: destructive signature erasure is ordered after confirmation and final revalidation
-All Arch installer script tests passed.
