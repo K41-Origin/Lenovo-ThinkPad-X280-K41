@@ -28,6 +28,7 @@ for required in \
   '--readiness' \
   '--diagnostics-only' \
   '/etc/arch-release' \
+  '/run/archiso' \
   '/sys/firmware/efi' \
   'ThinkPad X280 DMI identity' \
   'bash tests/run.sh' \
