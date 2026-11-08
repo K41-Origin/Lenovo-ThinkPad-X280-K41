@@ -15,6 +15,15 @@ for script in "$CANONICAL" "$READINESS_WRAPPER" "$DIAGNOSTICS_WRAPPER" "$SUPPLEM
 done
 pass "canonical validator, compatibility entry points, and supplemental collector pass bash -n"
 
+bash "$CANONICAL" --help >/dev/null || fail "canonical validator help should succeed without running checks"
+if bash "$CANONICAL" --invalid-option >/dev/null 2>&1; then
+  fail "canonical validator must reject unknown options"
+else
+  rc=$?
+  [[ $rc -eq 2 ]] || fail "unknown option should return exit 2, got $rc"
+fi
+pass "canonical validator help and argument rejection behavior are correct"
+
 for required in \
   '--readiness' \
   '--diagnostics-only' \
