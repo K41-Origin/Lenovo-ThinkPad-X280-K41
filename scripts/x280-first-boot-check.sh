@@ -141,10 +141,35 @@ check_efi_permissions() {
   esp_mode="$(stat -c '%a' "$efi_root")" || return 1
   loader_mode="$(stat -c '%a' "$efi_root/loader")" || return 1
   seed_mode="$(stat -c '%a' "$seed")" || return 1
-  mount_options="$(findmnt -nro OPTIONS /efi 2>/dev/null || true)"
-  printf 'EFI mount options: %s\n' "${mount_options:-unavailable}"
-  printf 'Effective modes (octal): /efi=%s /efi/loader=%s random-seed=%s\n' \
+  printf '===== /etc/fstab ESP entry =====\n'
+  if [[ -r "$etc_root/fstab" ]]; then
+    awk '$2 == "/efi" { printf "line %d: %s\\n", NR, $0; found=1 }
+      END { if (!found) print "No /efi entry found in fstab." }' "$etc_root/fstab"
+  else
+    printf '/etc/fstab is unavailable or unreadable.\n'
+  fi
+
+  printf '\\n===== Active ESP mount =====\\n'
+  mount_info="$(findmnt -nro SOURCE,FSTYPE,OPTIONS /efi 2>&1)" || mount_rc=$?
+  if [[ ${mount_rc:-0} -eq 0 && -n $mount_info ]]; then
+    printf '%s\\n' "$mount_info"
+    mount_options="${mount_info##* }"
+  else
+    printf 'findmnt query failed (exit %s): %s\\n' "${mount_rc:-unknown}" "$mount_info"
+    mount_options=unavailable
+  fi
+  printf 'EFI mount options: %s\\n' "${mount_options:-unavailable}"
+  printf 'Effective modes (octal): /efi=%s /efi/loader=%s random-seed=%s\\n' \
     "$esp_mode" "$loader_mode" "$seed_mode"
+
+  printf '\\n===== efi.mount unit status (read-only) =====\\n'
+  if command -v systemctl >/dev/null 2>&1; then
+    local unit_status_rc=0
+    systemctl status efi.mount --no-pager 2>&1 || unit_status_rc=$?
+    printf 'systemctl status exit code: %s\\n' "$unit_status_rc"
+  else
+    printf 'systemctl is unavailable.\\n'
+  fi
   for mode in "$esp_mode" "$loader_mode" "$seed_mode"; do
     [[ $mode =~ ^[0-7]{3,4}$ ]] || {
       printf 'Could not parse effective permission mode: %s\n' "$mode"
