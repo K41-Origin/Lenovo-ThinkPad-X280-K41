@@ -3,7 +3,7 @@
 ## Current repository snapshot
 
 **Snapshot date:** 2026-11-08  
-**Inspected `main` HEAD:** `351122b29a5d0e2a242843ffbcbbc66546cdddcf`  
+**Inspected `main` HEAD:** `58077d69adb442237b8d65d3ef38fc19f1d09fef`  
 **Default branch:** `main`
 
 This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
