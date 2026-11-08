@@ -71,8 +71,9 @@ After changing files:
   - `docs/03-ARCHITECTURE-AND-MODULES.md`: current system architecture, module boundaries, and interfaces, consistent with approved requirements and decisions.
   - `docs/04-INSTALLATION-AND-DISK.md`: canonical storage, encryption, boot, swap/resume, and disk-recovery contract.
   - `tests/README.md`: canonical test commands, manifest, evidence artifacts, and test-layer limitations.
-  - `docs/11-TESTING-AND-ACCEPTANCE.md`: acceptance criteria and historical/current evidence boundaries.
-  - `docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md`: current implementation matrix, exact CI evidence, and chronological change record.
+  - `docs/11-TESTING-AND-ACCEPTANCE.md`: concise project-wide acceptance principles and release gates.
+  - `docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md`: concise current implementation matrix, latest commit-bound CI evidence, and outstanding validation gates.
+  - `docs/archive/11-TESTING-AND-ACCEPTANCE-HISTORY-2026-11-08.md` and `docs/archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md`: preserved historical snapshots, not current status owners.
   - `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` and `docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md`: stage-specific design/implementation records, not competing architecture or status sources.
   - `docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md`: canonical security, desktop, hardware/power/network, package, developer-tool, and authorized security-testing policies.
 - Other documents may include a brief summary when useful, but must link to or name the owning document instead of duplicating its full requirements, decisions, or procedures. Keep indexes and cross-references concise.
