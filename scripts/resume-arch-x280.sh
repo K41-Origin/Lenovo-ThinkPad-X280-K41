@@ -42,7 +42,11 @@ init_logging() {
   install -d -o root -g root -m 0700 "$base" || return 1
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   local log_dir="$base/resume-$timestamp"
-  while ! mkdir -m 0700 -- "$log_dir" 2>/dev/null; do
+  while :; do
+    if mkdir -m 0700 -- "$log_dir" 2>/dev/null; then
+      break
+    fi
+    [[ -e $log_dir ]] || { printf 'FATAL: cannot create repository-local log directory: %s\\n' "$log_dir" >&2; return 1; }
     suffix=$((suffix + 1))
     log_dir="$base/resume-$timestamp-$suffix"
   done
