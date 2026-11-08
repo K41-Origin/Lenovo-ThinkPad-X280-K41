@@ -42,7 +42,6 @@ for required in \
   'default_cmdline="/etc/kernel/cmdline"' \
   'HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)' \
   'rd.luks.name=${root_uuid}=cryptroot root=/dev/mapper/cryptroot rw' \
-  "grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' /etc/kernel/cmdline" \\
   '[[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]]' \
   '[[ -s /mnt/etc/locale.conf ]]'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
@@ -57,6 +56,7 @@ grep -Fq ': >"$installer_log_file" || return 1' "$SCRIPT" || fail "installer mus
 # shellcheck disable=SC2016
 grep -Fq 'chmod 0600 "$installer_log_file" || return 1' "$SCRIPT" || fail "installer must stop if log permissions cannot be secured"
 pass "installer includes repository-local root-only logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks"
+grep -Fq "grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' /etc/kernel/cmdline" "$SCRIPT" || fail "installer must validate root= as a whitespace-delimited kernel argument"
 if grep -Eq '^[[:space:]]*set[[:space:]]+-[^#]*x|^[[:space:]]*set[[:space:]]+-o[[:space:]]+xtrace' "$SCRIPT"; then
   fail "installer enables shell xtrace, which could expose sensitive command arguments"
 fi
