@@ -26,10 +26,19 @@ case "${1-}" in
   "") ;;
   --readiness) mode=readiness ;;
   --diagnostics-only) mode=diagnostics ;;
-  -h|--help) usage; exit 0 ;;
-  *) usage >&2; exit 2 ;;
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
 esac
-[[ $# -le 1 ]] || { usage >&2; exit 2; }
+[[ $# -le 1 ]] || {
+  usage >&2
+  exit 2
+}
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   printf 'ERROR: repository checkout not found: %s\n' "$ROOT" >&2
@@ -131,27 +140,43 @@ capture_optional() {
 }
 
 check_root() {
-  (( EUID == 0 )) || { printf 'Run as root from the official Arch ISO.\n'; return 1; }
+  ((EUID == 0)) || {
+    printf 'Run as root from the official Arch ISO.\n'
+    return 1
+  }
   printf 'Effective UID: %s\n' "$EUID"
 }
 check_arch() {
-  [[ -f /etc/arch-release ]] || { printf 'Not an Arch Linux environment.\n'; return 1; }
-  [[ -d /run/archiso ]] || { printf 'Arch ISO runtime marker /run/archiso not found. Boot the official Arch Linux ISO.\n'; return 1; }
+  [[ -f /etc/arch-release ]] || {
+    printf 'Not an Arch Linux environment.\n'
+    return 1
+  }
+  [[ -d /run/archiso ]] || {
+    printf 'Arch ISO runtime marker /run/archiso not found. Boot the official Arch Linux ISO.\n'
+    return 1
+  }
   printf 'Arch Linux release and live ISO runtime markers found.\n'
 }
 check_uefi() {
-  [[ -d /sys/firmware/efi ]] || { printf 'Boot the Arch ISO in UEFI mode.\n'; return 1; }
+  [[ -d /sys/firmware/efi ]] || {
+    printf 'Boot the Arch ISO in UEFI mode.\n'
+    return 1
+  }
   printf 'UEFI runtime detected.\n'
 }
 check_x280_dmi() {
   local vendor product version=''
   [[ -r /sys/class/dmi/id/sys_vendor && -r /sys/class/dmi/id/product_name ]] || {
-    printf 'DMI vendor/product identity is unavailable.\n'; return 1;
+    printf 'DMI vendor/product identity is unavailable.\n'
+    return 1
   }
-  vendor="$(< /sys/class/dmi/id/sys_vendor)"
-  product="$(< /sys/class/dmi/id/product_name)"
-  [[ ! -r /sys/class/dmi/id/product_version ]] || version="$(< /sys/class/dmi/id/product_version)"
-  [[ "${vendor,,}" == *lenovo* ]] || { printf 'Unexpected system vendor: %s\n' "$vendor"; return 1; }
+  vendor="$(</sys/class/dmi/id/sys_vendor)"
+  product="$(</sys/class/dmi/id/product_name)"
+  [[ ! -r /sys/class/dmi/id/product_version ]] || version="$(</sys/class/dmi/id/product_version)"
+  [[ "${vendor,,}" == *lenovo* ]] || {
+    printf 'Unexpected system vendor: %s\n' "$vendor"
+    return 1
+  }
   [[ "$product $version" == *'ThinkPad X280'* ]] || {
     printf "Expected ThinkPad X280; detected product_name='%s', product_version='%s'.\n" "$product" "$version"
     return 1
@@ -163,12 +188,18 @@ check_commands() {
   for cmd in bash git find lsblk jq swapon base64 readlink stat python3; do
     command -v "$cmd" >/dev/null 2>&1 || missing+=("$cmd")
   done
-  (("${#missing[@]}" == 0)) || { printf 'Missing required commands: %s\n' "${missing[*]}"; return 1; }
+  (("${#missing[@]}" == 0)) || {
+    printf 'Missing required commands: %s\n' "${missing[*]}"
+    return 1
+  }
   printf 'All readiness dependencies are available.\n'
 }
 check_syntax() {
   mapfile -d '' shell_files < <(find . -type f \( -name '*.sh' -o -name installer \) -not -path './.git/*' -print0)
-  (("${#shell_files[@]}" > 0)) || { printf 'No shell scripts found.\n'; return 1; }
+  (("${#shell_files[@]}" > 0)) || {
+    printf 'No shell scripts found.\n'
+    return 1
+  }
   local file
   for file in "${shell_files[@]}"; do
     bash -n "$file" || return 1
@@ -181,10 +212,10 @@ check_shfmt() {
 }
 finalize_report() {
   local rc="$1" result finished
-  (( finalized == 0 )) || return 0
+  ((finalized == 0)) || return 0
   finalized=1
   finished="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-  if (( rc == 0 && checks_failed == 0 )); then result=PASS; else result=FAIL; fi
+  if ((rc == 0 && checks_failed == 0)); then result=PASS; else result=FAIL; fi
 
   {
     printf '# K41 live validation readiness report\n\n'
@@ -217,7 +248,7 @@ finalize_report() {
     printf -- '- Checks counted: %s\n' "$checks"
     printf -- '- Failures: %s\n' "$checks_failed"
     printf -- '- Optional diagnostics skipped: %s\n' "$skips"
-    if (( checks_failed == 0 && rc == 0 )); then
+    if ((checks_failed == 0 && rc == 0)); then
       printf -- '- Overall repository validation: PASS (within checks available on this host)\n'
     else
       printf -- '- Overall repository validation: FAIL\n'
@@ -310,5 +341,5 @@ run_check "installer --help" ./installer --help
   printf '\nPreflight exit code: %s\n' "$preflight_rc" >>"$live_report"
 } 
 
-if (( checks_failed > 0 )); then exit 1; fi
+if ((checks_failed > 0)); then exit 1; fi
 exit 0
