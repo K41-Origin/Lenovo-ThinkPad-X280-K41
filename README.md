@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. Four physical installer trials are recorded; the fourth completed all installer stages, generated the UKI, and exited 0. Actual SSD boot succeeded; First Boot diagnostic recorded 13 PASS and 1 FAIL due to permissive ESP VFAT masks. A source fix now enforces owner-only ESP permissions and awaits CI/physical reinstall validation. Desktop, hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
+> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. The latest physical First Boot report records 14 PASS, 0 FAIL, and 0 SKIP, including verified owner-only EFI permissions. PR #23 adds a separately invoked Hyprland/Quickshell desktop setup with an optional reviewed stable Caelestia AUR build; CI and physical desktop acceptance are pending. Hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
 
 ## AI-assisted development
 
@@ -21,7 +21,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 - `installer` — diagnostic-only entry point with `--help` and `--preflight`.
 - `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires source review, a passing read-only live-readiness gate, and a second exact acknowledgement before launching the destructive installer.
-- `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; four physical trials are documented, with trial 4 completing successfully. First Boot remains unverified.
+- `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; physical installer and First Boot acceptance are recorded separately.
+- `scripts/setup-desktop-x280.sh` — separate post-install Hyprland/Quickshell setup; Caelestia AUR build requires explicit recipe review; physical session remains untested.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
 - `lib/storage.sh` — read-only whole-disk discovery and fresh target validation; no partition/format/mount operations.
@@ -70,6 +71,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - [Stage 9 — initial interactive Arch installer](docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md)
 - [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
 - [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
+- [X280 desktop environment physical test](docs/19-X280-DESKTOP-TEST.md)
 
 ### Historical record
 - [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)

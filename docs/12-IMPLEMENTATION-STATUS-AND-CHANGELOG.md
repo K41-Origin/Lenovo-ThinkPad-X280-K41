@@ -16,11 +16,11 @@ This document records the latest inspected repository state and physical install
 | Initial encrypted Arch installer | IMPLEMENTED | Destructive base-system installer exists. It must only run after documented source review, live readiness, target-plan confirmation, recovery preparation, and explicit operator authorization. |
 | Fresh-trial recovery workflow | IMPLEMENTED (documented) | Every failed physical trial is restarted from the official Arch ISO using the full installer from its first stage. The legacy continuation utility is not part of this workflow. |
 | Installer diagnostic logging | IMPLEMENTED | Full logs are stored in timestamped repository-local report directories with root-only permissions; installer refuses unsupported runtime/checkouts. Preserve logs before reboot. |
-| First-boot evidence collector | IMPLEMENTED / TESTED | Read-only collector and automated tests exist. Physical First Boot report 2026-11-08: 13 PASS, 1 FAIL; sole failure is the ESP permission audit. |
+| First-boot evidence collector | IMPLEMENTED / TESTED | Read-only collector and automated tests exist. Latest physical First Boot report `20261108T083237Z`: 14 PASS, 0 FAIL, 0 SKIP; secure ESP masks and effective modes were confirmed. |
 | Host inventory and storage discovery/planning/revalidation | IMPLEMENTED | Read-only discovery, topology, planning, prerequisite, confirmation, and revalidation modules exist; automated tests use fixtures/mocks. |
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
-| Desktop: Hyprland, Caelestia Shell, Quickshell | PLANNED | Upstream dependency/compatibility verification and implementation remain outstanding. |
+| Desktop setup foundation | IMPLEMENTED (branch; pending review/CI) | Adds a manual post-install Hyprland/Quickshell setup, optional reviewed unprivileged stable Caelestia AUR build, starter config, and fixture test. Physical X280 desktop session remains NOT TESTED. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
@@ -68,8 +68,9 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 
 ## Other outstanding gates
 
-- First Boot from the internal SSD and first-boot evidence collection: **NOT TESTED**.
-- Desktop integration, X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
+- First Boot from the internal SSD and first-boot evidence collection: **VERIFIED for report `20261108T083237Z` (14 PASS)**.
+- Desktop setup foundation: **IMPLEMENTED on PR #23 branch; CI/merge pending; physical session NOT TESTED**.
+- X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
 - VM installation testing: **OUT OF SCOPE** by owner decision.
 - No release is claimed.
 

@@ -50,7 +50,7 @@ This is a factual description of code paths, not evidence that the complete work
 | `lib/storage-execution-dry-run.sh`, `lib/storage-execution-boundary.sh` | In-memory operation model and mock-only orchestration/recovery ledger | IMPLEMENTED; tests invoke mocks only |
 | `lib/base-system.sh` | Guarded package bootstrap and fstab generation for already-mounted target | IMPLEMENTED; invoked by the initial installer on main |
 | `scripts/install-arch-x280.sh` | Initial destructive installer orchestration | IMPLEMENTED; physical installer execution TESTED in trial 4; successful SSD boot NOT TESTED |
-| `scripts/configure-arch-x280.sh` | Interactive initial target-system configuration | IMPLEMENTED; invoked through arch-chroot; full integration NOT TESTED |
+| `scripts/configure-arch-x280.sh` | Interactive initial target-system configuration | IMPLEMENTED; invoked through arch-chroot; full integration NOT TESTED |\n| `scripts/setup-desktop-x280.sh` | Separate post-install desktop setup and manual session preparation | IMPLEMENTED on feature branch; physical session and AUR recipe remain subject to operator review/testing |
 | `native/storage-handle.c` | Standalone read-only native descriptor prototype | IMPLEMENTED; compile/CLI test only; not integrated with installer |
 | `lib/bootloader.sh`, `lib/user-setup.sh`, `lib/desktop.sh`, `lib/hardware.sh`, `lib/packages.sh`, `lib/security.sh`, `lib/validation.sh`, `lib/report.sh` | Future domain-specific reusable modules | PLANNED placeholders; do not imply they are called by the installer |
 
@@ -87,7 +87,7 @@ The initial physical installer process has completed successfully in trial 4. Be
 - Full reusable storage executor with a proven descriptor/capability contract.
 - Successful boot from the installed SSD and First Boot acceptance on the physical X280 (NOT TESTED). The installer process itself completed in physical trial 4.
 - Resume-offset lifecycle and hibernation.
-- Hyprland, Caelestia Shell, Quickshell, portals, audio, and session integration.
+- Physical validation of Hyprland, Caelestia Shell, Quickshell, portals, audio, and session integration.
 - Hardware/power/thermal tuning based on Linux-observed capabilities.
 - Optional selective BlackArch integration.
 - Final health validation and post-install report generation.
