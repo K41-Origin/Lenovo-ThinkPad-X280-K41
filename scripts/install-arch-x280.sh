@@ -213,6 +213,8 @@ mkdir -p /mnt/efi
 run_step "mount ESP with owner-only VFAT permissions" mount -o fmask=0177,dmask=0077 "$esp_ref" /mnt/efi
 
 run_step "instal sistem dasar Arch" base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"
+efi_fstab_options="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 4 && $2 == "/efi" { print $4; count++ } END { if (count != 1) exit 1 }' /mnt/etc/fstab)" || die "Target fstab must contain exactly one /efi entry."
+[[ ,$efi_fstab_options, == *,fmask=0177,* && ,$efi_fstab_options, == *,dmask=0077,* && ,$efi_fstab_options, != *,umask=* ]] || die "Target /efi fstab entry does not enforce owner-only VFAT permissions."
 install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" /mnt/root/k41-configure-arch-x280.sh
 run_step "konfigurasi user, locale, timezone, microcode, dan swapfile" arch-chroot /mnt /root/k41-configure-arch-x280.sh "${plan[swapfile_target_bytes]}"
 rm -f -- /mnt/root/k41-configure-arch-x280.sh
