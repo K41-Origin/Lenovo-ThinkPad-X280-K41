@@ -111,7 +111,7 @@ bind = $mainMod, down, movefocus, d
 
 # Start the shell only when its package is installed.
 exec-once = systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
-exec-once = hyprpolkitagent
+exec-once = systemctl --user start hyprpolkitagent.service
 HYPR
 chmod 0644 "$config_tmp"
 chown "$desktop_user:$(id -gn "$desktop_user")" "$config_tmp"
@@ -143,10 +143,10 @@ if pacman -Qq caelestia-shell >/dev/null 2>&1; then
 fi
 
 # Validate files and binaries without starting a graphical session or changing the login target.
-for binary in Hyprland qs foot thunar; do
+for binary in start-hyprland Hyprland qs foot thunar; do
   command -v "$binary" >/dev/null 2>&1 || die "Required desktop executable missing after package install: $binary"
 done
 [[ -s $desktop_home/.config/hypr/hyprland.conf ]] || die 'Hyprland configuration was not written.'
 chown -R "$desktop_user:$(id -gn "$desktop_user")" "$desktop_home/.config/hypr"
 info 'Desktop setup completed. No graphical session was started and no automatic TTY launch was configured.'
-info 'Log out to TTY1, sign in as the regular user, then run: Hyprland'
+info 'Log out to TTY1, sign in as the regular user, then run: start-hyprland'
