@@ -57,7 +57,7 @@ if [[ "$mode" == readiness && -d /run/archiso ]]; then
     exit 2
   }
   case "$report_fs" in
-    overlay|tmpfs) ;;
+  overlay | tmpfs) ;;
     *)
       printf 'ERROR: repository checkout is on filesystem %s; move it to the Arch ISO live filesystem before running readiness.\n' "$report_fs" >&2
       exit 2
