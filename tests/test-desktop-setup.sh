@@ -8,6 +8,7 @@ pass() { printf 'PASS: %s\n' "$*"; }
 bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
 pass 'desktop setup script passes bash -n'
 for token in \
+  # shellcheck disable=SC2016
   'pacman -Syu --needed' \
   'hyprland quickshell xdg-desktop-portal-hyprland' \
   'pipewire pipewire-audio pipewire-pulse wireplumber' \
