@@ -75,6 +75,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md)
 - [X280 first-boot test and evidence collection](docs/17-X280-FIRST-BOOT-TEST.md)
 - [X280 desktop environment physical test](docs/19-X280-DESKTOP-TEST.md)
+- [X280 desktop customization](docs/22-X280-DESKTOP-CUSTOMIZATION.md)
 - [X280 hardware audit procedure](docs/20-X280-HARDWARE-AUDIT.md)\n- [X280 power-management baseline audit](docs/21-X280-POWER-MANAGEMENT-AUDIT.md)
 
 ### Historical record
@@ -135,8 +136,9 @@ See [LICENSE](LICENSE).
 
 The active work sequence is:
 
-1. **Desktop functional validation** — complete manual and automated acceptance of Hyprland, Caelestia/Quickshell, display, input devices, audio, networking, portals, locking, and session recovery.
-2. **Optional software components** — review and implement only explicitly selected optional components, including selective BlackArch tools if still required.
-3. **Final hardware and system customization** — defer all X280 hardware/performance tuning, power and battery tuning, thermal optimization, suspend/hibernate/resume testing, and extended system-stability testing until the final project stage.
+1. **Desktop functional validation** — complete physical and automated acceptance of Hyprland, Caelestia/Quickshell, display, input, audio, networking, portals, locking, and session recovery.
+2. **Desktop customization** — create the polished, minimal, refined monochromatic visual identity described in [Desktop Customization](docs/22-X280-DESKTOP-CUSTOMIZATION.md).
+3. **Optional software integration** — review and implement only explicitly selected optional components, including selective BlackArch tools if still required.
+4. **Final hardware and system customization** — defer X280 performance, thermal, power/battery, suspend/hibernate/resume, and extended stability work until the final project stage.
 
-Do not start the final hardware/system customization stage while desktop functional acceptance or required software integration remains incomplete. Battery and power-profile experimentation is not an active priority. This is a sequencing decision, not a claim that the deferred work is complete.
+Do not start a later stage until the preceding stage's acceptance criteria are met. Battery and power-profile experimentation is not an active priority. This is a sequencing decision, not a claim that deferred work is complete.
