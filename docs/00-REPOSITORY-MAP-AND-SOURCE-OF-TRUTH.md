@@ -51,11 +51,11 @@ A file's existence does not prove execution. A PASS in a mock/fixture test is no
 |---|---|---|
 | `installer` | Legacy diagnostic entry point; `--help` and read-only `--preflight`; not the Arch installer | 03, 11, tests guide |
 | `scripts/bootstrap-archiso.sh` | Retrieves/reviews main source and gates launch; itself is not the disk installer | 16, 04 |
-| `scripts/k41-live-validation.sh` | Canonical read-only Live Validation implementation; strict Arch ISO/X280 readiness and broad host diagnostics | 11, tests guide |\n| `scripts/x280-install-readiness.sh` | Compatibility wrapper for canonical strict readiness mode | 11, tests guide |\n| `scripts/live-validation.sh` | Compatibility wrapper for canonical diagnostics-only mode | 11, tests guide |
+| `scripts/k41-live-validation.sh` | Canonical read-only Live Validation implementation; strict Arch ISO/X280 readiness and broad host diagnostics | 11, tests guide |\n| `scripts/x280-install-readiness.sh` | Compatibility wrapper for canonical strict readiness mode | 11, tests guide |
+| `scripts/live-validation.sh` | Compatibility wrapper for canonical diagnostics-only mode | 11, tests guide |
 | `scripts/install-arch-x280.sh` | Initial destructive encrypted Arch base installer; exact target/plan confirmation required | 04, 15, 11 |
 | `scripts/resume-arch-x280.sh` | Narrow continuation for the recorded post-pacstrap/pre-configuration checkpoint; no repartition/format/pacstrap | 10, 15, 17 |
 | `scripts/configure-arch-x280.sh` | Configures the already-installed target's initial user/locale/timezone/base settings and boot artifacts | 04, 05, 15 |
-| `scripts/live-validation.sh` | Read-only host/storage diagnostics and local validation report | 11, tests guide |
 | `scripts/validate-live-storage.sh` | Read-only X280 target identity and live topology validation | 04, 11, 13 |
 | `scripts/x280-archiso-test.sh` | Physical Arch ISO storage test procedure; inspect script and report before use | 04, 11, tests guide |
 | `scripts/x280-first-boot-check.sh` | Read-only post-install evidence collector; not a repair script | 10, 11, 17 |
