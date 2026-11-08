@@ -45,7 +45,7 @@ for required in \
   'Process exit code:' \
   'local candidate="$root/$timestamp" suffix=0' \
   'findmnt -T "$ROOT" -n -o FSTYPE' \
-  'overlay|tmpfs'; do
+  'overlay | tmpfs'; do
   grep -Fq -- "$required" "$CANONICAL" || fail "required live-validation feature is missing: $required"
 done
 pass "canonical validator retains readiness, host diagnostics, static analysis, tests, installer diagnostics, and both reports"
