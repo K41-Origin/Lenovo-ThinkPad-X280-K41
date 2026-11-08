@@ -59,3 +59,14 @@ bash tests/run.sh
 ```
 
 See the [Test Guide](../tests/README.md) for prerequisites, suite composition, report locations, live Arch ISO checks, first-boot evidence collection, and interpretation of PASS/FAIL/SKIP. Current CI commit-to-run mappings and implementation state belong only in [Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
+
+
+## Project-stage acceptance order
+
+Project acceptance follows the approved sequence in [Requirements and Decisions](02-REQUIREMENTS-AND-DECISIONS.md):
+
+1. **Desktop functional validation — current priority.** Complete the physical X280 checklist for Hyprland/Caelestia interaction, display, keyboard, touchpad/TrackPoint, audio, Wi-Fi, required Bluetooth behavior, portals, lock/logout, and TTY recovery. Mark unavailable or untested functions honestly; setup-script success alone is insufficient.
+2. **Optional software integration.** Validate only the optional components actually selected by the owner. BlackArch remains optional and must be limited to individually reviewed tools.
+3. **Final hardware/system customization — deferred.** Only after stages 1 and 2 are accepted, conduct hardware/performance tuning, CPU/GPU/thermal and power/battery evaluation, suspend/hibernate/resume testing, and extended stability/regression testing.
+
+The final-stage work must use a documented baseline and change one variable at a time. Capture before/after evidence, retain rollback instructions, and distinguish short functional checks from sustained stability tests. No hardware tuning, battery optimization, or suspend/resume campaign is part of the current stage. This ordering can change only through an explicit project decision.
