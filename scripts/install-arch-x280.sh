@@ -241,7 +241,8 @@ CHROOT
 
 [[ -s /mnt/etc/fstab ]] || die "Target fstab tidak ditemukan atau kosong."
 [[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]] || die "UKI tidak berhasil dibuat."
-grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' /mnt/etc/fstab || die "Entri swapfile tidak ditemukan di fstab."
+swap_fstab_count="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 3 && $1 == "/swapfile" && $2 == "none" && $3 == "swap" { count++ } END { print count + 0 }' /mnt/etc/fstab)" || die "Tidak dapat memvalidasi entri swapfile di fstab."
+[[ $swap_fstab_count == 1 ]] || die "Diharapkan tepat satu entri '/swapfile none swap'; ditemukan: $swap_fstab_count."
 [[ -s /mnt/etc/hostname ]] || die "Hostname target tidak terkonfigurasi."
 [[ -s /mnt/etc/locale.conf ]] || die "Locale target tidak terkonfigurasi."
 [[ -L /mnt/etc/localtime ]] || die "Timezone target tidak terkonfigurasi."
