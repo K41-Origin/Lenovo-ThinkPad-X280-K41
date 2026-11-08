@@ -2,8 +2,8 @@
 
 ## Current repository snapshot
 
-**Snapshot date:** 2026-11-08  
-**Inspected `main` HEAD:** `58077d69adb442237b8d65d3ef38fc19f1d09fef`  
+**Snapshot date:** 2026-11-09  
+**Inspected implementation HEAD:** `ce6a300b25e887be543c892dcb7287c2895f2b8a`  
 **Default branch:** `main`
 
 This document records the latest inspected repository state and physical installer evidence. Historical branch names, PR states, and CI outcomes in the [implementation history archive](archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md) are historical only.
@@ -20,11 +20,25 @@ This document records the latest inspected repository state and physical install
 | Host inventory and storage discovery/planning/revalidation | IMPLEMENTED | Read-only discovery, topology, planning, prerequisite, confirmation, and revalidation modules exist; automated tests use fixtures/mocks. |
 | Base-system bootstrap and fstab handling | IMPLEMENTED | Guarded base package setup; ESP is mounted with owner-only VFAT masks and `/efi` fstab options are normalized to `fmask=0177,dmask=0077`; regression coverage added. |
 | Native storage handle prototype | IMPLEMENTED (prototype) | Standalone read-only C prototype; not integrated into the installer and does not establish physical device-handle safety. |
-| Desktop setup foundation and attempt evidence | IMPLEMENTED (PR #23 and #25 merged) | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
-| Caelestia AUR dependency handling | IMPLEMENTED (PR #26, #28, and #30 merged; CI PASS) | Builds the reviewed AUR chain `quickshell-git` → `python-materialyoucolor3` v3 → `caelestia-cli` → `caelestia-shell`. Requires the v3 `.SRCINFO` to provide `python-materialyoucolor` for compatibility with the current CLI dependency and verifies it with `pacman -T` before proceeding. Exact PR #30 head passed both CI workflows. Physical AUR build and desktop session remain NOT TESTED. |
+| Desktop setup foundation and attempt evidence | IMPLEMENTED | Manual post-install Hyprland/Quickshell setup, per-attempt timestamped logs, and package snapshots are on `main`. Physical X280 desktop session remains NOT TESTED. |
+| Caelestia AUR dependency handling | IMPLEMENTED (recursive resolver; CI pending for current change) | `lib/aur-dependency-resolver.sh` recursively reads required/make dependencies from `.SRCINFO`, checks installed and official packages, clones missing exact-name AUR packages, detects cycles, validates package/provider identity, and builds dependencies before parents after per-recipe approval. The Material You v3 compatibility alias remains explicit and verified. Arbitrary AUR virtual-provider discovery is not generalized. Physical AUR build and desktop session remain NOT TESTED. |
 | X280 power, battery, thermal, and device tuning | PLANNED | Requires verified runtime hardware evidence and physical testing. |
 | Hibernation/resume and recovery-key lifecycle | PLANNED | Configuration and actual suspend/hibernate/resume/recovery validation remain outstanding. |
 | Optional selective BlackArch integration | PLANNED | Must remain opt-in and limited to individually selected tools. |
+
+## Latest desktop resolver implementation — 2026-11-09
+
+The fourth desktop trial is gated on the recursive AUR dependency resolver replacing the previous fixed four-package build sequence.
+
+- `lib/aur-dependency-resolver.sh` — IMPLEMENTED. Parses `.SRCINFO` required/make dependencies, checks installed packages and exact official repository package names, recursively clones missing AUR package bases, detects dependency cycles, checks package/provider identity, and builds dependencies before their parents.
+- `scripts/setup-desktop-x280.sh` — IMPLEMENTED. Sources the resolver and invokes it for the four Caelestia roots; existing manual approval and unprivileged `makepkg --syncdeps --install` behavior is retained.
+- `tests/test-desktop-setup.sh` — UPDATED. Adds syntax checks and fixture coverage for versioned dependency normalization, `.SRCINFO` package/provider matching, and dependency/makedepends extraction.
+- `docs/19-X280-DESKTOP-TEST.md` and `README.md` — UPDATED to describe the resolver boundary and fourth-trial procedure.
+- Implementation commits: resolver `eba9239`; setup integration `716c57a`; fixture tests `7cd3284`; metadata validation hardening `ce6a300`.
+- The latest implementation commit is `ce6a300b25e887be543c892dcb7287c2895f2b8a`. GitHub Actions results for this change must be checked before the physical trial.
+- No AUR package was built in CI or by this development session. The physical desktop setup and Hyprland/Caelestia session remain NOT TESTED.
+
+Resolver limitations are deliberate: dependency package names are looked up as exact AUR package bases, except the explicitly mapped Material You v3 provider. Generic AUR RPC search for arbitrary virtual providers and split-package base discovery are not implemented. Unresolved or mismatched metadata stops the setup rather than being guessed.
 
 ## Current validation evidence
 
@@ -83,7 +97,7 @@ Do not use `scripts/resume-arch-x280.sh` for this workflow. A fresh trial erases
 ## Other outstanding gates
 
 - First Boot from the internal SSD and first-boot evidence collection: **VERIFIED for report `20261108T083237Z` (14 PASS)**.
-- Desktop setup foundation, logging, and Caelestia AUR dependency handling: **IMPLEMENTED on `main` (PR #23, #25, and #26 merged); CI PASS for PR #26 head `8260604d70e50df191c522cd6b7b9f8c5431e738`; first physical attempt FAIL (missing AUR build tools); corrected physical AUR build and desktop session NOT TESTED**.
+- Desktop setup foundation, logging, and recursive Caelestia AUR dependency handling: **IMPLEMENTED on `main`; current resolver CI validation pending; first three physical desktop attempts FAIL; fourth desktop attempt and physical session NOT TESTED**.
 - X280 tuning, hibernation/resume, and selective BlackArch: **PLANNED**.
 - VM installation testing: **OUT OF SCOPE** by owner decision.
 - No release is claimed.
