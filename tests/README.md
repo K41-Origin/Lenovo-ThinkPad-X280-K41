@@ -48,17 +48,19 @@ Each run creates a unique `reports/test-runs/<UTC timestamp>/` directory contain
 
 The runner does not automatically commit reports. Inspect logs and review them for host-specific or sensitive information before sharing or committing. Reports apply only to their recorded checkout and host snapshot.
 
-The consolidated physical readiness command `bash scripts/x280-install-readiness.sh` additionally creates `reports/live-readiness/<UTC timestamp>/summary.md` and `diagnostics.log`. It records each readiness check, checkout SHA, environment metadata, final result, and captured output; detected disk serial values are redacted from diagnostics. The script does not run `git add`, commit, or push. After reviewing the report, commit and push only the intended timestamped report directory. The test runner's `reports/test-runs/` remains available for deeper per-test logs.
+The canonical Live Validation command is `bash scripts/k41-live-validation.sh --readiness`. It combines strict Arch ISO/X280 readiness and the broad read-only diagnostics previously provided by separate scripts. It creates `reports/live-readiness/<UTC timestamp>/summary.md` and serial-redacted `diagnostics.log`, plus `reports/live-validation/<UTC timestamp>.md` and `latest.md`. It records checkout identity, environment, hardware/storage/network observations, Bash syntax, ShellCheck/shfmt when available, the canonical test suite, target SSD identity/topology, and installer diagnostics. It does not run `git add`, commit, or push. Review both reports before sharing; the detailed host report may contain hardware identifiers. The test runner's `reports/test-runs/` remains available for per-test logs.
+
+Backward-compatible wrappers remain: `scripts/x280-install-readiness.sh` delegates to strict readiness mode; `scripts/live-validation.sh` delegates to `--diagnostics-only` for broad host diagnostics without requiring Arch ISO/root/X280 readiness. These wrappers contain no separate validation implementation.
 
 ## Live Arch ISO / X280 validation
 
-The broad read-only validation command is:
+For broad diagnostics on any checked-out host, the compatibility command remains:
 
 ```bash
 bash scripts/live-validation.sh
 ```
 
-It gathers host/boot/storage/network diagnostics, runs local quality checks when available, executes the canonical suite, and records output under `reports/live-validation/`. The report is local evidence, not automatically committed. It must be reviewed for sensitive details before sharing.
+It delegates to `scripts/k41-live-validation.sh --diagnostics-only`. For the strict Arch ISO/X280 readiness gate, use `bash scripts/k41-live-validation.sh --readiness`. Both modes share one implementation and report logic; neither modifies disks. Reports are local evidence, not automatically committed, and must be reviewed for sensitive details before sharing.
 
 The target-specific read-only storage validator is:
 
