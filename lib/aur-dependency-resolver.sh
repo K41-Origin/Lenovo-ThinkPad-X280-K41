@@ -10,8 +10,15 @@ aur_dependency_name() {
 
 aur_metadata_matches() {
   local metadata=$1 package_name=$2
-  grep -Eq "^[[:space:]]*pkgname = ${package_name//./\\.}$" "$metadata" ||
-    grep -Eq "^[[:space:]]*provides = ${package_name//./\\.}([<=>].*)?$" "$metadata"
+  awk -v target="$package_name" '
+    $1 == "pkgname" && $2 == "=" && $3 == target { found = 1 }
+    $1 == "provides" && $2 == "=" {
+      provided = $3
+      sub(/[<=>].*$/, "", provided)
+      if (provided == target) found = 1
+    }
+    END { exit !found }
+  ' "$metadata"
 }
 
 aur_metadata_dependencies() {
@@ -29,13 +36,12 @@ declare -gA K41_AUR_STATE=()
 
 resolve_and_build_aur_dependency() {
   local requested=$1 package_name aur_dir commit dependency
-  requested=$(aur_dependency_name "$requested")
   [[ -n $requested ]] || return 0
-
   if pacman -T "$requested" >/dev/null 2>&1; then
-    info "AUR dependency already satisfied: $requested"
+    info "Dependency already satisfied: $requested"
     return 0
   fi
+  requested=$(aur_dependency_name "$requested")
 
   package_name=$requested
   if [[ $requested == python-materialyoucolor ]]; then
