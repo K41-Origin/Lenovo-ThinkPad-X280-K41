@@ -208,7 +208,7 @@ check_syntax() {
 }
 check_shfmt() {
   shfmt -d -i 2 scripts/k41-live-validation.sh scripts/live-validation.sh \
-    scripts/x280-install-readiness.sh tests/run.sh tests/helpers/storage-fixtures.sh
+    scripts/x280-install-readiness.sh scripts/x280-archiso-test.sh tests/run.sh tests/helpers/storage-fixtures.sh
 }
 finalize_report() {
   local rc="$1" result finished
