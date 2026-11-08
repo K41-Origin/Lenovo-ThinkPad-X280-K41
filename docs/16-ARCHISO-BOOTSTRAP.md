@@ -26,13 +26,13 @@ sudo bash scripts/bootstrap-archiso.sh
 
 The Arch ISO root shell may already be root; in that case run `bash scripts/bootstrap-archiso.sh` without `sudo`.
 
-The bootstrap creates a private checkout under `/root/k41-archiso.XXXXXX/repository`. It then pages through README/agent instructions, storage/boot policy, the hardware profile, the bootstrap itself, destructive installer, target configuration, readiness/validation scripts, storage/preflight modules, the canonical test runner, and every tracked test script. Review each file. The commit SHA and checkout path are printed before the review. At the end, type exactly:
+The bootstrap creates a private checkout under `/root/k41-archiso.XXXXXX/repository`. It then pages through README/agent instructions, storage/boot policy, the hardware profile, the bootstrap itself, destructive installer, target configuration, the canonical `scripts/k41-live-validation.sh` implementation and compatibility wrappers, storage/preflight modules, the canonical test runner, and every tracked test script. Review each file. The commit SHA and checkout path are printed before the review. At the end, type exactly:
 
 ```text
 REVIEWED <40-character-commit-SHA> AND AUTHORIZE READ-ONLY READINESS CHECK
 ```
 
-The placeholder must be replaced by the SHA printed by the script. Any other input stops without running readiness. The bootstrap then runs `bash scripts/x280-install-readiness.sh`. This gate must pass; it records a report under `reports/live-readiness/`. If any check fails, the bootstrap stops without launching the installer. After a PASS, type exactly `READINESS PASSED FOR <40-character-commit-SHA> AND AUTHORIZE INSTALLER LAUNCH` to launch the installer.
+The placeholder must be replaced by the SHA printed by the script. Any other input stops without running readiness. The bootstrap then runs `bash scripts/k41-live-validation.sh --readiness`. This gate must pass; it records reports under `reports/live-readiness/` and `reports/live-validation/`. The supplemental `x280-archiso-test.sh` evidence is stored under `reports/x280-archiso-test/`. On an Arch ISO, both report-producing scripts verify that the checkout resides on an `overlay` or `tmpfs` filesystem and stop before writing if it resolves to a persistent filesystem. Keep the checkout on the ISO live environment (for example, under `/root` or `/tmp`); do not place it on the target SSD. If any check fails, the bootstrap stops without launching the installer. After a PASS, type exactly `READINESS PASSED FOR <40-character-commit-SHA> AND AUTHORIZE INSTALLER LAUNCH` to launch the installer.
 
 ## Two distinct authorization gates
 

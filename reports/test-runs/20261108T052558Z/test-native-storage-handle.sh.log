@@ -1,0 +1,1 @@
+SKIP: optional compiler cc is unavailable; install base-devel or a C compiler to run this native-helper test.

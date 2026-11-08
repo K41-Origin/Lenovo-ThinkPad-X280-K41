@@ -1,0 +1,10 @@
+PASS: installer passes bash -n
+PASS: installer includes root-only local logging, stage reporting, X280 profile, confirmation gate, LUKS2, base bootstrap, sd-encrypt UKI setup, and postcondition checks
+PASS: installer does not enable shell xtrace
+PASS: logging is initialized before any destructive disk operation
+PASS: mkinitcpio preset formatter uses real newline delimiters
+PASS: installer completion message matches the configuration stage actually run
+PASS: installer does not disable all live-ISO swap or bypass base-system module
+PASS: destructive signature erasure is ordered after confirmation and final revalidation
+PASS: initial and final revalidation use separate target snapshots, leaving final output arrays empty
+All Arch installer script tests passed.

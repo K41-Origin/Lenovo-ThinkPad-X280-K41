@@ -51,13 +51,14 @@ A file's existence does not prove execution. A PASS in a mock/fixture test is no
 |---|---|---|
 | `installer` | Legacy diagnostic entry point; `--help` and read-only `--preflight`; not the Arch installer | 03, 11, tests guide |
 | `scripts/bootstrap-archiso.sh` | Retrieves/reviews main source and gates launch; itself is not the disk installer | 16, 04 |
-| `scripts/x280-install-readiness.sh` | Read-only Arch ISO/UEFI, syntax, test-suite and live-storage readiness/report gate | 11, tests guide |
+| `scripts/k41-live-validation.sh` | Canonical read-only Live Validation implementation; strict Arch ISO/X280 readiness and broad host diagnostics | 11, tests guide |
+| `scripts/x280-install-readiness.sh` | Compatibility wrapper for canonical strict readiness mode | 11, tests guide |
+| `scripts/live-validation.sh` | Compatibility wrapper for canonical diagnostics-only mode | 11, tests guide |
 | `scripts/install-arch-x280.sh` | Initial destructive encrypted Arch base installer; exact target/plan confirmation required | 04, 15, 11 |
 | `scripts/resume-arch-x280.sh` | Narrow continuation for the recorded post-pacstrap/pre-configuration checkpoint; no repartition/format/pacstrap | 10, 15, 17 |
 | `scripts/configure-arch-x280.sh` | Configures the already-installed target's initial user/locale/timezone/base settings and boot artifacts | 04, 05, 15 |
-| `scripts/live-validation.sh` | Read-only host/storage diagnostics and local validation report | 11, tests guide |
 | `scripts/validate-live-storage.sh` | Read-only X280 target identity and live topology validation | 04, 11, 13 |
-| `scripts/x280-archiso-test.sh` | Physical Arch ISO storage test procedure; inspect script and report before use | 04, 11, tests guide |
+| `scripts/x280-archiso-test.sh` | Supplemental Arch ISO evidence collector; delegates readiness and storage validation to the canonical Live Validation entry point | 04, 11, tests guide |
 | `scripts/x280-first-boot-check.sh` | Read-only post-install evidence collector; not a repair script | 10, 11, 17 |
 
 ### Shell libraries
@@ -107,6 +108,8 @@ The installer sources libraries as functions; sourcing is not equivalent to exec
 | `reports/test-runs/<timestamp>/` | Local canonical test runner summaries and per-test logs | Exact checkout/host only; inspect for sensitive host data before sharing |
 | `reports/live-readiness/<timestamp>/` | Read-only readiness summary and diagnostics | PASS is not install authorization; review redaction before publication |
 | `reports/live-validation/` | Live validation snapshots | Dated host evidence; not necessarily current |
+| `reports/x280-archiso-test/` | Supplemental X280 Arch ISO evidence logs | Repository-local, private hardware inventory; review before sharing |
+| `reports/test-runs/` | Canonical test-run logs and summaries | Repository-local test evidence; review before sharing |
 | `reports/first-boot/` | Expected destination for first-boot evidence | No physical first-boot report was present in the inspected tree |
 | `reports/x280-archiso-storage-test-*.log` | Output of the physical Arch ISO storage test | Historical evidence; must be tied to exact environment and reviewed |
 | `docs/archive/` | Historical document snapshots | Never treat as current requirements, CI state, or procedure |
