@@ -54,29 +54,28 @@ It writes persistent summaries and logs under `reports/test-runs/`. Required sui
 
 See [tests/README.md](../tests/README.md) for the single authoritative test procedure and [11 — Testing and Acceptance](11-TESTING-AND-ACCEPTANCE.md) for acceptance criteria and evidence boundaries.
 
-## Recorded physical trial and current failure — 2026-11-08
+## Recorded physical trials and current failure — 2026-11-08
 
-The pushed diagnostic log at `reports/installer/20261108T060151Z/installer.log` records a full destructive run from commit `97f826713a61645f5946aec32529eb4940d250fc`. It confirms that the installer:
+Two destructive full-installer attempts have been pushed as repository-local evidence:
 
-- Passed X280 hardware identification, UEFI, disk discovery, storage-plan confirmation, and final revalidation.
-- Replaced the GPT layout, created the LUKS2 root container, formatted the ESP as FAT32 and root as ext4, and mounted both filesystems.
-- Completed `pacstrap`, generated/validated fstab, configured hostname/locale/timezone/user/password/swapfile, and enabled NetworkManager.
-- Installed systemd-boot and successfully generated the UKI at `/efi/EFI/Linux/arch-linux.efi`.
-- Exited with status 1 during the final kernel-command-line assertions.
+- `reports/installer/20261108T060151Z/installer.log`
+- `reports/installer/20261108T062317Z/installer.log`
 
-### Root cause identified
+The first attempt completed storage preparation, LUKS2/ext4/ESP formatting, mounting, `pacstrap`, fstab generation, target configuration, systemd-boot installation, and UKI generation. It then failed because the kernel-command-line assertion incorrectly expected `root=` at the start of a line. The argument is correctly written as a whitespace-delimited token on the same line as `rd.luks.name=...`; that validation was corrected.
 
-The installer wrote both kernel parameters on one line:
+The second attempt confirms the previous correction worked: it passed package installation and target configuration, created the swapfile, enabled NetworkManager, installed systemd-boot, and generated the UKI successfully. It then failed at the installer's final swapfile fstab postcondition.
+
+### Current root cause
+
+The configuration script writes this valid fstab entry:
 
 ```text
-rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw
+/swapfile none swap defaults 0 0
 ```
 
-But it validated the root parameter using an anchored expression, `^root=/dev/mapper/cryptroot`, which incorrectly assumes `root=` starts a new line. Kernel command-line arguments are whitespace-separated tokens on the same line. The assertion therefore returned false even though the UKI generation succeeded.
+The installer previously checked for a line where `/swapfile` appeared in the **second** fstab column (the mountpoint). In fstab, the first column is the source, the second is the mountpoint, and the third is the filesystem type. For a swapfile, the correct fields are source `/swapfile`, target `none`, and type `swap`. The check therefore rejected a correctly configured entry.
 
-The correction changes the check to recognize `root=/dev/mapper/cryptroot` as a whitespace-delimited token anywhere on that line and adds a regression test using the same argument ordering. This is a validation bug, not evidence that the UKI generation itself failed. A successful UKI build still does not prove that firmware can boot it or that LUKS unlock and root mounting work.
-
-The same log exposed a second issue: the installer set a process-wide `umask 077`, which was inherited by `pacstrap`. Pacman reported target directories such as `/mnt/etc`, `/mnt/var`, and `/mnt/var/lib` as mode 0700 where package metadata expected 0755. The installer now uses `umask 022` for normal system creation while setting log directories/files explicitly to 0700/0600. The package set also explicitly includes `iptables` and `mkinitcpio` to select the providers that were interactively requested during the trial. A regression test now checks those package selections.
+The postcondition now counts entries whose first three fields exactly match `/swapfile none swap` and requires exactly one. The regression test covers valid, missing, and duplicate entries. This is a validation bug; the latest log shows that the swapfile was created and `mkswap` succeeded, but it does not establish that the installed system has booted.
 
 ### Required trial-and-error procedure
 
@@ -93,8 +92,8 @@ The installer deliberately re-creates the partition table and formats the target
 
 ## Validation and acceptance boundaries
 
-- **TESTED:** current continuation code passed GitHub Actions run #375 (`42404369312`), including Bash syntax, ShellCheck, and 20 repository test scripts (20 passed, 0 failed, 0 skipped).
+- **TESTED:** the latest pre-fix installer branch passed Repository validation #502 and Bash validation #329. The current swapfile postcondition fix and regression tests require a new CI run.
 - The prior successful read-only readiness report remains historical evidence for the pre-installation snapshot; it is not rerun against a disk that is now intentionally partitioned and encrypted.
 - The continuation script's own target identity, partition, LUKS2, filesystem, and package checks are required to bind the operation to the existing partial installation. These are not a repeat of the old blank-disk readiness gate.
-- No successful physical installation or first boot is claimed until the continuation completes and the X280 boots from the installed SSD.
+- No successful physical installation or first boot is claimed until the full installer completes and the X280 boots from the installed SSD.
 - VM installation testing remains OUT OF SCOPE by owner decision.
