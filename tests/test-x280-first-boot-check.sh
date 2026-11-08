@@ -22,6 +22,10 @@ printf 'LENOVO\n' >"$sys_root/class/dmi/id/sys_vendor"
 printf '20KESC2Y00\n' >"$sys_root/class/dmi/id/product_name"
 printf 'N20ET49W\n' >"$sys_root/class/dmi/id/bios_version"
 : >"$efi_root/EFI/Linux/arch-linux.efi"
+mkdir -p "$efi_root/loader"
+: >"$efi_root/loader/random-seed"
+chmod 700 "$efi_root" "$efi_root/loader"
+chmod 600 "$efi_root/loader/random-seed"
 
 cat >"$mock_bin/findmnt" <<'MOCK'
 #!/usr/bin/env bash
@@ -105,6 +109,8 @@ done
 grep -Fq -- '- Result: **PASS**' "$report" || fail "healthy fixture did not produce PASS"
 grep -Fq 'Encrypted root mount' "$report" || fail "root encryption check is absent from summary"
 grep -Fq 'Network connected' "$report" || fail "network check is absent from summary"
+grep -Fq 'EFI random-seed permission security' "$report" || fail "EFI permission audit is absent from summary"
+grep -Fq 'EFI mountpoint, loader directory, and random seed deny group/other access' "$report_dir/boot-status.txt" || fail "secure EFI permission fixture was not accepted"
 grep -Fq '20KESC2Y00' "$report_dir/hardware.txt" || fail "hardware profile evidence was not captured"
 if grep -R -Fq 'SHOULD_NOT_LEAK' "$report_dir"; then
   fail "password-like journal content was not redacted"
@@ -114,6 +120,29 @@ if grep -R -Fq 'aa:bb:cc:dd:ee:ff' "$report_dir"; then
 fi
 pass "healthy mocked first boot generates complete PASS report and evidence files"
 pass "password-like strings and MAC addresses are redacted from captured journal output"
+
+# Group/other-readable ESP permissions must fail the audit.
+chmod 755 "$efi_root"
+insecure_reports="$tmp/insecure-reports"
+if (
+  cd "$ROOT"
+  PATH="$mock_bin:$PATH" \
+  K41_FIRST_BOOT_SYS_ROOT="$sys_root" \
+  K41_FIRST_BOOT_ETC_ROOT="$etc_root" \
+  K41_FIRST_BOOT_REPORT_ROOT="$insecure_reports" \
+  K41_FIRST_BOOT_ESP_ROOT="$efi_root" \
+  K41_FIRST_BOOT_BOOT_ROOT="$tmp/boot" \
+  SUDO_UID=1000 \
+    bash "$SCRIPT"
+) >"$run_dir/insecure.out" 2>&1; then
+  fail "collector accepted a world-accessible EFI mountpoint"
+fi
+insecure_summary="$(find "$insecure_reports" -name summary.md -print -quit)"
+[[ -n $insecure_summary ]] || fail "EFI permission failure report was not generated"
+grep -Fq -- '- Result: **FAIL**' "$insecure_summary" || fail "insecure EFI permissions did not fail the report"
+grep -Fq 'EFI random-seed permission security' "$insecure_summary" || fail "EFI permission check row is missing"
+pass "group/other-accessible EFI paths produce a retained FAIL report and non-zero exit"
+
 
 # A failed systemd unit must make the overall collector exit non-zero.
 cat >"$mock_bin/systemctl" <<'MOCK'
