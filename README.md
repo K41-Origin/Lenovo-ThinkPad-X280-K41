@@ -31,7 +31,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `native/storage-handle.c` and `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — Stage 8 read-only native descriptor-holder prototype and its canonical design/limitations; hardware behavior and executor integration remain unverified.
 - `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Other desktop, hardware tuning, package/security policy, validation, and reporting modules remain PLANNED.
 - `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
-- `scripts/k41-live-validation.sh` — canonical read-only Live Validation entry point; combines strict Arch ISO/X280 readiness, host diagnostics, static analysis, tests, SSD identity/topology validation, installer diagnostics, and timestamped evidence.\n- `scripts/x280-install-readiness.sh` and `scripts/live-validation.sh` — backward-compatible wrappers; both delegate to the canonical validator without duplicate implementations.
+- `scripts/k41-live-validation.sh` — canonical read-only Live Validation entry point; combines strict Arch ISO/X280 readiness, host diagnostics, static analysis, tests, SSD identity/topology validation, installer diagnostics, and timestamped evidence.
+- `scripts/x280-install-readiness.sh` and `scripts/live-validation.sh` — backward-compatible wrappers; both delegate to the canonical validator without duplicate implementations.
 - `docs/` — project requirements, decisions, architecture, safety, and status.
 
 ## Intended workflow
