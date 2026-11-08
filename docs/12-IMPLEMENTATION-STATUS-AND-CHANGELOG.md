@@ -451,3 +451,11 @@ Historical entries above that said validation was pending describe the state at 
 - **IMPLEMENTED:** static regression coverage ensures the continuation entry point does not invoke destructive formatting/partitioning or pacstrap. Canonical test manifest now contains 20 scripts.
 - **PROCESS DECISION:** do not run `scripts/bootstrap-archiso.sh`, `scripts/x280-install-readiness.sh`, `scripts/validate-live-storage.sh`, or `scripts/install-arch-x280.sh` against this already-initialized target. The earlier successful readiness report remains historical evidence for the pre-installation snapshot; the continuation script performs only the narrow checks needed for this partial-install checkpoint.
 - **TESTED:** GitHub Actions run #375 (`42404369312`) passed on continuation code commit `067dd661bb80b46ec29bebc409cb8a2e62651144`: Bash syntax, ShellCheck, and 20 test scripts (20 passed, 0 failed, 0 skipped). Physical continuation and first boot remain NOT TESTED until performed on the actual X280.
+
+### 2026-11-08 — Consolidate platform policy documentation
+
+- Merged the security, desktop, hardware/power/network, package-management, and authorized developer/bug-bounty policies into `docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md`.
+- Removed the five superseded split policy files after their substantive policy content was carried into the consolidated owner document.
+- Grouped the README documentation index by purpose and synchronized the AI documentation ownership map.
+- Corrected stale references to the old recovery branch and pre-merge installer location.
+- No installer behavior or acceptance status changed. Physical X280 installation and first boot remain NOT TESTED.
