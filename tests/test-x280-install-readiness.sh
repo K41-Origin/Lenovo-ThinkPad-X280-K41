@@ -3,7 +3,8 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 CANONICAL="$ROOT/scripts/k41-live-validation.sh"
 READINESS_WRAPPER="$ROOT/scripts/x280-install-readiness.sh"
-DIAGNOSTICS_WRAPPER="$ROOT/scripts/live-validation.sh"\nSUPPLEMENTAL="$ROOT/scripts/x280-archiso-test.sh"
+DIAGNOSTICS_WRAPPER="$ROOT/scripts/live-validation.sh"
+SUPPLEMENTAL="$ROOT/scripts/x280-archiso-test.sh"
 
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$1"; }
