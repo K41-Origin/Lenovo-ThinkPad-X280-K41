@@ -19,8 +19,22 @@ The current Caelestia upstream describes Hyprland and Quickshell as its core com
 - Official packages are installed with pacman's normal signature verification. No repository or signature policy is changed.
 - The AUR recipe is displayed before approval. The build runs as the regular user, never root. Declining AUR leaves the official Hyprland/Quickshell foundation installed.
 - Existing Hyprland and Caelestia configuration is not overwritten.
-- Portal routing explicitly selects GTK as the default and Hyprland for Screenshot/ScreenCast; existing portal preference files are never overwritten.\n- No display manager, autologin, automatic graphical target, Bluetooth service, firewall, power manager, hibernation, or hardware-specific tuning is enabled.
+- Portal routing explicitly selects GTK as the default and Hyprland for Screenshot/ScreenCast; existing portal preference files are never overwritten.
+- No display manager, autologin, automatic graphical target, Bluetooth service, firewall, power manager, hibernation, or hardware-specific tuning is enabled.
 - The initial session is manual: sign in on TTY1 and run `start-hyprland`. This preserves a reliable TTY recovery path during physical testing.
+
+## Per-attempt setup evidence
+
+Every invocation of `scripts/setup-desktop-x280.sh` creates a unique report under `reports/desktop/<UTC timestamp>/`, including invocations that fail an early safety/preflight check. A collision in the same timestamp gets a numeric suffix. The report contains:
+
+- `setup.log` — combined stdout/stderr, package-manager output, AUR review/build output, and explicit failing command/line when a command triggers the ERR trap.
+- `summary.md` — start/end timestamps, exit status, result, and source commit.
+- `system-info.txt` — repository commit/worktree state, hostname, kernel, architecture, Arch marker, invoking user, and script path.
+- `packages-before.txt` and `packages-after.txt` — complete `pacman -Q` snapshots to identify package changes, including partial changes after failure.
+
+The report directory and files are root-only (`0700`/`0600`) because the setup runs through sudo. Inspect with `sudo less reports/desktop/<timestamp>/setup.log` and `sudo cat reports/desktop/<timestamp>/summary.md`. Copy a report to a user-owned location before uploading or sharing it. Reports are local, are not committed automatically, and may reveal host/user/package information; review and redact them first. If the report directory cannot be created, the script stops before making desktop changes.
+
+A setup-script `PASS` means only that the setup script exited successfully. It does not mean the compositor or physical hardware has passed testing.
 
 ## First physical test
 
@@ -28,7 +42,7 @@ The current Caelestia upstream describes Hyprland and Quickshell as its core com
 2. Review the script and the exact resolved repository commit.
 3. Run `sudo bash scripts/setup-desktop-x280.sh`.
 4. Review the AUR PKGBUILD and .SRCINFO. Decline if unexpected commands, sources, dependencies, or privilege behavior appear.
-5. Log out to TTY1, sign in as the regular user, and run `Hyprland`.
+5. Log out to TTY1, sign in as the regular user, and run `start-hyprland`.
 6. Test display, keyboard, touchpad, terminal, file manager, audio output/input, Wi-Fi, notifications, screenshot/portal behavior, screen sharing, lock, logout, and return to TTY.
 7. Capture diagnostics and logs before making repairs. Do not configure automatic session launch until manual session stability is demonstrated.
 
