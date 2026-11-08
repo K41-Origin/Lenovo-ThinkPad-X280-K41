@@ -23,17 +23,17 @@ USAGE
 
 mode=readiness
 case "${1-}" in
-  "") ;;
-  --readiness) mode=readiness ;;
-  --diagnostics-only) mode=diagnostics ;;
-  -h | --help)
-    usage
-    exit 0
-    ;;
-  *)
-    usage >&2
-    exit 2
-    ;;
+"") ;;
+--readiness) mode=readiness ;;
+--diagnostics-only) mode=diagnostics ;;
+-h | --help)
+  usage
+  exit 0
+  ;;
+*)
+  usage >&2
+  exit 2
+  ;;
 esac
 [[ $# -le 1 ]] || {
   usage >&2
