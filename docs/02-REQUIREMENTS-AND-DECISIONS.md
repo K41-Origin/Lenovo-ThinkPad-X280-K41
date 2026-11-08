@@ -87,3 +87,10 @@ Traceability status is documentation-only at this stage. These links define inte
 
 ## Change process
 When a decision changes, update its ID and owning domain document together, recording rationale and evidence. Do not mark anything implemented, tested, verified, or released without evidence.
+
+
+## Project execution order
+- **DECISION-PROJECT-001 — APPROVED:** Complete desktop functional validation first. Then complete any required optional software integration. Defer X280 hardware/performance customization—including CPU/GPU/thermal/power/battery tuning—and suspend, hibernate/resume, and extended system-stability testing to the final project stage. These deferred tasks must not be pulled forward as active work unless the owner explicitly changes this decision.
+- **Rationale:** Establish a functionally accepted desktop and complete required software integration before changing device-specific performance, power, thermal, sleep, or recovery behavior. This reduces overlapping variables and makes later regression testing attributable.
+- **Current next stage:** Desktop functional validation, as defined in [X280 Desktop Environment Physical Test](19-X280-DESKTOP-TEST.md).
+- **Acceptance boundary:** A completed desktop setup script or runtime process detection does not satisfy manual desktop acceptance. Final-stage hardware and sleep/stability work remains PLANNED until its own evidence is collected.
