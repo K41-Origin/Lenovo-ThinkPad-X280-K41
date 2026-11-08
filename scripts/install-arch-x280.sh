@@ -210,7 +210,7 @@ run_step "format root ext4" mkfs.ext4 -F -L K41_ROOT /dev/mapper/cryptroot
 mkdir -p /mnt
 run_step "mount root" mount /dev/mapper/cryptroot /mnt
 mkdir -p /mnt/efi
-run_step "mount ESP" mount "$esp_ref" /mnt/efi
+run_step "mount ESP with owner-only VFAT permissions" mount -o fmask=0177,dmask=0077 "$esp_ref" /mnt/efi
 
 run_step "instal sistem dasar Arch" base_system::bootstrap /mnt "BOOTSTRAP ARCH BASE"
 install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" /mnt/root/k41-configure-arch-x280.sh
