@@ -42,6 +42,7 @@ for required in \
   'default_cmdline="/etc/kernel/cmdline"' \
   'HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)' \
   'rd.luks.name=${root_uuid}=cryptroot root=/dev/mapper/cryptroot rw' \
+  "grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' /etc/kernel/cmdline" \\
   '[[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]]' \
   '[[ -s /mnt/etc/locale.conf ]]'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required installer guard/action is missing: $required"
@@ -93,4 +94,9 @@ if grep -Fq 'storage::plan_collect_live_prerequisites plan fresh_target prereq' 
 fi
 pass "initial and final revalidation use separate target snapshots, leaving final output arrays empty"
 
-printf '%s\n' 'All Arch installer script tests passed.'
+printf '%s\n' '# Kernel command-line parameters are whitespace-separated tokens on one line.
+cmdline_sample='rd.luks.name=01234567-89ab-cdef-0123-456789abcdef=cryptroot root=/dev/mapper/cryptroot rw'
+grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' <<<"$cmdline_sample" || fail "root= token must be found after rd.luks.name on the same kernel command line"
+pass "UKI kernel command-line root token is validated as a whitespace-delimited argument"
+
+All Arch installer script tests passed.'
