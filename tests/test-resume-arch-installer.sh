@@ -10,6 +10,9 @@ if grep -Eq '^[[:space:]]*(run_step[[:space:]].*[[:space:]])?(wipefs|pacstrap|mk
   exit 1
 fi
 grep -Fq 'cryptsetup open "$root_part" cryptroot' "$script"
+grep -Fq 'lsblk -nrpo MOUNTPOINTS "$disk"' "$script"
+grep -Fq '[[ -z ${mounted_paths//[[:space:]]/} ]]' "$script"
+grep -Fq '! mountpoint -q "$ESP_MOUNT"' "$script"
 grep -Fq 'base="$ROOT/reports/installer"' "$script"
 grep -Fq 'findmnt -nro FSTYPE -T "$ROOT"' "$script"
 if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$script"; then
