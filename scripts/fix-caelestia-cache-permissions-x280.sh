@@ -64,7 +64,7 @@ if [[ $owner != 0:0 ]]; then
   exit 1
 fi
 
-if [[ $mode != apply ]]; then
+if [[ $mode == check ]]; then
   printf 'DRY RUN: would change ownership of this directory only (non-recursively).\n'
   printf 'No files, subdirectories, permissions, packages, or services will be changed.\n'
   printf 'Re-run with --apply to authorize this exact ownership change.\n'
