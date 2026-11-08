@@ -28,25 +28,32 @@ set_stage() {
 }
 
 init_logging() {
-  local base timestamp suffix=0
+  local base timestamp suffix=0 fs_type
   command -v tee >/dev/null 2>&1 || return 1
   command -v install >/dev/null 2>&1 || return 1
-  base=/var/log/x280-installer
-  if ! install -d -o root -g root -m 0700 "$base" 2>/dev/null; then
-    base=/run/x280-installer
-    install -d -o root -g root -m 0700 "$base" || return 1
-    printf 'WARNING: log is in volatile /run.\n' >&2
-  fi
+  command -v findmnt >/dev/null 2>&1 || return 1
+  [[ -d /run/archiso ]] || { printf 'FATAL: continuation is allowed only from the official Arch Linux ISO.\n' >&2; return 1; }
+  fs_type="$(findmnt -nro FSTYPE -T "$ROOT")" || return 1
+  case "$fs_type" in
+    overlay|tmpfs) ;;
+    *) printf 'FATAL: repository checkout must be on Arch ISO overlay/tmpfs; found: %s.\n' "$fs_type" >&2; return 1 ;;
+  esac
+  base="$ROOT/reports/installer"
+  install -d -o root -g root -m 0700 "$base" || return 1
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   local log_dir="$base/resume-$timestamp"
-  while ! mkdir -m 0700 -- "$log_dir" 2>/dev/null; do
+  while :; do
+    if mkdir -m 0700 -- "$log_dir" 2>/dev/null; then
+      break
+    fi
+    [[ -e $log_dir ]] || { printf 'FATAL: cannot create repository-local log directory: %s\n' "$log_dir" >&2; return 1; }
     suffix=$((suffix + 1))
     log_dir="$base/resume-$timestamp-$suffix"
   done
   LOG_FILE="$log_dir/resume.log"
-  : >"$LOG_FILE"
-  chmod 0600 "$LOG_FILE"
-  exec > >(tee -a "$LOG_FILE") 2>&1
+  : >"$LOG_FILE" || return 1
+  chmod 0600 "$LOG_FILE" || return 1
+  exec > >(tee -a "$LOG_FILE") 2>&1 || return 1
   printf 'X280 installer continuation log\nStarted (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf 'Repository: %s\nCommit: %s\n' "$ROOT" "$(git -C "$ROOT" rev-parse HEAD 2>/dev/null || printf unknown)"
 }
@@ -90,6 +97,9 @@ readonly_flag="$(lsblk -dnro RO "$disk" | sed 's/[[:space:]]*$//')"
 size_bytes="$(blockdev --getsize64 "$disk")"
 [[ $model == "$EXPECTED_MODEL" && $serial == "$EXPECTED_SERIAL" && $size_bytes == "$EXPECTED_CAPACITY" ]] || die 'SSD model, serial, or exact byte capacity does not match the configured X280 target.'
 [[ $transport == nvme && $removable == 0 && $readonly_flag == 0 ]] || die 'Target is not a writable, non-removable NVMe device.'
+mounted_paths="$(lsblk -nrpo MOUNTPOINTS "$disk")" || die 'Could not inspect target disk mount state.'
+[[ -z ${mounted_paths//[[:space:]]/} ]] || die "Target disk or one of its partitions is mounted: $mounted_paths"
+! mountpoint -q "$ESP_MOUNT" || die 'EFI mountpoint is already mounted; inspect it manually.'
 [[ $(blkid -s PTTYPE -o value "$disk") == gpt ]] || die 'Target does not contain the expected GPT partition table.'
 
 disk_name="$(basename "$disk")"

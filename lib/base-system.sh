@@ -57,6 +57,7 @@ base_system::install_packages() {
     base linux linux-firmware
     cryptsetup networkmanager sudo
     e2fsprogs dosfstools
+    iptables mkinitcpio
     nano man-db man-pages
   )
   k41::log_info 'Installing the minimal approved Arch base package set.'

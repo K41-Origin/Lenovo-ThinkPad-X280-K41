@@ -33,7 +33,7 @@ The test list is defined only in `tests/run.sh` (20 scripts at this revision). D
 | `test-preflight-gate.sh` | Mocked preflight gate and failure propagation |
 | `test-native-storage-handle.sh` | Native helper compile/CLI behavior; no real block device is opened. |
 | `test-base-system-fstab.sh` | Fstab generation preserves existing unrelated entries, is idempotent, and rejects conflicting root/EFI entries. |
-| `test-resume-arch-installer.sh` | Static safety contract for the checkpoint-specific continuation path; asserts it does not partition, format, or rerun pacstrap. |
+| `test-resume-arch-installer.sh` | Static safety contract for the checkpoint-specific continuation path; asserts it does not partition, format, or rerun pacstrap, and refuses already-mounted target partitions. |
 
 The suite does not run a complete installer transaction. The disposable loop test formats only its temporary loop-backed image; it is not a physical NVMe test. It is bounded utility-interface coverage only and must never be treated as a substitute for the required destructive full-SSD installation test on the actual X280. Fixture/static checks do not establish that the installer boots or that every target-device race is impossible.
 
@@ -98,7 +98,7 @@ After the initial install boots successfully on the actual X280 and the regular 
 
 ## Destructive installer run logs
 
-The destructive installer creates `/var/log/x280-installer/<UTC timestamp>/installer.log` before host preflight or storage operations. The directory is root-only (0700) and the file root-only (0600). If `/var/log` is unavailable, it uses `/run/x280-installer/`; that fallback is volatile. The Arch ISO may also keep `/var/log` on an ephemeral overlay, so copy the log to persistent media before reboot regardless of path. The installer prints the exact log path on exit.
+The destructive installer and checkpoint continuation write logs inside the repository checkout: `reports/installer/<UTC timestamp>/installer.log` and `reports/installer/resume-<UTC timestamp>/resume.log`. Directories are root-only (0700) and files root-only (0600). Logging fails closed unless the checkout is on the official Arch ISO `overlay` or `tmpfs`; there is no external `/var/log` or `/run` fallback. Copy the report directory to persistent storage before reboot. The installer prints the exact log path on exit.
 
 The log contains stdout/stderr, stage markers, start/end metadata, exit status, and stage-specific storage validation diagnostics. It does not enable shell xtrace. Never enter secrets as command-line arguments; interactive prompts are intended to read them from the terminal. Hardware identifiers may appear in the log, so inspect and redact before sharing. See [Error Recovery and Reporting](../docs/10-ERROR-RECOVERY-AND-REPORTING.md).
 

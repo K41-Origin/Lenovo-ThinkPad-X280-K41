@@ -53,4 +53,10 @@ if base_system::generate_fstab "$target" 'WRITE FSTAB'; then
 fi
 [[ "$(cat "$target/etc/fstab")" == "$before" ]]
 
-printf 'PASS: fstab generation preserves unrelated entries, is idempotent, and rejects conflicting mountpoints\n'
+# Verify the base package set explicitly selects providers to avoid pacstrap prompts.
+pacstrap() { printf '%s\n' "$@" >"$tmpdir/pacstrap.args"; }
+base_system::install_packages "$target" 'INSTALL BASE SYSTEM'
+grep -Fxq iptables "$tmpdir/pacstrap.args"
+grep -Fxq mkinitcpio "$tmpdir/pacstrap.args"
+
+echo 'PASS: fstab generation preserves unrelated entries, is idempotent, and rejects conflicting mountpoints'

@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and a reviewed Arch ISO bootstrap gate at `scripts/bootstrap-archiso.sh`, plus the destructive base installer at `scripts/install-arch-x280.sh` and target configuration, guarded base bootstrap, and bounded loop-device integration coverage. Physical X280 installation and boot remain NOT TESTED. The top-level `installer --preflight` remains read-only diagnostics.
+> **Project status (2026-11-08):** The current integration branch contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. Four physical installer trials are recorded; the fourth completed all installer stages, generated the UKI, and exited 0. Actual boot from the internal SSD and the separate First Boot acceptance test remain NOT VERIFIED. Desktop, hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
 
 ## AI-assisted development
 
@@ -10,8 +10,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ## Goals
 - One interactive installer launched from the shell of an official, unmodified Arch Linux ISO booted from USB.
-- Retrieve the latest code from the repository's `main` branch, display the resolved commit SHA, and review the relevant shell code before invoking the installer.
-- Carefully verified encrypted ext4 system with swapfile and hibernation readiness.
+- Retrieve the latest code from the repository's `main` branch, display the resolved commit SHA, and review relevant shell code before invoking the installer.
+- Carefully verified encrypted ext4 system with swapfile and future hibernation readiness.
 - Hyprland with Caelestia Shell / Quickshell, subject to verified upstream compatibility.
 - ThinkPad hardware, power, and network configuration based on actual device inventory.
 - Optional AUR workflow and selective BlackArch integration.
@@ -21,7 +21,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 - `installer` — diagnostic-only entry point with `--help` and `--preflight`.
 - `scripts/bootstrap-archiso.sh` — reviewed Arch ISO bootstrap that fetches latest `main`, displays its commit SHA, and requires source review, a passing read-only live-readiness gate, and a second exact acknowledgement before launching the destructive installer.
-- `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; physical X280 installation remains NOT TESTED.
+- `scripts/install-arch-x280.sh` — initial destructive encrypted Arch base installer; four physical trials are documented, with trial 4 completing successfully. First Boot remains unverified.
 - `config/hardware/thinkpad-x280.conf` — declarative target profile, never disk-selection authority.
 - `lib/inventory.sh` — read-only runtime host discovery and profile comparison.
 - `lib/storage.sh` — read-only whole-disk discovery and fresh target validation; no partition/format/mount operations.
@@ -29,7 +29,7 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 - `lib/storage-execution-dry-run.sh` — in-memory operation manifest and failure simulator.
 - `lib/storage-execution-boundary.sh` — mock-only execution orchestration with per-operation identity probes and partial-failure ledger; it does not open or lock a real block device.
 - `native/storage-handle.c` and `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` — Stage 8 read-only native descriptor-holder prototype and its canonical design/limitations; hardware behavior and executor integration remain unverified.
-- `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Other desktop, hardware tuning, package/security policy, validation, and reporting modules remain PLANNED.
+- `lib/base-system.sh` — guarded `pacstrap -K` base package installation and UUID-based fstab generation for an already mounted target. Desktop, hardware tuning, package/security policy, validation, and reporting modules remain PLANNED.
 - `tests/run.sh` — canonical fixture-based test runner; `tests/helpers/` contains shared test-only fixtures. Test dependencies are `bash`, `jq`, and `python3`.
 - `scripts/k41-live-validation.sh` — canonical read-only Live Validation entry point; combines strict Arch ISO/X280 readiness, host diagnostics, static analysis, tests, SSD identity/topology validation, installer diagnostics, and timestamped evidence.
 - `scripts/x280-install-readiness.sh` and `scripts/live-validation.sh` — backward-compatible wrappers; both delegate to the canonical validator without duplicate implementations.
@@ -39,12 +39,14 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 1. Boot the official Arch Linux ISO from USB.
 2. Connect to the network.
 3. Obtain and independently review `scripts/bootstrap-archiso.sh` from the repository before executing it; follow [Arch ISO bootstrap and source-review gate](docs/16-ARCHISO-BOOTSTRAP.md).
-4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through the relevant source files, requires an exact SHA-bound acknowledgement, runs the read-only readiness gate, and requires a second exact acknowledgement before launching the installer.
-5. After readiness passes, inspect the installer’s target-specific storage plan, verify the exact internal SSD identity and your backup/recovery arrangements, and only then enter the exact plan-bound confirmation. This is the point at which the selected SSD is erased.
+4. Run the bootstrap from the official ISO shell. It fetches latest `main`, displays the resolved commit SHA, pages through relevant source files, requires an exact SHA-bound acknowledgement, runs the read-only readiness gate, and requires a second exact acknowledgement before launching the installer.
+5. After readiness passes, inspect the installer’s target-specific storage plan, verify the exact internal SSD identity and backup/recovery arrangements, and only then enter the exact plan-bound confirmation. This is the point at which the selected SSD is erased.
 6. The current initial installer configures an encrypted base Arch system only; desktop and optional components are not included.
 7. Validate outcomes and create `AFTER-INSTALL-X280-K41.txt`.
 
-**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` is destructive and has not been validated on the physical X280. Do not run it until the documented review, test, and hardware-readiness gates are satisfied.
+**Trial-reset policy:** if any physical trial fails, preserve its evidence, reboot into the Arch ISO, and restart the full installer from its first stage. Do not use the legacy continuation utility. Each fresh trial is destructive and requires exact target revalidation and explicit confirmation.
+
+**Important:** `./installer --preflight` is read-only and is not the destructive installer. `scripts/install-arch-x280.sh` is destructive. A successful installer exit and generated UKI do not prove that the physical laptop boots successfully.
 
 ## Documentation index
 

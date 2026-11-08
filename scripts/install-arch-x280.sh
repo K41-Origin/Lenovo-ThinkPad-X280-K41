@@ -2,7 +2,9 @@
 # Interactive Arch Linux installation for the Lenovo ThinkPad X280.
 # DESTRUCTIVE: erases the selected whole NVMe disk after an exact plan confirmation.
 set -Eeuo pipefail
-umask 077
+# Keep normal system directory modes for pacstrap and target configuration.
+# Diagnostic files/directories are secured explicitly in installer::init_logging.
+umask 022
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 # shellcheck source=lib/common.sh
@@ -31,27 +33,34 @@ installer::stage() {
   printf '\n[STAGE] %s — %s\n' "$current_stage" "$*"
 }
 installer::init_logging() {
-  local root timestamp suffix=0
+  local root timestamp suffix=0 fs_type
   command -v tee >/dev/null 2>&1 || { printf 'FATAL: tee tidak tersedia; logging wajib tidak dapat diinisialisasi.\n' >&2; return 1; }
   command -v install >/dev/null 2>&1 || { printf 'FATAL: install tidak tersedia; direktori log aman tidak dapat dibuat.\n' >&2; return 1; }
-  root=/var/log/x280-installer
-  if ! install -d -o root -g root -m 0700 "$root" 2>/dev/null; then
-    root=/run/x280-installer
-    install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: tidak dapat membuat direktori log root-only di /var/log maupun /run.\n' >&2; return 1; }
-    printf 'WARNING: /var/log tidak dapat digunakan; log disimpan sementara di /run.\n' >&2
-  fi
+  command -v findmnt >/dev/null 2>&1 || { printf 'FATAL: findmnt tidak tersedia; filesystem checkout tidak dapat diverifikasi.\n' >&2; return 1; }
+  [[ -d /run/archiso ]] || { printf 'FATAL: installer hanya boleh berjalan dari Arch Linux ISO.\n' >&2; return 1; }
+  fs_type="$(findmnt -nro FSTYPE -T "$ROOT")" || { printf 'FATAL: filesystem checkout tidak dapat diidentifikasi.\n' >&2; return 1; }
+  case "$fs_type" in
+    overlay|tmpfs) ;;
+    *) printf 'FATAL: checkout harus berada pada overlay/tmpfs Arch ISO, ditemukan: %s.\n' "$fs_type" >&2; return 1 ;;
+  esac
+  root="$ROOT/reports/installer"
+  install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: direktori log root-only di dalam repositori tidak dapat dibuat.\n' >&2; return 1; }
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   installer_log_dir="$root/$timestamp"
-  while ! mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; do
+  while :; do
+    if mkdir -m 0700 -- "$installer_log_dir" 2>/dev/null; then
+      break
+    fi
+    [[ -e $installer_log_dir ]] || { printf 'FATAL: direktori log tidak dapat dibuat: %s\n' "$installer_log_dir" >&2; return 1; }
     suffix=$((suffix + 1))
     installer_log_dir="$root/$timestamp-$suffix"
   done
   installer_log_file="$installer_log_dir/installer.log"
-  : >"$installer_log_file"
+  : >"$installer_log_file" || return 1
   chmod 0600 "$installer_log_file" || return 1
   # No xtrace is enabled. Interactive secrets are read from the controlling
   # terminal and are never passed as command arguments.
-  exec > >(tee -a "$installer_log_file") 2>&1
+  exec > >(tee -a "$installer_log_file") 2>&1 || return 1
   printf 'X280 installer diagnostic log\n'
   printf 'Started (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf 'Kernel: %s\nArchitecture: %s\n' "$(uname -sr)" "$(uname -m)"
@@ -227,12 +236,13 @@ mkinitcpio -P
 [[ -s /efi/EFI/Linux/arch-linux.efi ]]
 [[ -s /etc/kernel/cmdline ]]
 grep -q '^rd.luks.name=' /etc/kernel/cmdline
-grep -q '^root=/dev/mapper/cryptroot' /etc/kernel/cmdline
+grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' /etc/kernel/cmdline
 CHROOT
 
 [[ -s /mnt/etc/fstab ]] || die "Target fstab tidak ditemukan atau kosong."
 [[ -s /mnt/efi/EFI/Linux/arch-linux.efi ]] || die "UKI tidak berhasil dibuat."
-grep -qE '^[^#].+[[:space:]]+/swapfile[[:space:]]+swap[[:space:]]' /mnt/etc/fstab || die "Entri swapfile tidak ditemukan di fstab."
+swap_fstab_count="$(awk '$0 !~ /^[[:space:]]*#/ && NF >= 3 && $1 == "/swapfile" && $2 == "none" && $3 == "swap" { count++ } END { print count + 0 }' /mnt/etc/fstab)" || die "Tidak dapat memvalidasi entri swapfile di fstab."
+[[ $swap_fstab_count == 1 ]] || die "Diharapkan tepat satu entri '/swapfile none swap'; ditemukan: $swap_fstab_count."
 [[ -s /mnt/etc/hostname ]] || die "Hostname target tidak terkonfigurasi."
 [[ -s /mnt/etc/locale.conf ]] || die "Locale target tidak terkonfigurasi."
 [[ -L /mnt/etc/localtime ]] || die "Timezone target tidak terkonfigurasi."

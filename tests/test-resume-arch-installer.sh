@@ -10,6 +10,18 @@ if grep -Eq '^[[:space:]]*(run_step[[:space:]].*[[:space:]])?(wipefs|pacstrap|mk
   exit 1
 fi
 grep -Fq 'cryptsetup open "$root_part" cryptroot' "$script"
+grep -Fq 'lsblk -nrpo MOUNTPOINTS "$disk"' "$script"
+grep -Fq '[[ -z ${mounted_paths//[[:space:]]/} ]]' "$script"
+grep -Fq '! mountpoint -q "$ESP_MOUNT"' "$script"
+grep -Fq 'base="$ROOT/reports/installer"' "$script"
+grep -Fq 'findmnt -nro FSTYPE -T "$ROOT"' "$script"
+if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$script"; then
+  printf 'FAIL: continuation logs must remain inside the repository checkout\\n' >&2
+  exit 1
+fi
+grep -Fq '[[ -e $log_dir ]] ||' "$script"
+grep -Fq ': >"$LOG_FILE" || return 1' "$script"
+grep -Fq 'chmod 0600 "$LOG_FILE" || return 1' "$script"
 grep -Fq 'e2fsck -fn "$MAPPER"' "$script"
 grep -Fq "base_system::generate_fstab" "$script"
 grep -Fq 'pacman --root "$ROOT_MOUNT" -Q base linux linux-firmware' "$script"
