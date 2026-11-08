@@ -104,3 +104,39 @@ The collector is read-only: it does not install packages, start/stop services, e
 
 Before committing the report, inspect all three files. Journal output and hardware inventory can contain machine-specific details; redact anything private. Then commit and push the report directory so it can be reviewed. Do not upload passwords, tokens, private keys, Wi-Fi credentials, or unrelated personal logs. The collection result only means the script completed; the manual checklist and diagnostic evidence determine physical acceptance.
 
+
+
+## Focused Caelestia runtime test
+
+The general desktop collector confirms package and process state, but it does not attempt to start Caelestia. For a focused runtime check, update the checkout and run this from a terminal inside the active Hyprland session:
+
+```bash
+git pull --ff-only
+bash scripts/test-caelestia-x280.sh
+```
+
+The focused collector runs as the regular user and creates `reports/caelestia-diagnostics/<UTC timestamp>/` with:
+
+- `summary.md` — session state, whether Caelestia was already running, and whether the test attempted startup.
+- `diagnostics.txt` — installed package versions, CLI help, IPC command discovery, process state, Quickshell log output, and recent user journal errors.
+- `manual-checklist.md` — visual and interactive checks that cannot be reliably automated.
+
+If Caelestia is already running, the script leaves it untouched. If it is not running, the script attempts `caelestia shell -d`, waits briefly, checks runtime state, and deliberately leaves it running for manual UI testing. It does not kill the shell, install packages, edit configuration, or invoke privileged commands. A successful collection is not by itself proof that the UI works.
+
+Fill in the manual checklist, inspect all report files for private data, then commit and push the report directory. Do not upload tokens, credentials, private keys, or unrelated personal logs.
+
+### Stop Caelestia manually
+
+To close only the Caelestia shell while keeping Hyprland running, use:
+
+```bash
+caelestia shell --kill
+```
+
+If that CLI action is unavailable, use Quickshell directly:
+
+```bash
+qs -c caelestia kill
+```
+
+Upstream usage references: the Caelestia shell README documents `caelestia shell -d` as the preferred start command, and the upstream discussion documents `caelestia shell --kill` / Quickshell kill as stop methods.
