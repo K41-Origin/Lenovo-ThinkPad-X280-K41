@@ -3,7 +3,7 @@
 ## Status and scope
 
 - Initial destructive entry point: `scripts/install-arch-x280.sh`.
-- Interrupted-run continuation: `scripts/resume-arch-x280.sh` on the recovery branch; it is restricted to the recorded post-pacstrap/pre-configuration checkpoint.
+- Interrupted-run continuation: `scripts/resume-arch-x280.sh` on `main`; it is restricted to the recorded post-pacstrap/pre-configuration checkpoint.
 - Implementation: IMPLEMENTED on `main`.
 - Automated evidence: TESTED on the specific commits/runs recorded in [12 — Implementation Status](12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md); the loop integration covers selected utilities against a disposable loop image.
 - VM installation testing: OUT OF SCOPE by owner decision; no VM test will be performed.
@@ -62,7 +62,7 @@ The fstab implementation has since been corrected to preserve comments and unrel
 
 The laptop was powered off after that failure. The intended next operation is **continuation**, not a fresh installation:
 
-1. Pull branch `fix/installer-diagnostics-stacked-2026-11-08` at the latest reviewed commit.
+1. Obtain the latest reviewed `main` checkout from the official Arch ISO workflow and inspect `scripts/resume-arch-x280.sh` at the displayed commit SHA before execution. The continuation script is part of `main`; no separate recovery branch is required.
 2. Do **not** run `scripts/bootstrap-archiso.sh`, `scripts/x280-install-readiness.sh`, `scripts/validate-live-storage.sh`, or `scripts/install-arch-x280.sh` for this already-partitioned target. The old blank-disk readiness gate is not applicable after the disk has been initialized, and the original installer would erase it again.
 3. Run `bash scripts/resume-arch-x280.sh` as root from the official Arch ISO in UEFI mode.
 4. The continuation script performs a narrow, read-only identity/layout/filesystem check for the exact configured SSD and existing GPT/ESP/LUKS2/ext4 layout. It does not repeat the broad readiness suite, partition, format, or run pacstrap. It unlocks the existing LUKS volume, checks ext4 read-only, mounts the existing filesystems, verifies the base packages, safely completes fstab, then proceeds with target configuration and UKI boot setup.
