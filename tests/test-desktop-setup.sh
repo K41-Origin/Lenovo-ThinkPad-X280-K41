@@ -14,6 +14,15 @@ pass 'desktop diagnostic collector passes bash -n'
 [[ -f $ROOT/scripts/test-caelestia-x280.sh ]] || fail 'Caelestia diagnostic collector missing'
 bash -n "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia diagnostic collector syntax invalid'
 pass 'Caelestia diagnostic collector passes bash -n'
+[[ -f $ROOT/scripts/fix-caelestia-cache-permissions-x280.sh ]] || fail 'Caelestia cache repair script missing'
+bash -n "$ROOT/scripts/fix-caelestia-cache-permissions-x280.sh" || fail 'Caelestia cache repair script syntax invalid'
+for token in '--apply' 'EUID == 0' '! -L $cache' 'owner != 0:0' 'sudo chown --no-dereference' 'new_owner'; do
+  grep -Fq -- "$token" "$ROOT/scripts/fix-caelestia-cache-permissions-x280.sh" || fail "missing cache repair safety guard: $token"
+done
+if grep -Eq 'chown .*-[Rr]|chmod .*-[Rr]' "$ROOT/scripts/fix-caelestia-cache-permissions-x280.sh"; then
+  fail 'cache repair must not perform recursive ownership or permission changes'
+fi
+pass 'Caelestia cache repair script passes syntax and safety-contract checks'
 [[ -f $ROOT/scripts/test-caelestia-permissions-x280.sh ]] || fail 'Caelestia permissions diagnostic collector missing'
 bash -n "$ROOT/scripts/test-caelestia-permissions-x280.sh" || fail 'Caelestia permissions diagnostic collector syntax invalid'
 grep -Fq 'return 0' "$ROOT/scripts/test-caelestia-permissions-x280.sh" || fail 'permissions collector must continue after optional command failures'
