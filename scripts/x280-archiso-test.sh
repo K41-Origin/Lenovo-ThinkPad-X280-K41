@@ -28,7 +28,10 @@ if [[ ${1-} == --help || ${1-} == -h ]]; then
   usage
   exit 0
 fi
-[[ $# -eq 0 ]] || { usage >&2; exit 2; }
+[[ $# -eq 0 ]] || {
+  usage >&2
+  exit 2
+}
 
 fail() {
   printf 'FAIL: %s\n' "$*" >&2
@@ -51,11 +54,11 @@ report="/run/x280-archiso-storage-test-$timestamp.log"
 chmod 600 "$report"
 exec > >(tee -a "$report") 2>&1
 
-vendor="$(< /sys/class/dmi/id/sys_vendor)"
-product="$(< /sys/class/dmi/id/product_name)"
+vendor="$(</sys/class/dmi/id/sys_vendor)"
+product="$(</sys/class/dmi/id/product_name)"
 product_version=''
 if [[ -r /sys/class/dmi/id/product_version ]]; then
-  product_version="$(< /sys/class/dmi/id/product_version)"
+  product_version="$(</sys/class/dmi/id/product_version)"
 fi
 
 printf '%s\n' 'ThinkPad X280 — supplemental Arch ISO evidence'
