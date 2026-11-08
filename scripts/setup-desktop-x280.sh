@@ -104,7 +104,7 @@ id "$SUDO_USER" >/dev/null 2>&1 || die 'SUDO_USER does not identify an existing 
 id -nG "$SUDO_USER" | tr ' ' '\n' | grep -qx wheel || die 'The desktop account must belong to wheel.'
 if [[ -n ${WAYLAND_DISPLAY:-} || -n ${DISPLAY:-} ]]; then die 'Run from a TTY, not from inside an active graphical session.'; fi
 
-proceed='' install_caelestia='' approve_aur=''
+proceed='' install_caelestia=''
 desktop_user=$SUDO_USER
 desktop_home=$(getent passwd "$desktop_user" | cut -d: -f6)
 [[ -n $desktop_home && -d $desktop_home ]] || die 'Could not resolve the desktop user home directory.'
@@ -121,17 +121,56 @@ its PKGBUILD will be shown for manual review and built as the regular user.
 NOTICE
 prompt_yes_no proceed 'Install Hyprland, Quickshell, audio, portal, and desktop utilities'
 [[ $proceed == yes ]] || die 'Cancelled without changes.'
+prompt_yes_no install_caelestia 'Install Caelestia Shell and its reviewed AUR dependencies'
 
 packages=(
-  hyprland quickshell xdg-desktop-portal xdg-desktop-portal-hyprland
+  hyprland xdg-desktop-portal xdg-desktop-portal-hyprland
   xdg-desktop-portal-gtk pipewire pipewire-audio pipewire-pulse wireplumber
   polkit hyprpolkitagent hyprlock wofi foot thunar firefox
   grim slurp wl-clipboard cliphist swappy brightnessctl playerctl
   pavucontrol xdg-user-dirs xorg-xwayland mesa vulkan-intel
   noto-fonts noto-fonts-emoji ttf-dejavu
 )
+if [[ $install_caelestia == yes ]]; then
+  # Caelestia's AUR metadata requires quickshell-git, which conflicts with
+  # the official quickshell package. Build tools/runtime dependencies come
+  # from configured signature-verified official repositories.
+  packages+=(base-devel git ddcutil libnotify dart-sass gpu-screen-recorder fuzzel)
+else
+  packages+=(quickshell)
+fi
 info 'Installing packages only from configured, signature-verified Arch repositories.'
 pacman -Syu --needed "${packages[@]}"
+
+# Build the AUR dependency chain explicitly. makepkg --syncdeps resolves
+# dependencies from configured pacman repositories; it does not build AUR packages.
+if [[ $install_caelestia == yes ]]; then
+  aur_root="$desktop_home/.cache/k41-aur/$timestamp"
+  install -d -m 0700 -o "$desktop_user" -g "$(id -gn "$desktop_user")" "$aur_root"
+
+  build_aur_package() {
+    local package_name=$1 aur_dir="$aur_root/$1" commit
+    runuser -u "$desktop_user" -- git clone "https://aur.archlinux.org/${package_name}.git" "$aur_dir"
+    [[ -f $aur_dir/PKGBUILD && -f $aur_dir/.SRCINFO ]] || die "AUR checkout for $package_name is missing PKGBUILD or .SRCINFO."
+    commit=$(git -C "$aur_dir" rev-parse HEAD)
+    printf '\n===== AUR package review: %s (commit %s) =====\n' "$package_name" "$commit"
+    printf '\n===== PKGBUILD: %s =====\n' "$package_name"
+    cat "$aur_dir/PKGBUILD"
+    printf '\n===== .SRCINFO: %s =====\n' "$package_name"
+    cat "$aur_dir/.SRCINFO"
+    prompt_yes_no approve_aur "Approve this exact $package_name recipe and dependency metadata"
+    [[ $approve_aur == yes ]] || die "AUR package $package_name was not approved; stopping before its build."
+    runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --syncdeps --install' _ "$aur_dir"
+  }
+
+  # The stable Caelestia shell metadata requires these AUR runtime dependencies.
+  for package_name in quickshell-git caelestia-cli caelestia-shell; do
+    build_aur_package "$package_name"
+  done
+  pacman -Q quickshell-git caelestia-cli caelestia-shell
+else
+  info 'Caelestia AUR installation skipped; the official Quickshell package will be used.'
+fi
 
 install -d -m 0755 -o "$desktop_user" -g "$(id -gn "$desktop_user")" "$desktop_home/.config/hypr"
 config_tmp=$(mktemp "$desktop_home/.config/hypr/.hyprland.conf.k41.XXXXXX")
@@ -201,29 +240,8 @@ chmod 0644 "$config_tmp"
 chown "$desktop_user:$(id -gn "$desktop_user")" "$config_tmp"
 mv -- "$config_tmp" "$desktop_home/.config/hypr/hyprland.conf"
 
-# AUR is never trusted implicitly: show the recipe, require an explicit review decision,
-# and build/install as the unprivileged account (makepkg itself refuses root).
-prompt_yes_no install_caelestia 'Fetch the stable caelestia-shell AUR recipe for review and build it'
-if [[ $install_caelestia == yes ]]; then
-  command -v git >/dev/null 2>&1 || pacman -S --needed git
-  aur_dir="$desktop_home/.cache/k41-aur/caelestia-shell"
-  [[ ! -e $aur_dir ]] || die "AUR checkout already exists at $aur_dir; inspect/remove it manually before retry."
-  install -d -m 0755 -o "$desktop_user" -g "$(id -gn "$desktop_user")" "$(dirname "$aur_dir")"
-  runuser -u "$desktop_user" -- git clone https://aur.archlinux.org/caelestia-shell.git "$aur_dir"
-  [[ -f $aur_dir/PKGBUILD && -f $aur_dir/.SRCINFO ]] || die 'AUR checkout is missing PKGBUILD or .SRCINFO.'
-  printf '\n===== AUR PKGBUILD (review before build) =====\n'
-  sed -n '1,240p' "$aur_dir/PKGBUILD"
-  printf '\n===== AUR .SRCINFO =====\n'
-  sed -n '1,240p' "$aur_dir/.SRCINFO"
-  prompt_yes_no approve_aur 'Do you approve this exact AUR recipe and its dependencies'
-  [[ $approve_aur == yes ]] || die "AUR build declined. Official Hyprland/Quickshell foundation and config remain installed."
-  runuser -u "$desktop_user" -- bash -lc "cd '$aur_dir' && makepkg --syncdeps --install"
-else
-  info 'Caelestia AUR installation skipped by choice; Hyprland + Quickshell remain available for validation.'
-fi
-
 if pacman -Qq caelestia-shell >/dev/null 2>&1; then
-  printf '%s\n' 'exec-once = qs -c caelestia' >>"$desktop_home/.config/hypr/hyprland.conf"
+  printf '%s\n' 'exec-once = caelestia shell -d' >>"$desktop_home/.config/hypr/hyprland.conf"
 fi
 
 # Validate files and binaries without starting a graphical session or changing the login target.
