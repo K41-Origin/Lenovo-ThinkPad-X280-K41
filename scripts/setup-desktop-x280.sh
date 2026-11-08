@@ -12,6 +12,88 @@ prompt_yes_no() {
   [[ $answer == [yY] ]] && printf -v "$__result" yes || printf -v "$__result" no
 }
 
+# Every invocation gets a private, timestamped report, including preflight failures.
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+report_root="$repo_root/reports/desktop"
+started_utc="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+mkdir -p -- "$report_root"
+run_dir="$report_root/$timestamp"
+suffix=0
+while ! mkdir -- "$run_dir" 2>/dev/null; do
+  suffix=$((suffix + 1))
+  run_dir="$report_root/$timestamp-$suffix"
+done
+chmod 0700 "$run_dir"
+setup_log="$run_dir/setup.log"
+exec > >(tee -a "$setup_log") 2>&1
+chmod 0600 "$setup_log"
+
+write_system_snapshot() {
+  {
+    printf 'Captured (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    printf 'Repository: %s\n' "$repo_root"
+    printf 'Commit: '
+    git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf 'unknown\n'
+    printf 'Working tree: '
+    git -C "$repo_root" status --short 2>/dev/null || printf 'unavailable\n'
+    printf 'Hostname: %s\n' "$(hostname 2>/dev/null || printf unknown)"
+    printf 'Kernel: %s\n' "$(uname -sr 2>/dev/null || printf unknown)"
+    printf 'Architecture: %s\n' "$(uname -m 2>/dev/null || printf unknown)"
+    printf 'Arch release: '
+    if [[ -r /etc/arch-release ]]; then cat /etc/arch-release; else printf 'unavailable\n'; fi
+    printf 'Invoker: %s\n' "${SUDO_USER:-unknown}"
+    printf 'Script: %s\n' "$script_dir/setup-desktop-x280.sh"
+  } >"$run_dir/system-info.txt"
+  chmod 0600 "$run_dir/system-info.txt"
+}
+
+capture_packages() {
+  local destination=$1
+  if command -v pacman >/dev/null 2>&1; then
+    pacman -Q >"$destination" 2>&1 || printf 'ERROR: pacman -Q failed (exit %s)\n' "$?" >>"$destination"
+  else
+    printf 'pacman unavailable\n' >"$destination"
+  fi
+  chmod 0600 "$destination"
+}
+
+write_system_snapshot
+capture_packages "$run_dir/packages-before.txt"
+printf 'Desktop setup attempt started: %s\n' "$run_dir"
+printf 'Setup log: %s\n' "$setup_log"
+
+on_setup_error() {
+  local rc=$? line=$1 command=$2
+  printf 'ERROR: command failed (exit %s) at line %s: %s\n' "$rc" "$line" "$command" >&2
+  exit "$rc"
+}
+on_setup_exit() {
+  local rc=$?
+  trap - EXIT
+  capture_packages "$run_dir/packages-after.txt"
+  {
+    printf '# Desktop setup attempt\n\n'
+    printf -- '- Started (UTC): %s\n' "$started_utc"
+    printf -- '- Finished (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    printf -- '- Exit status: %s\n' "$rc"
+    if ((rc == 0)); then printf -- '- Result: **PASS**\n'; else printf -- '- Result: **FAIL**\n'; fi
+    printf -- '- Repository commit: '
+    git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf 'unknown\n'
+    printf -- '- Log: `setup.log`\n'
+    printf -- '- System snapshot: `system-info.txt`\n'
+    printf -- '- Package snapshots: `packages-before.txt`, `packages-after.txt`\n'
+    printf '\nA successful setup-script exit confirms only that this script completed. It does not prove a physical Hyprland session or hardware behavior. Review and redact reports before sharing.\n'
+  } >"$run_dir/summary.md"
+  chmod 0600 "$run_dir/summary.md"
+  printf 'Desktop setup report: %s\n' "$run_dir"
+  printf 'Desktop setup exit status: %s\n' "$rc"
+  exit "$rc"
+}
+trap 'on_setup_error "$?" "$LINENO" "$BASH_COMMAND"' ERR
+trap on_setup_exit EXIT
+
 (( EUID == 0 )) || die 'Run with sudo from the installed Arch system.'
 [[ -f /etc/arch-release ]] || die 'This must run on the installed Arch Linux system, not the Arch ISO or a chroot.'
 [[ $(uname -m) == x86_64 ]] || die 'Only x86_64 is supported.'
