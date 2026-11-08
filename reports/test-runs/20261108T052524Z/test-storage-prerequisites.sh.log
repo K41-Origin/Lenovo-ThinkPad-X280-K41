@@ -1,0 +1,3 @@
+PASS: live UEFI, tool, target identity, unused-state, and topology evidence is bound to the plan
+PASS: failed live checks never produce a passed prerequisite snapshot
+PASS: changed stable identity cannot bind live prerequisites
