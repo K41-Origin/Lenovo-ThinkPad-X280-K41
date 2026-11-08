@@ -107,4 +107,4 @@ This logging does not change the destructive boundary: final read-only revalidat
 
 ## Desktop setup attempt evidence
 
-The desktop setup script is being extended on branch `fix/desktop-setup-logging` to create `reports/desktop/<UTC timestamp>/` for every invocation. The proposed report includes combined `setup.log`, `summary.md`, `system-info.txt`, and before/after `pacman -Q` snapshots. Reports are root-only (directory 0700, files 0600), local-only, and not committed automatically. After the change is merged, inspect a run with `sudo less reports/desktop/<timestamp>/setup.log`. A script PASS is not physical desktop acceptance.
+The desktop setup implementation and per-attempt reporting are already present on `main`. The canonical procedure, report contents, privacy boundary, and physical acceptance checklist are maintained in [X280 Desktop Environment — Physical Test Preparation](../docs/19-X280-DESKTOP-TEST.md). A setup-script PASS is not physical desktop acceptance; current evidence and unresolved checks are summarized only in [Implementation Status](../docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md).
