@@ -11,6 +11,7 @@ tests=(
   tests/test-desktop-setup.sh
   tests/test-hardware-audit.sh
   tests/test-power-management-audit.sh
+  tests/test-power-profile-selector.sh
   tests/test-bootstrap-archiso.sh
   tests/test-common-preflight.sh
   tests/test-installer-entry.sh
