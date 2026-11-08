@@ -108,6 +108,8 @@ The installer sources libraries as functions; sourcing is not equivalent to exec
 | `reports/test-runs/<timestamp>/` | Local canonical test runner summaries and per-test logs | Exact checkout/host only; inspect for sensitive host data before sharing |
 | `reports/live-readiness/<timestamp>/` | Read-only readiness summary and diagnostics | PASS is not install authorization; review redaction before publication |
 | `reports/live-validation/` | Live validation snapshots | Dated host evidence; not necessarily current |
+| `reports/x280-archiso-test/` | Supplemental X280 Arch ISO evidence logs | Repository-local, private hardware inventory; review before sharing |
+| `reports/test-runs/` | Canonical test-run logs and summaries | Repository-local test evidence; review before sharing |
 | `reports/first-boot/` | Expected destination for first-boot evidence | No physical first-boot report was present in the inspected tree |
 | `reports/x280-archiso-storage-test-*.log` | Output of the physical Arch ISO storage test | Historical evidence; must be tied to exact environment and reviewed |
 | `docs/archive/` | Historical document snapshots | Never treat as current requirements, CI state, or procedure |
