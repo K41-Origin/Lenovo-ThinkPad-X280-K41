@@ -28,7 +28,7 @@ Approved target direction:
 9. Installs systemd-boot and configures mkinitcpio with `HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)`; kernel command line uses `rd.luks.name=<LUKS-UUID>=cryptroot root=/dev/mapper/cryptroot rw`.
 10. Generates the default UKI, checks expected configuration artifacts, and does not reboot automatically.
 
-This describes the current source path only. It does not establish successful end-to-end execution, a bootable result, or physical-hardware safety. See [Stage 9 installer record](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
+This describes the current source path. Physical trial 4 confirms installer-process completion and UKI generation, but does not establish successful boot, LUKS unlock, or full physical-hardware acceptance. See [Stage 9 installer record](15-ARCH-INSTALLER-INITIAL-EXECUTION.md).
 
 ## Mandatory safety gates
 
