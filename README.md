@@ -2,7 +2,7 @@
 
 A personal, modular, security-conscious Arch Linux installation and setup project for the Lenovo ThinkPad X280.
 
-> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. The latest physical First Boot report records 14 PASS, 0 FAIL, and 0 SKIP, including verified owner-only EFI permissions. PR #23 and #25 merged the separately invoked Hyprland/Quickshell desktop setup and per-attempt logs. Its first physical attempt installed official desktop packages but failed during Caelestia AUR packaging because `base-devel` tools were missing; a follow-up correction also addresses the shell's AUR dependency chain. Physical desktop acceptance remains pending. Hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
+> **Project status (2026-11-08):** `main` contains the initial destructive X280 base installer and the reviewed Arch ISO bootstrap gate. The latest physical First Boot report records 14 PASS, 0 FAIL, and 0 SKIP, including verified owner-only EFI permissions. PR #23, #25, and #26 merged the separately invoked Hyprland/Quickshell desktop setup, per-attempt logs, and Caelestia AUR dependency handling. The first physical attempt installed official desktop packages but failed during Caelestia AUR packaging because `base-devel` tools were missing. The correction adds the build toolchain and explicitly builds the AUR dependency chain; CI passed for the exact PR head. Physical AUR build and desktop acceptance remain pending. Hardware tuning, hibernation/resume, and optional BlackArch integration remain PLANNED.
 
 ## AI-assisted development
 
