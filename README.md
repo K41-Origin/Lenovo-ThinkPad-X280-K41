@@ -129,3 +129,14 @@ See [implementation status and changelog](docs/12-IMPLEMENTATION-STATUS-AND-CHAN
 
 ## License
 See [LICENSE](LICENSE).
+
+
+## Approved project execution order
+
+The active work sequence is:
+
+1. **Desktop functional validation** — complete manual and automated acceptance of Hyprland, Caelestia/Quickshell, display, input devices, audio, networking, portals, locking, and session recovery.
+2. **Optional software components** — review and implement only explicitly selected optional components, including selective BlackArch tools if still required.
+3. **Final hardware and system customization** — defer all X280 hardware/performance tuning, power and battery tuning, thermal optimization, suspend/hibernate/resume testing, and extended system-stability testing until the final project stage.
+
+Do not start the final hardware/system customization stage while desktop functional acceptance or required software integration remains incomplete. Battery and power-profile experimentation is not an active priority. This is a sequencing decision, not a claim that the deferred work is complete.
