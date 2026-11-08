@@ -68,6 +68,8 @@ Repository-wide AI contribution rules are defined in [`AGENTS.md`](AGENTS.md). A
 
 ### Historical record
 - [Historical repository audit (2026-11-07)](docs/18-REPOSITORY-AUDIT-HISTORICAL.md)
+- [Historical testing and acceptance record](docs/archive/11-TESTING-AND-ACCEPTANCE-HISTORY-2026-11-08.md)
+- [Historical implementation changelog](docs/archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md)
 
 Operational target values are stored in `config/hardware/thinkpad-x280.conf`. Runtime inventory independently reads the running host. A profile match is not authorization to partition a disk.
 
