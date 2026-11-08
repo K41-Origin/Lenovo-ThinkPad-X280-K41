@@ -45,6 +45,26 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   exit 2
 fi
 
+# On a real Arch ISO, keep report writes on the live overlay/RAM filesystem.
+# Refuse to create reports if the checkout resolves to a persistent filesystem.
+if [[ "$mode" == readiness && -d /run/archiso ]]; then
+  if ! command -v findmnt >/dev/null 2>&1; then
+    printf 'ERROR: findmnt is required to verify that repository reports stay off persistent disks.\n' >&2
+    exit 2
+  fi
+  report_fs="$(findmnt -T "$ROOT" -n -o FSTYPE 2>/dev/null)" || {
+    printf 'ERROR: cannot determine the repository filesystem; refusing to write reports.\n' >&2
+    exit 2
+  }
+  case "$report_fs" in
+    overlay|tmpfs) ;;
+    *)
+      printf 'ERROR: repository checkout is on filesystem %s; move it to the Arch ISO live filesystem before running readiness.\n' "$report_fs" >&2
+      exit 2
+      ;;
+  esac
+fi
+
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 started="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 branch="$(git branch --show-current 2>/dev/null || printf unknown)"
@@ -56,7 +76,8 @@ else
 fi
 
 make_report_dir() {
-  local root="$1" candidate="$root/$timestamp" suffix=0
+  local root="$1"
+  local candidate="$root/$timestamp" suffix=0
   mkdir -p -- "$root"
   while ! mkdir -- "$candidate" 2>/dev/null; do
     suffix=$((suffix + 1))
