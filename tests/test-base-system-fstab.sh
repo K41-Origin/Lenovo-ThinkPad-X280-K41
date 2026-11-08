@@ -54,7 +54,7 @@ fi
 [[ "$(cat "$target/etc/fstab")" == "$before" ]]
 
 # Verify the base package set explicitly selects providers to avoid pacstrap prompts.
-pacstrap() { printf '%s\\n' "$@" >"$tmpdir/pacstrap.args"; }
+pacstrap() { printf '%s\n' "$@" >"$tmpdir/pacstrap.args"; }
 base_system::install_packages "$target" 'INSTALL BASE SYSTEM'
 grep -Fxq iptables "$tmpdir/pacstrap.args"
 grep -Fxq mkinitcpio "$tmpdir/pacstrap.args"
