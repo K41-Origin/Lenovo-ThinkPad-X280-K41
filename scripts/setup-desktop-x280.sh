@@ -148,6 +148,17 @@ if [[ $install_caelestia == yes ]]; then
   aur_root="$desktop_home/.cache/k41-aur/$timestamp"
   install -d -m 0700 -o "$desktop_user" -g "$(id -gn "$desktop_user")" "$aur_root"
 
+  check_aur_dependencies() {
+    local package_name=$1 aur_dir=$2 dependency
+    while IFS= read -r dependency; do
+      dependency=${dependency%%[<=>]*}
+      [[ -n $dependency ]] || continue
+      if ! pacman -T "$dependency" >/dev/null 2>&1 && ! pacman -Si "$dependency" >/dev/null 2>&1; then
+        die "AUR package $package_name has unresolved dependency '$dependency'; it is neither installed nor available from configured official repositories. Extend and review the AUR dependency order before proceeding."
+      fi
+    done < <(awk -F ' = ' '/^[[:space:]]*(depends|makedepends)(_[[:alnum:]_]+)? = / { print $2 }' "$aur_dir/.SRCINFO" | sort -u)
+  }
+
   build_aur_package() {
     local package_name=$1 aur_dir="$aur_root/$1" commit
     runuser -u "$desktop_user" -- git clone "https://aur.archlinux.org/${package_name}.git" "$aur_dir"
@@ -159,6 +170,7 @@ if [[ $install_caelestia == yes ]]; then
     cat "$aur_dir/PKGBUILD"
     printf '\n===== .SRCINFO: %s =====\n' "$package_name"
     cat "$aur_dir/.SRCINFO"
+    check_aur_dependencies "$package_name" "$aur_dir"
     prompt_yes_no approve_aur "Approve this exact $package_name recipe and dependency metadata"
     [[ $approve_aur == yes ]] || die "AUR package $package_name was not approved; stopping before its build."
     runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --syncdeps --install' _ "$aur_dir"
