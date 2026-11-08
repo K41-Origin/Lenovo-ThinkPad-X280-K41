@@ -38,11 +38,19 @@ capture() {
     printf ' %q' "$@"
     printf '\n'
   } >>"$diag"
-  if "$@" >>"$diag" 2>&1; then
-    printf 'COMMAND EXIT: 0\n' >>"$diag"
+  if [[ $label == 'PulseAudio compatibility server' ]]; then
+    # pactl info includes the local PulseAudio authentication cookie; never publish it.
+    if "$@" 2>&1 | sed -E '/^Cookie:/d' >>"$diag"; then
+      printf 'COMMAND EXIT: 0\\n' >>"$diag"
+    else
+      rc=$?
+      printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\\n' "$rc" >>"$diag"
+    fi
+  elif "$@" >>"$diag" 2>&1; then
+    printf 'COMMAND EXIT: 0\\n' >>"$diag"
   else
     rc=$?
-    printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\n' "$rc" >>"$diag"
+    printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\\n' "$rc" >>"$diag"
   fi
 }
 
