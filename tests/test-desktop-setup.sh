@@ -37,6 +37,8 @@ done
 
 resolver_tokens=(
   'aur_metadata_dependencies'
+  'aur_metadata_supports_x86_64'
+  'makepkg --printsrcinfo'
   'Circular AUR dependency detected'
   'python-materialyoucolor3'
   'makepkg --syncdeps --install'
@@ -63,6 +65,7 @@ cat >"$fixture_dir/.SRCINFO" <<'SRCINFO'
 pkgbase = fixture-demo
 pkgver = 1.0
 pkgrel = 1
+arch = x86_64
 depends = libcava>=1.0
 makedepends_x86_64 = cmake
 depends_aarch64 = ignored-arm-only-dependency
@@ -74,6 +77,7 @@ source "$RESOLVER"
 [[ $(aur_dependency_name 'libcava>=1.0') == libcava ]] || fail 'versioned dependency normalization failed'
 aur_metadata_matches "$fixture_dir/.SRCINFO" fixture-demo || fail 'pkgname metadata matching failed'
 aur_metadata_matches "$fixture_dir/.SRCINFO" legacy-demo || fail 'provides metadata matching failed'
+aur_metadata_supports_x86_64 "$fixture_dir/.SRCINFO" || fail 'x86_64 metadata support check failed'
 [[ $(aur_metadata_dependencies "$fixture_dir/.SRCINFO" | paste -sd ' ' -) == 'cmake libcava>=1.0' ]] ||
   fail 'depends/makedepends extraction failed'
 
