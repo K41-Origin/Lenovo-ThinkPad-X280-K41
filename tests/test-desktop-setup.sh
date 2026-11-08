@@ -3,8 +3,8 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/setup-desktop-x280.sh"
 RESOLVER="$ROOT/lib/aur-dependency-resolver.sh"
-fail() { printf 'FAIL: %s\\n' "$*" >&2; exit 1; }
-pass() { printf 'PASS: %s\\n' "$*"; }
+fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
+pass() { printf 'PASS: %s\n' "$*"; }
 
 [[ -f $SCRIPT ]] || fail 'desktop setup script missing'
 [[ -f $RESOLVER ]] || fail 'AUR dependency resolver missing'
@@ -51,7 +51,7 @@ done
   fail 'desktop script contains duplicated Hyprland configuration blocks'
 [[ $(grep -Fc 'AUR package review: %s' "$RESOLVER") -eq 1 ]] ||
   fail 'resolver contains duplicated AUR review blocks'
-grep -Fq "printf '%s\\\\n' '- Log: setup.log'" "$SCRIPT" ||
+grep -Fq "printf '%s\\\n' '- Log: setup.log'" "$SCRIPT" ||
   fail 'desktop summary log entry formatting is invalid'
 grep -Fq 'command -v caelestia' "$SCRIPT" || fail 'Caelestia autostart lacks CLI validation'
 if grep -Eq 'systemctl enable.*(gdm|sddm|ly)|getty@tty1.*autologin|AutomaticLogin' "$SCRIPT"; then
@@ -79,4 +79,4 @@ aur_metadata_matches "$fixture_dir/.SRCINFO" legacy-demo || fail 'provides metad
 
 pass 'AUR metadata parsing, provider matching, and dependency normalization pass fixtures'
 pass 'desktop setup logging, recursive resolution, reviewed unprivileged builds, overwrite protection, and manual session start are present'
-printf '%s\\n' 'Desktop setup tests passed.'
+printf '%s\n' 'Desktop setup tests passed.'
