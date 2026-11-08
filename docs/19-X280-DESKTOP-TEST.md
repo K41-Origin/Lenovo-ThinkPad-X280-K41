@@ -39,7 +39,7 @@ The report directory and files are root-only (`0700`/`0600`) because the setup r
 
 A setup-script `PASS` means only that the setup script exited successfully. It does not mean the compositor or physical hardware has passed testing.
 
-## First physical test
+## Desktop setup procedure
 
 1. Confirm the latest First Boot report is PASS and the system has working network access.
 2. Review the script and the exact resolved repository commit.
@@ -51,7 +51,7 @@ A setup-script `PASS` means only that the setup script exited successfully. It d
 
 ## Current acceptance boundary
 
-Automated shell tests can validate script syntax and safety guards. They cannot prove that Hyprland, GPU acceleration, Caelestia, audio, portals, touchpad gestures, suspend/resume, or battery behavior work on the physical X280. Those remain NOT TESTED until the laptop owner runs the physical test and uploads the evidence.
+The latest physical diagnostics TESTED detection of an active Hyprland session, Caelestia/Quickshell process, and successful Caelestia IPC target discovery. They do not prove complete graphical or hardware acceptance. GPU acceleration quality, manual panel/launcher/dashboard/notification/widget interaction, wallpaper/theme behavior, audio and portal workflows, touchpad gestures, suspend/resume, and battery/thermal behavior remain NOT TESTED until exercised on the X280.
 
 
 ## Physical desktop setup attempts — historical record
@@ -104,24 +104,18 @@ Fill in the manual checklist, inspect all report files for private data, then co
 
 ### Stop Caelestia manually
 
-To close only the Caelestia shell while keeping Hyprland running, use:
-
-```bash
-caelestia shell --kill
-```
-
-If that CLI action is unavailable, use Quickshell directly:
+To close only the Caelestia shell while keeping Hyprland running, use the Quickshell subcommand confirmed by the captured local CLI help:
 
 ```bash
 qs -c caelestia kill
 ```
 
-Upstream usage references: the Caelestia shell README documents `caelestia shell -d` as the preferred start command, and the upstream discussion documents `caelestia shell --kill` / Quickshell kill as stop methods.
+Start it again with `caelestia shell -d`.
 
 
 ## Caelestia cache/state and Bluetooth diagnostics
 
-The previous runtime report recorded permission errors while creating Mesa, Caelestia image-cache, and ddcutil cache paths, plus a BlueZ D-Bus warning. Do not apply recursive `chmod` or `chown` fixes based only on those messages. First update the checkout and run the read-only collector from a terminal inside the active Hyprland session:
+This collector is for a new, unresolved issue only. The current cache ownership issue has already been investigated and the latest evidence is summarized below; do not rerun this collector just to repeat the same capture. The earlier runtime report recorded permission errors while creating Mesa, Caelestia image-cache, and ddcutil cache paths, plus a BlueZ D-Bus warning. Do not apply recursive `chmod` or `chown` fixes based only on those messages. If a new diagnostic is needed, update the checkout and run the read-only collector from a terminal inside the active Hyprland session:
 
 ```bash
 git pull --ff-only
