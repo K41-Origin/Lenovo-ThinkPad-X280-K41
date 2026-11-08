@@ -46,7 +46,7 @@ init_logging() {
     if mkdir -m 0700 -- "$log_dir" 2>/dev/null; then
       break
     fi
-    [[ -e $log_dir ]] || { printf 'FATAL: cannot create repository-local log directory: %s\\n' "$log_dir" >&2; return 1; }
+    [[ -e $log_dir ]] || { printf 'FATAL: cannot create repository-local log directory: %s\n' "$log_dir" >&2; return 1; }
     suffix=$((suffix + 1))
     log_dir="$base/resume-$timestamp-$suffix"
   done
