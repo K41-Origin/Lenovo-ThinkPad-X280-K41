@@ -61,6 +61,11 @@ if grep -Eq '^[[:space:]]*set[[:space:]]+-[^#]*x|^[[:space:]]*set[[:space:]]+-o[
   fail "installer enables shell xtrace, which could expose sensitive command arguments"
 fi
 pass "installer does not enable shell xtrace"
+grep -Fq 'umask 022' "$SCRIPT" || fail "installer must preserve standard target directory permissions for pacstrap"
+if grep -Fq 'umask 077' "$SCRIPT"; then
+  fail "installer must not propagate a restrictive log umask into the installed system"
+fi
+pass "installer uses a normal system umask while securing diagnostic files explicitly"
 log_init_line="$(grep -nF 'installer::init_logging || exit 1' "$SCRIPT" | cut -d: -f1)"
 erase_line_for_log="$(grep -nF 'wipefs --all --force' "$SCRIPT" | cut -d: -f1)"
 [[ -n $log_init_line && -n $erase_line_for_log ]] || fail "logging initialization or destructive step is absent"
