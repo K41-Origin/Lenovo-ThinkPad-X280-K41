@@ -89,10 +89,15 @@ resolve_and_build_aur_dependency() {
       die 'python-materialyoucolor3 must provide the legacy python-materialyoucolor dependency.'
   fi
 
-  while IFS= read -r dependency; do
+  # Materialize the dependency list before recursion. Keeping the loop's
+  # process-substitution stream on stdin leaks the next dependency line into
+  # nested makepkg/pacman prompts (e.g. "libpipewire" is read as [Y/n]).
+  local -a dependencies=()
+  mapfile -t dependencies < <(aur_metadata_dependencies "$aur_dir/.SRCINFO")
+  for dependency in "${dependencies[@]}"; do
     [[ -n $dependency ]] || continue
     resolve_and_build_aur_dependency "$dependency"
-  done < <(aur_metadata_dependencies "$aur_dir/.SRCINFO")
+  done
 
   commit=$(git -C "$aur_dir" rev-parse HEAD)
   printf '\n===== AUR package review: %s (commit %s) =====\n' "$package_name" "$commit"
@@ -108,7 +113,7 @@ resolve_and_build_aur_dependency() {
   # PKGBUILD parsing runs as the unprivileged builder, never as root.
   local generated_srcinfo
   generated_srcinfo=$(mktemp "$aur_dir/.SRCINFO.generated.XXXXXX")
-  runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --printsrcinfo' _ "$aur_dir" >"$generated_srcinfo"
+  runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --printsrcinfo' _ "$aur_dir" </dev/null >"$generated_srcinfo"
   if ! cmp -s "$aur_dir/.SRCINFO" "$generated_srcinfo"; then
     diff -u "$aur_dir/.SRCINFO" "$generated_srcinfo" || true
     rm -f -- "$generated_srcinfo"
@@ -119,7 +124,7 @@ resolve_and_build_aur_dependency() {
   # Build as the regular user. --syncdeps may install official repo dependencies;
   # all discovered AUR dependencies have already been built by the recursion.
   # shellcheck disable=SC2016 # The nested login shell must expand $1 after runuser.
-  runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --syncdeps --install' _ "$aur_dir"
+  runuser -u "$desktop_user" -- bash -lc 'cd -- "$1" && makepkg --syncdeps --install' _ "$aur_dir" </dev/tty
 
   if [[ $requested == python-materialyoucolor ]]; then
     pacman -T python-materialyoucolor >/dev/null 2>&1 ||
