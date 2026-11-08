@@ -8,6 +8,9 @@ pass() { printf 'PASS: %s\n' "$*"; }
 
 [[ -f $SCRIPT ]] || fail 'desktop setup script missing'
 [[ -f $RESOLVER ]] || fail 'AUR dependency resolver missing'
+[[ -f $ROOT/scripts/test-desktop-x280.sh ]] || fail 'desktop diagnostic collector missing'
+bash -n "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop diagnostic collector syntax invalid'
+pass 'desktop diagnostic collector passes bash -n'
 bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
 bash -n "$RESOLVER" || fail 'AUR dependency resolver syntax invalid'
 pass 'desktop setup script and resolver pass bash -n'
