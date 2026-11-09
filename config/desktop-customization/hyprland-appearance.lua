@@ -1,4 +1,6 @@
 -- K41 Obsidian Minimalism — appearance overlay.
+-- Keep the compositor cursor theme aligned with GTK and Caelestia.
+hl.env("XCURSOR_THEME", "Adwaita")
 -- Loaded at the end of the existing Hyprland Lua config by the apply script.
 -- Keep this module limited to visual settings; do not redefine keybinds or input.
 
