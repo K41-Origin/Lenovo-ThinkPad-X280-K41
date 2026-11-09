@@ -478,7 +478,9 @@ diagnostic 'CPU SMT state and topology' 'cpu-smt-state.txt' bash -c '
   lscpu -e=CPU,CORE,SOCKET,ONLINE 2>&1 || true
 '
 diagnostic 'CPU microcode revision and relevant flags' 'cpu-microcode.txt' bash -c '
-  grep -m1 -E "^(vendor_id|model name|microcode|flags)[[:space:]]*:" /proc/cpuinfo
+  grep -m1 "^model name" /proc/cpuinfo || true
+  grep -m1 "^microcode" /proc/cpuinfo || true
+  grep -m1 "^flags" /proc/cpuinfo || true
   printf "\\nPer-CPU microcode revisions:\\n"
   awk -F ": " "/^processor[[:space:]]*:|^microcode[[:space:]]*:/ {print}" /proc/cpuinfo
 '
@@ -532,9 +534,9 @@ diagnostic 'PAM fallback policy metadata and content' 'pam-other-policy.txt' bas
   namei -l /etc/pam.d/other 2>&1 || true
 '
 diagnostic 'Caelestia packaged PAM asset inventory' 'caelestia-pam-assets.txt' bash -c '
-  pacman -Ql caelestia-shell 2>&1 | awk "$2 ~ /pam[.]d/ {print $2}" |
-  while IFS= read -r file; do
-    [[ -n $file ]] || continue
+  pacman -Ql caelestia-shell 2>&1 |
+  while read -r package file; do
+    [[ $file == *pam.d* ]] || continue
     printf "\\n===== %s =====\\n" "$file"
     stat -c "mode=%a owner=%U:%G size=%s" "$file" 2>&1 || true
     if [[ -f $file ]]; then sed -n "1,160p" "$file"; fi
@@ -575,6 +577,7 @@ fi
   printf -- '- checks.tsv: machine-readable PASS/WARN/FAIL/SKIP results\n'
   printf -- '- validation.log: command output and detailed diagnostic collection\n'
   printf -- '- diagnostics.tsv and diagnostics.log: focused read-only hardware, package, firmware, service, and kernel evidence\n'
+  printf -- '- cpu-*.txt, bluetooth-*.txt, pam-*.txt, and caelestia-pam-assets.txt: targeted Stage 4 evidence\n'
   printf -- '- *.txt at report root: individual focused diagnostic captures\n'
   printf -- '- environment.txt: host/session metadata\n'
   printf -- '- desktop/ and caelestia/: supplemental diagnostic collectors\n'
