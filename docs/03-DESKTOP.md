@@ -20,7 +20,7 @@ Tahap ini menggunakan validasi otomatis berbasis kondisi sistem, proses, konfigu
 bash scripts/k41-desktop-validation.sh
 ```
 
-Script bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfigurasi, mengaktifkan/menonaktifkan service, atau me-restart desktop. Script hanya membuat laporan privat. Cakupan otomatis:
+Script bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfigurasi, mengaktifkan/menonaktifkan service, me-restart desktop, atau men-start Caelestia jika prosesnya tidak berjalan. Jika Caelestia tidak aktif, pemeriksaan IPC/log dan collector terkait di-SKIP agar validator tidak mengubah kondisi yang sedang diuji. Script hanya membuat laporan privat. Cakupan otomatis:
 - Platform/session: Arch Linux, arsitektur, Wayland, executable Hyprland/Quickshell/Caelestia.
 - Paket wajib dan paket opsional yang relevan.
 - Hyprland: konfigurasi, monitor, input device, dan proses.
