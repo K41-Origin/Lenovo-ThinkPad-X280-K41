@@ -172,42 +172,6 @@ if [[ -e $HOME/.face ]]; then
 else
   record SKIP 'Caelestia profile image' 'optional; no placeholder generated'
 fi
-shopt -s nullglob
-kernel_reports=("$ROOT"/reports/desktop-validation/*/kernel-journal-warnings.txt)
-system_reports=("$ROOT"/reports/desktop-validation/*/system-journal-errors.txt)
-user_reports=("$ROOT"/reports/desktop-validation/*/user-journal-errors.txt)
-if ((${#kernel_reports[@]} > 0)); then
-  latest_kernel_report="${kernel_reports[${#kernel_reports[@]}-1]}"
-  if grep -Eiq 'Bluetooth: hci[0-9]+: Reading supported features failed|HCI LE Coded PHY feature bit is set' "$latest_kernel_report"; then
-    record WARN 'Bluetooth HCI negotiation' 'latest kernel report contains controller feature errors; BlueZ cannot repair controller/driver firmware'
-  else
-    record PASS 'Bluetooth HCI negotiation' 'no HCI feature-negotiation warning in latest kernel report'
-  fi
-  if grep -Eiq 'MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$latest_kernel_report"; then
-    record WARN 'CPU security mitigations' 'latest kernel report contains MDS/MMIO/VMSCAPE findings; no SMT or kernel parameters changed'
-  else
-    record PASS 'CPU security mitigations' 'no configured CPU mitigation warning in latest kernel report'
-  fi
-else
-  record SKIP 'Kernel warning classification' 'no committed kernel journal report available'
-fi
-if ((${#system_reports[@]} > 0)); then
-  latest_system_report="${system_reports[${#system_reports[@]}-1]}"
-  if grep -Eiq 'nl80211: kernel reports: multicast RX registrations are not supported' "$latest_system_report"; then
-    record SKIP 'Wi-Fi multicast RX warning' 'driver/kernel informational warning; no network reset performed'
-  else
-    record PASS 'Wi-Fi multicast RX warning' 'no matching warning in latest system journal report'
-  fi
-fi
-if ((${#user_reports[@]} > 0)); then
-  latest_user_report="${user_reports[${#user_reports[@]}-1]}"
-  if grep -Fq 'PAM _pam_init_handlers: no default config other' "$latest_user_report"; then
-    record WARN 'PAM runtime warning' 'Quickshell journal contains PAM fallback warning; inspect pambase-integrity.txt; PAM policy was not rewritten'
-  fi
-fi
-record SKIP 'Qt Wayland text-input warnings' 'no safe configuration change supported by this evidence'
-record SKIP 'PipeWire libcamera plugin' 'optional camera integration; no package added'
-record SKIP 'lsusb utility' 'diagnostic-only utility, not a desktop runtime dependency'
 
 {
   printf 'Captured UTC: %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
@@ -222,12 +186,87 @@ chmod 0600 "$report_dir"/*.txt
 
 log ""
 log "=== Post-repair validation ==="
+validation_rc=0
 if bash "$ROOT/scripts/k41-desktop-validation.sh" >"$report_dir/validation-output.log" 2>&1; then
-  record PASS 'Desktop validation' 'validator returned exit 0'
+  validation_rc=0
 else
-  rc=$?
-  record WARN 'Desktop validation' "validator returned exit $rc; inspect newest validation report"
+  validation_rc=$?
 fi
+
+# Grade the actual post-repair report, not only the exit code: WARN is a
+# successful execution but is not a clean PASS.
+validation_reports=("$ROOT"/reports/desktop-validation/*/summary.md)
+latest_validation_summary=''
+latest_validation_dir=''
+if (("${#validation_reports[@]}" > 0)) && [[ -f ${validation_reports[-1]} ]]; then
+  latest_validation_summary=${validation_reports[-1]}
+  latest_validation_dir=${latest_validation_summary%/summary.md}
+  validation_result="$(sed -n 's/^- Result: \*\*\(.*\)\*\*$/\1/p' "$latest_validation_summary" | head -n 1)"
+  validation_counts="$(sed -n 's/^- Checks: //p' "$latest_validation_summary" | head -n 1)"
+  printf 'Report: %s\nExit code: %s\nResult: %s\nChecks: %s\n' \
+    "$latest_validation_dir" "$validation_rc" "${validation_result:-unknown}" "${validation_counts:-unknown}" \
+    >"$report_dir/validation-result.txt"
+  case "$validation_result:$validation_rc" in
+    PASS:0)
+      record PASS 'Desktop validation' "clean PASS; $validation_counts"
+      ;;
+    PASS_WITH_WARNINGS:0)
+      record WARN 'Desktop validation' "validator completed with review findings; $validation_counts"
+      ;;
+    *)
+      record FAIL 'Desktop validation' "validator failed or report result is invalid (exit $validation_rc, result ${validation_result:-missing})"
+      ;;
+  esac
+else
+  printf 'No complete post-repair validation summary found. Exit code: %s\n' "$validation_rc" \
+    >"$report_dir/validation-result.txt"
+  record FAIL 'Desktop validation' 'validator produced no complete summary report'
+fi
+
+# Classify diagnostics from this exact post-repair snapshot. Missing evidence
+# is SKIP, never silently interpreted as a clean PASS.
+if [[ -n $latest_validation_dir && -r $latest_validation_dir/kernel-journal-warnings.txt ]]; then
+  latest_kernel_report="$latest_validation_dir/kernel-journal-warnings.txt"
+  if grep -Eiq 'Bluetooth: hci[0-9]+: Reading supported features failed|HCI LE Coded PHY feature bit is set' "$latest_kernel_report"; then
+    record WARN 'Bluetooth HCI negotiation' 'post-repair kernel snapshot contains controller feature errors; firmware/driver investigation required'
+  else
+    record PASS 'Bluetooth HCI negotiation' 'no configured HCI feature-negotiation signature in post-repair kernel snapshot'
+  fi
+  if grep -Eiq 'MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$latest_kernel_report"; then
+    record WARN 'CPU security mitigations' 'post-repair kernel snapshot contains mitigation findings; no SMT or kernel parameters changed'
+  else
+    record PASS 'CPU security mitigations' 'no configured CPU mitigation signature in post-repair kernel snapshot'
+  fi
+else
+  record SKIP 'Kernel warning classification' 'post-repair kernel journal snapshot unavailable'
+fi
+
+if [[ -n $latest_validation_dir && -r $latest_validation_dir/system-journal-errors.txt ]]; then
+  latest_system_report="$latest_validation_dir/system-journal-errors.txt"
+  if grep -Eiq 'nl80211: kernel reports: multicast RX registrations are not supported' "$latest_system_report"; then
+    record SKIP 'Wi-Fi multicast RX warning' 'recognized driver/kernel informational message; no network reset performed'
+  else
+    record PASS 'Wi-Fi multicast RX warning' 'no matching informational warning in post-repair system snapshot'
+  fi
+else
+  record SKIP 'Wi-Fi multicast RX warning' 'post-repair system journal snapshot unavailable'
+fi
+
+if [[ -n $latest_validation_dir && -r $latest_validation_dir/user-journal-errors.txt ]]; then
+  latest_user_report="$latest_validation_dir/user-journal-errors.txt"
+  if grep -Fq 'PAM _pam_init_handlers: no default config other' "$latest_user_report"; then
+    pam_warning_count="$(grep -Fc 'PAM _pam_init_handlers: no default config other' "$latest_user_report")"
+    record WARN 'PAM runtime warning' "$pam_warning_count matching entry/entries in post-repair user journal; compare pambase-integrity.txt and pam-other-owner.txt; policy unchanged"
+  else
+    record PASS 'PAM runtime warning' 'no matching PAM fallback warning in post-repair user journal snapshot'
+  fi
+else
+  record SKIP 'PAM runtime warning' 'post-repair user journal snapshot unavailable; runtime behavior not assessed'
+fi
+
+record SKIP 'Qt Wayland text-input warnings' 'no safe configuration change supported by current evidence'
+record SKIP 'PipeWire libcamera plugin' 'optional camera integration; no package added'
+record SKIP 'lsusb utility' 'diagnostic-only utility, not a desktop runtime dependency'
 
 {
   printf '# K41 desktop repair summary\n\n'
@@ -236,6 +275,6 @@ fi
   printf -- '- Actions: %s PASS, %s WARN, %s FAIL, %s SKIP\n' "$pass_count" "$warn_count" "$fail_count" "$skip_count"
   printf '\nPAM policy, kernel parameters, CPU SMT policy, desktop configuration, optional profile imagery, and controller firmware were not rewritten. Package installation is limited to missing bluez, bluez-utils, wireless-regdb, and rtkit. Review/redact reports before sharing.\n'
 } >"$report_dir/summary.md"
-chmod 0600 "$log_file" "$actions_file" "$report_dir/summary.md"
+chmod 0600 "$log_file" "$actions_file" "$report_dir/summary.md" "$report_dir/validation-result.txt"
 log "Repair complete: $report_dir"
 (( fail_count == 0 ))
