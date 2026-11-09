@@ -45,7 +45,7 @@ Langkah penutup: tarik `main`, jalankan `bash scripts/k41-desktop-repair.sh` dar
 - PAM `/etc/pam.d/other` terdeteksi readable, tetapi laporan lama tidak memuat hasil `pacman -Qkk pambase` atau ownership file. Penyebab warning PAM runtime belum terbukti; jangan menulis ulang PAM. Repair terbaru kini menyimpan bukti tersebut.
 - Bluetooth HCI negotiation dan CPU mitigation MDS/MMIO/VMSCAPE tetap diagnostik-only. Log tidak membuktikan fungsi fisik Bluetooth atau efektivitas setiap mitigasi.
 - Tidak ada visual/physical acceptance yang diklaim. Log/runtime validation tidak dapat membuktikan tampilan panel, input fisik, audio output, microphone, suspend/resume, atau interaksi UI.
-- CI sukses historis pada commit `cb7140fd0f512d5b85bcd2de1b9cdabf4a860779`; itu bukan bukti CI untuk perubahan setelahnya. Status CI terbaru harus diperiksa pada commit HEAD saat ini.
+- CI **SUCCESS** pada commit `f9b487af6a40fc76c7ddf89a364b8fdcd5d82d75`: Repository validation (run `42575704839`) dan Bash validation (run `42575704881`) selesai sukses. Ini memvalidasi code/docs sampai commit tersebut; commit dokumentasi sesudahnya tetap memicu CI baru.
 
 ## Keputusan dan batas
 
