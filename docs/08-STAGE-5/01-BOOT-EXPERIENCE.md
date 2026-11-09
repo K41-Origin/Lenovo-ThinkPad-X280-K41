@@ -4,74 +4,114 @@
 
 ## Tujuan
 
-Membuat transisi visual yang konsisten dan terkendali pada tiga jalur boot/shutdown tanpa merusak bootability, autentikasi, enkripsi, atau recovery. Tujuan visual saat ini termasuk menghilangkan frame/logo/wallpaper Hyprland yang tidak diinginkan dan menggunakan identitas K41/Plymouth sejauh didukung lifecycle sistem.
+Mewujudkan pengalaman visual K41 yang konsisten pada cold boot/power-on, reboot, dan poweroff. Tampilan normal yang diinginkan adalah splash K41 monokrom tanpa prompt password, logo/wallpaper/frame Hyprland, atau tampilan desktop yang bocor selama transisi.
+
+Pada jalur normal, root LUKS dibuka otomatis melalui TPM2. Passphrase LUKS tetap dipertahankan sebagai jalur recovery apabila TPM2 auto-unlock gagal atau kebijakan PCR tidak cocok. Prompt recovery bukan bagian dari desain visual normal dan tidak boleh dihapus dengan mengorbankan keamanan atau kemampuan pemulihan.
+
+## Arsitektur dan tanggung jawab
+
+| Komponen | Tanggung jawab |
+|---|---|
+| UEFI firmware, systemd-boot, UKI | Memulai sistem dan memuat kernel/initramfs |
+| TPM2 + systemd-cryptenroll | Membuka root LUKS secara otomatis pada kondisi PCR yang cocok |
+| Plymouth K41 | Splash early boot serta transisi reboot/poweroff sejauh didukung lifecycle systemd |
+| systemd | Mengatur urutan startup, shutdown, reboot, dan unit transisi |
+| TTY1, Hyprland, Quickshell/Caelestia | Handoff dari splash boot ke sesi grafis dan lock screen |
+| Quickshell K41 | Menjaga tampilan K41 selama handoff grafis sampai lock screen siap |
+
+Plymouth dan Quickshell adalah renderer berbeda. Keduanya mengikuti spesifikasi visual yang sama, tetapi kesamaan piksel tidak dijamin.
 
 ## Batas
 
-Termasuk firmware-to-userspace splash, kernel/KMS/initramfs/Plymouth, systemd transition, TTY/session startup dan shutdown handoff yang relevan.
+Termasuk firmware-to-userspace splash, kernel/KMS/initramfs/Plymouth, systemd transition, TPM2 auto-unlock, TTY/session startup, lock-screen handoff, serta jalur reboot dan poweroff.
 
-Tidak termasuk perubahan desain global, redesign lock screen, perubahan autentikasi/PAM, pengubahan LUKS keyslot, penghapusan passphrase, enrollment TPM baru tanpa persetujuan, Secure Boot redesign, atau optimasi daya tahap 6.
+Tidak termasuk redesign lock screen, perubahan autentikasi/PAM, penghapusan passphrase/keyslot LUKS, penghapusan token TPM tanpa rencana recovery, Secure Boot redesign, atau optimasi daya tahap 6.
 
-## Kondisi dan risiko yang telah diketahui
+## Prosedur kerja dan pengujian nyata
 
-Pada laporan pengguna 2026-11-09, visual Hyprland masih terlihat saat power-on, reboot, dan poweroff. Implementasi Plymouth K41 dan Quickshell overlay sudah ada, tetapi konsistensi visual perangkat belum tercapai. Temuan tersebut adalah baseline historis; audit ulang kondisi terkini sebelum tindakan.
+Pengujian utama dilakukan pada ThinkPad X280 fisik. Static test dan inspeksi konfigurasi adalah pemeriksaan pendukung, bukan pengganti boot/reboot/poweroff nyata.
 
-## Prosedur
+1. **Audit repository:** baca script konfigurasi boot, installer Plymouth, theme, Quickshell splash, unit terkait, tests, dan laporan terbaru. Jangan mengasumsikan riwayat percakapan menggambarkan state repository terkini.
+2. **Audit perangkat sebelum perubahan:** catat bootloader/UKI, kernel command line, mkinitcpio hooks, mount `/efi`, tema Plymouth, unit transition, status LUKS2/TPM2, status Secure Boot, TTY1/autologin, konfigurasi sesi, dan jalur recovery yang tersedia.
+3. **Siapkan recovery:** pastikan passphrase LUKS yang sekarang masih valid dan tersedia secara offline; pastikan dapat mengakses firmware/systemd-boot recovery atau Arch ISO bila boot gagal. Jangan menghapus atau mengganti keyslot passphrase.
+4. **Jalankan konfigurasi aktual:** setelah prasyarat dan backup ditinjau, jalankan `sudo bash scripts/k41-configure-boot-experience.sh` pada sistem target. Script ini bukan preview: script menginstal Plymouth, memilih tema K41, mengubah hook mkinitcpio dan kernel command line, membangun ulang initramfs/UKI, memasang konfigurasi handoff TTY1/Plymouth, lalu menawarkan enrollment TPM2 PCR 7 secara interaktif.
+5. **Perlakukan enrollment TPM2 sebagai perubahan keamanan:** script meminta persetujuan terpisah sebelum menjalankan `systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7`. Enrollment menambahkan metode unlock; tidak menghapus passphrase. Pastikan token TPM2 tercatat di metadata LUKS setelah enrollment. PCR 7 tidak boleh dianggap sebagai Secure Boot verification ketika Secure Boot disabled.
+6. **Jangan reboot bila rebuild UKI gagal atau status enrollment tidak jelas.** Simpan lokasi backup konfigurasi yang dicetak script dan periksa artefak UKI yang dihasilkan.
+7. **Uji cold boot/power-on secara fisik:** amati apakah K41 muncul, apakah TPM2 membuka root tanpa prompt, apakah ada frame/logo/wallpaper yang bocor, dan apakah transisi menuju Caelestia lock screen benar.
+8. **Uji reboot secara terpisah:** amati urutan shutdown, Plymouth reboot transition, tidak adanya frame Hyprland, dan keberhasilan boot berikutnya.
+9. **Uji poweroff secara terpisah:** amati Plymouth poweroff transition dan pastikan sistem benar-benar mati tanpa tampilan desktop yang tidak diinginkan.
+10. **Uji recovery secara terkendali bila diperlukan:** jika TPM2 tidak dapat membuka root, passphrase LUKS harus tetap dapat digunakan. Jangan sengaja mengubah PCR, firmware, Secure Boot, atau keyslot hanya untuk memancing kegagalan tanpa rencana recovery yang disetujui.
+11. **Kumpulkan bukti:** catat hasil visual yang dikonfirmasi pengguna, boot entry/kernel, status token TPM2 tanpa membocorkan rahasia, unit gagal, journal boot/shutdown, serta hasil test statis.
 
-1. **Audit repository:** baca script boot, theme Plymouth, Quickshell splash, Hyprland config, test, dan laporan sebelumnya. Jangan menimpa implementasi yang sudah ada.
-2. **Audit perangkat read-only:** kumpulkan bootloader/UKI/kernel command line, initramfs hooks, Plymouth theme dan unit, systemd unit links, session manager/TTY, proses Quickshell/Caelestia/Hyprland, journal boot dan shutdown, serta konfigurasi Hyprland yang benar-benar dimuat.
-3. **Pisahkan tiga jalur:** buat timeline power-on, reboot, dan poweroff. Jangan menganggap satu penyebab menjelaskan semuanya.
-4. **Bentuk hipotesis:** setiap hipotesis harus didukung artefak (unit ordering, journal timestamp, process lifetime, config aktif, atau reproduksi visual).
-5. **Rencanakan perubahan:** satu perubahan kecil per iterasi. Sebelum mengubah boot parameters, initramfs, systemd units, atau UKI, jelaskan dampak, cara recovery, dan rollback.
-6. **Implementasikan:** utamakan unit/hook resmi Arch/Plymouth dan mekanisme upstream. Hindari arbitrary sleep, competing custom units, dan perubahan yang hanya menyembunyikan gejala.
-7. **Uji terpisah:** cold boot/power-on, reboot, dan poweroff. Lakukan beberapa iterasi bila perubahan menyangkut timing/transisi.
-8. **Verifikasi recovery:** pastikan boot normal, passphrase LUKS tetap berfungsi sebagai recovery path, dan tidak ada perubahan autentikasi/keyslot yang tidak disetujui.
+## Kontrak script konfigurasi aktual
+
+`scripts/k41-configure-boot-experience.sh` memiliki efek sistem yang nyata:
+
+- Memerlukan UEFI, root `/dev/mapper/cryptroot`, volume LUKS2, TPM2 `/dev/tpmrm0`, mount `/efi`, konfigurasi mkinitcpio/UKI, dan sesi akun desktop yang sesuai.
+- Menginstal paket Plymouth dari repository Arch yang terverifikasi oleh pacman.
+- Menyalin theme K41 dan memilihnya sebagai tema default.
+- Menambahkan hook Plymouth dengan urutan `systemd < plymouth < sd-encrypt`.
+- Menambahkan kernel arguments `quiet splash`.
+- Menjalankan `mkinitcpio -P` untuk membangun ulang preset/initramfs/UKI.
+- Memasang helper handoff lock-aware, mengubah konfigurasi getty TTY1 dan drop-in Plymouth, lalu menjalankan `systemctl daemon-reload`, verifikasi unit, dan enable unit K41.
+- Menawarkan enrollment TPM2 PCR 7 setelah konfigurasi Plymouth selesai.
+- Membuat backup konfigurasi lokal di `/var/lib/k41/boot-experience/backups/<timestamp>`.
+
+**Batas backup:** script saat ini secara eksplisit tidak membuat backup LUKS header. Karena itu, sebelum menjalankannya, pastikan passphrase LUKS yang ada diketahui dan tervalidasi serta tersedia media/jalur recovery. Jangan menganggap backup konfigurasi sebagai backup LUKS header.
+
+## Hipotesis dan diagnosis visual
+
+Pisahkan tiga timeline: power-on, reboot, dan poweroff. Untuk setiap kebocoran visual, cari bukti dari journal timestamp, unit ordering, proses Quickshell/Hyprland, konfigurasi yang benar-benar dimuat, dan perilaku display handoff. Jangan menganggap satu penyebab menjelaskan ketiganya.
+
+Utamakan mekanisme upstream Arch/Plymouth/systemd. Hindari arbitrary sleep, unit kustom yang berkompetisi dengan unit paket, atau perubahan yang sekadar menyembunyikan gejala.
 
 ## Acceptance criteria
 
-- Ketiga jalur diuji secara terpisah pada perangkat fisik.
-- Tidak terlihat frame/logo/wallpaper Hyprland yang tidak diinginkan pada fase yang telah disepakati.
-- Plymouth K41 tampil pada fase yang memang didukung dan dikonfigurasi.
-- Handoff ke sesi/lock screen tidak memperlihatkan desktop yang seharusnya tersembunyi.
-- Boot normal dan recovery LUKS tetap tersedia.
-- Tidak ada unit gagal baru, loop boot, timeout, atau regression shutdown.
-- Bukti mencatat perangkat, kernel/boot entry, konfigurasi, test, dan konfirmasi visual pengguna.
+- Pada boot normal, TPM2 membuka root LUKS tanpa prompt passphrase ketika PCR state cocok.
+- Passphrase LUKS tetap tersedia sebagai recovery bila TPM2 auto-unlock gagal.
+- Desain K41 tampil pada fase early boot dan transisi reboot/shutdown yang didukung serta dikonfigurasi.
+- Tidak ada wallpaper, logo, desktop, atau frame Hyprland yang terlihat pada fase yang telah disepakati.
+- Handoff ke sesi grafis tidak menampilkan desktop sebelum Caelestia lock screen siap.
+- Cold boot/power-on, reboot, dan poweroff diuji terpisah pada perangkat fisik.
+- Tidak ada unit gagal baru, loop boot, timeout, boot regression, atau regression shutdown.
+- Bukti mencatat perangkat, kernel/boot entry, konfigurasi, hasil test, dan konfirmasi visual pengguna.
 
 ## Rollback dan keselamatan
 
-Sebelum perubahan, simpan salinan konfigurasi, unit override, kernel command line, dan artefak boot yang relevan. Pastikan tersedia jalur masuk TTY/recovery. Jangan menghapus keyslot, mengubah TPM enrollment, atau menonaktifkan verifikasi signature untuk mengatasi masalah visual. Perubahan boot yang berisiko memerlukan persetujuan eksplisit setelah target dan prosedur recovery dijelaskan.
+Sebelum perubahan, simpan konfigurasi mkinitcpio, kernel command line, Plymouth config/theme, unit/drop-in, dan artefak boot yang relevan. Pastikan `/efi` benar-benar ter-mount. Simpan passphrase LUKS dan media recovery yang dapat diakses.
+
+Jangan menghapus keyslot passphrase, menghapus token TPM, mengubah PCR policy, mengubah Secure Boot, atau mengubah firmware sebagai eksperimen tanpa rencana dan persetujuan eksplisit. Jika rebuild UKI gagal, jangan reboot sampai konfigurasi diperbaiki atau dipulihkan. Jika TPM2 enrollment gagal atau hasilnya tidak pasti, jangan menganggap auto-unlock telah aktif.
 
 ## Gate keluar
 
-Workstream berstatus VERIFIED hanya setelah tiga jalur berhasil diuji dan bukti visual dikonfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 2 — Lock Screen](02-LOCK-SCREEN.md).
+Workstream berstatus **VERIFIED** hanya setelah cold boot/power-on, reboot, dan poweroff berhasil diuji secara terpisah pada ThinkPad X280, normal TPM2 unlock dan recovery path dipahami, serta bukti visual dikonfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 2 — Lock Screen](02-LOCK-SCREEN.md).
 
 ## Design baseline — K41 compact rectangle ring (approved 2026-11-09)
 
-The user-approved boot visual baseline is the compact monochrome K41 mark above a tightly grouped circular ring of 12 small rectangular glyphs. This is a visual specification, not a claim that the complete boot/handoff lifecycle has passed device acceptance.
+Desain visual yang disetujui adalah wordmark K41 putih minimalis di atas ring rapat berisi 12 glyph persegi panjang kecil, dengan satu glyph terang bergantian dan sebelas lainnya redup.
 
 ### Canonical Plymouth source
 
-- **Canonical visual reference:** `themes/plymouth/k41/k41.script`.
-- Black background using the Plymouth window background colors.
-- Centered white `K41` wordmark using `Image.Text("K41", 0.8, 0.8, 0.8)`.
-- Twelve rectangle glyphs using `Image.Text("▯", 0.9, 0.9, 0.9)`.
-- Ring radius: `9`.
-- Ring vertical offset: `+10` relative to `center_y`.
-- Wordmark vertical placement: `center_y - 17 - logo_image.GetHeight()`.
-- Initial rectangle opacity: `0.18`; active rectangle opacity: `1.0`.
-- One active rectangle advances per refresh callback; the other eleven remain dim.
-- The existing password prompt, bullet feedback, normal-display callback, and Plymouth message/quit callbacks must remain functional. Visual refinements must not remove or weaken the LUKS password prompt.
+- **Referensi visual kanonis:** `themes/plymouth/k41/k41.script`.
+- Background hitam.
+- Wordmark `K41` terpusat, putih melalui `Image.Text("K41", 0.8, 0.8, 0.8)`.
+- Dua belas glyph melalui `Image.Text("▯", 0.9, 0.9, 0.9)`.
+- Ring radius `9`; offset vertikal ring `+10` relatif terhadap `center_y`.
+- Posisi wordmark vertikal `center_y - 17 - logo_image.GetHeight()`.
+- Opacity awal glyph `0.18`; glyph aktif `1.0`.
+- Satu glyph aktif maju setiap refresh; sebelas lainnya tetap redup.
 
 ### Quickshell handoff counterpart
 
-`config/quickshell/k41-boot-splash/shell.qml` must visually follow the same design direction: black background, compact centered K41 wordmark, 12 small outlined rectangles arranged in a circle, and a single bright rectangle advancing at a time. QML uses native rectangles and rotation; Plymouth uses its script-rendered glyph. Exact pixel parity is not assumed because the rendering engines and font/glyph metrics differ.
+`config/quickshell/k41-boot-splash/shell.qml` mengikuti bahasa visual yang sama: background hitam, wordmark K41, ring 12 persegi panjang outline, dan satu elemen terang yang bergantian. Implementasi QML menggunakan rectangle dan rotasi native; Plymouth memakai glyph teks. Kesamaan piksel tidak dijanjikan.
 
 ### Change control
 
-This design is the approved baseline. Do not change the wordmark, ring geometry, rectangle count, relative spacing, monochrome palette, or sequential glow behavior without explicit user approval. Any future visual adjustment must update both Plymouth and Quickshell counterparts plus this document in the same change set.
+Jangan mengubah wordmark, geometri ring, jumlah rectangle, jarak relatif, palet monokrom, atau pola sequential glow tanpa persetujuan pengguna. Perubahan visual harus memperbarui Plymouth, Quickshell, dokumen ini, dan test terkait dalam satu rangkaian perubahan.
 
 ### Validation status
 
-- **APPROVED DESIGN:** confirmed by the user in conversation on 2026-11-09.
-- **IMPLEMENTED:** repository source updated to reflect the approved visual baseline.
-- **NOT YET TESTED:** Plymouth script parser/rendering, Quickshell runtime rendering, physical boot, LUKS prompt appearance, and Plymouth-to-lock-screen handoff. Static text checks alone do not establish visual or device verification.
+- **APPROVED DESIGN:** disetujui pengguna pada 2026-11-09.
+- **IMPLEMENTED:** sumber desain Plymouth dan Quickshell tersedia di repository.
+- **NOT VERIFIED:** rendering runtime, cold boot fisik, TPM2 auto-unlock pada boot aktual, reboot, poweroff, dan handoff lock-screen belum dinyatakan lulus berdasarkan bukti yang tersedia.
+- **TESTING POLICY:** pengujian nyata pada perangkat fisik tetap menjadi acceptance utama; test statis tidak menggantikannya.
