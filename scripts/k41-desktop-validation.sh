@@ -154,7 +154,7 @@ else
   record FAIL 'Caelestia IPC' 'IPC discovery failed or returned no targets'
 fi
 if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
-  if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*Error|failed to load.*(QML|plugin|module)' "$tmp/caelestia-log"; then
+  if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|Source file does not exist|BlueZ system service is not available|RTKit error' "$tmp/caelestia-log"; then
     record WARN 'Caelestia runtime log' 'Potential runtime/QML/module errors found; inspect validation.log'
   else
     record PASS 'Caelestia runtime log' 'No matching fatal/critical/QML-load error pattern found'
@@ -235,6 +235,32 @@ if command -v rfkill >/dev/null 2>&1 && capture 'Radio block state' "$tmp/rfkill
 else
   record WARN 'Radio block state' 'rfkill unavailable or query failed'
 fi
+if command -v lspci >/dev/null 2>&1 && lspci -nnk >"$tmp/pci" 2>&1; then
+  if grep -q 'Kernel driver in use: i915' "$tmp/pci"; then
+    record PASS 'Intel graphics driver' 'i915 is bound to a PCI graphics device'
+  else
+    record WARN 'Intel graphics driver' 'i915 binding not found; inspect PCI inventory'
+  fi
+else
+  record WARN 'PCI hardware inventory' 'lspci unavailable or query failed'
+fi
+backlight_found=0
+for backlight in /sys/class/backlight/*; do
+  [[ -d $backlight ]] || continue
+  backlight_found=1
+  if [[ -r $backlight/brightness && -r $backlight/max_brightness ]]; then
+    current="$(<"$backlight/brightness")"
+    maximum="$(<"$backlight/max_brightness")"
+    if [[ $current =~ ^[0-9]+$ && $maximum =~ ^[0-9]+$ ]] && (( maximum > 0 && current <= maximum )); then
+      record PASS 'Backlight telemetry' "${backlight##*/}: ${current}/${maximum}"
+    else
+      record WARN 'Backlight telemetry' "${backlight##*/}: invalid or unreadable brightness values"
+    fi
+  else
+    record WARN 'Backlight telemetry' "${backlight##*/}: brightness attributes unavailable"
+  fi
+done
+(( backlight_found == 1 )) || record WARN 'Backlight telemetry' 'No backlight device found'
 
 # 7. Resource and storage capacity snapshots.
 if command -v free >/dev/null 2>&1 && free -b >"$tmp/memory" 2>&1; then
