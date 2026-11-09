@@ -313,7 +313,7 @@ git -C "$staging" fetch --quiet --depth 1 origin "$UPSTREAM_REVISION"
 git -C "$staging" checkout --quiet --detach FETCH_HEAD
 [[ $(git -C "$staging" rev-parse HEAD) == "$UPSTREAM_REVISION" ]] ||
     die 'Fetched upstream revision does not match the audited revision.'
-for required in shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml modules/lock/LockSurface.qml; do
+for required in shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml; do
     [[ -s $staging/$required && ! -L $staging/$required ]] || die "Upstream source is missing required file: $required"
 done
 
