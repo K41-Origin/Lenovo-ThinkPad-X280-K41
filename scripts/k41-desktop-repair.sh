@@ -218,7 +218,7 @@ fi
   printf -- '- Captured UTC: %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf -- '- Repository commit: %s\n' "$(git rev-parse HEAD 2>/dev/null || printf unknown)"
   printf -- '- Actions: %s PASS, %s WARN, %s FAIL, %s SKIP\n' "$pass_count" "$warn_count" "$fail_count" "$skip_count"
-  printf '\nPAM policy, kernel parameters, CPU SMT policy, desktop configuration, optional profile imagery, and controller firmware were not rewritten. Package installation is limited to missing bluez, bluez-utils, and wireless-regdb. Review/redact reports before sharing.\n'
+  printf '\nPAM policy, kernel parameters, CPU SMT policy, desktop configuration, optional profile imagery, and controller firmware were not rewritten. Package installation is limited to missing bluez, bluez-utils, wireless-regdb, and rtkit. Review/redact reports before sharing.\n'
 } >"$report_dir/summary.md"
 chmod 0600 "$log_file" "$actions_file" "$report_dir/summary.md"
 log "Repair complete: $report_dir"
