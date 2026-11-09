@@ -4,7 +4,7 @@
 
 - **Project:** Lenovo ThinkPad X280 K41
 - **Stage:** 5 — Desktop Environment Customization
-- **Design status:** APPROVED DIRECTION; first Hyprland/Fuzzel layer applied; launcher runtime confirmed by user; Caelestia integration audit pending
+- **Design status:** APPROVED DIRECTION; Hyprland/Fuzzel foundation applied; Caelestia Graphite typography and monochrome scheme applied with runtime restart/log verified; remaining Stage 5 components pending
 - **Specification version:** 1.0
 - **Last updated:** 2026-11-09
 
@@ -205,13 +205,15 @@ Audit terbaru berasal dari `reports/desktop-customization-audit/20261109T084605Z
 - Quickshell menggunakan sekitar 12.3% RAM dan Hyprland sekitar 3.3% RAM pada satu pengambilan.
 - Nilai CPU tidak digunakan sebagai baseline karena proses `ps` milik audit sendiri tampil sebagai proses CPU tertinggi. Pengukuran komparatif perlu dilakukan setelah baseline visual dan dengan metode yang tidak mengukur collector itu sendiri.
 
-### Status setelah audit dan batch Caelestia pertama disiapkan
+### Status setelah audit dan batch Caelestia pertama diterapkan
 
 - Hyprland/Fuzzel apply sukses pada run `20261109T090739Z`; pengguna mengonfirmasi `SUPER + R` berfungsi.
 - Audit Caelestia read-only selesai pada run `20261109T091310Z`; konfigurasi valid dan runtime aktif.
-- Profil tipografi Graphite dan pemilihan scheme upstream `caelestia/dark/monochrome` telah IMPLEMENTED di repository, tetapi belum dijalankan pada perangkat.
+- Profil tipografi Graphite dan scheme upstream `caelestia/dark/monochrome` telah diterapkan pada perangkat.
+- Laporan `reports/caelestia-customization/20261109T093038Z/`: SUCCESS; restart CONFIRMED; runtime log OK; 3 entri Configuration Loaded; 1 proses Quickshell teramati; 0 WARN, 0 ERROR, 0 FATAL.
 - `shell-tokens.json` tetap tidak dibuat karena upstream menandai token internal sebagai advanced/unstable.
-- Visual review, wallpaper, icon/cursor, dan validasi runtime setelah profil Caelestia masih PENDING.
+- Visual review, wallpaper, icon/cursor, Foot, GTK/Thunar, Qt, dan lock screen masih PENDING.
+- Audit GTK menunjukkan CSS GTK3/GTK4 dan Thunar masih memakai aksen teal lama; icon theme Adwaita tersedia; cursor theme saat audit masih `default`; tidak ada wallpaper daemon aktif. Tidak ada daemon wallpaper baru yang perlu dipasang sebelum memakai integrasi wallpaper Caelestia/upstream.
 - Jangan menghapus `hyprland.conf` secara otomatis; perlakukan sebagai file legacy yang tidak aktif.
 
 ## 11. Implementation workflow
@@ -270,7 +272,7 @@ Keputusan yang telah disetujui:
 - Compositor: Hyprland.
 - Typography candidates: Inter dan JetBrains Mono; Noto Sans sebagai fallback bila diperlukan.
 - Wallpaper: abstract monochrome.
-- Launcher: Fuzzel sebagai satu launcher utama (runtime test pending).
+- Launcher: Fuzzel sebagai satu launcher utama (pengguna telah mengonfirmasi `SUPER + R` berfungsi).
 - Dashboard: sesuai kebutuhan, bukan selalu tampil.
 - Motion: subtle.
 - Transparency: selective.
@@ -288,6 +290,6 @@ Hal yang belum diputuskan dan harus diverifikasi:
 
 ---
 
-**Status keseluruhan: DESIGN DIRECTION APPROVED — HYPRLAND/FUZZEL LAUNCHER VERIFIED; CAELESTIA AUDITED; FIRST GRAPHITE PROFILE IMPLEMENTED, DEVICE APPLY PENDING.**
+**Status keseluruhan: DESIGN DIRECTION APPROVED — HYPRLAND/FUZZEL FOUNDATION APPLIED; CAELESTIA GRAPHITE PROFILE APPLIED AND RUNTIME VERIFIED; REMAINING STAGE 5 COMPONENTS PENDING.**
 
 Dokumen ini menjadi acuan utama untuk keputusan desain dan review perubahan selama tahap 5. Setiap penyimpangan material harus memiliki alasan teknis dan persetujuan sebelum implementasi.
