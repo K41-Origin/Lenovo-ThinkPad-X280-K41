@@ -4,7 +4,7 @@
 
 - **Project:** Lenovo ThinkPad X280 K41
 - **Stage:** 5 — Desktop Environment Customization
-- **Design status:** APPROVED DIRECTION; active configuration audited; first implementation committed, device application pending
+- **Design status:** APPROVED DIRECTION; first Hyprland/Fuzzel layer applied; launcher runtime confirmed by user; Caelestia integration audit pending
 - **Specification version:** 1.0
 - **Last updated:** 2026-11-09
 
@@ -204,11 +204,12 @@ Audit terbaru berasal dari `reports/desktop-customization-audit/20261109T084605Z
 - Quickshell menggunakan sekitar 12.3% RAM dan Hyprland sekitar 3.3% RAM pada satu pengambilan.
 - Nilai CPU tidak digunakan sebagai baseline karena proses `ps` milik audit sendiri tampil sebagai proses CPU tertinggi. Pengukuran komparatif perlu dilakukan setelah baseline visual dan dengan metode yang tidak mengukur collector itu sendiri.
 
-### Outstanding after first implementation commit
+### Status setelah fondasi pertama diterapkan
 
-- Patch belum diterapkan pada perangkat; launcher `SUPER + R` perlu diuji setelah penerapan.
-- Icon theme, cursor theme, dan wallpaper aktif perlu diperiksa langsung oleh pengguna saat menilai tampilan.
-- Caelestia scheme dan token overrides perlu ditangani melalui opsi upstream yang benar; jangan mengedit file paket atau mengasumsikan custom scheme didukung.
+- Script apply menghasilkan `SUCCESS` pada run `20261109T090739Z`; backup privat dibuat dan Hyprland/Fuzzel config diperbarui.
+- Pengguna mengonfirmasi `SUPER + R` berhasil. Launcher runtime: TESTED dan VERIFIED oleh konfirmasi pengguna.
+- `hyprctl configerrors`, visual review menyeluruh, icon/cursor theme, dan wallpaper aktif belum memiliki bukti terbaru pada run tersebut.
+- Caelestia configuration, scheme, and token integration remain PLANNED pending a read-only audit of the actual device config and installed version.
 - Jangan menghapus `hyprland.conf` secara otomatis; perlakukan sebagai file legacy yang tidak aktif.
 
 ## 11. Implementation workflow
@@ -254,7 +255,7 @@ Committed implementation files:
 
 The apply script modifies only the active Hyprland Lua file and Fuzzel config. It backs up both before writing. It changes the audited launcher declaration from missing `hyprlauncher` to installed `fuzzel`, appends an appearance-only block, disables compositor blur to limit GPU cost, and disables the default Hyprland logo/wallpaper behavior. It does not rewrite keybinds, input, monitor layout, workspace rules, window rules, or autostart.
 
-**Validation status:** repository files committed; no shell syntax test, Lua runtime validation, or device execution has been performed yet. Do not treat the configuration as tested or visually accepted until the operator applies it and reports runtime results.
+**Validation status:** repository files committed. The user ran the apply script successfully (report `20261109T090739Z`) and confirmed `SUPER + R` works. This verifies the launcher path only; no claim is made that all appearance settings or the full desktop are visually accepted.
 
 ## 13. Decision log
 
@@ -285,6 +286,6 @@ Hal yang belum diputuskan dan harus diverifikasi:
 
 ---
 
-**Status keseluruhan: DESIGN DIRECTION APPROVED — FIRST CONFIGURATION BATCH COMMITTED; DEVICE APPLICATION AND VALIDATION PENDING.**
+**Status keseluruhan: DESIGN DIRECTION APPROVED — FIRST HYPRLAND/FUZZEL BATCH APPLIED; LAUNCHER RUNTIME VERIFIED BY USER; CAELESTIA INTEGRATION AUDIT PENDING.**
 
 Dokumen ini menjadi acuan utama untuk keputusan desain dan review perubahan selama tahap 5. Setiap penyimpangan material harus memiliki alasan teknis dan persetujuan sebelum implementasi.
