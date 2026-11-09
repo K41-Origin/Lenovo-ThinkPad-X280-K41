@@ -41,13 +41,13 @@ Langkah penutup: tarik `main`, jalankan `bash scripts/k41-desktop-repair.sh` dar
 
 ## Bukti terbaru yang tersedia
 
-- Desktop validation `reports/desktop-validation/20261109T064511Z/`: 52 PASS, 4 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`.
-- Repair `reports/desktop-repair/20261109T064428Z/`: 10 PASS, 3 WARN, 0 FAIL, 5 SKIP. Scheme Caelestia berhasil dibuat; BlueZ, bluez-utils, wireless-regdb, dan rtkit terpasang; `bluetooth.service` enabled/running; `regulatory.db` tersedia.
+- Desktop validation terbaru `reports/desktop-validation/20261109T065933Z/`: 52 PASS, 4 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`.
+- Repair terbaru `reports/desktop-repair/20261109T065932Z/`: 7 PASS, 3 WARN, 0 FAIL, 5 SKIP. Scheme Caelestia sudah ada; BlueZ, bluez-utils, wireless-regdb, dan rtkit terpasang; `bluetooth.service` aktif; `regulatory.db` tersedia.
 - Caelestia scheme ada pada post-repair snapshot. Runtime log validator lama masih membaca warning yang tercatat sebelum scheme dibuat, serta `.face` opsional; classifier baru ditujukan untuk menghindari false-positive tersebut dan perlu dikonfirmasi dengan rerun.
-- PAM `/etc/pam.d/other` terdeteksi readable, tetapi laporan lama tidak memuat hasil `pacman -Qkk pambase` atau ownership file. Penyebab warning PAM runtime belum terbukti; jangan menulis ulang PAM. Repair terbaru kini menyimpan bukti tersebut.
+- PAM `/etc/pam.d/other` terdeteksi readable, dimiliki `pambase`, dan pemeriksaan `pacman -Qkk pambase` pada repair terbaru lulus. Penyebab warning PAM runtime tetap belum terbukti; jangan menulis ulang PAM hanya untuk menghilangkan pesan tersebut.
 - Bluetooth HCI negotiation dan CPU mitigation MDS/MMIO/VMSCAPE tetap diagnostik-only. Log tidak membuktikan fungsi fisik Bluetooth atau efektivitas setiap mitigasi.
 - Tidak ada visual/physical acceptance yang diklaim. Log/runtime validation tidak dapat membuktikan tampilan panel, input fisik, audio output, microphone, suspend/resume, atau interaksi UI.
-- CI **SUCCESS** pada commit `a93671071bb069019d954a10039dfc08c6893650`: Repository validation (run `42578550388`) dan Bash validation (run `42578550400`) selesai sukses. Bash syntax, ShellCheck, formatting step, dan repository test suite lulus pada kedua workflow. Ini memvalidasi kode classifier dan regression tests pada commit tersebut; belum membuktikan perilaku baru pada sesi desktop X280.
+- CI **SUCCESS** pada commit `a1881b76363b9dcfa1ba43920cedad7eff506ff5`: Repository validation (run `42578669696`) dan Bash validation (run `42578669698`) selesai sukses. Kedua workflow menyelesaikan Bash syntax, ShellCheck, dan repository test suite; workflow Bash juga menyelesaikan formatting step. Ini memvalidasi kode classifier, regression fixtures, dan dokumentasi pada commit tersebut; belum membuktikan perilaku baru pada sesi desktop X280.
 
 ## Keputusan dan batas
 
