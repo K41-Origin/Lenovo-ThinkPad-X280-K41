@@ -214,7 +214,7 @@ else
 fi
 
 # 6. Audio graph, network adapter, radio state.
-if command -v wpctl >/dev/null 2>&1 && capture 'PipeWire graph' "$tmp/wpctl" wpctl status && grep -qE 'Audio|Sinks|Sources' "$tmp/wpctl"; then
+if command -v wpctl >/dev/null 2>&1 && capture 'PipeWire graph' "$tmp/wpctl" wpctl status && grep -q 'Sinks:' "$tmp/wpctl" && grep -q 'Sources:' "$tmp/wpctl"; then
   record PASS 'PipeWire graph' 'wpctl returned audio graph sections'
 else
   record WARN 'PipeWire graph' 'wpctl unavailable or no graph data'
@@ -375,6 +375,8 @@ for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journ
   journal_name=${journal_file##*/}
   if [[ ! -s $journal_file ]]; then
     record WARN "Journal: $journal_name" 'No entries returned or journal access unavailable'
+  elif grep -Eiq 'not seeing messages|permission denied|failed to open.*journal|No journal files were found' "$journal_file"; then
+    record WARN "Journal: $journal_name" 'Journal access appears limited; this source is not fully validated'
   elif grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
     record FAIL "Journal: $journal_name" 'Critical kernel/memory failure signature found; inspect saved journal'
   elif grep -Eiq 'segfault|coredump|Failed|failed|failure|QML.*Error|error:' "$journal_file"; then
