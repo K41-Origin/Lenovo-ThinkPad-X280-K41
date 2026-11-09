@@ -11,8 +11,8 @@ timeout_seconds=${K41_PLYMOUTH_LOCK_TIMEOUT:-75}
 
 for ((second = 0; second < timeout_seconds; second++)); do
     if [[ -f $marker && ! -L $marker ]]; then
-        /usr/bin/plymouth quit --retain-splash
-        exit $?
+        /usr/bin/plymouth quit --retain-splash >/dev/null 2>&1 || true
+        exit 0
     fi
     sleep 1
 done
@@ -21,4 +21,5 @@ done
 # Fail closed: do not leave the tty1 autologin shell exposed if lock startup failed.
 /usr/bin/systemctl stop getty@tty1.service || true
 /usr/bin/plymouth quit || true
+/usr/bin/chvt 2 || true
 exit 0
