@@ -391,7 +391,60 @@ for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journ
     record PASS "Journal: $journal_name" 'No configured critical/actionable error signatures detected'
   fi
 done
-chmod 0600 "$run_dir"/*.txt "$log" "$checks"
+chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"
+
+# 9. Focused diagnostic evidence for future, evidence-based remediation.
+# This section is read-only. Outputs are private because hardware/service details
+# and journal messages may expose host-specific information.
+diagnostics="$run_dir/diagnostics.tsv"
+diagnostics_log="$run_dir/diagnostics.log"
+printf 'STATUS\\tDIAGNOSTIC\\tEXIT_CODE\\tOUTPUT_FILE\\n' >"$diagnostics"
+: >"$diagnostics_log"
+chmod 0600 "$diagnostics" "$diagnostics_log"
+
+diagnostic() {
+  local label=$1 output_file=$2 rc=0
+  shift 2
+  if ! command -v "$1" >/dev/null 2>&1; then
+    printf 'SKIP\\t%s\\tNA\\t%s\\n' "$label" "$output_file" >>"$diagnostics"
+    printf '\\n===== %s =====\\nSKIPPED: command not installed (%s)\\n' "$label" "$1" >>"$diagnostics_log"
+    return 0
+  fi
+  printf '\\n===== %s =====\\nCOMMAND:' "$label" >>"$diagnostics_log"
+  printf ' %q' "$@" >>"$diagnostics_log"
+  printf '\\n' >>"$diagnostics_log"
+  if "$@" >"$tmp/$output_file" 2>&1; then
+    rc=0
+  else
+    rc=$?
+  fi
+  cat -- "$tmp/$output_file" >>"$diagnostics_log"
+  printf 'COMMAND EXIT: %s\\n' "$rc" >>"$diagnostics_log"
+  printf 'CAPTURED\\t%s\\t%s\\t%s\\n' "$label" "$rc" "$output_file" >>"$diagnostics"
+}
+
+diagnostic 'Kernel command line' 'kernel-cmdline.txt' cat /proc/cmdline
+diagnostic 'CPU model and topology' 'cpu-info.txt' lscpu
+diagnostic 'CPU vulnerability mitigations' 'cpu-vulnerabilities.txt' bash -c 'for f in /sys/devices/system/cpu/vulnerabilities/*; do [[ -r $f ]] || continue; printf "%s: " "${f##*/}"; cat "$f"; done'
+diagnostic 'PCI devices and bound drivers' 'pci-detail.txt' lspci -nnk
+diagnostic 'USB device inventory' 'usb-detail.txt' lsusb
+diagnostic 'Loaded kernel modules relevant to desktop' 'modules.txt' bash -c 'grep -E "^(i915|xe|iwlwifi|btusb|bluetooth|thinkpad_acpi|snd_hda_intel|snd_sof|nvme) " /proc/modules || true'
+diagnostic 'Firmware package metadata' 'firmware-package.txt' pacman -Qi linux-firmware
+diagnostic 'Regulatory database package ownership' 'regulatory-owner.txt' pacman -Qo /usr/lib/firmware/regulatory.db
+diagnostic 'Bluetooth package metadata' 'bluetooth-packages.txt' pacman -Qi bluez bluez-utils
+diagnostic 'Bluetooth service properties' 'bluetooth-unit.txt' systemctl show bluetooth.service -p LoadState -p ActiveState -p SubState -p UnitFileState -p FragmentPath
+diagnostic 'NetworkManager service properties' 'networkmanager-unit.txt' systemctl show NetworkManager.service -p LoadState -p ActiveState -p SubState -p UnitFileState
+diagnostic 'Power profile service properties' 'power-profiles-unit.txt' systemctl show power-profiles-daemon.service -p LoadState -p ActiveState -p SubState -p UnitFileState
+diagnostic 'Thermal hardware monitor inventory' 'hwmon.txt' bash -c 'for d in /sys/class/hwmon/hwmon*; do [[ -d $d ]] || continue; printf "DEVICE %s\\n" "$d"; [[ -r $d/name ]] && cat "$d/name"; for f in "$d"/temp*_input "$d"/fan*_input "$d"/power*_input; do [[ -r $f ]] || continue; printf "%s=" "${f##*/}"; cat "$f"; done; done'
+diagnostic 'ThinkPad ACPI interface' 'thinkpad-acpi.txt' bash -c 'for f in /sys/devices/platform/thinkpad_acpi/{fan_control,hotkey_mask,hotkey_all_mask}; do [[ -r $f ]] || continue; printf "%s=" "$f"; cat "$f"; done'
+diagnostic 'PAM other policy metadata' 'pam-other.txt' stat /etc/pam.d/other
+diagnostic 'Relevant installed package versions' 'desktop-package-versions.txt' pacman -Q hyprland quickshell-git caelestia-shell caelestia-cli pipewire wireplumber bluez bluez-utils linux-firmware
+diagnostic 'Systemd failed unit details' 'failed-units-detail.txt' systemctl --failed --no-pager --full
+diagnostic 'User systemd failed unit details' 'failed-user-units-detail.txt' systemctl --user --failed --no-pager --full
+
+# Do not capture nmcli connection profiles, Wi-Fi SSIDs, MAC addresses from
+# network configuration, environment variables, or full process command lines.
+chmod 0600 "$diagnostics" "$diagnostics_log"
 
 result=PASS
 if (( fail_count > 0 )); then
