@@ -22,7 +22,6 @@ grep -Fq 'SUDO_USER' "$installer"
 grep -Fq 'runuser --user' "$installer"
 grep -Fq 'K41_SUDO_REEXEC=1' "$installer"
 grep -Fq 'Refusing to perform user-file operations as root' "$installer"
-grep -Fq 'no ownership changes made' "$installer" || true
 grep -Fq 'install -d -o' "$installer"
 grep -Fq 'chown "$target_uid:' "$installer"
 grep -Fq 'Managed lock directory is not owned' "$installer"
