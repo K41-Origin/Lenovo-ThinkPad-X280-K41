@@ -7,7 +7,7 @@ pass() { printf 'PASS: %s\n' "$*"; }
 
 [[ -f $SCRIPT ]] || fail 'canonical desktop validator missing'
 bash -n "$SCRIPT" || fail 'desktop validator syntax invalid'
-for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'fail_count'; do
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'caelestia_running' 'fail_count'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "validator missing expected health check: $token"
 done
 if grep -Eq '(^|[[:space:]])sudo[[:space:]]|pacman -S|systemctl (enable|disable|start|stop)|mkfs\.|cryptsetup luksFormat|wipefs|parted' "$SCRIPT"; then
