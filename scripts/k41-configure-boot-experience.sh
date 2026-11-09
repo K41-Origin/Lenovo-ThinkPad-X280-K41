@@ -47,11 +47,13 @@ IFS=: read -r _ _ USER_UID USER_GID _ USER_HOME USER_SHELL <<<"$USER_ENTRY"
 GETTY_DROPIN="/etc/systemd/system/getty@tty1.service.d/k41-autologin.conf"
 BASH_PROFILE="$USER_HOME/.bash_profile"
 HELPER_TARGET="$USER_HOME/.local/bin/k41-lock-caelestia-after-start"
+LAUNCHER_TARGET="$USER_HOME/.local/bin/k41-start-hyprland"
 [[ -f $GETTY_DROPIN ]] && grep -Fq -- "--autologin $USER_NAME" "$GETTY_DROPIN" ||
   die "The existing K41 tty1 autologin configuration was not found; enable the approved Caelestia autologin first."
 [[ -f $BASH_PROFILE ]] && grep -Fq '# K41 HYPRLAND AUTOLOGIN START' "$BASH_PROFILE" &&
   grep -Fq 'start-hyprland' "$BASH_PROFILE" || die "The K41 tty1 Hyprland login block was not found."
 [[ -f $HELPER_TARGET ]] || die "The installed Caelestia lock helper was not found."
+[[ -x $LAUNCHER_TARGET ]] || die "The installed K41 Hyprland launcher was not found; rerun the autologin setup after updating the repository."
 HYPRLAND_CONFIG="$USER_HOME/.config/hypr/hyprland.lua"
 [[ -r $HYPRLAND_CONFIG ]] || die "Expected Hyprland config is missing: $HYPRLAND_CONFIG"
 command -v qs >/dev/null 2>&1 || die "Quickshell (qs) is required for the K41 graphical handoff."
@@ -91,6 +93,7 @@ backup_file "$GETTY_DROPIN" "etc/systemd/system/getty@tty1.service.d/k41-autolog
 backup_file "$BASH_PROFILE" "home/$USER_NAME/.bash_profile"
 backup_file "$HYPRLAND_CONFIG" "home/$USER_NAME/.config/hypr/hyprland.lua"
 backup_file "$HELPER_TARGET" "home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start"
+backup_file "$LAUNCHER_TARGET" "home/$USER_NAME/.local/bin/k41-start-hyprland"
 backup_file "/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf" "etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf"
 backup_file "/etc/systemd/system/k41-plymouth-release.service" "etc/systemd/system/k41-plymouth-release.service"
 backup_file "/usr/local/libexec/k41-plymouth-quit-after-lock" "usr/local/libexec/k41-plymouth-quit-after-lock"
@@ -178,9 +181,9 @@ if text.count(start) != 1 or text.count(end) != 1:
 a = text.index(start)
 b = text.index(end, a) + len(end)
 block = text[a:b]
-launch = re.search(r"(?m)^(\s*)start-hyprland\s*$", block)
+launch = re.search(r"(?m)^(\s*)\"\$HOME/\.local/bin/k41-start-hyprland\"\s*$", block)
 if not launch:
-    raise SystemExit("Managed K41 login block does not contain a plain start-hyprland command.")
+    raise SystemExit("Managed K41 login block does not contain the K41 Hyprland launcher.")
 marker = '    mkdir -p "$HOME/.cache/k41"\n    rm -f -- "$HOME/.cache/k41/boot-lock-ready"\n'
 if "boot-lock-ready" not in block:
     block = block[:launch.start()] + marker + block[launch.start():]
