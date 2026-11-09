@@ -253,7 +253,7 @@ Jalankan dari root repository pada sesi desktop yang sedang aktif:
 sudo bash scripts/k41-enable-caelestia-autologin.sh
 ```
 
-Script meminta konfirmasi eksplisit, membuat backup privat di `~/.local/state/k41/autologin/backups/`, menambahkan systemd drop-in khusus tty1, memperbarui `~/.bash_profile` dan konfigurasi aktif `~/.config/hypr/hyprland.lua`, serta memasang helper ke `~/.local/bin/`. Script tidak mengubah default boot target, tidak memasang/mengaktifkan display manager, tidak me-restart getty saat sesi aktif, dan tidak mengubah konfigurasi PAM. Perubahan berlaku setelah reboot.
+Script meminta konfirmasi eksplisit, membuat backup root-only di `/var/lib/k41/autologin/USER/backups/`, menambahkan systemd drop-in khusus tty1, memperbarui `~/.bash_profile` dan konfigurasi aktif `~/.config/hypr/hyprland.lua`, serta memasang helper ke `~/.local/bin/`. Script tidak mengubah default boot target, tidak memasang/mengaktifkan display manager, tidak me-restart getty saat sesi aktif, dan tidak mengubah konfigurasi PAM. Perubahan berlaku setelah reboot.
 
 Rollback (gunakan path backup yang dicetak installer):
 
