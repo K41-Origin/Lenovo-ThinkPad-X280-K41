@@ -1,0 +1,28 @@
+K41 ThinkPad X280 automatic desktop repair
+UTC: 2026-11-09T06:44:28Z
+Repository commit: cb7140fd0f512d5b85bcd2de1b9cdabf4a860779
+Report: /home/kai/Lenovo-ThinkPad-X280-K41/reports/desktop-repair/20261109T064428Z
+Policy: narrowly scoped repairs; no PAM, kernel, or desktop configuration rewrites.
+
+[PASS] Caelestia scheme — initialized using upstream default scheme
+ACTION: install missing packages: bluez bluez-utils wireless-regdb rtkit
+[PASS] Package bluez — installed
+[PASS] Package bluez-utils — installed
+[PASS] Package wireless-regdb — installed
+[PASS] Package rtkit — installed
+[PASS] RealtimeKit — rtkit package installed; D-Bus activation remains on demand
+[PASS] Wireless regulatory database — regulatory.db present and readable
+[PASS] Bluetooth service — enabled and started
+[PASS] PAM fallback policy — /etc/pam.d/other readable
+[SKIP] Caelestia profile image — optional; no placeholder generated
+[WARN] Bluetooth HCI negotiation — latest kernel report contains controller feature errors; BlueZ cannot repair controller/driver firmware
+[WARN] CPU security mitigations — latest kernel report contains MDS/MMIO/VMSCAPE findings; no SMT or kernel parameters changed
+[SKIP] Wi-Fi multicast RX warning — driver/kernel informational warning; no network reset performed
+[WARN] PAM runtime warning — Quickshell journal contains PAM fallback warning; inspect pambase-integrity.txt; PAM policy was not rewritten
+[SKIP] Qt Wayland text-input warnings — no safe configuration change supported by this evidence
+[SKIP] PipeWire libcamera plugin — optional camera integration; no package added
+[SKIP] lsusb utility — diagnostic-only utility, not a desktop runtime dependency
+
+=== Post-repair validation ===
+[PASS] Desktop validation — validator returned exit 0
+Repair complete: /home/kai/Lenovo-ThinkPad-X280-K41/reports/desktop-repair/20261109T064428Z
