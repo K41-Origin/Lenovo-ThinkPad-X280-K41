@@ -21,7 +21,7 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
   '/var/lib/systemd/coredump' '/sys/block/zram*' '/sys/module/zswap' \
   'loginctl list-sessions' 'loginctl show-user guest' 'getent passwd guest' \
   '/var/lib/systemd/linger/guest' 'pacman -Q' '/usr/share/wayland-sessions' \
-  '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn'; do
+  '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn' 'checkout path omitted' '/etc/sudoers.d'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing audit/safety scope: $token"
 done
 pass 'storage, logind, account, desktop, browser and permission audit scope is present'
