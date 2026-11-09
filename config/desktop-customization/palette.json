@@ -1,0 +1,14 @@
+{
+  "name": "K41 Obsidian Minimalism",
+  "variant": "Graphite Monochrome",
+  "colors": {
+    "background": "#0A0A0B",
+    "surface": "#141416",
+    "surface_elevated": "#1C1C20",
+    "border": "#29292E",
+    "text_primary": "#F2F2F0",
+    "text_secondary": "#A1A1A6",
+    "text_muted": "#68686F",
+    "accent": "#C4C4C9"
+  }
+}
