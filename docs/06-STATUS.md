@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan. Pengguna mengonfirmasi script konfigurasi boot experience selesai dijalankan tanpa melaporkan error. Hasil reboot, TPM auto-unlock, dan handoff visual ke lock screen belum dikonfirmasi. Quickshell K41 memakai desain ring 12 titik yang disamakan dengan Plymouth; installer juga menekan wallpaper/logo/splash Hyprland selama handoff. Tema Plymouth K41 dipakai untuk early boot dan unit reboot/poweroff/halt bawaan Arch diverifikasi oleh installer. Perubahan terbaru belum diuji pada perangkat fisik. |
+| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan. Pengguna mengonfirmasi script konfigurasi boot experience selesai dijalankan tanpa melaporkan error. Hasil reboot, TPM auto-unlock, dan handoff visual ke lock screen belum dikonfirmasi. Quickshell K41 memakai desain ring 12 titik yang disamakan dengan Plymouth; installer mengatur opsi visual Hyprland untuk handoff. Namun pengguna mengonfirmasi tampilan Hyprland masih bocor pada power-on, reboot, dan poweroff. Tema Plymouth K41 serta pemeriksaan unit reboot/poweroff/halt telah diimplementasikan, tetapi konsistensi visual perangkat BELUM TERCAPAI. Investigasi kebocoran ditunda ke sesi berikutnya. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -30,13 +30,45 @@
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5: Desktop Customization / boot experience.**
+**CURRENT — Tahap 5: dokumentasi boot experience selesai; perbaikan visual ditunda.**
 
-Audit perangkat yang tersedia sebelumnya menunjukkan TPM2 terdeteksi, belum ada token TPM2 pada saat audit, LUKS2 menggunakan passphrase keyslot 0, Plymouth belum terpasang, dan Secure Boot disabled. Script konfigurasi boot experience telah dijalankan oleh pengguna dan pengguna mengonfirmasi proses berhasil. Konfirmasi ini hanya mencatat keberhasilan eksekusi script; bukan bukti bahwa konfigurasi telah lolos reboot atau semua fitur bekerja.
+### Status faktual visual boot
 
-Langkah aktif berikutnya: jalankan kedua static test boot, jalankan ulang installer Plymouth untuk memeriksa unit reboot/shutdown dan membangun ulang UKI, jalankan ulang installer Quickshell untuk menyelaraskan animasi serta pengaturan visual Hyprland, lalu uji reboot dan shutdown fisik. Verifikasi metadata token LUKS tanpa menampilkan secret dan status bootloader tetap menjadi pemeriksaan terpisah. Acceptance: splash muncul selama early boot dan menutupi proses startup; TPM membuka root tanpa prompt passphrase; Caelestia lock screen menjadi tampilan pertama tanpa banner/login TTY atau desktop Hyprland terlihat; Hyprlock menjadi fallback; kegagalan lock menghentikan tty1 autologin setelah timeout; passphrase lama tetap dapat dipakai sebagai recovery jika TPM unlock gagal. Seluruh hasil tersebut masih NOT VERIFIED sampai ada bukti pemeriksaan setelah reboot.
+Pengguna mengonfirmasi pada 2026-11-09 bahwa tampilan Hyprland masih terlihat/bocor pada ketiga kondisi:
+- **Power-on:** tampilan Hyprland muncul selama transisi startup.
+- **Reboot:** tampilan Hyprland muncul selama transisi restart.
+- **Poweroff:** tampilan Hyprland masih terlihat selama proses shutdown.
 
-Jangan menghapus keyslot passphrase. Secure Boot masih disabled pada snapshot audit; PCR 7 saja bukan bukti verifikasi boot penuh. Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6. Hindari animasi/efek berat pada Intel UHD 620.
+Ini adalah hasil pengujian visual langsung yang dilaporkan pengguna. Karena itu, jangan menyatakan tampilan boot/reboot/shutdown sudah konsisten atau bebas flicker. Pengaturan Hyprland dan overlay Quickshell yang telah ditambahkan baru berstatus IMPLEMENTED; efektivitasnya belum menyelesaikan masalah di perangkat.
+
+### Pekerjaan yang sudah diimplementasikan
+
+- Tema native Plymouth K41: background hitam, wordmark K41, spinner 12 titik, dan callback prompt password.
+- Quickshell memakai wordmark dan spinner 12 titik dengan gaya yang disamakan ke Plymouth.
+- Installer Quickshell mengatur opsi visual Hyprland untuk menonaktifkan logo/splash, wallpaper default, dan memakai background hitam selama handoff.
+- Installer Plymouth memeriksa unit transisi reboot, poweroff, dan halt yang disediakan paket Arch.
+- Dokumentasi sekarang mencatat keterbatasan aktual dan pekerjaan yang belum selesai.
+
+### Pekerjaan berikutnya — PLANNED, belum dikerjakan
+
+Lakukan audit terpisah untuk tiga jalur visual, tanpa mengasumsikan satu penyebab:
+1. **Power-on:** urutan firmware → kernel/KMS → initramfs/Plymouth → systemd → getty/Hyprland → Quickshell → Caelestia.
+2. **Reboot:** urutan shutdown target, Plymouth reboot unit, compositor/session exit, dan display handoff.
+3. **Poweroff:** urutan shutdown target, Plymouth poweroff unit, compositor/session exit, dan display handoff.
+
+Kumpulkan bukti konfigurasi dan journal sebelum mengubah service, hook, kernel parameter, atau timing. Periksa konfigurasi Hyprland yang benar-benar dimuat, proses Quickshell, layer-shell stacking, unit Plymouth yang aktif/tertaut, serta isi UKI dan kernel command line. Jangan menambahkan delay buatan atau unit kustom yang berkompetisi dengan unit paket tanpa diagnosis.
+
+### Acceptance criteria berikutnya
+
+- Tidak ada wallpaper, logo, desktop, atau frame Hyprland yang terlihat saat power-on, reboot, maupun poweroff.
+- Animasi K41 Plymouth digunakan pada fase early boot dan transisi reboot/shutdown sejauh didukung lifecycle systemd.
+- Handoff ke Quickshell/Caelestia tidak menampilkan desktop Hyprland.
+- Caelestia Lock Screen tetap terverifikasi terkunci sebelum splash Quickshell ditutup.
+- Passphrase LUKS tetap menjadi recovery path; tidak ada perubahan keyslot/TPM tanpa kebutuhan dan persetujuan eksplisit.
+
+Status target visual keseluruhan: **NOT VERIFIED / KNOWN ISSUE**. Pekerjaan perbaikan ditunda sesuai keputusan pengguna dan akan dilanjutkan pada sesi berikutnya.
+
+Jangan menghapus keyslot passphrase. Secure Boot masih disabled pada snapshot audit; PCR 7 saja bukan bukti verifikasi boot penuh. Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6.
 
 ## Bukti tahap 4
 
