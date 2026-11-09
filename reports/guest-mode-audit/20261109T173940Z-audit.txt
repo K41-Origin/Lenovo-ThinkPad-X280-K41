@@ -1,0 +1,783 @@
+K41 Guest Mode — Extended Read-only Audit
+Timestamp UTC: 20261109T173940Z
+Repository: checkout path omitted (privacy)
+Branch: main
+Commit: 5ebb023ac36497f57d7078c1ce38b292c130de24
+Kernel: Linux 7.2.14-arch1-1
+Collector UID: 1000 (username omitted)
+Scope: read-only host, session, account, desktop and persistence inspection.
+No home content, browser profiles, credentials, document contents, or user-specific config are read.
+Review/redact host-specific information before sharing.
+
+========== Systemd and package manager versions ==========
+systemd 262 (262.1-1-arch)
+
+
+========== Memory capacity and pressure snapshot ==========
+               total        used        free      shared  buff/cache   available
+Mem:      8069128192  3294871552  3111522304   595795968  1887444992  4774256640
+Swap:    10216632320           0 10216632320
+
+========== Selected memory counters ==========
+MemTotal:        7880008 kB
+MemAvailable:    4662360 kB
+Cached:          1737036 kB
+SwapCached:            0 kB
+SwapTotal:       9977180 kB
+SwapFree:        9977180 kB
+Dirty:               352 kB
+Writeback:            48 kB
+Shmem:            581832 kB
+CommitLimit:    13917184 kB
+Committed_AS:    6692420 kB
+
+========== Root filesystem ==========
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+========== Active swap and swapfile metadata ==========
+/swapfile file 9.5G 0B -1  
+type=regular file size_bytes=10216636416 mode=600 owner_uid=0 group_gid=0 path=/swapfile
+
+========== Filesystem table and crypttab metadata (comments and keyfile fields omitted) ==========
+UUID=[REDACTED] / ext4 rw,relatime 0 1
+UUID=[REDACTED] /efi vfat rw,relatime,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro,fmask=0177,dmask=0077 0 2
+/swapfile none swap defaults 0 0
+
+========== Resume/hibernate configuration indicators ==========
+
+-- /etc/kernel/cmdline --
+
+========== Initramfs resume hook indicators ==========
+/etc/mkinitcpio.conf:MODULES=()
+/etc/mkinitcpio.conf:HOOKS=(base systemd plymouth autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+/sys/power/state: freeze mem disk
+/sys/power/disk: [platform] shutdown reboot suspend test_resume
+
+========== ZRAM and zswap indicators ==========
+No zram block devices detected.
+/sys/module/zswap/parameters/enabled: Y
+/sys/module/zswap/parameters/max_pool_percent: 20
+/sys/module/zswap/parameters/compressor: zstd
+
+========== Effective journald configuration (selected directives) ==========
+
+========== Journald storage directories and service state ==========
+
+-- /var/log/journal --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=2755 owner_uid=0 group_gid=981
+
+-- /run/log/journal --
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+object_type=directory mode=2755 owner_uid=0 group_gid=981
+LoadState=loaded
+ActiveState=active
+SubState=running
+Interpretation: empty directive output means defaults may apply; check journal directory existence and installed systemd version.
+
+========== Effective coredump configuration (selected directives) ==========
+
+========== Coredump paths and unit state ==========
+
+-- /var/lib/systemd/coredump --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+LoadState=loaded
+ActiveState=active
+SubState=listening
+Empty directive output is not equivalent to disabled coredumps; defaults apply.
+
+========== Relevant mount destinations and directory metadata ==========
+
+-- /home --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /root --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=750 owner_uid=0 group_gid=0
+
+-- /tmp --
+/tmp tmpfs tmpfs rw,nosuid,nodev,nr_inodes=1048576,inode64,huge=advise,usrquota
+object_type=directory mode=1777 owner_uid=0 group_gid=0
+
+-- /dev/shm --
+/dev/shm tmpfs tmpfs rw,nosuid,nodev,inode64,huge=advise,usrquota
+object_type=directory mode=1777 owner_uid=0 group_gid=0
+
+-- /run --
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /run/user --
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /run/user/1000 --
+/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=788000k,nr_inodes=197000,mode=700,uid=1000,gid=1000,inode64,huge=advise
+object_type=directory mode=700 owner_uid=1000 group_gid=1000
+
+-- /var/tmp --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=1777 owner_uid=0 group_gid=0
+
+-- /var/log --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /var/log/journal --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=2755 owner_uid=0 group_gid=981
+
+-- /run/log/journal --
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+object_type=directory mode=2755 owner_uid=0 group_gid=981
+
+-- /var/lib --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /var/lib/systemd --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /var/lib/systemd/coredump --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /var/lib/AccountsService --
+PATH MISSING
+
+-- /var/lib/flatpak --
+PATH MISSING
+
+-- /var/cache --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /var/spool --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /var/mail --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=symbolic link mode=777 owner_uid=0 group_gid=0
+
+-- /opt --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /usr/local --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /srv --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /mnt --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+
+-- /media --
+PATH MISSING
+
+========== Complete mounted filesystem topology (identifiers redacted) ==========
+/ /dev/mapper/cryptroot ext4 rw,relatime
+/dev devtmpfs devtmpfs rw,nosuid,size=3890708k,nr_inodes=972677,mode=755,inode64,huge=advise
+/dev/shm tmpfs tmpfs rw,nosuid,nodev,inode64,huge=advise,usrquota
+/dev/pts devpts devpts rw,nosuid,noexec,relatime,gid=5,mode=600,ptmxmode=000
+/sys sysfs sysfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/security securityfs securityfs rw,nosuid,nodev,noexec,relatime
+/sys/fs/cgroup cgroup2 cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot,memory_hugetlb_accounting
+/sys/fs/pstore none pstore rw,nosuid,nodev,noexec,relatime
+/sys/firmware/efi/efivars efivarfs efivarfs rw,nosuid,nodev,noexec,relatime
+/sys/fs/bpf bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700
+/proc proc proc rw,nosuid,nodev,noexec,relatime
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=44,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=2492
+/sys/kernel/config configfs configfs rw,nosuid,nodev,noexec,relatime
+/dev/mqueue mqueue mqueue rw,nosuid,nodev,noexec,relatime
+/dev/hugepages hugetlbfs hugetlbfs rw,nosuid,nodev,relatime,pagesize=2M
+/sys/kernel/debug debugfs debugfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/tracing tracefs tracefs rw,nosuid,nodev,noexec,relatime
+/sys/fs/fuse/connections fusectl fusectl rw,nosuid,nodev,noexec,relatime
+/run/credentials/systemd-journald.service none tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,inode64,huge=advise,noswap
+/tmp tmpfs tmpfs rw,nosuid,nodev,nr_inodes=1048576,inode64,huge=advise,usrquota
+/efi /dev/nvme0n1p1 vfat rw,relatime,fmask=0177,dmask=0077,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro
+/run/credentials/getty@tty1.service none tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,inode64,huge=advise,noswap
+/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=788000k,nr_inodes=197000,mode=700,uid=1000,gid=1000,inode64,huge=advise
+/run/user/1000/doc portal fuse.portal rw,nosuid,nodev,relatime,user_id=1000,group_id=1000
+
+========== Home directory metadata and ACLs (no contents or names) ==========
+path=/home type=directory mode=755 owner_uid=0 group_gid=0
+user::rwx
+group::r-x
+other::r-x
+
+path=/root type=directory mode=750 owner_uid=0 group_gid=0
+user::rwx
+group::r-x
+other::---
+
+home_entry type=directory mode=700 owner_uid=1000 group_gid=1000
+user::rwx
+group::---
+other::---
+
+
+========== systemd-logind effective session policy ==========
+
+========== Active login sessions (user names omitted) ==========
+session_id=1 uid=1000 seat=seat0 tty=517
+session_id=2 uid=1000 seat=- tty=535
+session_id=c2 uid=1000 seat=- tty=1151
+Failed to look up user guest: No such process
+
+========== Guest account and privilege indicators ==========
+guest_exists=no
+
+========== Sudo policy indicators (no policy file contents) ==========
+group=wheel gid=998 member_count=1
+sudo_policy_path=/etc/sudoers type=regular file mode=440 owner_uid=0 group_gid=0
+sudo_policy_path=/etc/sudoers.d type=directory mode=750 owner_uid=0 group_gid=0
+Sudo policy contents are intentionally not read; group membership is only an indicator, not a complete sudo authorization check.
+
+========== Installed desktop, portal, and browser packages ==========
+caelestia-cli 1.1.3-1
+caelestia-shell 2.5.0-1
+caelestia-shell-debug 2.5.0-1
+firefox 159.0.1-1
+hyprland 0.57.1-1
+hyprland-guiutils 0.2.2-6
+hyprland-qt-support 0.1.0-14
+pipewire 1:1.6.10-1
+pipewire-audio 1:1.6.10-1
+pipewire-jack 1:1.6.10-1
+pipewire-pulse 1:1.6.10-1
+polkit 128-1
+polkit-qt6 0.201.1-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+seatd 0.9.3-1
+wireplumber 0.5.18-1
+xdg-desktop-portal 1.22.1-2
+xdg-desktop-portal-gtk 1.15.3-2
+xdg-desktop-portal-hyprland 1.5.0-1
+
+========== System desktop session definitions and autostart filenames ==========
+
+-- /usr/share/wayland-sessions --
+hyprland-uwsm.desktop
+hyprland.desktop
+
+-- /usr/share/xsessions --
+directory missing
+
+-- /etc/xdg/autostart --
+at-spi-dbus-bus.desktop
+xdg-user-dirs.desktop
+
+========== Relevant running desktop processes (process names only) ==========
+Hyprland
+firefox
+pipewire
+polkitd
+wireplumber
+
+========== Relevant systemd units and active swap units ==========
+
+[systemd-journald.service]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+[systemd-coredump.socket]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+[systemd-tmpfiles-clean.timer]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+[logrotate.timer]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+
+[swapfile.swap]
+LoadState=loaded
+ActiveState=active
+UnitFileState=generated
+  swapfile.swap loaded active active /swapfile
+\n-- Running system service unit names only --\nNetworkManager.service
+bluetooth.service
+dbus-broker.service
+getty@tty1.service
+polkit.service
+power-profiles-daemon.service
+rtkit-daemon.service
+systemd-journald.service
+systemd-logind.service
+systemd-udevd.service
+systemd-userdbd.service
+upower.service
+user@1000.service
+wpa_supplicant.service
+
+========== Filesystem topology, capacity and volatile mount limits ==========
+NAME          TYPE  FSTYPE        SIZE MOUNTPOINTS
+sda           disk                  0B 
+nvme0n1       disk              238.5G 
+├─nvme0n1p1   part  vfat            1G /efi
+└─nvme0n1p2   part  crypto_LUKS 237.5G 
+  └─cryptroot crypt ext4        237.5G /
+Filesystem                1-blocks        Used    Available Capacity Mounted on
+/dev/mapper/cryptroot 249830211584 22654595072 214410395648      10% /
+/dev/mapper/cryptroot 249830211584 22654595072 214410395648      10% /
+tmpfs                   4034564096        4096   4034560000       1% /tmp
+tmpfs                   4034564096      372736   4034191360       1% /dev/shm
+/dev/mapper/cryptroot 249830211584 22654595072 214410395648      10% /
+/dev/mapper/cryptroot 249830211584 22654595072 214410395648      10% /
+/dev/mapper/cryptroot 249830211584 22654595072 214410395648      10% /
+/dev/mapper/cryptroot 249830211584 22654595072 214410395648      10% /
+tmpfs                   1613828096     1351680   1612476416       1% /run
+tmpfs                    806912000     4632576    802279424       1% /run/user/1000
+
+-- /dev/shm --
+/dev/shm tmpfs tmpfs rw,nosuid,nodev,inode64,huge=advise,usrquota
+object_type=directory mode=1777 owner_uid=0 group_gid=0
+user::rwx
+group::rwx
+other::rwx
+
+
+-- /run/user/1000 --
+/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=788000k,nr_inodes=197000,mode=700,uid=1000,gid=1000,inode64,huge=advise
+object_type=directory mode=700 owner_uid=1000 group_gid=1000
+user::rwx
+group::---
+other::---
+
+
+-- /var/lib --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+user::rwx
+group::r-x
+other::r-x
+
+
+-- /var/lib/AccountsService --
+PATH MISSING
+
+-- /var/lib/flatpak --
+PATH MISSING
+
+-- /opt --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+user::rwx
+group::r-x
+other::r-x
+
+
+-- /usr/local --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+object_type=directory mode=755 owner_uid=0 group_gid=0
+user::rwx
+group::r-x
+other::r-x
+
+
+========== Memory and cgroup limits relevant to session storage ==========
+Id=user-1000.slice
+ActiveState=active
+ControlGroup=/user.slice/user-1000.slice
+MemoryHigh=infinity
+MemoryMax=infinity
+TasksMax=20221
+
+Id=user@1000.service
+ActiveState=active
+ControlGroup=/user.slice/user-1000.slice/user@1000.service
+MemoryHigh=infinity
+MemoryMax=infinity
+TasksMax=infinity
+user-1000.slice memory.max: max
+user-1000.slice memory.high: max
+user-1000.slice memory.current: 4443381760
+user-1000.slice memory.swap.max: max
+user-1000.slice pids.max: 20221
+user@1000.service memory.max: max
+user@1000.service memory.high: max
+user@1000.service memory.current: 803000320
+user@1000.service memory.swap.max: max
+user@1000.service pids.max: max
+
+========== Current user manager, lingering and session lifecycle ==========
+UID=1000
+GID=1000
+RuntimePath=/run/user/1000
+State=active
+Sessions=c2 2 1
+Linger=no
+Failed to look up user guest: No such process
+Id=user@1000.service
+LoadState=loaded
+ActiveState=active
+SubState=running
+ControlGroup=/user.slice/user-1000.slice/user@1000.service
+
+Id=user-1000.slice
+LoadState=loaded
+ActiveState=active
+SubState=active
+ControlGroup=/user.slice/user-1000.slice
+
+-- User manager service/socket/target names and states only --
+at-spi-dbus-bus.service loaded active
+dbus-:1.14-org.a11y.atspi.Registry@0.service loaded active
+dbus-broker.service loaded active
+dconf.service loaded active
+dirmngr.service loaded inactive
+gpg-agent.service loaded inactive
+keyboxd.service loaded inactive
+p11-kit-server.service loaded inactive
+● pipewire-media-session.service not-found
+pipewire-pulse.service loaded active
+pipewire.service loaded active
+● pulseaudio.service not-found
+systemd-importd.service loaded inactive
+systemd-machined.service loaded inactive
+● systemd-remount-fs.service not-found
+wireplumber.service loaded active
+xdg-desktop-portal-gtk.service loaded active
+xdg-desktop-portal-hyprland.service loaded active
+xdg-desktop-portal.service loaded active
+xdg-document-portal.service loaded active
+xdg-permission-store.service loaded active
+xdg-user-dirs.service loaded inactive
+dbus.socket loaded active
+dirmngr.socket loaded active
+gpg-agent-browser.socket loaded active
+gpg-agent-extra.socket loaded active
+gpg-agent-ssh.socket loaded active
+gpg-agent.socket loaded active
+keyboxd.socket loaded active
+p11-kit-server.socket loaded active
+pipewire-pulse.socket loaded active
+pipewire.socket loaded active
+● pulseaudio.socket not-found
+systemd-ask-password.socket loaded active
+systemd-importd.socket loaded active
+systemd-journalctl.socket loaded active
+systemd-machined.socket loaded active
+systemd-storage-fs.socket loaded active
+basic.target loaded active
+● blockdev@dev-nvme0n1p1.target not-found
+bluetooth.target loaded active
+default.target loaded active
+graphical-session-pre.target loaded active
+graphical-session.target loaded active
+hyprland-session.target loaded active
+paths.target loaded active
+shutdown.target loaded inactive
+sockets.target loaded active
+sound.target loaded inactive
+timers.target loaded active
+
+-- User manager service/socket unit-file names and states --
+at-spi-dbus-bus.service static
+cliphist.service disabled
+dbus-:1.14-org.a11y.atspi.Registry@0.service transient
+dbus-broker.service disabled
+dbus-org.freedesktop.import1.service alias
+dbus-org.freedesktop.machine1.service alias
+dbus-org.freedesktop.portable1.service alias
+dbus.service alias
+dconf.service static
+dirmngr.service static
+filter-chain.service disabled
+foot-server.service disabled
+glib-pacrunner.service static
+gpg-agent.service static
+gpu-screen-recorder.service disabled
+hyprpolkitagent.service disabled
+keyboxd.service static
+mpris-proxy.service disabled
+p11-kit-server.service disabled
+pipewire-pulse.service disabled
+pipewire-session-manager.service alias
+pipewire.service disabled
+systemd-ask-password@.service static
+systemd-exit.service static
+systemd-importd.service static
+systemd-journalctl@.service static
+systemd-machined.service static
+systemd-nspawn@.service disabled
+systemd-portabled.service static
+systemd-storage-fs@.service static
+systemd-tmpfiles-clean.service static
+systemd-tmpfiles-setup.service disabled
+systemd-vmspawn@.service disabled
+thunar.service static
+tinysparql-xdg-portal-3.service static
+wireplumber.service enabled
+wireplumber@.service disabled
+xdg-desktop-portal-gtk.service static
+xdg-desktop-portal-hyprland.service static
+xdg-desktop-portal-rewrite-launchers.service disabled
+xdg-desktop-portal.service static
+xdg-document-portal.service static
+xdg-permission-store.service static
+xdg-user-dirs.service enabled
+xfconfd.service static
+dbus.socket static
+dirmngr.socket static
+foot-server.socket disabled
+gpg-agent-browser.socket static
+gpg-agent-extra.socket static
+gpg-agent-ssh.socket static
+gpg-agent.socket static
+keyboxd.socket static
+p11-kit-server.socket enabled
+pipewire-pulse.socket enabled
+pipewire.socket enabled
+systemd-ask-password.socket static
+systemd-importd.socket static
+systemd-journalctl.socket static
+systemd-machined.socket static
+systemd-storage-fs.socket disabled
+collector_user_linger=no uid=1000
+collector_user_process_names:
+(sd-pam)
+Hyprland
+Isolated Web Co
+Privileged Cont
+RDD Process
+Socket Process
+Utility Process
+Web Content
+WebExtensions
+Xwayland
+at-spi-bus-laun
+at-spi2-registr
+bash
+crashhelper
+dbus-broker
+dbus-broker-lau
+dconf-service
+firefox
+forkserver
+kitten
+kitty
+nmcli
+pipewire
+pipewire-pulse
+ps
+qs
+sort
+start-hyprland
+systemd
+wireplumber
+xdg-desktop-por
+xdg-document-po
+xdg-permission-
+
+========== Login manager and PAM entry-point metadata ==========
+LoadState=not-found
+ActiveState=inactive
+SubState=dead
+FragmentPath=
+systemd-logind.service                       static          -
+pam_stack_files (names only):
+chfn
+chpasswd
+chsh
+hyprlock
+login
+newusers
+other
+passwd
+remote
+runuser
+runuser-l
+su
+su-l
+sudo
+system-auth
+system-local-login
+system-login
+system-remote-login
+system-services
+vlock
+
+Selected PAM auth/account/session module chains (no password database or secrets):
+[login]
+auth       requisite    pam_nologin.so
+auth       include      system-local-login
+account    include      system-local-login
+session    include      system-local-login
+[system-local-login]
+auth      include   system-login
+account   include   system-login
+session   include   system-login
+[system-login]
+auth       required   pam_shells.so
+auth       requisite  pam_nologin.so
+auth       include    system-auth
+account    required   pam_access.so
+account    required   pam_nologin.so
+account    include    system-auth
+session    optional   pam_loginuid.so
+session    optional   pam_keyinit.so       force revoke
+session    include    system-auth
+session    optional   pam_lastlog2.so      silent
+session    optional   pam_motd.so
+session    optional   pam_mail.so          dir=/var/spool/mail standard quiet
+session    optional   pam_umask.so
+session    required   pam_env.so
+[system-auth]
+auth       required                    pam_faillock.so      preauth
+auth       [success=1 default=bad]     pam_unix.so          try_first_pass nullok
+auth       [default=die]               pam_faillock.so      authfail
+auth       optional                    pam_permit.so
+auth       required                    pam_env.so
+auth       required                    pam_faillock.so      authsucc
+account    required                    pam_unix.so
+account    optional                    pam_permit.so
+account    required                    pam_time.so
+session    required                    pam_limits.so
+session    required                    pam_unix.so
+session    optional                    pam_permit.so
+[sudo]
+auth		include		system-auth
+account		include		system-auth
+session		include		system-auth
+session		optional	pam_systemd.so class=none
+[hyprlock]
+auth        include     login
+[other]
+auth      required   pam_deny.so
+auth      required   pam_warn.so
+account   required   pam_deny.so
+account   required   pam_warn.so
+session   required   pam_deny.so
+session   required   pam_warn.so
+
+========== System session launch metadata (Name, Exec, TryExec only) ==========
+
+-- /usr/share/wayland-sessions --
+[hyprland-uwsm.desktop]
+Name=Hyprland (uwsm-managed)
+Exec=uwsm start -e -D Hyprland hyprland.desktop
+TryExec=uwsm
+[hyprland.desktop]
+Name=Hyprland
+Exec=/usr/bin/start-hyprland
+
+-- /usr/share/xsessions --
+directory missing
+
+========== Installed browser desktop launchers (selected metadata only) ==========
+[firefox.desktop]
+Exec=/usr/lib/firefox/firefox %u
+MimeType=application/json;application/pdf;application/rdf+xml;application/rss+xml;application/x-xpinstall;application/xhtml+xml;application/xml;audio/flac;audio/ogg;audio/webm;image/avif;image/gif;image/jpeg;image/png;image/svg+xml;image/webp;text/html;text/xml;video/ogg;video/webm;x-scheme-handler/chrome;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/mailto;
+Name=Firefox
+Exec=/usr/lib/firefox/firefox --new-window %u
+Name=New Window
+Exec=/usr/lib/firefox/firefox --private-window %u
+Name=New Private Window
+Exec=/usr/lib/firefox/firefox --ProfileManager
+Name=Open Profile Manager
+
+========== Browser private-mode policy indicators (selected policy keys only) ==========
+
+========== System and active-user default browser associations (selected MIME keys only) ==========
+active_user_default[text/html]=firefox.desktop
+active_user_default[x-scheme-handler/http]=firefox.desktop
+active_user_default[x-scheme-handler/https]=firefox.desktop
+active_user_default_web_browser=firefox.desktop
+Only selected browser association keys are queried; browser profiles, cookies, history and credentials are not inspected.
+Archived and active journals take up 40M in the file system.
+
+========== User desktop autostart metadata (selected keys only) ==========
+
+-- /home/kai/.config/autostart --
+directory missing
+
+-- /etc/xdg/autostart --
+[at-spi-dbus-bus.desktop]
+Name=AT-SPI D-Bus Bus
+Exec=/usr/lib/at-spi-bus-launcher --launch-immediately
+OnlyShowIn=GNOME;Unity;
+[xdg-user-dirs.desktop]
+Name=User folders update
+TryExec=xdg-user-dirs-update
+Exec=xdg-user-dirs-update
+
+========== Hyprland startup directives (selected directives only) ==========
+exec-once = systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
+exec-once = systemctl --user start hyprpolkitagent.service
+exec-once = caelestia shell -d
+
+========== Quickshell/Caelestia config inventory (names and file types only) ==========
+
+-- /home/kai/.config/quickshell --
+d k41-boot-splash
+f k41-boot-splash/shell.qml
+d caelestia
+d caelestia/utils
+d caelestia/scripts
+d caelestia/.vscode
+d caelestia/plugin
+f caelestia/.envrc
+d caelestia/assets
+f caelestia/.clang-tidy
+d caelestia/services
+d caelestia/.git
+f caelestia/shell.qml
+f caelestia/.clang-format
+d caelestia/modules
+f caelestia/README.md
+d caelestia/extras
+d caelestia/components
+f caelestia/.gitignore
+f caelestia/LICENSE
+d caelestia/.github
+f caelestia/flake.nix
+f caelestia/CMakeLists.txt
+f caelestia/flake.lock
+d caelestia/nix
+
+-- /home/kai/.config/caelestia --
+f cli.json
+d monitors
+d monitors/eDP-1
+f shell.json
+
+-- /home/kai/.config/hypr --
+f hyprland.conf
+f hyprland.lua
+d scheme
+f scheme/current.lua
+
+-- /home/kai/.local/share/caelestia --
+directory missing
+
+========== Audit boundaries and interpretation ==========
+- Snapshot only: this does not prove every application write path or filesystem permission boundary.
+- Home directories are not enumerated. Only selected desktop startup directives, autostart keys and bounded path names are read; browser profiles, cookies, credentials, history and documents are not read.
+- Session IDs and system paths may be identifying; review/redact before sharing.
+- Empty systemd directive output means defaults may apply, not that a feature is disabled.
+- Persistent swap, persistent logs/coredumps, lingering user services, and unisolated writable paths must be addressed in the Guest design.
+- Browser MIME defaults and desktop launchers are collected, but they do not prove which browser process will launch in every session.
+- User-manager unit names/status, session IDs and mount paths may be identifying; review/redact before sharing.
+- Selected Hyprland startup directives, desktop autostart entries, PAM module chains and browser MIME defaults are included for design analysis; review/redact before sharing.
+- Browser profiles, cookies, history, credentials and general user documents are not inspected.
+- Selected startup Exec directives may still reveal local paths or arguments; review/redact before publishing.
+- Quickshell/Caelestia configuration contents are not dumped; only bounded file/directory names are inventoried.
+- This collector does not inspect remote/server-side activity, network device logs, or removable media.
+- No settings, packages, services, mounts, swap devices, boot entries, permissions, or existing files were changed.
