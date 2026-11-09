@@ -332,3 +332,16 @@ Both create timestamped backups before applying configuration. Their rollback co
 Repository implementation is **IMPLEMENTED**, not yet device-verified. JSON profile syntax was parsed before commit and the chosen Caelestia option names are grounded in the upstream v2.5.0 README. No Bash syntax check, ShellCheck, GTK CSS parser, Foot config parser, shell runtime restart, wallpaper decoder check, performance measurement, or on-device visual acceptance has yet been executed for this batch.
 
 Stage 5 remains open until the user runs both scripts and confirms lock screen authentication, bar/taskbar, dashboard, launcher, sidebar, utilities, notifications, Thunar, Foot, and general desktop stability.
+
+
+## 12. Device test audit correction — 2026-11-09
+
+The latest user-pushed device report disproves the earlier implication that the complete component redesign had been applied. The Hyprland appearance layer succeeded, and the older Caelestia typography/monochrome-only script succeeded. The full Caelestia component-profile script failed while decoding the wallpaper because it passed the asset's trailing newline to Python base64 validation. Its failure handler restored the backed-up `shell.json` and `scheme.json`; therefore the component profile did not remain applied. No integration run report was present for GTK/Thunar/Foot/Qt.
+
+The decoder now strips surrounding whitespace and validates the JPEG payload before any configuration mutation. Static checks confirm valid base64, JPEG signature, 1280x720 dimensions, and no unknown keys against the upstream Caelestia Shell v2.5.0 example schema. This is a code correction and static validation only; laptop runtime is still pending.
+
+Current evidence-based state:
+- Hyprland appearance/Fuzzel/cursor: APPLIED in user report.
+- Caelestia typography + monochrome scheme: APPLIED by the earlier narrow script.
+- Caelestia bar/dashboard/launcher/lock/sidebar/notifications/OSD/utilities profile: NOT APPLIED in the failed full-profile run; retry required.
+- GTK3/GTK4, Thunar, Foot and generated Qt theme: NOT VERIFIED; no integration report.
