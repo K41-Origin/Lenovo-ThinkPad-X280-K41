@@ -66,6 +66,22 @@ Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. S
 
 Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu mengambil atau mengunggah screenshot; penilaian visual dilakukan langsung pada display ThinkPad X280 oleh pengguna.
 
+### Urutan workstream Tahap 5
+
+Pekerjaan customization dibagi agar tiap kelompok dapat diaudit, diterapkan, dan diterima sebelum melanjutkan ke kelompok berikutnya:
+
+1. **Boot experience — power-on, reboot, poweroff.** Samakan identitas visual firmware-to-userspace sejauh platform mendukung, Plymouth, transisi session, dan handoff menuju lock screen. Ini adalah pekerjaan yang sedang berlangsung; masalah visual leakage Hyprland masih terbuka.
+2. **Lock screen.** Wallpaper, jam/tanggal, layout, prompt autentikasi, indikator, notifikasi saat terkunci, serta jalur unlock/recovery. Jangan mengubah PAM, autentikasi, atau keyslot sebagai pekerjaan kosmetik.
+3. **Dashboard.** Hierarki informasi, layout, media, resource/system information, kalender, dan perilaku buka/tutup.
+4. **Taskbar/panel.** Workspace, active window, tray, clock/date, status indikator, ukuran, posisi, dan perilaku interaksi.
+5. **Launcher.** Satu launcher utama, tampilan hasil, kategori/action, keyboard navigation, serta safe defaults.
+6. **Sidebar.** Panel samping, navigasi, quick access, ukuran, dan perilaku tampil/sembunyi.
+7. **Utilities.** Quick toggles dan kontrol seperti jaringan, Bluetooth, audio, microphone, brightness, DND, game mode, dan settings—hanya yang didukung serta berguna pada perangkat.
+
+Urutan tersebut adalah urutan kerja, bukan pembatas cakupan visual. Sebelum workstream pertama dan sepanjang proses, jaga konsistensi lintas-komponen untuk **fondasi visual** (palette/design tokens, typography, iconography, cursor, wallpaper, spacing, radius, border, opacity, dan motion), **notifikasi dan OSD**, **window/compositor appearance** (border, focus state, gaps, workspace transitions, floating windows), serta **integrasi aplikasi** (terminal Foot, GTK/Qt, file manager, aplikasi umum). Elemen ini bukan workstream tambahan yang berdiri sendiri; terapkan saat komponen terkait dikerjakan agar tidak membuat pekerjaan paralel atau duplikasi.
+
+Setiap workstream ditutup dengan: (a) audit konfigurasi dan dependensi upstream yang benar-benar aktif; (b) backup/rollback; (c) perubahan sekecil mungkin; (d) pemeriksaan syntax/runtime dan fungsi; (e) review visual pengguna di perangkat; dan (f) pencatatan status IMPLEMENTED/TESTED/VERIFIED secara terpisah. Komponen yang tidak relevan atau tidak didukung boleh dinyatakan tidak berlaku dengan alasan, bukan dipaksakan.
+
 ### Fondasi tampilan — SUDAH DITERAPKAN
 
 Script `scripts/k41-apply-desktop-customization.sh` menerapkan overlay appearance Hyprland, mengalihkan launcher `SUPER + R` ke Fuzzel, dan memasang konfigurasi Fuzzel Graphite. Script dijalankan sebagai user biasa, tanpa sudo:
