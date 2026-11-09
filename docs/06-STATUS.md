@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan dan pengguna mengonfirmasi perubahan. Workflow opt-in autologin + Caelestia lock screen baru diimplementasikan di repository; belum diuji pada laptop. |
+| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan dan pengguna mengonfirmasi perubahan. Workflow opt-in autologin + Caelestia lock screen telah diperkuat agar memverifikasi status `isLocked` dan menggunakan Hyprlock sebagai fallback; belum diuji pada laptop. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -23,7 +23,7 @@
 | `scripts/k41-install-desktop.sh` | Desktop installation | IMPLEMENTED |
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
 | `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
-| `scripts/k41-enable-caelestia-autologin.sh` | Opt-in tty1 autologin + Hyprland + Caelestia lock startup | IMPLEMENTED — NOT TESTED ON DEVICE |
+| `scripts/k41-enable-caelestia-autologin.sh` + `scripts/k41-lock-caelestia-after-start.sh` | Opt-in tty1 autologin + verified Caelestia lock startup + Hyprlock fallback | IMPLEMENTED — NOT TESTED ON DEVICE |
 | `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — DEVICE REPORT PENDING |
 
 ## Prioritas saat ini
@@ -32,7 +32,7 @@
 
 Collector audit boot telah ditambahkan. Jalankan pada laptop, review report privasi, lalu commit/push hasilnya sebelum keputusan desain Plymouth dan TPM2 dibuat.
 
-Arah desain telah disetujui dan perubahan tampilan utama telah diterapkan pada perangkat. Langkah aktif berikutnya adalah uji workflow boot otomatis: pull commit, review script, jalankan installer opt-in, reboot, pastikan Caelestia langsung terkunci, uji password unlock, dan validasi rollback. Workflow baru berstatus IMPLEMENTED, belum TESTED/VERIFIED pada perangkat.
+Arah desain telah disetujui dan perubahan tampilan utama telah diterapkan pada perangkat. Langkah aktif berikutnya adalah uji workflow boot otomatis: pull commit, review script, jalankan installer opt-in, reboot, pastikan status Caelestia `isLocked` benar-benar aktif sebelum login, uji password unlock, uji fallback Hyprlock, dan validasi rollback. Workflow baru berstatus IMPLEMENTED, belum TESTED/VERIFIED pada perangkat.
 
 Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6. Hindari animasi/efek berat pada Intel UHD 620.
 
