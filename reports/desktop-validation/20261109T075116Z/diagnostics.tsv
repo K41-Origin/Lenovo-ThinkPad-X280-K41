@@ -1,0 +1,19 @@
+STATUS	DIAGNOSTIC	EXIT_CODE	OUTPUT_FILE
+CAPTURED	Kernel command line	0	kernel-cmdline.txt
+CAPTURED	CPU model and topology	0	cpu-info.txt
+CAPTURED	CPU vulnerability mitigations	0	cpu-vulnerabilities.txt
+CAPTURED	PCI devices and bound drivers	0	pci-detail.txt
+SKIP	USB device inventory	NA	usb-detail.txt
+CAPTURED	Loaded kernel modules relevant to desktop	0	modules.txt
+CAPTURED	Firmware package metadata	0	firmware-package.txt
+CAPTURED	Regulatory database package ownership	0	regulatory-owner.txt
+CAPTURED	Bluetooth package metadata	0	bluetooth-packages.txt
+CAPTURED	Bluetooth service properties	0	bluetooth-unit.txt
+CAPTURED	NetworkManager service properties	0	networkmanager-unit.txt
+CAPTURED	Power profile service properties	0	power-profiles-unit.txt
+CAPTURED	Thermal hardware monitor inventory	0	hwmon.txt
+CAPTURED	ThinkPad ACPI interface	0	thinkpad-acpi.txt
+CAPTURED	PAM other policy metadata	0	pam-other.txt
+CAPTURED	Relevant installed package versions	0	desktop-package-versions.txt
+CAPTURED	Systemd failed unit details	0	failed-units-detail.txt
+CAPTURED	User systemd failed unit details	0	failed-user-units-detail.txt

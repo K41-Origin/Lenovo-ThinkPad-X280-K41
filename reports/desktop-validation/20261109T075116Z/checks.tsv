@@ -1,0 +1,56 @@
+PASS	Arch Linux	Arch release marker present
+PASS	Architecture	x86_64
+PASS	Wayland session	XDG_SESSION_TYPE=wayland
+PASS	Hyprland CLI	/usr/bin/hyprctl
+PASS	Quickshell CLI	/usr/bin/qs
+PASS	Caelestia CLI	/usr/bin/caelestia
+PASS	Package: hyprland	hyprland 0.57.1-1
+PASS	Package: quickshell-git	quickshell-git 0.3.2.r11.g9b0f339-1
+PASS	Package: caelestia-shell	caelestia-shell 2.5.0-1
+PASS	Package: caelestia-cli	caelestia-cli 1.1.3-1
+PASS	Package: pipewire	pipewire 1:1.6.10-1
+PASS	Package: wireplumber	wireplumber 0.5.18-1
+PASS	Package: pipewire-pulse	pipewire-pulse 1:1.6.10-1
+PASS	Package: xdg-desktop-portal	xdg-desktop-portal 1.22.1-2
+PASS	Package: xdg-desktop-portal-hyprland	xdg-desktop-portal-hyprland 1.5.0-1
+PASS	Optional package: mesa	mesa 1:26.2.6-1
+PASS	Optional package: vulkan-intel	vulkan-intel 1:26.2.6-1
+PASS	Optional package: brightnessctl	brightnessctl 0.5.1-3
+PASS	Optional package: upower	upower 1.91.5-1
+PASS	Optional package: networkmanager	networkmanager 1.58.1-3
+PASS	Hyprland configuration	hyprctl configerrors returned no diagnostic text
+PASS	Monitor enumeration	Hyprland returned at least one monitor
+PASS	Input device enumeration	Hyprland returned input-device data
+PASS	Hyprland process	Hyprland process exists
+PASS	Caelestia process	Matching process detected
+PASS	Caelestia IPC	IPC target list returned data
+PASS	Caelestia runtime log	No unresolved fatal/QML/resource error detected; stale scheme startup and optional .face warnings are excluded only when their conditions are met
+PASS	User service: pipewire.service	active
+PASS	User service: wireplumber.service	active
+PASS	Portal service: xdg-desktop-portal.service	active
+PASS	Portal service: xdg-desktop-portal-hyprland.service	active
+PASS	NetworkManager service	active
+PASS	System failed units	No failed system units reported
+PASS	User failed units	No failed user units reported
+PASS	PipeWire graph	wpctl returned audio graph sections
+PASS	PulseAudio compatibility	pactl info succeeded
+PASS	Network connectivity state	At least one Wi-Fi/Ethernet device reports connected
+PASS	Radio block state	No soft/hard radio blocks reported
+PASS	Intel graphics driver	i915 is bound to a PCI graphics device
+PASS	Backlight telemetry	intel_backlight: 303/1515
+PASS	Memory availability	6290 MiB available (81%)
+PASS	Repository filesystem capacity	10% used
+PASS	Battery charge snapshot	BAT0: 77%
+PASS	Battery capacity health estimate	BAT0: 91% of design capacity
+PASS	Thermal: acpitz	37°C
+PASS	Thermal: pch_skylake	37°C
+PASS	Thermal: INT3400 Thermal	20°C
+PASS	Thermal: SEN1	34°C
+PASS	Thermal: B0D4	37°C
+PASS	Thermal: iwlwifi_1	33°C
+PASS	Thermal: x86_pkg_temp	38°C
+PASS	Supplemental desktop inventory	Collector completed; command-level errors remain in the report
+PASS	Supplemental Caelestia inventory	Collector completed; running shell was left untouched
+WARN	Journal: user-journal	Actionable application, firmware, Bluetooth, PAM, or CPU-security warning found; inspect saved journal and repair report
+WARN	Journal: system-journal	Actionable application, firmware, Bluetooth, PAM, or CPU-security warning found; inspect saved journal and repair report
+WARN	Journal: kernel-journal	Actionable application, firmware, Bluetooth, PAM, or CPU-security warning found; inspect saved journal and repair report

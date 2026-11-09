@@ -1,0 +1,8 @@
+  File: /etc/pam.d/other
+  Size: 274       	Blocks: 8          IO Block: 4096   regular file
+Device: 253,0	Inode: 5767247     Links: 1
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2026-11-09 01:58:51.585622244 +0700
+Modify: 2026-06-16 11:40:03.000000000 +0700
+Change: 2026-11-09 01:57:35.405444507 +0700
+ Birth: 2026-11-09 01:57:35.405268266 +0700
