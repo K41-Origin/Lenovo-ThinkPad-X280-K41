@@ -10,11 +10,20 @@ pass() { printf 'PASS: %s\n' "$*"; }
 [[ -f $RESOLVER ]] || fail 'AUR dependency resolver missing'
 [[ -f $ROOT/scripts/k41-desktop-validation.sh ]] || fail 'canonical desktop validation entry point missing'
 bash -n "$ROOT/scripts/k41-desktop-validation.sh" || fail 'canonical desktop validation entry point syntax invalid'
-pass 'canonical desktop validation entry point passes bash -n'
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'K41_REPORT_DIR=' 'qs -c caelestia kill' 'manual-checklist.md' 'umask 077'; do
+  grep -Fq -- "$token" "$ROOT/scripts/k41-desktop-validation.sh" || fail "canonical desktop validator missing contract: $token"
+done
+if grep -Eq 'sudo|systemctl (enable|disable|start|stop)' "$ROOT/scripts/k41-desktop-validation.sh"; then
+  fail 'desktop functional validator must not use sudo or mutate system services'
+fi
+pass 'canonical desktop validation entry point passes syntax and safety-contract checks'
 [[ -f $ROOT/scripts/test-desktop-x280.sh ]] || fail 'desktop diagnostic collector missing'
 bash -n "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop diagnostic collector syntax invalid'
 grep -Fq 'K41_REPORT_DIR' "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop collector does not support consolidated report output'
-pass 'desktop diagnostic collector passes syntax and consolidated report contract'
+if grep -Fq 'Suspend and resume' "$ROOT/scripts/test-desktop-x280.sh"; then
+  fail 'suspend/resume belongs to Stage 6, not Stage 4'
+fi
+pass 'desktop diagnostic collector passes syntax, report, and Stage 4 scope checks'
 [[ -f $ROOT/scripts/test-caelestia-x280.sh ]] || fail 'Caelestia diagnostic collector missing'
 bash -n "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia diagnostic collector syntax invalid'
 grep -Fq 'K41_REPORT_DIR' "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector does not support consolidated report output'
