@@ -206,23 +206,22 @@ Audit terbaru berasal dari `reports/desktop-customization-audit/20261109T084605Z
 
 ### Outstanding after first implementation commit
 
-- Baseline screenshot desktop, launcher, dashboard, dan lock screen belum tersedia.
-- Executable launcher yang benar-benar tersedia dan keybind runtime perlu diverifikasi.
-- Icon theme, cursor theme, dan wallpaper visual belum dapat dipastikan hanya dari inventaris teks.
-- Caelestia scheme dan token overrides perlu ditangani melalui opsi upstream yang benar; jangan mengedit file paket atau mengasumsikan custom scheme didukung.\n- Jangan menghapus `hyprland.conf` secara otomatis; perlakukan sebagai file legacy yang tidak aktif.
+- Patch belum diterapkan pada perangkat; launcher `SUPER + R` perlu diuji setelah penerapan.
+- Icon theme, cursor theme, dan wallpaper aktif perlu diperiksa langsung oleh pengguna saat menilai tampilan.
+- Caelestia scheme dan token overrides perlu ditangani melalui opsi upstream yang benar; jangan mengedit file paket atau mengasumsikan custom scheme didukung.
+- Jangan menghapus `hyprland.conf` secara otomatis; perlakukan sebagai file legacy yang tidak aktif.
 
 ## 11. Implementation workflow
 
 1. Audit konfigurasi aktif Hyprland, Caelestia, Quickshell, GTK, Qt, fonts, icons, cursor, dan wallpaper.
-2. Catat baseline screenshot dan kondisi runtime/performa yang relevan.
-3. Petakan konfigurasi upstream versus konfigurasi pengguna.
-4. Tetapkan design tokens final dan struktur konfigurasi.
-5. Backup konfigurasi serta siapkan rollback.
-6. Implementasikan perubahan kecil per komponen.
-7. Validasi syntax/configuration dan runtime setelah setiap kelompok perubahan.
-8. Periksa regresi fungsi desktop dan dampak performa.
-9. Ambil screenshot before/after dan lakukan review visual pada perangkat X280.
-10. Catat hasil, isu tersisa, dan keputusan penerimaan.
+2. Petakan konfigurasi upstream versus konfigurasi pengguna.
+3. Tetapkan design tokens dan struktur konfigurasi.
+4. Backup konfigurasi serta siapkan rollback.
+5. Implementasikan perubahan kecil per komponen.
+6. Validasi syntax/configuration dan runtime setelah setiap kelompok perubahan.
+7. Periksa regresi fungsi desktop dan dampak performa.
+8. Pengguna menilai tampilan langsung pada perangkat X280; screenshot tidak diwajibkan.
+9. Catat hasil, isu tersisa, dan keputusan penerimaan.
 
 Jangan melakukan bulk rewrite sebelum langkah audit dan desain selesai.
 
@@ -268,7 +267,7 @@ Keputusan yang telah disetujui:
 - Compositor: Hyprland.
 - Typography candidates: Inter dan JetBrains Mono; Noto Sans sebagai fallback bila diperlukan.
 - Wallpaper: abstract monochrome.
-- Launcher: satu launcher utama.
+- Launcher: Fuzzel sebagai satu launcher utama (runtime test pending).
 - Dashboard: sesuai kebutuhan, bukan selalu tampil.
 - Motion: subtle.
 - Transparency: selective.
@@ -278,7 +277,7 @@ Keputusan yang telah disetujui:
 
 Hal yang belum diputuskan dan harus diverifikasi:
 - Mekanisme override Caelestia/Quickshell dan opsi theming upstream yang tepat.
-- Launcher final berdasarkan kemampuan dan integrasi aktual.
+- Hasil runtime Fuzzel setelah bind `SUPER + R` dialihkan.
 - Icon dan cursor theme final.
 - Nilai final spacing, radius, ukuran panel, opacity, dan durasi animasi.
 - Paket font/theme yang diperlukan.
