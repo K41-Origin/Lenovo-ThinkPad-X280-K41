@@ -31,6 +31,8 @@
 
 Perubahan terakhir:
 - Caelestia classifier kini hanya mengecualikan warning scheme yang path-nya sama persis dengan file konfigurasi aktif; warning dari path lain tetap actionable. `.face` diperlakukan sebagai resource avatar opsional. BlueZ/RTKit hanya menjadi temuan jika service/package prasyaratnya tidak tersedia.
+- Journal classifier kini mengorelasikan pesan boot MDS/MMIO/VMSCAPE dengan file sysfs vulnerability yang sesuai. Status `Mitigation`/`Not affected` tidak otomatis menjadi WARN; status `Vulnerable`, `SMT vulnerable`, atau bukti sysfs yang hilang/tidak dikenal tetap actionable. Regression fixtures mencakup mitigasi penuh, SMT rentan, dan status tidak diketahui.
+- Validator menuliskan daftar WARN/FAIL/SKIP langsung di `summary.md`. Repair mengikat diagnosis ke path laporan yang dicetak oleh run validasi pasca-repair, membedakan PASS bersih dari PASS_WITH_WARNINGS, dan mengklasifikasikan PAM/HCI/CPU dari snapshot yang sama. Bukti journal yang tidak tersedia dicatat SKIP.
 - Journal classifier membedakan query berhasil tanpa error-priority entries dari kegagalan akses/query. Warning `regulatory.db` lama tidak lagi actionable bila database saat ini sudah readable. Signature kritis dan error tak dikenal tetap diprioritaskan di atas pesan informational.
 - Repair mengumpulkan `pacman -Qkk pambase`, versi paket `pambase`, dan ownership `/etc/pam.d/other` tanpa mengubah file PAM.
 - `AGENTS.md` dan dokumentasi desktop diselaraskan dengan implementasi repair tanpa `--apply`.
