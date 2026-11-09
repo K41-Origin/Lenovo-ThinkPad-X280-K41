@@ -1,0 +1,65 @@
+{
+    "bar": {
+        "activeWindow": {
+            "showOnHover": false
+        },
+        "clock": {
+            "showIcon": false
+        },
+        "dragThreshold": 10,
+        "persistent": false,
+        "popouts": {
+            "activeWindow": false,
+            "tray": false
+        },
+        "showOnHover": true,
+        "statusIcons": [
+            {
+                "enabled": true,
+                "id": "lockStatus"
+            },
+            {
+                "enabled": false,
+                "id": "audio"
+            },
+            {
+                "enabled": false,
+                "id": "microphone"
+            },
+            {
+                "enabled": false,
+                "id": "kbLayout"
+            },
+            {
+                "enabled": true,
+                "id": "network"
+            },
+            {
+                "enabled": false,
+                "id": "bluetooth"
+            },
+            {
+                "enabled": true,
+                "id": "battery"
+            }
+        ],
+        "workspaces": {
+            "activeIndicator": false,
+            "activeTrail": false,
+            "perMonitor": false,
+            "showUnoccupied": false,
+            "showWindows": false,
+            "showWindowsOnSpecialWorkspaces": false
+        }
+    },
+    "dashboard": {
+        "dragThreshold": 15,
+        "performance": {
+            "showGpu": true
+        },
+        "showMedia": true,
+        "showOnHover": true,
+        "showPerformance": true,
+        "showWeather": true
+    }
+}

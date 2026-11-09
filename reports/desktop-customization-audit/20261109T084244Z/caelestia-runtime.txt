@@ -1,0 +1,27 @@
+Command: bash -c pgrep\ -a\ -f\ \"caelestia\|quickshell\|qs\"\ \|\|\ true\;\ if\ command\ -v\ caelestia\ \>/dev/null\ 2\>\&1\;\ then\ caelestia\ --help\ 2\>\&1\ \|\ head\ -n\ 100\;\ fi\;\ if\ command\ -v\ qs\ \>/dev/null\ 2\>\&1\;\ then\ qs\ --version\ 2\>\&1\ \|\|\ true\;\ fi
+4688 qs -c caelestia -n -d
+7365 bash -c pgrep -a -f "caelestia|quickshell|qs" || true; if command -v caelestia >/dev/null 2>&1; then caelestia --help 2>&1 | head -n 100; fi; if command -v qs >/dev/null 2>&1; then qs --version 2>&1 || true; fi
+usage: caelestia [-h] [-v] COMMAND ...
+
+Main control script for the Caelestia dotfiles
+
+options:
+  -h, --help     show this help message and exit
+  -v, --version  print the current version
+
+subcommands:
+  valid subcommands
+
+  COMMAND        the subcommand to run
+    shell        start or message the shell
+    toggle       toggle a special workspace
+    scheme       manage the colour scheme
+    screenshot   take a screenshot
+    record       start a screen recording
+    clipboard    open clipboard history
+    emoji        emoji/glyph utilities
+    wallpaper    manage the wallpaper
+    resizer      window resizer daemon
+    install      install the Caelestia dotfiles
+    update       update the Caelestia dotfiles
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
