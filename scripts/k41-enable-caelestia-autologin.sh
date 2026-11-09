@@ -46,7 +46,7 @@ if [[ $MODE == rollback ]]; then
     # Accept only the exact paths this installer manages; never trust arbitrary manifest paths.
     while IFS=' ' read -r state relative; do
         case "$relative" in
-            etc/systemd/system/getty@tty1.service.d/k41-autologin.conf|home/$USER_NAME/.bash_profile|home/$USER_NAME/.config/hypr/hyprland.lua|home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start) ;;
+            etc/systemd/system/getty@tty1.service.d/k41-autologin.conf|home/$USER_NAME/.bash_profile|home/$USER_NAME/.config/hypr/hyprland.lua|home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start|home/$USER_NAME/.local/bin/k41-start-hyprland) ;;
             *) die "Unexpected path in backup manifest: $relative" ;;
         esac
         target="/$relative"
@@ -77,18 +77,21 @@ fi
 [[ $USER_SHELL == */bash ]] || die "The desktop account must use Bash for this TTY autostart method (found: $USER_SHELL)."
 [[ -x /usr/bin/agetty ]] || die 'Expected /usr/bin/agetty is unavailable.'
 [[ -r $HELPER_SOURCE ]] || die 'Caelestia lock helper is missing from the repository.'
+[[ -r $LAUNCHER_SOURCE ]] || die 'K41 Hyprland launcher is missing from the repository.'
 
 CONFIG_DIR="$USER_HOME/.config/hypr"
 HYPRLAND_LUA="$CONFIG_DIR/hyprland.lua"
 BASH_PROFILE="$USER_HOME/.bash_profile"
 LOCAL_BIN="$USER_HOME/.local/bin"
 HELPER_TARGET="$LOCAL_BIN/k41-lock-caelestia-after-start"
+LAUNCHER_SOURCE="$SCRIPT_DIR/k41-start-hyprland.sh"
+LAUNCHER_TARGET="$LOCAL_BIN/k41-start-hyprland"
 GETTY_DROPIN_DIR="/etc/systemd/system/getty@tty1.service.d"
 GETTY_DROPIN="$GETTY_DROPIN_DIR/k41-autologin.conf"
 BACKUP_DIR=""
 
 [[ -d $CONFIG_DIR && -f $HYPRLAND_LUA ]] || die 'Active Hyprland Lua config not found; refusing to modify an unknown configuration.'
-[[ ! -L $HYPRLAND_LUA && ! -L $BASH_PROFILE && ! -L $GETTY_DROPIN && ! -L $LOCAL_BIN && ! -L $HELPER_TARGET && ! -L $GETTY_DROPIN_DIR ]] || die 'Symlink targets are not supported for managed files.'
+[[ ! -L $HYPRLAND_LUA && ! -L $BASH_PROFILE && ! -L $GETTY_DROPIN && ! -L $LOCAL_BIN && ! -L $HELPER_TARGET && ! -L $LAUNCHER_TARGET && ! -L $GETTY_DROPIN_DIR ]] || die 'Symlink targets are not supported for managed files.'
 [[ -r $HYPRLAND_LUA && -w $CONFIG_DIR ]] || die 'Hyprland configuration is not accessible.'
 command -v caelestia >/dev/null 2>&1 || die 'Caelestia CLI is required.'
 command -v hyprlock >/dev/null 2>&1 || die 'hyprlock is required as a fail-safe lock fallback.'
@@ -166,6 +169,7 @@ backup_one "$GETTY_DROPIN" 'etc/systemd/system/getty@tty1.service.d/k41-autologi
 backup_one "$BASH_PROFILE" "home/$USER_NAME/.bash_profile"
 backup_one "$HYPRLAND_LUA" "home/$USER_NAME/.config/hypr/hyprland.lua"
 backup_one "$HELPER_TARGET" "home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start"
+backup_one "$LAUNCHER_TARGET" "home/$USER_NAME/.local/bin/k41-start-hyprland"
 chown -R root:root "$BACKUP_DIR"
 chmod 0700 "$BACKUP_DIR"
 
@@ -178,6 +182,7 @@ IFS= read -r answer </dev/tty
 # Install the helper as a regular-user executable.
 install -d -m 0755 -o "$USER_UID" -g "$USER_GID" "$LOCAL_BIN"
 install -m 0755 -o "$USER_UID" -g "$USER_GID" "$HELPER_SOURCE" "$HELPER_TARGET"
+install -m 0755 -o "$USER_UID" -g "$USER_GID" "$LAUNCHER_SOURCE" "$LAUNCHER_TARGET"
 
 # Preserve existing login profile and add a guarded tty1-only session launch.
 python3 - "$BASH_PROFILE" "$PROFILE_MARKER" <<'PY'
@@ -194,7 +199,7 @@ if [[ -z ${WAYLAND_DISPLAY:-} && -z ${DISPLAY:-} && -z ${K41_AUTOLOGIN_SESSION:-
    [[ "$(tty 2>/dev/null || true)" == /dev/tty1 ]] &&
    command -v start-hyprland >/dev/null 2>&1; then
     export K41_AUTOLOGIN_SESSION=1
-    start-hyprland
+    "$HOME/.local/bin/k41-start-hyprland"
 fi
 # K41 HYPRLAND AUTOLOGIN END
 """
@@ -259,7 +264,7 @@ chmod 0644 "$GETTY_DROPIN"
 /usr/bin/systemctl daemon-reload
 
 info "Automatic tty1 login configured for: $USER_NAME"
-info 'Bash login will start start-hyprland; the Hyprland startup hook waits for Caelestia IPC and locks the session.'
+info 'Bash login uses the K41 launcher; start-hyprland stdout/stderr are retained in ~/.local/state/k41/hyprland-startup.log while stdin/TTY remain attached.'
 info "Private backup: $BACKUP_DIR"
 info "Rollback: sudo bash scripts/k41-enable-caelestia-autologin.sh --rollback '$BACKUP_DIR'"
 info 'The change takes effect after reboot; this script does not restart getty or terminate the current session.'
