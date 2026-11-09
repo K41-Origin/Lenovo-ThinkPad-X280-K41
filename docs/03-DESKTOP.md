@@ -28,7 +28,7 @@ Script bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfig
 - Service user: PipeWire, WirePlumber, portal; service NetworkManager.
 - Audio graph, status konektivitas NetworkManager, dan radio block state.
 - Kapasitas filesystem repository, telemetry baterai/estimasi health, temperatur thermal zones.
-- Journal user, system, dan kernel.
+- Status failed system/user units, penggunaan RAM, serta journal user/system/kernel dengan triage pola error kritis.
 - Collector diagnostik desktop dan Caelestia yang sudah ada.
 
 Satu run menghasilkan `reports/desktop-validation/<timestamp>/`:
