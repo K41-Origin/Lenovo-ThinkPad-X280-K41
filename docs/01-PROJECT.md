@@ -21,6 +21,7 @@ Tidak ada perpindahan otomatis antar tahap. Hasil PASS dan review operator menja
 - `scripts/k41-live-validation.sh`
 - `scripts/k41-install-basic-arch.sh` → delegasi ke `scripts/install-arch-x280.sh`
 - `scripts/k41-install-desktop.sh` → delegasi ke `scripts/setup-desktop-x280.sh`
+- `scripts/k41-desktop-validation.sh` → entry point validasi fungsional desktop tahap 4 (user biasa di sesi Hyprland)
 
 Implementasi lama tetap dipertahankan sampai migrasi internal dilakukan secara terpisah. Jangan menggandakan logika di wrapper.
 
