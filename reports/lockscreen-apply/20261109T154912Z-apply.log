@@ -1,0 +1,21 @@
+========== K41 LOCKSCREEN SOURCE DEPLOYMENT ==========
+User     : kai (UID 1000)
+Repo     : /home/kai/Lenovo-ThinkPad-X280-K41
+Report   : /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T154912Z-apply.log
+INFO: Fetching audited upstream revision d999d4878ee4cec134168e60d913714566a8cfa6.
+INFO: Complete upstream QML source tree fetched and pinned; K41 lock overrides applied.
+INFO: This fixes the previous inert two-file directory: the local shell.qml is now present, so Quickshell can resolve the user-local config instead of falling back to /etc/xdg.
+Backup: /home/kai/.local/state/k41/lockscreen/backups/20261109T154912Z
+Install local source tree at: /home/kai/.config/quickshell/caelestia
+Apply this complete source tree? [y/N] INFO: Complete pinned Caelestia source tree installed under the user config directory.
+INFO: The package-managed /etc/xdg tree, PAM, authentication, Hyprland configuration, and system services were not modified.
+INFO: Restart from the active Hyprland terminal as the regular user: caelestia shell -r -d
+INFO: Then confirm the restart log names ~/.config/quickshell/caelestia/shell.qml, not /etc/xdg/quickshell/caelestia/shell.qml.
+INFO: Rollback: sudo bash scripts/k41-apply-lockscreen-design.sh --rollback '/home/kai/.local/state/k41/lockscreen/backups/20261109T154912Z'
+INFO: No visual/runtime acceptance is claimed until lock/unlock and visual checks pass on the X280.
+
+========== EXECUTION SUMMARY ==========
+Finished : 2026-11-09T22:49:21+07:00
+Exit code: 0
+Result   : SUCCESS
+Log file : /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T154912Z-apply.log
