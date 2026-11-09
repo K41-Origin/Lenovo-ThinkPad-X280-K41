@@ -3,8 +3,8 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/bootstrap-archiso.sh"
 
-fail() { printf 'FAIL: %s\\n' "$1" >&2; exit 1; }
-pass() { printf 'PASS: %s\\n' "$1"; }
+fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
+pass() { printf 'PASS: %s\n' "$1"; }
 
 [[ -f $SCRIPT ]] || fail "Arch ISO bootstrap script is missing"
 bash -n "$SCRIPT" || fail "Arch ISO bootstrap has a Bash syntax error"
@@ -57,12 +57,12 @@ for token in "${required[@]}"; do
 done
 pass "bootstrap pins commit, verifies origin/clean checkout, reviews current files, runs readiness, and requires two exact acknowledgements"
 
-if grep -Eq 'curl[^|]*\\|[[:space:]]*(ba)?sh|wget[^|]*\\|[[:space:]]*(ba)?sh' "$SCRIPT"; then
+if grep -Eq 'curl[^|]*\|[[:space:]]*(ba)?sh|wget[^|]*\|[[:space:]]*(ba)?sh' "$SCRIPT"; then
   fail "bootstrap pipes remote content directly into a shell"
 fi
 pass "bootstrap does not pipe remote content into a shell"
 
-if grep -Eq 'wipefs|sgdisk|cryptsetup|mkfs\\.' "$SCRIPT"; then
+if grep -Eq 'wipefs|sgdisk|cryptsetup|mkfs\.' "$SCRIPT"; then
   fail "bootstrap itself contains destructive storage commands"
 fi
 pass "bootstrap delegates storage operations only to the separately reviewed installer"
