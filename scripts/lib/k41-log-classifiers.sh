@@ -34,7 +34,7 @@ k41_classify_caelestia_log() {
 }
 
 # Classify journal query results without treating an empty error-priority
-# query as a fault. Arguments: FILE QUERY_EXIT_CODE REGULATORY_DB_PRESENT
+# query as a fault. Arguments: FILE QUERY_EXIT_CODE REGULATORY_DB_PRESENT [CPU_VULNERABILITY_DIR]
 k41_classify_journal() {
   local journal_file=$1 query_rc=$2 regulatory_db_present=$3 cpu_vulnerability_dir=${4:-/sys/devices/system/cpu/vulnerabilities} filtered cpu_attention=0
   if (( query_rc != 0 )); then
