@@ -51,7 +51,7 @@ for pkg in caelestia-shell caelestia-cli quickshell quickshell-git hyprland hypr
 done
 
 section 'Relevant executable paths and versions'
-for bin in caelestia qs quickshell hyprctl hyprlock swaylock gtklock loginctl fprintd howdy;
+for bin in caelestia qs quickshell hyprctl hyprlock swaylock gtklock loginctl fprintd howdy; do
   if have "$bin"; then
     printf '%s: %s\n' "$bin" "$(command -v "$bin")" >> "$report"
     case "$bin" in
@@ -131,6 +131,8 @@ for base in "$HOME/.config/hypr" "$HOME/.config/caelestia" "$HOME/.config/quicks
   [[ -d $base ]] || continue
   printf '\n[%s]\n' "$base" >> "$report"
   find "$base" -maxdepth 4 -type f \( -iname '*lock*' -o -iname '*.qml' -o -iname 'hyprland.lua' -o -iname 'hyprland.conf' \) -printf '%p\n' 2>/dev/null | head -n 150 >> "$report" || true
+  printf 'Files containing lock-related configuration keywords (paths only):\n' >> "$report"
+  grep -RIlE 'lock|hyprlock|swaylock' "$base" 2>/dev/null | head -n 100 >> "$report" || true
 done
 
 section 'PAM auth stack: module names only; no options or credentials'
