@@ -59,9 +59,9 @@ fi
 [[ -d $config_root/caelestia && -d $state_root/caelestia ]] || die 'Caelestia config/state directories are missing.'
 
 # Validate profile and existing user JSON before making any changes.
-python3 - "$profile_file" "$shell_file" "$scheme_file" <<'PY'
-import json, pathlib, sys
-for name in sys.argv[1:]:
+python3 - "$profile_file" "$shell_file" "$scheme_file" "$wallpaper_source" <<'PY'
+import base64, binascii, json, pathlib, sys
+for name in sys.argv[1:4]:
     path = pathlib.Path(name)
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -69,6 +69,14 @@ for name in sys.argv[1:]:
         raise SystemExit(f"Invalid JSON in {path}: {type(exc).__name__}: {exc}")
     if not isinstance(value, dict):
         raise SystemExit(f"Expected a JSON object in {path}")
+wallpaper_path = pathlib.Path(sys.argv[4])
+try:
+    payload = base64.b64decode(wallpaper_path.read_text(encoding="ascii").strip(), validate=True)
+except (UnicodeError, binascii.Error) as exc:
+    raise SystemExit(f"Invalid base64 wallpaper asset {wallpaper_path}: {exc}")
+if not payload.startswith(b"\\xff\\xd8\\xff"):
+    raise SystemExit(f"Wallpaper asset is not a JPEG: {wallpaper_path}")
+print(f"PASS: wallpaper asset preflight ({len(payload)} decoded bytes).")
 PY
 
 scheme_help="$(timeout 8s caelestia scheme set -h 2>&1)" || die 'Unable to inspect Caelestia scheme command.'
@@ -210,7 +218,7 @@ fi
 python3 - "$wallpaper_source" "$wallpaper_target" <<'PY'
 import base64, pathlib, sys
 source, target = map(pathlib.Path, sys.argv[1:])
-data = base64.b64decode(source.read_text(encoding="ascii"), validate=True)
+data = base64.b64decode(source.read_text(encoding="ascii").strip(), validate=True)
 if not data.startswith(b"\xff\xd8\xff"):
     raise SystemExit("Wallpaper payload is not a JPEG file.")
 target.parent.mkdir(parents=True, exist_ok=True)
