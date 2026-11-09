@@ -11,9 +11,9 @@ Usage: bash scripts/k41-guest-storage-audit.sh
 Creates a read-only Guest Mode audit report under reports/guest-mode-audit/.
 Run from the repository clone as the regular desktop user, without sudo.
 
-Collects memory/swap/hibernate, mounts and permissions, journald/coredump,
-logind/session/linger state, the guest account and privilege indicators,
-installed desktop/browser packages, and system-level desktop launchers.
+Collects storage/mount topology, swap/hibernate, volatile-memory limits,
+systemd persistence and user-session lifecycle, account/privilege metadata,
+login/session entry points, desktop/browser packages and system launchers.
 It does NOT enumerate home-directory contents, read browser profiles,
 credentials, document contents, or user-specific configuration files.
 
@@ -223,6 +223,79 @@ if have systemctl; then
   systemctl list-units --type=swap --all --no-legend --no-pager 2>&1 | redact_ids >>"$report" || true
 else note 'systemctl unavailable'; fi
 
+section 'Filesystem topology, capacity and volatile mount limits'
+if have lsblk; then lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINTS 2>&1 | redact_ids >>"$report" || true; else note 'lsblk unavailable'; fi
+if have df; then df -B1 -P / /home /tmp /var /run 2>&1 >>"$report" || true; fi
+for path in /dev/shm /run/user/"$EUID" /var/lib /var/lib/AccountsService /var/lib/flatpak /opt /usr/local; do
+  printf '\n-- %s --\n' "$path" >>"$report"
+  if [[ -e $path ]]; then
+    findmnt -T "$path" -n -o TARGET,SOURCE,FSTYPE,OPTIONS 2>&1 | redact_ids >>"$report" || true
+    stat -c 'object_type=%F mode=%a owner_uid=%u group_gid=%g' "$path" >>"$report" 2>&1 || true
+    if have getfacl; then getfacl -cpn "$path" 2>/dev/null | grep -v '^#' >>"$report" || true; fi
+  else note 'PATH MISSING'; fi
+done
+
+section 'Memory and cgroup limits relevant to session storage'
+for file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.current /sys/fs/cgroup/memory.swap.max; do
+  [[ -r $file ]] && printf '%s: %s\n' "$file" "$(cat "$file")" >>"$report"
+done
+if have systemctl; then
+  systemctl show "user-$EUID.slice" "user@$EUID.service" -p Id -p ActiveState -p MemoryMax -p MemoryHigh -p TasksMax -p ControlGroup --no-pager >>"$report" 2>&1 || true
+fi
+
+section 'Current user manager, lingering and session lifecycle'
+if have loginctl; then
+  loginctl show-user "$EUID" -p UID -p GID -p State -p Sessions -p Linger -p RuntimePath --no-pager >>"$report" 2>&1 || true
+  loginctl show-user guest -p UID -p GID -p State -p Sessions -p Linger -p RuntimePath --no-pager >>"$report" 2>&1 || true
+fi
+if have systemctl; then
+  systemctl show "user@$EUID.service" "user-$EUID.slice" -p Id -p LoadState -p ActiveState -p SubState -p ControlGroup --no-pager >>"$report" 2>&1 || true
+  printf '\n-- User manager unit names/status (no command lines or properties) --\n' >>"$report"
+  systemctl --user list-units --all --no-legend --no-pager 2>&1 | awk '{print $1 " " $2 " " $3}' >>"$report" || true
+  printf '\n-- User manager unit-file names/state --\n' >>"$report"
+  systemctl --user list-unit-files --no-legend --no-pager 2>&1 | awk '{print $1 " " $2}' >>"$report" || true
+fi
+if [[ -e /var/lib/systemd/linger/"$EUID" ]]; then note "collector_user_linger=yes uid=$EUID"; else note "collector_user_linger=no uid=$EUID"; fi
+if have ps; then
+  printf 'collector_user_process_names:\n' >>"$report"
+  ps -u "$EUID" -o comm= 2>/dev/null | sort -u >>"$report" || true
+fi
+
+section 'Login manager and PAM entry-point metadata'
+if have systemctl; then
+  systemctl show display-manager.service -p LoadState -p ActiveState -p SubState -p FragmentPath --no-pager >>"$report" 2>&1 || true
+  systemctl list-unit-files --no-legend --no-pager 2>/dev/null | grep -Ei '(^|/)(sddm|greetd|ly|gdm|lightdm|systemd-logind)(\.service|@\.service)' >>"$report" || true
+fi
+if [[ -L /etc/systemd/system/display-manager.service ]]; then
+  printf 'display_manager_link=%s\n' "$(readlink /etc/systemd/system/display-manager.service)" >>"$report"
+fi
+if [[ -d /etc/pam.d ]]; then
+  printf 'pam_stack_files (names only):\n' >>"$report"
+  find /etc/pam.d -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort >>"$report" || true
+fi
+
+section 'System session launch metadata (Name, Exec, TryExec only)'
+for dir in /usr/share/wayland-sessions /usr/share/xsessions; do
+  printf '\n-- %s --\n' "$dir" >>"$report"
+  if [[ -d $dir ]]; then
+    find "$dir" -maxdepth 1 -type f -name '*.desktop' -print0 2>/dev/null |
+      while IFS= read -r -d '' file; do
+        printf '[%s]\n' "$(basename "$file")"
+        grep -E '^(Name|Exec|TryExec)=' "$file" 2>/dev/null || true
+      done >>"$report"
+  else note 'directory missing'; fi
+done
+
+section 'System-level default browser MIME associations'
+for file in /usr/share/applications/mimeapps.list /etc/xdg/mimeapps.list /usr/local/share/applications/mimeapps.list; do
+  if [[ -r $file ]]; then
+    printf '[%s]\n' "$file" >>"$report"
+    awk '/^\[Default Applications\]/{p=1;next} /^\[/{p=0} p && /^(text\/html|x-scheme-handler\/http|x-scheme-handler\/https)=/{print}' "$file" >>"$report"
+  fi
+done
+note 'Per-user MIME defaults and browser preferences are intentionally not inspected.'
+if have journalctl; then journalctl --disk-usage --no-pager 2>&1 >>"$report" || true; fi
+
 section 'Audit boundaries and interpretation'
 cat >>"$report" <<'BOUNDARIES'
 - Snapshot only: this does not prove every application write path or filesystem permission boundary.
@@ -231,7 +304,9 @@ cat >>"$report" <<'BOUNDARIES'
 - Empty systemd directive output means defaults may apply, not that a feature is disabled.
 - Persistent swap, persistent logs/coredumps, lingering user services, and unisolated writable paths must be addressed in the Guest design.
 - Browser package presence does not prove which browser is configured as the default or launched automatically.
-- System-level launcher filenames do not reveal user-level autostart configuration.
+- User-manager unit names/status, session IDs and mount paths may be identifying; review/redact before sharing.
+- System desktop-file Exec values and MIME defaults do not prove the actual per-user launch path.
+- Per-user MIME defaults, Caelestia/Hyprland dotfiles, browser profiles and user autostart are intentionally not inspected.
 - This collector does not inspect remote/server-side activity, network device logs, or removable media.
 - No settings, packages, services, mounts, swap devices, boot entries, permissions, or existing files were changed.
 BOUNDARIES
