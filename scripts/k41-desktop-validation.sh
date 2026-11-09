@@ -491,7 +491,7 @@ diagnostic 'CPU vulnerability sysfs detail' 'cpu-vulnerability-detail.txt' bash 
     cat "$f"
   done
 '
-diagnostic 'Bluetooth controller summary' 'bluetooth-controller.txt' timeout 12 bluetoothctl show
+diagnostic 'Bluetooth controller summary' 'bluetooth-controller.txt' bash -c 'timeout 12 bluetoothctl show | sed -E "s/Controller [0-9A-Fa-f:]{17}/Controller [REDACTED]/"'
 diagnostic 'Bluetooth management controller information' 'bluetooth-btmgmt-info.txt' timeout 12 btmgmt info
 diagnostic 'Bluetooth HCI sysfs and udev identity' 'bluetooth-hci-identity.txt' bash -c '
   for hci in /sys/class/bluetooth/hci*; do
@@ -500,7 +500,7 @@ diagnostic 'Bluetooth HCI sysfs and udev identity' 'bluetooth-hci-identity.txt' 
     printf "DEVICE_PATH="
     readlink -f "$hci/device" 2>/dev/null || true
     udevadm info --query=all --path="$hci/device" 2>&1 || true
-    for attr in address name type modalias; do
+    for attr in name type modalias; do
       [[ -r $hci/$attr ]] || continue
       printf "%s=" "$attr"
       cat "$hci/$attr"
@@ -508,18 +508,16 @@ diagnostic 'Bluetooth HCI sysfs and udev identity' 'bluetooth-hci-identity.txt' 
   done
 '
 diagnostic 'Bluetooth driver module metadata' 'bluetooth-driver.txt' modinfo btusb
-diagnostic 'Installed Intel Bluetooth firmware candidates' 'intel-bluetooth-firmware.txt' bash -c '
-  for d in /usr/lib/firmware/intel /lib/firmware/intel; do
-    [[ -d $d ]] || continue
-    printf "DIRECTORY=%s\\n" "$d"
-    find "$d" -maxdepth 1 -type f \\( -name "ibt-*.sfi" -o -name "ibt-*.ddc" \\) -printf "%f\\n" 2>/dev/null | sort -u
-  done
+diagnostic 'Installed Intel Bluetooth firmware package and files' 'intel-bluetooth-firmware.txt' bash -c '
+  pacman -Qi linux-firmware-intel
+  printf "\\n--- Intel Bluetooth firmware files ---\\n"
+  pacman -Ql linux-firmware-intel | grep -E "/ibt-[^/]+[.](sfi|ddc)([.]zst)?$" || true
 '
 diagnostic 'Bluetooth kernel boot messages' 'bluetooth-kernel-log.txt' bash -c '
   journalctl -k -b --no-pager 2>&1 | grep -Ei "Bluetooth:|btusb|btintel|ibt-|hci[0-9]|firmware.*(bluetooth|intel)" || true
 '
-diagnostic 'Bluetooth package integrity' 'bluetooth-package-integrity.txt' pacman -Qkk bluez bluez-utils linux-firmware
-diagnostic 'PAM base and Linux-PAM package integrity' 'pam-package-integrity.txt' pacman -Qkk pambase linux-pam
+diagnostic 'Bluetooth package integrity' 'bluetooth-package-integrity.txt' pacman -Qkk bluez bluez-utils linux-firmware-intel
+diagnostic 'PAM base and Linux-PAM package integrity' 'pam-package-integrity.txt' pacman -Qkk pambase pam
 diagnostic 'PAM fallback policy metadata and content' 'pam-other-policy.txt' bash -c '
   if [[ -e /etc/pam.d/other ]]; then
     stat /etc/pam.d/other
