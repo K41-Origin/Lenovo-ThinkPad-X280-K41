@@ -46,9 +46,8 @@ Setelah konfigurasi Plymouth/TPM2 yang sudah ada, jalankan dari checkout terbaru
 
 ```bash
 git pull --ff-only
-bash -n scripts/k41-install-animated-boot-splash.sh
-sudo bash scripts/k41-install-animated-boot-splash.sh
 bash tests/test-animated-boot-splash.sh
+sudo bash scripts/k41-install-animated-boot-splash.sh
 ```
 
 Installer menyalin konfigurasi Quickshell ke `~/.config/quickshell/k41-boot-splash/`, memasang helper lock terbaru, dan menambahkan overlay pada callback Hyprland-start. Animasi Quickshell memakai wordmark K41 putih dan ring 12 titik monokrom dengan pola opacity/rotasi yang sama seperti tema native Plymouth. Overlay memakai layer `Overlay` agar berada di atas layer shell biasa. Installer juga menonaktifkan wallpaper/logo/splash bawaan Hyprland dan menetapkan latar compositor hitam selama handoff; ini menghilangkan tampilan wallpaper/mascot Hyprland yang sebelumnya dapat muncul sebelum Quickshell terpetakan. Helper menutup proses Quickshell hanya setelah status lock Caelestia terverifikasi. Installer ini tidak mengubah LUKS, TPM, UKI, mkinitcpio, atau bootloader. Jalankan ulang installer setelah `git pull --ff-only` untuk memperbarui QML dan menambahkan pengaturan visual pada konfigurasi yang sudah ada.
