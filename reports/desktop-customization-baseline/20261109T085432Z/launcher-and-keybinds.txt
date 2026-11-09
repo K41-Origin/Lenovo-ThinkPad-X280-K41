@@ -1,0 +1,21 @@
+=== Launcher executables ===
+hyprlauncher   unavailable
+wofi           /usr/bin/wofi
+rofi           unavailable
+fuzzel         /usr/bin/fuzzel
+
+=== Launcher-related keybinds ===
+	flags: locked, repeat
+	flags: locked, repeat
+	flags: locked, repeat
+	flags: locked, repeat
+	flags: locked, repeat
+	flags: locked, repeat
+	flags: locked
+	flags: locked
+	flags: locked
+	flags: locked
+	flags: locked, release, non_consuming, ignore_mods
+	key: Caps_Lock
+	flags: locked, release, non_consuming, ignore_mods
+	key: Num_Lock

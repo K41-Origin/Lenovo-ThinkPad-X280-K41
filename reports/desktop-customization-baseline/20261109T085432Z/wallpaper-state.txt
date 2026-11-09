@@ -1,0 +1,8 @@
+=== Wallpaper-related Hyprland options ===
+int: -1
+set: true
+
+bool: false
+set: true
+
+=== Wallpaper-related processes ===
