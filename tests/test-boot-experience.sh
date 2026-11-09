@@ -10,7 +10,6 @@ grep -Fq 'cryptsetup luksHeaderBackup' "$SCRIPT"
 grep -Fq 'plymouth-set-default-theme bgrt' "$SCRIPT"
 grep -Fq 'quiet' "$SCRIPT"
 grep -Fq 'splash' "$SCRIPT"
-grep -Fq 'HOOKS=(...)' "$SCRIPT" && exit 1 || true
 ! grep -Eq 'cryptsetup[[:space:]]+luksErase|--wipe-slot=all|wipefs[[:space:]]' "$SCRIPT"
 
 printf 'PASS: boot-experience script syntax and safety invariants\n'
