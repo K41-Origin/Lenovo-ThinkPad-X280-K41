@@ -41,8 +41,17 @@ if [[ $EUID -eq 0 ]]; then
         done
     done
     target_gid="$(id -g "$SUDO_USER")"
-    install -d -o "$target_uid" -g "$target_gid" -- "$target_config" "$target_state"
-    chown "$target_uid:$target_gid" -- "$target_config" "$target_state"
+    for path in "$target_config" "$target_state"; do
+        if [[ -e $path && ! -d $path ]]; then
+            die "Managed path exists but is not a directory: $path"
+        fi
+        if [[ ! -d $path ]]; then
+            install -d -o "$target_uid" -g "$target_gid" -- "$path"
+        else
+            [[ $(stat -c %u "$path") == "$target_uid" ]] ||
+                die "Existing managed directory has unexpected owner; inspect manually: $path"
+        fi
+    done
 
     exec runuser --user "$SUDO_USER" -- env \
         HOME="$target_home" \
@@ -178,6 +187,10 @@ done < <(find "$target_root" -type f -print0)
 while IFS= read -r -d '' link; do
     die "Symlink found in existing user shell tree: $link"
 done < <(find "$target_root" -type l -print0)
+while IFS= read -r -d '' dir; do
+    rel="${dir#"$target_root"/}"
+    case "$rel" in modules|modules/lock) ;; *) die "Unexpected pre-existing user directory: $rel" ;; esac
+done < <(find "$target_root" -mindepth 1 -type d -print0)
 
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup_dir="$backup_root/$stamp"
