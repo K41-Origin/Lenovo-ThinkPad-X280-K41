@@ -16,7 +16,7 @@ fi
 (( EUID != 0 )) || { printf 'ERROR: run as regular user, never sudo.\n' >&2; exit 2; }
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -n ${WAYLAND_DISPLAY:-} ]] ||
   { printf 'ERROR: run inside active Hyprland session.\n' >&2; exit 2; }
-for cmd in date mkdir chmod pacman systemctl grep awk sed head tee stat; do
+for cmd in date mkdir chmod pacman systemctl grep awk sed head tee stat busctl; do
   command -v "$cmd" >/dev/null 2>&1 || { printf 'ERROR: missing command: %s\n' "$cmd" >&2; exit 2; }
 done
 [[ -f "$ROOT/scripts/k41-desktop-validation.sh" ]] || { printf 'ERROR: validator missing.\n' >&2; exit 2; }
@@ -141,6 +141,39 @@ if [[ -d /sys/class/bluetooth/hci0 ]] &&
   fi
 else
   record SKIP 'Bluetooth service' 'controller or BlueZ package prerequisites unavailable'
+fi
+
+# The latest hardware report showed Pairable=no and Discoverable=no.
+# Open a bounded three-minute pairing window; do not leave the adapter exposed.
+if [[ -d /sys/class/bluetooth/hci0 ]] && systemctl is-active --quiet bluetooth.service; then
+  adapter_path=/org/bluez/hci0
+  if busctl --system set-property org.bluez "$adapter_path" org.bluez.Adapter1 PairableTimeout u 180 &&
+     busctl --system set-property org.bluez "$adapter_path" org.bluez.Adapter1 Pairable b true; then
+    pairable_state="$(busctl --system get-property org.bluez "$adapter_path" org.bluez.Adapter1 Pairable 2>&1 || true)"
+    pairable_timeout="$(busctl --system get-property org.bluez "$adapter_path" org.bluez.Adapter1 PairableTimeout 2>&1 || true)"
+    if [[ $pairable_state == 'b true' && $pairable_timeout == 'u 180' ]]; then
+      record PASS 'Bluetooth incoming pairing window' 'Pairable enabled with an automatic 180-second timeout'
+    else
+      record WARN 'Bluetooth incoming pairing window' "Could not verify temporary pairable state (Pairable=$pairable_state; timeout=$pairable_timeout)"
+    fi
+  else
+    record WARN 'Bluetooth incoming pairing window' 'Could not enable timed Pairable mode; no persistent configuration was written'
+  fi
+
+  if busctl --system set-property org.bluez "$adapter_path" org.bluez.Adapter1 DiscoverableTimeout u 180 &&
+     busctl --system set-property org.bluez "$adapter_path" org.bluez.Adapter1 Discoverable b true; then
+    discoverable_state="$(busctl --system get-property org.bluez "$adapter_path" org.bluez.Adapter1 Discoverable 2>&1 || true)"
+    discoverable_timeout="$(busctl --system get-property org.bluez "$adapter_path" org.bluez.Adapter1 DiscoverableTimeout 2>&1 || true)"
+    if [[ $discoverable_state == 'b true' && $discoverable_timeout == 'u 180' ]]; then
+      record PASS 'Bluetooth discoverability window' 'Discoverable enabled with an automatic 180-second timeout'
+    else
+      record WARN 'Bluetooth discoverability window' "Could not verify temporary discoverability state (Discoverable=$discoverable_state; timeout=$discoverable_timeout)"
+    fi
+  else
+    record WARN 'Bluetooth discoverability window' 'Could not enable timed Discoverable mode; no persistent configuration was written'
+  fi
+else
+  record SKIP 'Bluetooth pairing window' 'Bluetooth controller or active BlueZ service unavailable'
 fi
 
 # PAM is security-critical: always capture package integrity and ownership; never rewrite policy.
