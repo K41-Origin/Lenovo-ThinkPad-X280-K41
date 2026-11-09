@@ -222,3 +222,17 @@ Setujui prompt masing-masing script. Jalankan desktop-customization lebih dahulu
 - **STATIC REVIEW:** JSON profile dibangun dan diparse sebagai JSON sebelum commit; field Caelestia dipilih dari dokumentasi upstream tag v2.5.0.
 - **NOT TESTED:** bash -n, ShellCheck, eksekusi script, parsing CSS/Foot pada versi lokal, dukungan SVG oleh wallpaper CLI, dan runtime/visual behavior belum dijalankan di laptop.
 - **DEVICE APPLY PENDING:** pengguna perlu pull commit, menjalankan dua script, lalu menguji komponen secara langsung. Jangan tandai Stage 5 selesai sebelum uji fungsi dan visual diterima.
+
+
+## Audit hasil uji laptop — 2026-11-09
+
+Audit terhadap commit pengguna `4c3433274112b597822b1173dfa2f9cab23f59b5` menemukan bahwa penerapan **belum berhasil pada Caelestia component profile**:
+
+- `reports/desktop-customization/20261109T095812Z`: SUCCESS. Ini hanya menerapkan layer Hyprland appearance, Fuzzel, dan cursor.
+- `reports/caelestia-customization/20261109T094136Z`: SUCCESS. Script lama hanya mengubah typography dan scheme monochrome, bukan redesign komponen.
+- `reports/desktop-profile/20261109T095832Z`: FAILED. Merge profile sempat berjalan, tetapi decoder wallpaper menolak base64 karena newline akhir file dibaca bersama payload. Script lalu mengembalikan `shell.json` dan `scheme.json` dari backup. Jadi perubahan bar/dashboard/launcher/lock/sidebar/utilities dari full profile **tidak bertahan**.
+- Tidak ditemukan report eksekusi `k41-apply-desktop-integration.sh` pada commit uji tersebut; penerapan GTK/Thunar/Foot/Qt belum terbukti.
+
+Perbaikan decoder sudah dikomit: script sekarang melakukan `.strip()` pada payload base64 dan memvalidasi wallpaper sebelum backup/perubahan konfigurasi. Aset diuji secara statis: base64 valid, JPEG signature valid, 1280x720. Profile Caelestia juga dicocokkan dengan contoh schema upstream v2.5.0: tidak ada key asing. Ini belum menggantikan uji runtime.
+
+**Status saat audit:** Hyprland layer = APPLIED; typography/scheme Caelestia lama = APPLIED; full Caelestia component profile = NOT APPLIED (percobaan sebelumnya rollback otomatis); GTK/Thunar/Foot integration = NOT VERIFIED. Jalankan ulang full profile dan integration setelah mengambil commit perbaikan terbaru.
