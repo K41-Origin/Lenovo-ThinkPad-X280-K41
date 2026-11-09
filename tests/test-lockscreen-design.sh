@@ -30,6 +30,8 @@ grep -Fq 'reports/lockscreen-apply' "$installer"
 grep -Fq 'exec > >(tee -a "$log_file") 2>&1' "$installer"
 grep -Fq 'EXECUTION SUMMARY' "$installer"
 grep -Fq 'Report   :' "$installer"
+grep -Fq '/proc/sys/kernel/hostname' "$installer"
+! grep -Fq 'tee hostname' "$installer"
 grep -Fq 'finish_log "$rc"' "$installer"
 printf 'PASS: lock-screen override structure, installer syntax, and in-repository report logging checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
