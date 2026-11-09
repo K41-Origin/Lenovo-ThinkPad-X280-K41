@@ -12,41 +12,44 @@ Entry point ini mendelegasikan ke `scripts/setup-desktop-x280.sh`. Setup memasan
 
 Exit code 0 bukan acceptance desktop. Lanjutkan ke tahap 4.
 
-## Tahap 4 — Desktop Environment Begin: functional validation (TAHAP AKTIF)
+## Tahap 4 — Desktop Environment: automated functional health validation (TAHAP AKTIF)
 
-Validasi otomatis dan checklist fisik dijalankan melalui satu entry point, dari terminal di sesi Hyprland sebagai user biasa (tanpa sudo):
+Tahap ini menggunakan validasi otomatis berbasis kondisi sistem, proses, konfigurasi, service, IPC, dan log. Pemeriksaan visual/fisik tidak menjadi bagian dari gate tahap ini sesuai keputusan proyek. Jalankan dari terminal sesi Hyprland sebagai user biasa, tanpa sudo:
 
 ```bash
 bash scripts/k41-desktop-validation.sh
 ```
 
-Script menjalankan dua collector yang sudah ada, lalu meminta konfirmasi sebelum me-restart Caelestia untuk memeriksa cache dan log runtime yang baru. Restart hanya menyentuh instance Caelestia/Quickshell, bukan Hyprland. Simpan pekerjaan sebelum menyetujui restart. Jawab `y` untuk melakukan restart atau Enter/`n` untuk melewatinya.
+Script bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfigurasi, mengaktifkan/menonaktifkan service, atau me-restart desktop. Script hanya membuat laporan privat. Cakupan otomatis:
+- Platform/session: Arch Linux, arsitektur, Wayland, executable Hyprland/Quickshell/Caelestia.
+- Paket wajib dan paket opsional yang relevan.
+- Hyprland: konfigurasi, monitor, input device, dan proses.
+- Caelestia: proses, IPC target, runtime log, QML/load-error pattern.
+- Service user: PipeWire, WirePlumber, portal; service NetworkManager.
+- Audio graph, status konektivitas NetworkManager, dan radio block state.
+- Kapasitas filesystem repository, telemetry baterai/estimasi health, temperatur thermal zones.
+- Journal user, system, dan kernel.
+- Collector diagnostik desktop dan Caelestia yang sudah ada.
 
-Semua bukti untuk satu kali eksekusi disatukan dalam satu direktori `reports/desktop-validation/<timestamp>/`:
-- `summary.md`: metadata dan hasil collector.
-- `validation.log`: output collector, hasil restart, cache ownership, log Caelestia, dan user journal.
-- `desktop/` dan `caelestia/`: detail diagnostik masing-masing.
-- `manual-checklist.md`: checklist fisik gabungan.
+Satu run menghasilkan `reports/desktop-validation/<timestamp>/`:
+- `summary.md`: hasil agregat PASS/WARN/FAIL/SKIP dan batas interpretasi.
+- `checks.tsv`: hasil setiap pemeriksaan yang dapat diproses.
+- `validation.log`: command dan output diagnostik.
+- `environment.txt`: metadata sistem/sesi.
+- `desktop/` dan `caelestia/`: laporan collector tambahan.
+- `*-journal*.txt`: snapshot journal yang dapat diakses user.
 
-Selesaikan checklist, lalu tinjau dan redaksi informasi host, perangkat, jaringan, dan log sebelum membagikan laporan. Script tidak melakukan instalasi paket, perubahan konfigurasi, atau perintah privileged. Collector lama tetap dapat dijalankan sendiri untuk diagnosis terarah.
+**Interpretasi hasil:**
+- PASS: kondisi yang diperiksa memenuhi aturan otomatis pada saat snapshot.
+- WARN: kondisi belum tentu rusak, tetapi perlu ditinjau (misalnya service on-demand, jaringan tidak tersambung, atau telemetry opsional).
+- FAIL: prasyarat/health check yang ditetapkan tidak terpenuhi; jangan lanjut ke tahap berikutnya sebelum dianalisis.
+- SKIP: pemeriksaan tidak dijalankan; bukan PASS.
 
-| Area | Kriteria penerimaan |
-|---|---|
-| Sesi Hyprland | Start, stabil, konfigurasi tanpa error kritis |
-| Display | Resolusi, scaling, refresh, brightness, monitor eksternal bila tersedia |
-| Input | Keyboard/function keys, TrackPoint, touchpad, klik, tap, scroll |
-| Audio | Output, volume/mute, microphone, PipeWire/WirePlumber |
-| Jaringan | Wi-Fi connect/disconnect/reconnect; NetworkManager |
-| Bluetooth | Uji bila diperlukan; laporkan terpisah, jangan menyamakan tidak dipasang dengan lulus |
-| Desktop utilities | Terminal, file manager, launcher, clipboard, screenshot |
-| Portals | Screenshot dan screen sharing bila dibutuhkan |
-| Caelestia/Quickshell | Panel, launcher, dashboard, widget, notifikasi, indikator, IPC dan interaksi UI |
-| Session recovery | Lock/unlock, logout ke TTY, login ulang |
-| Logs/stability | Tidak ada error kritis berulang atau crash selama penggunaan normal |
+Validasi log tidak dapat membuktikan bahwa panel terlihat, launcher menerima input, speaker menghasilkan suara, microphone merekam, tombol fisik bekerja, atau interaksi lain berhasil. Script tidak akan mengklaim hal tersebut. Hasil PASS berarti hanya tidak ada kondisi FAIL yang dideteksi oleh pemeriksaan otomatis yang tersedia; bukan jaminan semua fungsi hardware/UI berjalan.
 
-Setiap item berstatus PASS, FAIL, atau NOT TESTED dengan catatan. Collector otomatis hanya bukti pendukung; proses terdeteksi atau IPC merespons tidak membuktikan UI dan interaksi diterima.
+Laporan dapat memuat username, hostname, identitas perangkat, status jaringan, path, dan log. Review/redaksi sebelum push. Jangan menganggap log journal sebagai bukti lengkap jika akses journal dibatasi.
 
-**Gate tahap 4:** seluruh fungsi wajib lulus, kegagalan memiliki penyelesaian/pengecualian yang disetujui, checklist direview, dan bukti aman dibagikan disimpan. Sampai gate ini disetujui, tahap 5 tetap PLANNED.
+**Gate tahap 4:** script selesai dengan exit 0, tidak ada FAIL yang belum diselesaikan, seluruh WARN ditinjau dan diberi alasan/keputusan, dan laporan direview. Tahap 5 dapat dimulai setelah gate berbasis bukti log ini disetujui. Penerimaan visual/interaksi tetap berada di luar cakupan gate ini dan tidak boleh diklaim VERIFIED.
 
 ## Tahap 5 — Desktop Environment Customization
 
