@@ -1,0 +1,2 @@
+error: package 'linux-pam' was not found
+pambase: 8 total files, 0 altered files
