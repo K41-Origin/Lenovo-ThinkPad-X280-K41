@@ -44,3 +44,34 @@ Sebelum perubahan, simpan salinan konfigurasi, unit override, kernel command lin
 ## Gate keluar
 
 Workstream berstatus VERIFIED hanya setelah tiga jalur berhasil diuji dan bukti visual dikonfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 2 — Lock Screen](02-LOCK-SCREEN.md).
+
+## Design baseline — K41 compact rectangle ring (approved 2026-11-09)
+
+The user-approved boot visual baseline is the compact monochrome K41 mark above a tightly grouped circular ring of 12 small rectangular glyphs. This is a visual specification, not a claim that the complete boot/handoff lifecycle has passed device acceptance.
+
+### Canonical Plymouth source
+
+- **Canonical visual reference:** `themes/plymouth/k41/k41.script`.
+- Black background using the Plymouth window background colors.
+- Centered white `K41` wordmark using `Image.Text("K41", 0.8, 0.8, 0.8)`.
+- Twelve rectangle glyphs using `Image.Text("▯", 0.9, 0.9, 0.9)`.
+- Ring radius: `9`.
+- Ring vertical offset: `+10` relative to `center_y`.
+- Wordmark vertical placement: `center_y - 17 - logo_image.GetHeight()`.
+- Initial rectangle opacity: `0.18`; active rectangle opacity: `1.0`.
+- One active rectangle advances per refresh callback; the other eleven remain dim.
+- The existing password prompt, bullet feedback, normal-display callback, and Plymouth message/quit callbacks must remain functional. Visual refinements must not remove or weaken the LUKS password prompt.
+
+### Quickshell handoff counterpart
+
+`config/quickshell/k41-boot-splash/shell.qml` must visually follow the same design direction: black background, compact centered K41 wordmark, 12 small outlined rectangles arranged in a circle, and a single bright rectangle advancing at a time. QML uses native rectangles and rotation; Plymouth uses its script-rendered glyph. Exact pixel parity is not assumed because the rendering engines and font/glyph metrics differ.
+
+### Change control
+
+This design is the approved baseline. Do not change the wordmark, ring geometry, rectangle count, relative spacing, monochrome palette, or sequential glow behavior without explicit user approval. Any future visual adjustment must update both Plymouth and Quickshell counterparts plus this document in the same change set.
+
+### Validation status
+
+- **APPROVED DESIGN:** confirmed by the user in conversation on 2026-11-09.
+- **IMPLEMENTED:** repository source updated to reflect the approved visual baseline.
+- **NOT YET TESTED:** Plymouth script parser/rendering, Quickshell runtime rendering, physical boot, LUKS prompt appearance, and Plymouth-to-lock-screen handoff. Static text checks alone do not establish visual or device verification.
