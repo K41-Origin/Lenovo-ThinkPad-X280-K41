@@ -1,5 +1,0 @@
-PASS: entry point resolves modules relative to itself and documents its limits
-PASS: unsupported arguments fail closed
-PASS: preflight cannot return success or claim installation approval
-PASS: entry point has no storage/install module or privileged/system-changing command path
-All installer-entry tests passed.

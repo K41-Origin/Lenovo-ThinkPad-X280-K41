@@ -1,8 +1,0 @@
-Captured UTC: 2026-11-09T08:00:28Z
-Repository commit: 89269214c405344ae25879e98ce2f756e8654f65
-Kernel: Linux 7.2.14-arch1-1
-Architecture: x86_64
-User: kai
-Session type: wayland
-Wayland display: present (value omitted)
-Hyprland instance: present (value omitted)

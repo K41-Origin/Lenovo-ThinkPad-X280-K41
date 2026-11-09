@@ -1,13 +1,25 @@
 # Historical report archive — November 2026
 
-This directory preserves the report artifacts that were previously stored directly under `reports/`.
+The complete historical report snapshot is preserved in Git history in commit:
 
-- Archived files: **594**
+`02f6194ed04c8f13ea64eda35b7afb94f7006504`
+
+Browse the immutable snapshot:
+https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41/tree/02f6194ed04c8f13ea64eda35b7afb94f7006504/reports/archive/2026-11
+
+- Preserved historical report files: **594**
 - Snapshot period: **2026-11**
-- Original paths are preserved below this directory, including report category and timestamp.
-- No report contents were rewritten or intentionally discarded during relocation.
+- Original category and timestamp paths were retained.
+- No report contents were rewritten or intentionally discarded.
+- The 594 report files are intentionally absent from the current `main` tree so routine repository and AI context stays focused. They remain retrievable from the snapshot commit.
 
-## Archived categories
+Restore or inspect a specific file without checking out the old tree:
+
+```bash
+git show 02f6194ed04c8f13ea64eda35b7afb94f7006504:reports/archive/2026-11/<category>/<timestamp>/<file>
+```
+
+## Categories
 
 | Category | Files |
 |---|---:|
@@ -40,8 +52,8 @@ This directory preserves the report artifacts that were previously stored direct
 
 ## Handling and privacy
 
-These are historical snapshots, not authoritative statements about the current machine or current project state. Prefer the current owning documentation and explicitly curated acceptance evidence.
+These snapshots are historical evidence, not authoritative statements about current machine or project state. Prefer current owning documentation and explicitly curated acceptance evidence.
 
-Diagnostic reports may contain device identifiers, package inventories, paths, journal excerpts, network or hardware metadata, and other environment details. Review and redact them before sharing outside the project. Never add credentials, passwords, LUKS recovery material, tokens, cookies, or other secrets.
+Diagnostic reports may contain device identifiers, package inventories, paths, journal excerpts, network or hardware metadata, and other environment details. Review and redact before sharing outside the project. Never add credentials, passwords, LUKS recovery material, tokens, cookies, or other secrets.
 
-AI agents and maintainers should not enumerate or read this archive during routine work. Open an archived report only when a task explicitly requires historical evidence or when a current document links to a specific artifact.
+AI agents and maintainers must not enumerate or read the historical snapshot during routine work. Retrieve a specific file only when historical evidence is explicitly required or a current document links to it.

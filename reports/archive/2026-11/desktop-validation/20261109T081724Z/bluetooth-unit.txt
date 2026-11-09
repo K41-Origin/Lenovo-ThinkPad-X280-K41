@@ -1,5 +1,0 @@
-LoadState=loaded
-ActiveState=active
-SubState=running
-FragmentPath=/usr/lib/systemd/system/bluetooth.service
-UnitFileState=enabled

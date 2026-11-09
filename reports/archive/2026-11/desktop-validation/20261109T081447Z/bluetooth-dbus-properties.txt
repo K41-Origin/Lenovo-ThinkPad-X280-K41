@@ -1,6 +1,0 @@
-b true
-b false
-u 0
-b false
-u 180
-b false

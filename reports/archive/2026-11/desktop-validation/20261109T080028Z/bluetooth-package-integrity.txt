@@ -1,3 +1,0 @@
-bluez: 37 total files, 0 altered files
-bluez-utils: 122 total files, 0 altered files
-linux-firmware: 0 total files, 0 altered files

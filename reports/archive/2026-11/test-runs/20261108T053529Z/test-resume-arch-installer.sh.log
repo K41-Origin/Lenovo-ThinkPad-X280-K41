@@ -1,1 +1,0 @@
-PASS: resume entry point validates existing target and continues after pacstrap/fstab without repartitioning, formatting, or rerunning pacstrap

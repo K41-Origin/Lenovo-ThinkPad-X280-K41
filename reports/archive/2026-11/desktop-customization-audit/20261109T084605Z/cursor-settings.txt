@@ -1,5 +1,0 @@
-Command: bash -c gsettings\ get\ org.gnome.desktop.interface\ cursor-theme\ 2\>/dev/null\ \|\|\ true\;\ gsettings\ get\ org.gnome.desktop.interface\ cursor-size\ 2\>/dev/null\ \|\|\ true\;\ printf\ \"XCURSOR_THEME=%s\\\\nXCURSOR_SIZE=%s\\\\n\"\ \"\$\{XCURSOR_THEME:-\}\"\ \"\$\{XCURSOR_SIZE:-\}\"
-'default'
-24
-XCURSOR_THEME=
-XCURSOR_SIZE=24

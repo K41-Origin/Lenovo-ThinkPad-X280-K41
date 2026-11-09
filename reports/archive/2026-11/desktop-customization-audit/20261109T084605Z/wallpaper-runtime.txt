@@ -1,7 +1,0 @@
-Command: bash -c $'\n  printf "Wallpaper-related processes (exact executable names):\\\\n"\n  for proc in swww-daemon hyprpaper mpvpaper swaybg; do pgrep -a -x "$proc" 2>/dev/null || true; done\n  printf "\\\\nWallpaper tool state (when installed):\\\\n"\n  if command -v swww >/dev/null 2>&1; then swww query 2>&1 || true; fi\n  if command -v hyprctl >/dev/null 2>&1; then\n    printf "\\\\nHyprland startup/config references:\\\\n"\n    grep -RInE "(^|[[:space:]])(exec|exec-once)[[:space:]]*=.*(wallpaper|swww|hyprpaper|mpvpaper|swaybg)|wallpaper" "$HOME/.config/hypr" "$HOME/.config/caelestia" "$HOME/.config/quickshell" 2>/dev/null | head -n 160 || true\n  fi\n'
-Wallpaper-related processes (exact executable names):
-
-Wallpaper tool state (when installed):
-
-Hyprland startup/config references:
-/home/kai/.config/hypr/hyprland.lua:215:        force_default_wallpaper = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers

@@ -1,4 +1,0 @@
-LoadState=loaded
-ActiveState=active
-SubState=running
-UnitFileState=enabled

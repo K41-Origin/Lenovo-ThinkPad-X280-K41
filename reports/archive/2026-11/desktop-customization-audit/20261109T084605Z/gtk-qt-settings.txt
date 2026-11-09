@@ -1,4 +1,0 @@
-Command: bash -c printf\ \"GTK_THEME=%s\\\\nQT_STYLE_OVERRIDE=%s\\\\nQT_QPA_PLATFORMTHEME=%s\\\\n\"\ \"\$\{GTK_THEME:-\}\"\ \"\$\{QT_STYLE_OVERRIDE:-\}\"\ \"\$\{QT_QPA_PLATFORMTHEME:-\}\"\;\ for\ f\ in\ \"\$HOME/.config/gtk-3.0/settings.ini\"\ \"\$HOME/.config/gtk-4.0/settings.ini\"\ \"\$HOME/.config/kdeglobals\"\;\ do\ if\ \[\[\ -f\ \$f\ \]\]\;\ then\ printf\ \"\\\\n---\ %s\ ---\\\\n\"\ \"\$f\"\;\ sed\ -n\ \"1\,200p\"\ \"\$f\"\;\ fi\;\ done
-GTK_THEME=
-QT_STYLE_OVERRIDE=
-QT_QPA_PLATFORMTHEME=

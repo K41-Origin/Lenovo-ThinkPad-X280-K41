@@ -1,1 +1,0 @@
-rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw

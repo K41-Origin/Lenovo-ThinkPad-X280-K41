@@ -1,2 +1,0 @@
-Command: bash -c pgrep\ -a\ -f\ \"swww\|hyprpaper\|mpvpaper\|wallpaper\"\ \|\|\ true
-7356 bash -c pgrep -a -f "swww|hyprpaper|mpvpaper|wallpaper" || true

@@ -1,4 +1,0 @@
-Nov 09 14:26:19 archlinux kernel: virt/tdx: TDX not supported by the host platform
-Nov 09 14:26:34 x280 wpa_supplicant[601]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
-Nov 09 14:26:34 x280 wpa_supplicant[601]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
-Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)

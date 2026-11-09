@@ -1,6 +1,0 @@
-K41 Desktop Customization Run
-Timestamp UTC: 20261109T094114Z
-Status: FAILED (exit 1)
-Detected launcher declaration: fuzzel
-Backup: NOT_CREATED
-Log: reports/desktop-customization/20261109T094114Z/run.log
