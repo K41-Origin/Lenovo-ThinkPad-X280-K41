@@ -37,21 +37,18 @@ import os, pathlib, stat, sys, tempfile
 p = pathlib.Path(sys.argv[1])
 text = p.read_text(encoding="utf-8")
 marker = "-- K41 ANIMATED BOOT SPLASH START"
-if "hl.on(\"hyprland.start\"" not in text:
-    raise SystemExit("No existing hl.on(\"hyprland.start\") hook found; refusing unsafe insertion.")
-block = r"""
-
--- K41 ANIMATED BOOT SPLASH START
--- Keep a lightweight Quickshell overlay above the desktop during shell startup.
-hl.on("hyprland.start", function()
-    hl.exec_cmd("sh -c 'qs -c k41-boot-splash >/dev/null 2>&1 & echo $! > \"$HOME/.cache/k41/boot-splash.pid\"'")
-end)
--- K41 ANIMATED BOOT SPLASH END
-"""
+hook = 'hl.on("hyprland.start", function()'
+if marker in text:
+    raise SystemExit("K41 animated splash hook already exists.")
+if text.count(hook) < 1:
+    raise SystemExit("No existing Hyprland-start callback found; refusing unsafe insertion.")
+# Insert before the existing callback body so the overlay is requested before Caelestia startup.
+insertion = hook + '\n    hl.exec_cmd("sh -c \'mkdir -p \\"$HOME/.cache/k41\\"; qs -c k41-boot-splash >/dev/null 2>&1 & echo $! > \\"$HOME/.cache/k41/boot-splash.pid\\"\'")\n    ' + marker + '\n'
+text = text.replace(hook, insertion, 1)
 fd, tmp = tempfile.mkstemp(prefix=".k41-boot-splash-", dir=p.parent)
 try:
     with os.fdopen(fd, "w", encoding="utf-8") as f:
-        f.write(text.rstrip() + block)
+        f.write(text)
     os.chmod(tmp, stat.S_IMODE(p.stat().st_mode))
     os.replace(tmp, p)
 except BaseException:
