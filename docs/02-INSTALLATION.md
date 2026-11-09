@@ -21,4 +21,10 @@ Desain terdokumentasi: UEFI/GPT, ESP, LUKS2, ext4, swapfile, systemd-boot UKI. I
 Tidak ada wipe/partition/format/LUKS/disk write tanpa persetujuan eksplisit. Setelah kegagalan operasi disk, inspeksi keadaan aktual; jangan rerun membabi buta. UKI terbentuk bukan bukti firmware boot. Instalasi penuh tidak diuji di VM; acceptance dilakukan pada X280 fisik setelah gate dan otorisasi.
 
 ## First Boot
-Setelah boot dan login user, jalankan `sudo /usr/local/sbin/x280-first-boot-check`. Collector read-only membuat laporan bertimestamp. Review data sensitif sebelum share. First Boot PASS bukan acceptance desktop/Bluetooth/suspend/stability.
+Installer menyalin collector awal ke `/usr/local/sbin/x280-first-boot-check` agar tersedia setelah reboot. Untuk audit terbaru setelah source repository diperbarui, jalankan salinan repository dari root checkout:
+
+```bash
+sudo bash scripts/x280-first-boot-check.sh
+```
+
+Kedua entry point bersifat read-only dan membuat laporan bertimestamp. Salinan di `/usr/local/sbin` adalah snapshot saat instalasi; gunakan salinan repository untuk memperoleh perbaikan collector terbaru. Review laporan untuk data sensitif sebelum dibagikan. First Boot PASS bukan acceptance desktop/Bluetooth/suspend/stability.
