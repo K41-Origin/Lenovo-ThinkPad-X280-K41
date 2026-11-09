@@ -68,28 +68,34 @@ Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu 
 
 ### Implementasi pertama — fondasi tampilan
 
-Setelah pull commit yang memuat script dan konfigurasi tahap 5, jalankan sebagai user biasa dari root repository, bukan dengan sudo:
+Setelah pull commit terbaru yang memuat script dan konfigurasi tahap 5, jalankan sebagai user biasa dari root repository, bukan dengan sudo:
 
 ```bash
 bash scripts/k41-apply-desktop-customization.sh
 ```
 
-Script meminta konfirmasi, membuat backup privat konfigurasi aktif, lalu:
+Script membuat laporan otomatis sebelum pemeriksaan awal, sehingga kegagalan preflight pun tercatat. Setiap eksekusi menghasilkan direktori unik di `reports/desktop-customization/<timestamp>/` yang berisi:
+- `run.log`: seluruh output INFO/ERROR dan diagnostik saat eksekusi.
+- `summary.txt`: status akhir, timestamp, launcher yang terdeteksi, dan lokasi log.
+
+Jika launcher declaration tidak cocok, script sekarang mencari satu deklarasi Lua sederhana `local menu = "…"` dengan toleransi spasi dan tanda kutip tunggal/ganda. Jika tidak ditemukan tepat satu deklarasi, script berhenti tanpa mengubah konfigurasi dan menyimpan diagnostik ke `run.log`. Jangan edit konfigurasi secara manual hanya untuk melewati pemeriksaan; push laporan agar dapat diaudit.
+
+Saat lolos preflight dan disetujui, script membuat backup privat konfigurasi aktif, lalu:
 - Menambahkan appearance overlay ringan ke `~/.config/hypr/hyprland.lua`.
-- Mengubah launcher `SUPER + R` dari executable `hyprlauncher` yang tidak tersedia menjadi Fuzzel yang sudah terpasang.
-- Mengganti konfigurasi Fuzzel yang memiliki duplikasi blok warna dengan palet Graphite.
+- Mengatur variabel launcher `menu` ke Fuzzel yang sudah terpasang.
+- Mengganti konfigurasi Fuzzel dengan palet Graphite.
 - Mempertahankan keybind lain, input, monitor, workspace, window rules, dan autostart yang sudah ada.
 - Tidak memasang paket atau mengubah konfigurasi Caelestia, GTK, daya, maupun hardware.
 
-Backup disimpan di `~/.local/state/k41/desktop-customization/backups/`. Script menampilkan lokasi backup dan perintah rollback. Untuk rollback:
+Backup disimpan di `~/.local/state/k41/desktop-customization/backups/`. Untuk rollback, gunakan path backup yang dicatat pada output terminal atau file `latest-backup`:
 
 ```bash
 bash scripts/k41-apply-desktop-customization.sh --rollback /path/ke/direktori-backup
 ```
 
-Setelah penerapan, jalankan `hyprctl reload` dan uji launcher dengan `SUPER + R`. Jika terjadi masalah, gunakan backup sebelum melanjutkan. Jangan menjalankan script dengan sudo.
+Setelah penerapan, jalankan `hyprctl reload` dan uji launcher dengan `SUPER + R`. Jika terjadi masalah, jangan hapus backup. Push seluruh direktori laporan `reports/desktop-customization/` ke GitHub agar saya dapat memeriksa hasilnya tanpa Anda mengetik log secara manual. Tinjau laporan sebelum push jika memuat informasi lokal yang tidak ingin dipublikasikan. Jangan menjalankan script dengan sudo.
 
-**Status implementasi pertama:** konfigurasi dan script telah ditambahkan ke repository; belum diterapkan atau diuji pada perangkat. Tahap berikutnya adalah memvalidasi runtime Hyprland/launcher, lalu melanjutkan integrasi Caelestia dan aplikasi lain. Penerimaan visual tetap menjadi keputusan pengguna berdasarkan tampilan langsung di perangkat.
+**Status implementasi:** perbaikan deteksi launcher dan logging sudah di-commit ke repository; belum diuji pada perangkat. Tahap berikutnya adalah menjalankan script terbaru, push laporan yang dihasilkan, lalu memvalidasi runtime Hyprland/launcher. Penerimaan visual tetap menjadi keputusan pengguna berdasarkan tampilan langsung di perangkat.
 
 ## Tahap 6 — Optimization
 
