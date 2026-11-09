@@ -4,7 +4,7 @@
 
 - **Project:** Lenovo ThinkPad X280 K41
 - **Stage:** 5 — Desktop Environment Customization
-- **Design status:** APPROVED DIRECTION; implementation not started
+- **Design status:** APPROVED DIRECTION; active configuration audited; baseline visual capture pending
 - **Specification version:** 1.0
 - **Last updated:** 2026-11-09
 
@@ -189,7 +189,7 @@ Pekerjaan tersebut berada pada tahap 6 atau memerlukan keputusan arsitektur terp
 
 Jangan melakukan bulk rewrite sebelum langkah audit dan desain selesai.
 
-## 11. Acceptance criteria
+## 12. Acceptance criteria
 
 Tahap 5 dapat diterima jika:
 
@@ -208,7 +208,7 @@ Tahap 5 dapat diterima jika:
 
 Automated validation saja tidak cukup untuk menyatakan visual acceptance. Persetujuan visual akhir memerlukan review pengguna pada perangkat.
 
-## 12. Decision log
+## 13. Decision log
 
 Keputusan yang telah disetujui:
 - Nama arah desain: **K41 Obsidian Minimalism**.
@@ -228,7 +228,7 @@ Keputusan yang telah disetujui:
 - Tahap 5 tidak mencakup optimasi hardware tahap 6.
 
 Hal yang belum diputuskan dan harus diverifikasi:
-- Konfigurasi aktif serta mekanisme override Caelestia/Quickshell.
+- Mekanisme override Caelestia/Quickshell dan opsi theming upstream yang tepat.
 - Launcher final berdasarkan kemampuan dan integrasi aktual.
 - Icon dan cursor theme final.
 - Nilai final spacing, radius, ukuran panel, opacity, dan durasi animasi.
