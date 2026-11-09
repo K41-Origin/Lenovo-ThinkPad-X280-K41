@@ -74,7 +74,7 @@ try:
     payload = base64.b64decode(wallpaper_path.read_text(encoding="ascii").strip(), validate=True)
 except (UnicodeError, binascii.Error) as exc:
     raise SystemExit(f"Invalid base64 wallpaper asset {wallpaper_path}: {exc}")
-if not payload.startswith(b"\\xff\\xd8\\xff"):
+if not payload.startswith(b"\xff\xd8\xff"):
     raise SystemExit(f"Wallpaper asset is not a JPEG: {wallpaper_path}")
 print(f"PASS: wallpaper asset preflight ({len(payload)} decoded bytes).")
 PY
