@@ -17,9 +17,9 @@ login/session entry points, desktop/browser packages and system launchers.
 It does NOT enumerate home-directory contents, read browser profiles,
 credentials, document contents, or user-specific configuration files.
 
-The report may contain host paths, package versions, session IDs, and
-configuration values. Review and redact it before sharing. No system
-configuration or service state is changed.
+The report may contain host paths, package versions, session IDs, device identifiers,
+and selected desktop/PAM configuration. Review and redact it before sharing.
+No system configuration or service state is changed.
 USAGE
 }
 case "${1-}" in "" ) ;; -h|--help) usage; exit 0 ;; *) usage >&2; exit 2 ;; esac
@@ -52,8 +52,13 @@ capture_shell() {
   if "$@" >>"$report" 2>&1; then note 'COLLECTION EXIT: 0'; else note "COLLECTION EXIT: $? (collection continues)"; fi
 }
 redact_ids() {
-  sed -E -e 's/(UUID=)[^ ,]+/\1[REDACTED]/g' -e 's/(PARTUUID=)[^ ,]+/\1[REDACTED]/g' \
-    -e 's/(rd\.luks\.name=)[^ ]+/\1[REDACTED]/g' -e 's/(cryptdevice=)[^ ]+/\1[REDACTED]/g'
+  sed -E \
+    -e 's/(UUID=)[^ ,]+/\1[REDACTED]/g' \
+    -e 's/(PARTUUID=)[^ ,]+/\1[REDACTED]/g' \
+    -e 's/(rd\.luks\.name=)[^ ]+/\1[REDACTED]/g' \
+    -e 's/(cryptdevice=)[^ ]+/\1[REDACTED]/g' \
+    -e 's/(nvme\.eui\.)[[:alnum:]]+/\1[REDACTED]/g' \
+    -e 's/(SERIAL=)[^ ,]+/\1[REDACTED]/g'
 }
 mount_for_path() {
   local path="$1"
@@ -117,8 +122,12 @@ if have swapon; then swapon --show --noheadings --raw --output NAME,TYPE,SIZE,US
 for path in /swapfile; do
   if [[ -e $path ]]; then stat -c 'type=%F size_bytes=%s mode=%a owner_uid=%u group_gid=%g path=%n' "$path" >>"$report"; else note "$path: MISSING"; fi
 done
-section 'Relevant fstab entries'
-if [[ -r /etc/fstab ]]; then awk '$0 !~ /^[[:space:]]*#/ && NF>=3 && ($3=="swap" || $2=="swap") {print}' /etc/fstab | redact_ids >>"$report"; fi
+section 'Filesystem table and crypttab metadata (comments and keyfile fields omitted)'
+if [[ -r /etc/fstab ]]; then awk '$0 !~ /^[[:space:]]*#/ && NF>=4 {print $1, $2, $3, $4, $5, $6}' /etc/fstab | redact_ids >>"$report"; fi
+if [[ -r /etc/crypttab ]]; then
+  printf '\ncrypttab (name, source, options only; keyfile field omitted):\n' >>"$report"
+  awk '$0 !~ /^[[:space:]]*#/ && NF>=3 {print $1, $2, $4}' /etc/crypttab | redact_ids >>"$report"
+fi
 section 'Resume/hibernate configuration indicators'
 if [[ -r /proc/cmdline ]]; then tr ' ' '\n' </proc/cmdline | grep -E '^(resume=|resume_offset=|noresume$|hibernate=)' | redact_ids >>"$report" || true; fi
 for file in /etc/kernel/cmdline /etc/default/grub; do
@@ -160,7 +169,9 @@ fi
 note 'Empty directive output is not equivalent to disabled coredumps; defaults apply.'
 
 section 'Relevant mount destinations and directory metadata'
-for path in /home /root /tmp /var/tmp /var/log /var/log/journal /run/log/journal /var/lib/systemd/coredump /var/cache /run /run/user; do mount_for_path "$path"; done
+for path in /home /root /tmp /dev/shm /run /run/user /run/user/"$EUID" /var/tmp /var/log /var/log/journal /run/log/journal /var/lib /var/lib/systemd /var/lib/systemd/coredump /var/lib/AccountsService /var/lib/flatpak /var/cache /var/spool /var/mail /opt /usr/local /srv /mnt /media; do mount_for_path "$path"; done
+section 'Complete mounted filesystem topology (identifiers redacted)'
+if have findmnt; then findmnt -rn -o TARGET,SOURCE,FSTYPE,OPTIONS 2>&1 | redact_ids >>"$report" || true; fi
 section 'Home directory metadata and ACLs (no contents or names)'
 for path in /home /root; do
   if [[ -e $path ]]; then
@@ -229,7 +240,7 @@ else note 'systemctl unavailable'; fi
 
 section 'Filesystem topology, capacity and volatile mount limits'
 if have lsblk; then lsblk -o NAME,TYPE,FSTYPE,SIZE,MOUNTPOINTS 2>&1 | redact_ids >>"$report" || true; else note 'lsblk unavailable'; fi
-if have df; then df -B1 -P / /home /tmp /var /run 2>&1 >>"$report" || true; fi
+if have df; then df -B1 -P / /home /tmp /dev/shm /var /var/tmp /var/log /var/lib /run /run/user/"$EUID" >>"$report" 2>&1 || true; fi
 for path in /dev/shm /run/user/"$EUID" /var/lib /var/lib/AccountsService /var/lib/flatpak /opt /usr/local; do
   printf '\n-- %s --\n' "$path" >>"$report"
   if [[ -e $path ]]; then
