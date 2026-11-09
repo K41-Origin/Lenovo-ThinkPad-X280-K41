@@ -24,10 +24,13 @@
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
 | `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
 | `scripts/k41-enable-caelestia-autologin.sh` | Opt-in tty1 autologin + Hyprland + Caelestia lock startup | IMPLEMENTED — NOT TESTED ON DEVICE |
+| `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — DEVICE REPORT PENDING |
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5: Desktop Customization / boot audit.**\n\nCollector audit boot telah ditambahkan. Jalankan pada laptop, review report privasi, lalu commit/push hasilnya sebelum keputusan desain Plymouth dan TPM2 dibuat.
+**CURRENT — Tahap 5: Desktop Customization / boot audit.**
+
+Collector audit boot telah ditambahkan. Jalankan pada laptop, review report privasi, lalu commit/push hasilnya sebelum keputusan desain Plymouth dan TPM2 dibuat.
 
 Arah desain telah disetujui dan perubahan tampilan utama telah diterapkan pada perangkat. Langkah aktif berikutnya adalah uji workflow boot otomatis: pull commit, review script, jalankan installer opt-in, reboot, pastikan Caelestia langsung terkunci, uji password unlock, dan validasi rollback. Workflow baru berstatus IMPLEMENTED, belum TESTED/VERIFIED pada perangkat.
 
