@@ -22,4 +22,8 @@ for ((i = 1; i <= attempts; i++)); do
     sleep "$interval"
 done
 
-die "Caelestia lock IPC did not become ready after $attempts attempts."
+printf "K41 Caelestia lock: WARNING: IPC did not become ready after %s attempts; starting hyprlock fallback.\\n" "$attempts" >&2
+if command -v hyprlock >/dev/null 2>&1; then
+    exec hyprlock
+fi
+die "Caelestia lock IPC did not become ready and hyprlock fallback is unavailable."
