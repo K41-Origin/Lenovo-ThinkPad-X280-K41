@@ -4,7 +4,7 @@
 set -Eeuo pipefail
 umask 077
 
-ROOT="$(cd -- "$(dirname -- "$0")/.." && pwd -P)"
+ROOT="$(cd -- "$(dirname -- "$0")/../../.." && pwd -P)"
 # shellcheck source=lib/common.sh
 source "$ROOT/lib/common.sh"
 # shellcheck source=stages/stage-2-basic-arch-install/lib/base-system.sh

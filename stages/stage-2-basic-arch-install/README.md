@@ -9,13 +9,13 @@ Dokumen ini adalah sumber utama untuk pemetaan implementasi, alur instalasi, dep
 Entry point kanonis saat ini:
 
 ```bash
-bash stages/stage-2-basic-arch-install/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh
+bash stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh
 ```
 
 Wrapper tersebut meneruskan seluruh argumen ke implementasi:
 
 ```text
-scripts/k41-install-basic-arch.sh
+stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh
   └── stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh
 ```
 
@@ -38,8 +38,8 @@ File yang eksklusif untuk Stage 2 dikelompokkan di direktori tahap ini. Modul st
 
 | Path | Peran | Kepemilikan |
 |---|---|---|
-| `scripts/k41-install-basic-arch.sh` | Entry point kanonis yang tipis | Khusus Stage 2 |
-| `scripts/install-arch-x280.sh` | Orkestrasi instalasi destruktif dari preflight sampai validasi artefak boot | Khusus Stage 2 |
+| `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` | Entry point kanonis yang tipis | Khusus Stage 2 |
+| `stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh` | Orkestrasi instalasi destruktif dari preflight sampai validasi artefak boot | Khusus Stage 2 |
 | `stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh` | Helper interaktif yang disalin dan dijalankan di dalam `arch-chroot` target | Khusus Stage 2 |
 | `stages/stage-2-basic-arch-install/scripts/resume-arch-x280.sh` | Utility continuation lama untuk checkpoint pasca-pacstrap | **LEGACY — bukan recovery path aktif; jangan dijalankan** |
 | `stages/stage-2-basic-arch-install/lib/base-system.sh` | Validasi mount, instalasi paket dasar, dan penulisan fstab | Modul Stage 2 |
@@ -57,7 +57,7 @@ File yang eksklusif untuk Stage 2 dikelompokkan di direktori tahap ini. Modul st
 
 ### Status utility resume
 
-`scripts/resume-arch-x280.sh` masih ada karena kompatibilitas/histori dan memiliki test statis, tetapi dokumentasi aktif mengecualikannya dari workflow recovery fisik. Jangan menjalankannya untuk melanjutkan instalasi yang terputus. Test keberadaan atau syntax script ini bukan persetujuan untuk menggunakannya.
+`stages/stage-2-basic-arch-install/scripts/resume-arch-x280.sh` masih ada karena kompatibilitas/histori dan memiliki test statis, tetapi dokumentasi aktif mengecualikannya dari workflow recovery fisik. Jangan menjalankannya untuk melanjutkan instalasi yang terputus. Test keberadaan atau syntax script ini bukan persetujuan untuk menggunakannya.
 
 ## 3. Alur implementasi
 
@@ -143,7 +143,7 @@ Ini adalah operasi destruktif terhadap seluruh disk target. Tidak ada rollback o
 
 ### 3.5 Instalasi sistem dasar
 
-`lib/base-system.sh` memvalidasi bahwa root adalah mount ext4 dari mapper terenkripsi dan ESP adalah mount vfat terpisah pada `/efi` di dalam target. Paket dasar dipasang dengan `pacstrap -K`:
+`stages/stage-2-basic-arch-install/lib/base-system.sh` memvalidasi bahwa root adalah mount ext4 dari mapper terenkripsi dan ESP adalah mount vfat terpisah pada `/efi` di dalam target. Paket dasar dipasang dengan `pacstrap -K`:
 
 - `base`, `linux`, `linux-firmware`
 - `cryptsetup`, `networkmanager`, `sudo`
@@ -194,7 +194,7 @@ Jangan menebak path disk dan jangan mengandalkan nomor indeks tanpa memeriksa id
 
 Installer tidak menyediakan rollback otomatis. Jika gagal atau terputus:
 1. Jangan langsung menjalankan ulang installer.
-2. Jangan menjalankan `scripts/resume-arch-x280.sh`; utility itu bukan recovery path yang disetujui.
+2. Jangan menjalankan `stages/stage-2-basic-arch-install/scripts/resume-arch-x280.sh`; utility itu bukan recovery path yang disetujui.
 3. Simpan dan periksa log terakhir di `reports/installer/`.
 4. Boot/pertahankan lingkungan recovery yang sesuai dan periksa kondisi aktual partition table, LUKS, mapper, filesystem, mount, fstab, dan UKI tanpa melakukan write tambahan.
 5. Jangan meng-unmount, menutup mapper, memformat, atau mengulang langkah secara otomatis jika kondisi belum dipahami.

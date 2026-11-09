@@ -119,4 +119,4 @@ IFS= read -r acknowledgement </dev/tty
   die "Installer-launch acknowledgement did not match; no disk operation was started."
 
 info "Launching installer commit $commit_sha. A third, target-specific storage-plan confirmation is still required."
-exec bash "$repo_dir/scripts/k41-install-basic-arch.sh"
+exec bash "$repo_dir/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh"

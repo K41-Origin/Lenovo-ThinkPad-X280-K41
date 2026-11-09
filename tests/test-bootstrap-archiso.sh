@@ -9,10 +9,9 @@ pass() { printf 'PASS: %s\n' "$1"; }
 [[ -f $SCRIPT ]] || fail "Arch ISO bootstrap script is missing"
 bash -n "$SCRIPT" || fail "Arch ISO bootstrap has a Bash syntax error"
 
-for entry in k41-install-basic-arch.sh k41-install-desktop.sh; do
-  path="$ROOT/scripts/$entry"
-  [[ -f $path ]] || fail "canonical entry point is missing: $entry"
-  bash -n "$path" || fail "canonical entry point has a Bash syntax error: $entry"
+for path in "$ROOT/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh" "$ROOT/scripts/k41-install-desktop.sh"; do
+  [[ -f $path ]] || fail "canonical entry point is missing: $path"
+  bash -n "$path" || fail "canonical entry point has a Bash syntax error: $path"
 done
 grep -Fq 'exec bash "$ROOT/stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh" "$@"' "$ROOT/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh" ||
   fail "basic Arch entry point does not delegate to the existing installer"
@@ -50,7 +49,7 @@ required=(
   'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK'
   'bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh --readiness'
   'READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH'
-  'exec bash "$repo_dir/scripts/k41-install-basic-arch.sh"'
+  'exec bash "$repo_dir/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh"'
 )
 for token in "${required[@]}"; do
   grep -Fq -- "$token" "$SCRIPT" || fail "required bootstrap review/safety control is missing: $token"
