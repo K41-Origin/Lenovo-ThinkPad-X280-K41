@@ -157,10 +157,14 @@ Klasifikasi warning:
 **IMPLEMENTED di repository.** Installer tidak lagi menjalankan `caelestia shell -r -d` dari proses `runuser` yang environment-nya disanitasi. Setelah file override berhasil dipasang, script mencetak instruksi agar restart dijalankan dari terminal sesi desktop aktif sebagai user biasa:
 
 ```bash
-caelestia shell -r -d
+mkdir -p reports/lockscreen-apply
+restart_log="reports/lockscreen-apply/$(date -u +'%Y%m%dT%H%M%SZ')-session-restart.log"
+set -o pipefail
+caelestia shell -r -d 2>&1 | tee "$restart_log"
+printf 'Restart command exit code: %s\\n' "$?"
 ```
 
-Ini menjaga agar Quickshell mewarisi environment Wayland/Hyprland dari sesi yang benar. Perbaikan ini tidak mengubah autentikasi, PAM, atau konfigurasi compositor. Test statis juga memastikan installer tidak lagi menjalankan restart dari konteks tersebut.
+Simpan report restart tersebut ke Git setelah meninjau isinya. Jalankan dari terminal dalam sesi Hyprland aktif, tanpa `sudo`; jangan menjalankan command itu dari TTY, SSH, atau proses installer yang kehilangan environment sesi. Ini menjaga agar Quickshell mewarisi environment Wayland/Hyprland dari sesi yang benar. Perbaikan ini tidak mengubah autentikasi, PAM, atau konfigurasi compositor. Test statis juga memastikan installer tidak lagi menjalankan restart dari konteks tersebut.
 
 ### Validasi yang harus dilakukan di perangkat
 
