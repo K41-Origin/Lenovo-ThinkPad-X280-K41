@@ -2,7 +2,6 @@
 # Read-only lock-screen inventory for the K41 ThinkPad X280.
 # Supports sudo while collecting the invoking desktop user's session/configuration.
 set -Eeuo pipefail
-umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
