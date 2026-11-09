@@ -128,3 +128,32 @@ Tidak ada hasil acceptance test yang diklaim dalam dokumen ini.
 ## 9. Riwayat keputusan
 
 - 2026-11-09: pengguna menyetujui akun terpisah `guest`, desktop bersama Hyprland + Caelestia, tanpa RAM statis, browser otomatis Incognito/Private, session tracking, ephemeral storage, serta boot-time verification dan cleanup dengan fail-closed behavior.
+
+## 10. Arah akses Guest Mode melalui Caelestia Lock Screen — PLANNED
+
+**Catatan keputusan pengguna, 2026-11-10:**
+
+Guest Mode diinginkan dapat dipilih langsung dari **lock screen Caelestia Shell**. Pengguna tidak ingin harus reboot untuk berpindah dari sesi akun utama ke Guest.
+
+Alur yang dituju:
+
+1. Akun utama sedang berjalan dan layar dikunci melalui Caelestia.
+2. Pengguna memilih aksi **Guest Mode** pada lock screen.
+3. Sistem mengakhiri sesi akun utama secara aman; sesi utama tidak dibiarkan berjalan di belakang sesi Guest.
+4. Sistem menyiapkan akun `guest` dan storage ephemeral yang terisolasi.
+5. Setelah persiapan dan verifikasi berhasil, sesi Hyprland + Caelestia dijalankan sebagai `guest`.
+6. Saat Guest logout, sesi dan storage ephemeral dihancurkan, lalu pengguna dikembalikan ke layar login/greeter.
+
+**Tidak ada reboot dalam alur perpindahan sesi tersebut.** Jika persiapan atau verifikasi Guest gagal, Guest tidak boleh dijalankan.
+
+Batas keputusan saat ini:
+
+- Titik masuk yang diminta adalah **Caelestia Lock Screen**, bukan hanya greeter saat boot.
+- Ini adalah kebutuhan UX/alur yang dicatat, bukan keputusan tentang implementasi teknis.
+- Mekanisme pergantian sesi, integrasi dengan compositor/lock screen, pengakhiran sesi utama, dan peluncuran sesi Guest masih harus diteliti serta diuji terhadap kemampuan upstream.
+- Jangan menjalankan aplikasi Guest di dalam sesi atau hak akses akun utama (misalnya sekadar mengganti UID untuk satu aplikasi). Guest harus menjadi sesi pengguna Linux yang benar-benar terpisah.
+- Threat model sengaja dibatasi pada kebutuhan praktis penggunaan keluarga: memisahkan data Guest dari akun utama, mencegah akses administrator, dan memastikan data lokal Guest tidak tertinggal. Tidak diperlukan model ancaman kompleks untuk lingkungan publik/multi-tenant.
+- Implementasi tetap tunduk pada gate proyek: custom lock screen harus lebih dahulu diterima pengguna, dan arsitektur teknis harus dinilai layak sebelum perubahan sistem dimulai.
+
+**Catatan prioritas pengguna:** “Guest Mode direalisasikan nanti kalau tidak mager.” Ini fitur opsional/prioritas rendah, bukan pekerjaan aktif atau komitmen implementasi. Pengguna meminta diingatkan pada tahun 2027.
+
