@@ -32,7 +32,7 @@ elif [[ $# -ne 0 ]]; then
 fi
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
-for cmd in python3 tee cp mv mkdir date caelestia pgrep sed grep; do
+for cmd in python3 tee cp mv mkdir date caelestia grep; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 
@@ -59,15 +59,13 @@ command -v timeout >/dev/null 2>&1 || die 'timeout is required.'
 [[ -f $scheme_file ]] || die "Caelestia scheme state not found: $scheme_file"
 [[ -d $config_root/caelestia && -d $state_root/caelestia ]] || die 'Caelestia config/state directories are missing.'
 
-# Fail closed unless this installed CLI explicitly exposes the selected variant.
 scheme_help="$(timeout 8s caelestia scheme set -h 2>&1)" || die 'Unable to inspect caelestia scheme set help.'
 grep -q -- 'monochrome' <<<"$scheme_help" || die 'Installed Caelestia CLI does not expose the monochrome variant.'
 grep -q -- 'caelestia' <<<"$scheme_help" || die 'Installed Caelestia CLI does not expose the caelestia scheme.'
 
 python3 - "$profile_file" "$shell_file" "$scheme_file" <<'PY'
 import json, pathlib, sys
-profile, shell, scheme = map(pathlib.Path, sys.argv[1:])
-for path in (profile, shell, scheme):
+for path in map(pathlib.Path, sys.argv[1:]):
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
@@ -96,6 +94,7 @@ error_count=0
 fatal_count=0
 config_loaded_count=0
 quickshell_process_count=0
+
 write_summary() {
     local rc=$1
     if (( rc != 0 )); then status="FAILED (exit $rc)"; fi
@@ -106,12 +105,17 @@ write_summary() {
         printf 'Scheme: caelestia / dark / monochrome\n'
         printf 'Shell restart: %s\n' "$restart_status"
         printf 'Shell runtime log: %s\n' "$shell_log_status"
-        printf 'WARN/ERROR log lines: %s\n' "$warning_count"
+        printf 'WARN/WARNING log lines: %s\n' "$warning_count"
+        printf 'ERROR log lines: %s\n' "$error_count"
+        printf 'FATAL log lines: %s\n' "$fatal_count"
+        printf 'Configuration Loaded entries: %s\n' "$config_loaded_count"
+        printf 'Quickshell processes observed: %s\n' "$quickshell_process_count"
         printf 'Backup: %s\n' "${backup_dir:-not-created}"
         printf 'Report: reports/caelestia-customization/%s/\n' "$(basename -- "$report_dir")"
         printf 'Mode: user configuration only; no packages or system services changed.\n'
     } >"$summary_file"
 }
+
 on_exit() {
     local rc=$?
     trap - EXIT
@@ -121,9 +125,29 @@ on_exit() {
         cp -- "$backup_dir/scheme.json" "$scheme_file" || true
     fi
     if [[ -f $log_file ]]; then
-        clean_log="$(sed -E 
+        read -r warning_count error_count fatal_count config_loaded_count < <(
+            python3 - "$log_file" <<'PY'
+import pathlib, re, sys
+text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace")
+text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
+lines = text.splitlines()
+warnings = sum(bool(re.search(r"\bWARN(?:ING)?\b", line, re.I)) for line in lines)
+errors = sum(bool(re.search(r"\bERROR\b", line, re.I)) for line in lines)
+fatals = sum(bool(re.search(r"\bFATAL\b", line, re.I)) for line in lines)
+loaded = sum("Configuration Loaded" in line for line in lines)
+print(warnings, errors, fatals, loaded)
+PY
+        )
+        quickshell_process_count="$(pgrep -xc quickshell 2>/dev/null || true)"
+        warning_count="${warning_count:-0}"
+        error_count="${error_count:-0}"
+        fatal_count="${fatal_count:-0}"
+        config_loaded_count="${config_loaded_count:-0}"
+        quickshell_process_count="${quickshell_process_count:-0}"
+    fi
     if (( rc == 0 )); then
-        if [[ $restart_status == UNCONFIRMED* || $shell_log_status == FAILED* || $error_count -gt 0 || $fatal_count -gt 0 || $warning_count -gt 0 ]]; then
+        if [[ $restart_status == UNCONFIRMED* || $restart_status == COMMAND_FAILED* || $shell_log_status == FAILED* ]] \
+            || (( warning_count > 0 || error_count > 0 || fatal_count > 0 )); then
             status="SUCCESS_WITH_WARNINGS"
         elif [[ $restart_status == "NOT_RUN" ]]; then
             status="SUCCESS_RESTART_NOT_RUN"
@@ -153,20 +177,17 @@ cp -a -- "$shell_file" "$backup_dir/shell.json"
 cp -a -- "$scheme_file" "$backup_dir/scheme.json"
 info "Private backup created: ${backup_dir#"$HOME"/}"
 
-# Merge only the repository-owned profile keys, preserving all other user settings.
 python3 - "$profile_file" "$shell_file" <<'PY'
 import json, os, pathlib, stat, sys, tempfile
 profile_path, target_path = map(pathlib.Path, sys.argv[1:])
 profile = json.loads(profile_path.read_text(encoding="utf-8"))
 target = json.loads(target_path.read_text(encoding="utf-8"))
-
 def merge(dst, src):
     for key, value in src.items():
         if isinstance(value, dict) and isinstance(dst.get(key), dict):
             merge(dst[key], value)
         else:
             dst[key] = value
-
 merge(target, profile)
 fd, temporary = tempfile.mkstemp(prefix=".k41-shell-", dir=target_path.parent)
 try:
@@ -187,7 +208,6 @@ if ! timeout 15s caelestia scheme set -n caelestia -m dark -v monochrome; then
     cp -- "$backup_dir/scheme.json" "$scheme_file"
     die 'Caelestia scheme change failed; original files restored.'
 fi
-
 scheme_output="$(timeout 8s caelestia scheme get 2>&1)" || {
     cp -- "$backup_dir/shell.json" "$shell_file"
     cp -- "$backup_dir/scheme.json" "$scheme_file"
@@ -204,12 +224,8 @@ import json, pathlib, sys
 data = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
 font = data.get("appearance", {}).get("font", {})
 expected = {
-    "clock": "Rubik",
-    "workspaces": "Rubik",
-    "headline": "Rubik",
-    "title": "Rubik",
-    "body": "Rubik",
-    "label": "Rubik",
+    "clock": "Rubik", "workspaces": "Rubik", "headline": "Rubik",
+    "title": "Rubik", "body": "Rubik", "label": "Rubik",
     "mono": "CaskaydiaCove NF",
 }
 for key, value in expected.items():
@@ -219,14 +235,12 @@ for key, value in expected.items():
         raise SystemExit(f"Font setting verification failed: {key}")
 print("PASS: merged typography settings verified.")
 PY
-
 info 'Caelestia profile applied and scheme variant verified.'
 
 printf 'Restart Caelestia now and collect its runtime log? [Y/n] '
 IFS= read -r restart_answer
 if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
-    info 'Restarting Caelestia; stdout/stderr will be saved to run.log.'
-    info 'Running the documented Caelestia restart command with a 30-second safety bound.'
+    info 'Running caelestia shell -r with a 30-second safety bound.'
     set +e
     timeout 30s caelestia shell -r
     restart_rc=$?
@@ -236,7 +250,7 @@ if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
         info 'Caelestia restart command returned successfully.'
     elif (( restart_rc == 124 )); then
         restart_status="FOREGROUND_TIMEOUT"
-        info 'WARNING: Restart command remained active until the 30-second bound; this alone does not prove shell failure.'
+        info 'WARNING: Restart command remained active for 30 seconds; timeout alone does not prove shell failure.'
     else
         restart_status="COMMAND_FAILED (exit $restart_rc)"
         info "WARNING: Caelestia restart command exited with $restart_rc; profile files remain applied."
@@ -253,320 +267,21 @@ if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
         shell_log_status="FAILED (exit $shell_log_rc)"
         info "WARNING: Caelestia runtime log collector returned $shell_log_rc."
     fi
-    clean_runtime="$(sed -E 
-    shell_log_status="SKIPPED_BY_USER"
-    info 'Shell restart and runtime log collection skipped by user.'
-fi
 
-info 'Review WARN/WARNING/ERROR/FATAL counts and matching lines in the generated run.log.'
-info 'Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>'
-s/\\x1B\\[[0-9;?]*[ -/]*[@-~]//g' "$log_file")"
-        warning_count="$(grep -Eic '(^|[^[:alpha:]_])(WARN|WARNING)([^[:alpha:]_]|$)' <<<"$clean_log" || true)"
-        error_count="$(grep -Eic '(^|[^[:alpha:]_])ERROR([^[:alpha:]_]|$)' <<<"$clean_log" || true)"
-        fatal_count="$(grep -Eic '(^|[^[:alpha:]_])FATAL([^[:alpha:]_]|$)' <<<"$clean_log" || true)"
-        config_loaded_count="$(grep -Fic 'Configuration Loaded' <<<"$clean_log" || true)"
-        quickshell_process_count="$(pgrep -fc '[q]uickshell' || true)"
-        warning_count="${warning_count:-0}"
-        error_count="${error_count:-0}"
-        fatal_count="${fatal_count:-0}"
-        config_loaded_count="${config_loaded_count:-0}"
-        quickshell_process_count="${quickshell_process_count:-0}"
-    fi
-    if (( rc == 0 )); then
-        if [[ $restart_status == FAILED* || $shell_log_status == FAILED* || $warning_count -gt 0 ]]; then
-            status="SUCCESS_WITH_WARNINGS"
-        elif [[ $restart_status == "NOT_RUN" ]]; then
-            status="SUCCESS_RESTART_NOT_RUN"
+    if (( restart_rc == 124 )); then
+        if grep -Fq 'Configuration Loaded' "$log_file" && [[ "$(pgrep -xc quickshell 2>/dev/null || true)" =~ ^[1-9][0-9]*$ ]]; then
+            restart_status="CONFIRMED_AFTER_FOREGROUND_TIMEOUT"
+            info 'PASS: runtime configuration loaded and a Quickshell process is present after the bounded restart.'
         else
-            status="SUCCESS"
+            restart_status="UNCONFIRMED_AFTER_TIMEOUT"
+            info 'WARNING: restart timed out and independent runtime confirmation was incomplete.'
         fi
     fi
-    write_summary "$rc"
-    info "Report: reports/caelestia-customization/$(basename -- "$report_dir")/"
-}
-trap on_exit EXIT
-
-info "K41 Caelestia customization started (UTC $timestamp)"
-info 'Changes: Rubik UI typography, CaskaydiaCove Mono, Caelestia dark monochrome scheme.'
-info 'No shell tokens, wallpaper, package, service, or upstream package files are modified.'
-printf 'Apply this profile? [y/N] '
-IFS= read -r answer
-[[ $answer =~ ^[Yy]([Ee][Ss])?$ ]] || die 'Cancelled by user.'
-
-backup_dir="$backup_root/$timestamp"
-suffix=0
-while ! mkdir -- "$backup_dir" 2>/dev/null; do
-    suffix=$((suffix + 1))
-    backup_dir="$backup_root/$timestamp-$suffix"
-done
-cp -a -- "$shell_file" "$backup_dir/shell.json"
-cp -a -- "$scheme_file" "$backup_dir/scheme.json"
-info "Private backup created: ${backup_dir#"$HOME"/}"
-
-# Merge only the repository-owned profile keys, preserving all other user settings.
-python3 - "$profile_file" "$shell_file" <<'PY'
-import json, os, pathlib, stat, sys, tempfile
-profile_path, target_path = map(pathlib.Path, sys.argv[1:])
-profile = json.loads(profile_path.read_text(encoding="utf-8"))
-target = json.loads(target_path.read_text(encoding="utf-8"))
-
-def merge(dst, src):
-    for key, value in src.items():
-        if isinstance(value, dict) and isinstance(dst.get(key), dict):
-            merge(dst[key], value)
-        else:
-            dst[key] = value
-
-merge(target, profile)
-fd, temporary = tempfile.mkstemp(prefix=".k41-shell-", dir=target_path.parent)
-try:
-    with os.fdopen(fd, "w", encoding="utf-8") as stream:
-        json.dump(target, stream, indent=2, ensure_ascii=False)
-        stream.write("\n")
-    os.chmod(temporary, stat.S_IMODE(target_path.stat().st_mode))
-    os.replace(temporary, target_path)
-except BaseException:
-    try: os.unlink(temporary)
-    except FileNotFoundError: pass
-    raise
-PY
-
-if ! timeout 15s caelestia scheme set -n caelestia -m dark -v monochrome; then
-    info 'Scheme command failed; restoring both backed-up files.'
-    cp -- "$backup_dir/shell.json" "$shell_file"
-    cp -- "$backup_dir/scheme.json" "$scheme_file"
-    die 'Caelestia scheme change failed; original files restored.'
-fi
-
-scheme_output="$(timeout 8s caelestia scheme get 2>&1)" || {
-    cp -- "$backup_dir/shell.json" "$shell_file"
-    cp -- "$backup_dir/scheme.json" "$scheme_file"
-    die 'Could not verify active scheme; original files restored.'
-}
-if ! grep -Eiq 'Variant:[[:space:]]*monochrome' <<<"$scheme_output"; then
-    cp -- "$backup_dir/shell.json" "$shell_file"
-    cp -- "$backup_dir/scheme.json" "$scheme_file"
-    die 'Active scheme did not report monochrome; original files restored.'
-fi
-
-python3 - "$shell_file" <<'PY'
-import json, pathlib, sys
-data = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-font = data.get("appearance", {}).get("font", {})
-expected = {
-    "clock": "Rubik",
-    "workspaces": "Rubik",
-    "headline": "Rubik",
-    "title": "Rubik",
-    "body": "Rubik",
-    "label": "Rubik",
-    "mono": "CaskaydiaCove NF",
-}
-for key, value in expected.items():
-    actual = font.get(key)
-    actual = actual.get("family") if isinstance(actual, dict) else actual
-    if actual != value:
-        raise SystemExit(f"Font setting verification failed: {key}")
-print("PASS: merged typography settings verified.")
-PY
-
-info 'Caelestia profile applied and scheme variant verified.'
-
-printf 'Restart Caelestia now and collect its runtime log? [Y/n] '
-IFS= read -r restart_answer
-if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
-    info 'Restarting Caelestia; stdout/stderr will be saved to run.log.'
-    set +e
-    timeout 30s caelestia shell -r 2>&1 | tee -a "$log_file"
-    restart_rc=${PIPESTATUS[0]}
-    set -e
-    if (( restart_rc == 0 )); then
-        restart_status="OK"
-        info 'Caelestia restart command completed.'
-    else
-        restart_status="FAILED (exit $restart_rc)"
-        info "WARNING: Caelestia restart command returned $restart_rc; profile files remain applied."
-    fi
-
-    info 'Collecting Caelestia runtime log with: caelestia shell -l'
-    set +e
-    timeout 20s caelestia shell -l 2>&1 | tee -a "$log_file"
-    shell_log_rc=${PIPESTATUS[0]}
-    set -e
-    if (( shell_log_rc == 0 )); then
-        shell_log_status="OK"
-    else
-        shell_log_status="FAILED (exit $shell_log_rc)"
-        info "WARNING: Caelestia runtime log collector returned $shell_log_rc."
-    fi
 else
     restart_status="SKIPPED_BY_USER"
     shell_log_status="SKIPPED_BY_USER"
     info 'Shell restart and runtime log collection skipped by user.'
 fi
 
-info 'Review WARN/ERROR lines in this terminal and in the generated run.log.'
-info 'Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>'
-s/\\x1B\\[[0-9;?]*[ -/]*[@-~]//g' "$log_file")"
-    if (( restart_rc == 124 )) && grep -Fq 'Configuration Loaded' <<<"$clean_runtime" && (( $(pgrep -fc '[q]uickshell' || true) > 0 )); then
-        restart_status="CONFIRMED_AFTER_FOREGROUND_TIMEOUT"
-        info 'PASS: runtime configuration loaded and a Quickshell process is present after the bounded restart.'
-    elif (( restart_rc == 124 )); then
-        restart_status="UNCONFIRMED_AFTER_TIMEOUT"
-        info 'WARNING: restart timed out and runtime/process confirmation was incomplete.'
-    fi
-else
-    restart_status="SKIPPED_BY_USER"
-    shell_log_status="SKIPPED_BY_USER"
-    info 'Shell restart and runtime log collection skipped by user.'
-fi
-
-info 'Review WARN/ERROR lines in this terminal and in the generated run.log.'
-info 'Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>'
-s/\\x1B\\[[0-9;?]*[ -/]*[@-~]//g' "$log_file")"
-        warning_count="$(grep -Eic '(^|[^[:alpha:]_])(WARN|WARNING)([^[:alpha:]_]|$)' <<<"$clean_log" || true)"
-        error_count="$(grep -Eic '(^|[^[:alpha:]_])ERROR([^[:alpha:]_]|$)' <<<"$clean_log" || true)"
-        fatal_count="$(grep -Eic '(^|[^[:alpha:]_])FATAL([^[:alpha:]_]|$)' <<<"$clean_log" || true)"
-        config_loaded_count="$(grep -Fic 'Configuration Loaded' <<<"$clean_log" || true)"
-        quickshell_process_count="$(pgrep -fc '[q]uickshell' || true)"
-        warning_count="${warning_count:-0}"
-        error_count="${error_count:-0}"
-        fatal_count="${fatal_count:-0}"
-        config_loaded_count="${config_loaded_count:-0}"
-        quickshell_process_count="${quickshell_process_count:-0}"
-    fi
-    if (( rc == 0 )); then
-        if [[ $restart_status == FAILED* || $shell_log_status == FAILED* || $warning_count -gt 0 ]]; then
-            status="SUCCESS_WITH_WARNINGS"
-        elif [[ $restart_status == "NOT_RUN" ]]; then
-            status="SUCCESS_RESTART_NOT_RUN"
-        else
-            status="SUCCESS"
-        fi
-    fi
-    write_summary "$rc"
-    info "Report: reports/caelestia-customization/$(basename -- "$report_dir")/"
-}
-trap on_exit EXIT
-
-info "K41 Caelestia customization started (UTC $timestamp)"
-info 'Changes: Rubik UI typography, CaskaydiaCove Mono, Caelestia dark monochrome scheme.'
-info 'No shell tokens, wallpaper, package, service, or upstream package files are modified.'
-printf 'Apply this profile? [y/N] '
-IFS= read -r answer
-[[ $answer =~ ^[Yy]([Ee][Ss])?$ ]] || die 'Cancelled by user.'
-
-backup_dir="$backup_root/$timestamp"
-suffix=0
-while ! mkdir -- "$backup_dir" 2>/dev/null; do
-    suffix=$((suffix + 1))
-    backup_dir="$backup_root/$timestamp-$suffix"
-done
-cp -a -- "$shell_file" "$backup_dir/shell.json"
-cp -a -- "$scheme_file" "$backup_dir/scheme.json"
-info "Private backup created: ${backup_dir#"$HOME"/}"
-
-# Merge only the repository-owned profile keys, preserving all other user settings.
-python3 - "$profile_file" "$shell_file" <<'PY'
-import json, os, pathlib, stat, sys, tempfile
-profile_path, target_path = map(pathlib.Path, sys.argv[1:])
-profile = json.loads(profile_path.read_text(encoding="utf-8"))
-target = json.loads(target_path.read_text(encoding="utf-8"))
-
-def merge(dst, src):
-    for key, value in src.items():
-        if isinstance(value, dict) and isinstance(dst.get(key), dict):
-            merge(dst[key], value)
-        else:
-            dst[key] = value
-
-merge(target, profile)
-fd, temporary = tempfile.mkstemp(prefix=".k41-shell-", dir=target_path.parent)
-try:
-    with os.fdopen(fd, "w", encoding="utf-8") as stream:
-        json.dump(target, stream, indent=2, ensure_ascii=False)
-        stream.write("\n")
-    os.chmod(temporary, stat.S_IMODE(target_path.stat().st_mode))
-    os.replace(temporary, target_path)
-except BaseException:
-    try: os.unlink(temporary)
-    except FileNotFoundError: pass
-    raise
-PY
-
-if ! timeout 15s caelestia scheme set -n caelestia -m dark -v monochrome; then
-    info 'Scheme command failed; restoring both backed-up files.'
-    cp -- "$backup_dir/shell.json" "$shell_file"
-    cp -- "$backup_dir/scheme.json" "$scheme_file"
-    die 'Caelestia scheme change failed; original files restored.'
-fi
-
-scheme_output="$(timeout 8s caelestia scheme get 2>&1)" || {
-    cp -- "$backup_dir/shell.json" "$shell_file"
-    cp -- "$backup_dir/scheme.json" "$scheme_file"
-    die 'Could not verify active scheme; original files restored.'
-}
-if ! grep -Eiq 'Variant:[[:space:]]*monochrome' <<<"$scheme_output"; then
-    cp -- "$backup_dir/shell.json" "$shell_file"
-    cp -- "$backup_dir/scheme.json" "$scheme_file"
-    die 'Active scheme did not report monochrome; original files restored.'
-fi
-
-python3 - "$shell_file" <<'PY'
-import json, pathlib, sys
-data = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
-font = data.get("appearance", {}).get("font", {})
-expected = {
-    "clock": "Rubik",
-    "workspaces": "Rubik",
-    "headline": "Rubik",
-    "title": "Rubik",
-    "body": "Rubik",
-    "label": "Rubik",
-    "mono": "CaskaydiaCove NF",
-}
-for key, value in expected.items():
-    actual = font.get(key)
-    actual = actual.get("family") if isinstance(actual, dict) else actual
-    if actual != value:
-        raise SystemExit(f"Font setting verification failed: {key}")
-print("PASS: merged typography settings verified.")
-PY
-
-info 'Caelestia profile applied and scheme variant verified.'
-
-printf 'Restart Caelestia now and collect its runtime log? [Y/n] '
-IFS= read -r restart_answer
-if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
-    info 'Restarting Caelestia; stdout/stderr will be saved to run.log.'
-    set +e
-    timeout 30s caelestia shell -r 2>&1 | tee -a "$log_file"
-    restart_rc=${PIPESTATUS[0]}
-    set -e
-    if (( restart_rc == 0 )); then
-        restart_status="OK"
-        info 'Caelestia restart command completed.'
-    else
-        restart_status="FAILED (exit $restart_rc)"
-        info "WARNING: Caelestia restart command returned $restart_rc; profile files remain applied."
-    fi
-
-    info 'Collecting Caelestia runtime log with: caelestia shell -l'
-    set +e
-    timeout 20s caelestia shell -l 2>&1 | tee -a "$log_file"
-    shell_log_rc=${PIPESTATUS[0]}
-    set -e
-    if (( shell_log_rc == 0 )); then
-        shell_log_status="OK"
-    else
-        shell_log_status="FAILED (exit $shell_log_rc)"
-        info "WARNING: Caelestia runtime log collector returned $shell_log_rc."
-    fi
-else
-    restart_status="SKIPPED_BY_USER"
-    shell_log_status="SKIPPED_BY_USER"
-    info 'Shell restart and runtime log collection skipped by user.'
-fi
-
-info 'Review WARN/ERROR lines in this terminal and in the generated run.log.'
+info 'Review WARN/WARNING/ERROR/FATAL counts and matching lines in run.log.'
 info 'Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>'
