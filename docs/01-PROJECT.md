@@ -18,6 +18,12 @@ Tahap 5 dikerjakan berurutan dalam tujuh workstream: (1) boot experience — pow
 
 Tidak ada perpindahan otomatis antar tahap. Hasil otomatis, klasifikasi WARN/FAIL, dan review bukti menjadi gate. Tahap 4 hanya menilai kondisi yang dapat diamati otomatis; visual dan interaksi fisik tidak termasuk dan tidak boleh diklaim VERIFIED. **Tahap 4 telah diterima dan ditutup** berdasarkan bukti pada `reports/desktop-validation/20261109T081724Z/`; Tahap 5 adalah tahap aktif.
 
+### Status fitur lock screen dan Guest Mode
+
+Workstream 2 (lock screen) memiliki override QML dan installer deployment yang telah **IMPLEMENTED** di branch `main`. Perubahan terbaru mencakup transparansi surface luar, pemeliharaan surface/kartu password terpisah, dan penataan kelompok jam/tanggal/password menggunakan parent area penuh serta `anchors.centerIn`. Implementasi tersebut belum boleh disebut **TESTED** atau **VERIFIED** pada ThinkPad X280: runtime QML, path source aktif setelah deployment, lock/unlock, wake, dan penerimaan visual masih harus dibuktikan. Rincian commit, file, perintah, serta batas validasi berada di [Workstream 2 — Lock Screen](08-STAGE-5/02-LOCK-SCREEN.md) dan [status proyek](06-STATUS.md).
+
+**Guest Mode: NOT IMPLEMENTED.** Fitur ini belum memiliki implementasi. Pengerjaan maupun desain Guest Mode ditunda sampai pengguna secara eksplisit menerima custom lock screen. Penundaan ini bukan indikasi bahwa fitur sudah tersedia.
+
 ## Entry point kanonis
 
 - `scripts/k41-live-validation.sh`
