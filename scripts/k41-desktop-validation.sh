@@ -166,7 +166,8 @@ if (( caelestia_running == 1 )); then
     else
       record PASS 'Caelestia runtime log' 'No unresolved fatal/QML/resource error detected; stale scheme startup and optional .face warnings are excluded only when their conditions are met'
     fi
-  fi
+  else
+    record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
   fi
 else
   record SKIP 'Caelestia IPC' 'Skipped because no Caelestia process is running'
