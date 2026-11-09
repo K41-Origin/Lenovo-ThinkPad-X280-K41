@@ -6,7 +6,7 @@ umask 077
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
 usage() {
-    printf 'Usage:\n  bash %s [--no-restart]\n  bash %s --rollback BACKUP_DIRECTORY\n' "$0" "$0"
+    printf 'Usage:\n  sudo bash %s\n  sudo bash %s --rollback BACKUP_DIRECTORY\n' "$0" "$0"
 }
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -115,7 +115,6 @@ state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
 target_root="$config_root/quickshell/caelestia/modules/lock"
 backup_root="$state_root/k41/lockscreen/backups"
 mode=apply
-restart=ask
 rollback_dir=""
 
 if [[ ${1:-} == --rollback ]]; then
@@ -258,22 +257,11 @@ info "QML overrides installed for user $USER under $config_root/quickshell/caele
 info 'Upstream LockSurface.qml, wallpaper selection/blur, WlSessionLock and PAM components remain untouched.'
 info "Rollback: bash scripts/k41-apply-lockscreen-design.sh --rollback '$backup_dir'"
 
-if [[ $restart == ask ]]; then
-    printf 'Restart the running Caelestia shell now? This briefly closes/reloads shell widgets. [y/N] '
-    IFS= read -r restart_answer
-    if [[ $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
-        if command -v timeout >/dev/null 2>&1 && command -v caelestia >/dev/null 2>&1; then
-            if timeout 15s caelestia shell -r -d; then
-                info 'Restart command returned successfully; inspect the lock screen and runtime log.'
-            else
-                info 'WARNING: restart command failed or timed out; overrides remain installed. Log out/in or rollback.'
-            fi
-        else
-            info 'WARNING: timeout/caelestia CLI unavailable; log out/in to load the overrides.'
-        fi
-    else
-        info 'Restart skipped. Log out/in or restart Caelestia when ready.'
-    fi
-fi
-
+# This process was deliberately re-executed through runuser with a clean,
+# minimal environment. It does not inherit the active Wayland/Hyprland session
+# variables, so launching Quickshell here would create a broken second instance.
+info 'Shell restart was not attempted from the sanitized installer process.'
+info 'After this script exits, restart Caelestia from a terminal inside the active desktop session as the regular user:'
+printf '  caelestia shell -r -d\\n'
+info 'If the shell is not available afterward, log out/in or use the documented rollback command.'
 info 'No visual/runtime acceptance is claimed until lock/unlock and visual checks pass on the X280.'
