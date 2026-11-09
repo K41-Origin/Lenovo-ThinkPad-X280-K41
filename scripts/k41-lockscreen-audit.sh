@@ -1,17 +1,14 @@
 #!/usr/bin/env bash
 # Read-only lock-screen inventory for the K41 ThinkPad X280.
-# Supports sudo while collecting the invoking desktop user's session/configuration.
 set -Eeuo pipefail
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
+(( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 command -v git >/dev/null 2>&1 || die 'Git tidak tersedia; audit harus dijalankan dari clone repository.'
 git -C "$repo_root" rev-parse --show-toplevel >/dev/null 2>&1 || die "Direktori script bukan working tree Git yang valid: $repo_root"
 
-# This collector must run as the desktop user. Never use sudo: creating/changing
-# ownership or mode bits inside a Git working tree can make audit artifacts
-# inaccessible to the user and interfere with review/commit/push.
-(( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
+# Run as the checkout owner; never alter permissions or ownership.
 audit_user="$(id -un)"
 audit_uid="$(id -u)"
 [[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
