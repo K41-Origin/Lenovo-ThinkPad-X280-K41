@@ -87,7 +87,7 @@ backup_file "$GETTY_DROPIN" "etc/systemd/system/getty@tty1.service.d/k41-autolog
 backup_file "$BASH_PROFILE" "home/$USER_NAME/.bash_profile"
 backup_file "$HELPER_TARGET" "home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start"
 backup_file "/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf" "etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf"
-backup_file "/etc/systemd/system/k41-plymouth-deactivate.service" "etc/systemd/system/k41-plymouth-deactivate.service"
+backup_file "/etc/systemd/system/k41-plymouth-release.service" "etc/systemd/system/k41-plymouth-release.service"
 backup_file "/usr/local/libexec/k41-plymouth-quit-after-lock" "usr/local/libexec/k41-plymouth-quit-after-lock"
 backup_file "/etc/plymouth/plymouthd.conf" "etc/plymouth/plymouthd.conf"
 printf '%s\n' "$crypt_device" >"$backup_dir/luks-device"
@@ -191,7 +191,7 @@ chown "$USER_UID:$USER_GID" "$BASH_PROFILE"
 cat >"$GETTY_DROPIN" <<EOF
 [Unit]
 After=
-After=systemd-user-sessions.service getty-pre.target k41-plymouth-deactivate.service
+After=systemd-user-sessions.service getty-pre.target k41-plymouth-release.service
 
 [Service]
 Type=simple
@@ -215,9 +215,9 @@ EOF
 chown root:root /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
 chmod 0644 /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
 
-cat >/etc/systemd/system/k41-plymouth-deactivate.service <<'EOF'
+cat >/etc/systemd/system/k41-plymouth-release.service <<'EOF'
 [Unit]
-Description=Release Plymouth display ownership before K41 Hyprland startup
+Description=Retain splash frame and release Plymouth display ownership before K41 Hyprland startup
 Wants=plymouth-start.service
 After=plymouth-start.service
 Before=getty@tty1.service
@@ -230,11 +230,11 @@ RemainAfterExit=yes
 [Install]
 WantedBy=multi-user.target
 EOF
-chown root:root /etc/systemd/system/k41-plymouth-deactivate.service
-chmod 0644 /etc/systemd/system/k41-plymouth-deactivate.service
+chown root:root /etc/systemd/system/k41-plymouth-release.service
+chmod 0644 /etc/systemd/system/k41-plymouth-release.service
 systemctl daemon-reload
-systemd-analyze verify k41-plymouth-deactivate.service plymouth-quit.service getty@tty1.service
-systemctl enable k41-plymouth-deactivate.service
+systemd-analyze verify k41-plymouth-release.service plymouth-quit.service getty@tty1.service
+systemctl enable k41-plymouth-release.service
 
 printf '\nTPM2 enrollment adds a new LUKS unlock method. It does NOT remove or replace the existing passphrase keyslot.\n'
 printf 'Enter the current LUKS passphrase when systemd-cryptenroll asks for it.\n'
