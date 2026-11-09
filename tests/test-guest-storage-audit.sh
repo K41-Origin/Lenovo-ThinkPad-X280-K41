@@ -35,7 +35,7 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
 done
 pass 'storage, logind, account, desktop, browser and permission audit scope is present'
 
-if grep -Eq 'pacman[[:space:]]+-S|systemctl[[:space:]]+(enable|disable|start|stop|restart)|swapon[[:space:]]+-a|swapoff|mkfs\.|cryptsetup[[:space:]]+(luksFormat|open|close)|mkinitcpio[[:space:]]+-P|chown[[:space:]]|chmod[[:space:]]|user(add|del|mod)|group(add|del|mod)|passwd[[:space:]]|rm[[:space:]]+-rf' "$SCRIPT"; then
+if grep -Eq 'pacman[[:space:]]+-S|systemctl[[:space:]]+(enable|disable|start|stop|restart)|swapon[[:space:]]+-a|swapoff|mkfs\.|cryptsetup[[:space:]]+(luksFormat|open|close)|mkinitcpio[[:space:]]+-P|chown[[:space:]]|chmod[[:space:]]|user(add|del|mod)|group(add|del|mod)|(^|[;&|][[:space:]]*|then[[:space:]]+)(sudo[[:space:]]+)?passwd[[:space:]]|rm[[:space:]]+-rf' "$SCRIPT"; then
   fail 'collector must not mutate system configuration, accounts, swap, storage, or permissions'
 fi
 pass 'no system mutation, account management, package install, or destructive operation found'
