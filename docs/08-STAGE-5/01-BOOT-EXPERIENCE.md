@@ -17,6 +17,7 @@ Pada jalur normal, root LUKS dibuka otomatis melalui TPM2. Passphrase LUKS tetap
 | Plymouth K41 | Splash early boot serta transisi reboot/poweroff sejauh didukung lifecycle systemd |
 | systemd | Mengatur urutan startup, shutdown, reboot, dan unit transisi |
 | TTY1, Hyprland, Quickshell/Caelestia | Handoff dari splash boot ke sesi grafis dan lock screen |
+| K41 Hyprland launcher | Menjalankan `start-hyprland` dengan stdin/TTY tetap terhubung, tetapi mengalihkan stdout/stderr ke log privat agar teks startup tidak tercetak pada TTY1 |
 | Quickshell K41 | Menjaga tampilan K41 selama handoff grafis sampai lock screen siap |
 
 Plymouth dan Quickshell adalah renderer berbeda. Keduanya mengikuti spesifikasi visual yang sama, tetapi kesamaan piksel tidak dijamin.
@@ -55,10 +56,17 @@ Pengujian utama dilakukan pada ThinkPad X280 fisik. Static test dan inspeksi kon
 - Menjalankan `mkinitcpio -P` untuk membangun ulang preset/initramfs/UKI.
 - Menjalankan `k41-install-animated-boot-splash.sh` untuk memasang Quickshell handoff, helper lock Caelestia, dan pengaturan suppress visual Hyprland. Konfigurasi `hyprland.lua` ikut dicadangkan sebelum installer dijalankan.
 - Memasang helper handoff lock-aware, mengubah konfigurasi getty TTY1 dan drop-in Plymouth, lalu menjalankan `systemctl daemon-reload`, verifikasi unit, dan enable unit K41.
+- Autologin menjalankan `~/.local/bin/k41-start-hyprland`, yang mempertahankan stdin/TTY tetapi mengalihkan stdout dan stderr `start-hyprland` ke `~/.local/state/k41/hyprland-startup.log` (direktori privat). Ini menekan teks startup yang terlihat di TTY tanpa membuang diagnostik. Log diputar saat mencapai 1 MiB.
 - Menawarkan enrollment TPM2 PCR 7 setelah konfigurasi Plymouth selesai.
 - Membuat backup konfigurasi lokal di `/var/lib/k41/boot-experience/backups/<timestamp>`.
 
 **Batas backup:** script saat ini secara eksplisit tidak membuat backup LUKS header. Karena itu, sebelum menjalankannya, pastikan passphrase LUKS yang ada diketahui dan tervalidasi serta tersedia media/jalur recovery. Jangan menganggap backup konfigurasi sebagai backup LUKS header.
+
+## Penanganan output terminal Hyprland
+
+`start-hyprland` sebelumnya dijalankan langsung dari `.bash_profile`, sehingga output stdout/stderr dapat tertinggal pada buffer TTY1 dan terlihat kembali saat transisi compositor/shutdown. K41 launcher mengalihkan kedua stream ke file log privat, tanpa memutus stdin atau mengganti TTY. Ini menargetkan teks startup terminal; bukan pengganti pengaturan `misc.disable_hyprland_logo` atau `misc.disable_splash_rendering`, yang merupakan kontrol visual compositor terpisah.
+
+Lokasi log: `~/.local/state/k41/hyprland-startup.log`. Log diputar menjadi `.1` ketika file aktif telah mencapai 1 MiB. Kegagalan launcher atau executable upstream dilaporkan ke stderr wrapper.
 
 ## Hipotesis dan diagnosis visual
 
