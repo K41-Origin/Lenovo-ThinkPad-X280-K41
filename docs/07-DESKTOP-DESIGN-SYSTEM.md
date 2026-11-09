@@ -100,17 +100,22 @@ Wallpaper alternatif boleh tersedia, tetapi harus tetap berada dalam keluarga vi
 
 | Komponen | Arah customization | Prinsip |
 |---|---|---|
-| Caelestia panel | Ringkas, graphite, indikator jelas | Pusat kontrol desktop |
+| Boot experience | Power-on, reboot, poweroff; Plymouth dan handoff session konsisten | Hindari frame/logo Hyprland yang tidak diinginkan; jangan merusak recovery boot |
+| Lock screen | Gelap, jam/tanggal jelas, prompt sederhana | Pertahankan Hyprlock/integrasi autentikasi yang bekerja |
+| Dashboard | Muncul sesuai kebutuhan; informasi terkurasi | Tidak selalu memenuhi desktop |
+| Taskbar/panel | Ringkas, graphite, workspace dan indikator jelas | Pusat kontrol desktop yang mudah dipindai |
 | Launcher | Satu launcher utama, keyboard-first | Cepat dan minim distraksi |
-| Dashboard | Muncul sesuai kebutuhan | Tidak selalu memenuhi desktop |
+| Sidebar | Navigasi dan quick access yang terstruktur | Muncul sesuai kebutuhan, tidak menutupi konten |
+| Utilities | Quick toggles/kontrol perangkat yang relevan | Status jelas dan tindakan aman |
+| Notifications/OSD | Hierarki jelas, ukuran dan durasi terkendali | Tidak mengganggu secara berlebihan |
 | Clock/calendar | Tipografi bersih, informasi secukupnya | Mudah dipindai |
 | System widgets | CPU, RAM, baterai, jaringan bila berguna | Polling hemat dan tidak redundan |
-| Notifications | Hierarki jelas, ukuran terkendali | Tidak mengganggu secara berlebihan |
-| Audio/brightness | Kontrol sederhana dan konsisten | Memanfaatkan integrasi yang tersedia |
-| Media | Informasi dan kontrol seperlunya | Tidak membuat service duplikat |
-| Lock screen | Gelap, jam/tanggal jelas, prompt sederhana | Pertahankan Hyprlock/integrasi yang bekerja |
+| Audio/brightness/media | Kontrol sederhana dan konsisten | Memanfaatkan integrasi yang tersedia |
+| Wallpaper | Abstract monochrome, resolusi dan scaling sesuai panel | Mendukung konten, bukan bersaing dengannya |
+| Typography/icons/cursor | Keluarga visual konsisten dan terbaca | Hindari campuran theme/font tanpa alasan |
+| Window/compositor | Border, focus, gaps, radius, opacity, workspace/floating state | Konsisten tanpa efek berat |
 | Terminal | Graphite, teks kontras, monospace | Pertahankan Foot |
-| GTK/Qt apps | Tampilan sedekat mungkin dengan design tokens | Konsistensi tanpa patch rapuh |
+| GTK/Qt apps dan file manager | Tampilan sedekat mungkin dengan design tokens | Konsistensi tanpa patch rapuh |
 
 ### Caelestia and Quickshell strategy
 
@@ -154,13 +159,13 @@ Arah pengelolaan:
 ### In scope — Stage 5
 
 - Art direction dan design tokens.
-- Wallpaper dan typography.
-- Icon/cursor direction.
-- Caelestia panel, launcher, dashboard, widgets, dan notifications.
-- Hyprland visual appearance.
-- Lock screen appearance.
-- Foot terminal appearance.
-- GTK/Qt consistency where maintainable.
+- Boot experience untuk power-on, reboot, dan poweroff.
+- Lock screen appearance dan visual state terkait (tanpa perubahan autentikasi yang tidak diperlukan).
+- Dashboard, taskbar/panel, launcher, sidebar, dan utilities.
+- Wallpaper, typography, icons, dan cursor.
+- Notifications dan OSD.
+- Hyprland window/compositor appearance.
+- Foot terminal, file manager, serta GTK/Qt consistency where maintainable.
 - On-device visual review by the user, functional regression, and rollback; screenshots are not required.
 
 ### Out of scope — Stage 5
