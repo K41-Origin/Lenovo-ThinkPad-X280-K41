@@ -9,5 +9,9 @@ grep -Fq 'Plymouth.SetRefreshFunction(refresh_callback)' "$ROOT/themes/plymouth/
 grep -Fq 'Plymouth.SetDisplayPasswordFunction(display_password_callback)' "$ROOT/themes/plymouth/k41/k41.script"
 grep -Fq 'Plymouth.SetDisplayNormalFunction(display_normal_callback)' "$ROOT/themes/plymouth/k41/k41.script"
 grep -Fq 'mkinitcpio -P' "$ROOT/scripts/k41-install-plymouth-theme.sh"
+grep -Fq 'plymouth-reboot.service' "$ROOT/scripts/k41-install-plymouth-theme.sh"
+grep -Fq 'plymouth-poweroff.service' "$ROOT/scripts/k41-install-plymouth-theme.sh"
+grep -Fq 'reboot.target.wants' "$ROOT/scripts/k41-install-plymouth-theme.sh"
+grep -Fq 'poweroff.target.wants' "$ROOT/scripts/k41-install-plymouth-theme.sh"
 ! grep -Eq 'systemd-cryptenroll|luksAddKey|luksRemoveKey|luksErase|wipe-slot' "$ROOT/scripts/k41-install-plymouth-theme.sh"
 printf 'PASS: K41 Plymouth theme static invariants\n'
