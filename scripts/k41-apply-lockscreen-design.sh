@@ -34,7 +34,7 @@ fi
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
 [[ $config_root == /* && $state_root == /* ]] || die 'XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.'
-for cmd in mkdir cp mv mktemp date pacman; do
+for cmd in mkdir cp mv mktemp date pacman stat rm chmod; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 pacman -Q caelestia-shell >/dev/null 2>&1 || die 'caelestia-shell package is not installed.'
@@ -136,6 +136,7 @@ printf 'Apply K41 minimal Floating Password Card layout? [y/N] '
 IFS= read -r answer
 [[ $answer =~ ^[Yy]([Ee][Ss])?$ ]] || die 'Cancelled; backup retained and active configuration unchanged.'
 
+restore_on_failure=1
 for name in Content.qml Center.qml; do
     tmp="$(mktemp "$target_root/.k41-install.XXXXXX")"
     cp -- "$source_root/$name" "$tmp"
