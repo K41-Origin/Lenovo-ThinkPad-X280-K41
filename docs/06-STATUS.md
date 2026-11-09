@@ -122,7 +122,29 @@ Jangan menghapus keyslot passphrase. Secure Boot masih disabled pada snapshot au
 
 ### Guest Mode
 
-**NOT IMPLEMENTED — BELUM DIIMPLEMENTASIKAN.** Tidak ada implementasi Guest Mode yang dapat digunakan atau dinyatakan aman. Fitur ini ditunda; desain dan implementasi baru boleh dimulai setelah pengguna secara eksplisit menyatakan custom lock screen telah diterima. Guest Mode bukan bagian dari status selesai workstream lock screen saat ini.
+**DESAIN KONSEPTUAL DISETUJUI — IMPLEMENTASI BELUM DIMULAI.** Pada 2026-11-09 pengguna menyetujui arah arsitektur Guest Mode dan meminta keputusan dicatat. Persetujuan ini hanya mencakup spesifikasi konseptual; bukan izin untuk mengubah akun, konfigurasi, service, mount, swap, atau storage perangkat.
+
+Dokumen spesifikasi: [Guest Mode — Ephemeral Session](08-STAGE-5/03-GUEST-MODE.md).
+
+Ringkasan keputusan:
+- Gunakan akun Linux terpisah dengan username default **`guest`**.
+- Gunakan desktop environment/session yang sudah tersedia: Hyprland + Caelestia. Jangan memasang atau menjalankan desktop environment kedua khusus Guest.
+- Gunakan aplikasi sistem yang sama jika aman; pisahkan home, konfigurasi, runtime, dan data aplikasi Guest dari akun utama.
+- Tidak ada pembagian atau reservasi RAM statis. Mekanisme volatile seperti tmpfs boleh menggunakan RAM secara dinamis sesuai kebutuhan, dengan batas dan dampak memory pressure yang harus diuji.
+- Browser Guest harus diluncurkan otomatis dalam mode Incognito/Private dan memakai profile Guest terpisah; jangan pernah memakai profile akun utama. Incognito bukan pengganti isolasi penyimpanan.
+- Guest tidak memperoleh hak administrator dan tidak boleh membaca atau mengubah data pribadi akun utama maupun konfigurasi sistem yang dilindungi.
+- Semua data lokal yang dapat ditulis selama sesi Guest harus ephemeral dan tidak boleh bertahan setelah reboot atau poweroff. Akun utama dan data persistent miliknya tetap berada di luar cakupan cleanup Guest.
+- Session ID dan metadata/log sesi digunakan untuk tracking dan lifecycle management, bukan sebagai satu-satunya daftar sumber data yang harus dihapus.
+- Penyimpanan sesi harus diisolasi sejak awal. Saat logout, sesi dapat dihancurkan; setelah setiap boot/reboot, sistem wajib memeriksa bahwa storage Guest bersih, membersihkan residu yang ditemukan, lalu memverifikasi ulang.
+- Jika pemeriksaan atau cleanup gagal, Guest login harus ditolak (fail closed), bukan meneruskan sesi di atas storage yang belum terbukti bersih.
+- Swapfile persistent aktif pada baseline X280 adalah blocker yang harus diselesaikan dalam desain; LUKS encryption sendiri tidak menjadikan swap ephemeral.
+
+Batas dan status:
+- Arsitektur storage final (mis. selective ephemeral storage vs full-session OverlayFS) **belum dipilih**. Pilihan harus didasarkan pada audit write paths, kompatibilitas aplikasi, RAM 8 GB, serta pengujian.
+- Belum ada jaminan bahwa semua data lokal Guest sudah dapat dihapus; klaim tersebut baru boleh dibuat setelah acceptance tests membuktikan jalur penyimpanan, swap, crash, forced poweroff, dan reboot.
+- Penghapusan tidak dapat mencakup data yang sudah dikirim ke server, router, DNS resolver, perangkat eksternal, atau media lain di luar kontrol lokal sistem.
+- Audit storage read-only sebelumnya tetap menjadi baseline; tidak ada konfigurasi perangkat yang diubah sebagai bagian dari keputusan desain ini.
+- Gate urutan proyek yang sudah berlaku tetap dihormati: implementasi Guest Mode tidak dimulai sebelum custom lock screen diterima pengguna. Dokumentasi keputusan konseptual ini tidak menutup gate tersebut.
 
 ## Keputusan dan batas
 
