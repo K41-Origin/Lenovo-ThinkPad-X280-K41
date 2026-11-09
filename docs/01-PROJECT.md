@@ -6,7 +6,7 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji
 
 ## Tujuh tahap resmi
 
-1. **Live readiness:** validasi ISO, mode boot, perangkat, jaringan, dependensi, repository, test suite, dan prasyarat storage. Read-only dalam arti tidak mengubah sistem atau SSD target; validator tetap menulis laporan lokal dan test suite memakai disposable loop-backed image. Detail alur dan batasnya ada di [Stage 1 — Live Readiness](09-STAGE-1-LIVE-READINESS.md).
+1. **Live readiness:** validasi ISO, mode boot, perangkat, jaringan, dependensi, repository, test suite, dan prasyarat storage. Read-only dalam arti tidak mengubah sistem atau SSD target; validator tetap menulis laporan lokal dan test suite memakai disposable loop-backed image. Detail alur dan batasnya ada di [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 2. **Basic Arch installation:** instalasi dasar Arch pada SSD target setelah pemeriksaan identitas dan konfirmasi eksplisit. Destruktif.
 3. **Desktop installation:** setup desktop dari Arch terpasang melalui TTY.
 4. **Desktop functional validation:** pemeriksaan otomatis sesi, konfigurasi, proses, IPC, service, audio, jaringan, baterai, thermal, dan journal. Tidak menggantikan review interaksi pengguna.
@@ -27,7 +27,7 @@ Penerimaan Workstream 1 tidak boleh ditafsirkan sebagai klaim bahwa setiap detai
 
 ## Entry point kanonis
 
-- `scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](09-STAGE-1-LIVE-READINESS.md).
+- `scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 - `scripts/k41-install-basic-arch.sh` → delegasi internal `scripts/install-arch-x280.sh`
 - `scripts/k41-install-desktop.sh` → delegasi internal `scripts/setup-desktop-x280.sh`
 - `scripts/k41-desktop-validation.sh`
