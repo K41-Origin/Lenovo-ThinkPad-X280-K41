@@ -21,8 +21,8 @@
 | `scripts/k41-live-validation.sh` | — | IMPLEMENTED |
 | `scripts/k41-install-basic-arch.sh` | `scripts/install-arch-x280.sh` | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | `scripts/setup-desktop-x280.sh` | IMPLEMENTED |
-| `scripts/k41-desktop-validation.sh` | Paket, proses, konfigurasi, service, portal, audio, jaringan, baterai, thermal, journal + supplemental collectors | IMPLEMENTED; false-positive fixes IMPLEMENTED; runtime test pending |
-| `scripts/k41-desktop-repair.sh` | Audit otomatis dan remediation terbatas BlueZ; validasi ulang | IMPLEMENTED; runtime test pending |
+| `scripts/k41-desktop-validation.sh` | Paket, proses, konfigurasi, service, portal, audio, jaringan, baterai, thermal, journal + focused hardware/package/service diagnostics | IMPLEMENTED; diagnostic initialization-order fix IMPLEMENTED; runtime test pending |
+| `scripts/k41-desktop-repair.sh` | Automatic scoped remediation for Caelestia scheme, missing BlueZ/wireless-regdb packages, Bluetooth service; PAM/kernel findings remain diagnostic-only | IMPLEMENTED; runtime test pending |
 
 Nama implementasi lama masih ada dan tidak perlu dijalankan terpisah. Bootstrap ISO juga telah diarahkan untuk mereview entry point kanonis dan menjalankan basic-install wrapper.
 
@@ -41,7 +41,7 @@ Jangan mulai customization sebelum validator terbaru dijalankan, seluruh FAIL di
 - Caelestia/Quickshell: TESTED — proses, konfigurasi/QML, dan IPC terdeteksi pada `reports/caelestia-diagnostics/20261108T193701Z/` dan `194633Z/`; panel/UI interaktif belum VERIFIED.
 - Cache ownership: VERIFIED — `~/.cache` berubah dari root-owned menjadi user-owned pada `reports/caelestia-permissions-diagnostics/20261108T194621Z/`. Tidak ada perubahan rekursif.
 - Automated health validation: IMPLEMENTED pada `scripts/k41-desktop-validation.sh`; whitespace-only Hyprland output tidak lagi FAIL, dan log Caelestia/journal memakai klasifikasi yang lebih selektif. Belum TESTED pada X280 setelah perubahan.
-- Desktop remediation: IMPLEMENTED pada `scripts/k41-desktop-repair.sh`; default audit-only, `--apply` hanya mengaktifkan BlueZ yang sudah terpasang setelah persetujuan; PAM, firmware, paket, dan konfigurasi desktop tidak diubah otomatis. Belum TESTED pada X280.
+- Desktop remediation: IMPLEMENTED pada `scripts/k41-desktop-repair.sh`; tidak ada opsi `--apply`. Perbaikan terbatas berjalan otomatis: Caelestia default scheme, paket BlueZ dan wireless-regdb yang belum terpasang, serta aktivasi bluetooth.service dengan prasyarat terverifikasi. PAM, CPU/kernel security policy, konfigurasi desktop, dan firmware controller tidak diubah otomatis. Belum TESTED pada X280.
 - Pemeriksaan visual/interaksi hardware: OUT OF SCOPE untuk gate tahap 4 berdasarkan keputusan proyek; log tidak dapat membuktikan fungsi fisik/UI dan statusnya tidak akan diklaim VERIFIED.
 - Bluetooth/BlueZ: NOT TESTED — BlueZ tidak tersedia pada snapshot; uji hanya jika fitur ini dibutuhkan.
 - CI pada HEAD `d647cca2aa8aac1a06437d881e093da6f35d1348`: Repository Validation dan Bash Validation SUCCESS menurut audit repository terakhir; hasil ini hanya berlaku untuk commit tersebut.
