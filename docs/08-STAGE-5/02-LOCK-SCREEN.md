@@ -98,7 +98,7 @@ Dari clone repository yang sudah diperbarui, jalankan melalui sudo dari akun des
 sudo bash scripts/k41-apply-lockscreen-design.sh
 ```
 
-Installer memerlukan `SUDO_USER`, kemudian otomatis berpindah kembali ke UID pengguna tersebut dengan `runuser`. Target konfigurasi adalah `/home/<user>/.config/quickshell/caelestia/modules/lock`; backup berada di `/home/<user>/.local/state/k41/lockscreen/backups`. Jika direktori `.config` atau `.local/state` yang sudah ada bukan milik pengguna pemanggil, installer berhenti tanpa menjalankan `chown` atau mengubah ownership. Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
+Installer memerlukan `SUDO_USER`. Sebelum berpindah kembali ke UID pengguna dengan `runuser`, tahap sudo hanya membuat/memastikan dua direktori leaf yang dikelola installer (`~/.config/quickshell/caelestia/modules/lock` dan `~/.local/state/k41/lockscreen/backups`) dan menetapkan ownership kedua direktori tersebut kepada pengguna desktop. Parent seperti `~/.config`, `~/.config/quickshell`, dan `~/.local` tidak di-chown secara rekursif. Jika parent path tidak dapat ditelusuri pengguna atau ada komponen symlink, installer berhenti dengan pesan error. Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
 
 Rollback juga dijalankan melalui sudo:
 
