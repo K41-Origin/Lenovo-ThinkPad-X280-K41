@@ -9,7 +9,7 @@
 | 1. Arch ISO — Live Readiness | IMPLEMENTED | `scripts/k41-live-validation.sh` adalah entry point kanonis. |
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer destruktif; penerimaan boot fisik tetap dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
-| 4. Desktop Functional Validation | IN PROGRESS | Laporan X280 terbaru sebelum perubahan validator saat ini (`20261109T072936Z`) menunjukkan 54 PASS, 2 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`. Audit lanjutan menemukan false-positive pada warning startup Caelestia yang sudah stale dan query journal kosong; classifier diperketat dan diberi regression fixtures. CI repository dan Bash validation lulus pada commit `a93671071bb069019d954a10039dfc08c6893650`. Gate tetap menunggu rerun pada X280 dengan classifier terbaru. |
+| 4. Desktop Functional Validation | IN PROGRESS | Laporan X280 terbaru sebelum perubahan validator saat ini (`20261109T072936Z`) menunjukkan 54 PASS, 2 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`. Audit lanjutan menemukan false-positive pada warning startup Caelestia yang sudah stale dan query journal kosong; classifier diperketat dan diberi regression fixtures. CI sebelumnya lulus pada commit `a93671071bb069019d954a10039dfc08c6893650`; perubahan sesi ini belum memiliki hasil CI terverifikasi. Gate tetap menunggu CI dan rerun pada X280. |
 | 5. Desktop Customization | PLANNED | Desain sudah ditetapkan; menunggu gate tahap 4 terbaru. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh gate, regression, dokumentasi, dan bukti final. |
@@ -21,9 +21,9 @@
 | `scripts/k41-live-validation.sh` | Live ISO readiness | IMPLEMENTED |
 | `scripts/k41-install-basic-arch.sh` | Basic Arch installation | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | Desktop installation | IMPLEMENTED |
-| `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED; classifier regression tests and CI pass, latest classifier still needs X280 rerun |
-| `scripts/lib/k41-log-classifiers.sh` | Shared Caelestia and journal log classification | IMPLEMENTED; fixture-tested |
-| `scripts/k41-desktop-repair.sh` | Scoped automatic repair and evidence collection | IMPLEMENTED; latest X280 run exists, PAM integrity evidence enhancement needs rerun |
+| `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED; summary diperjelas, menunggu CI dan rerun X280 untuk perubahan terbaru |
+| `scripts/lib/k41-log-classifiers.sh` | Shared Caelestia and journal log classification | IMPLEMENTED; fixture diperluas untuk sentinel journal dan status mitigasi CPU, belum dijalankan setelah perubahan terbaru |
+| `scripts/k41-desktop-repair.sh` | Scoped automatic repair and evidence collection | IMPLEMENTED; grading PASS/WARN/FAIL dan diagnosis snapshot pasca-repair diperbaiki, menunggu CI dan rerun X280 |
 
 ## Prioritas saat ini
 
@@ -31,7 +31,7 @@
 
 Perubahan terakhir:
 - Caelestia classifier kini hanya mengecualikan warning scheme yang path-nya sama persis dengan file konfigurasi aktif; warning dari path lain tetap actionable. `.face` diperlakukan sebagai resource avatar opsional. BlueZ/RTKit hanya menjadi temuan jika service/package prasyaratnya tidak tersedia.
-- Journal classifier kini mengorelasikan pesan boot MDS/MMIO/VMSCAPE dengan file sysfs vulnerability yang sesuai. Status `Mitigation`/`Not affected` tidak otomatis menjadi WARN; status `Vulnerable`, `SMT vulnerable`, atau bukti sysfs yang hilang/tidak dikenal tetap actionable. Regression fixtures mencakup mitigasi penuh, SMT rentan, dan status tidak diketahui.
+- Journal classifier kini mengorelasikan pesan boot MDS/MMIO/VMSCAPE dengan file sysfs vulnerability yang sesuai. Status `Mitigation`/`Not affected` tidak otomatis menjadi WARN; status `Vulnerable`, `SMT vulnerable`, atau bukti sysfs yang hilang/tidak dikenal tetap actionable. Regression fixtures ditambahkan untuk mitigasi penuh, SMT rentan, status tidak diketahui, dan sentinel `-- No entries --`; belum dijalankan pada versi terbaru.
 - Validator menuliskan daftar WARN/FAIL/SKIP langsung di `summary.md`. Repair mengikat diagnosis ke path laporan yang dicetak oleh run validasi pasca-repair, membedakan PASS bersih dari PASS_WITH_WARNINGS, dan mengklasifikasikan PAM/HCI/CPU dari snapshot yang sama. Bukti journal yang tidak tersedia dicatat SKIP.
 - Journal classifier membedakan query berhasil tanpa error-priority entries dari kegagalan akses/query. Warning `regulatory.db` lama tidak lagi actionable bila database saat ini sudah readable. Signature kritis dan error tak dikenal tetap diprioritaskan di atas pesan informational.
 - Repair mengumpulkan `pacman -Qkk pambase`, versi paket `pambase`, dan ownership `/etc/pam.d/other` tanpa mengubah file PAM.
