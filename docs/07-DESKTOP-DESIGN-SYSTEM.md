@@ -293,3 +293,42 @@ Hal yang belum diputuskan dan harus diverifikasi:
 **Status keseluruhan: DESIGN DIRECTION APPROVED — HYPRLAND/FUZZEL FOUNDATION APPLIED; CAELESTIA GRAPHITE PROFILE APPLIED AND RUNTIME VERIFIED; REMAINING STAGE 5 COMPONENTS PENDING.**
 
 Dokumen ini menjadi acuan utama untuk keputusan desain dan review perubahan selama tahap 5. Setiap penyimpangan material harus memiliki alasan teknis dan persetujuan sebelum implementasi.
+
+## 11. Implemented Graphite profile — 2026-11-09
+
+The approved direction has now been translated into project-owned configuration files. This implementation targets the installed Caelestia Shell **v2.5.0** configuration schema and deliberately avoids internal shell-tokens.json overrides.
+
+### Caelestia components
+
+- **Bar/taskbar:** persistent compact layout; workspace shapes; active-window label; compact tray; date-enabled clock; network, Bluetooth, battery, audio and lock indicators. Decorative logo entry removed.
+- **Dashboard:** media and performance modules enabled; weather disabled until a location is intentionally configured. Resource polling interval set to 2500 ms and media interval to 2000 ms to reduce unnecessary update frequency.
+- **Launcher:** 9 visible results, fuzzy app/action matching, existing safe actions retained, dangerous actions disabled.
+- **Lock screen:** wallpaper enabled and lock notifications hidden. Fingerprint and Howdy settings remain enabled with their previous retry limits; password/PAM/authentication configuration is not modified.
+- **Sidebar:** enabled and not hover-only.
+- **Utilities:** quick toggles for Wi-Fi, Bluetooth, microphone, settings, game mode and DND; VPN toggle remains disabled.
+- **Notifications/OSD:** smaller notification preview group and short OSD duration.
+- **Appearance:** Rubik UI, CaskaydiaCove NF monospace, Material Symbols Rounded, reduced spacing/padding and animation scale, no shell transparency/blur assumptions.
+
+### Application integration
+
+- GTK3/GTK4 use Adwaita-dark preferences and Graphite color definitions.
+- Thunar retains the audited layout intent but drops the previous teal palette and entrance animation.
+- Foot uses the CaskaydiaCove NF font, Graphite background, high-contrast foreground, restrained semantic ANSI colors, and a non-blinking beam cursor.
+- Caelestia CLI is configured to generate GTK and Qt themes with the Adwaita icon theme. Hyprland, Fuzzel and Foot are managed by project-owned settings to avoid competing generators.
+- GTK icon/cursor preferences use Adwaita, which was present in the prior device audit. This is a conservative fallback, not a custom monochrome icon pack.
+
+### Wallpaper and rollback
+
+The repository includes assets/wallpapers/k41-obsidian-1920x1080.svg. The full profile script installs it into the Caelestia wallpaper directory and asks Caelestia CLI to activate it. SVG decoding by the device's exact Qt/CLI build is not yet verified; this remains an explicit runtime acceptance item.
+
+Two scripts separate the shell profile from cross-application integration:
+- scripts/k41-apply-full-desktop-profile.sh
+- scripts/k41-apply-desktop-integration.sh
+
+Both create timestamped backups before applying configuration. Their rollback commands and limitations are documented in docs/03-DESKTOP.md. Neither script installs packages, changes system services, modifies PAM, or edits internal Caelestia tokens.
+
+### Validation status
+
+Repository implementation is **IMPLEMENTED**, not yet device-verified. JSON profile syntax was parsed before commit and the chosen Caelestia option names are grounded in the upstream v2.5.0 README. No Bash syntax check, ShellCheck, GTK CSS parser, Foot config parser, shell runtime restart, wallpaper decoder check, performance measurement, or on-device visual acceptance has yet been executed for this batch.
+
+Stage 5 remains open until the user runs both scripts and confirms lock screen authentication, bar/taskbar, dashboard, launcher, sidebar, utilities, notifications, Thunar, Foot, and general desktop stability.
