@@ -30,7 +30,7 @@ log_file="$fixture_dir/runtime.log"
 scheme_file="$fixture_dir/scheme.json"
 printf '%s\n' '{}' >"$scheme_file"
 
-printf '%s\n' 'QML FileView: Read of /home/test/.local/state/caelestia/scheme.json failed: File does not exist.' >"$log_file"
+printf 'QML FileView: Read of %s failed: File does not exist.\n' "$scheme_file" >"$log_file"
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 [[ -z $findings ]] || fail "resolved stale scheme warning was classified: $findings"
 rm -f -- "$scheme_file"
@@ -51,7 +51,8 @@ findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 [[ $findings == runtime-error ]] || fail "real QML runtime error was not classified: $findings"
 
 printf '%s\n' '{}' >"$scheme_file"
-printf '%s\n' 'QML FileView: Read of /home/test/.local/state/caelestia/scheme.json failed: File does not exist.' 'QML Error: TypeError: invalid object' >"$log_file"
+printf 'QML FileView: Read of %s failed: File does not exist.\n' "$scheme_file" >"$log_file"
+printf '%s\n' 'QML Error: TypeError: invalid object' >>"$log_file"
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 [[ $findings == runtime-error ]] || fail "real QML error was hidden by stale scheme warning: $findings"
 
