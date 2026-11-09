@@ -22,6 +22,24 @@ Temuan penting dari snapshot tersebut:
 
 Report adalah snapshot saat audit, bukan jaminan kondisi perangkat saat ini.
 
+### Native K41 Plymouth early-boot theme
+
+Tema native Plymouth sekarang tersedia di `themes/plymouth/k41/`. Tema memakai background hitam, wordmark K41 di tengah, dan ring 12 titik yang dianimasikan oleh callback refresh Plymouth. Callback password mempertahankan prompt dan indikator bullet untuk fallback passphrase LUKS. Plymouth script themes memang menyediakan refresh, password-display, dan normal-display callbacks; tema dimasukkan ke initramfs/UKI saat preset dibangun ulang. Referensi: [ArchWiki Plymouth](https://wiki.archlinux.org/title/Plymouth) dan contoh API script theme upstream.
+
+Untuk mengaktifkan tema pada perangkat yang sudah menjalankan konfigurasi boot-experience sebelumnya, gunakan installer khusus ini (tidak menjalankan TPM enrollment ulang):
+
+```bash
+git pull --ff-only
+bash -n scripts/k41-install-plymouth-theme.sh
+sudo bash scripts/k41-install-plymouth-theme.sh
+bash tests/test-plymouth-k41-theme.sh
+bash tests/test-boot-experience.sh
+```
+
+Installer memeriksa hook `systemd -> plymouth -> sd-encrypt`, parameter `quiet splash`, mount `/efi`, dan preset kernel. Ia membuat backup tema/config sebelumnya, memasang tema `k41`, memilihnya sebagai default, lalu menjalankan `mkinitcpio -P` untuk membangun ulang initramfs dan UKI. Installer ini tidak mengubah keyslot, token TPM2, atau konfigurasi LUKS. Jika build gagal, jangan reboot; backup konfigurasi tema ada di `/var/lib/k41/boot-experience/theme-backups/`.
+
+**Batas:** Plymouth baru dapat menggambar setelah firmware menyerahkan display ke kernel/initramfs dan framebuffer/KMS siap. Karena itu, tema tidak dapat menggantikan logo firmware Lenovo sebelum handoff tersebut. Jika sepersekian detik output TTY masih muncul, itu perlu ditelusuri terpisah melalui urutan KMS/Plymouth dan parameter kernel; tema custom sendiri tidak membuktikan flicker sudah hilang.
+
 ### Animated K41 handoff splash (Quickshell)
 
 Setelah konfigurasi Plymouth/TPM2 yang sudah ada, jalankan dari checkout terbaru:
@@ -35,7 +53,7 @@ bash tests/test-animated-boot-splash.sh
 
 Installer menyalin konfigurasi Quickshell ke `~/.config/quickshell/k41-boot-splash/`, memasang helper lock terbaru, lalu menambahkan pemanggilan overlay pada callback Hyprland-start yang sudah ada. Overlay hitam dengan teks K41 dan spinner ringan diminta sebelum Caelestia mulai; helper menutup proses Quickshell hanya setelah status lock Caelestia terverifikasi. Installer ini tidak mengubah LUKS, TPM, UKI, mkinitcpio, atau bootloader. Untuk membatalkan, hapus blok bertanda `K41 ANIMATED BOOT SPLASH START/END` dari `~/.config/hypr/hyprland.lua` dan direktori `~/.config/quickshell/k41-boot-splash`; helper lock dapat dipulihkan dari backup autologin jika diperlukan.
 
-**Batas implementasi saat ini:** animasi Quickshell hanya mencakup handoff sejak Hyprland mulai mengambil alih display. Plymouth early-boot masih memakai tema BGRT yang telah dipilih sebelumnya, sehingga logo K41 animasi belum tampil sejak Lenovo firmware logo menghilang. Layer-shell stacking terhadap lockscreen Caelestia dan transisi tanpa flicker wajib diuji langsung di X280; jangan menganggap hasil visual telah VERIFIED sebelum reboot fisik.
+**Batas implementasi saat ini:** animasi Quickshell hanya mencakup handoff sejak Hyprland mulai mengambil alih display. Plymouth early-boot menggunakan tema K41 custom setelah installer `k41-install-plymouth-theme.sh` dijalankan dan UKI dibangun ulang. Quickshell overlay menangani tahap handoff Hyprland. Layer-shell stacking terhadap lockscreen Caelestia dan transisi tanpa flicker wajib diuji langsung di X280; jangan menganggap hasil visual telah VERIFIED sebelum reboot fisik.
 
 ### Plymouth splash + TPM2 auto-unlock
 
@@ -53,7 +71,7 @@ Script akan:
 
 1. Memastikan root aktif adalah `/dev/mapper/cryptroot`, volume LUKS2 dapat diidentifikasi, UKI berada di `/efi`, dan TPM2 terdeteksi.
 2. Membuat backup otomatis untuk file konfigurasi boot di `/var/lib/k41/boot-experience/backups/`. Script tidak meminta lokasi backup header LUKS. Backup header LUKS dilewati agar proses lebih sederhana; karena itu, jangan menghapus/mengubah keyslot passphrase dan pastikan passphrase lama tetap tersimpan aman.
-3. Memasang paket resmi `plymouth` melalui pacman, memilih tema BGRT, menambahkan hook `plymouth` setelah `systemd` dan sebelum `sd-encrypt`, lalu menambahkan `quiet splash` ke command line UKI.
+3. Memasang paket resmi `plymouth` melalui pacman, memasang dan memilih tema K41 custom, menambahkan hook `plymouth` setelah `systemd` dan sebelum `sd-encrypt`, lalu menambahkan `quiet splash` ke command line UKI.
 4. Membangun ulang UKI melalui `mkinitcpio -P`.
 5. Mengubah TTY1 autologin menjadi mode senyap (`--noissue --nohostname`), menjalankan `plymouth quit --retain-splash` sebelum Hyprland agar DRM dilepas tetapi frame terakhir splash tetap tertahan, dan menahan unit `plymouth-quit.service` sampai helper Caelestia memverifikasi status lock. Compositor kemudian menggambar lock screen sebagai tampilan pertama yang terlihat. Animasi splash dapat berhenti pada frame terakhir selama handoff.
 6. Jika Caelestia tidak dapat dikunci, helper mencoba Hyprlock. Jika tidak ada marker lock yang valid dalam 75 detik, helper root menghentikan `getty@tty1.service` dan berpindah ke TTY2; ini mencegah autologin TTY dibiarkan terbuka.
