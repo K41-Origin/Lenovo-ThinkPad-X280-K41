@@ -170,6 +170,8 @@ done
 for name in Content.qml Center.qml; do
     [[ -s $source_root/$name && ! -L $source_root/$name ]] || die "Override source missing or unsafe: $name"
 done
+password_override="$source_root/center/PasswordInput.qml"
+[[ -s $password_override && ! -L $password_override ]] || die 'PasswordInput override source missing or unsafe.'
 
 if [[ $mode == rollback ]]; then
     [[ -d $rollback_dir && ! -L $rollback_dir && -d $rollback_dir/preexisting && ! -L $rollback_dir/preexisting ]] ||
@@ -204,10 +206,40 @@ package_version="${package_line#* }"
 if [[ -f $target_root/shell.qml ]]; then
     [[ $(git -C "$target_root" rev-parse HEAD 2>/dev/null || true) == "$UPSTREAM_REVISION" ]] ||
         die 'A shell.qml already exists but is not the expected pinned upstream checkout; inspect it before replacing anything.'
+    [[ $(git -C "$target_root" remote get-url origin 2>/dev/null || true) == "$UPSTREAM_REPO" ]] ||
+        die 'The existing local shell has an unexpected upstream remote; refusing to modify it.'
+    git -C "$target_root" diff --quiet -- . ':!modules/lock/Content.qml' ':!modules/lock/Center.qml' ':!modules/lock/center/PasswordInput.qml' ||
+        die 'Other tracked source files have local changes; refusing to overwrite local work.'
+    [[ -z $(git -C "$target_root" ls-files --others --exclude-standard) ]] ||
+        die 'Untracked files exist in the local shell tree; refusing to overwrite local work.'
+    [[ -f $target_root/modules/lock/Content.qml && -f $target_root/modules/lock/Center.qml &&
+       -f $target_root/modules/lock/center/PasswordInput.qml ]] ||
+        die 'One or more managed lock override targets are missing; inspect the local shell tree.'
+    if cmp -s "$target_root/modules/lock/Content.qml" "$source_root/Content.qml" &&
+       cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" &&
+       cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override"; then
+        info 'The pinned local Caelestia source and all K41 lock overrides are already installed; no files changed.'
+        exit 0
+    fi
+    stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+    update_backup="$backup_root/$stamp-overlay-update"
+    suffix=0
+    while ! mkdir -- "$update_backup" 2>/dev/null; do
+        suffix=$((suffix + 1))
+        update_backup="$backup_root/$stamp-overlay-update-$suffix"
+    done
+    cp -a -- "$target_root/modules/lock/Content.qml" "$target_root/modules/lock/Center.qml" "$update_backup/"
+    mkdir -- "$update_backup/center"
+    cp -a -- "$target_root/modules/lock/center/PasswordInput.qml" "$update_backup/center/"
+    printf 'Upstream revision: %s\\nOverlay update backup for existing managed source tree.\\n' "$UPSTREAM_REVISION" > "$update_backup/manifest"
+    cp -- "$source_root/Content.qml" "$target_root/modules/lock/Content.qml"
+    cp -- "$source_root/Center.qml" "$target_root/modules/lock/Center.qml"
+    cp -- "$password_override" "$target_root/modules/lock/center/PasswordInput.qml"
     cmp -s "$target_root/modules/lock/Content.qml" "$source_root/Content.qml" &&
-        cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" ||
-        die 'The existing local shell has different lock overrides; refusing to overwrite local work.'
-    info 'The pinned local Caelestia source and K41 lock overrides are already installed; no files changed.'
+        cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" &&
+        cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override" ||
+        die 'Lock override deployment verification failed; restore from the reported overlay backup.'
+    info "Updated K41 lock overrides in the pinned local source tree. Backup: $update_backup"
     exit 0
 fi
 
@@ -268,7 +300,7 @@ git -C "$staging" fetch --quiet --depth 1 origin "$UPSTREAM_REVISION"
 git -C "$staging" checkout --quiet --detach FETCH_HEAD
 [[ $(git -C "$staging" rev-parse HEAD) == "$UPSTREAM_REVISION" ]] ||
     die 'Fetched upstream revision does not match the audited revision.'
-for required in shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml; do
+for required in shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml; do
     [[ -s $staging/$required && ! -L $staging/$required ]] || die "Upstream source is missing required file: $required"
 done
 
