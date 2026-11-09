@@ -22,7 +22,7 @@ chmod_line="$(grep -n '^chmod 0600 "\$run_dir"/\*.txt "\$log" "\$checks" "\$diag
 (( diag_line < chmod_line )) || fail 'diagnostic report chmod occurs before report files are initialized'
 pass 'validator syntax, read-only contract, and diagnostic initialization order'
 
-for token in 'umask 077' 'scheme set -n caelestia' 'bluez-utils' 'wireless-regdb' 'pacman -S --needed --noconfirm' 'systemctl enable --now bluetooth.service' 'pacman -Qkk pambase' 'pambase-integrity.txt' 'k41-desktop-validation.sh' 'actions.tsv' 'post-repair-state.txt'; do
+for token in 'umask 077' 'scheme set -n caelestia' 'bluez-utils' 'wireless-regdb' 'rtkit' 'pacman -S --needed --noconfirm' 'systemctl enable --now bluetooth.service' 'pacman -Qkk pambase' 'pambase-integrity.txt' 'k41-desktop-validation.sh' 'actions.tsv' 'post-repair-state.txt'; do
   grep -Fq -- "$token" "$REPAIR" || fail "repair script missing expected scoped behavior: $token"
 done
 if grep -Eq -- '--apply|--no-validate|read -r -p|systemctl (disable|stop)|pacman -Syu|mkfs\.|cryptsetup luksFormat|wipefs|parted|tee /etc/pam.d|> ?/etc/pam.d' "$REPAIR"; then
