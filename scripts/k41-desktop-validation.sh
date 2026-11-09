@@ -492,7 +492,24 @@ diagnostic 'CPU vulnerability sysfs detail' 'cpu-vulnerability-detail.txt' bash 
   done
 '
 diagnostic 'Bluetooth controller summary' 'bluetooth-controller.txt' bash -c 'timeout 12 bluetoothctl show | sed -E "s/Controller [0-9A-Fa-f:]{17}/Controller [REDACTED]/"'
-diagnostic 'Bluetooth management controller information' 'bluetooth-btmgmt-info.txt' timeout 12 btmgmt info
+diagnostic 'Bluetooth management controller information' 'bluetooth-btmgmt-info.txt' bash -c 'timeout 12 btmgmt info 2>&1 | sed -E "s/([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}/[REDACTED]/g"'
+diagnostic 'Bluetooth rfkill state' 'bluetooth-rfkill.txt' rfkill list bluetooth
+diagnostic 'BlueZ adapter D-Bus state' 'bluetooth-dbus-properties.txt' bash -c '
+  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered 2>&1 || true
+  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Pairable 2>&1 || true
+  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 PairableTimeout 2>&1 || true
+  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Discoverable 2>&1 || true
+  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 DiscoverableTimeout 2>&1 || true
+  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Discovering 2>&1 || true
+'
+diagnostic 'BlueZ adapter configuration overrides' 'bluetooth-config.txt' bash -c '
+  for f in /etc/bluetooth/main.conf /etc/bluetooth/main.conf.d/*.conf; do
+    [[ -r $f ]] || continue
+    printf "\\n===== %s =====\\n" "$f"
+    awk "/^[[:space:]]*\\[/ {print; next} /^[[:space:]]*(DiscoverableTimeout|PairableTimeout|AutoEnable|ControllerMode|Privacy|FastConnectable|Experimental|KernelExperimental)[[:space:]]*=/ {print}" "$f"
+  done
+'
+diagnostic 'Bluetooth daemon journal' 'bluetooth-service-journal.txt' bash -c 'journalctl -u bluetooth.service -b --no-pager -n 300 2>&1 | sed -E "s/([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}/[REDACTED]/g"'
 diagnostic 'Bluetooth HCI sysfs and udev identity' 'bluetooth-hci-identity.txt' bash -c '
   for hci in /sys/class/bluetooth/hci*; do
     [[ -e $hci ]] || continue
@@ -517,6 +534,24 @@ diagnostic 'Bluetooth kernel boot messages' 'bluetooth-kernel-log.txt' bash -c '
   journalctl -k -b --no-pager 2>&1 | grep -Ei "Bluetooth:|btusb|btintel|ibt-|hci[0-9]|firmware.*(bluetooth|intel)" || true
 '
 diagnostic 'Bluetooth package integrity' 'bluetooth-package-integrity.txt' pacman -Qkk bluez bluez-utils linux-firmware-intel
+
+# Pairing readiness is a configuration snapshot, not proof of a successful
+# pairing transaction. Discoverable may be intentionally off outside pairing.
+if [[ -s $run_dir/bluetooth-controller.txt ]]; then
+  if grep -Eiq '^Pairable:[[:space:]]*no' "$run_dir/bluetooth-controller.txt"; then
+    record WARN 'Bluetooth pairing readiness' 'BlueZ reports Pairable=no; inspect D-Bus properties and configuration evidence; no settings changed'
+  elif grep -Eiq '^Pairable:[[:space:]]*yes' "$run_dir/bluetooth-controller.txt"; then
+    if grep -Eiq '^Discoverable:[[:space:]]*no' "$run_dir/bluetooth-controller.txt"; then
+      record WARN 'Bluetooth discovery readiness' 'Pairable=yes but Discoverable=no; discovery may be intentionally disabled; inspect settings before changing them'
+    else
+      record PASS 'Bluetooth pairing readiness' 'BlueZ reports Pairable=yes; real pairing still requires a manual test'
+    fi
+  else
+    record WARN 'Bluetooth pairing readiness' 'Could not determine Pairable state from bluetoothctl output'
+  fi
+else
+  record SKIP 'Bluetooth pairing readiness' 'No controller summary available'
+fi
 diagnostic 'PAM base and Linux-PAM package integrity' 'pam-package-integrity.txt' pacman -Qkk pambase pam
 diagnostic 'PAM fallback policy metadata and content' 'pam-other-policy.txt' bash -c '
   if [[ -e /etc/pam.d/other ]]; then
