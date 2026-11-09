@@ -9,6 +9,7 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 [[ -n ${XDG_RUNTIME_DIR:-} && -d $XDG_RUNTIME_DIR ]] || die 'XDG_RUNTIME_DIR is unset or invalid.'
 command -v caelestia >/dev/null 2>&1 || die 'caelestia command was not found.'
 command -v tee >/dev/null 2>&1 || die 'tee command was not found.'
+command -v grep >/dev/null 2>&1 || die 'grep command was not found.'
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
@@ -49,8 +50,19 @@ caelestia shell -r -d 2>&1 | tee -a "$report"
 command_status=${PIPESTATUS[0]}
 set -e
 
+expected_shell="$HOME/.config/quickshell/caelestia/shell.qml"
+if grep -Fq "$expected_shell" "$report"; then
+    config_path_status=PASS
+elif grep -Fq '/etc/xdg/quickshell/caelestia/shell.qml' "$report"; then
+    config_path_status=FAIL_SYSTEM_FALLBACK
+else
+    config_path_status=UNKNOWN
+fi
+
 {
     printf '\n========== SUMMARY ==========\n'
+    printf 'Expected user shell: %s\n' "$expected_shell"
+    printf 'Selected config path check: %s\n' "$config_path_status"
     printf 'Restart command exit code: %s\n' "$command_status"
     if (( command_status == 0 )); then
         printf 'Command result: EXITED SUCCESSFULLY (runtime behavior still requires visual/functional verification)\n'
@@ -61,5 +73,12 @@ set -e
 } | tee -a "$report"
 
 printf '\nReport created: %s\n' "$report"
+if [[ $config_path_status == FAIL_SYSTEM_FALLBACK ]]; then
+    printf 'ERROR: Caelestia still selected the package system config; do not assume K41 overrides are active.\n' >&2
+    exit 3
+fi
+if [[ $config_path_status == UNKNOWN ]]; then
+    printf 'WARNING: selected config path was not present in command output; active source remains unverified.\n' >&2
+fi
 printf 'Review it for personal information, then commit and push it for analysis.\n'
 exit "$command_status"
