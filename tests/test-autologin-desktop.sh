@@ -29,31 +29,40 @@ if grep -Eq 'systemctl (enable|start).*?(gdm|sddm|ly|greetd)|default.target' "$I
   fail 'installer must not enable a display manager or change boot target'
 fi
 grep -Fq 'caelestia shell -s' "$HELPER" || fail 'lock helper does not wait for Caelestia IPC'
-grep -Fq 'caelestia shell lock lock' "$HELPER" || fail 'lock helper does not call Caelestia lock IPC'
+grep -Fq 'caelestia shell lock lock' "$HELPER" || fail 'lock helper does not invoke Caelestia lock IPC'
+grep -Fq 'caelestia shell lock isLocked' "$HELPER" || fail 'lock helper does not verify lock state'
 grep -Fq 'exec hyprlock' "$HELPER" || fail 'lock helper lacks a fail-safe Hyprlock fallback'
 pass 'autologin installer and lock helper pass syntax and static safety contracts'
 
-# Exercise the helper using a deterministic Caelestia CLI mock.
 fixture="$(mktemp -d)"
 trap 'rm -rf "$fixture"' EXIT
 mkdir -p "$fixture/bin"
 cat >"$fixture/bin/caelestia" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >>"$K41_MOCK_LOG"
-if [[ $* == 'shell -s' ]]; then
-  printf 'target lock\n  function lock(): void\n'
-  exit 0
-fi
-[[ $* == 'shell lock lock' ]]
+case "$*" in
+  'shell -s')
+    printf 'target lock\n  function lock(): void\n  function isLocked(): bool\n'
+    ;;
+  'shell lock lock')
+    : >"$K41_LOCKED_STATE"
+    ;;
+  'shell lock isLocked')
+    [[ -f $K41_LOCKED_STATE ]] && printf 'true\n' || printf 'false\n'
+    ;;
+  *) exit 1 ;;
+esac
 MOCK
 chmod 0755 "$fixture/bin/caelestia"
 export K41_MOCK_LOG="$fixture/calls.log"
-PATH="$fixture/bin:$PATH" K41_LOCK_RETRIES=1 K41_LOCK_INTERVAL=0 bash "$HELPER" || fail 'mock Caelestia lock call failed'
+export K41_LOCKED_STATE="$fixture/locked"
+PATH="$fixture/bin:$PATH" K41_LOCK_RETRIES=1 K41_LOCK_INTERVAL=0 K41_LOCK_VERIFY_RETRIES=1 bash "$HELPER" || fail 'verified Caelestia lock flow failed'
 grep -Fxq 'shell -s' "$K41_MOCK_LOG" || fail 'helper did not inspect Caelestia IPC'
 grep -Fxq 'shell lock lock' "$K41_MOCK_LOG" || fail 'helper did not invoke lock IPC'
-pass 'Caelestia lock helper passes mocked IPC readiness and lock invocation'
+grep -Fxq 'shell lock isLocked' "$K41_MOCK_LOG" || fail 'helper did not verify the lock state'
+pass 'Caelestia lock helper passes mocked IPC readiness, lock request, and state verification'
 
-# If Caelestia IPC never exposes the lock target, the helper must fail closed.
+# If Caelestia never exposes the lock target, fail closed through Hyprlock.
 cat >"$fixture/bin/caelestia" <<'MOCK'
 #!/usr/bin/env bash
 [[ $* == 'shell -s' ]] && printf 'target notifs\n'
@@ -65,7 +74,7 @@ printf 'fallback\n' >"$K41_FALLBACK_LOG"
 MOCK
 chmod 0755 "$fixture/bin/caelestia" "$fixture/bin/hyprlock"
 export K41_FALLBACK_LOG="$fixture/fallback.log"
-PATH="$fixture/bin:$PATH" K41_LOCK_RETRIES=1 K41_LOCK_INTERVAL=0 bash "$HELPER" || fail 'Hyprlock fallback did not run'
+PATH="$fixture/bin:$PATH" K41_LOCK_RETRIES=1 K41_LOCK_INTERVAL=0 K41_LOCK_VERIFY_RETRIES=1 bash "$HELPER" || fail 'Hyprlock fallback did not run'
 grep -Fxq 'fallback' "$K41_FALLBACK_LOG" || fail 'helper did not invoke Hyprlock fallback'
 pass 'Caelestia lock helper passes fail-safe Hyprlock fallback fixture'
 printf '%s\n' 'Autologin desktop tests passed.'
