@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 
-// K41 handoff splash: intentionally mirrors themes/plymouth/k41/k41.script.
+// K41 handoff splash: visual counterpart of themes/plymouth/k41/k41.script.
 PanelWindow {
     id: root
 
@@ -19,53 +19,54 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
     color: "#000000"
 
-    readonly property int dotCount: 12
-    readonly property real ringRadius: 24
+    readonly property int rectangleCount: 12
+    readonly property real ringRadius: 9
     property int phase: 0
 
     Timer {
-        interval: 90
+        interval: 100
         running: true
         repeat: true
-        onTriggered: root.phase = (root.phase + 1) % root.dotCount
+        onTriggered: root.phase = (root.phase + 1) % root.rectangleCount
     }
 
     Text {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height / 2 - 58
+        y: parent.height / 2 - 30
         text: "K41"
         color: "#ffffff"
-        font.family: "Sans"
-        font.pixelSize: 42
-        font.weight: Font.DemiBold
-        font.letterSpacing: 5
+        font.pixelSize: 18
+        font.weight: Font.Bold
+        font.letterSpacing: 3
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
     }
 
     Item {
         anchors.horizontalCenter: parent.horizontalCenter
-        y: parent.height / 2 + 2
-        width: 58
-        height: 58
+        y: parent.height / 2 + 10
+        width: 36
+        height: 36
 
         Repeater {
-            model: root.dotCount
+            model: root.rectangleCount
 
             delegate: Rectangle {
                 required property int index
 
-                width: 5
-                height: 5
-                radius: width / 2
-                color: "#e0e0e0"
+                width: 4
+                height: 10
+                color: "transparent"
+                border.width: 1
+                border.color: "#ffffff"
 
-                readonly property int distance:
-                    (index - root.phase + root.dotCount) % root.dotCount
-
-                opacity: 0.22 + ((root.dotCount - distance) / root.dotCount) * 0.78
                 x: parent.width / 2 - width / 2
-                   + Math.cos(index * 2 * Math.PI / root.dotCount) * root.ringRadius
+                   + Math.cos(index * 2 * Math.PI / root.rectangleCount) * root.ringRadius
                 y: parent.height / 2 - height / 2
-                   + Math.sin(index * 2 * Math.PI / root.dotCount) * root.ringRadius
+                   + Math.sin(index * 2 * Math.PI / root.rectangleCount) * root.ringRadius
+
+                rotation: index * (360 / root.rectangleCount)
+                opacity: index === root.phase ? 1.0 : 0.18
             }
         }
     }
