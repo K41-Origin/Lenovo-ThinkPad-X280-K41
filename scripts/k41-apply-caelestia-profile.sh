@@ -89,17 +89,23 @@ exec > >(tee -a "$log_file") 2>&1
 
 status="FAILED"
 backup_dir=""
+restart_status="NOT_RUN"
+shell_log_status="NOT_RUN"
+warning_count=0
 write_summary() {
     local rc=$1
-    if (( rc == 0 )); then status="SUCCESS"; else status="FAILED (exit $rc)"; fi
+    if (( rc != 0 )); then status="FAILED (exit $rc)"; fi
     {
-        printf 'K41 Caelestia Customization\n'
-        printf 'Timestamp UTC: %s\n' "$timestamp"
-        printf 'Status: %s\n' "$status"
-        printf 'Scheme: caelestia / dark / monochrome\n'
-        printf 'Backup: %s\n' "${backup_dir:-not-created}"
-        printf 'Report: reports/caelestia-customization/%s/\n' "$(basename -- "$report_dir")"
-        printf 'Mode: user configuration only; no packages or system services changed.\n'
+        printf 'K41 Caelestia Customization\\n'
+        printf 'Timestamp UTC: %s\\n' "$timestamp"
+        printf 'Status: %s\\n' "$status"
+        printf 'Scheme: caelestia / dark / monochrome\\n'
+        printf 'Shell restart: %s\\n' "$restart_status"
+        printf 'Shell runtime log: %s\\n' "$shell_log_status"
+        printf 'WARN/ERROR log lines: %s\\n' "$warning_count"
+        printf 'Backup: %s\\n' "${backup_dir:-not-created}"
+        printf 'Report: reports/caelestia-customization/%s/\\n' "$(basename -- "$report_dir")"
+        printf 'Mode: user configuration only; no packages or system services changed.\\n'
     } >"$summary_file"
 }
 on_exit() {
@@ -109,6 +115,19 @@ on_exit() {
         info 'Failure detected after backup; restoring original Caelestia files.'
         cp -- "$backup_dir/shell.json" "$shell_file" || true
         cp -- "$backup_dir/scheme.json" "$scheme_file" || true
+    fi
+    if [[ -f $log_file ]]; then
+        warning_count="$(grep -Eic '(^|[[:space:]])(WARN|WARNING|ERROR|FATAL)(:|[[:space:]])' "$log_file" || true)"
+        warning_count="${warning_count:-0}"
+    fi
+    if (( rc == 0 )); then
+        if [[ $restart_status == FAILED* || $shell_log_status == FAILED* || $warning_count -gt 0 ]]; then
+            status="SUCCESS_WITH_WARNINGS"
+        elif [[ $restart_status == "NOT_RUN" ]]; then
+            status="SUCCESS_RESTART_NOT_RUN"
+        else
+            status="SUCCESS"
+        fi
     fi
     write_summary "$rc"
     info "Report: reports/caelestia-customization/$(basename -- "$report_dir")/"
