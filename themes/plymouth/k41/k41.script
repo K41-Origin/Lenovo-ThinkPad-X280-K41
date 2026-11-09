@@ -1,46 +1,58 @@
-# Minimal K41 theme: black background, centered wordmark, lightweight rotating dot ring.
+# Minimal K41 theme: black background, compact wordmark, and animated rectangle ring.
 Window.SetBackgroundTopColor (0.0, 0.0, 0.0);
 Window.SetBackgroundBottomColor (0.0, 0.0, 0.0);
 
 global.status = "normal";
+global.count = 12;
 global.phase = 0;
-global.dot_count = 12;
-global.logo_image = Image.Text("K41", 1.0, 1.0, 1.0);
-global.dot_image = Image.Text("●", 0.88, 0.88, 0.88);
-global.password_image = NULL;
-global.password_sprite = NULL;
-global.bullet_sprites = NULL;
-
+global.radius = 9;
 global.center_x = Window.GetX() + Window.GetWidth() / 2;
 global.center_y = Window.GetY() + Window.GetHeight() / 2;
 
+global.logo_image = Image.Text("K41", 0.8, 0.8, 0.8);
 global.logo_sprite = Sprite(global.logo_image);
-global.logo_sprite.SetPosition(global.center_x - global.logo_image.GetWidth() / 2,
-                               global.center_y - 42, 10);
+global.logo_sprite.SetPosition(
+    global.center_x - global.logo_image.GetWidth() / 2,
+    global.center_y - 17 - global.logo_image.GetHeight(),
+    10
+);
 
-global.dots = NULL;
-global.radius = 24;
-for (i = 0; i < global.dot_count; i++)
+global.rectangle_image = Image.Text("▯", 0.9, 0.9, 0.9);
+global.rectangles = [];
+
+for (i = 0; i < global.count; i++)
 {
-    global.dots[i].sprite = Sprite(global.dot_image);
-    angle = (i * 2 * 3.141592653589793) / global.dot_count;
-    x = global.center_x + Math.Cos(angle) * global.radius - global.dot_image.GetWidth() / 2;
-    y = global.center_y + 20 + Math.Sin(angle) * global.radius - global.dot_image.GetHeight() / 2;
-    global.dots[i].sprite.SetPosition(x, y, 10);
-    global.dots[i].sprite.SetOpacity(0.25);
+    global.rectangles[i] = Sprite(global.rectangle_image);
+
+    angle = (i * 2 * 3.141592653589793) / global.count;
+
+    x = global.center_x
+        + Math.Cos(angle) * global.radius
+        - global.rectangle_image.GetWidth() / 2;
+
+    y = global.center_y + 10
+        + Math.Sin(angle) * global.radius
+        - global.rectangle_image.GetHeight() / 2;
+
+    global.rectangles[i].SetPosition(x, y, 10);
+    global.rectangles[i].SetOpacity(0.18);
 }
+
+global.password_image = NULL;
+global.password_sprite = NULL;
+global.bullet_sprites = NULL;
 
 fun refresh_callback ()
 {
     if (global.status == "normal")
     {
-        for (i = 0; i < global.dot_count; i++)
+        for (i = 0; i < global.count; i++)
         {
-            distance = (i - global.phase + global.dot_count) % global.dot_count;
-            opacity = 0.22 + ((global.dot_count - distance) / global.dot_count) * 0.78;
-            global.dots[i].sprite.SetOpacity(opacity);
+            opacity = (i == global.phase) ? 1.0 : 0.18;
+            global.rectangles[i].SetOpacity(opacity);
         }
-        global.phase = (global.phase + 1) % global.dot_count;
+
+        global.phase = (global.phase + 1) % global.count;
     }
 }
 Plymouth.SetRefreshFunction(refresh_callback);
@@ -61,9 +73,9 @@ fun display_password_callback (prompt, bullets)
     {
         if (!global.bullet_sprites[i])
         {
-            global.bullet_sprites[i] = Sprite(global.dot_image);
+            global.bullet_sprites[i] = Sprite(global.rectangle_image);
             global.bullet_sprites[i].SetPosition(global.center_x +
-                (i - bullets / 2) * (global.dot_image.GetWidth() + 5),
+                (i - bullets / 2) * (global.rectangle_image.GetWidth() + 5),
                 global.center_y + 108, 101);
         }
         if (i < bullets)
@@ -72,6 +84,7 @@ fun display_password_callback (prompt, bullets)
             global.bullet_sprites[i].SetOpacity(0);
     }
 }
+
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
 
 fun display_normal_callback ()
@@ -82,6 +95,7 @@ fun display_normal_callback ()
     for (i = 0; global.bullet_sprites[i]; i++)
         global.bullet_sprites[i].SetOpacity(0);
 }
+
 Plymouth.SetDisplayNormalFunction(display_normal_callback);
 
 fun message_callback (message)
