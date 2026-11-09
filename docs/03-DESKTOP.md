@@ -62,6 +62,8 @@ PASS atau PASS_WITH_WARNINGS hanya mencerminkan pemeriksaan otomatis yang tersed
 
 ## Tahap 5 — Desktop Environment Customization (DESIGN APPROVED)
 
+Status terkini: workstream 1 (boot experience) ditutup berdasarkan konfirmasi pengguna; workstream 2 (lock screen) masih **IN PROGRESS**. Override dan installer lock screen tersedia di repository, tetapi runtime QML, lock/unlock, wake, dan penerimaan visual belum diverifikasi pada X280. **Guest Mode BELUM DIIMPLEMENTASIKAN** dan ditunda sampai custom lock screen diterima pengguna. Lihat [indeks workstream](08-STAGE-5/README.md), [panduan lock screen](08-STAGE-5/02-LOCK-SCREEN.md), dan [status](06-STATUS.md).
+
 Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. Spesifikasi dan design tokens tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md).
 
 Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu mengambil atau mengunggah screenshot; penilaian visual dilakukan langsung pada display ThinkPad X280 oleh pengguna.
@@ -70,7 +72,7 @@ Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu 
 
 Pekerjaan customization dibagi agar tiap kelompok dapat diaudit, diterapkan, dan diterima sebelum melanjutkan ke kelompok berikutnya:
 
-1. **Boot experience — power-on, reboot, poweroff.** Samakan identitas visual firmware-to-userspace sejauh platform mendukung, Plymouth, transisi session, dan handoff menuju lock screen. Ini adalah pekerjaan yang sedang berlangsung; masalah visual leakage Hyprland masih terbuka.
+1. **Boot experience — power-on, reboot, poweroff.** Samakan identitas visual firmware-to-userspace sejauh platform mendukung, Plymouth, transisi session, dan handoff menuju lock screen. Workstream 1 dinyatakan selesai oleh pengguna; isu visual leakage yang tercatat dalam histori harus dibaca bersama status terbaru di [06 — Status](06-STATUS.md), bukan dianggap sebagai pekerjaan aktif tanpa bukti baru.
 2. **Lock screen.** Wallpaper, jam/tanggal, layout, prompt autentikasi, indikator, notifikasi saat terkunci, serta jalur unlock/recovery. Jangan mengubah PAM, autentikasi, atau keyslot sebagai pekerjaan kosmetik.
 3. **Dashboard.** Hierarki informasi, layout, media, resource/system information, kalender, dan perilaku buka/tutup.
 4. **Taskbar/panel.** Workspace, active window, tray, clock/date, status indikator, ukuran, posisi, dan perilaku interaksi.
