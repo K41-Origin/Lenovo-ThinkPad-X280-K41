@@ -53,5 +53,18 @@ findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 printf '%s\\n' 'QML FileView: Read of /home/test/.local/state/caelestia/scheme.json failed: File does not exist.' 'QML Error: TypeError: invalid object' >"$log_file"
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 [[ $findings == runtime-error ]] || fail "real QML error was hidden by stale scheme warning: $findings"
-pass 'Caelestia log classifier regression fixtures (stale scheme, optional avatar, missing resource, and real QML errors)'
+
+printf '%s\n' 'org.bluez: D-Bus ObjectManager warning' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file" 1 1)"
+[[ -z $findings ]] || fail "active Bluetooth service warning was classified: $findings"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file" 0 1)"
+[[ $findings == bluez-service-inactive ]] || fail "inactive Bluetooth service was not classified: $findings"
+
+printf '%s\n' 'RTKit: realtime scheduling unavailable' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file" 1 1)"
+[[ -z $findings ]] || fail "installed RTKit package warning was classified: $findings"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file" 1 0)"
+[[ $findings == rtkit-package-missing ]] || fail "missing RTKit package was not classified: $findings"
+
+pass 'Caelestia log classifier regression fixtures (stale scheme, optional avatar, missing resource, real QML errors, BlueZ, and RTKit)'
 
