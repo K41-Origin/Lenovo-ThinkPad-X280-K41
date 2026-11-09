@@ -2,7 +2,7 @@
 # Conservative Caelestia log classifier. Prints one finding per line.
 # Arguments: LOG_FILE SCHEME_FILE
 k41_classify_caelestia_log() {
-  local log_file=$1 scheme_file=$2
+  local log_file=$1 scheme_file=$2 bluetooth_active=${3:-0} rtkit_installed=${4:-0}
   local filtered
   filtered="$(mktemp)" || return 2
 
@@ -22,6 +22,12 @@ k41_classify_caelestia_log() {
   fi
   if grep -Eiq 'Source file does not exist' "$filtered"; then
     printf '%s\n' 'missing-resource'
+  fi
+  if [[ $bluetooth_active != 1 ]] && grep -Eiq 'org\\.bluez' "$filtered"; then
+    printf '%s\n' 'bluez-service-inactive'
+  fi
+  if [[ $rtkit_installed != 1 ]] && grep -Eiq 'RTKit' "$filtered"; then
+    printf '%s\n' 'rtkit-package-missing'
   fi
   rm -f -- "$filtered"
 }
