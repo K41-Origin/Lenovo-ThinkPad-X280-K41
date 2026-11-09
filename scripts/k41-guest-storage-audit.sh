@@ -327,7 +327,7 @@ if [[ -d /usr/share/applications ]]; then
 fi
 if have flatpak; then
   printf '\nFlatpak applications (IDs/branch/installation only):\n' >>"$report"
-  flatpak list --app --columns=application,branch,installation 2>&1 >>"$report" || true
+  flatpak list --app --columns=application,branch,installation >>"$report" 2>&1 || true
 fi
 
 section 'System and active-user default browser associations (selected MIME keys only)'
