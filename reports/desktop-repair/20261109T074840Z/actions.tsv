@@ -1,0 +1,15 @@
+STATUS	ACTION	DETAIL
+PASS	Caelestia scheme	existing scheme preserved
+PASS	Bluetooth packages	bluez and bluez-utils already installed
+PASS	RealtimeKit	rtkit package installed; D-Bus activation remains on demand
+PASS	Wireless regulatory database	regulatory.db present and readable
+PASS	Bluetooth service	already active
+PASS	PAM fallback policy	file readable, owned by pambase, and package integrity check passed
+SKIP	Caelestia profile image	optional; no placeholder generated
+FAIL	Desktop validation	validator produced no complete summary report
+SKIP	Kernel warning classification	post-repair kernel journal snapshot unavailable
+SKIP	Wi-Fi multicast RX warning	post-repair system journal snapshot unavailable
+SKIP	PAM runtime warning	post-repair user journal snapshot unavailable; runtime behavior not assessed
+SKIP	Qt Wayland text-input warnings	no safe configuration change supported by current evidence
+SKIP	PipeWire libcamera plugin	optional camera integration; no package added
+SKIP	lsusb utility	diagnostic-only utility, not a desktop runtime dependency
