@@ -1,0 +1,13 @@
+INFO: K41 full desktop profile started (UTC 20261109T095832Z)
+INFO: This profile changes Caelestia appearance, bar, dashboard, launcher, lock screen, sidebar, notifications, utilities and wallpaper.
+INFO: It preserves existing authentication settings and does not edit shell-tokens.json, Hyprland binds, packages or system services.
+Apply the full K41 Obsidian profile? [y/N] INFO: Private backup created: .local/state/k41/desktop-profile/backups/20261109T095832Z
+PASS: merged Caelestia profile and required component settings verified.
+Traceback (most recent call last):
+  File "<stdin>", line 3, in <module>
+  File "/usr/lib/python3.14/base64.py", line 85, in b64decode
+    return binascii.a2b_base64(s, strict_mode=validate)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+binascii.Error: Only base64 data is allowed
+INFO: Failure before wallpaper activation; restoring original shell and scheme files.
+INFO: Report: reports/desktop-profile/20261109T095832Z/

@@ -1,0 +1,11 @@
+K41 Full Desktop Profile
+Timestamp UTC: 20261109T095832Z
+Status: FAILED (exit 1)
+Scheme: caelestia / dark / monochrome
+Wallpaper: /home/kai/Pictures/Wallpapers/k41-obsidian-1280x720.jpg
+Wallpaper applied: 0
+Shell restart: NOT_RUN
+Runtime log: NOT_RUN
+Backup: /home/kai/.local/state/k41/desktop-profile/backups/20261109T095832Z
+Report: reports/desktop-profile/20261109T095832Z/
+Rollback restores shell.json and scheme.json; wallpaper selection is manual.

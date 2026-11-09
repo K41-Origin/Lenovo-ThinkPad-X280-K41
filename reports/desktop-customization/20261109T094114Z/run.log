@@ -1,0 +1,5 @@
+INFO: K41 desktop customization started (UTC 20261109T094114Z)
+INFO: Report directory: reports/desktop-customization/20261109T094114Z
+INFO: Detected launcher declaration value: fuzzel
+ERROR: K41 appearance overlay already exists. Do not apply twice; inspect the active config or use its backup to roll back.
+INFO: Run report: reports/desktop-customization/20261109T094114Z/
