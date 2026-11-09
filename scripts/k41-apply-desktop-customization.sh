@@ -15,9 +15,10 @@ fuzzel_target="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel/fuzzel.ini"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}/k41/desktop-customization/backups"
 report_root="$repo_root/reports/desktop-customization"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+mkdir -p -- "$report_root"
 report_dir="$report_root/$timestamp"
 suffix=0
-while ! mkdir -p -- "$report_dir" 2>/dev/null; do
+while ! mkdir -- "$report_dir" 2>/dev/null; do
     suffix=$((suffix + 1))
     report_dir="$report_root/$timestamp-$suffix"
 done
