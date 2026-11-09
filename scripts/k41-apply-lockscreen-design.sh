@@ -62,7 +62,7 @@ if [[ $EUID -eq 0 ]]; then
            $(stat -c %u "$target_config/modules/lock/Content.qml") == "$target_uid" &&
            $(stat -c %u "$target_config/modules/lock/Center.qml") == "$target_uid" ]] ||
             die "Legacy lock override files have unexpected type/owner: $target_config/modules/lock"
-        mapfile -t legacy_entries < <(find "$target_config" -mindepth 1 -printf '%P\\n' | LC_ALL=C sort)
+        mapfile -t legacy_entries < <(find "$target_config" -mindepth 1 -printf '%P\n' | LC_ALL=C sort)
         expected_entries=(
             modules
             modules/lock
