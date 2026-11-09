@@ -5,6 +5,7 @@ set -Eeuo pipefail
 die() { printf 'K41 Caelestia lock: %s\n' "$*" >&2; exit 1; }
 command -v caelestia >/dev/null 2>&1 || die 'caelestia CLI is unavailable.'
 command -v sleep >/dev/null 2>&1 || die 'sleep is unavailable.'
+command -v grep >/dev/null 2>&1 || die 'grep is unavailable.'
 
 attempts=${K41_LOCK_RETRIES:-45}
 interval=${K41_LOCK_INTERVAL:-1}
