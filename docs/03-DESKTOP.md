@@ -162,3 +162,60 @@ Hasil visual tetap dinilai langsung oleh pengguna pada perangkat. Perbaikan diag
 ## Tahap 6 — Optimization
 
 Optimasi perangkat dan sistem dilakukan setelah tampilan diterima. Rencana dan batasnya ada di [05 — Operations](05-OPERATIONS.md). Jangan melakukan tuning agresif sebelum baseline terukur.
+
+## Tahap 5 — Full Graphite implementation (IMPLEMENTED IN REPOSITORY; DEVICE APPLY PENDING)
+
+Batch pertama Caelestia sebelumnya hanya mengganti font dan scheme; itu **bukan** redesign komponen. Implementasi repository berikut memperluas profil ke seluruh konfigurasi komponen Caelestia yang tersedia pada Shell **v2.5.0** dan menambahkan integrasi aplikasi desktop.
+
+### Cakupan profil Caelestia
+
+config/desktop-customization/caelestia-shell.json sekarang mengatur:
+- Appearance scale, spacing, padding, rounding, typography, dan animasi yang lebih hemat.
+- Bar/taskbar: urutan elemen, workspace indicator, active-window compact, tray, clock/date, status icons; logo dekoratif dihilangkan.
+- Dashboard: media dan resource monitor; interval polling diperlonggar untuk mengurangi aktivitas periodik.
+- Launcher: jumlah hasil lebih banyak dan fuzzy search untuk aplikasi/actions; dangerous actions tetap disabled.
+- Lock screen: menggunakan wallpaper Obsidian, menyembunyikan notifikasi saat terkunci. Pengaturan autentikasi fingerprint/Howdy yang sebelumnya aktif dipertahankan; tidak ada perubahan PAM.
+- Sidebar, notification grouping, OSD, utilities quick toggles, dan paths wallpaper.
+- Scheme caelestia/dark/monochrome; smart dynamic scheme dimatikan agar wallpaper tidak mengubah identitas monochrome.
+
+### Wallpaper
+
+Aset vector assets/wallpapers/k41-obsidian-1920x1080.svg ditambahkan. Script full profile menyalinnya ke ~/Pictures/Wallpapers/ dan menggunakan command wallpaper resmi caelestia wallpaper -f. Dukungan format SVG pada build lokal tetap perlu dikonfirmasi saat uji perangkat; bila CLI menolak SVG, script akan gagal pada tahap aktivasi wallpaper dan mengembalikan file konfigurasi serta scheme dari backup.
+
+### GTK, Thunar, Foot, Qt, icon dan cursor
+
+Konfigurasi proyek:
+- gtk-settings.ini: Adwaita-dark, icon/cursor Adwaita, Rubik, prefer-dark.
+- gtk3.css dan gtk4.css: token Graphite untuk surface, text, selection, dan sidebar.
+- thunar.css: mempertahankan struktur layout Thunar yang diaudit, menghapus teal dan animasi entrance, serta menjaga focus indication.
+- foot.ini: CaskaydiaCove NF, palette Graphite, cursor beam non-blinking, dan padding terminal.
+- caelestia-cli.json: meminta generator upstream mengaktifkan tema GTK dan Qt serta icon theme Adwaita. Tema Hyprland, Fuzzel, dan Foot tidak didelegasikan ke generator agar tidak bertabrakan dengan konfigurasi proyek yang dikelola terpisah.
+
+Script integrasi:
+scripts/k41-apply-desktop-integration.sh
+
+### Urutan penerapan pada laptop
+
+Setelah commit tersedia di branch lokal, dari root repository jalankan sebagai user biasa, tanpa sudo:
+
+~~~bash
+bash scripts/k41-apply-full-desktop-profile.sh
+bash scripts/k41-apply-desktop-integration.sh
+~~~
+
+Setujui prompt masing-masing script. Full profile melakukan merge recursive ke shell.json, menerapkan monochrome, menyalin dan mengaktifkan wallpaper, restart Caelestia detached, lalu mengumpulkan runtime log. Script integrasi membuat backup, merge cli.json, menjalankan generator theme upstream, memasang GTK/Thunar/Foot, dan restart Caelestia. Tutup dan buka kembali aplikasi GTK/Foot agar konfigurasi barunya terbaca.
+
+### Backup dan rollback
+
+- Full Caelestia: backup ~/.local/state/k41/desktop-profile/backups/; rollback memakai scripts/k41-apply-full-desktop-profile.sh --rollback BACKUP_DIRECTORY.
+- GTK/Thunar/Foot/CLI: backup ~/.local/state/k41/desktop-integration/backups/; rollback memakai scripts/k41-apply-desktop-integration.sh --rollback BACKUP_DIRECTORY.
+- Rollback full profile mengembalikan shell.json dan scheme.json; pemilihan wallpaper sebelumnya perlu dipulihkan manual melalui >wallpaper.
+- Rollback integrasi mengembalikan file yang memang sudah ada sebelum penerapan. File baru yang sebelumnya tidak ada dibiarkan dan perlu dihapus manual bila pengguna ingin kembali ke kondisi tanpa file tersebut.
+- Kedua script berjalan sebagai user biasa dan tidak memasang paket, mengubah service sistem, atau mengedit shell-tokens.json.
+
+### Status validasi
+
+- **IMPLEMENTED:** profil, wallpaper SVG, GTK3/GTK4, Thunar, Foot, CLI theme preferences, dan dua script apply/rollback telah dikomit ke main.
+- **STATIC REVIEW:** JSON profile dibangun dan diparse sebagai JSON sebelum commit; field Caelestia dipilih dari dokumentasi upstream tag v2.5.0.
+- **NOT TESTED:** bash -n, ShellCheck, eksekusi script, parsing CSS/Foot pada versi lokal, dukungan SVG oleh wallpaper CLI, dan runtime/visual behavior belum dijalankan di laptop.
+- **DEVICE APPLY PENDING:** pengguna perlu pull commit, menjalankan dua script, lalu menguji komponen secara langsung. Jangan tandai Stage 5 selesai sebelum uji fungsi dan visual diterima.
