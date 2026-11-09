@@ -35,14 +35,14 @@ sudo bash scripts/k41-configure-boot-experience.sh
 Script akan:
 
 1. Memastikan root aktif adalah `/dev/mapper/cryptroot`, volume LUKS2 dapat diidentifikasi, UKI berada di `/efi`, dan TPM2 terdeteksi.
-2. Meminta path backup header LUKS pada filesystem di disk fisik lain. Jangan simpan satu-satunya backup pada SSD yang sama.
+2. Membuat backup otomatis untuk file konfigurasi boot di `/var/lib/k41/boot-experience/backups/`. Script tidak meminta lokasi backup header LUKS. Backup header LUKS dilewati agar proses lebih sederhana; karena itu, jangan menghapus/mengubah keyslot passphrase dan pastikan passphrase lama tetap tersimpan aman.
 3. Memasang paket resmi `plymouth` melalui pacman, memilih tema BGRT, menambahkan hook `plymouth` setelah `systemd` dan sebelum `sd-encrypt`, lalu menambahkan `quiet splash` ke command line UKI.
 4. Membangun ulang UKI melalui `mkinitcpio -P`.
 5. Mengubah TTY1 autologin menjadi mode senyap (`--noissue --nohostname`), menjalankan `plymouth quit --retain-splash` sebelum Hyprland agar DRM dilepas tetapi frame terakhir splash tetap tertahan, dan menahan unit `plymouth-quit.service` sampai helper Caelestia memverifikasi status lock. Compositor kemudian menggambar lock screen sebagai tampilan pertama yang terlihat. Animasi splash dapat berhenti pada frame terakhir selama handoff.
 6. Jika Caelestia tidak dapat dikunci, helper mencoba Hyprlock. Jika tidak ada marker lock yang valid dalam 75 detik, helper root menghentikan `getty@tty1.service` dan berpindah ke TTY2; ini mencegah autologin TTY dibiarkan terbuka.
 7. Meminta konfirmasi terpisah sebelum menambahkan TPM2 token menggunakan PCR 7. Saat diminta, masukkan passphrase LUKS yang sekarang.
 
-TPM2 enrollment bersifat **additive**: script tidak menghapus passphrase/keyslot yang ada. Jika TPM tidak dapat membuka volume, passphrase lama tetap menjadi recovery path dan Plymouth seharusnya menampilkan prompt unlock. Jangan menghapus keyslot passphrase setelah enrollment.
+TPM2 enrollment bersifat **additive**: script tidak menghapus passphrase/keyslot yang ada. Backup konfigurasi lokal bukan backup LUKS header; jika header rusak, pemulihan lebih terbatas tanpa header backup eksternal. Jika TPM tidak dapat membuka volume, passphrase lama tetap menjadi recovery path dan Plymouth seharusnya menampilkan prompt unlock. Jangan menghapus keyslot passphrase setelah enrollment.
 
 **Batas keamanan penting:** PCR 7 mengikat TPM token pada kebijakan Secure Boot saat ini, tetapi audit menunjukkan Secure Boot sedang disabled. Ini tidak membuktikan bahwa UKI/kernel telah diverifikasi oleh Secure Boot. Perubahan firmware atau Secure Boot dapat membuat TPM gagal membuka volume; passphrase tetap diperlukan sebagai fallback. Jangan menganggap TPM auto-unlock berhasil sebelum reboot fisik membuktikannya.
 
