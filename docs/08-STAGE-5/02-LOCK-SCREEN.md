@@ -98,6 +98,23 @@ Dari clone repository yang sudah diperbarui, jalankan melalui sudo dari akun des
 sudo bash scripts/k41-apply-lockscreen-design.sh
 ```
 
+Setiap eksekusi installer otomatis menyimpan seluruh output terminal (stdout dan stderr), timestamp, serta ringkasan exit code ke dalam working tree repository:
+
+```text
+reports/lockscreen-apply/<timestamp>-apply.log
+```
+
+File report dibuat oleh user desktop yang menjalankan Git, bukan root. Setelah selesai, tinjau report untuk memastikan tidak ada informasi sensitif, lalu masukkan ke commit bersama perubahan yang relevan:
+
+```bash
+git add reports/lockscreen-apply/
+git status --short
+git commit -m "Add lockscreen application report"
+git push origin main
+```
+
+Jika log menunjukkan kegagalan, jangan anggap instalasi berhasil. Jangan mengedit atau menghapus bukti error sebelum dianalisis; jika perlu, jalankan ulang setelah perbaikan sehingga setiap percobaan memiliki file report tersendiri.
+
 Installer memerlukan `SUDO_USER`. Sebelum berpindah kembali ke UID pengguna dengan `runuser`, tahap sudo hanya membuat/memastikan dua direktori leaf yang dikelola installer (`~/.config/quickshell/caelestia/modules/lock` dan `~/.local/state/k41/lockscreen/backups`) dan menetapkan ownership kedua direktori tersebut kepada pengguna desktop. Parent seperti `~/.config`, `~/.config/quickshell`, dan `~/.local` tidak di-chown secara rekursif. Jika parent path tidak dapat ditelusuri pengguna atau ada komponen symlink, installer berhenti dengan pesan error. Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
 
 Rollback juga dijalankan melalui sudo:
