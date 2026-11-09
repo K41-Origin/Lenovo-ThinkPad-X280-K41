@@ -4,16 +4,15 @@
 
 The current repository on branch `main` is the source of truth. At the start of substantial work, inspect the current implementation, owning document, tests, branch, and available working-tree state. Preserve unrelated work. Never infer current behavior from conversation history alone.
 
-Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `docs/06-STATUS.md`. The canonical user-facing entry points are:
+Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `docs/06-STATUS.md`. The canonical script entry points are:
 
 1. `scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
 2. `scripts/k41-install-basic-arch.sh` — Arch base installation; destructive.
 3. `scripts/k41-install-desktop.sh` — desktop setup from installed Arch TTY.
 4. `scripts/k41-desktop-validation.sh` — read-only automated package, process, configuration, service, portal, audio, network, battery, thermal, and journal health checks from the active Hyprland session; run as the regular user, never with sudo.
-5. `scripts/k41-desktop-repair.sh` — automated, narrowly scoped desktop remediation; no `--apply` mode. It installs only specifically missing supported packages, initializes the upstream Caelestia default scheme when absent, enables Bluetooth when prerequisites are met, captures PAM package-integrity evidence without rewriting PAM, and reruns validation.
-5. Desktop customization.
-6. Desktop and hardware optimization.
-7. Release.
+5. `scripts/k41-desktop-repair.sh` — Stage 4 remediation utility; applies narrowly scoped evidence-based repairs, has no `--apply` mode, captures PAM package-integrity evidence without rewriting PAM, and reruns validation.
+
+The remaining project stages are: Stage 5 desktop customization, Stage 6 desktop and hardware optimization, and Stage 7 release.
 
 The Stage 2 and Stage 3 entry points currently delegate to legacy implementation scripts. Keep wrappers thin; do not duplicate implementation. First-boot diagnostics are optional and are not a required gate between Stages 2 and 3.
 
