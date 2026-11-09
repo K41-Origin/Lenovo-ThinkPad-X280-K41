@@ -4,6 +4,10 @@
 
 Gunakan dokumentasi/upstream resmi untuk paket dan dependensi yang berubah. Jangan menonaktifkan signature verification atau pipe script remote ke shell. Review AUR recipe dan build sebagai user non-root. Jangan mencatat password, LUKS key, token, cookie, atau credential. Backup konfigurasi sebelum perubahan dan siapkan rollback. BlackArch tetap opt-in dan selektif.
 
+### Autologin dan lock screen
+
+`scripts/k41-enable-caelestia-autologin.sh` adalah opsi Stage 5, bukan default instalasi. Ia mengaktifkan passwordless autologin hanya pada `getty@tty1`, lalu memulai Hyprland dari Bash login dan meminta Caelestia mengunci sesi setelah IPC siap. Autologin menghilangkan autentikasi TTY1; lock screen grafis baru aktif setelah compositor dan shell berjalan. Ini bukan pengganti full-disk encryption. Jangan aktifkan pada perangkat dengan risiko akses fisik tanpa enkripsi disk, dan selalu simpan jalur rollback. TTY selain tty1 tetap memakai login normal.
+
 ## Tahap 6 — Desktop & Hardware Optimization
 
 Tahap ini baru dimulai setelah tahap 4 (functional validation) dan tahap 5 (customization) diterima.
