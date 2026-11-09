@@ -5,7 +5,7 @@
 1. **Arch Linux Live ISO — Readiness:** jalankan satu entry point, `bash scripts/k41-live-validation.sh`.
 2. **Arch Linux Live ISO — Basic Arch:** setelah readiness PASS dan hasilnya direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Tahap ini menghapus SSD target.
 3. **Basic Arch Linux — Desktop setup:** setelah boot ke TTY Arch Linux, login sebagai user biasa lalu jalankan `sudo bash scripts/k41-install-desktop.sh`. Tidak ada first-boot validation wajib di antara tahap 2 dan 3.
-4. **Desktop Functional Validation:** validasi fungsi desktop secara fisik dan lengkapi checklist.
+4. **Desktop Functional Validation:** dari terminal sesi Hyprland, jalankan `bash scripts/k41-desktop-validation.sh`, lalu lengkapi checklist fisik.
 5. **Desktop Customization:** mulai hanya setelah tahap 4 diterima.
 6. **Desktop & Hardware Optimization:** optimasi desktop, CPU/GPU, termal, daya, baterai, dan sleep/resume setelah customization diterima.
 7. **Release:** hanya setelah seluruh acceptance gate dan regression checks lulus.
@@ -17,6 +17,7 @@
 | `k41-live-validation.sh` | Implementasi langsung |
 | `k41-install-basic-arch.sh` | `install-arch-x280.sh` |
 | `k41-install-desktop.sh` | `setup-desktop-x280.sh` |
+| `k41-desktop-validation.sh` | Menjalankan collector desktop/Caelestia dan membuat satu laporan validasi terpadu |
 
 Gunakan entry point kanonis. Nama lama dipertahankan agar perubahan antarmuka tidak memaksa pemindahan besar pada implementasi yang sudah ada.
 
