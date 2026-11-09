@@ -373,29 +373,51 @@ else
   record SKIP 'Supplemental Caelestia inventory' 'Skipped to avoid starting Caelestia during a read-only validation run'
 fi
 
-capture 'User journal errors (last 100)' "$tmp/user-journal" journalctl --user -b -p err --no-pager -n 100 || true
-capture 'System journal errors (last 100; permission may be limited)' "$tmp/system-journal" journalctl -b -p err --no-pager -n 100 || true
-capture 'Recent kernel warnings/errors (last 100)' "$tmp/kernel-journal" journalctl -k -b -p warning --no-pager -n 100 || true
+user_journal_rc=0
+system_journal_rc=0
+kernel_journal_rc=0
+capture 'User journal errors (last 100)' "$tmp/user-journal" journalctl --user -b -p err --no-pager -n 100 || user_journal_rc=$?
+capture 'System journal errors (last 100; permission may be limited)' "$tmp/system-journal" journalctl -b -p err --no-pager -n 100 || system_journal_rc=$?
+capture 'Recent kernel warnings/errors (last 100)' "$tmp/kernel-journal" journalctl -k -b -p warning --no-pager -n 100 || kernel_journal_rc=$?
 cp -- "$tmp/user-journal" "$run_dir/user-journal-errors.txt" 2>/dev/null || :
 cp -- "$tmp/system-journal" "$run_dir/system-journal-errors.txt" 2>/dev/null || :
 cp -- "$tmp/kernel-journal" "$run_dir/kernel-journal-warnings.txt" 2>/dev/null || :
+regulatory_db_present=0
+[[ -r /usr/lib/firmware/regulatory.db ]] && regulatory_db_present=1
 for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journal"; do
   journal_name=${journal_file##*/}
-  if [[ ! -s $journal_file ]]; then
-    record WARN "Journal: $journal_name" 'No entries returned or journal access unavailable'
-  elif grep -Eiq 'not seeing messages|permission denied|failed to open.*journal|No journal files were found' "$journal_file"; then
-    record WARN "Journal: $journal_name" 'Journal access appears limited; this source is not fully validated'
-  elif grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
-    record FAIL "Journal: $journal_name" 'Critical kernel/memory failure signature found; inspect saved journal'
-  elif grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\.db failed|MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$journal_file"; then
-    record WARN "Journal: $journal_name" 'Actionable application, firmware, Bluetooth, PAM, or CPU-security warning found; inspect saved journal and repair report'
-  elif grep -Eiq 'nl80211: kernel reports: multicast RX registrations are not supported|virt/tdx: TDX not supported|hpet_acpi_probe: no address or irqs in _CRS|ENERGY_PERF_BIAS:' "$journal_file"; then
-    record PASS "Journal: $journal_name" 'Only recognized informational platform/driver messages detected'
-  elif grep -Eiq 'Failed|failed|failure|QML.*Error|error:' "$journal_file"; then
-    record WARN "Journal: $journal_name" 'Unclassified error-level journal entry found; inspect saved journal'
-  else
-    record PASS "Journal: $journal_name" 'No configured critical/actionable error signatures detected'
-  fi
+  case "$journal_name" in
+    user-journal) journal_rc=$user_journal_rc ;;
+    system-journal) journal_rc=$system_journal_rc ;;
+    kernel-journal) journal_rc=$kernel_journal_rc ;;
+  esac
+  journal_classification="$(k41_classify_journal "$journal_file" "$journal_rc" "$regulatory_db_present")"
+  case "$journal_classification" in
+    no-error-entries)
+      record PASS "Journal: $journal_name" 'No error-priority entries returned for this boot'
+      ;;
+    access-limited)
+      record WARN "Journal: $journal_name" 'Journal access appears limited; this source is not fully validated'
+      ;;
+    query-failed|classifier-failed)
+      record WARN "Journal: $journal_name" "Journal query/classifier failed (exit $journal_rc); inspect validation.log"
+      ;;
+    critical)
+      record FAIL "Journal: $journal_name" 'Critical kernel/memory failure signature found; inspect saved journal'
+      ;;
+    actionable)
+      record WARN "Journal: $journal_name" 'Actionable application, firmware, Bluetooth, PAM, or CPU-security warning found; inspect saved journal and repair report'
+      ;;
+    unclassified-error)
+      record WARN "Journal: $journal_name" 'Unclassified error-priority journal entry found; inspect saved journal'
+      ;;
+    informational-only)
+      record PASS "Journal: $journal_name" 'Only recognized informational platform/driver messages detected'
+      ;;
+    *)
+      record PASS "Journal: $journal_name" 'No configured critical/actionable error signatures detected'
+      ;;
+  esac
 done
 # 9. Focused diagnostic evidence for future, evidence-based remediation.
 # This section is read-only. Outputs are private because hardware/service details
