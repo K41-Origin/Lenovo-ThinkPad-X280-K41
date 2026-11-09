@@ -7,7 +7,7 @@ umask 077
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, bukan root/sudo.'
 [[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in date mkdir chmod uname id pacman grep awk find pgrep sed; do
+for cmd in date mkdir chmod uname id pacman grep awk find pgrep sed git head; do
   command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
 done
 
