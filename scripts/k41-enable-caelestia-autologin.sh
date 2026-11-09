@@ -5,12 +5,18 @@ umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
+on_exit() {
+    local rc=$?
+    if (( rc != 0 )) && [[ -n ${BACKUP_DIR:-} && -d $BACKUP_DIR ]]; then
+        printf 'Recovery backup retained at: %s\n' "$BACKUP_DIR" >&2
+    fi
+}
+trap on_exit EXIT
 usage() {
     printf 'Usage:\n  sudo bash %s\n  sudo bash %s --rollback BACKUP_DIRECTORY\n' "$0" "$0"
 }
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 HELPER_SOURCE="$SCRIPT_DIR/k41-lock-caelestia-after-start.sh"
 MODE=apply
 ROLLBACK_DIR=""
@@ -32,7 +38,7 @@ USER_ENTRY="$(getent passwd "$USER_NAME")" || die "Cannot resolve account: $USER
 IFS=: read -r _ _ USER_UID USER_GID _ USER_HOME USER_SHELL <<<"$USER_ENTRY"
 [[ $USER_UID =~ ^[0-9]+$ && $USER_GID =~ ^[0-9]+$ && -d $USER_HOME ]] || die 'Desktop account metadata is invalid.'
 [[ $USER_SHELL == */bash ]] || die "The desktop account must use Bash for this TTY autostart method (found: $USER_SHELL)."
-[[ -x /usr/bin/agetty || -x /sbin/agetty ]] || die 'agetty is unavailable.'
+[[ -x /usr/bin/agetty ]] || die 'Expected /usr/bin/agetty is unavailable.'
 [[ -x /usr/bin/systemctl ]] || die 'systemctl is unavailable.'
 [[ -r $HELPER_SOURCE ]] || die 'Caelestia lock helper is missing from the repository.'
 
@@ -54,6 +60,11 @@ command -v grep >/dev/null 2>&1 || die 'grep is required.'
 
 MARKER='-- K41 CAELESTIA AUTOLOCK START'
 PROFILE_MARKER='# K41 HYPRLAND AUTOLOGIN START'
+
+if [[ $MODE == apply ]]; then
+    grep -Fq "$PROFILE_MARKER" "$BASH_PROFILE" 2>/dev/null && die "Autologin is already configured in $BASH_PROFILE."
+    grep -Fq "$MARKER" "$HYPRLAND_LUA" && die "Caelestia autolock is already configured in $HYPRLAND_LUA."
+fi
 
 if [[ $MODE == apply ]]; then
     grep -Fq "$PROFILE_MARKER" "$BASH_PROFILE" 2>/dev/null && die "Autologin is already configured in $BASH_PROFILE."
