@@ -53,7 +53,7 @@ grep -Fq 'journalctl --disk-usage --no-pager >>"$report" 2>&1' "$SCRIPT" ||
   fail 'journalctl stdout/stderr must both be captured in report'
 grep -Fq 'flatpak list --app --columns=application,branch,installation >>"$report" 2>&1' "$SCRIPT" ||
   fail 'flatpak stdout/stderr must both be captured in report'
-if grep -Eq '(df|journalctl|flatpak list)[^|]*2>&1 >>"\\$report"' "$SCRIPT"; then
+if grep -Fq '2>&1 >>"$report"' "$SCRIPT"; then
   fail 'incorrect output redirection order found'
 fi
 pass 'report redirections capture stdout and stderr correctly'
