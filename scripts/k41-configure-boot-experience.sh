@@ -101,8 +101,13 @@ warn "LUKS header backup is being skipped by request. Keep the existing passphra
 # Install Plymouth from the signed official Arch repository; do not bypass pacman verification.
 pacman -S --needed plymouth
 command -v plymouth-set-default-theme >/dev/null 2>&1 || die "Plymouth installation did not provide plymouth-set-default-theme."
-[[ -d /usr/share/plymouth/themes/bgrt ]] || die "The packaged BGRT theme is unavailable."
-plymouth-set-default-theme bgrt
+THEME_SOURCE="$SCRIPT_DIR/../themes/plymouth/k41"
+[[ -s "$THEME_SOURCE/k41.plymouth" && -s "$THEME_SOURCE/k41.script" ]] ||
+  die "The K41 Plymouth theme source files are missing."
+install -d -m 0755 /usr/share/plymouth/themes/k41
+install -m 0644 "$THEME_SOURCE/k41.plymouth" /usr/share/plymouth/themes/k41/k41.plymouth
+install -m 0644 "$THEME_SOURCE/k41.script" /usr/share/plymouth/themes/k41/k41.script
+plymouth-set-default-theme k41
 
 python3 - /etc/mkinitcpio.conf /etc/kernel/cmdline <<'PY'
 import pathlib
@@ -240,7 +245,7 @@ if ! cryptsetup luksDump --dump-json-metadata "$crypt_device" |
   die "TPM2 token was not found in LUKS metadata after enrollment. Keep the passphrase; do not reboot until investigated."
 fi
 
-info "Plymouth BGRT is configured and the UKI was rebuilt."
+info "The animated K41 Plymouth theme is configured and the UKI was rebuilt."
 info "TPM2 token is present in LUKS2 metadata; the original passphrase remains available."
 info "Config backup: $backup_dir"
 info "LUKS header backup: $header_backup"
