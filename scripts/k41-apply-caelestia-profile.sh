@@ -32,7 +32,7 @@ elif [[ $# -ne 0 ]]; then
 fi
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
-for cmd in python3 tee cp mv mkdir date caelestia grep; do
+for cmd in python3 tee cp mv mkdir date caelestia grep pgrep; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 
@@ -250,7 +250,7 @@ if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
         info 'Caelestia restart command returned successfully.'
     elif (( restart_rc == 124 )); then
         restart_status="FOREGROUND_TIMEOUT"
-        info 'WARNING: Restart command remained active for 30 seconds; timeout alone does not prove shell failure.'
+        info 'Restart command remained active for 30 seconds; runtime/process checks will determine whether the shell loaded.'
     else
         restart_status="COMMAND_FAILED (exit $restart_rc)"
         info "WARNING: Caelestia restart command exited with $restart_rc; profile files remain applied."
