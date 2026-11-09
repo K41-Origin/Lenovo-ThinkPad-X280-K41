@@ -31,6 +31,6 @@ fi
 grep -Fq 'privileged systemctl enable --now bluetooth.service' "$REPAIR" || fail 'Bluetooth action must be scoped and use privilege helper'
 grep -Fq 'chmod 0700 "$report_dir"' "$REPAIR" && grep -Fq 'chmod 0600 "$log_file" "$actions_file"' "$REPAIR" ||
   fail 'repair reports must use private permissions'
-grep -Fq 'No synthetic file written' "$REPAIR" || fail 'Caelestia state must not be fabricated'
+grep -Fq 'no synthetic file written' "$REPAIR" || fail 'Caelestia state must not be fabricated'
 grep -Fq 'no forced overwrite' "$REPAIR" || fail 'installed firmware package must not be overwritten blindly'
 pass 'automatic repair syntax, bounded actions, and safety contract'
