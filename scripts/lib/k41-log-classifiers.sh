@@ -23,7 +23,7 @@ k41_classify_caelestia_log() {
   if grep -Eiq 'Source file does not exist' "$filtered"; then
     printf '%s\n' 'missing-resource'
   fi
-  if [[ $bluetooth_active != 1 ]] && grep -Eiq 'org\\.bluez' "$filtered"; then
+  if [[ $bluetooth_active != 1 ]] && grep -Eiq 'org\.bluez' "$filtered"; then
     printf '%s\n' 'bluez-service-inactive'
   fi
   if [[ $rtkit_installed != 1 ]] && grep -Eiq 'RTKit' "$filtered"; then
