@@ -85,28 +85,28 @@ Audit upstream pada revision yang benar-benar terpasang mengonfirmasi bahwa:
 Perubahan repository:
 - `config/quickshell/caelestia/modules/lock/Content.qml`: mengganti tiga kolom widget dengan satu komponen Center di tengah.
 - `config/quickshell/caelestia/modules/lock/Center.qml`: hanya menampilkan Clock, tanggal/hari, PasswordInput, dan StateMessage. ProfilePic serta widget samping dihilangkan. StateMessage dipertahankan untuk feedback autentikasi/keyboard.
-- `scripts/k41-apply-lockscreen-design.sh`: installer user-level dengan pemeriksaan paket dan layout upstream, backup, instalasi atomik, rollback, serta pilihan restart Caelestia. Tidak menggunakan sudo dan tidak mengubah PAM, service sistem, package, atau file upstream.
+- `scripts/k41-apply-lockscreen-design.sh`: installer sudo-aware dengan pemeriksaan paket dan layout upstream, backup, instalasi atomik, rollback, serta pilihan restart Caelestia. Script menerima `sudo`, membaca identitas pemanggil dari `SUDO_USER`, lalu menurunkan privilege menggunakan `runuser` sebelum menyentuh konfigurasi/backup. Tidak ada operasi tulis file pengguna yang dijalankan sebagai root; tidak mengubah PAM, service sistem, package, atau file upstream.
 - `tests/test-lockscreen-design.sh`: pemeriksaan statis struktur override dan sintaks Bash.
 
 Override tidak mengganti `LockSurface.qml` atau `Lock.qml`; wallpaper aktif, blur, WlSessionLock, PAM, dan protokol lock tetap berasal dari upstream. Layout visual belum dapat dinilai hanya dari source code.
 
 ### Penerapan pada ThinkPad X280
 
-Dari clone repository yang sudah diperbarui, jalankan sebagai user desktop biasa:
+Dari clone repository yang sudah diperbarui, jalankan melalui sudo dari akun desktop yang sedang digunakan:
 
 ```bash
-bash scripts/k41-apply-lockscreen-design.sh
+sudo bash scripts/k41-apply-lockscreen-design.sh
 ```
 
-Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
+Installer memerlukan `SUDO_USER`, kemudian otomatis berpindah kembali ke UID pengguna tersebut dengan `runuser`. Target konfigurasi adalah `/home/<user>/.config/quickshell/caelestia/modules/lock`; backup berada di `/home/<user>/.local/state/k41/lockscreen/backups`. Jika direktori `.config` atau `.local/state` yang sudah ada bukan milik pengguna pemanggil, installer berhenti tanpa menjalankan `chown` atau mengubah ownership. Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
 
-Rollback:
+Rollback juga dijalankan melalui sudo:
 
 ```bash
-bash scripts/k41-apply-lockscreen-design.sh --rollback "/path/backup-yang-dicetak-script"
+sudo bash scripts/k41-apply-lockscreen-design.sh --rollback "/home/<user>/.local/state/k41/lockscreen/backups/<timestamp>"
 ```
 
-Jangan menjalankan dengan sudo. Jangan menguji lock dengan menyimpan password dalam log atau command line.
+Jangan menjalankan script dengan `sudo -E` dari akun lain atau melalui root login; gunakan akun desktop yang memiliki sesi Caelestia. Jangan menguji lock dengan menyimpan password dalam log atau command line.
 
 ### Validasi yang harus dilakukan di perangkat
 
