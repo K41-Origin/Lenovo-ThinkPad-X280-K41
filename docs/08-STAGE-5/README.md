@@ -23,6 +23,10 @@ Dokumen ini adalah indeks operasional untuk tujuh workstream customization deskt
 
 Design System menentukan arah desain yang telah disetujui, tetapi **penerapan global atau penyelarasan tampilan lintas-komponen ditunda sampai ketujuh workstream selesai**. Selama suatu workstream, perubahan visual dibatasi pada komponen yang sedang dikerjakan dan hanya sejauh diperlukan untuk memenuhi fungsinya. Jangan memulai redesign wallpaper, typography global, icon/cursor global, window/compositor, GTK/Qt, terminal, notifications/OSD, atau tema aplikasi lain sebagai pekerjaan paralel.
 
+## Status khusus — Guest Mode
+
+**Guest Mode: NOT IMPLEMENTED / BELUM DIIMPLEMENTASIKAN.** Belum ada kode atau workflow Guest Mode yang dapat digunakan. Fitur ini secara eksplisit ditunda dan tidak boleh mulai dirancang atau diimplementasikan sampai pengguna menyatakan custom lock screen telah diterima. Status lock screen saat ini tetap **IN PROGRESS**, bukan VERIFIED; lihat [Workstream 2 — Lock Screen](02-LOCK-SCREEN.md) dan [status proyek](../06-STATUS.md).
+
 ## Aturan eksekusi wajib
 
 1. Kerjakan satu workstream pada satu waktu dan ikuti urutan di atas.
