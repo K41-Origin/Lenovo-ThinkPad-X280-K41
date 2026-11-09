@@ -3,6 +3,7 @@
 # Arguments: LOG_FILE SCHEME_FILE
 k41_classify_caelestia_log() {
   local log_file=$1 scheme_file=$2 bluetooth_active=${3:-0} rtkit_installed=${4:-0}
+  local scheme_warning="Read of $scheme_file failed: File does not exist"
   local filtered
   filtered="$(mktemp)" || return 2
 
