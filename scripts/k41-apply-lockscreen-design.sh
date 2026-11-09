@@ -12,6 +12,27 @@ usage() {
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
 source_root="$repo_root/config/quickshell/caelestia/modules/lock"
+
+# Require sudo at entry, then drop privileges before touching user files.
+# All config/backup writes run as SUDO_USER, never as root.
+if [[ $EUID -eq 0 ]]; then
+    [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] ||
+        die 'Run with sudo from your regular desktop account (sudo bash scripts/k41-apply-lockscreen-design.sh).'
+    command -v runuser >/dev/null 2>&1 || die 'runuser is required (provided by util-linux).'
+    command -v getent >/dev/null 2>&1 || die 'getent is required to resolve the invoking user.'
+    passwd_entry="$(getent passwd "$SUDO_USER")" || die "Cannot resolve sudo user: $SUDO_USER"
+    IFS=: read -r _ _ target_uid _ _ target_home _ <<<"$passwd_entry"
+    [[ $target_uid =~ ^[0-9]+$ && $target_uid -ne 0 && $target_home == /* ]] ||
+        die 'Could not safely resolve a non-root user home directory.'
+    exec runuser --user "$SUDO_USER" -- env \
+        HOME="$target_home" \
+        XDG_CONFIG_HOME="$target_home/.config" \
+        XDG_STATE_HOME="$target_home/.local/state" \
+        K41_SUDO_REEXEC=1 \
+        bash "$0" "$@"
+fi
+
+[[ ${K41_SUDO_REEXEC:-} == 1 ]] || die 'This installer must be started with sudo.'
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
 target_root="$config_root/quickshell/caelestia/modules/lock"
@@ -32,7 +53,16 @@ elif [[ $# -ne 0 ]]; then
     exit 2
 fi
 
-[[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
+[[ $EUID -ne 0 ]] || die 'Refusing to perform user-file operations as root.'
+[[ $config_root == "$HOME/.config" && $state_root == "$HOME/.local/state" ]] ||
+    die 'Unexpected XDG path; this sudo installer intentionally targets the invoking user home.'
+for managed_root in "$config_root" "$state_root"; do
+    if [[ -e $managed_root ]]; then
+        [[ -d $managed_root && ! -L $managed_root ]] || die "Invalid user directory: $managed_root"
+        [[ $(stat -c %u "$managed_root") == "$EUID" ]] ||
+            die "Directory is not owned by the invoking user: $managed_root (no ownership changes made)."
+    fi
+done
 [[ $config_root == /* && $state_root == /* ]] || die 'XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.'
 for cmd in mkdir cp mv mktemp date pacman stat rm chmod; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
@@ -145,7 +175,7 @@ for name in Content.qml Center.qml; do
 done
 restore_on_failure=0
 
-info 'QML overrides installed under ~/.config/quickshell/caelestia/modules/lock/.'
+info "QML overrides installed for user $USER under $config_root/quickshell/caelestia/modules/lock/."
 info 'Upstream LockSurface.qml, wallpaper selection/blur, WlSessionLock and PAM components remain untouched.'
 info "Rollback: bash scripts/k41-apply-lockscreen-design.sh --rollback '$backup_dir'"
 
