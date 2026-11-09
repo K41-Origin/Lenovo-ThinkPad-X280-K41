@@ -44,14 +44,14 @@ have() { command -v "$1" >/dev/null 2>&1; }
 } >> "$report"
 
 section 'Installed package versions'
-for pkg in caelestia-shell caelestia-cli quickshell quickshell-git hyprland hyprlock swaylock gtklock greetd; do
+for pkg in caelestia-shell caelestia-cli quickshell quickshell-git hyprland hyprlock swaylock gtklock greetd fprintd pam_fprintd howdy; do
   if pacman -Q "$pkg" >> "$report" 2>&1; then :; else
     printf '%s: not installed (or package name differs)\n' "$pkg" >> "$report"
   fi
 done
 
 section 'Relevant executable paths and versions'
-for bin in caelestia qs quickshell hyprctl hyprlock swaylock gtklock loginctl; do
+for bin in caelestia qs quickshell hyprctl hyprlock swaylock gtklock loginctl fprintd howdy;
   if have "$bin"; then
     printf '%s: %s\n' "$bin" "$(command -v "$bin")" >> "$report"
     case "$bin" in
@@ -65,7 +65,7 @@ for bin in caelestia qs quickshell hyprctl hyprlock swaylock gtklock loginctl; d
 done
 
 section 'Lock-related process names (arguments intentionally omitted)'
-for proc in Hyprland quickshell qs caelestia hyprlock swaylock gtklock; do
+for proc in Hyprland quickshell qs caelestia hyprlock swaylock gtklock fprintd; do
   if pgrep -x "$proc" >/dev/null 2>&1; then
     printf '%s: running (PID values omitted)\n' "$proc" >> "$report"
   else
@@ -134,7 +134,7 @@ for base in "$HOME/.config/hypr" "$HOME/.config/caelestia" "$HOME/.config/quicks
 done
 
 section 'PAM auth stack: module names only; no options or credentials'
-pam_files=(/etc/pam.d/hyprlock /etc/pam.d/login /etc/pam.d/system-local-login /etc/pam.d/sudo /etc/pam.d/polkit-1)
+pam_files=(/etc/pam.d/hyprlock /etc/pam.d/caelestia /etc/pam.d/login /etc/pam.d/system-local-login /etc/pam.d/system-auth /etc/pam.d/sudo /etc/pam.d/polkit-1)
 pam_found=0
 for pam in "${pam_files[@]}"; do
   [[ -r $pam ]] || continue
@@ -146,7 +146,7 @@ done
 
 section 'Relevant user and system services'
 if have systemctl; then
-  for unit in caelestia.service quickshell.service hyprlock.service; do
+  for unit in caelestia.service quickshell.service hyprlock.service fprintd.service; do
     printf '%s: ' "$unit" >> "$report"
     systemctl --user is-active "$unit" 2>/dev/null >> "$report" || printf 'inactive/not found\n' >> "$report"
   done
