@@ -107,11 +107,11 @@ PY
 )" || die 'Could not safely identify the launcher variable. The run log contains diagnostic details; configuration was not modified.'
 detected_launcher="${launcher_info%%$'\t'*}"
 info "Detected launcher declaration value: $detected_launcher"
-! grep -Fq 'K41_OBSIDIAN_APPEARANCE_BEGIN' "$hypr_target" || die 'K41 appearance overlay already exists. Do not apply twice; inspect the active config or use its backup to roll back.'
+[[ $(grep -Fc 'K41_OBSIDIAN_APPEARANCE_BEGIN' "$hypr_target" || true) -le 1 && $(grep -Fc 'K41_OBSIDIAN_APPEARANCE_END' "$hypr_target" || true) -le 1 ]] || die 'Multiple K41 appearance markers found; inspect the active config before applying.'
 
 printf '%s\n' 'This applies the first Graphite Monochrome layer:'
 printf '%s\n' '  - Hyprland appearance only; existing binds, input, rules and autostart are preserved'
-printf '%s\n' '  - SUPER+R launcher is set to installed Fuzzel'
+printf '%s\n' '  - SUPER+R launcher is set to installed Fuzzel and the existing K41 appearance overlay is updated idempotently'
 printf '%s\n' '  - Fuzzel receives the repository Graphite configuration'
 printf '%s\n' 'No packages, wallpaper, Caelestia, GTK, power, or hardware settings are changed.'
 read -r -p 'Apply these changes? [y/N] ' answer
