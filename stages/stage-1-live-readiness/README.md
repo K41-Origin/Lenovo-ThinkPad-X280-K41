@@ -167,3 +167,8 @@ Setelah readiness:
 ## 9. Status bukti
 
 Pemetaan ini berdasarkan inspeksi statis source, manifest, workflow CI, dan referensi aktif pada branch `main`. Tidak ada script, test, atau readiness gate yang dijalankan dalam perubahan pemindahan ini. Bash syntax, ShellCheck, shfmt, test suite, dan validasi fisik tetap perlu dijalankan pada tahap verifikasi berikutnya.
+
+## Catatan
+
+Catatan: stage 1 dan stage 2 akan menjadi gerbang dalam pembuatan proyek selanjutnya Custom Arch ISO, sebuah proyek kostumisasi ISO resmi dari arch sehingga saat di burn ke flashdisk dan di boot akan didalamnha sudah ada script costum milik Kai. 
+Ingetin gua nanti tahun 2027 kalo ga mager baru gue buat
