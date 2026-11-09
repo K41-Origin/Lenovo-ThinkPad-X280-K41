@@ -21,6 +21,8 @@ have git || die 'Git tidak tersedia.'
 repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)" ||
   die 'Script harus dijalankan dari dalam working tree Git.'
 repo_root="$(cd -- "$repo_root" && pwd -P)" || die 'Tidak dapat menentukan root repository.'
+current_branch="$(git -C "$repo_root" branch --show-current)" || die 'Tidak dapat membaca branch aktif.'
+[[ "$current_branch" == main ]] || die "Audit hanya diizinkan pada branch main; branch aktif: ${current_branch:-detached HEAD}."
 
 # Do not create files in a checkout owned by another account.
 have stat || die 'Perintah stat tidak tersedia.'
@@ -29,7 +31,7 @@ current_uid="$(id -u)"
 [[ "$repo_owner" == "$current_uid" ]] ||
   die "Repository dimiliki UID $repo_owner, sedangkan script berjalan sebagai UID $current_uid. Jangan gunakan sudo/chown; periksa checkout secara manual."
 
-for cmd in date mkdir uname pacman grep awk find pgrep sed head tr id; do
+for cmd in date mkdir uname pacman grep awk find pgrep sed head id; do
   have "$cmd" || die "Perintah wajib tidak tersedia: $cmd"
 done
 
@@ -232,5 +234,5 @@ printf 'Collector dijalankan sebagai user biasa dan tidak mengubah permission/ow
 printf '\nSetelah meninjau dan menyunting laporan, jalankan perintah berikut:\n'
 printf 'git -C %q add -- %q\n' "$repo_root" "${report#"$repo_root"/}"
 printf 'git -C %q diff --cached --check\n' "$repo_root"
-printf 'git -C %q commit -m %q\n' "$repo_root" 'audit(lockscreen): add X280 audit report'
+printf 'git -C %q commit --only -m %q -- %q\n' "$repo_root" 'audit(lockscreen): add X280 audit report' "${report#"$repo_root"/}"
 printf 'git -C %q push origin main\n' "$repo_root"
