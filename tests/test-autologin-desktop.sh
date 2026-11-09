@@ -30,6 +30,7 @@ if grep -Eq 'systemctl (enable|start).*?(gdm|sddm|ly|greetd)|default.target' "$I
 fi
 grep -Fq 'caelestia shell -s' "$HELPER" || fail 'lock helper does not wait for Caelestia IPC'
 grep -Fq 'caelestia shell lock lock' "$HELPER" || fail 'lock helper does not call Caelestia lock IPC'
+grep -Fq 'exec hyprlock' "$HELPER" || fail 'lock helper lacks a fail-safe Hyprlock fallback'
 pass 'autologin installer and lock helper pass syntax and static safety contracts'
 
 # Exercise the helper using a deterministic Caelestia CLI mock.
