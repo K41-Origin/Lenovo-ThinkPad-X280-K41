@@ -17,6 +17,8 @@ for required in bash date mkdir chmod uname pacman systemctl journalctl grep awk
 done
 [[ -f "$ROOT/scripts/test-desktop-x280.sh" ]] || die 'Desktop diagnostic collector is missing.'
 [[ -f "$ROOT/scripts/test-caelestia-x280.sh" ]] || die 'Caelestia diagnostic collector is missing.'
+[[ -f "$ROOT/scripts/lib/k41-log-classifiers.sh" ]] || die 'Log classifier library is missing.'
+source "$ROOT/scripts/lib/k41-log-classifiers.sh"
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_root="$ROOT/reports/desktop-validation"
@@ -158,22 +160,13 @@ if (( caelestia_running == 1 )); then
   fi
   if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
     scheme_file="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
-    if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|TypeError:|ReferenceError:' "$tmp/caelestia-log"; then
-      record WARN 'Caelestia runtime log' 'Actionable runtime/QML error signature found; inspect validation.log'
-    elif grep -Eiq 'Read of .+scheme\.json failed: File does not exist' "$tmp/caelestia-log" && [[ ! -s $scheme_file ]]; then
-      record WARN 'Caelestia runtime log' 'Caelestia scheme is still missing; inspect repair report'
-    elif grep -Eiq 'Source file does not exist' "$tmp/caelestia-log" &&
-         grep -Eiv '\.face([[:space:]]|$)' "$tmp/caelestia-log" | grep -Eiq 'Source file does not exist'; then
-      record WARN 'Caelestia runtime log' 'A non-optional QML resource is missing; inspect validation.log'
-    elif grep -Eiq 'org\.bluez' "$tmp/caelestia-log" && ! systemctl is-active --quiet bluetooth.service; then
-      record WARN 'Caelestia runtime log' 'BlueZ D-Bus warning remains while bluetooth.service is inactive'
-    elif grep -Eiq 'RTKit' "$tmp/caelestia-log" && ! pacman -Q rtkit >/dev/null 2>&1; then
-      record WARN 'Caelestia runtime log' 'RTKit warning remains and the rtkit package is absent'
+    mapfile -t caelestia_findings < <(k41_classify_caelestia_log "$tmp/caelestia-log" "$scheme_file")
+    if (( ${#caelestia_findings[@]} > 0 )); then
+      record WARN 'Caelestia runtime log' "Unresolved findings: $(IFS=,; printf '%s' "${caelestia_findings[*]}"); inspect validation.log"
     else
-      record PASS 'Caelestia runtime log' 'No unresolved fatal/QML/resource/service error detected; optional .face and resolved service warnings are ignored'
+      record PASS 'Caelestia runtime log' 'No unresolved fatal/QML/resource error detected; stale scheme startup and optional .face warnings are excluded only when their conditions are met'
     fi
-  else
-    record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
+  fi
   fi
 else
   record SKIP 'Caelestia IPC' 'Skipped because no Caelestia process is running'
