@@ -314,3 +314,44 @@ bash scripts/k41-report-lockscreen-permissions.sh
 Script akan mencetak perintah `git -C ...` untuk menambahkan hanya report baru, memeriksa staged diff, commit hanya file report tersebut, dan push ke `main`. Ikuti perintah yang dicetak setelah meninjau report. Tidak perlu menjalankan command diagnostik manual atau mengirim screenshot.
 
 Setelah report masuk ke GitHub, audit metadata tersebut terlebih dahulu. Baru setelah penyebab ownership/ACL/path terbukti, perbaiki installer secara sempit dan aman. Tidak ada permission yang boleh diubah berdasarkan dugaan.
+
+
+## Update implementasi terbaru — 2026-11-09
+
+Bagian ini mencatat keadaan repository setelah perubahan layout terbaru. Catatan insiden dan laporan historis di atas tetap dipertahankan sebagai histori; status terkini di bawah ini yang menjadi acuan untuk implementasi pada `main`.
+
+### Perubahan yang sudah diimplementasikan
+
+- `config/quickshell/caelestia/modules/lock/LockSurface.qml`: surface/card besar di belakang seluruh konten dibuat transparan sehingga tidak membentuk panel pembungkus; wallpaper dan efek blur upstream tetap menjadi latar. Jalur session-lock dan autentikasi upstream tidak dimaksudkan untuk diubah.
+- `config/quickshell/caelestia/modules/lock/center/PasswordInput.qml`: field password tetap mempertahankan surface rounded miliknya sendiri; transparansi surface luar tidak menghilangkan kartu input tersebut.
+- `config/quickshell/caelestia/modules/lock/Content.qml`: komponen `Center` mengisi seluruh area konten yang diberikan parent melalui `anchors.fill: parent`.
+- `config/quickshell/caelestia/modules/lock/Center.qml`: root menjadi area `Item` penuh; `ColumnLayout` yang berisi clock, tanggal, password, dan pesan state diposisikan dengan `anchors.centerIn: parent`.
+- `scripts/k41-apply-lockscreen-design.sh`: installer mengirimkan override ke source tree Caelestia lokal dengan mekanisme backup/rollback dan validasi versi/revision upstream. Ikuti instruksi installer yang berlaku di repository; restart shell harus dilakukan dari terminal sesi Hyprland aktif sebagai user biasa.
+
+### Commit terkait
+
+- `35d924ad2de25c858389961c8eac3b255d13ed46` — membuat konten lock screen mengisi area parent yang tersedia.
+- `5851a5b5ef90621f460e5541aecd44ad2fc96e7b` — memusatkan kelompok konten secara geometris di dalam area tersebut.
+- Perubahan pendukung sebelumnya: `0d3f80d` (password surface rounded), `e2df3cc` (outer surface transparan), `f75a8e4` (installer deploy LockSurface override), dan `1bb8ba1` (deduplikasi pemeriksaan sumber installer).
+
+### Status validasi
+
+- **IMPLEMENTED:** perubahan QML dan installer ada pada branch `main`.
+- **NOT TESTED:** belum ada hasil `qmllint`, validasi parser QML, atau runtime Quickshell untuk perubahan layout terakhir.
+- **NOT VERIFIED:** belum ada bukti perangkat bahwa source tree lokal terbaru aktif, seluruh elemen benar-benar berada di tengah layar, password field tampil terpisah, autentikasi benar/salah berfungsi, wake/resume aman, dan tampilan diterima pengguna.
+- Restart command exit 0 atau log `Configuration Loaded` saja tidak cukup untuk mengubah status menjadi VERIFIED.
+
+### Langkah penerapan dan penerimaan berikutnya
+
+Dari clone repository yang sudah diperbarui:
+
+```bash
+git pull --ff-only origin main
+sudo bash scripts/k41-apply-lockscreen-design.sh
+```
+
+Setelah installer selesai, jalankan restart dari terminal Hyprland aktif sebagai user biasa atau gunakan collector sesi yang didokumentasikan di atas. Pastikan report restart menunjukkan source tree lokal `~/.config/quickshell/caelestia/shell.qml`, bukan fallback `/etc/xdg/quickshell/caelestia/shell.qml`. Kemudian lakukan seluruh skenario pada bagian **Validasi yang harus dilakukan di perangkat** dan acceptance criteria. Tidak perlu mengirim screenshot; review visual dilakukan langsung pada display X280.
+
+### Guest Mode — BELUM DIIMPLEMENTASIKAN
+
+Guest Mode **belum memiliki implementasi**. Statusnya **NOT IMPLEMENTED / DEFERRED**, bukan fitur aktif, bukan fitur yang sudah diuji, dan bukan bagian dari acceptance lock screen saat ini. Jangan membuat desain, akun guest, session workflow, atau perubahan permission/policy terkait Guest Mode sampai pengguna secara eksplisit menyatakan custom lock screen telah diterima. Setelah persetujuan tersebut, Guest Mode harus diaudit dan dirancang sebagai workstream terpisah dengan batas keamanan, isolasi data, persistence, dan cleanup yang jelas.
