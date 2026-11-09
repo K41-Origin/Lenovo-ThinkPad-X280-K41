@@ -1,0 +1,6 @@
+K41 Caelestia Audit
+Timestamp UTC: 20261109T091310Z
+Status: COMPLETED
+Report: reports/caelestia-audit/20261109T091310Z/
+Files: run.log, summary.txt, config-snapshot.json
+Mode: read-only; no configuration or system state changed.
