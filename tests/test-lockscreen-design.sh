@@ -33,5 +33,8 @@ grep -Fq 'Report   :' "$installer"
 grep -Fq '/proc/sys/kernel/hostname' "$installer"
 ! grep -Fq 'tee hostname' "$installer"
 grep -Fq 'finish_log "$rc"' "$installer"
+grep -Fq 'Shell restart was not attempted from the sanitized installer process' "$installer"
+grep -Fq 'caelestia shell -r -d' "$installer"
+! grep -Fq 'timeout 15s caelestia shell -r -d' "$installer"
 printf 'PASS: lock-screen override structure, installer syntax, and in-repository report logging checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
