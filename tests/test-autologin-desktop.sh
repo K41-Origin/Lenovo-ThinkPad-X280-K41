@@ -18,7 +18,7 @@ for token in \
   'caelestia shell -d' \
   'systemctl daemon-reload' \
   '--rollback BACKUP_DIRECTORY' \
-  'SUDO_USER'; do
+  'SUDO_USER' \\\n  'lock.enabled' \\\n  'getty@tty1.service'; do
   grep -Fq -- "$token" "$INSTALLER" || fail "installer contract missing: $token"
 done
 if grep -Eq 'systemctl (enable|start).*?(gdm|sddm|ly|greetd)|default.target' "$INSTALLER"; then
