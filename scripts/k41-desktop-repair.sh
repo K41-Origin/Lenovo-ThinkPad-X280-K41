@@ -147,9 +147,39 @@ fi
 [[ -e $HOME/.face ]] &&
   record PASS 'Caelestia profile image' 'optional image exists' ||
   record SKIP 'Caelestia profile image' 'optional; no placeholder generated'
-record WARN 'Bluetooth HCI negotiation' 'kernel HCI feature errors are not repaired by BlueZ; controller/driver firmware untouched'
-record WARN 'CPU security mitigations' 'MDS/MMIO/VMSCAPE are CPU/kernel policy findings; no SMT or kernel parameters changed'
-record SKIP 'Wi-Fi multicast RX warning' 'driver/kernel informational warning; Wi-Fi is connected, no network reset'
+shopt -s nullglob
+kernel_reports=("$ROOT"/reports/desktop-validation/*/kernel-journal-warnings.txt)
+system_reports=("$ROOT"/reports/desktop-validation/*/system-journal-errors.txt)
+user_reports=("$ROOT"/reports/desktop-validation/*/user-journal-errors.txt)
+if (("${#kernel_reports[@]}" > 0)); then
+  latest_kernel_report="${kernel_reports[$(("${#kernel_reports[@]}" - 1))]}"
+  if grep -Eiq 'Bluetooth: hci[0-9]+: Reading supported features failed|HCI LE Coded PHY feature bit is set' "$latest_kernel_report"; then
+    record WARN 'Bluetooth HCI negotiation' 'latest kernel report contains controller feature errors; BlueZ cannot repair controller/driver firmware'
+  else
+    record PASS 'Bluetooth HCI negotiation' 'no HCI feature-negotiation warning in latest kernel report'
+  fi
+  if grep -Eiq 'MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$latest_kernel_report"; then
+    record WARN 'CPU security mitigations' 'latest kernel report contains MDS/MMIO/VMSCAPE findings; no SMT or kernel parameters changed'
+  else
+    record PASS 'CPU security mitigations' 'no configured CPU mitigation warning in latest kernel report'
+  fi
+else
+  record SKIP 'Kernel warning classification' 'no committed kernel journal report available'
+fi
+if (("${#system_reports[@]}" > 0)); then
+  latest_system_report="${system_reports[$(("${#system_reports[@]}" - 1))]}"
+  if grep -Eiq 'nl80211: kernel reports: multicast RX registrations are not supported' "$latest_system_report"; then
+    record SKIP 'Wi-Fi multicast RX warning' 'driver/kernel informational warning; no network reset performed'
+  else
+    record PASS 'Wi-Fi multicast RX warning' 'no matching warning in latest system journal report'
+  fi
+fi
+if (("${#user_reports[@]}" > 0)); then
+  latest_user_report="${user_reports[$(("${#user_reports[@]}" - 1))]}"
+  if grep -Fq 'PAM _pam_init_handlers: no default config other' "$latest_user_report"; then
+    record WARN 'PAM runtime warning' 'Quickshell journal contains PAM fallback warning; inspect pambase-integrity.txt; PAM policy was not rewritten'
+  fi
+fi
 record SKIP 'Qt Wayland text-input warnings' 'no safe configuration change supported by this evidence'
 record SKIP 'PipeWire libcamera plugin' 'optional camera integration; no package added'
 record SKIP 'lsusb utility' 'diagnostic-only utility, not a desktop runtime dependency'
