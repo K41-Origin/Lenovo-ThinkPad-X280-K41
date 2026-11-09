@@ -26,10 +26,10 @@ grep -Fq 'install -d -o' "$installer"
 grep -Fq 'chown "$target_uid:' "$installer"
 grep -Fq 'Managed lock directory is not owned' "$installer"
 grep -Fq 'A parent directory in the config path is not traversable' "$installer"
-grep -Fq 'K41_LOG_DIR' "$installer"
+grep -Fq 'reports/lockscreen-apply' "$installer"
 grep -Fq 'exec > >(tee -a "$log_file") 2>&1' "$installer"
 grep -Fq 'EXECUTION SUMMARY' "$installer"
-grep -Fq 'Log file :' "$installer"
+grep -Fq 'Report   :' "$installer"
 grep -Fq 'finish_log "$rc"' "$installer"
-printf 'PASS: lock-screen override structure, installer syntax, and persistent logging checks.\n'
+printf 'PASS: lock-screen override structure, installer syntax, and in-repository report logging checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
