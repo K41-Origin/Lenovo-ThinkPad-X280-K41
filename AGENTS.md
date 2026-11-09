@@ -11,7 +11,7 @@
 ## Canonical entry points
 
 1. `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
-2. `scripts/k41-install-basic-arch.sh` — instalasi dasar Arch; destruktif.
+2. `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` — instalasi dasar Arch; destruktif.
 3. `scripts/k41-install-desktop.sh` — setup desktop dari Arch terpasang melalui TTY.
 4. `scripts/k41-desktop-validation.sh` — validasi desktop read-only; jalankan sebagai user biasa dalam sesi Hyprland.
 5. `scripts/k41-desktop-repair.sh` — remediasi terbatas berbasis bukti.
@@ -28,7 +28,7 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Tujuan, tahapan, arsitektur | `docs/01-PROJECT.md` |
 | Tahap 1–3: ringkasan prosedur instalasi | `docs/02-INSTALLATION.md` |
 | Stage 1: peta readiness dan ownership | `stages/stage-1-live-readiness/README.md` |
-| Stage 2: peta installer dasar, storage safety, recovery, dan test | `stages/stage-2-basic-arch-install/README.md` |
+| Stage 2: peta installer dasar, storage safety, recovery, dan test | `stages/stage-2-basic-arch-install/README.md` |\n| Stage 3: peta desktop installer, AUR resolver, side effects, dan test | `stages/stage-3-desktop-install/README.md` |
 | Desktop tahap 3–5 dan handoff | `docs/03-DESKTOP.md` |
 | Test suite dan acceptance gate | `docs/04-TESTING.md`, `tests/README.md` |
 | Security, recovery, optimasi tahap 6 | `docs/05-OPERATIONS.md` |

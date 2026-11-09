@@ -42,7 +42,7 @@ Setelah installer selesai, reboot dan masuk ke TTY sistem Arch Linux yang baru t
 sudo bash scripts/k41-install-desktop.sh
 ```
 
-Wrapper meneruskan ke `scripts/setup-desktop-x280.sh`. Script harus dijalankan dari TTY, bukan dari Arch ISO, chroot, atau sesi grafis. Ikuti prompt instalasi dan review AUR recipe saat diminta.
+Wrapper meneruskan ke `scripts/setup-desktop-x280.sh`. Script harus dijalankan dari TTY, bukan dari Arch ISO, chroot, atau sesi grafis. Ikuti prompt instalasi dan review AUR recipe saat diminta. Peta file, AUR resolver, efek samping, laporan, dan test tersedia di [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md).
 
 **Tidak ada first-boot validation wajib di antara tahap 2 dan 3.** First-boot collector `scripts/x280-first-boot-check.sh` tetap tersedia sebagai alat diagnosis read-only bila diperlukan, tetapi bukan prasyarat workflow dan bukan gerbang untuk menjalankan desktop installer.
 

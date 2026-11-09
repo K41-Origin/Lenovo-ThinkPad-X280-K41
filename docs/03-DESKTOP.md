@@ -10,7 +10,7 @@ Jalankan dari Arch Linux yang telah terpasang, melalui TTY, sebagai user biasa:
 sudo bash scripts/k41-install-desktop.sh
 ```
 
-Jangan jalankan dari Arch ISO, chroot, atau sesi grafis. Entry point ini adalah wrapper kanonis untuk desktop setup.
+Jangan jalankan dari Arch ISO, chroot, atau sesi grafis. Entry point ini adalah wrapper kanonis untuk desktop setup. Peta implementasi Stage 3: [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md).
 
 ## Tahap 4 — Functional validation
 
