@@ -96,16 +96,16 @@ write_summary() {
     local rc=$1
     if (( rc != 0 )); then status="FAILED (exit $rc)"; fi
     {
-        printf 'K41 Caelestia Customization\\n'
-        printf 'Timestamp UTC: %s\\n' "$timestamp"
-        printf 'Status: %s\\n' "$status"
-        printf 'Scheme: caelestia / dark / monochrome\\n'
-        printf 'Shell restart: %s\\n' "$restart_status"
-        printf 'Shell runtime log: %s\\n' "$shell_log_status"
-        printf 'WARN/ERROR log lines: %s\\n' "$warning_count"
-        printf 'Backup: %s\\n' "${backup_dir:-not-created}"
-        printf 'Report: reports/caelestia-customization/%s/\\n' "$(basename -- "$report_dir")"
-        printf 'Mode: user configuration only; no packages or system services changed.\\n'
+        printf 'K41 Caelestia Customization\n'
+        printf 'Timestamp UTC: %s\n' "$timestamp"
+        printf 'Status: %s\n' "$status"
+        printf 'Scheme: caelestia / dark / monochrome\n'
+        printf 'Shell restart: %s\n' "$restart_status"
+        printf 'Shell runtime log: %s\n' "$shell_log_status"
+        printf 'WARN/ERROR log lines: %s\n' "$warning_count"
+        printf 'Backup: %s\n' "${backup_dir:-not-created}"
+        printf 'Report: reports/caelestia-customization/%s/\n' "$(basename -- "$report_dir")"
+        printf 'Mode: user configuration only; no packages or system services changed.\n'
     } >"$summary_file"
 }
 on_exit() {
