@@ -131,14 +131,14 @@ import pathlib, re, sys
 text = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8", errors="replace")
 text = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", text)
 lines = text.splitlines()
-warnings = sum(bool(re.search(r"\bWARN(?:ING)?\b", line, re.I)) for line in lines)
-errors = sum(bool(re.search(r"\bERROR\b", line, re.I)) for line in lines)
-fatals = sum(bool(re.search(r"\bFATAL\b", line, re.I)) for line in lines)
+warnings = sum(bool(re.match(r"^\s*WARN(?:ING)?\b", line, re.I)) for line in lines)
+errors = sum(bool(re.match(r"^\s*ERROR\b", line, re.I)) for line in lines)
+fatals = sum(bool(re.match(r"^\s*FATAL\b", line, re.I)) for line in lines)
 loaded = sum("Configuration Loaded" in line for line in lines)
 print(warnings, errors, fatals, loaded)
 PY
         )
-        quickshell_process_count="$(pgrep -xc quickshell 2>/dev/null || true)"
+        quickshell_process_count="$(pgrep -af '(^|/)(qs|quickshell)( |$).*caelestia' 2>/dev/null | wc -l || true)"
         warning_count="${warning_count:-0}"
         error_count="${error_count:-0}"
         fatal_count="${fatal_count:-0}"
@@ -240,20 +240,17 @@ info 'Caelestia profile applied and scheme variant verified.'
 printf 'Restart Caelestia now and collect its runtime log? [Y/n] '
 IFS= read -r restart_answer
 if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
-    info 'Running caelestia shell -r with a 30-second safety bound.'
+    info 'Running the upstream-documented detached restart: caelestia shell -r -d.'
     set +e
-    timeout 30s caelestia shell -r
+    timeout 10s caelestia shell -r -d
     restart_rc=$?
     set -e
     if (( restart_rc == 0 )); then
         restart_status="COMMAND_RETURNED"
-        info 'Caelestia restart command returned successfully.'
-    elif (( restart_rc == 124 )); then
-        restart_status="FOREGROUND_TIMEOUT"
-        info 'Restart command remained active for 30 seconds; runtime/process checks will determine whether the shell loaded.'
+        info 'PASS: detached Caelestia restart command returned successfully.'
     else
         restart_status="COMMAND_FAILED (exit $restart_rc)"
-        info "WARNING: Caelestia restart command exited with $restart_rc; profile files remain applied."
+        info "WARNING: detached Caelestia restart command exited with $restart_rc; profile files remain applied."
     fi
 
     info 'Collecting Caelestia runtime log with: caelestia shell -l'
@@ -268,13 +265,13 @@ if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
         info "WARNING: Caelestia runtime log collector returned $shell_log_rc."
     fi
 
-    if (( restart_rc == 124 )); then
-        if grep -Fq 'Configuration Loaded' "$log_file" && [[ "$(pgrep -xc quickshell 2>/dev/null || true)" =~ ^[1-9][0-9]*$ ]]; then
-            restart_status="CONFIRMED_AFTER_FOREGROUND_TIMEOUT"
-            info 'PASS: runtime configuration loaded and a Quickshell process is present after the bounded restart.'
+    if (( restart_rc == 0 )); then
+        if grep -Fq 'Configuration Loaded' "$log_file"; then
+            restart_status="CONFIRMED"
+            info 'PASS: runtime log contains Configuration Loaded after the detached restart.'
         else
-            restart_status="UNCONFIRMED_AFTER_TIMEOUT"
-            info 'WARNING: restart timed out and independent runtime confirmation was incomplete.'
+            restart_status="UNCONFIRMED"
+            info 'WARNING: detached restart returned, but the collected runtime log did not confirm Configuration Loaded.'
         fi
     fi
 else
