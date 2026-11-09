@@ -1,0 +1,13 @@
+Command: bash -c printf\ \"Model:\ \"\;\ cat\ /sys/class/dmi/id/product_name\ 2\>/dev/null\ \|\|\ true\;\ printf\ \"CPU:\ \"\;\ lscpu\ 2\>/dev/null\ \|\ grep\ -E\ \"Model\ name\|Architecture\|CPU\\\\\(s\\\\\)\"\ \|\|\ true\;\ printf\ \"\\\\nGPU:\ \"\;\ lspci\ -nnk\ 2\>/dev/null\ \|\ grep\ -A3\ -Ei\ \"VGA\|3D\|Display\"\ \|\|\ true
+Model: 20KESC2Y00
+CPU: Architecture:                            x86_64
+CPU(s):                                  8
+On-line CPU(s) list:                     0-7
+Model name:                              Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
+CPU(s) scaling MHz:                      25%
+NUMA node0 CPU(s):                       0-7
+
+GPU: 00:02.0 VGA compatible controller [0300]: Intel Corporation Kaby Lake-R GT2 [UHD Graphics 620] [8086:5917] (rev 07)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: i915
+	Kernel modules: i915

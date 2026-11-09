@@ -1,0 +1,2 @@
+Command: uname -a
+Linux x280 7.2.14-arch1-1 #1 SMP PREEMPT_DYNAMIC Fri, 30 Oct 2026 14:32:40 +0000 x86_64 GNU/Linux

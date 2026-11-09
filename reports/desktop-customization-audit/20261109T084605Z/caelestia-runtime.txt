@@ -1,0 +1,43 @@
+Command: bash -c $'\n  printf "%s\\\\n" "--- relevant processes ---"\n  for proc in caelestia quickshell qs; do pgrep -a -x "$proc" 2>/dev/null || true; done\n  if command -v caelestia >/dev/null 2>&1; then\n    printf "\\\\n--- caelestia version/help ---\\\\n"\n    caelestia --version 2>&1 || true\n    caelestia --help 2>&1 | head -n 100 || true\n  fi\n  if command -v qs >/dev/null 2>&1; then printf "\\\\n--- Quickshell version ---\\\\n"; qs --version 2>&1 || true; fi\n'
+--- relevant processes ---
+4688 qs -c caelestia -n -d
+
+--- caelestia version/help ---
+Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (package: caelestia-shell)
+
+Quickshell:
+    Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+usage: caelestia [-h] [-v] COMMAND ...
+
+Main control script for the Caelestia dotfiles
+
+options:
+  -h, --help     show this help message and exit
+  -v, --version  print the current version
+
+subcommands:
+  valid subcommands
+
+  COMMAND        the subcommand to run
+    shell        start or message the shell
+    toggle       toggle a special workspace
+    scheme       manage the colour scheme
+    screenshot   take a screenshot
+    record       start a screen recording
+    clipboard    open clipboard history
+    emoji        emoji/glyph utilities
+    wallpaper    manage the wallpaper
+    resizer      window resizer daemon
+    install      install the Caelestia dotfiles
+    update       update the Caelestia dotfiles
+
+--- Quickshell version ---
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))

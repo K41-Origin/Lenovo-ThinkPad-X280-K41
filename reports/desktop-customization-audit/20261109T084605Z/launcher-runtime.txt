@@ -1,0 +1,5 @@
+Command: bash -c for\ app\ in\ wofi\ rofi\ fuzzel\;\ do\ if\ command\ -v\ \"\$app\"\ \>/dev/null\ 2\>\&1\;\ then\ printf\ \"%s:\ %s\\\\n\"\ \"\$app\"\ \"\$\(command\ -v\ \"\$app\"\)\"\;\ fi\;\ done\;\ printf\ \"\\\\nLauncher\ processes:\\\\n\"\;\ for\ proc\ in\ wofi\ rofi\ fuzzel\;\ do\ pgrep\ -a\ -x\ \"\$proc\"\ 2\>/dev/null\ \|\|\ true\;\ done
+wofi: /usr/bin/wofi
+fuzzel: /usr/bin/fuzzel
+
+Launcher processes:

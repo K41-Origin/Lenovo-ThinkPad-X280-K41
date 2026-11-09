@@ -1,0 +1,230 @@
+Command: bash -c $'\n  if ! command -v hyprctl >/dev/null 2>&1; then echo "hyprctl unavailable"; exit 0; fi\n  printf "%s\\\\n" "--- version ---"; hyprctl version 2>&1 || true\n  printf "\\\\n%s\\\\n" "--- monitors ---"; hyprctl -j monitors 2>&1 || true\n  printf "\\\\n%s\\\\n" "--- workspaces ---"; hyprctl -j workspaces 2>&1 || true\n  printf "\\\\n%s\\\\n" "--- devices ---"; hyprctl -j devices 2>&1 || true\n  printf "\\\\n%s\\\\n" "--- runtime option values ---"\n  for option in general:gaps_in general:gaps_out general:border_size decoration:rounding decoration:active_opacity decoration:inactive_opacity decoration:blur:enabled animations:enabled; do\n    printf "\\\\n[%s]\\\\n" "$option"; hyprctl getoption "$option" 2>&1 || true\n  done\n  printf "\\\\n%s\\\\n" "--- config errors ---"; hyprctl configerrors 2>&1 || true\n  printf "\\\\n%s\\\\n" "--- Hyprland process command line ---"\n  pgrep -a -x Hyprland 2>/dev/null || true\n  printf "\\\\nHYPRLAND_INSTANCE_SIGNATURE=%s\\\\n" "${HYPRLAND_INSTANCE_SIGNATURE:-}"\n'
+--- version ---
+Hyprland 0.57.1 built from branch v0.57.1 at commit acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9 clean ([gha] Nix: update inputs).
+Date: Tue Nov 3 09:45:48 2026
+Tag: v0.57.1, commits: 7993
+
+Libraries:
+Hyprgraphics: built against 0.6.0, system has 0.6.0
+Hyprutils: built against 0.14.3, system has 0.14.3
+Hyprcursor: built against 0.1.13, system has 0.1.13
+Hyprlang: built against 0.6.8, system has 0.6.8
+Aquamarine: built against 0.16.0, system has 0.16.0
+
+Version ABI string: acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_aq_0.16_hu_0.14_hg_0.6_hc_0.1_hlg_0.6
+no flags were set
+
+
+--- monitors ---
+[{
+    "id": 0,
+    "name": "eDP-1",
+    "description": "InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6",
+    "make": "InfoVision Optoelectronics (Kunshan) Co.,Ltd China",
+    "model": "0x04E6",
+    "serial": "",
+    "width": 1920,
+    "height": 1080,
+    "physicalWidth": 280,
+    "physicalHeight": 160,
+    "refreshRate": 60.00100,
+    "x": 0,
+    "y": 0,
+    "activeWorkspace": {
+        "address": "1",
+        "id": 1,
+        "type": "normal",
+        "name": "1"
+    },
+    "specialWorkspace": {
+        "address": "",
+        "type": "",
+        "name": ""
+    },
+    "reserved": [10, 10, 10, 10],
+    "scale": 1.5,
+    "transform": 0,
+    "focused": true,
+    "dpmsStatus": true,
+    "vrr": false,
+    "solitary": "0",
+    "solitaryBlockedBy": ["WINDOWED","CANDIDATE"],
+    "activelyTearing": false,
+    "tearingBlockedBy": ["NOT_TORN","USER","CANDIDATE"],
+    "directScanoutTo": "0",
+    "directScanoutBlockedBy": ["USER","CANDIDATE"],
+    "disabled": false,
+    "currentFormat": "XRGB8888",
+    "mirrorOf": "none",
+    "availableModes": ["1920x1080@60.00Hz"],
+    "colorManagementPreset": "srgb",
+    "sdrBrightness": 1,
+    "sdrSaturation": 1,
+    "sdrMinLuminance": 0.2,
+    "sdrMaxLuminance": 80,
+    "hardwareCursorsInUse": true,
+    "hardwareDetails": {
+        "backend": "drm",
+        "hdr": false,
+        "chroma": true,
+        "bt2020": false,
+        "vrrCapable": false
+    }
+}]
+
+--- workspaces ---
+[{
+    "address": "1",
+    "id": 1,
+    "type": "normal",
+    "name": "1",
+    "monitor": "eDP-1",
+    "monitorID": 0,
+    "windows": 1,
+    "hasfullscreen": false,
+    "lastwindow": "0x564b4a109600",
+    "lastwindowtitle": "bash scripts/k41-desktop-costumization-check.sh ",
+    "ispersistent": false,
+    "tiledLayout": "dwindle"
+}]
+
+--- devices ---
+{
+"mice": [
+    {
+        "address": "0x564b49659fe0",
+        "name": "synaptics-tm3381-002",
+        "defaultSpeed": 0.00000,
+        "scrollFactor": -1.00
+    },    {
+        "address": "0x564b4a4dab90",
+        "name": "tpps/2-elan-trackpoint",
+        "defaultSpeed": 0.00000,
+        "scrollFactor": -1.00
+    }
+],
+"keyboards": [
+    {
+        "address": "0x564b495ac1d0",
+        "name": "video-bus",
+        "rules": "",
+        "model": "",
+        "layout": "us",
+        "variant": "",
+        "options": "",
+        "active_layout_index": 0,
+        "active_keymap": "English (US)",
+        "capsLock": false,
+        "numLock": false,
+        "main": false
+    },    {
+        "address": "0x564b4a4f6980",
+        "name": "power-button",
+        "rules": "",
+        "model": "",
+        "layout": "us",
+        "variant": "",
+        "options": "",
+        "active_layout_index": 0,
+        "active_keymap": "English (US)",
+        "capsLock": false,
+        "numLock": false,
+        "main": false
+    },    {
+        "address": "0x564b4a52da60",
+        "name": "sleep-button",
+        "rules": "",
+        "model": "",
+        "layout": "us",
+        "variant": "",
+        "options": "",
+        "active_layout_index": 0,
+        "active_keymap": "English (US)",
+        "capsLock": false,
+        "numLock": false,
+        "main": false
+    },    {
+        "address": "0x564b4a58d4f0",
+        "name": "at-translated-set-2-keyboard",
+        "rules": "",
+        "model": "",
+        "layout": "us",
+        "variant": "",
+        "options": "",
+        "active_layout_index": 0,
+        "active_keymap": "English (US)",
+        "capsLock": false,
+        "numLock": false,
+        "main": true
+    },    {
+        "address": "0x564b4a5b00f0",
+        "name": "thinkpad-extra-buttons",
+        "rules": "",
+        "model": "",
+        "layout": "us",
+        "variant": "",
+        "options": "",
+        "active_layout_index": 0,
+        "active_keymap": "English (US)",
+        "capsLock": false,
+        "numLock": false,
+        "main": false
+    }
+],
+"tablets": [
+
+],
+"touch": [
+
+],
+"switches": [
+    {
+        "address": "0x564b49625810",
+        "name": "Lid Switch"
+    }
+]
+}
+
+
+--- runtime option values ---
+
+[general:gaps_in]
+css gap data: 5 5 5 5
+set: true
+
+[general:gaps_out]
+css gap data: 20 20 20 20
+set: true
+
+[general:border_size]
+int: 2
+set: true
+
+[decoration:rounding]
+int: 10
+set: true
+
+[decoration:active_opacity]
+float: 1.000000
+set: true
+
+[decoration:inactive_opacity]
+float: 1.000000
+set: true
+
+[decoration:blur:enabled]
+bool: true
+set: true
+
+[animations:enabled]
+bool: true
+set: true
+
+--- config errors ---
+
+
+
+--- Hyprland process command line ---
+4558 Hyprland --watchdog-fd 4
+
+HYPRLAND_INSTANCE_SIGNATURE=acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794211857_1165967726
