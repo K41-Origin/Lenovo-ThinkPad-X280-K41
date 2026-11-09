@@ -22,7 +22,7 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
   'loginctl list-sessions' 'loginctl show-user guest' 'getent passwd guest' \
   '/var/lib/systemd/linger/guest' 'pacman -Q' '/usr/share/wayland-sessions' \
   '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn' 'checkout path omitted' '/etc/sudoers.d' \
-  'Filesystem topology, capacity and volatile mount limits' 'memory.max' 'user manager unit names/status' \
+  'Filesystem topology, capacity and volatile mount limits' 'memory.max' 'Current user manager, lingering and session lifecycle' \
   'display-manager.service' '/etc/pam.d' 'System session launch metadata' \
   'System and active-user default browser associations' 'active_user_default_web_browser' \
   'Installed browser desktop launchers' 'Browser private-mode policy indicators' \
