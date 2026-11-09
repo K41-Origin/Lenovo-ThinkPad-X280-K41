@@ -10,15 +10,19 @@ pass() { printf 'PASS: %s\n' "$*"; }
 bash -n "$INSTALLER" || fail 'autologin installer syntax invalid'
 bash -n "$HELPER" || fail 'Caelestia lock helper syntax invalid'
 
-for token in \
-  'getty@tty1.service.d/k41-autologin.conf' \
-  '--autologin $USER_NAME' \
-  'start-hyprland' \
-  'hyprland.start' \
-  'caelestia shell -d' \
-  'systemctl daemon-reload' \
-  '--rollback BACKUP_DIRECTORY' \
-  'SUDO_USER' \\\n  'lock.enabled' \\\n  'getty@tty1.service'; do
+tokens=(
+  'getty@tty1.service.d/k41-autologin.conf'
+  '--autologin $USER_NAME'
+  'start-hyprland'
+  'hyprland.start'
+  'caelestia shell -d'
+  'systemctl daemon-reload'
+  '--rollback BACKUP_DIRECTORY'
+  'SUDO_USER'
+  'lock.enabled'
+  'getty@tty1.service'
+)
+for token in "${tokens[@]}"; do
   grep -Fq -- "$token" "$INSTALLER" || fail "installer contract missing: $token"
 done
 if grep -Eq 'systemctl (enable|start).*?(gdm|sddm|ly|greetd)|default.target' "$INSTALLER"; then
