@@ -1,0 +1,36 @@
+INFO: K41 Caelestia customization started (UTC 20261109T092153Z)
+INFO: Changes: Rubik UI typography, CaskaydiaCove Mono, Caelestia dark monochrome scheme.
+INFO: No shell tokens, wallpaper, package, service, or upstream package files are modified.
+Apply this profile? [y/N] INFO: Private backup created: .local/state/k41/caelestia/backups/20261109T092153Z
+PASS: merged typography settings verified.
+INFO: Caelestia profile applied and scheme variant verified.
+Restart Caelestia now and collect its runtime log? [Y/n] INFO: Restarting Caelestia; stdout/stderr will be saved to run.log.
+INFO: WARNING: Caelestia restart command returned 124; profile files remain applied.
+INFO: Collecting Caelestia runtime log with: caelestia shell -l
+[32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/g09n0a8ot/log.qslog"
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[32m  INFO[0m: qs:@/qs/components/controls/StyledProgressBar.qml: Object or context destroyed during incubation
+[32m  INFO[0m: qs:@/qs/modules/dashboard/Media.qml: Object or context destroyed during incubation
+[33m  WARN[97m scene[0m: QML CachingImage at @modules/dashboard/dash/User.qml[88:13]: Source file does not exist: /home/kai/.face
+[32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/g09n0a8ot/log.qslog"
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[33m  WARN[97m caelestia.images.cacheprovider[0m: Source file does not exist: /home/kai/.face
+[32m  INFO[0m: qs:@/qs/components/controls/StyledProgressBar.qml: Object or context destroyed during incubation
+[32m  INFO[0m: qs:@/qs/modules/dashboard/Media.qml: Object or context destroyed during incubation
+[33m  WARN[97m scene[0m: QML CachingImage at @modules/dashboard/dash/User.qml[88:13]: Source file does not exist: /home/kai/.face
+INFO: Review WARN/ERROR lines in this terminal and in the generated run.log.
+INFO: Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>
+INFO: Report: reports/caelestia-customization/20261109T092153Z/

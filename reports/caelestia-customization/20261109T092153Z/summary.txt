@@ -1,0 +1,10 @@
+K41 Caelestia Customization
+Timestamp UTC: 20261109T092153Z
+Status: SUCCESS_WITH_WARNINGS
+Scheme: caelestia / dark / monochrome
+Shell restart: FAILED (exit 124)
+Shell runtime log: OK
+WARN/ERROR log lines: 1
+Backup: /home/kai/.local/state/k41/caelestia/backups/20261109T092153Z
+Report: reports/caelestia-customization/20261109T092153Z/
+Mode: user configuration only; no packages or system services changed.
