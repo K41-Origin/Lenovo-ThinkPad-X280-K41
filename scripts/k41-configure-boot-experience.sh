@@ -93,24 +93,10 @@ backup_file "/etc/plymouth/plymouthd.conf" "etc/plymouth/plymouthd.conf"
 printf '%s\n' "$crypt_device" >"$backup_dir/luks-device"
 chmod 0600 "$backup_dir/luks-device"
 
-# A LUKS header backup must be stored on a different physical disk.
-printf '\nEnter an absolute path on an external disk for the LUKS header backup.\n'
-printf 'Example: /run/media/%s/USB/k41-cryptroot-header.img\n' "${SUDO_USER:-user}"
-printf 'Header backup path: '
-IFS= read -r header_backup </dev/tty
-[[ $header_backup == /* && $header_backup != */ && ! -e $header_backup ]] ||
-  die "Header backup path must be an unused absolute file path."
-header_parent="$(dirname -- "$header_backup")"
-[[ -d $header_parent ]] || die "Header backup directory does not exist: $header_parent"
-backup_source="$(findmnt -no SOURCE -T "$header_parent" | head -n1)"
-[[ -b $backup_source ]] || die "Header backup destination must be on a mounted block-device filesystem."
-root_parent="$(lsblk -no PKNAME "$crypt_device" | head -n1)"
-backup_parent="$(lsblk -no PKNAME "$backup_source" | head -n1)"
-[[ -n $root_parent && -n $backup_parent && $root_parent != "$backup_parent" ]] ||
-  die "Header backup destination is not demonstrably on a different physical disk."
-cryptsetup luksHeaderBackup "$crypt_device" --header-backup-file "$header_backup"
-chmod 0600 "$header_backup"
-info "LUKS header backup created on a different physical disk: $header_backup"
+# No external LUKS-header backup destination is requested.
+# The existing passphrase keyslot is preserved; config backups remain local under
+# /var/lib/k41/boot-experience/backups for restoring boot configuration only.
+warn "LUKS header backup is being skipped by request. Keep the existing passphrase safe; do not remove or overwrite its keyslot."
 
 # Install Plymouth from the signed official Arch repository; do not bypass pacman verification.
 pacman -S --needed plymouth
@@ -258,5 +244,5 @@ info "Plymouth BGRT is configured and the UKI was rebuilt."
 info "TPM2 token is present in LUKS2 metadata; the original passphrase remains available."
 info "Config backup: $backup_dir"
 info "LUKS header backup: $header_backup"
-warn "Physical reboot testing is still required. Keep the external header backup and the LUKS passphrase."
+warn "Physical reboot testing is still required. No LUKS header backup was created; keep the existing passphrase safe."
 warn "If TPM2 unlock fails, enter the existing passphrase through the Plymouth prompt; press Esc to reveal boot messages."
