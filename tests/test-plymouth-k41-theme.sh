@@ -14,7 +14,6 @@ grep -Fq 'plymouth-poweroff.service' "$ROOT/scripts/k41-install-plymouth-theme.s
 grep -Fq 'reboot.target.wants' "$ROOT/scripts/k41-install-plymouth-theme.sh"
 grep -Fq 'poweroff.target.wants' "$ROOT/scripts/k41-install-plymouth-theme.sh"
 ! grep -Eq 'systemd-cryptenroll|luksAddKey|luksRemoveKey|luksErase|wipe-slot' "$ROOT/scripts/k41-install-plymouth-theme.sh"
-printf 'PASS: K41 Plymouth theme static invariants\n'
 
 grep -Fq 'global.count = 12;' "$ROOT/themes/plymouth/k41/k41.script"
 grep -Fq 'global.radius = 9;' "$ROOT/themes/plymouth/k41/k41.script"
@@ -27,3 +26,5 @@ grep -Fq 'readonly property real ringRadius: 9' "$ROOT/config/quickshell/k41-boo
 grep -Fq 'text: "K41"' "$ROOT/config/quickshell/k41-boot-splash/shell.qml"
 grep -Fq 'width: 4' "$ROOT/config/quickshell/k41-boot-splash/shell.qml"
 grep -Fq 'height: 10' "$ROOT/config/quickshell/k41-boot-splash/shell.qml"
+
+printf 'PASS: K41 Plymouth theme static invariants\n'
