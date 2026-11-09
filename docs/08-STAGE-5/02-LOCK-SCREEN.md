@@ -125,6 +125,17 @@ sudo bash scripts/k41-apply-lockscreen-design.sh --rollback "/home/<user>/.local
 
 Jangan menjalankan script dengan `sudo -E` dari akun lain atau melalui root login; gunakan akun desktop yang memiliki sesi Caelestia. Jangan menguji lock dengan menyimpan password dalam log atau command line.
 
+### Insiden installer — 2026-11-09
+
+**FAILED sebelum perubahan konfigurasi.** Report `reports/lockscreen-apply/20261109T151425Z-apply.log` mencatat `hostname: command not found` dan exit code `1`. Penyebabnya adalah installer menganggap executable `hostname` sebagai dependency wajib. Pada instalasi Arch minimal, executable tersebut tidak selalu tersedia; pengambilan metadata host tidak seharusnya menjadi syarat untuk menerapkan konfigurasi.
+
+Perbaikan di repository:
+- Installer membaca hostname langsung dari `/proc/sys/kernel/hostname`, dengan fallback ke variabel `HOSTNAME` atau nilai `unknown`.
+- `hostname` dihapus dari daftar executable wajib.
+- Test statis ditambah untuk memastikan metadata host tidak lagi bergantung pada executable opsional tersebut.
+
+Report gagal asli tetap dipertahankan sebagai bukti dan **bukan** bukti instalasi berhasil. Setelah menarik perbaikan, jalankan ulang installer. Setiap percobaan menghasilkan report baru; tinjau report terbaru dan pastikan exit code `0` sebelum menyimpulkan proses instalasi berhasil.
+
 ### Validasi yang harus dilakukan di perangkat
 
 1. Pastikan shell hidup tanpa QML load error setelah restart; periksa `caelestia shell -l`.
