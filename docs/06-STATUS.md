@@ -9,7 +9,7 @@
 | 1. Arch ISO — Live Readiness | IMPLEMENTED | `scripts/k41-live-validation.sh` adalah entry point kanonis; default readiness mode. |
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer destruktif lama. Tetap perlu physical install/boot acceptance sesuai gate. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup lama. Exit 0 bukan UI acceptance. |
-| 4. Desktop Functional Validation | IN PROGRESS / NOT ACCEPTED | Tahap aktif. Bukti diagnostik tersedia; checklist penerimaan fisik belum disetujui. |
+| 4. Desktop Functional Validation | NOT TESTED | Tahap aktif. Bukti diagnostik tersedia; checklist penerimaan fisik belum disetujui. |
 | 5. Desktop Customization | PLANNED | Menunggu gate tahap 4. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5; baseline dan tuning terukur diperlukan. |
 | 7. Release | PLANNED | Menunggu seluruh gate, regression, dokumentasi, dan bukti final. |
