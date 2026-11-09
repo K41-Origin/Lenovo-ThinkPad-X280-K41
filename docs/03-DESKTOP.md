@@ -37,13 +37,9 @@ Jika hasil menunjukkan WARN/FAIL, jalankan remediation audit otomatis dari termi
 bash scripts/k41-desktop-repair.sh
 ```
 
-Mode default hanya mengaudit dan membuat laporan privat di `reports/desktop-repair/<timestamp>/`; tidak mengubah sistem. Untuk mengizinkan satu tindakan terbatas—mengaktifkan dan menjalankan `bluetooth.service` yang paket/unit-nya memang sudah terpasang—gunakan:
+Script repair menerapkan tindakan terbatas secara otomatis berdasarkan kondisi yang terdeteksi; tidak ada opsi `--apply` atau `--no-validate`. Script dapat menginisialisasi scheme default Caelestia, memasang hanya paket yang memang diperlukan dan belum tersedia (`bluez`, `bluez-utils`, `wireless-regdb`, `rtkit`), serta mengaktifkan `bluetooth.service` jika controller dan paket BlueZ terdeteksi. Autentikasi sudo hanya diminta bila tindakan sistem diperlukan. Tidak ada upgrade sistem menyeluruh.
 
-```bash
-bash scripts/k41-desktop-repair.sh --apply
-```
-
-Tindakan tersebut tetap meminta konfirmasi interaktif dan memakai sudo hanya untuk `systemctl enable --now bluetooth.service`. Script tidak memasang/memperbarui paket, tidak mengubah PAM, tidak membuat `scheme.json` atau foto profil palsu, tidak mengubah konfigurasi desktop/kernel/firmware, dan tidak menganggap error HCI sebagai sesuatu yang dapat diselesaikan dengan restart service. Setelah audit/perbaikan, validator dijalankan ulang otomatis; gunakan `--no-validate` hanya bila memang ingin melewati validasi ulang.
+PAM tidak pernah ditulis ulang. Repair selalu menyimpan hasil `pacman -Qkk pambase`, versi paket, dan pemilik `/etc/pam.d/other` pada laporan privat untuk diagnosis. Jika integritas atau kepemilikan tidak dapat dipastikan, hasilnya WARN dan kebijakan PAM tetap tidak disentuh. Foto profil `.face` tidak dibuat otomatis. Kernel parameters/SMT, firmware controller, dan konfigurasi desktop tidak diubah. Error HCI tidak dianggap dapat diselesaikan dengan restart service. Setelah tindakan, validator dijalankan ulang otomatis.
 
 Satu run menghasilkan `reports/desktop-validation/<timestamp>/`:
 - `summary.md`: hasil agregat PASS/WARN/FAIL/SKIP dan batas interpretasi.
