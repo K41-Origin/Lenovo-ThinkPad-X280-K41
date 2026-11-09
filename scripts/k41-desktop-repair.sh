@@ -231,18 +231,31 @@ if [[ -n $latest_validation_dir && -r $latest_validation_dir/kernel-journal-warn
     record PASS 'Bluetooth HCI negotiation' 'no configured HCI feature-negotiation signature in post-repair kernel snapshot'
   fi
   cpu_vulnerability_report="$latest_validation_dir/cpu-vulnerabilities.txt"
-  if grep -Eiq 'MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$latest_kernel_report"; then
-    if [[ -r $cpu_vulnerability_report ]] &&
-       grep -Eiq 'Vulnerable|SMT vulnerable' "$cpu_vulnerability_report"; then
-      record WARN 'CPU security mitigations' 'kernel signature correlates with a vulnerable/SMT-vulnerable sysfs state; inspect cpu-vulnerabilities.txt; no SMT or kernel parameters changed'
-    elif [[ -r $cpu_vulnerability_report ]] &&
-         grep -Eiq 'Mitigation:|Not affected' "$cpu_vulnerability_report"; then
-      record PASS 'CPU security mitigations' 'kernel hardware notice is paired with a mitigation/not-affected sysfs state'
-    else
-      record WARN 'CPU security mitigations' 'kernel notice found but current sysfs mitigation state is unavailable or unclassified; inspect cpu-vulnerabilities.txt'
+  cpu_patterns=('MDS CPU bug present' 'MMIO Stale Data CPU bug present' 'VMSCAPE:')
+  cpu_keys=(mds mmio_stale_data vmscape)
+  cpu_attention=0
+  cpu_notice_found=0
+  for cpu_index in "${!cpu_patterns[@]}"; do
+    if grep -Fqi -- "${cpu_patterns[$cpu_index]}" "$latest_kernel_report"; then
+      cpu_notice_found=1
+      cpu_key="${cpu_keys[$cpu_index]}"
+      cpu_state=''
+      if [[ -r $cpu_vulnerability_report ]]; then
+        cpu_state="$(awk -F: -v key="$cpu_key" '$1 == key { sub(/^[^:]*:[[:space:]]*/, ""); print; exit }' "$cpu_vulnerability_report")"
+      fi
+      if [[ -z $cpu_state ]] ||
+         grep -Eiq 'Vulnerable|SMT vulnerable' <<<"$cpu_state" ||
+         ! grep -Eiq 'Mitigation:|Not affected' <<<"$cpu_state"; then
+        cpu_attention=1
+      fi
     fi
-  else
+  done
+  if (( cpu_notice_found == 0 )); then
     record PASS 'CPU security mitigations' 'no configured CPU mitigation signature in post-repair kernel snapshot'
+  elif (( cpu_attention == 1 )); then
+    record WARN 'CPU security mitigations' 'at least one matching CPU notice has a vulnerable, SMT-vulnerable, or unknown sysfs state; inspect cpu-vulnerabilities.txt; no SMT or kernel parameters changed'
+  else
+    record PASS 'CPU security mitigations' 'each CPU boot notice is paired with its own mitigated/not-affected sysfs state'
   fi
 else
   record SKIP 'Kernel warning classification' 'post-repair kernel journal snapshot unavailable'
