@@ -15,6 +15,18 @@ THEME_DIR="/usr/share/plymouth/themes/k41"
 [[ -s "$SOURCE_DIR/k41.plymouth" && -s "$SOURCE_DIR/k41.script" ]] || die "K41 theme source files are missing."
 command -v plymouth-set-default-theme >/dev/null 2>&1 || die "Plymouth is not installed."
 command -v mkinitcpio >/dev/null 2>&1 || die "mkinitcpio is unavailable."
+# Arch's Plymouth package supplies the matching systemd transition units and
+# wires them into reboot/poweroff targets. The selected K41 theme is reused by
+# these units in shutdown/reboot mode; do not create competing custom units.
+for unit_path in \
+    /usr/lib/systemd/system/plymouth-reboot.service \
+    /usr/lib/systemd/system/plymouth-poweroff.service \
+    /usr/lib/systemd/system/plymouth-halt.service \
+    /usr/lib/systemd/system/reboot.target.wants/plymouth-reboot.service \
+    /usr/lib/systemd/system/poweroff.target.wants/plymouth-poweroff.service \
+    /usr/lib/systemd/system/halt.target.wants/plymouth-halt.service; do
+    [[ -e $unit_path ]] || die "Plymouth reboot/shutdown integration is incomplete: missing $unit_path"
+done
 [[ -r /etc/mkinitcpio.conf ]] || die "/etc/mkinitcpio.conf is missing."
 [[ -r /etc/kernel/cmdline ]] || die "/etc/kernel/cmdline is missing."
 mountpoint -q /efi || die "/efi is not mounted; refusing to rebuild UKI to an unmounted path."
