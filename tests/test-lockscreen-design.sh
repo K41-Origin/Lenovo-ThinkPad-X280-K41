@@ -27,10 +27,10 @@ grep -Fq 'shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml' "$instal
 grep -Fq 'cp -- "$source_root/Content.qml" "$staging/modules/lock/Content.qml"' "$installer"
 grep -Fq 'cp -- "$source_root/Center.qml" "$staging/modules/lock/Center.qml"' "$installer"
 grep -Fq 'EXPECTED_PACKAGE_VERSION="2.5.0-1"' "$installer"
-grep -Fq 'Complete upstream QML source tree installed under the user config directory' "$installer"
-grep -Fq 'Refusing destructive rollback' "$installer"
+grep -Fq 'Complete pinned Caelestia source tree installed under the user config directory' "$installer"
+grep -Fq 'refusing destructive rollback' "$installer"
 grep -Fq 'sudo bash scripts/k41-apply-lockscreen-design.sh --rollback' "$installer"
-! grep -Fq '/etc/xdg/quickshell/caelestia/modules/lock/Content.qml' "$installer"
+! grep -Fq 'cp -- "$source_root/Content.qml" "/etc/xdg' "$installer"
 
 # Preserve sudo privilege drop and avoid restarting from a sanitized process.
 grep -Fq 'SUDO_USER' "$installer"
