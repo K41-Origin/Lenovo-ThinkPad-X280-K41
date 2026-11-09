@@ -386,7 +386,11 @@ done
 chmod 0600 "$run_dir"/*.txt "$log" "$checks"
 
 result=PASS
-(( fail_count == 0 )) || result=FAIL
+if (( fail_count > 0 )); then
+  result=FAIL
+elif (( warn_count > 0 )); then
+  result=PASS_WITH_WARNINGS
+fi
 {
   printf '# K41 ThinkPad X280 automated desktop validation\n\n'
   printf -- '- Captured (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
