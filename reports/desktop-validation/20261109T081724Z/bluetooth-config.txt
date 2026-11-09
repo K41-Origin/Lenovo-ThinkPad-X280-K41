@@ -1,0 +1,12 @@
+
+===== /etc/bluetooth/main.conf =====
+[General]
+[BR]
+[LE]
+[GATT]
+[ChannelSounding]
+[CSIS]
+[AVDTP]
+[AVRCP]
+[Policy]
+[AdvMon]

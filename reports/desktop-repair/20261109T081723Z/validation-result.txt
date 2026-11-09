@@ -1,0 +1,4 @@
+Report: /home/kai/Lenovo-ThinkPad-X280-K41/reports/desktop-validation/20261109T081724Z
+Exit code: 0
+Result: PASS_WITH_WARNINGS
+Checks: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP
