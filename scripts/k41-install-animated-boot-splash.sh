@@ -57,8 +57,8 @@ if visual_marker not in text:
     text = text[:position] + visual_block + text[position:]
 
 if splash_marker not in text:
-    command = "sh -c 'mkdir -p \\"$HOME/.cache/k41\\"; qs -c k41-boot-splash >/dev/null 2>&1 & echo $! > \\"$HOME/.cache/k41/boot-splash.pid\\"'"
-    launch = hook + "\\n" + "    hl.exec_cmd(" + json.dumps(command) + ")\\n" + "    " + splash_marker + "\\n"
+    command = """sh -c 'mkdir -p "$HOME/.cache/k41"; qs -c k41-boot-splash >/dev/null 2>&1 & echo $! > "$HOME/.cache/k41/boot-splash.pid"'"""
+    launch = hook + chr(10) + "    hl.exec_cmd(" + json.dumps(command) + ")" + chr(10) + "    " + splash_marker + chr(10)
     text = text.replace(hook, launch, 1)
 
 fd, tmp = tempfile.mkstemp(prefix=".k41-boot-visuals-", dir=p.parent)
