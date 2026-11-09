@@ -8,7 +8,7 @@ Jalankan dari TTY Basic Arch Linux sebagai user biasa:
 sudo bash scripts/k41-install-desktop.sh
 ```
 
-Entry point ini mendelegasikan ke `scripts/setup-desktop-x280.sh`. Setup memasang stack Wayland/Hyprland, audio, portal, utilitas, dan opsi Caelestia sesuai pilihan operator. Login desktop tetap manual dari TTY; tidak ada display manager/autologin. Jangan menambahkan autostart Caelestia duplikat.
+Entry point ini mendelegasikan ke `scripts/setup-desktop-x280.sh`. Setup memasang stack Wayland/Hyprland, audio, portal, utilitas, dan opsi Caelestia sesuai pilihan operator. Default setelah instalasi adalah login manual dari TTY; installer tidak mengaktifkan display manager atau autologin. Otomatisasi login baru merupakan opsi terpisah pada tahap 5.
 
 Exit code 0 bukan acceptance desktop. Lanjutkan ke tahap 4.
 
@@ -236,3 +236,31 @@ Audit terhadap commit pengguna `4c3433274112b597822b1173dfa2f9cab23f59b5` menemu
 Perbaikan decoder sudah dikomit: script sekarang melakukan `.strip()` pada payload base64 dan memvalidasi wallpaper sebelum backup/perubahan konfigurasi. Aset diuji secara statis: base64 valid, JPEG signature valid, 1280x720. Profile Caelestia juga dicocokkan dengan contoh schema upstream v2.5.0: tidak ada key asing. Ini belum menggantikan uji runtime.
 
 **Status saat audit:** Hyprland layer = APPLIED; typography/scheme Caelestia lama = APPLIED; full Caelestia component profile = NOT APPLIED (percobaan sebelumnya rollback otomatis); GTK/Thunar/Foot integration = NOT VERIFIED. Jalankan ulang full profile dan integration setelah mengambil commit perbaikan terbaru.
+
+
+### Otomatisasi boot — TTY1 autologin + Caelestia lock screen (OPT-IN)
+
+Setelah tampilan dan lock screen Caelestia sudah diterima, sesi dapat dibuat otomatis saat laptop dinyalakan. Desain implementasinya sengaja tidak memasang display manager:
+
+1. systemd `getty@tty1` melakukan autologin hanya untuk akun desktop yang menjalankan installer.
+2. Bash login profile memanggil `start-hyprland` hanya pada TTY1. TTY lain tetap meminta kredensial normal.
+3. Hook `hyprland.start` mempertahankan autostart Caelestia yang sudah ada; jika tidak ditemukan di konfigurasi Hyprland, hook akan memulainya.
+4. Helper menunggu Caelestia IPC siap, lalu memanggil target `lock` / fungsi `lock()`. Boot tidak dianggap selesai hanya karena compositor muncul; lock screen harus benar-benar tampil dan menerima password.
+
+Jalankan dari root repository pada sesi desktop yang sedang aktif:
+
+```bash
+sudo bash scripts/k41-enable-caelestia-autologin.sh
+```
+
+Script meminta konfirmasi eksplisit, membuat backup privat di `~/.local/state/k41/autologin/backups/`, menambahkan systemd drop-in khusus tty1, memperbarui `~/.bash_profile` dan konfigurasi aktif `~/.config/hypr/hyprland.lua`, serta memasang helper ke `~/.local/bin/`. Script tidak mengubah default boot target, tidak memasang/mengaktifkan display manager, tidak me-restart getty saat sesi aktif, dan tidak mengubah konfigurasi PAM. Perubahan berlaku setelah reboot.
+
+Rollback (gunakan path backup yang dicetak installer):
+
+```bash
+sudo bash scripts/k41-enable-caelestia-autologin.sh --rollback /home/USER/.local/state/k41/autologin/backups/TIMESTAMP
+```
+
+Rollback mengembalikan file yang dikelola ke kondisi sebelum instalasi; reboot diperlukan agar getty membaca ulang konfigurasi.
+
+**Batas keamanan:** agetty autologin melewati password login TTY1. Caelestia lock screen mengunci sesi grafis setelah shell siap, tetapi bukan pengganti enkripsi disk, dan ada jeda boot sebelum lock screen aktif. Jangan gunakan opsi ini pada laptop yang perlu tetap aman ketika hilang/dicuri tanpa full-disk encryption. Jangan tinggalkan sesi autologin terbuka setelah Caelestia gagal start; pertahankan password login di TTY lain dan ketahui prosedur rollback. Pengujian fisik wajib memastikan boot berakhir di Caelestia lock screen, password membuka sesi, dan reboot kedua tidak menghasilkan login loop.
