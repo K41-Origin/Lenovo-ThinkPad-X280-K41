@@ -25,7 +25,7 @@ Ketiga nama script di atas adalah entry point kanonis. Script lama dipertahankan
 ## Status fitur
 
 - Lock screen kustom: implementasi QML dan deployment installer tersedia; validasi runtime, lock/unlock, wake, dan visual pada X280 masih **belum diverifikasi**. Lihat [status proyek](docs/06-STATUS.md) dan [panduan lock screen](docs/08-STAGE-5/02-LOCK-SCREEN.md).
-- **Guest Mode: BELUM DIIMPLEMENTASIKAN.** Fitur ini ditunda sampai lock screen kustom diterima pengguna; belum ada implementasi atau jaminan keamanan Guest Mode.
+- **Guest Mode: DESAIN KONSEPTUAL DISETUJUI; BELUM DIIMPLEMENTASIKAN.** Akun terpisah `guest`, memakai Hyprland + Caelestia yang sudah ada, browser otomatis Incognito/Private, session tracking, ephemeral storage, dan boot-time verification/cleanup. Implementasi menunggu penerimaan lock screen dan audit/desain storage final. Lihat [spesifikasi Guest Mode](docs/08-STAGE-5/03-GUEST-MODE.md).
 
 ## Keselamatan
 
