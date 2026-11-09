@@ -152,3 +152,6 @@ Batas dan status:
 - Repair tidak melakukan full system upgrade dan tidak mengubah PAM/kernel/SMT/firmware.
 - Laporan dapat memuat username, hostname, path, identitas perangkat, status jaringan, dan journal. Review/redaksi sebelum push.
 - Tahap 5 berfokus pada tema minimalis monochromatic, elegan/premium, dengan kontras dan keterbacaan terjaga serta beban animasi ringan untuk Intel UHD 620.
+
+**Pembaruan 2026-11-10 — arah akses Guest Mode:** Pengguna menginginkan pilihan Guest Mode langsung dari **Caelestia Lock Screen**, tanpa reboot untuk berpindah sesi. Target alur: dari lock screen, akhiri sesi akun utama dengan aman, siapkan storage ephemeral, lalu jalankan sesi Hyprland + Caelestia sebagai akun `guest`; setelah Guest logout, hancurkan storage dan kembali ke greeter. Mekanisme teknis pergantian sesi belum dipilih atau diverifikasi. Threat model dibatasi pada kebutuhan praktis penggunaan keluarga. Fitur ini berprioritas rendah dan ditunda (“direalisasikan nanti kalau tidak mager”); pengguna meminta pengingat pada 2027. Detail dan batas keputusan: [Guest Mode — Ephemeral Session](08-STAGE-5/03-GUEST-MODE.md).
+
