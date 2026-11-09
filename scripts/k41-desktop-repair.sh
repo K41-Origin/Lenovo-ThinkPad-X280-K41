@@ -16,7 +16,7 @@ fi
 (( EUID != 0 )) || { printf 'ERROR: run as regular user, never sudo.\n' >&2; exit 2; }
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -n ${WAYLAND_DISPLAY:-} ]] ||
   { printf 'ERROR: run inside active Hyprland session.\n' >&2; exit 2; }
-for cmd in date mkdir chmod pacman systemctl grep awk sed tee stat; do
+for cmd in date mkdir chmod pacman systemctl grep awk sed head tee stat; do
   command -v "$cmd" >/dev/null 2>&1 || { printf 'ERROR: missing command: %s\n' "$cmd" >&2; exit 2; }
 done
 [[ -f "$ROOT/scripts/k41-desktop-validation.sh" ]] || { printf 'ERROR: validator missing.\n' >&2; exit 2; }
