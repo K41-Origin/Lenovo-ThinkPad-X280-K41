@@ -3,6 +3,14 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 bash -n "$ROOT/scripts/k41-install-animated-boot-splash.sh"
 bash -n "$ROOT/scripts/k41-lock-caelestia-after-start.sh"
+python3 - "$ROOT/scripts/k41-install-animated-boot-splash.sh" <<'PY'
+import pathlib, re, sys
+source = pathlib.Path(sys.argv[1]).read_text(encoding="utf-8")
+match = re.search(r"python3 - \"\\$lua\" <<'PY'\\n(.*?)\\nPY", source, re.S)
+if not match:
+    raise SystemExit("Could not locate embedded Python installer block.")
+compile(match.group(1), "k41-install-animated-boot-splash.py", "exec")
+PY
 grep -Fq 'WlrLayershell.layer: WlrLayer.Overlay' "$ROOT/config/quickshell/k41-boot-splash/shell.qml"
 grep -Fq 'model: root.dotCount' "$ROOT/config/quickshell/k41-boot-splash/shell.qml"
 grep -Fq 'interval: 90' "$ROOT/config/quickshell/k41-boot-splash/shell.qml"
