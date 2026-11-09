@@ -1,23 +1,37 @@
 # Panduan Awal
 
-## Urutan membaca
-1. [AGENTS.md](../AGENTS.md) — aturan keselamatan dan workflow.
-2. [01 Proyek](01-PROJECT.md) — tujuan dan keputusan.
-3. Pilih topik: [Instalasi](02-INSTALLATION.md), [Desktop](03-DESKTOP.md), [Pengujian](04-TESTING.md), [Operasional](05-OPERATIONS.md).
-4. Periksa [Status](06-STATUS.md) sebelum bekerja.
+## Alur kerja utama
+
+1. **Arch Linux Live ISO — Readiness:** jalankan satu entry point, `bash scripts/k41-live-validation.sh`.
+2. **Arch Linux Live ISO — Basic Arch:** setelah readiness PASS dan hasilnya direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Tahap ini menghapus SSD target.
+3. **Basic Arch Linux — Desktop setup:** setelah boot ke TTY Arch Linux, login sebagai user biasa lalu jalankan `sudo bash scripts/k41-install-desktop.sh`. Tidak ada first-boot validation wajib di antara tahap 2 dan 3.
+4. **Desktop Functional Validation:** validasi fungsi desktop secara fisik dan lengkapi checklist.
+5. **Desktop Customization:** mulai hanya setelah tahap 4 diterima.
+6. **Desktop & Hardware Optimization:** optimasi desktop, CPU/GPU, termal, daya, baterai, dan sleep/resume setelah customization diterima.
+7. **Release:** hanya setelah seluruh acceptance gate dan regression checks lulus.
+
+## Entry point dan implementasi
+
+| Entry point kanonis | Implementasi yang dipakai saat ini |
+|---|---|
+| `k41-live-validation.sh` | Implementasi langsung |
+| `k41-install-basic-arch.sh` | `install-arch-x280.sh` |
+| `k41-install-desktop.sh` | `setup-desktop-x280.sh` |
+
+Gunakan entry point kanonis. Nama lama dipertahankan agar perubahan antarmuka tidak memaksa pemindahan besar pada implementasi yang sudah ada.
 
 ## Sumber kebenaran
-Kode branch aktif adalah implementasi; test runner/test aktual adalah sumber hasil test; `reports/` adalah bukti untuk commit dan lingkungan yang tercatat. Dokumen aktif menjelaskan prosedur. `docs/archive/` adalah histori, bukan instruksi terkini.
 
-## Aturan AI
-Inspeksi sebelum mengubah; pertahankan pekerjaan tak terkait; satu topik satu dokumen pemilik; baca kode dan test untuk perubahan implementasi; gunakan upstream resmi untuk klaim versi; jangan melakukan operasi disk destruktif atau perubahan sistem fisik tanpa otorisasi; laporkan hanya test yang benar-benar dijalankan.
+Kode branch `main` adalah implementasi. Test runner dan hasil test aktual adalah sumber hasil test. `reports/` menyimpan bukti untuk commit dan lingkungan yang tercatat. Dokumen aktif menjelaskan workflow saat ini; `docs/archive/` adalah histori, bukan instruksi operasional.
 
 ## Pemilik topik
+
 | Topik | Dokumen |
 |---|---|
-| Tujuan, keputusan, tahap, arsitektur | [01](01-PROJECT.md) |
-| Bootstrap, installer, disk, boot | [02](02-INSTALLATION.md) |
-| Hyprland, Caelestia, desktop acceptance | [03](03-DESKTOP.md) |
-| Test suite dan acceptance | [04](04-TESTING.md) |
-| Security, recovery, software, hardware | [05](05-OPERATIONS.md) |
-| Status dan prioritas | [06](06-STATUS.md) |
+| Tujuan, 7 tahap, arsitektur | [01 — Proyek](01-PROJECT.md) |
+| Live readiness, instalasi dasar, boot | [02 — Instalasi](02-INSTALLATION.md) |
+| Desktop install, validasi, customization | [03 — Desktop](03-DESKTOP.md) |
+| Test suite dan acceptance/release gate | [04 — Testing](04-TESTING.md) |
+| Security, recovery, optimasi hardware | [05 — Operations](05-OPERATIONS.md) |
+| Status aktual dan prioritas | [06 — Status](06-STATUS.md) |
+
