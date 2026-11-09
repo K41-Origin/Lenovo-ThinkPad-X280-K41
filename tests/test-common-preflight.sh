@@ -74,7 +74,7 @@ pass 'network check reports unavailable diagnostics as unknown'
 # Base-system module is source-safe and validates exact encrypted-root/ESP mounts.
 before_options="$(set +o)"
 before_traps="$(trap -p)"
-source "$repo_root/lib/base-system.sh" >"$tmp/base-source.out" 2>"$tmp/base-source.err" || fail 'base-system module sourcing failed'
+source "$repo_root/stages/stage-2-basic-arch-install/lib/base-system.sh" >"$tmp/base-source.out" 2>"$tmp/base-source.err" || fail 'base-system module sourcing failed'
 [[ ! -s "$tmp/base-source.out" && ! -s "$tmp/base-source.err" ]] || fail 'base-system sourcing emitted output'
 [[ "$(set +o)" == "$before_options" ]] || fail 'base-system sourcing changed shell options'
 [[ "$(trap -p)" == "$before_traps" ]] || fail 'base-system sourcing changed traps'
