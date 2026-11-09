@@ -3,6 +3,12 @@
 set -Eeuo pipefail
 
 die() { printf 'K41 Caelestia lock: %s\n' "$*" >&2; exit 1; }
+mark_ready() {
+    local marker="$HOME/.cache/k41/boot-lock-ready"
+    install -d -m 0700 "$(dirname -- "$marker")"
+    : >"$marker"
+    chmod 0600 "$marker"
+}
 command -v caelestia >/dev/null 2>&1 || die 'caelestia CLI is unavailable.'
 command -v sleep >/dev/null 2>&1 || die 'sleep is unavailable.'
 command -v grep >/dev/null 2>&1 || die 'grep is unavailable.'
@@ -33,6 +39,7 @@ for ((i = 1; i <= attempts; i++)); do
             for ((v = 1; v <= verify_attempts; v++)); do
                 if is_locked; then
                     printf 'K41 Caelestia lock: lock state verified.\n'
+                    mark_ready
                     exit 0
                 fi
                 sleep "$interval"
@@ -44,6 +51,14 @@ done
 
 printf 'K41 Caelestia lock: ERROR: lock IPC did not reach a verified locked state; starting Hyprlock fallback.\n' >&2
 if command -v hyprlock >/dev/null 2>&1; then
-    exec hyprlock
+    hyprlock &
+    lock_pid=$!
+    sleep 1
+    if kill -0 "$lock_pid" 2>/dev/null; then
+        mark_ready
+        wait "$lock_pid"
+        exit $?
+    fi
+    wait "$lock_pid" || true
 fi
 die 'Caelestia lock could not be verified and Hyprlock fallback is unavailable.'
