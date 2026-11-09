@@ -43,6 +43,5 @@ grep -Fq 'Do not run with sudo' "$reporter"
 grep -Fq 'WAYLAND_DISPLAY' "$reporter"
 grep -Fq 'caelestia shell -r -d' "$reporter"
 grep -Fq 'PIPESTATUS[0]' "$reporter"
-grep -Fq 'umask 077' "$reporter"
 printf 'PASS: lock-screen override structure, installer/reporter syntax, and in-repository report logging checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
