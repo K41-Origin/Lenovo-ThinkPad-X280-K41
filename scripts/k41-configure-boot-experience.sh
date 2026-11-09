@@ -224,6 +224,7 @@ Before=getty@tty1.service
 
 [Service]
 Type=oneshot
+ExecStartPre=/usr/bin/rm -f -- "$USER_HOME/.cache/k41/boot-lock-ready"
 ExecStart=-/usr/bin/plymouth quit --retain-splash
 RemainAfterExit=yes
 
