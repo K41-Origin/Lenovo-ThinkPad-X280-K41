@@ -28,7 +28,7 @@ fixture_dir="$(mktemp -d)"
 trap 'rm -rf -- "$fixture_dir"' EXIT
 log_file="$fixture_dir/runtime.log"
 scheme_file="$fixture_dir/scheme.json"
-: >"$scheme_file"
+printf '%s\n' '{}' >"$scheme_file"
 
 printf '%s\\n' 'QML FileView: Read of /home/test/.local/state/caelestia/scheme.json failed: File does not exist.' >"$log_file"
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
