@@ -27,7 +27,7 @@ Implementasi lama tetap dipertahankan sampai migrasi internal dilakukan secara t
 
 ## Keputusan sistem
 
-- Login desktop manual dari TTY; tidak ada display manager/autologin.
+- Tahap instalasi desktop mempertahankan login manual dari TTY tanpa display manager/autologin. Setelah tahap 5 diterima, pengguna dapat secara eksplisit mengaktifkan TTY1 autologin + Caelestia lock screen melalui script terpisah; ini bukan default instalasi.
 - NetworkManager untuk jaringan.
 - Hindari power manager yang saling bersaing; audit service aktif sebelum perubahan.
 - Review AUR recipe dan build sebagai user non-root.
