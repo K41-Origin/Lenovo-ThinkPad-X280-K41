@@ -76,11 +76,11 @@ mkdir -p "$backup_dir/files"
 backup_file() {
   local source=$1 relative=$2
   if [[ -e $source ]]; then
-    printf 'present %s\\n' "$relative" >>"$backup_dir/manifest"
+    printf 'present %s\n' "$relative" >>"$backup_dir/manifest"
     mkdir -p "$backup_dir/files/$(dirname -- "$relative")"
     cp -a "$source" "$backup_dir/files/$relative"
   else
-    printf 'absent %s\\n' "$relative" >>"$backup_dir/manifest"
+    printf 'absent %s\n' "$relative" >>"$backup_dir/manifest"
   fi
 }
 backup_file "$GETTY_DROPIN" "etc/systemd/system/getty@tty1.service.d/k41-autologin.conf"
@@ -178,10 +178,10 @@ if text.count(start) != 1 or text.count(end) != 1:
 a = text.index(start)
 b = text.index(end, a) + len(end)
 block = text[a:b]
-launch = re.search(r"(?m)^(\\s*)start-hyprland\\s*$", block)
+launch = re.search(r"(?m)^(\s*)start-hyprland\s*$", block)
 if not launch:
     raise SystemExit("Managed K41 login block does not contain a plain start-hyprland command.")
-marker = '    mkdir -p "$HOME/.cache/k41"\\n    rm -f -- "$HOME/.cache/k41/boot-lock-ready"\\n'
+marker = '    mkdir -p "$HOME/.cache/k41"\n    rm -f -- "$HOME/.cache/k41/boot-lock-ready"\n'
 if "boot-lock-ready" not in block:
     block = block[:launch.start()] + marker + block[launch.start():]
 path.write_text(text[:a] + block + text[b:], encoding="utf-8")
