@@ -125,9 +125,9 @@ Jalankan setelah pull sebagai user biasa, tanpa sudo:
 bash scripts/k41-apply-caelestia-profile.sh
 ```
 
-Setujui prompt apply. Setelah konfigurasi dan scheme diverifikasi, script menawarkan restart Caelestia. Pilih **Y** (default). Perintah restart diberi batas 30 detik; beberapa CLI menjalankan shell sebagai proses foreground yang memang tidak segera selesai. Karena itu, exit 124 tidak langsung dikategorikan sebagai kegagalan. Script kemudian mengambil runtime log melalui `caelestia shell -l`. Jika restart mencapai batas waktu, status dikonfirmasi secara terpisah menggunakan keberadaan `Configuration Loaded` pada log dan jumlah proses `quickshell`. Bila bukti tersebut tidak tersedia, hasil ditandai belum terkonfirmasi.
+Setujui prompt apply. Setelah konfigurasi dan scheme diverifikasi, script menawarkan restart Caelestia. Pilih **Y** (default). Restart menggunakan `caelestia shell -r -d` dengan batas 10 detik agar shell diluncurkan detached dan script tidak membunuh proses foreground yang harus tetap hidup. Pola `-r -d` digunakan upstream pada proses post-update Caelestia. Setelah itu script mengambil runtime log melalui `caelestia shell -l` dan mencari entri `Configuration Loaded`. Jika perintah restart gagal, pengambilan log gagal, atau konfigurasi tidak terkonfirmasi, status dilaporkan sebagai warning.
 
-Output command ditangkap sekali melalui `run.log` (tanpa pipeline tee ganda). Ringkasan menghitung baris WARN/WARNING, ERROR, dan FATAL setelah menghapus ANSI color sequences, serta menghitung entri `Configuration Loaded` dan proses Quickshell yang teramati.
+Output command ditangkap sekali melalui `run.log`. Ringkasan menghapus ANSI color sequences dan hanya menghitung WARN/WARNING, ERROR, dan FATAL yang berada di awal baris sebagai level log; kata-kata tersebut di dalam pesan INFO script tidak ikut dihitung. Jumlah proses Quickshell juga dicatat sebagai informasi diagnostik, bukan satu-satunya bukti keberhasilan.
 
 Laporan `reports/caelestia-customization/<timestamp>/` memuat:
 - `run.log`: output apply, restart, dan runtime log.
@@ -154,8 +154,8 @@ Laporan pengguna: `reports/caelestia-customization/20261109T092153Z/`.
 - Log memuat `Configuration Loaded` dua kali dan tidak memuat baris ERROR/FATAL.
 - Warning `~/.face` tidak ditemukan berulang kali; ini memengaruhi gambar profil pengguna, bukan bukti kegagalan shell.
 - Pesan `Object or context destroyed during incubation` pada StyledProgressBar dan Media tercatat sebagai INFO, bukan ERROR.
-- `caelestia shell -r` mencapai timeout 30 detik (exit 124). Runtime log tetap dapat dikumpulkan; bukti ini tidak cukup untuk menyebut restart gagal ataupun memastikan proses shell tetap berjalan setelah timeout.
-- Ringkasan lama hanya melaporkan satu WARN/ERROR line meskipun log berisi beberapa warning. Karena itu penghitung log diperbaiki pada versi script berikutnya.
+- Script lama menjalankan `caelestia shell -r` (foreground) di dalam `timeout 30s`. Exit 124 menghentikan proses foreground; ini merupakan kesalahan implementasi diagnostik dan dapat menjelaskan mengapa pemeriksaan proses Quickshell berikutnya menghasilkan 0. Restart diperbaiki ke pola detached upstream `caelestia shell -r -d`.
+- Penghitung lama mencari kata WARN/ERROR/FATAL di seluruh pesan, sehingga turut menghitung teks INFO script sendiri. Pada laporan ini, angka WARN 8 terlalu tinggi; angka ERROR 1 dan FATAL 1 adalah false positive dari baris INFO "Review WARN/WARNING/ERROR/FATAL counts". Parser baru hanya menghitung level log di awal baris. Log runtime sebenarnya menunjukkan 6 baris WARN (5 terkait `~/.face`, 1 terkait QML CachingImage), 0 ERROR, dan 0 FATAL.
 
 Hasil visual tetap dinilai langsung oleh pengguna pada perangkat. Perbaikan diagnostik terbaru belum dianggap teruji sampai script baru dijalankan dan laporan barunya diaudit. Review isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan.
 
