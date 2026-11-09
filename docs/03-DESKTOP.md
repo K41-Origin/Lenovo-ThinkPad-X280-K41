@@ -60,6 +60,18 @@ PASS atau PASS_WITH_WARNINGS hanya mencerminkan pemeriksaan otomatis yang tersed
 
 **Keputusan gate:** tahap 4 diterima dan ditutup berdasarkan exit code 0, nol FAIL, seluruh WARN ditinjau dan risiko residualnya dicatat, serta konfirmasi manual pairing dari pengguna. Pemeriksaan visual/fisik yang berada di luar cakupan tahap 4 tidak menghalangi dimulainya tahap 5.
 
+### Pengumpulan baseline visual
+
+Agar operator tidak perlu mengetik rangkaian command panjang, gunakan satu script dari terminal sesi Hyprland sebagai user biasa:
+
+```bash
+bash scripts/k41-desktop-baseline.sh
+```
+
+Script bersifat read-only. Script mengumpulkan executable launcher, keybind terkait, opsi wallpaper Hyprland, monitor, dan config errors. Jika `grim` tersedia, script memandu pengambilan screenshot desktop kosong, launcher, dan dashboard Caelestia. Operator cukup menyiapkan tampilan yang diminta lalu menekan Enter. Jika `grim` tidak tersedia, laporan diagnostik tetap dibuat; jangan memasang paket hanya untuk menjalankan audit ini tanpa keputusan terpisah.
+
+Laporan dibuat di `reports/desktop-customization-baseline/<timestamp>/` dengan permission privat (direktori 0700, file 0600). **Jangan push laporan atau screenshot ke repository publik.** Tinjau isi dan kirim laporan/screenshot secara privat di percakapan proyek. Screenshot lock screen tidak diambil menggunakan `grim`; bila diperlukan, gunakan foto kamera eksternal dan kirim secara privat.
+
 ## Tahap 5 — Desktop Environment Customization (DESIGN APPROVED)
 
 Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. Spesifikasi visual, design tokens awal, cakupan, batas performa, workflow, dan acceptance criteria tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md). Dokumen tersebut menjadi acuan utama customization tahap 5.
