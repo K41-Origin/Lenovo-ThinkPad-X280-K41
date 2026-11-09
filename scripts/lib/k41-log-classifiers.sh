@@ -9,13 +9,13 @@ k41_classify_caelestia_log() {
 
   # Classify the scheme condition separately so a resolved startup warning
   # cannot be re-detected by the generic QML failure matcher.
-  grep -Eiv 'Read of .+scheme\.json failed: File does not exist' "$log_file" >"$filtered" || :
+  grep -Fiv -- "$scheme_warning" "$log_file" >"$filtered" || :
   # A missing .face is an optional avatar resource, not a shell failure.
   sed -E '/Source file does not exist.*\.face([[:space:]]|$)/Id' "$filtered" >"$filtered.tmp"
   mv -- "$filtered.tmp" "$filtered"
 
   if [[ ! -s $scheme_file ]] &&
-     grep -Eiq 'Read of .+scheme\.json failed: File does not exist' "$log_file"; then
+     grep -Fqi -- "$scheme_warning" "$log_file"; then
     printf '%s\n' 'scheme-missing'
   fi
   if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|TypeError:|ReferenceError:' "$filtered"; then
