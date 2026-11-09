@@ -61,15 +61,17 @@ if [[ $MODE == rollback ]]; then
         target="/$relative"
         case "$relative" in
             etc/systemd/system/getty@tty1.service.d/k41-autologin.conf) ;;
-            *) target="$USER_HOME/${relative#home/}" ;;
+            *) target="$USER_HOME/${relative#home/$USER_NAME/}" ;;
         esac
         case "$state" in
             present)
                 [[ -f $ROLLBACK_DIR/files/$relative ]] || die "Backup file missing: $relative"
-                install -D -m 0600 -o "$USER_UID" -g "$USER_GID" "$ROLLBACK_DIR/files/$relative" "$target"
+                mkdir -p -- "$(dirname -- "$target")"
+                cp -a -- "$ROLLBACK_DIR/files/$relative" "$target"
                 if [[ $relative == etc/systemd/system/* ]]; then
                     chown root:root "$target"
-                    chmod 0644 "$target"
+                else
+                    chown "$USER_UID:$USER_GID" "$target"
                 fi
                 ;;
             absent) rm -f -- "$target" ;;
@@ -114,7 +116,8 @@ backup_one() {
     local target=$1 relative=$2
     if [[ -e $target ]]; then
         printf 'present %s\n' "$relative" >> "$BACKUP_DIR/manifest"
-        install -D -m 0600 "$target" "$BACKUP_DIR/files/$relative"
+        mkdir -p -- "$BACKUP_DIR/files/$(dirname -- "$relative")"
+        cp -a -- "$target" "$BACKUP_DIR/files/$relative"
     else
         printf 'absent %s\n' "$relative" >> "$BACKUP_DIR/manifest"
     fi
