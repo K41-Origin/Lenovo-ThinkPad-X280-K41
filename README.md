@@ -6,7 +6,7 @@ Proyek ini membangun instalasi Arch Linux yang modular, aman, reproducible, dan 
 
 | Tahap | Lingkungan | Entry point |
 |---|---|---|
-| 1. Live readiness | Arch Linux Live ISO | `bash scripts/k41-live-validation.sh` · [Peta Stage 1](docs/09-STAGE-1-LIVE-READINESS.md) |
+| 1. Live readiness | Arch Linux Live ISO | `bash scripts/k41-live-validation.sh` · [Peta Stage 1](stages/stage-1-live-readiness/README.md) |
 | 2. Basic Arch installation | Arch Linux Live ISO | `bash scripts/k41-install-basic-arch.sh` |
 | 3. Desktop installation | Arch Linux terpasang, TTY | `sudo bash scripts/k41-install-desktop.sh` |
 | 4. Desktop functional validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` |
@@ -19,7 +19,7 @@ Gunakan entry point kanonis. Script implementasi lama yang dipanggil oleh wrappe
 ## Mulai di sini
 
 1. Baca [AGENTS.md](AGENTS.md) dan [Panduan Awal](docs/00-START-HERE.md).
-2. Ikuti [alur instalasi](docs/02-INSTALLATION.md) dan [peta Stage 1](docs/09-STAGE-1-LIVE-READINESS.md).
+2. Ikuti [alur instalasi](docs/02-INSTALLATION.md) dan [peta Stage 1](stages/stage-1-live-readiness/README.md).
 3. Periksa [status aktual](docs/06-STATUS.md) sebelum mengubah kode atau konfigurasi.
 4. Untuk Stage 5, ikuti urutan [workstream](docs/08-STAGE-5/README.md) dan gunakan [Design System](docs/07-DESKTOP-DESIGN-SYSTEM.md).
 
