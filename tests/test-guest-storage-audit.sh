@@ -25,7 +25,8 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
   'Filesystem topology, capacity and volatile mount limits' 'memory.max' 'user manager unit names/status' \
   'display-manager.service' '/etc/pam.d' 'System session launch metadata' \
   'System and active-user default browser associations' 'active_user_default_web_browser' \
-  'journalctl --disk-usage' 'Complete mounted filesystem topology' \
+  'Installed browser desktop launchers' 'Browser private-mode policy indicators' \
+  'Flatpak applications' 'journalctl --disk-usage' 'Complete mounted filesystem topology' \
   'Selected PAM auth/account/session module chains' 'Hyprland startup directives' \
   'Quickshell/Caelestia config inventory' 'memory.swap.max' \
   'systemctl --version' 'sddm|greetd|ly|gdm|lightdm'; do
