@@ -144,6 +144,8 @@ if [[ $mode == rollback ]]; then
     [[ $(stat -c %u "$rollback_dir") == "$EUID" ]] || die 'Backup must be owned by the current user.'
     [[ $(git -C "$target_root" rev-parse HEAD 2>/dev/null) == "$UPSTREAM_REVISION" ]] ||
         die 'Current local shell is not the managed pinned checkout; refusing destructive rollback.'
+    [[ $(git -C "$target_root" remote get-url origin 2>/dev/null) == "$UPSTREAM_REPO" ]] ||
+        die 'Current local shell has an unexpected upstream remote; refusing destructive rollback.'
     cmp -s "$target_root/modules/lock/Content.qml" "$source_root/Content.qml" ||
         die 'Content.qml has local changes; refusing destructive rollback.'
     cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" ||
