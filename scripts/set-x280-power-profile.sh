@@ -14,7 +14,7 @@ USAGE
 }
 
 die() {
-  printf 'ERROR: %s\\n' "$*" >&2
+  printf 'ERROR: %s\n' "$*" >&2
   exit 1
 }
 
@@ -67,7 +67,7 @@ active="${active%\"}"
 active="${active#\"}"
 
 if [[ ${1} == --show ]]; then
-  printf 'D-Bus service: %s\\nObject: %s\\nActive profile: %s\\nAvailable profile data: %s\\n' \
+  printf 'D-Bus service: %s\nObject: %s\nActive profile: %s\nAvailable profile data: %s\n' \
     "$service" "$object_path" "$active" "$profiles"
   exit 0
 fi
@@ -81,12 +81,12 @@ esac
 grep -Fq "\"$requested\"" <<<"$profiles" || die "profile '$requested' is not exposed by this device."
 
 if [[ $requested == "$active" ]]; then
-  printf 'Already active: %s\\n' "$active"
+  printf 'Already active: %s\n' "$active"
   exit 0
 fi
 
-printf 'Changing power profile: %s -> %s\\n' "$active" "$requested"
-printf 'Rollback: bash scripts/set-x280-power-profile.sh --apply %s\\n' "$active"
+printf 'Changing power profile: %s -> %s\n' "$active" "$requested"
+printf 'Rollback: bash scripts/set-x280-power-profile.sh --apply %s\n' "$active"
 
 busctl --system set-property "$service" "$object_path" "$interface" ActiveProfile s "$requested" ||
   die 'D-Bus rejected the profile change.'
@@ -99,4 +99,4 @@ verified="${verified#\"}"
 [[ $verified == "$requested" ]] ||
   die "verification mismatch: expected '$requested', observed '$verified'."
 
-printf 'VERIFIED active profile: %s\\n' "$verified"
+printf 'VERIFIED active profile: %s\n' "$verified"
