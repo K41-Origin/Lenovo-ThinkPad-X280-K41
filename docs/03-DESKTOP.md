@@ -258,7 +258,7 @@ Script meminta konfirmasi eksplisit, membuat backup root-only di `/var/lib/k41/a
 Rollback (gunakan path backup yang dicetak installer):
 
 ```bash
-sudo bash scripts/k41-enable-caelestia-autologin.sh --rollback /home/USER/.local/state/k41/autologin/backups/TIMESTAMP
+sudo bash scripts/k41-enable-caelestia-autologin.sh --rollback /var/lib/k41/autologin/USER/backups/TIMESTAMP
 ```
 
 Rollback mengembalikan file yang dikelola ke kondisi sebelum instalasi; reboot diperlukan agar getty membaca ulang konfigurasi.
