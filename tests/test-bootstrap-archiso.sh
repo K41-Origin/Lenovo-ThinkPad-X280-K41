@@ -8,6 +8,15 @@ pass() { printf 'PASS: %s\n' "$1"; }
 
 [[ -f $SCRIPT ]] || fail "Arch ISO bootstrap script is missing"
 bash -n "$SCRIPT" || fail "Arch ISO bootstrap has a Bash syntax error"
+for entry in k41-install-basic-arch.sh k41-install-desktop.sh; do
+  path="$ROOT/scripts/$entry"
+  [[ -f $path ]] || fail "canonical entry point is missing: $entry"
+  bash -n "$path" || fail "canonical entry point has a Bash syntax error: $entry"
+done
+grep -Fq 'exec bash "$ROOT/scripts/install-arch-x280.sh" "$@"' "$ROOT/scripts/k41-install-basic-arch.sh" ||
+  fail "basic Arch entry point does not delegate to the existing installer"
+grep -Fq 'exec bash "$ROOT/scripts/setup-desktop-x280.sh" "$@"' "$ROOT/scripts/k41-install-desktop.sh" ||
+  fail "desktop entry point does not delegate to the existing setup implementation"
 pass "bootstrap passes bash -n"
 
 for required in \
@@ -31,7 +40,7 @@ for required in \
   'REVIEWED $commit_sha AND AUTHORIZE READ-ONLY READINESS CHECK' \
   'bash scripts/k41-live-validation.sh --readiness' \
   'READINESS PASSED FOR $commit_sha AND AUTHORIZE INSTALLER LAUNCH' \
-  'exec bash "$repo_dir/scripts/install-arch-x280.sh"'; do
+  'exec bash "$repo_dir/scripts/k41-install-basic-arch.sh"'; do
   grep -Fq -- "$required" "$SCRIPT" || fail "required bootstrap review/safety control is missing: $required"
 done
 pass "bootstrap pins and displays the fetched commit, verifies origin/clean checkout, reviews source, runs live readiness, and requires two exact acknowledgements"
