@@ -1,8 +1,8 @@
 {
   "theme": {
-    "enableTerm": true,
-    "enableHypr": true,
-    "enableFuzzel": true,
+    "enableTerm": false,
+    "enableHypr": false,
+    "enableFuzzel": false,
     "enableGtk": true,
     "enableQt": true,
     "iconTheme": "Adwaita",
