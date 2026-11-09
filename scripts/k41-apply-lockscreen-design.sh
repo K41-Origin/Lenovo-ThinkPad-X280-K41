@@ -98,7 +98,15 @@ trap 'finish_log "$?"' EXIT
 printf '========== K41 LOCKSCREEN INSTALLER ==========\n'
 printf 'Started  : %s\n' "$(date --iso-8601=seconds)"
 printf 'User     : %s (UID %s)\n' "$USER" "$EUID"
-printf 'Host     : %s\n' "$(hostname)"
+# Read the kernel hostname directly; do not depend on the optional
+# inetutils `hostname` executable being installed on a minimal Arch system.
+host_name=unknown
+if [[ -r /proc/sys/kernel/hostname ]]; then
+    IFS= read -r host_name < /proc/sys/kernel/hostname || host_name=unknown
+elif [[ -n ${HOSTNAME:-} ]]; then
+    host_name=$HOSTNAME
+fi
+printf 'Host     : %s\n' "$host_name"
 printf 'Repo     : %s\n' "$repo_root"
 printf 'Report   : %s\n\n' "$log_file"
 
@@ -135,7 +143,7 @@ fi
 [[ -x $state_root && -x $state_root/k41 && -x $state_root/k41/lockscreen ]] ||
     die "A parent directory in the backup path is not traversable by $USER; inspect ownership/mode before proceeding."
 [[ $config_root == /* && $state_root == /* ]] || die 'XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.'
-for cmd in mkdir cp mv mktemp date pacman stat rm chmod tee hostname; do
+for cmd in mkdir cp mv mktemp date pacman stat rm chmod tee; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 pacman -Q caelestia-shell >/dev/null 2>&1 || die 'caelestia-shell package is not installed.'
