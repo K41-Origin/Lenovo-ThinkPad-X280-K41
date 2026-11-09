@@ -214,7 +214,7 @@ Setujui prompt masing-masing script. Jalankan desktop-customization lebih dahulu
 - GTK/Thunar/Foot/CLI: backup ~/.local/state/k41/desktop-integration/backups/; rollback memakai scripts/k41-apply-desktop-integration.sh --rollback BACKUP_DIRECTORY.
 - Rollback full profile mengembalikan shell.json dan scheme.json; pemilihan wallpaper sebelumnya perlu dipulihkan manual melalui >wallpaper.
 - Rollback integrasi mengembalikan file yang memang sudah ada sebelum penerapan. File baru yang sebelumnya tidak ada dibiarkan dan perlu dihapus manual bila pengguna ingin kembali ke kondisi tanpa file tersebut.
-- Kedua script berjalan sebagai user biasa dan tidak memasang paket, mengubah service sistem, atau mengedit shell-tokens.json.
+- Semua script berjalan sebagai user biasa dan tidak memasang paket, mengubah service sistem, atau mengedit shell-tokens.json.
 
 ### Status validasi
 
