@@ -17,11 +17,14 @@ for required in \
   'git -C "$repo_dir" rev-parse HEAD' \
   'git -C "$repo_dir" status --porcelain' \
   'review_files=(' \
-  'scripts/install-arch-x280.sh' \
+  'scripts/k41-install-basic-arch.sh' \\
+  'scripts/install-arch-x280.sh' \\
   'scripts/configure-arch-x280.sh' \
   'config/hardware/thinkpad-x280.conf' \
   'scripts/bootstrap-archiso.sh' \
-  'scripts/k41-live-validation.sh' \
+  'scripts/k41-live-validation.sh' \\
+  'scripts/k41-install-desktop.sh' \\
+  'scripts/setup-desktop-x280.sh' \\
   'scripts/x280-install-readiness.sh' \
   'scripts/x280-first-boot-check.sh' \
   'tests/helpers/storage-fixtures.sh' \
