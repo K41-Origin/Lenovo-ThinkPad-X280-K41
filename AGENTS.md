@@ -1,97 +1,84 @@
 # AI Development Instructions
 
-## Purpose
+## Source of truth and workflow
 
-These instructions govern AI-assisted work in this repository. The repository and its reviewed files are the source of truth; conversation history or model memory must not override them.
+The current repository on branch `main` is the source of truth. At the start of substantial work, inspect the current implementation, owning document, tests, branch, and available working-tree state. Preserve unrelated work. Never infer current behavior from conversation history alone.
 
-## Project continuity and anti-drift
+Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `docs/06-STATUS.md`. The canonical user-facing entry points are:
 
-- The committed repository is the source of truth, not conversation summaries, model memory, or assumptions about earlier work.
-- At the start of each substantial task, read the current implementation/status record, the owning domain document, the relevant approved requirements/decisions, and the actual code/tests being changed.
-- Continue from the latest verified repository state. Do not recreate, replace, or bypass an existing module because a conversation summary describes it incompletely.
-- Record material architecture decisions, evidence, test results, limitations, and the next gate in the owning documentation and status/changelog before ending the work.
-- Clearly label design proposals as PLANNED until code exists; label code IMPLEMENTED only after repository verification; label behavior TESTED only after the stated test actually ran; label hardware behavior NOT TESTED until observed on the actual device.
-- When repository evidence is missing or contradictory, stop and inspect it. Do not fill gaps with plausible-sounding implementation details.
+1. `scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
+2. `scripts/k41-install-basic-arch.sh` — Arch base installation; destructive.
+3. `scripts/k41-install-desktop.sh` — desktop setup from installed Arch TTY.
+4. Desktop functional validation.
+5. Desktop customization.
+6. Desktop and hardware optimization.
+7. Release.
 
-## Required workflow
+The Stage 2 and Stage 3 entry points currently delegate to legacy implementation scripts. Keep wrappers thin; do not duplicate implementation. First-boot diagnostics are optional and are not a required gate between Stages 2 and 3.
 
-Before changing files:
+## Documentation ownership
 
-1. Inspect the current branch, working-tree changes when available, and relevant repository files.
-2. Read `README.md`, `docs/01-PROJECT-CHARTER.md`, `docs/02-REQUIREMENTS-AND-DECISIONS.md`, and `docs/03-ARCHITECTURE-AND-MODULES.md`. Read the relevant domain documents and tests before work that affects them.
-3. Identify applicable requirement IDs, existing behavior, constraints, and acceptance criteria.
-4. Keep the change focused. Preserve unrelated work and do not overwrite or delete content without inspecting it.
-5. If a material requirement or safety decision is ambiguous, explain the ambiguity and ask before proceeding. Do not silently invent a project decision.
+- `README.md`: concise project entry and canonical workflow.
+- `AGENTS.md`: AI workflow, repository editing, safety, and reporting rules.
+- `docs/00-START-HERE.md`: navigation and source-of-truth index.
+- `docs/01-PROJECT.md`: purpose, seven stages, architecture, decisions.
+- `docs/02-INSTALLATION.md`: Stage 1–3 live readiness, basic Arch installation, and desktop installation handoff.
+- `docs/03-DESKTOP.md`: desktop setup, Stage 4 functional acceptance, Stage 5 customization.
+- `docs/04-TESTING.md` and `tests/README.md`: automated test and acceptance principles.
+- `docs/05-OPERATIONS.md`: security, recovery, Stage 6 optimization.
+- `docs/06-STATUS.md`: current stage, status, evidence, and priorities.
+- `docs/archive/`: historical material only; never cite archived instructions as current procedures.
 
-After changing files:
+Each topic has one owning document. Keep other documents concise and link to the owner. When workflow or implementation changes, update affected owners, summaries, tests, and cross-references together. Do not restore references to archived paths as active instructions.
 
-1. Verify every successful write by fetching or reading the resulting repository content again.
-2. Run relevant checks when available and safe. State the exact checks run and their results.
-3. Review the diff for unintended changes and consistency with related documentation.
-4. Update status and changelog documentation when the change materially affects project state.
-5. Report changed files, verification evidence, tests not run, limitations, and remaining work.
+## Required change process
+
+Before edits:
+1. Inspect current branch and repository state where available.
+2. Read the owning document, affected implementation, and relevant tests.
+3. Identify requirements, interfaces, safety constraints, and acceptance criteria.
+4. Keep changes focused and preserve unrelated work.
+5. Ask only when an ambiguity changes safety, scope, or a material architecture decision.
+
+After edits:
+1. Fetch/read every changed file again to verify the write.
+2. Run relevant safe tests and report exact commands/results.
+3. Review references and documentation consistency.
+4. Update `docs/06-STATUS.md` when project state materially changes.
+5. Report changed files, commit evidence, tests not run, limitations, and next gate.
 
 ## Truth and status
 
-- Never invent repository contents, upstream facts, command results, test results, or successful operations.
-- Distinguish proposals and assumptions from approved decisions and verified facts.
-- Use the status vocabulary defined in `docs/01-PROJECT-CHARTER.md`, including `NOT TESTED`; do not create competing definitions.
-- A file existing does not prove its behavior works. Syntax checks do not prove runtime correctness; simulated tests do not prove hardware compatibility.
-- Never mark a requirement or feature tested, verified, or released without appropriate evidence.
+Use these labels precisely:
+- **PLANNED**: not implemented.
+- **IMPLEMENTED**: code exists and repository state confirms it.
+- **TESTED**: named tests were actually executed.
+- **VERIFIED**: behavior was confirmed with appropriate evidence.
+- **RELEASED**: incorporated into an explicitly designated release.
+- **NOT TESTED**: no adequate test evidence.
+
+A file existing or wrapper delegating does not prove runtime behavior. Syntax checks do not prove correct execution. Fixture tests do not prove physical hardware compatibility. Never fabricate repository content, test output, upstream compatibility, or successful GitHub operations.
 
 ## Safety and security
 
-- Never perform destructive disk operations without explicit authorization and verified target identification.
-- Keep the installer fail-closed: uncertain prerequisites, target identity, integrity, or critical configuration must stop the relevant operation safely.
-- Never bypass package signature or integrity verification.
-- Never pipe remotely retrieved scripts directly into a shell.
-- Build AUR packages as an unprivileged user; do not run package build steps as root.
-- Never place passwords, LUKS passphrases, recovery keys, tokens, or other credentials in logs or reports.
-- Do not execute privileged operations, modify real system configuration, or make destructive changes merely to validate a proposed design.
+- Never perform destructive disk operations without explicit user authorization and verified target identity.
+- Keep storage operations fail-closed. Uncertain prerequisites, target identity, integrity, or configuration must stop the operation.
+- Stage 1 readiness is read-only. Stage 2 installation can erase the selected internal SSD and requires backup, source review, target review, and explicit confirmations.
+- Stage 3 desktop setup must run from installed Arch Linux TTY as the regular user via sudo; it must not run from the ISO, chroot, or graphical session.
+- First-boot diagnostics are optional; do not reintroduce them as a mandatory gate before Stage 3.
+- Never disable package signature/integrity verification or pipe remotely retrieved scripts directly into a shell.
+- Build AUR packages as an unprivileged user after reviewing their recipe.
+- Never place passwords, LUKS passphrases, recovery keys, tokens, cookies, or credentials in logs/reports.
+- Do not execute privileged operations, change real system configuration, or perform destructive actions merely to validate a design.
 - Do not use virtual machines for project validation; the user has explicitly ruled out VM testing.
-- Use deterministic fixtures, mocks, static checks, and disposable loop-backed devices only for bounded automated tests. These do not replace hardware validation.
-- Preserve the real destructive installer path: the required end-to-end installation/erase test is performed on the actual ThinkPad X280 SSD after all safety gates pass, with explicit authorization and verified target identity. Never replace this acceptance step with a VM test or remove destructive operations merely to avoid VM testing.
+- Use deterministic fixtures, mocks, static checks, and disposable loop-backed devices only for bounded automated tests. They do not replace physical X280 validation.
 
-## Architecture and implementation
+## Architecture and engineering
 
-- Follow `docs/03-ARCHITECTURE-AND-MODULES.md` and the owning domain document.
-- Keep each module within its documented responsibility and privilege boundary. Do not add overlapping ownership of destructive operations or system configuration.
-- Before implementing a module, ensure its contract and acceptance criteria are sufficiently clear; surface missing decisions rather than guessing.
-- Prefer small, maintainable changes over premature frameworks, duplicated logic, or unnecessary dependencies.
-- Verify current official upstream documentation for version-sensitive packages, dependencies, and installation methods. Record important sources and unresolved compatibility questions.
-- Preserve the approved policy of retrieving the latest `main` commit for an installation attempt and displaying its resolved SHA. A SHA identifies a revision; it does not prove that the revision is safe.
+Use Bash unless another language has a documented material advantage. Quote expansions, validate inputs, handle errors, limit privileges, and use ShellCheck where available. Add tests alongside behavior changes where feasible. Keep canonical entry points thin and single-purpose. Avoid duplicated logic, unnecessary dependencies, and competing power-management services.
 
-## Documentation ownership and conflicts
-
-- Give each topic one owning document. The owning document is the canonical location for the complete, authoritative treatment of that topic.
-- Use this ownership map:
-  - `AGENTS.md`: AI workflow, repository-editing rules, safety boundaries, and reporting requirements.
-  - `docs/00-REPOSITORY-MAP-AND-SOURCE-OF-TRUTH.md`: repository-wide navigation, file-to-document/test/evidence cross-reference, and evidence hierarchy; index only, not a technical authority.
-  - `docs/01-PROJECT-CHARTER.md`: project purpose, scope, goals, and guiding principles.
-  - `docs/02-REQUIREMENTS-AND-DECISIONS.md`: requirement IDs and approved project decisions.
-  - `docs/03-ARCHITECTURE-AND-MODULES.md`: current system architecture, module boundaries, and interfaces, consistent with approved requirements and decisions.
-  - `docs/04-INSTALLATION-AND-DISK.md`: canonical storage, encryption, boot, swap/resume, and disk-recovery contract.
-  - `tests/README.md`: canonical test commands, manifest, evidence artifacts, and test-layer limitations.
-  - `docs/11-TESTING-AND-ACCEPTANCE.md`: concise project-wide acceptance principles and release gates.
-  - `docs/12-IMPLEMENTATION-STATUS-AND-CHANGELOG.md`: concise current implementation matrix, latest commit-bound CI evidence, and outstanding validation gates.
-  - `docs/archive/11-TESTING-AND-ACCEPTANCE-HISTORY-2026-11-08.md` and `docs/archive/12-IMPLEMENTATION-CHANGELOG-HISTORY-2026-11-08.md`: preserved historical snapshots, not current status owners.
-  - `docs/14-STAGE-8-NATIVE-DEVICE-ACCESS.md` and `docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md`: stage-specific design/implementation records, not competing architecture or status sources.
-  - `docs/05-PLATFORM-SECURITY-AND-SOFTWARE.md`: canonical security, desktop, hardware/power/network, package, developer-tool, and authorized security-testing policies.
-- Other documents may include a brief summary when useful, but must link to or name the owning document instead of duplicating its full requirements, decisions, or procedures. Keep indexes and cross-references concise.
-- This map assigns ownership by subject; it is not a blanket rule that one document overrides every other document. Approved decisions in the requirements-and-decisions document constrain the architecture. Architecture and domain documents must remain consistent with them.
-- If documents conflict, identify the exact conflicting statements and affected requirements. Do not silently choose one, invent a compromise, or propagate the conflict. Ask for clarification when resolving it would change scope, an approved decision, safety behavior, or an interface. For non-material editorial inconsistencies, make the smallest correction in the non-owning document and preserve the owning document's meaning.
-- When a topic changes, update its owning document first, then update only affected summaries, status records, and cross-references. Before finishing, check for stale or duplicated statements in the documents affected by the change.
-
-## Shell and test quality
-
-- Use Bash for installer code unless another language has a documented, material advantage.
-- Use safe shell practices, quote expansions appropriately, validate inputs, handle errors, and keep privileged operations minimal.
-- Add or update tests alongside behavior changes where feasible. Do not claim tests ran unless they actually ran.
-- Do not disable package verification or weaken safety controls to make a test pass.
-- Keep documentation consistent with actual code and observed test results.
+Verify version-sensitive package names, dependencies, and installation methods against official upstream documentation. Preserve the policy that bootstrap retrieves latest `main`, displays its resolved commit SHA, requires source review, and applies separate readiness and installer acknowledgements. A SHA identifies a revision; it does not prove safety.
 
 ## Scope and reporting
 
-- Do only the work requested for the current task; do not jump ahead into unrelated implementation.
-- Do not merge pull requests, release changes, or perform other consequential repository actions unless explicitly authorized.
-- Before reporting completion, check changed files and verification results. State what changed, what was verified, what was not tested, and any important risks.
+Do only the work requested. Do not merge pull requests, create releases/tags, or perform other consequential repository actions unless explicitly authorized. Never claim tests ran unless they actually ran. Report what changed, what was verified, what was not tested, risks, and the next concrete stage.
