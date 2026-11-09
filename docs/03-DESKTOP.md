@@ -125,7 +125,20 @@ Jalankan setelah pull sebagai user biasa, tanpa sudo:
 bash scripts/k41-apply-caelestia-profile.sh
 ```
 
-Setujui prompt untuk menerapkan. Laporan ada di `reports/caelestia-customization/<timestamp>/`. Jika shell tidak memperbarui tampilan otomatis, jalankan:
+Setujui prompt untuk menerapkan. Setelah konfigurasi dan scheme diverifikasi, script menawarkan restart Caelestia. Pilih **Y** (default) agar stdout/stderr restart ditampilkan langsung dan disimpan ke `run.log`; script kemudian menjalankan `caelestia shell -l` untuk mengambil runtime log Quickshell. Pengumpulan log dibatasi waktu dan kegagalannya tidak membatalkan konfigurasi yang sudah berhasil diterapkan.
+
+Laporan `reports/caelestia-customization/<timestamp>/` memuat:
+- `run.log`: output apply, restart, dan runtime log termasuk baris WARN/ERROR.
+- `summary.txt`: status apply, status restart/log collector, dan jumlah baris WARN/ERROR.
+- Backup privat tetap disimpan di `~/.local/state/k41/caelestia/backups/`.
+
+Jika memilih skip atau log collector gagal, pengumpulan log dapat dicoba manual:
+
+```bash
+caelestia shell -l
+```
+
+Perintah restart manual bila diperlukan:
 
 ```bash
 caelestia shell -r
@@ -138,7 +151,7 @@ bash scripts/k41-apply-caelestia-profile.sh --rollback /path/ke/direktori-backup
 caelestia shell -r
 ```
 
-Push laporan `reports/caelestia-customization/` agar hasil apply dan scheme aktual dapat diaudit. Tinjau isi laporan sebelum push. Profil ini belum diuji pada perangkat; hasil visual belum dinyatakan diterima.
+Push laporan `reports/caelestia-customization/` agar hasil apply, runtime log, dan warning dapat diaudit. Tinjau isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan. Status `SUCCESS_WITH_WARNINGS` berarti file profil berhasil diterapkan, tetapi restart/log mengeluarkan warning atau gagal; jangan menyimpulkan semua warning sebagai harmless tanpa membaca konteksnya. Hasil visual tetap dinilai langsung oleh pengguna pada perangkat.
 
 ## Tahap 6 — Optimization
 
