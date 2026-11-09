@@ -52,10 +52,10 @@ capture() {
       printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\n' "$rc" >>"$diag"
     fi
   elif "$@" >>"$diag" 2>&1; then
-    printf 'COMMAND EXIT: 0\\n' >>"$diag"
+    printf 'COMMAND EXIT: 0\n' >>"$diag"
   else
     rc=$?
-    printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\\n' "$rc" >>"$diag"
+    printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\n' "$rc" >>"$diag"
   fi
 }
 
