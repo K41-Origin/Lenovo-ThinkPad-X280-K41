@@ -10,6 +10,7 @@ Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `d
 2. `scripts/k41-install-basic-arch.sh` — Arch base installation; destructive.
 3. `scripts/k41-install-desktop.sh` — desktop setup from installed Arch TTY.
 4. `scripts/k41-desktop-validation.sh` — read-only automated package, process, configuration, service, portal, audio, network, battery, thermal, and journal health checks from the active Hyprland session; run as the regular user, never with sudo.
+5. `scripts/k41-desktop-repair.sh` — automated remediation audit; default read-only, with narrowly scoped, interactively approved BlueZ service activation only under `--apply`.
 5. Desktop customization.
 6. Desktop and hardware optimization.
 7. Release.
