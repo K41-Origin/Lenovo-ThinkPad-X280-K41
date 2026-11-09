@@ -69,8 +69,8 @@ capture fonts.txt fc-list : family style file
 capture icon-themes.txt bash -c 'find "$HOME/.icons" /usr/share/icons -mindepth 1 -maxdepth 2 -type d -print 2>/dev/null | sort -u'
 capture cursor-settings.txt bash -c 'gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null || true; gsettings get org.gnome.desktop.interface cursor-size 2>/dev/null || true; printf "XCURSOR_THEME=%s\nXCURSOR_SIZE=%s\n" "${XCURSOR_THEME:-}" "${XCURSOR_SIZE:-}"'
 capture wallpaper-processes.txt bash -c 'pgrep -a -f "swww|hyprpaper|mpvpaper|wallpaper" || true'
-capture hyprland-runtime.txt bash -c 'if have hyprctl; then hyprctl version; hyprctl -j monitors; hyprctl -j workspaces; hyprctl -j devices; else echo "hyprctl unavailable"; fi'
-capture caelestia-runtime.txt bash -c 'pgrep -a -f "caelestia|quickshell|qs" || true; if have caelestia; then caelestia --help 2>&1 | head -n 100; fi; if have qs; then qs --version 2>&1 || true; fi'
+capture hyprland-runtime.txt bash -c 'if command -v hyprctl >/dev/null 2>&1; then hyprctl version; hyprctl -j monitors; hyprctl -j workspaces; hyprctl -j devices; else echo "hyprctl unavailable"; fi'
+capture caelestia-runtime.txt bash -c 'pgrep -a -f "caelestia|quickshell|qs" || true; if command -v caelestia >/dev/null 2>&1; then caelestia --help 2>&1 | head -n 100; fi; if command -v qs >/dev/null 2>&1; then qs --version 2>&1 || true; fi'
 capture gtk-qt-settings.txt bash -c 'printf "GTK_THEME=%s\nQT_STYLE_OVERRIDE=%s\nQT_QPA_PLATFORMTHEME=%s\n" "${GTK_THEME:-}" "${QT_STYLE_OVERRIDE:-}" "${QT_QPA_PLATFORMTHEME:-}"; for f in "$HOME/.config/gtk-3.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini" "$HOME/.config/kdeglobals"; do if [[ -f $f ]]; then printf "\n--- %s ---\n" "$f"; sed -n "1,200p" "$f"; fi; done'
 
 # Copy relevant user configuration text for review. No symlinks, caches, sockets,
@@ -129,7 +129,7 @@ chmod 0600 "$report_dir/config-symlinks.txt"
 
 {
   printf '# Wallpaper and theme asset candidates\n'
-  for root in "$HOME/.壁紙" "$HOME/Pictures" "$HOME/.local/share/backgrounds" /usr/share/backgrounds; do
+  for root in "$HOME/Wallpapers" "$HOME/Pictures" "$HOME/.local/share/backgrounds" /usr/share/backgrounds; do
     [[ -d $root ]] || continue
     find "$root" -maxdepth 3 -type f \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.webp' -o -iname '*.svg' \) -printf '%p (%s bytes)\n' 2>/dev/null
   done
