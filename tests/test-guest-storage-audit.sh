@@ -41,7 +41,18 @@ pass 'no system mutation, account management, package install, or destructive op
 if grep -Eq 'cat[[:space:]]+--?[[:space:]]+.*(/home|/root)|find[[:space:]]+(/home|/root)([[:space:]]|$)' "$SCRIPT"; then
   fail 'collector must not read/list user home content'
 fi
-if grep -Eq 'firefox.*(profile|cookies)|chrom(e|ium).*(profile|cookies)|\.mozilla|\.config' "$SCRIPT"; then
-  fail 'collector must not inspect browser profiles or user config'
+if grep -Eq 'firefox.*(profile|cookies)|chrom(e|ium).*(profile|cookies)|\.mozilla|\.config/(google-chrome|chromium|brave|mozilla)' "$SCRIPT"; then
+  fail 'collector must not inspect browser profiles or browser credential stores'
 fi
-pass 'collector avoids home contents, browser profiles, credentials, and user configuration'
+pass 'collector avoids home contents, browser profiles, credentials, and browser credential stores'
+
+grep -Fq 'df -B1 -P / /home /tmp /dev/shm /var /var/tmp /var/log /var/lib /run /run/user/"$EUID" >>"$report" 2>&1' "$SCRIPT" ||
+  fail 'df stdout/stderr must both be captured in report'
+grep -Fq 'journalctl --disk-usage --no-pager >>"$report" 2>&1' "$SCRIPT" ||
+  fail 'journalctl stdout/stderr must both be captured in report'
+grep -Fq 'flatpak list --app --columns=application,branch,installation >>"$report" 2>&1' "$SCRIPT" ||
+  fail 'flatpak stdout/stderr must both be captured in report'
+if grep -Eq '(df|journalctl|flatpak list)[^|]*2>&1 >>"\\$report"' "$SCRIPT"; then
+  fail 'incorrect output redirection order found'
+fi
+pass 'report redirections capture stdout and stderr correctly'
