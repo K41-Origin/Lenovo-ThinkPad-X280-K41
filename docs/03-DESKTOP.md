@@ -66,36 +66,44 @@ Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. S
 
 Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu mengambil atau mengunggah screenshot; penilaian visual dilakukan langsung pada display ThinkPad X280 oleh pengguna.
 
-### Implementasi pertama — fondasi tampilan
+### Fondasi tampilan — SUDAH DITERAPKAN
 
-Setelah pull commit terbaru yang memuat script dan konfigurasi tahap 5, jalankan sebagai user biasa dari root repository, bukan dengan sudo:
+Script `scripts/k41-apply-desktop-customization.sh` menerapkan overlay appearance Hyprland, mengalihkan launcher `SUPER + R` ke Fuzzel, dan memasang konfigurasi Fuzzel Graphite. Script dijalankan sebagai user biasa, tanpa sudo:
 
 ```bash
 bash scripts/k41-apply-desktop-customization.sh
 ```
 
-Script membuat laporan otomatis sebelum pemeriksaan awal, sehingga kegagalan preflight pun tercatat. Setiap eksekusi menghasilkan direktori unik di `reports/desktop-customization/<timestamp>/` yang berisi:
-- `run.log`: seluruh output INFO/ERROR dan diagnostik saat eksekusi.
-- `summary.txt`: status akhir, timestamp, launcher yang terdeteksi, dan lokasi log.
+Bukti run pengguna:
+- Laporan: `reports/desktop-customization/20261109T090739Z/`.
+- Status script: `SUCCESS`; backup privat dibuat dan konfigurasi diperbarui.
+- Pengguna mengonfirmasi `SUPER + R` berhasil dijalankan.
+- Hasil ini memverifikasi jalur launcher secara manual, bukan seluruh tampilan Stage 5. Pemeriksaan visual tetap dilakukan pengguna langsung pada perangkat.
 
-Jika launcher declaration tidak cocok, script sekarang mencari satu deklarasi Lua sederhana `local menu = "…"` dengan toleransi spasi dan tanda kutip tunggal/ganda. Jika tidak ditemukan tepat satu deklarasi, script berhenti tanpa mengubah konfigurasi dan menyimpan diagnostik ke `run.log`. Jangan edit konfigurasi secara manual hanya untuk melewati pemeriksaan; push laporan agar dapat diaudit.
-
-Saat lolos preflight dan disetujui, script membuat backup privat konfigurasi aktif, lalu:
-- Menambahkan appearance overlay ringan ke `~/.config/hypr/hyprland.lua`.
-- Mengatur variabel launcher `menu` ke Fuzzel yang sudah terpasang.
-- Mengganti konfigurasi Fuzzel dengan palet Graphite.
-- Mempertahankan keybind lain, input, monitor, workspace, window rules, dan autostart yang sudah ada.
-- Tidak memasang paket atau mengubah konfigurasi Caelestia, GTK, daya, maupun hardware.
-
-Backup disimpan di `~/.local/state/k41/desktop-customization/backups/`. Untuk rollback, gunakan path backup yang dicatat pada output terminal atau file `latest-backup`:
+Setiap run menghasilkan `run.log` dan `summary.txt`. Backup disimpan privat di `~/.local/state/k41/desktop-customization/backups/`. Rollback:
 
 ```bash
 bash scripts/k41-apply-desktop-customization.sh --rollback /path/ke/direktori-backup
 ```
 
-Setelah penerapan, jalankan `hyprctl reload` dan uji launcher dengan `SUPER + R`. Jika terjadi masalah, jangan hapus backup. Push seluruh direktori laporan `reports/desktop-customization/` ke GitHub agar saya dapat memeriksa hasilnya tanpa Anda mengetik log secara manual. Tinjau laporan sebelum push jika memuat informasi lokal yang tidak ingin dipublikasikan. Jangan menjalankan script dengan sudo.
+### Audit Caelestia sebelum integrasi
 
-**Status implementasi:** perbaikan deteksi launcher dan logging sudah di-commit ke repository; belum diuji pada perangkat. Tahap berikutnya adalah menjalankan script terbaru, push laporan yang dihasilkan, lalu memvalidasi runtime Hyprland/launcher. Penerimaan visual tetap menjadi keputusan pengguna berdasarkan tampilan langsung di perangkat.
+Sebelum mengubah shell, lakukan audit read-only terhadap versi runtime, package versions, font resolution, konfigurasi aktif, skema warna, dan proses:
+
+```bash
+bash scripts/k41-audit-caelestia.sh
+```
+
+Jalankan sebagai user biasa dari root repository, tanpa sudo. Script tidak mengubah konfigurasi, paket, service, wallpaper, maupun proses shell. Laporan berada di `reports/caelestia-audit/<timestamp>/`:
+- `run.log`: versi, hasil CLI, font resolution, file konfigurasi, dan proses.
+- `summary.txt`: status dan daftar artefak.
+- `config-snapshot.json`: bagian konfigurasi Caelestia yang relevan; path personal dan lokasi cuaca disamarkan.
+
+Review `config-snapshot.json` sebelum push. Push direktori laporan tersebut ke GitHub agar konfigurasi aktual dapat diaudit tanpa mengetik atau menyalin log manual.
+
+**Alasan audit terlebih dahulu:** dokumentasi upstream menetapkan `~/.config/caelestia/shell.json` sebagai konfigurasi utama dan menyediakan `shell-tokens.json` untuk token internal tingkat lanjut. Upstream memperingatkan agar tidak menyalin seluruh contoh konfigurasi dan agar token internal tidak diubah tanpa pemahaman. Karena versi Caelestia yang terpasang dan konfigurasi aktual harus menjadi acuan, batch berikutnya belum akan menulis override warna/token atau mengubah wallpaper sebelum hasil audit diperiksa.
+
+Status: launcher Fuzzel telah diuji pengguna; integrasi Caelestia masih PLANNED.
 
 ## Tahap 6 — Optimization
 
