@@ -19,17 +19,17 @@ if (( EUID == 0 )); then
   [[ -n $audit_home && -d $audit_home ]] || die 'HOME akun pemanggil tidak valid.'
   export HOME="$audit_home" USER="$audit_user" LOGNAME="$audit_user"
   export XDG_RUNTIME_DIR="/run/user/$audit_uid"
-  # sudo may drop Hyprland's instance marker; recover it from the user's compositor.
-  if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+  # HYPRLAND_INSTANCE_SIGNATURE is not guaranteed to exist in /proc/<pid>/environ:
+  # Hyprland may create it after process startup. Discover instances via hyprctl instead.
+  if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
     hypr_pid="$(pgrep -u "$audit_uid" -x Hyprland | head -n 1 || true)"
     if [[ -n $hypr_pid && -r /proc/$hypr_pid/environ ]]; then
       session_env="$(tr '\0' '\n' < "/proc/$hypr_pid/environ")"
-      HYPRLAND_INSTANCE_SIGNATURE="$(printf '%s\n' "$session_env" | sed -n 's/^HYPRLAND_INSTANCE_SIGNATURE=//p' | head -n 1)"
-      WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-$(printf '%s\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)}"
-      XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
-      export HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_SESSION_TYPE
+      WAYLAND_DISPLAY="$(printf '%s\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)"
+      export WAYLAND_DISPLAY
     fi
   fi
+  [[ -n ${XDG_SESSION_TYPE:-} ]] || export XDG_SESSION_TYPE=wayland
   if [[ -S $XDG_RUNTIME_DIR/bus ]]; then
     export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
   fi
@@ -116,15 +116,26 @@ for proc in Hyprland quickshell qs caelestia hyprlock swaylock gtklock fprintd; 
   fi
 done
 
-section 'Hyprland live lock-related bindings'
-if have hyprctl && [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
-  if ! hyprctl binds 2>/dev/null | grep -iE -C 2 '(^|[^[:alnum:]_])(lock|hyprlock|swaylock)([^[:alnum:]_]|$)' | sed "s|$HOME|~|g" >> "$report"; then
-    printf 'No matching lock-related binding found, or query unavailable.\n' >> "$report"
+section 'Hyprland live instances and lock-related bindings'
+if have hyprctl; then
+  instances_output="$(hyprctl instances 2>&1 || true)"
+  if [[ -n $instances_output ]]; then
+    printf '%s\n' "$instances_output" >> "$report"
+    instance_count="$(printf '%s\n' "$instances_output" | grep -cE '^Instance[[:space:]]' || true)"
+    if [[ $instance_count == 1 ]]; then
+      if ! hyprctl -i 0 binds 2>/dev/null | grep -iE -C 2 '(^|[^[:alnum:]_])(lock|hyprlock|swaylock)([^[:alnum:]_]|$)' | sed "s|$HOME|~|g" >> "$report"; then
+        printf 'No matching lock-related binding found, or query unavailable.\n' >> "$report"
+      fi
+      printf '\nMonitor summary:\n' >> "$report"
+      hyprctl -i 0 monitors 2>/dev/null | grep -E 'Monitor |description:|model:|width:|height:|refreshRate:|scale:' >> "$report" || true
+    else
+      printf 'Live binding query skipped: expected exactly one discoverable Hyprland instance; found %s.\n' "${instance_count:-0}" >> "$report"
+    fi
+  else
+    note 'Skipped: hyprctl could not discover a running Hyprland instance.'
   fi
-  printf '\nMonitor summary:\n' >> "$report"
-  hyprctl monitors 2>/dev/null | grep -E 'Monitor |description:|model:|width:|height:|refreshRate:|scale:' >> "$report" || true
 else
-  note 'Skipped: not inside an active Hyprland session or hyprctl unavailable.'
+  note 'Skipped: hyprctl unavailable.'
 fi
 
 section 'Caelestia user configuration: selected lock and wallpaper fields only'
@@ -168,6 +179,15 @@ PY
   fi
 done
 (( found_config == 1 )) || note 'No conventional Caelestia shell.json/shell.jsonc candidate found under ~/.config/caelestia.'
+
+section 'Caelestia package source inventory (paths only)'
+if have pacman && pacman -Q caelestia-shell >/dev/null 2>&1; then
+  pacman -Ql caelestia-shell 2>/dev/null |
+    grep -iE 'quickshell|caelestia|modules/lock|Lock.qml|Content.qml' |
+    sed "s|$HOME|~|g" | head -n 200 >> "$report" || true
+else
+  note 'caelestia-shell package file inventory unavailable.'
+fi
 
 section 'Relevant configuration file inventory (paths only)'
 for base in "$HOME/.config/hypr" "$HOME/.config/caelestia" "$HOME/.config/quickshell" /etc/xdg/caelestia /usr/share/caelestia /usr/lib/caelestia; do
