@@ -47,13 +47,21 @@ printf '%s\n' \
 review_files=(
   README.md
   AGENTS.md
-  docs/04-INSTALLATION-AND-DISK.md
-  docs/15-ARCH-INSTALLER-INITIAL-EXECUTION.md
+  docs/00-START-HERE.md
+  docs/01-PROJECT.md
+  docs/02-INSTALLATION.md
+  docs/03-DESKTOP.md
+  docs/04-TESTING.md
+  docs/05-OPERATIONS.md
+  docs/06-STATUS.md
   config/hardware/thinkpad-x280.conf
   scripts/bootstrap-archiso.sh
+  scripts/k41-install-basic-arch.sh
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
   scripts/k41-live-validation.sh
+  scripts/k41-install-desktop.sh
+  scripts/setup-desktop-x280.sh
   scripts/x280-install-readiness.sh
   scripts/live-validation.sh
   scripts/x280-first-boot-check.sh
@@ -110,4 +118,4 @@ IFS= read -r acknowledgement </dev/tty
   die "Installer-launch acknowledgement did not match; no disk operation was started."
 
 info "Launching installer commit $commit_sha. A third, target-specific storage-plan confirmation is still required."
-exec bash "$repo_dir/scripts/install-arch-x280.sh"
+exec bash "$repo_dir/scripts/k41-install-basic-arch.sh"
