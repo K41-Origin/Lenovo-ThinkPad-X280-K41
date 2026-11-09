@@ -1,0 +1,25 @@
+INFO: K41 full desktop profile started (UTC 20261109T100415Z)
+INFO: This profile changes Caelestia appearance, bar, dashboard, launcher, lock screen, sidebar, notifications, utilities and wallpaper.
+INFO: It preserves existing authentication settings and does not edit shell-tokens.json, Hyprland binds, packages or system services.
+Apply the full K41 Obsidian profile? [y/N] INFO: Private backup created: .local/state/k41/desktop-profile/backups/20261109T100415Z
+PASS: merged Caelestia profile and required component settings verified.
+PASS: decoded JPEG wallpaper (9586 bytes).
+INFO: Wallpaper asset installed at: /home/kai/Pictures/Wallpapers/k41-obsidian-1280x720.jpg
+INFO: PASS: Caelestia wallpaper command returned successfully.
+INFO: Restarting Caelestia with the upstream-supported detached restart.
+[32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/uw7zb8ot/log.qslog"
+[32m  INFO[0m: Configuration Loaded
+INFO: Collecting Caelestia runtime log.
+[32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/uw7zb8ot/log.qslog"
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[97m qt.gui.imageio.jpeg[0m: Corrupt JPEG data: 3 extraneous bytes before marker 0xc2
+[33m  WARN[97m qt.gui.imageio.jpeg[0m: Corrupt JPEG data: 3 extraneous bytes before marker 0xc2
+[33m  WARN[97m qt.gui.imageio.jpeg[0m: Corrupt JPEG data: 3 extraneous bytes before marker 0xc2
+INFO: Visual components configured: lock screen, bar/taskbar, dashboard, launcher, sidebar, notifications, OSD and utility quick toggles.
+INFO: Open Caelestia panels with the existing Hyprland shortcuts; use SUPER+L to test lock screen if that binding is present.
+INFO: Rollback command: bash scripts/k41-apply-full-desktop-profile.sh --rollback '/home/kai/.local/state/k41/desktop-profile/backups/20261109T100415Z'
+INFO: Report: reports/desktop-profile/20261109T100415Z/
