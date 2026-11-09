@@ -130,7 +130,7 @@ tested in this project stage. No manual checklist is requested and no visual PAS
 is claimed.
 COVERAGE
 
-chmod 0600 "$log" "$summary" "$checklist"
+chmod 0600 "$log" "$summary" "$coverage"
 printf 'Caelestia diagnostic report created: %s\n' "$run_dir"
 printf 'Review diagnostics.txt, summary.md, and coverage-limitations.md before sharing.\n'
 printf 'The script does not stop Caelestia; it records runtime evidence only.\n'
