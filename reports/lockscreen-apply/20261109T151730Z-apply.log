@@ -1,0 +1,90 @@
+========== K41 LOCKSCREEN INSTALLER ==========
+Started  : 2026-11-09T22:17:30+07:00
+User     : kai (UID 1000)
+Host     : x280
+Repo     : /home/kai/Lenovo-ThinkPad-X280-K41
+Report   : /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T151730Z-apply.log
+
+This installs two user-level QML overrides only. No package, PAM, authentication, system service, or upstream file is changed.
+Backup: /home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z
+Apply K41 minimal Floating Password Card layout? [y/N] INFO: QML overrides installed for user kai under /home/kai/.config/quickshell/caelestia/modules/lock/.
+INFO: Upstream LockSurface.qml, wallpaper selection/blur, WlSessionLock and PAM components remain untouched.
+INFO: Rollback: bash scripts/k41-apply-lockscreen-design.sh --rollback '/home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z'
+Restart the running Caelestia shell now? This briefly closes/reloads shell widgets. [y/N] [32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/1x9hq8ot/log.qslog"
+[33m  WARN[97m caelestia.services.hypr[0m: $HYPRLAND_INSTANCE_SIGNATURE is unset. Unable to connect to Hyprland socket.
+[33m  WARN[0m: $HYPRLAND_INSTANCE_SIGNATURE is unset. Cannot connect to hyprland.
+[33m  WARN[0m: qs:@/qs/components/containers/StyledWindow.qml:10:5: Could not create attached properties object 'qs::wayland::layershell::WlrLayershell'
+
+[33m  WARN[0m: failed to create variant with object QVariant(QObject*, 0x7f495afa65c0)
+[33m  WARN[0m: qs:@/qs/components/containers/StyledWindow.qml:10:5: Could not create attached properties object 'qs::wayland::layershell::WlrLayershell'
+
+[33m  WARN[0m: failed to create variant with object QVariant(QObject*, 0x7f495afa65c0)
+[33m  WARN[0m: QQmlComponent: Component is not ready
+[33m  WARN[0m: qs:@/qs/components/containers/StyledWindow.qml:10:5: Could not create attached properties object 'qs::wayland::layershell::WlrLayershell'
+
+[33m  WARN[0m: failed to create variant with object QVariant(QObject*, 0x7f495afa65c0)
+[33m  WARN[0m: QQmlComponent: Component is not ready
+[33m  WARN[0m: qs:@/qs/components/containers/StyledWindow.qml:10:5: Could not create attached properties object 'qs::wayland::layershell::WlrLayershell'
+
+[33m  WARN[0m: failed to create variant with object QVariant(QObject*, 0x7f495afa65c0)
+[33m  WARN[97m [0m: Failed to create wl_display (No such file or directory)
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: Cannot create idle monitor as ext-idle-notify-v1 is not supported by the current compositor.
+[33m  WARN[0m: Cannot create idle monitor as ext-idle-notify-v1 is not supported by the current compositor.
+[33m  WARN[0m: Cannot create idle monitor as ext-idle-notify-v1 is not supported by the current compositor.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[97m quickshell.service.notifications[0m: Could not register notification server at org.freedesktop.Notifications, presumably because one is already registered.
+[33m  WARN[97m quickshell.service.notifications[0m: Registration will be attempted again if the active service is unregistered.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[33m  WARN[0m: The active compositor does not support hyprland_global_shortcuts_v1.
+[33m  WARN[0m: GlobalShortcut will not work.
+[32m  INFO[0m: Configuration Loaded
+INFO: Restart command returned successfully; inspect the lock screen and runtime log.
+INFO: No visual/runtime acceptance is claimed until lock/unlock and visual checks pass on the X280.
+
+========== EXECUTION SUMMARY ==========
+Finished : 2026-11-09T22:17:35+07:00
+Exit code: 0
+Result   : SUCCESS
+Log file : /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T151730Z-apply.log
