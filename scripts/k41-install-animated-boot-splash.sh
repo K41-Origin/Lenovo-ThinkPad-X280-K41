@@ -63,11 +63,11 @@ if visual_marker not in text:
 
 if splash_marker not in text:
     launch = (
-        hook + '\n'
-        + '    hl.exec_cmd("sh -c \'mkdir -p \\"$HOME/.cache/k41\\"; '
-        + 'qs -c k41-boot-splash >/dev/null 2>&1 & '
-        + 'echo $! > \\"$HOME/.cache/k41/boot-splash.pid\'")\n'
-        + '    ' + splash_marker + '\n'
+        hook + "\\n"
+        + "    hl.exec_cmd(\\"sh -c 'mkdir -p \\\\"$HOME/.cache/k41\\\\"; "
+        + "qs -c k41-boot-splash >/dev/null 2>&1 & "
+        + "echo $! > \\\\"$HOME/.cache/k41/boot-splash.pid\\\\"'\\")\\n"
+        + "    " + splash_marker + "\\n"
     )
     text = text.replace(hook, launch, 1)
 
