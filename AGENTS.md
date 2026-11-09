@@ -23,13 +23,14 @@ The Stage 2 and Stage 3 entry points currently delegate to legacy implementation
 - `docs/00-START-HERE.md`: navigation and source-of-truth index.
 - `docs/01-PROJECT.md`: purpose, seven stages, architecture, decisions.
 - `docs/02-INSTALLATION.md`: Stage 1–3 live readiness, basic Arch installation, and desktop installation handoff.
-- `docs/03-DESKTOP.md`: desktop setup, Stage 4 functional acceptance, Stage 5 customization.
+- `docs/03-DESKTOP.md`: desktop setup, Stage 4 functional acceptance, Stage 5 customization overview.
+- `docs/08-STAGE-5/README.md` and its seven workstream documents: Stage 5 execution order, component-specific decisions, acceptance, and implementation history; `02-LOCK-SCREEN.md` owns lock-screen and Guest Mode status.
 - `docs/04-TESTING.md` and `tests/README.md`: automated test and acceptance principles.
 - `docs/05-OPERATIONS.md`: security, recovery, Stage 6 optimization.
 - `docs/06-STATUS.md`: current stage, status, evidence, and priorities.
 - `docs/archive/`: historical material only; never cite archived instructions as current procedures.
 
-Each topic has one owning document. Keep other documents concise and link to the owner. When workflow or implementation changes, update affected owners, summaries, tests, and cross-references together. Do not restore references to archived paths as active instructions.
+Each topic has one owning document. Keep other documents concise and link to the owner. Guest Mode must consistently be described as **NOT IMPLEMENTED** and deferred until the user explicitly accepts the custom lock screen; do not imply it exists or is ready. When workflow or implementation changes, update affected owners, summaries, tests, and cross-references together. Do not restore references to archived paths as active instructions.
 
 ## Required change process
 
