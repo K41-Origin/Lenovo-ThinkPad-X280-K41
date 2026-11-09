@@ -398,7 +398,7 @@ chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"
 # and journal messages may expose host-specific information.
 diagnostics="$run_dir/diagnostics.tsv"
 diagnostics_log="$run_dir/diagnostics.log"
-printf 'STATUS\\tDIAGNOSTIC\\tEXIT_CODE\\tOUTPUT_FILE\\n' >"$diagnostics"
+printf 'STATUS\tDIAGNOSTIC\tEXIT_CODE\tOUTPUT_FILE\n' >"$diagnostics"
 : >"$diagnostics_log"
 chmod 0600 "$diagnostics" "$diagnostics_log"
 
@@ -406,21 +406,21 @@ diagnostic() {
   local label=$1 output_file=$2 rc=0
   shift 2
   if ! command -v "$1" >/dev/null 2>&1; then
-    printf 'SKIP\\t%s\\tNA\\t%s\\n' "$label" "$output_file" >>"$diagnostics"
-    printf '\\n===== %s =====\\nSKIPPED: command not installed (%s)\\n' "$label" "$1" >>"$diagnostics_log"
+    printf 'SKIP\t%s\tNA\t%s\n' "$label" "$output_file" >>"$diagnostics"
+    printf '\n===== %s =====\nSKIPPED: command not installed (%s)\n' "$label" "$1" >>"$diagnostics_log"
     return 0
   fi
-  printf '\\n===== %s =====\\nCOMMAND:' "$label" >>"$diagnostics_log"
+  printf '\n===== %s =====\nCOMMAND:' "$label" >>"$diagnostics_log"
   printf ' %q' "$@" >>"$diagnostics_log"
-  printf '\\n' >>"$diagnostics_log"
+  printf '\n' >>"$diagnostics_log"
   if "$@" >"$tmp/$output_file" 2>&1; then
     rc=0
   else
     rc=$?
   fi
   cat -- "$tmp/$output_file" >>"$diagnostics_log"
-  printf 'COMMAND EXIT: %s\\n' "$rc" >>"$diagnostics_log"
-  printf 'CAPTURED\\t%s\\t%s\\t%s\\n' "$label" "$rc" "$output_file" >>"$diagnostics"
+  printf 'COMMAND EXIT: %s\n' "$rc" >>"$diagnostics_log"
+  printf 'CAPTURED\t%s\t%s\t%s\n' "$label" "$rc" "$output_file" >>"$diagnostics"
 }
 
 diagnostic 'Kernel command line' 'kernel-cmdline.txt' cat /proc/cmdline
@@ -435,7 +435,7 @@ diagnostic 'Bluetooth package metadata' 'bluetooth-packages.txt' pacman -Qi blue
 diagnostic 'Bluetooth service properties' 'bluetooth-unit.txt' systemctl show bluetooth.service -p LoadState -p ActiveState -p SubState -p UnitFileState -p FragmentPath
 diagnostic 'NetworkManager service properties' 'networkmanager-unit.txt' systemctl show NetworkManager.service -p LoadState -p ActiveState -p SubState -p UnitFileState
 diagnostic 'Power profile service properties' 'power-profiles-unit.txt' systemctl show power-profiles-daemon.service -p LoadState -p ActiveState -p SubState -p UnitFileState
-diagnostic 'Thermal hardware monitor inventory' 'hwmon.txt' bash -c 'for d in /sys/class/hwmon/hwmon*; do [[ -d $d ]] || continue; printf "DEVICE %s\\n" "$d"; [[ -r $d/name ]] && cat "$d/name"; for f in "$d"/temp*_input "$d"/fan*_input "$d"/power*_input; do [[ -r $f ]] || continue; printf "%s=" "${f##*/}"; cat "$f"; done; done'
+diagnostic 'Thermal hardware monitor inventory' 'hwmon.txt' bash -c 'for d in /sys/class/hwmon/hwmon*; do [[ -d $d ]] || continue; printf "DEVICE %s\n" "$d"; [[ -r $d/name ]] && cat "$d/name"; for f in "$d"/temp*_input "$d"/fan*_input "$d"/power*_input; do [[ -r $f ]] || continue; printf "%s=" "${f##*/}"; cat "$f"; done; done'
 diagnostic 'ThinkPad ACPI interface' 'thinkpad-acpi.txt' bash -c 'for f in /sys/devices/platform/thinkpad_acpi/{fan_control,hotkey_mask,hotkey_all_mask}; do [[ -r $f ]] || continue; printf "%s=" "$f"; cat "$f"; done'
 diagnostic 'PAM other policy metadata' 'pam-other.txt' stat /etc/pam.d/other
 diagnostic 'Relevant installed package versions' 'desktop-package-versions.txt' pacman -Q hyprland quickshell-git caelestia-shell caelestia-cli pipewire wireplumber bluez bluez-utils linux-firmware
