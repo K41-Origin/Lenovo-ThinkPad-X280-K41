@@ -16,7 +16,7 @@ fi
 (( EUID != 0 )) || { printf 'ERROR: run as regular user, never sudo.\n' >&2; exit 2; }
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -n ${WAYLAND_DISPLAY:-} ]] ||
   { printf 'ERROR: run inside active Hyprland session.\n' >&2; exit 2; }
-for cmd in date mkdir chmod pacman systemctl grep awk tee stat; do
+for cmd in date mkdir chmod pacman systemctl grep awk sed tee stat; do
   command -v "$cmd" >/dev/null 2>&1 || { printf 'ERROR: missing command: %s\n' "$cmd" >&2; exit 2; }
 done
 [[ -f "$ROOT/scripts/k41-desktop-validation.sh" ]] || { printf 'ERROR: validator missing.\n' >&2; exit 2; }
@@ -195,12 +195,10 @@ fi
 
 # Grade the actual post-repair report, not only the exit code: WARN is a
 # successful execution but is not a clean PASS.
-validation_reports=("$ROOT"/reports/desktop-validation/*/summary.md)
+latest_validation_dir="$(awk '/^Report: / { sub(/^Report: /, ""); report=$0 } END { print report }' "$report_dir/validation-output.log")"
 latest_validation_summary=''
-latest_validation_dir=''
-if (("${#validation_reports[@]}" > 0)) && [[ -f ${validation_reports[-1]} ]]; then
-  latest_validation_summary=${validation_reports[-1]}
-  latest_validation_dir=${latest_validation_summary%/summary.md}
+if [[ $latest_validation_dir == "$ROOT"/reports/desktop-validation/* && -f $latest_validation_dir/summary.md ]]; then
+  latest_validation_summary="$latest_validation_dir/summary.md"
   validation_result="$(sed -n 's/^- Result: \*\*\(.*\)\*\*$/\1/p' "$latest_validation_summary" | head -n 1)"
   validation_counts="$(sed -n 's/^- Checks: //p' "$latest_validation_summary" | head -n 1)"
   printf 'Report: %s\nExit code: %s\nResult: %s\nChecks: %s\n' \
