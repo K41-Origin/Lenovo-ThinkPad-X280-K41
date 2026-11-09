@@ -2,7 +2,7 @@
 
 ## Urutan kerja proyek
 
-1. **Live readiness:** dari Arch Linux Live ISO jalankan `bash scripts/k41-live-validation.sh`.
+1. **Live readiness:** dari Arch Linux Live ISO jalankan `bash scripts/k41-live-validation.sh`. Lihat [peta Stage 1 — Live Readiness](09-STAGE-1-LIVE-READINESS.md).
 2. **Basic Arch installation:** setelah readiness PASS dan rencana/target direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Operasi ini destruktif.
 3. **Desktop installation:** setelah boot ke Arch terpasang dan login TTY sebagai user biasa, jalankan `sudo bash scripts/k41-install-desktop.sh`.
 4. **Desktop validation:** dari sesi Hyprland sebagai user biasa jalankan `bash scripts/k41-desktop-validation.sh`. Stage 4 telah diterima; bukti ringkas dan batasnya tercatat di [Status](06-STATUS.md).
@@ -40,7 +40,8 @@ Laporan runtime baru disimpan lokal di `reports/<category>/<timestamp>/` dan tid
 | Topik | Dokumen |
 |---|---|
 | Tujuan, tahapan, arsitektur | [01 — Proyek](01-PROJECT.md) |
-| Tahap 1–3 | [02 — Instalasi](02-INSTALLATION.md) |
+| Tahap 1–3: prosedur instalasi | [02 — Instalasi](02-INSTALLATION.md) |
+| Stage 1: peta entry point, call graph, modul, laporan, dan test | [09 — Stage 1 Live Readiness](09-STAGE-1-LIVE-READINESS.md) |
 | Desktop tahap 3–5 | [03 — Desktop](03-DESKTOP.md) |
 | Automated tests dan acceptance | [04 — Testing](04-TESTING.md) |
 | Security, recovery, tahap 6 | [05 — Operations](05-OPERATIONS.md) |
