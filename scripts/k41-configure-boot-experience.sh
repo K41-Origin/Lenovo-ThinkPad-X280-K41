@@ -52,6 +52,10 @@ HELPER_TARGET="$USER_HOME/.local/bin/k41-lock-caelestia-after-start"
 [[ -f $BASH_PROFILE ]] && grep -Fq '# K41 HYPRLAND AUTOLOGIN START' "$BASH_PROFILE" &&
   grep -Fq 'start-hyprland' "$BASH_PROFILE" || die "The K41 tty1 Hyprland login block was not found."
 [[ -f $HELPER_TARGET ]] || die "The installed Caelestia lock helper was not found."
+HYPRLAND_CONFIG="$USER_HOME/.config/hypr/hyprland.lua"
+[[ -r $HYPRLAND_CONFIG ]] || die "Expected Hyprland config is missing: $HYPRLAND_CONFIG"
+command -v qs >/dev/null 2>&1 || die "Quickshell (qs) is required for the K41 graphical handoff."
+[[ -x "$SCRIPT_DIR/k41-install-animated-boot-splash.sh" ]] || die "The K41 Quickshell handoff installer is missing."
 
 printf '\nK41 boot-experience setup\n'
 printf 'Root LUKS device: %s\n' "$crypt_device"
@@ -85,6 +89,7 @@ backup_file() {
 }
 backup_file "$GETTY_DROPIN" "etc/systemd/system/getty@tty1.service.d/k41-autologin.conf"
 backup_file "$BASH_PROFILE" "home/$USER_NAME/.bash_profile"
+backup_file "$HYPRLAND_CONFIG" "home/$USER_NAME/.config/hypr/hyprland.lua"
 backup_file "$HELPER_TARGET" "home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start"
 backup_file "/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf" "etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf"
 backup_file "/etc/systemd/system/k41-plymouth-release.service" "etc/systemd/system/k41-plymouth-release.service"
@@ -97,6 +102,10 @@ chmod 0600 "$backup_dir/luks-device"
 # The existing passphrase keyslot is preserved; config backups remain local under
 # /var/lib/k41/boot-experience/backups for restoring boot configuration only.
 warn "LUKS header backup is being skipped by request. Keep the existing passphrase safe; do not remove or overwrite its keyslot."
+
+# Install the graphical K41 handoff first. Its Hyprland config is backed up above.
+info "Installing the K41 Quickshell handoff and Hyprland visual suppression."
+bash "$SCRIPT_DIR/k41-install-animated-boot-splash.sh"
 
 # Install Plymouth from the signed official Arch repository; do not bypass pacman verification.
 pacman -S --needed plymouth
