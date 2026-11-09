@@ -93,6 +93,20 @@ printf '%s\n' 'kernel: Kernel panic - not syncing' >"$log_file"
 classification="$(k41_classify_journal "$log_file" 0 0)"
 [[ $classification == critical ]] || fail "critical kernel signature was not prioritized: $classification"
 
+# CPU boot notices must be correlated with current sysfs mitigation state.
+cpu_dir="$fixture_dir/cpu-vulnerabilities"
+mkdir -p "$cpu_dir"
+printf '%s\\n' 'kernel: MDS CPU bug present' >"$log_file"
+printf '%s\\n' 'Mitigation: Clear CPU buffers' >"$cpu_dir/mds"
+classification="$(k41_classify_journal "$log_file" 0 0 "$cpu_dir")"
+[[ $classification == no-configured-signature ]] || fail "mitigated MDS notice remained actionable: $classification"
+printf '%s\\n' 'Mitigation: Clear CPU buffers; SMT vulnerable' >"$cpu_dir/mds"
+classification="$(k41_classify_journal "$log_file" 0 0 "$cpu_dir")"
+[[ $classification == actionable ]] || fail "SMT-vulnerable MDS state was not actionable: $classification"
+rm -f "$cpu_dir/mds"
+classification="$(k41_classify_journal "$log_file" 0 0 "$cpu_dir")"
+[[ $classification == actionable ]] || fail "unknown MDS sysfs state was not handled conservatively: $classification"
+
 pass 'Journal classifier regression fixtures (empty queries, resolved firmware, mixed informational/error, and critical signatures)'
 pass 'Caelestia log classifier regression fixtures (stale scheme, optional avatar, missing resource, real QML errors, BlueZ, and RTKit)'
 
