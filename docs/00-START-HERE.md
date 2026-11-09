@@ -31,7 +31,7 @@ Kode branch `main` adalah implementasi. Test runner dan hasil test aktual adalah
 |---|---|
 | Tujuan, 7 tahap, arsitektur | [01 — Proyek](01-PROJECT.md) |
 | Live readiness, instalasi dasar, boot | [02 — Instalasi](02-INSTALLATION.md) |
-| Desktop install, validasi, customization | [03 — Desktop](03-DESKTOP.md) |
+| Desktop install, validasi, customization | [03 — Desktop](03-DESKTOP.md) dan [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md) |
 | Test suite dan acceptance/release gate | [04 — Testing](04-TESTING.md) |
 | Security, recovery, optimasi hardware | [05 — Operations](05-OPERATIONS.md) |
 | Status aktual dan prioritas | [06 — Status](06-STATUS.md) |
