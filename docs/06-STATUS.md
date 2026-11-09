@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna. Workstream 2: desain C disetujui; audit perangkat dan audit upstream revision Caelestia terpasang selesai; override QML minimal, installer backup/rollback dengan sudo handoff ke user desktop, dan static test telah ditambahkan ke `main`. **Static test belum dijalankan; belum TESTED/VERIFIED pada X280**: perlu apply, cek QML runtime, lock/unlock, wake, dan penerimaan visual. Guest Mode tetap ditunda sampai lock screen kustom diterima pengguna. Perbaikan tahap instalasi sebelumnya tetap dijadwalkan sebelum tahap 7. |
+| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 (boot experience) ditutup berdasarkan konfirmasi pengguna. Workstream 2: override QML `Content.qml`, `Center.qml`, `PasswordInput.qml`, dan `LockSurface.qml` serta installer deployment telah **IMPLEMENTED**. Commit layout terakhir: `35d924a` dan `5851a5b`; perubahan sebelumnya mencakup surface luar transparan, password surface terpisah, dan deployment source tree Caelestia lengkap. **Belum TESTED/VERIFIED pada X280**: belum ada bukti runtime QML, path source aktif setelah deployment terbaru, lock/unlock, wake, atau penerimaan visual. Guest Mode **NOT IMPLEMENTED** dan ditunda sampai pengguna menerima custom lock screen. Perbaikan tahap instalasi sebelumnya tetap dijadwalkan sebelum tahap 7. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -108,6 +108,21 @@ Jangan menghapus keyslot passphrase. Secure Boot masih disabled pada snapshot au
 - Tiga WARN journal masih ada pada validasi otomatis. HCI feature/debug messages masih tercatat di kernel log; pairing tetap berhasil setelah perbaikan readiness. CPU SMT vulnerability warnings adalah risiko residual yang secara eksplisit diterima pengguna dengan SMT tetap aktif. Tidak ada perubahan PAM, kernel parameters, SMT, atau firmware.
 - Rincian konfirmasi manual: `reports/desktop-validation/20261109T081724Z/manual-acceptance.md`.
 - Tahap 4 tidak mengklaim uji visual/fisik. Interaksi fisik/UI yang tidak tercakup tetap dapat diuji selama tahap 5 sebagai regression/acceptance tambahan.
+
+## Status lock screen dan Guest Mode — 2026-11-09
+
+### Lock screen
+
+- **IMPLEMENTED (repository):** override QML dan script `scripts/k41-apply-lockscreen-design.sh` tersedia di `main`. Installer men-deploy source tree Caelestia yang dipin ke versi/revision upstream, dengan backup dan rollback.
+- **Perubahan desain yang tercatat:** surface luar lock screen dibuat transparan agar wallpaper/blur tetap menjadi latar; kartu/field password mempertahankan surface rounded tersendiri; `Content.qml` mengisi area yang tersedia; `Center.qml` menempatkan kelompok clock/date/password melalui `anchors.centerIn` pada parent berukuran penuh.
+- **Komponen terkait:** `config/quickshell/caelestia/modules/lock/LockSurface.qml`, `Content.qml`, `Center.qml`, `center/PasswordInput.qml`, dan `scripts/k41-apply-lockscreen-design.sh`.
+- **Commit layout terbaru:** `35d924ad2de25c858389961c8eac3b255d13ed46` (full available content area) dan `5851a5b5ef90621f460e5541aecd44ad2fc96e7b` (geometric centering). Perubahan lock-screen lain ada pada histori commit sebelumnya di `main`.
+- **NOT TESTED / NOT VERIFIED pada perangkat:** tidak ada hasil yang membuktikan QML runtime berhasil memuat override terbaru, lock/unlock berfungsi, wake/resume aman, atau posisi visual benar-benar berada di tengah. Keberhasilan commit atau installer bukan bukti penerimaan tampilan.
+- **Acceptance berikutnya:** tarik `main`, jalankan installer sesuai panduan lock screen, restart Quickshell dari sesi Hyprland aktif, pastikan report menunjuk ke source tree lokal `~/.config/quickshell/caelestia/shell.qml`, lalu uji lock/unlock, password salah/benar, wake, dan review visual langsung di X280. Jangan mengubah PAM atau autentikasi untuk memperbaiki tampilan.
+
+### Guest Mode
+
+**NOT IMPLEMENTED — BELUM DIIMPLEMENTASIKAN.** Tidak ada implementasi Guest Mode yang dapat digunakan atau dinyatakan aman. Fitur ini ditunda; desain dan implementasi baru boleh dimulai setelah pengguna secara eksplisit menyatakan custom lock screen telah diterima. Guest Mode bukan bagian dari status selesai workstream lock screen saat ini.
 
 ## Keputusan dan batas
 
