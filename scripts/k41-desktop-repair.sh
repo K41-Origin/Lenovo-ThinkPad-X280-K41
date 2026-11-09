@@ -230,8 +230,17 @@ if [[ -n $latest_validation_dir && -r $latest_validation_dir/kernel-journal-warn
   else
     record PASS 'Bluetooth HCI negotiation' 'no configured HCI feature-negotiation signature in post-repair kernel snapshot'
   fi
+  cpu_vulnerability_report="$latest_validation_dir/cpu-vulnerabilities.txt"
   if grep -Eiq 'MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$latest_kernel_report"; then
-    record WARN 'CPU security mitigations' 'post-repair kernel snapshot contains mitigation findings; no SMT or kernel parameters changed'
+    if [[ -r $cpu_vulnerability_report ]] &&
+       grep -Eiq 'Vulnerable|SMT vulnerable' "$cpu_vulnerability_report"; then
+      record WARN 'CPU security mitigations' 'kernel signature correlates with a vulnerable/SMT-vulnerable sysfs state; inspect cpu-vulnerabilities.txt; no SMT or kernel parameters changed'
+    elif [[ -r $cpu_vulnerability_report ]] &&
+         grep -Eiq 'Mitigation:|Not affected' "$cpu_vulnerability_report"; then
+      record PASS 'CPU security mitigations' 'kernel hardware notice is paired with a mitigation/not-affected sysfs state'
+    else
+      record WARN 'CPU security mitigations' 'kernel notice found but current sysfs mitigation state is unavailable or unclassified; inspect cpu-vulnerabilities.txt'
+    fi
   else
     record PASS 'CPU security mitigations' 'no configured CPU mitigation signature in post-repair kernel snapshot'
   fi
