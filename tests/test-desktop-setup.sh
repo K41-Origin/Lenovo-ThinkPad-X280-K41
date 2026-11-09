@@ -10,7 +10,7 @@ pass() { printf 'PASS: %s\n' "$*"; }
 [[ -f $RESOLVER ]] || fail 'AUR dependency resolver missing'
 [[ -f $ROOT/scripts/k41-desktop-validation.sh ]] || fail 'canonical desktop validation entry point missing'
 bash -n "$ROOT/scripts/k41-desktop-validation.sh" || fail 'canonical desktop validation entry point syntax invalid'
-for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'K41_REPORT_DIR=' 'qs -c caelestia kill' 'manual-checklist.md' 'umask 077'; do
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'K41_REPORT_DIR=' 'qs -c caelestia kill' 'manual-checklist.md' 'umask 077' '[[ -f "$ROOT/scripts/test-desktop-x280.sh" ]]' '[[ -f "$ROOT/scripts/test-caelestia-x280.sh" ]]'; do
   grep -Fq -- "$token" "$ROOT/scripts/k41-desktop-validation.sh" || fail "canonical desktop validator missing contract: $token"
 done
 if grep -Eq '(^|[[:space:]])sudo[[:space:]]|systemctl (enable|disable|start|stop)' "$ROOT/scripts/k41-desktop-validation.sh"; then
