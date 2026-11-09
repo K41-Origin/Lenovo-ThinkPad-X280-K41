@@ -84,4 +84,4 @@ Jalankan dari terminal dalam sesi Hyprland sebagai user biasa (tanpa sudo):
 bash scripts/k41-lockscreen-audit.sh
 ```
 
-Laporan dibuat di `~/.local/state/k41/lockscreen-audit/<timestamp>/audit.txt` dengan permission direktori/file privat. Collector read-only; ia tidak mengubah konfigurasi, service, package, PAM, atau autentikasi. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib.
+Laporan dibuat langsung di repository pada `reports/lockscreen-audit/<timestamp>/audit.txt` dengan permission direktori/file privat. Setelah meninjau dan menyunting data sensitif, pengguna dapat menjalankan `git add reports/lockscreen-audit/ && git commit && git push` untuk mengirim bukti audit bersama repository. Collector read-only; ia tidak mengubah konfigurasi, service, package, PAM, atau autentikasi. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib. Walaupun collector menghindari username dan credential, laporan tetap harus diperiksa sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM.
