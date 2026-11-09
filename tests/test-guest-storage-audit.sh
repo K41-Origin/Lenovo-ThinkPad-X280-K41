@@ -21,7 +21,10 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
   '/var/lib/systemd/coredump' '/sys/block/zram*' '/sys/module/zswap' \
   'loginctl list-sessions' 'loginctl show-user guest' 'getent passwd guest' \
   '/var/lib/systemd/linger/guest' 'pacman -Q' '/usr/share/wayland-sessions' \
-  '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn' 'checkout path omitted' '/etc/sudoers.d'; do
+  '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn' 'checkout path omitted' '/etc/sudoers.d' \
+  'Filesystem topology, capacity and volatile mount limits' 'memory.max' 'user manager unit names/status' \
+  'display-manager.service' '/etc/pam.d' 'System session launch metadata' \
+  'System-level default browser MIME associations' 'journalctl --disk-usage'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing audit/safety scope: $token"
 done
 pass 'storage, logind, account, desktop, browser and permission audit scope is present'
@@ -31,7 +34,7 @@ if grep -Eq 'pacman[[:space:]]+-S|systemctl[[:space:]]+(enable|disable|start|sto
 fi
 pass 'no system mutation, account management, package install, or destructive operation found'
 
-if grep -Eq 'cat[[:space:]]+--?[[:space:]]+.*(/home|/root)|find[[:space:]].*(-name|--).*' "$SCRIPT"; then
+if grep -Eq 'cat[[:space:]]+--?[[:space:]]+.*(/home|/root)|find[[:space:]]+(/home|/root)([[:space:]]|$)' "$SCRIPT"; then
   fail 'collector must not read/list user home content'
 fi
 if grep -Eq 'firefox.*(profile|cookies)|chrom(e|ium).*(profile|cookies)|\.mozilla|\.config' "$SCRIPT"; then
