@@ -48,7 +48,7 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5: dokumentasi boot experience selesai; perbaikan visual ditunda.** Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 juga ditunda sampai sebelum Tahap 7.
+**CURRENT — Tahap 5, Workstream 1: boot experience (power-on, reboot, poweroff).** Visual leakage Hyprland masih merupakan known issue dan investigasi/perbaikannya adalah pekerjaan aktif. Setelah workstream ini diterima, lanjutkan berurutan ke lock screen, dashboard, taskbar/panel, launcher, sidebar, lalu utilities. Elemen lintas-komponen (design tokens, typography, icons/cursor, wallpaper, notifications/OSD, window appearance, terminal, GTK/Qt) dijaga konsisten saat komponen terkait dikerjakan. Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 tetap ditunda sampai sebelum Tahap 7.
 
 ### Status faktual visual boot
 
