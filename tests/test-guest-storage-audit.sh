@@ -24,7 +24,8 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
   '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn' 'checkout path omitted' '/etc/sudoers.d' \
   'Filesystem topology, capacity and volatile mount limits' 'memory.max' 'user manager unit names/status' \
   'display-manager.service' '/etc/pam.d' 'System session launch metadata' \
-  'System-level default browser MIME associations' 'journalctl --disk-usage'; do
+  'System-level default browser MIME associations' 'journalctl --disk-usage' \
+  'systemctl --version' 'sddm|greetd|ly|gdm|lightdm'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing audit/safety scope: $token"
 done
 pass 'storage, logind, account, desktop, browser and permission audit scope is present'
