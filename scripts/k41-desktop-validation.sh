@@ -157,12 +157,20 @@ if (( caelestia_running == 1 )); then
     record FAIL 'Caelestia IPC' 'IPC discovery failed or returned no targets'
   fi
   if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
+    scheme_file="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
     if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|TypeError:|ReferenceError:' "$tmp/caelestia-log"; then
       record WARN 'Caelestia runtime log' 'Actionable runtime/QML error signature found; inspect validation.log'
-    elif grep -Eiq 'Source file does not exist|Read of .+ failed: File does not exist|org\.bluez|RTKit' "$tmp/caelestia-log"; then
-      record WARN 'Caelestia runtime log' 'Optional resource or external-service warning found; inspect validation.log and repair report'
+    elif grep -Eiq 'Read of .+scheme\.json failed: File does not exist' "$tmp/caelestia-log" && [[ ! -s $scheme_file ]]; then
+      record WARN 'Caelestia runtime log' 'Caelestia scheme is still missing; inspect repair report'
+    elif grep -Eiq 'Source file does not exist' "$tmp/caelestia-log" &&
+         grep -Eiv '\.face([[:space:]]|$)' "$tmp/caelestia-log" | grep -Eiq 'Source file does not exist'; then
+      record WARN 'Caelestia runtime log' 'A non-optional QML resource is missing; inspect validation.log'
+    elif grep -Eiq 'org\.bluez' "$tmp/caelestia-log" && ! systemctl is-active --quiet bluetooth.service; then
+      record WARN 'Caelestia runtime log' 'BlueZ D-Bus warning remains while bluetooth.service is inactive'
+    elif grep -Eiq 'RTKit' "$tmp/caelestia-log" && ! pacman -Q rtkit >/dev/null 2>&1; then
+      record WARN 'Caelestia runtime log' 'RTKit warning remains and the rtkit package is absent'
     else
-      record PASS 'Caelestia runtime log' 'No actionable fatal/critical/QML runtime error signature found'
+      record PASS 'Caelestia runtime log' 'No unresolved fatal/QML/resource/service error detected; optional .face and resolved service warnings are ignored'
     fi
   else
     record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
