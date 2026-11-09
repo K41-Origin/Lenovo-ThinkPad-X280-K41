@@ -1,13 +1,410 @@
 {
   "appearance": {
+    "deformScale": 0.88,
+    "rounding": {
+      "scale": 1.12
+    },
+    "spacing": {
+      "scale": 0.92
+    },
+    "padding": {
+      "scale": 0.92
+    },
     "font": {
+      "scale": 1,
       "clock": "Rubik",
       "workspaces": "Rubik",
-      "headline": { "family": "Rubik" },
-      "title": { "family": "Rubik" },
-      "body": { "family": "Rubik" },
-      "label": { "family": "Rubik" },
-      "mono": { "family": "CaskaydiaCove NF" }
+      "headline": {
+        "family": "Rubik",
+        "large": {
+          "size": 32,
+          "weight": 600,
+          "italic": false,
+          "vaxes": {}
+        },
+        "medium": {
+          "size": 26,
+          "weight": 600,
+          "italic": false,
+          "vaxes": {}
+        },
+        "small": {
+          "size": 22,
+          "weight": 500,
+          "italic": false,
+          "vaxes": {}
+        }
+      },
+      "title": {
+        "family": "Rubik",
+        "large": {
+          "size": 22,
+          "weight": 600,
+          "italic": false,
+          "vaxes": {}
+        },
+        "medium": {
+          "size": 16,
+          "weight": 500,
+          "italic": false,
+          "vaxes": {}
+        },
+        "small": {
+          "size": 14,
+          "weight": 500,
+          "italic": false,
+          "vaxes": {}
+        }
+      },
+      "body": {
+        "family": "Rubik",
+        "large": {
+          "size": 16,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "medium": {
+          "size": 14,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "small": {
+          "size": 12,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        }
+      },
+      "label": {
+        "family": "Rubik",
+        "large": {
+          "size": 14,
+          "weight": 500,
+          "italic": false,
+          "vaxes": {}
+        },
+        "medium": {
+          "size": 12,
+          "weight": 500,
+          "italic": false,
+          "vaxes": {}
+        },
+        "small": {
+          "size": 11,
+          "weight": 500,
+          "italic": false,
+          "vaxes": {}
+        }
+      },
+      "mono": {
+        "family": "CaskaydiaCove NF",
+        "large": {
+          "size": 16,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "medium": {
+          "size": 14,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "small": {
+          "size": 12,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        }
+      },
+      "icon": {
+        "family": "Material Symbols Rounded",
+        "extraLarge": {
+          "size": 36,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "large": {
+          "size": 24,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "medium": {
+          "size": 18,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        },
+        "small": {
+          "size": 15,
+          "weight": 400,
+          "italic": false,
+          "vaxes": {}
+        }
+      }
+    },
+    "anim": {
+      "durations": {
+        "scale": 0.8
+      }
+    },
+    "transparency": {
+      "enabled": false,
+      "base": 0.85,
+      "layers": 0.4
     }
+  },
+  "background": {
+    "enabled": true,
+    "wallpaperEnabled": true
+  },
+  "bar": {
+    "persistent": true,
+    "showOnHover": false,
+    "dragThreshold": 20,
+    "scrollActions": {
+      "workspaces": true,
+      "volume": true,
+      "brightness": true
+    },
+    "popouts": {
+      "activeWindow": true,
+      "tray": true,
+      "statusIcons": true
+    },
+    "workspaces": {
+      "shown": 5,
+      "activeIndicator": true,
+      "occupiedBg": false,
+      "showUnoccupied": true,
+      "perMonitor": true,
+      "showWindows": false,
+      "showWindowsOnSpecialWorkspaces": false,
+      "maxWindowIcons": 3,
+      "activeTrail": true,
+      "displayType": "shapes",
+      "specialDisplayType": "icons"
+    },
+    "activeWindow": {
+      "compact": true,
+      "inverted": false,
+      "showOnHover": false
+    },
+    "tray": {
+      "background": false,
+      "recolour": true,
+      "compact": true
+    },
+    "clock": {
+      "background": false,
+      "showDate": true,
+      "showIcon": false
+    },
+    "statusIcons": [
+      {
+        "id": "lockStatus",
+        "enabled": true
+      },
+      {
+        "id": "audio",
+        "enabled": true
+      },
+      {
+        "id": "microphone",
+        "enabled": false
+      },
+      {
+        "id": "kbLayout",
+        "enabled": false
+      },
+      {
+        "id": "network",
+        "enabled": true
+      },
+      {
+        "id": "bluetooth",
+        "enabled": true
+      },
+      {
+        "id": "battery",
+        "enabled": true
+      }
+    ],
+    "entries": [
+      {
+        "id": "workspaces",
+        "enabled": true
+      },
+      {
+        "id": "spacer",
+        "enabled": true
+      },
+      {
+        "id": "activeWindow",
+        "enabled": true
+      },
+      {
+        "id": "spacer",
+        "enabled": true
+      },
+      {
+        "id": "tray",
+        "enabled": true
+      },
+      {
+        "id": "clock",
+        "enabled": true
+      },
+      {
+        "id": "statusIcons",
+        "enabled": true
+      },
+      {
+        "id": "power",
+        "enabled": true
+      }
+    ],
+    "excludedScreens": []
+  },
+  "dashboard": {
+    "enabled": true,
+    "showOnHover": false,
+    "showDashboard": true,
+    "showMedia": true,
+    "showPerformance": true,
+    "showWeather": false,
+    "mediaUpdateInterval": 2000,
+    "resourceUpdateInterval": 2500,
+    "dragThreshold": 50,
+    "performance": {
+      "showBattery": true,
+      "showGpu": true,
+      "showCpu": true,
+      "showMemory": true,
+      "showStorage": true,
+      "showNetwork": true
+    }
+  },
+  "launcher": {
+    "enabled": true,
+    "showOnHover": false,
+    "maxShown": 9,
+    "maxWallpapers": 9,
+    "specialPrefix": "@",
+    "actionPrefix": ">",
+    "enableDangerousActions": false,
+    "dragThreshold": 50,
+    "vimKeybinds": false,
+    "useFuzzy": {
+      "apps": true,
+      "actions": true,
+      "schemes": false,
+      "variants": false,
+      "wallpapers": false
+    }
+  },
+  "lock": {
+    "enabled": true,
+    "useWallpaper": true,
+    "recolourLogo": false,
+    "enableFprint": true,
+    "maxFprintTries": 3,
+    "enableHowdy": true,
+    "maxHowdyTries": 3,
+    "triggerHowdyOnWake": true,
+    "hideNotifs": true
+  },
+  "nexus": {
+    "wallpapersPerRow": 3,
+    "networkRescanInterval": 15000
+  },
+  "notifs": {
+    "expire": true,
+    "fullscreen": "On",
+    "defaultExpireTimeout": 5000,
+    "fullscreenExpireTimeout": 2000,
+    "clearThreshold": 0.3,
+    "expandThreshold": 20,
+    "actionOnClick": false,
+    "groupPreviewNum": 2,
+    "openExpanded": false
+  },
+  "osd": {
+    "enabled": true,
+    "hideDelay": 1800,
+    "enableBrightness": true,
+    "enableMicrophone": false
+  },
+  "sidebar": {
+    "enabled": true,
+    "showOnHover": false,
+    "minHoverThreshold": 200,
+    "dragThreshold": 80
+  },
+  "utilities": {
+    "enabled": true,
+    "maxToasts": 3,
+    "toasts": {
+      "fullscreen": "off",
+      "configLoaded": true,
+      "chargingChanged": true,
+      "gameModeChanged": true,
+      "dndChanged": true,
+      "audioOutputChanged": true,
+      "audioInputChanged": true,
+      "capsLockChanged": true,
+      "numLockChanged": true,
+      "kbLayoutChanged": true,
+      "kbLimit": true,
+      "vpnChanged": true,
+      "nowPlaying": false
+    },
+    "quickToggles": [
+      {
+        "id": "wifi",
+        "enabled": true
+      },
+      {
+        "id": "bluetooth",
+        "enabled": true
+      },
+      {
+        "id": "mic",
+        "enabled": true
+      },
+      {
+        "id": "settings",
+        "enabled": true
+      },
+      {
+        "id": "gameMode",
+        "enabled": true
+      },
+      {
+        "id": "dnd",
+        "enabled": true
+      },
+      {
+        "id": "vpn",
+        "enabled": false
+      }
+    ]
+  },
+  "services": {
+    "smartScheme": false,
+    "sensorUnits": "Celsius",
+    "dataUnits": "Binary",
+    "clockFormat": "Auto",
+    "gpuType": "Auto",
+    "audioIncrement": 0.05,
+    "brightnessIncrement": 0.05,
+    "maxVolume": 1
+  },
+  "paths": {
+    "wallpaperDir": "~/Pictures/Wallpapers"
   }
 }
