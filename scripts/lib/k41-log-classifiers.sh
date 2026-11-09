@@ -5,12 +5,10 @@ k41_classify_caelestia_log() {
   local log_file=$1 scheme_file=$2
   local filtered
   filtered="$(mktemp)" || return 2
-  if [[ -s $scheme_file ]]; then
-    # Ignore only the exact stale startup warning for the scheme that now exists.
-    grep -Eiv 'Read of .+scheme\.json failed: File does not exist' "$log_file" >"$filtered" || :
-  else
-    cp -- "$log_file" "$filtered"
-  fi
+
+  # Classify the scheme condition separately so a resolved startup warning
+  # cannot be re-detected by the generic QML failure matcher.
+  grep -Eiv 'Read of .+scheme\.json failed: File does not exist' "$log_file" >"$filtered" || :
   # A missing .face is an optional avatar resource, not a shell failure.
   sed -E '/Source file does not exist.*\.face([[:space:]]|$)/Id' "$filtered" >"$filtered.tmp"
   mv -- "$filtered.tmp" "$filtered"
