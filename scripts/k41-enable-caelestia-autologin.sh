@@ -166,7 +166,8 @@ try:
         if existing and not existing.endswith("\n"):
             stream.write("\n")
         stream.write(block.lstrip("\n"))
-    os.chmod(temporary, 0o644)
+    import stat
+    os.chmod(temporary, stat.S_IMODE(path.stat().st_mode) if path.exists() else 0o644)
     os.replace(temporary, path)
 except BaseException:
     try: os.unlink(temporary)
@@ -176,10 +177,11 @@ PY
 chown "$USER_UID:$USER_GID" "$BASH_PROFILE"
 
 # Install one Hyprland-start hook. Existing Caelestia autostart is preserved.
-python3 - "$HYPRLAND_LUA" "$MARKER" "$SHELL_ALREADY_AUTOSTARTED" <<'PY'
-import os, pathlib, stat, sys, tempfile
+python3 - "$HYPRLAND_LUA" "$HELPER_TARGET" "$MARKER" "$SHELL_ALREADY_AUTOSTARTED" <<'PY'
+import json, os, pathlib, shlex, stat, sys, tempfile
 path = pathlib.Path(sys.argv[1])
-marker, already = sys.argv[2], sys.argv[3] == "1"
+helper = pathlib.Path(sys.argv[2])
+marker, already = sys.argv[3], sys.argv[4] == "1"
 existing = path.read_text(encoding="utf-8")
 if marker in existing:
     raise SystemExit("K41 autolock hook already exists; refusing duplicate insertion.")
@@ -189,7 +191,7 @@ block = (
     "-- Start Caelestia only if no existing startup entry was detected.\n"
     'hl.on("hyprland.start", function()\n'
     + start_shell
-    + '    hl.exec_cmd("k41-lock-caelestia-after-start")\n'
+    + "    hl.exec_cmd(" + json.dumps(shlex.quote(str(helper))) + ")\n"
     + "end)\n"
     + "-- K41 CAELESTIA AUTOLOCK END\n"
 )
