@@ -160,7 +160,11 @@ if (( caelestia_running == 1 )); then
   fi
   if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
     scheme_file="${XDG_STATE_HOME:-$HOME/.local/state}/caelestia/scheme.json"
-    mapfile -t caelestia_findings < <(k41_classify_caelestia_log "$tmp/caelestia-log" "$scheme_file")
+    bluetooth_active=0
+    rtkit_installed=0
+    systemctl is-active --quiet bluetooth.service && bluetooth_active=1
+    pacman -Q rtkit >/dev/null 2>&1 && rtkit_installed=1
+    mapfile -t caelestia_findings < <(k41_classify_caelestia_log "$tmp/caelestia-log" "$scheme_file" "$bluetooth_active" "$rtkit_installed")
     if (( ${#caelestia_findings[@]} > 0 )); then
       record WARN 'Caelestia runtime log' "Unresolved findings: $(IFS=,; printf '%s' "${caelestia_findings[*]}"); inspect validation.log"
     else
