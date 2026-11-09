@@ -86,11 +86,6 @@ if [[ $MODE == apply ]]; then
     grep -Fq "$MARKER" "$HYPRLAND_LUA" && die "Caelestia autolock is already configured in $HYPRLAND_LUA."
 fi
 
-if [[ $MODE == apply ]]; then
-    grep -Fq "$PROFILE_MARKER" "$BASH_PROFILE" 2>/dev/null && die "Autologin is already configured in $BASH_PROFILE."
-    grep -Fq "$MARKER" "$HYPRLAND_LUA" && die "Caelestia autolock is already configured in $HYPRLAND_LUA."
-fi
-
 if [[ $MODE == rollback ]]; then
     [[ -d $ROLLBACK_DIR && -f $ROLLBACK_DIR/manifest ]] || die 'Invalid backup directory.'
     [[ $ROLLBACK_DIR == "$BACKUP_ROOT/"* ]] || die 'Rollback directory is outside the managed backup root.'
