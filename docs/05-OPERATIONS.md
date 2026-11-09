@@ -32,6 +32,8 @@ bash -n scripts/k41-configure-boot-experience.sh
 sudo bash scripts/k41-configure-boot-experience.sh
 ```
 
+**Catatan pelaksanaan (2026-11-09):** Pengguna mengonfirmasi bahwa `scripts/k41-configure-boot-experience.sh` berhasil dijalankan. Ini mencatat keberhasilan eksekusi script saja; reboot fisik dan acceptance splash, TPM2 auto-unlock, serta lock-screen handoff belum dikonfirmasi. Jangan tandai fitur boot sebagai VERIFIED sebelum pemeriksaan pascareboot selesai.
+
 Script akan:
 
 1. Memastikan root aktif adalah `/dev/mapper/cryptroot`, volume LUKS2 dapat diidentifikasi, UKI berada di `/efi`, dan TPM2 terdeteksi.
