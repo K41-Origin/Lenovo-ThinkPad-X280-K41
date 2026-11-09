@@ -43,5 +43,7 @@ grep -Fq 'Do not run with sudo' "$reporter"
 grep -Fq 'WAYLAND_DISPLAY' "$reporter"
 grep -Fq 'caelestia shell -r -d' "$reporter"
 grep -Fq 'PIPESTATUS[0]' "$reporter"
+grep -Fq 'Selected config path check' "$reporter"
+grep -Fq 'FAIL_SYSTEM_FALLBACK' "$reporter"
 printf 'PASS: lock-screen layout structure, installer/reporter Bash syntax, pinned-source deployment and rollback guards.\n'
 printf 'NOTE: installer execution, QML loading, lock/unlock and visual behavior require the target X280.\n'
