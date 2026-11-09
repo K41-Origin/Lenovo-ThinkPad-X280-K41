@@ -17,14 +17,19 @@ command -v caelestia >/dev/null 2>&1 || fail 'caelestia CLI is missing from PATH
 command -v qs >/dev/null 2>&1 || fail 'Quickshell CLI (qs) is missing from PATH.'
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/caelestia-diagnostics"
-mkdir -p -- "$report_root"
-run_dir="$report_root/$timestamp"
-suffix=0
-while ! mkdir -- "$run_dir" 2>/dev/null; do
-  suffix=$((suffix + 1))
-  run_dir="$report_root/$timestamp-$suffix"
-done
+if [[ -n ${K41_REPORT_DIR:-} ]]; then
+  run_dir=$K41_REPORT_DIR
+  mkdir -p -- "$run_dir"
+else
+  report_root="$ROOT/reports/caelestia-diagnostics"
+  mkdir -p -- "$report_root"
+  run_dir="$report_root/$timestamp"
+  suffix=0
+  while ! mkdir -- "$run_dir" 2>/dev/null; do
+    suffix=$((suffix + 1))
+    run_dir="$report_root/$timestamp-$suffix"
+  done
+fi
 chmod 0700 "$run_dir"
 log="$run_dir/diagnostics.txt"
 summary="$run_dir/summary.md"
