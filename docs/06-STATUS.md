@@ -10,9 +10,23 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan. Pengguna mengonfirmasi script konfigurasi boot experience selesai dijalankan tanpa melaporkan error. Hasil reboot, TPM auto-unlock, dan handoff visual ke lock screen belum dikonfirmasi. Quickshell K41 memakai desain ring 12 titik yang disamakan dengan Plymouth; installer mengatur opsi visual Hyprland untuk handoff. Namun pengguna mengonfirmasi tampilan Hyprland masih bocor pada power-on, reboot, dan poweroff. Tema Plymouth K41 serta pemeriksaan unit reboot/poweroff/halt telah diimplementasikan, tetapi konsistensi visual perangkat BELUM TERCAPAI. Investigasi kebocoran ditunda ke sesi berikutnya. |
+| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan. Pengguna mengonfirmasi script konfigurasi boot experience selesai dijalankan tanpa melaporkan error. Hasil reboot, TPM auto-unlock, dan handoff visual ke lock screen belum dikonfirmasi. Quickshell K41 memakai desain ring 12 titik yang disamakan dengan Plymouth; installer mengatur opsi visual Hyprland untuk handoff. Namun pengguna mengonfirmasi tampilan Hyprland masih bocor pada power-on, reboot, dan poweroff. Tema Plymouth K41 serta pemeriksaan unit reboot/poweroff/halt telah diimplementasikan, tetapi konsistensi visual perangkat BELUM TERCAPAI. Investigasi kebocoran ditunda. Tahap ini nantinya juga menjadi pedoman untuk menyederhanakan dan memperbaiki alur instalasi serta kustomisasi dari kondisi nol; perbaikan tahap-tahap sebelumnya dijadwalkan sebelum tahap 7. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
+
+## Keputusan arah proyek: Tahap 5 sebagai pedoman instalasi ulang
+
+Pengguna menetapkan bahwa hasil dan pembelajaran dari **Tahap 5 — Desktop Customization** nantinya tidak hanya dipakai untuk menyelesaikan tampilan desktop. Tahap 5 juga akan menjadi **referensi desain dan pedoman perbaikan** bagi proses instalasi serta kustomisasi sistem secara keseluruhan.
+
+Tujuan akhirnya adalah membuat proses membangun sistem dari kondisi nol menjadi lebih mudah, terstruktur, konsisten, dan dapat diulang. Dengan demikian, keputusan konfigurasi desktop, dependensi, urutan setup, integrasi boot/session, dan kebutuhan pengguna yang ditemukan selama Tahap 5 dapat digunakan untuk mengevaluasi kembali tahapan instalasi sebelumnya.
+
+Keputusan urutan kerja:
+1. Lanjutkan dan dokumentasikan Tahap 5 berdasarkan kondisi serta bukti aktual.
+2. Setelah pekerjaan Tahap 5 cukup matang, gunakan hasilnya untuk mengidentifikasi perubahan yang diperlukan pada tahapan instalasi sebelumnya.
+3. **Lakukan evaluasi dan perbaikan tahapan sebelumnya sebelum memulai Tahap 7 — Release.**
+4. Jangan memulai refactoring menyeluruh tahapan sebelumnya sekarang; pekerjaan tersebut secara eksplisit ditunda sampai waktunya sebelum Tahap 7.
+
+Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yang sudah diimplementasikan. Tidak ada perubahan pada script instalasi atau konfigurasi sistem sebagai bagian dari keputusan dokumentasi ini.
 
 ## Entry point kanonis
 
@@ -34,7 +48,7 @@
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5: dokumentasi boot experience selesai; perbaikan visual ditunda.**
+**CURRENT — Tahap 5: dokumentasi boot experience selesai; perbaikan visual ditunda.** Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 juga ditunda sampai sebelum Tahap 7.
 
 ### Status faktual visual boot
 
