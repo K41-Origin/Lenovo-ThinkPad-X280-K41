@@ -56,6 +56,7 @@ BACKUP_DIR=""
 [[ ! -L $HYPRLAND_LUA && ! -L $BASH_PROFILE && ! -L $GETTY_DROPIN && ! -L $LOCAL_BIN && ! -L $HELPER_TARGET && ! -L $GETTY_DROPIN_DIR ]] || die 'Symlink targets are not supported for managed files.'
 [[ -r $HYPRLAND_LUA && -w $CONFIG_DIR ]] || die 'Hyprland configuration is not accessible.'
 command -v caelestia >/dev/null 2>&1 || die 'Caelestia CLI is required.'
+command -v hyprlock >/dev/null 2>&1 || die 'hyprlock is required as a fail-safe lock fallback.'
 command -v start-hyprland >/dev/null 2>&1 || die 'start-hyprland is required.'
 /usr/bin/systemctl is-enabled --quiet getty@tty1.service || die 'getty@tty1.service must already be enabled.'
 for manager in gdm sddm ly greetd; do
