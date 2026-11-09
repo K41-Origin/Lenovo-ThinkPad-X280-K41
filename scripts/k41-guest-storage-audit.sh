@@ -316,6 +316,20 @@ for dir in /usr/share/wayland-sessions /usr/share/xsessions; do
   else note 'directory missing'; fi
 done
 
+section 'Installed browser desktop launchers (selected metadata only)'
+if [[ -d /usr/share/applications ]]; then
+  find /usr/share/applications -maxdepth 1 -type f \
+    \( -iname '*firefox*.desktop' -o -iname '*chromium*.desktop' -o -iname '*brave*.desktop' -o -iname '*browser*.desktop' \) -print0 2>/dev/null |
+    while IFS= read -r -d '' file; do
+      printf '[%s]\n' "$(basename "$file")"
+      grep -E '^(Name|Exec|TryExec|MimeType)=' "$file" 2>/dev/null || true
+    done >>"$report"
+fi
+if have flatpak; then
+  printf '\nFlatpak applications (IDs/branch/installation only):\n' >>"$report"
+  flatpak list --app --columns=application,branch,installation 2>&1 >>"$report" || true
+fi
+
 section 'System and active-user default browser associations (selected MIME keys only)'
 for file in /usr/share/applications/mimeapps.list /etc/xdg/mimeapps.list /usr/local/share/applications/mimeapps.list; do
   if [[ -r $file ]]; then
@@ -338,12 +352,13 @@ if have journalctl; then journalctl --disk-usage --no-pager >>"$report" 2>&1 || 
 
 section 'User desktop autostart metadata (selected keys only)'
 for dir in "$HOME/.config/autostart" /etc/xdg/autostart; do
-  printf '\n-- %s --\n' "$dir" >>"$report"
+  display_dir="${dir/#$HOME/~}"
+  printf '\n-- %s --\n' "$display_dir" >>"$report"
   if [[ -d $dir ]]; then
     while IFS= read -r -d '' file; do
       printf '[%s]\n' "$(basename "$file")" >>"$report"
       grep -E '^(Name|Exec|TryExec|Hidden|OnlyShowIn|NotShowIn|X-GNOME-Autostart-enabled)=' "$file" 2>/dev/null |
-        sed -E 's/([Tt][Oo][Kk][Ee][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Pp][Ii][_-]?[Kk][Ee][Yy])=[^ ;]+/\1=[REDACTED]/g' >>"$report" || true
+        sed -E 's/([Tt][Oo][Kk][Ee][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Pp][Ii][_-]?[Kk][Ee][Yy])=[^ ;]+/\1=[REDACTED]/g' | sed "s|$HOME|~|g" >>"$report" || true
     done < <(find "$dir" -maxdepth 1 -type f -name '*.desktop' -print0 2>/dev/null)
   else note 'directory missing'; fi
 done
@@ -351,11 +366,12 @@ section 'Hyprland startup directives (selected directives only)'
 hypr_config="$HOME/.config/hypr/hyprland.conf"
 if [[ -r $hypr_config ]]; then
   grep -E '^[[:space:]]*(exec(-once)?|source|env)[[:space:]]*=' "$hypr_config" |
-    sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|ACCESS[_-]?KEY)[^=]*=)[^ ,;]+/\1[REDACTED]/Ig' >>"$report" || true
+    sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|ACCESS[_-]?KEY)[^=]*=)[^ ,;]+/\1[REDACTED]/Ig' | sed "s|$HOME|~|g" >>"$report" || true
 else note 'Primary Hyprland config not found/readable at standard path.'; fi
 section 'Quickshell/Caelestia config inventory (names and file types only)'
 for dir in "$HOME/.config/quickshell" "$HOME/.config/caelestia" "$HOME/.config/hypr" "$HOME/.local/share/caelestia"; do
-  printf '\n-- %s --\n' "$dir" >>"$report"
+  display_dir="${dir/#$HOME/~}"
+  printf '\n-- %s --\n' "$display_dir" >>"$report"
   if [[ -d $dir ]]; then find "$dir" -maxdepth 2 -mindepth 1 -printf '%y %P\n' 2>/dev/null | head -n 100 >>"$report"; else note 'directory missing'; fi
 done
 
@@ -370,6 +386,7 @@ cat >>"$report" <<'BOUNDARIES'
 - User-manager unit names/status, session IDs and mount paths may be identifying; review/redact before sharing.
 - Selected Hyprland startup directives, desktop autostart entries, PAM module chains and browser MIME defaults are included for design analysis; review/redact before sharing.
 - Browser profiles, cookies, history, credentials and general user documents are not inspected.
+- Selected startup Exec directives may still reveal local paths or arguments; review/redact before publishing.
 - Quickshell/Caelestia configuration contents are not dumped; only bounded file/directory names are inventoried.
 - This collector does not inspect remote/server-side activity, network device logs, or removable media.
 - No settings, packages, services, mounts, swap devices, boot entries, permissions, or existing files were changed.
