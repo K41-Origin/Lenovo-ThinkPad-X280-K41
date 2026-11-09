@@ -6,7 +6,7 @@
 2. **Arch Linux Live ISO — Basic Arch:** setelah readiness PASS dan hasilnya direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Tahap ini menghapus SSD target.
 3. **Basic Arch Linux — Desktop setup:** setelah boot ke TTY Arch Linux, login sebagai user biasa lalu jalankan `sudo bash scripts/k41-install-desktop.sh`.
 4. **Desktop Functional Validation:** jalankan `bash scripts/k41-desktop-validation.sh`, tinjau semua WARN/FAIL, dan simpan laporan. Tahap 4 telah diterima pada snapshot 2026-11-09; bukti ada di `reports/desktop-validation/20261109T081724Z/`.
-5. **Desktop Customization:** tahap aktif berikutnya. Mulai setelah audit konfigurasi aktif dan baseline visual.
+5. **Desktop Customization:** tahap aktif; workstream 1 (boot experience) ditutup menurut konfirmasi pengguna, workstream 2 (lock screen) masih berjalan dan belum lolos verifikasi runtime/visual. Ikuti [indeks workstream](08-STAGE-5/README.md). Guest Mode belum diimplementasikan.
 6. **Desktop & Hardware Optimization:** optimasi desktop, CPU/GPU, termal, daya, baterai, dan sleep/resume setelah customization diterima.
 7. **Release:** hanya setelah seluruh acceptance gate dan regression checks lulus.
 
@@ -31,7 +31,7 @@ Kode branch `main` adalah implementasi. Test runner dan hasil test aktual adalah
 |---|---|
 | Tujuan, 7 tahap, arsitektur | [01 — Proyek](01-PROJECT.md) |
 | Live readiness, instalasi dasar, boot | [02 — Instalasi](02-INSTALLATION.md) |
-| Desktop install, validasi, customization | [03 — Desktop](03-DESKTOP.md) dan [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md) |
+| Desktop install, validasi, customization | [03 — Desktop](03-DESKTOP.md), [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md), dan [08 — Stage 5 workstreams](08-STAGE-5/README.md) |
 | Test suite dan acceptance/release gate | [04 — Testing](04-TESTING.md) |
 | Security, recovery, optimasi hardware | [05 — Operations](05-OPERATIONS.md) |
 | Status aktual dan prioritas | [06 — Status](06-STATUS.md) |
