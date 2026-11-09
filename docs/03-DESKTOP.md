@@ -199,14 +199,17 @@ scripts/k41-apply-desktop-integration.sh
 Setelah commit tersedia di branch lokal, dari root repository jalankan sebagai user biasa, tanpa sudo:
 
 ~~~bash
+bash scripts/k41-apply-desktop-customization.sh
 bash scripts/k41-apply-full-desktop-profile.sh
 bash scripts/k41-apply-desktop-integration.sh
+hyprctl reload
 ~~~
 
-Setujui prompt masing-masing script. Full profile melakukan merge recursive ke shell.json, menerapkan monochrome, menyalin dan mengaktifkan wallpaper, restart Caelestia detached, lalu mengumpulkan runtime log. Script integrasi membuat backup, merge cli.json, menjalankan generator theme upstream, memasang GTK/Thunar/Foot, dan restart Caelestia. Tutup dan buka kembali aplikasi GTK/Foot agar konfigurasi barunya terbaca.
+Setujui prompt masing-masing script. Jalankan desktop-customization lebih dahulu untuk memperbarui overlay Hyprland secara idempotent, shortcut Fuzzel, dan XCURSOR_THEME. Full profile melakukan merge recursive ke shell.json, menerapkan monochrome, mendekode dan mengaktifkan wallpaper JPEG, restart Caelestia detached, lalu mengumpulkan runtime log. Script integrasi membuat backup, merge cli.json, menjalankan generator theme upstream, memasang GTK/Thunar/Foot, dan restart Caelestia. Jalankan hyprctl reload, lalu tutup dan buka kembali aplikasi GTK/Foot agar konfigurasi barunya terbaca.
 
 ### Backup dan rollback
 
+- Hyprland/Fuzzel/cursor: backup ~/.local/state/k41/desktop-customization/backups/; rollback memakai scripts/k41-apply-desktop-customization.sh --rollback BACKUP_DIRECTORY.
 - Full Caelestia: backup ~/.local/state/k41/desktop-profile/backups/; rollback memakai scripts/k41-apply-full-desktop-profile.sh --rollback BACKUP_DIRECTORY.
 - GTK/Thunar/Foot/CLI: backup ~/.local/state/k41/desktop-integration/backups/; rollback memakai scripts/k41-apply-desktop-integration.sh --rollback BACKUP_DIRECTORY.
 - Rollback full profile mengembalikan shell.json dan scheme.json; pemilihan wallpaper sebelumnya perlu dipulihkan manual melalui >wallpaper.
