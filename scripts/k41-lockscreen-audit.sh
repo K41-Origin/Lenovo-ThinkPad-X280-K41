@@ -6,6 +6,8 @@ umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+command -v git >/dev/null 2>&1 || die 'Git tidak tersedia; audit harus dijalankan dari clone repository.'
+git -C "$repo_root" rev-parse --show-toplevel >/dev/null 2>&1 || die "Direktori script bukan working tree Git yang valid: $repo_root"
 
 if (( EUID == 0 )); then
   [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die 'Gunakan sudo dari akun desktop biasa (bukan login root langsung).'
@@ -209,5 +211,9 @@ note '- Wallpaper identity, actual lock/unlock, wrong-password behavior, fingerp
 note '- Report is stored inside the Git repository for review and push.'
 note '- Review before pushing; redact machine-specific identifiers or sensitive local configuration details if present.'
 
-printf 'Audit selesai. Laporan: %s\n' "${report#"$repo_root"/}"
+printf 'Audit selesai. Laporan: %s\n' "$report"
 printf 'Collector read-only terhadap sistem; sudo digunakan hanya untuk pengumpulan informasi yang memerlukan hak istimewa.\n'
+printf '\\nPerintah Git berikut dapat dijalankan dari direktori terminal mana pun:\\n'
+printf 'git -C %q add -- %q\\n' "$repo_root" "${report#"$repo_root"/}"
+printf 'git -C %q commit -m %q\\n' "$repo_root" 'test(lockscreen): add X280 audit report'
+printf 'git -C %q push origin main\\n' "$repo_root"
