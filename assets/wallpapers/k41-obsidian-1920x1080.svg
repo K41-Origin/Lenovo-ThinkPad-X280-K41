@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#080809"/>
+      <stop offset="0.52" stop-color="#111114"/>
+      <stop offset="1" stop-color="#050506"/>
+    </linearGradient>
+    <linearGradient id="slab" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#29292e" stop-opacity=".72"/>
+      <stop offset=".48" stop-color="#17171b" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#09090b" stop-opacity=".05"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c4c4c9" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#c4c4c9" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#c4c4c9" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="76%" cy="24%" r="62%">
+      <stop offset="0" stop-color="#77777f" stop-opacity=".17"/>
+      <stop offset="1" stop-color="#77777f" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="42"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <rect width="1920" height="1080" fill="url(#glow)"/>
+  <ellipse cx="1470" cy="260" rx="520" ry="300" fill="#8a8a92" opacity=".10" filter="url(#soft)"/>
+  <path d="M-180 1010 C250 820 440 740 720 500 C1010 250 1300 70 1800 30 L2100 30 L2100 520 C1630 520 1390 650 1120 840 C830 1040 510 1190 -180 1190Z" fill="url(#slab)"/>
+  <path d="M-130 1010 C290 830 490 700 760 470 C1040 230 1320 80 1810 30" fill="none" stroke="url(#edge)" stroke-width="2"/>
+  <path d="M250 1180 C610 970 850 760 1080 540 C1320 310 1540 210 1920 190" fill="none" stroke="#c4c4c9" stroke-opacity=".10" stroke-width="1"/>
+  <path d="M800 1180 C1110 930 1260 760 1450 560 C1610 390 1760 340 2020 330" fill="none" stroke="#f2f2f0" stroke-opacity=".07" stroke-width="1"/>
+  <path d="M1320 -100 C1200 180 1210 370 1400 540 C1570 690 1780 760 2050 760" fill="none" stroke="#c4c4c9" stroke-opacity=".09" stroke-width="2"/>
+  <circle cx="1510" cy="270" r="210" fill="none" stroke="#c4c4c9" stroke-opacity=".08" stroke-width="1"/>
+  <circle cx="1510" cy="270" r="270" fill="none" stroke="#c4c4c9" stroke-opacity=".045" stroke-width="1"/>
+  <rect x="0" y="0" width="1920" height="1080" fill="none" stroke="#ffffff" stroke-opacity=".025"/>
+</svg>
