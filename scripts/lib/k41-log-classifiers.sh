@@ -45,7 +45,11 @@ k41_classify_journal() {
     printf '%s\n' 'access-limited'
     return 0
   fi
-  if [[ ! -s $journal_file ]] || grep -Eiq '^[[:space:]]*-- No entries --[[:space:]]*  if grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
+  if [[ ! -s $journal_file ]] || grep -Eiq '^[[:space:]]*-- No entries --[[:space:]]*$' "$journal_file"; then
+    printf '%s\n' 'no-error-entries'
+    return 0
+  fi
+  if grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
     printf '%s\n' 'critical'
     return 0
   fi
