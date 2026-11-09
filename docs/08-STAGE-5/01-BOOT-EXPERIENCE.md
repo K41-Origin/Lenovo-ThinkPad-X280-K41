@@ -53,6 +53,7 @@ Pengujian utama dilakukan pada ThinkPad X280 fisik. Static test dan inspeksi kon
 - Menambahkan hook Plymouth dengan urutan `systemd < plymouth < sd-encrypt`.
 - Menambahkan kernel arguments `quiet splash`.
 - Menjalankan `mkinitcpio -P` untuk membangun ulang preset/initramfs/UKI.
+- Menjalankan `k41-install-animated-boot-splash.sh` untuk memasang Quickshell handoff, helper lock Caelestia, dan pengaturan suppress visual Hyprland. Konfigurasi `hyprland.lua` ikut dicadangkan sebelum installer dijalankan.
 - Memasang helper handoff lock-aware, mengubah konfigurasi getty TTY1 dan drop-in Plymouth, lalu menjalankan `systemctl daemon-reload`, verifikasi unit, dan enable unit K41.
 - Menawarkan enrollment TPM2 PCR 7 setelah konfigurasi Plymouth selesai.
 - Membuat backup konfigurasi lokal di `/var/lib/k41/boot-experience/backups/<timestamp>`.
