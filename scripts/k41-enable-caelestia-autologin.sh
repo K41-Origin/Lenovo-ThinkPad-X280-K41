@@ -53,7 +53,7 @@ BACKUP_ROOT="/var/lib/k41/autologin/$USER_NAME/backups"
 BACKUP_DIR=""
 
 [[ -d $CONFIG_DIR && -f $HYPRLAND_LUA ]] || die 'Active Hyprland Lua config not found; refusing to modify an unknown configuration.'
-[[ ! -L $HYPRLAND_LUA && ! -L $BASH_PROFILE && ! -L $GETTY_DROPIN ]] || die 'Symlink targets are not supported for managed files.'
+[[ ! -L $HYPRLAND_LUA && ! -L $BASH_PROFILE && ! -L $GETTY_DROPIN && ! -L $LOCAL_BIN && ! -L $HELPER_TARGET && ! -L $GETTY_DROPIN_DIR ]] || die 'Symlink targets are not supported for managed files.'
 [[ -r $HYPRLAND_LUA && -w $CONFIG_DIR ]] || die 'Hyprland configuration is not accessible.'
 command -v caelestia >/dev/null 2>&1 || die 'Caelestia CLI is required.'
 command -v start-hyprland >/dev/null 2>&1 || die 'start-hyprland is required.'
