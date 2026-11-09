@@ -391,8 +391,6 @@ for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journ
     record PASS "Journal: $journal_name" 'No configured critical/actionable error signatures detected'
   fi
 done
-chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"
-
 # 9. Focused diagnostic evidence for future, evidence-based remediation.
 # This section is read-only. Outputs are private because hardware/service details
 # and journal messages may expose host-specific information.
@@ -444,7 +442,7 @@ diagnostic 'User systemd failed unit details' 'failed-user-units-detail.txt' sys
 
 # Do not capture nmcli connection profiles, Wi-Fi SSIDs, MAC addresses from
 # network configuration, environment variables, or full process command lines.
-chmod 0600 "$diagnostics" "$diagnostics_log"
+chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"
 
 result=PASS
 if (( fail_count > 0 )); then
