@@ -256,6 +256,14 @@ for file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.current /sys/fs/cgro
 done
 if have systemctl; then
   systemctl show "user-$EUID.slice" "user@$EUID.service" -p Id -p ActiveState -p MemoryMax -p MemoryHigh -p TasksMax -p ControlGroup --no-pager >>"$report" 2>&1 || true
+  for unit in "user-$EUID.slice" "user@$EUID.service"; do
+    cg="$(systemctl show "$unit" -p ControlGroup --value 2>/dev/null || true)"
+    [[ -n $cg && $cg == /* ]] || continue
+    for key in memory.max memory.high memory.current memory.swap.max pids.max; do
+      file="/sys/fs/cgroup${cg%/}/$key"
+      [[ -r $file ]] && printf '%s %s: %s\n' "$unit" "$key" "$(cat "$file")" >>"$report"
+    done
+  done
 fi
 
 section 'Current user manager, lingering and session lifecycle'
@@ -265,10 +273,10 @@ if have loginctl; then
 fi
 if have systemctl; then
   systemctl show "user@$EUID.service" "user-$EUID.slice" -p Id -p LoadState -p ActiveState -p SubState -p ControlGroup --no-pager >>"$report" 2>&1 || true
-  printf '\n-- User manager unit names/status (no command lines or properties) --\n' >>"$report"
-  systemctl --user list-units --all --no-legend --no-pager 2>&1 | awk '{print $1 " " $2 " " $3}' >>"$report" || true
-  printf '\n-- User manager unit-file names/state --\n' >>"$report"
-  systemctl --user list-unit-files --no-legend --no-pager 2>&1 | awk '{print $1 " " $2}' >>"$report" || true
+  printf '\n-- User manager service/socket/target names and states only --\n' >>"$report"
+  systemctl --user list-units --type=service --type=socket --type=target --all --no-legend --no-pager 2>&1 | awk '{print $1 " " $2 " " $3}' >>"$report" || true
+  printf '\n-- User manager service/socket unit-file names and states --\n' >>"$report"
+  systemctl --user list-unit-files --type=service --type=socket --no-legend --no-pager 2>&1 | awk '{print $1 " " $2}' >>"$report" || true
 fi
 if [[ -e /var/lib/systemd/linger/"$EUID" ]]; then note "collector_user_linger=yes uid=$EUID"; else note "collector_user_linger=no uid=$EUID"; fi
 if have ps; then
@@ -287,6 +295,13 @@ fi
 if [[ -d /etc/pam.d ]]; then
   printf 'pam_stack_files (names only):\n' >>"$report"
   find /etc/pam.d -maxdepth 1 -type f -printf '%f\n' 2>/dev/null | sort >>"$report" || true
+  printf '\nSelected PAM auth/account/session module chains (no password database or secrets):\n' >>"$report"
+  for file in /etc/pam.d/login /etc/pam.d/system-local-login /etc/pam.d/system-login /etc/pam.d/system-auth /etc/pam.d/sudo /etc/pam.d/hyprlock /etc/pam.d/other; do
+    [[ -r $file ]] || continue
+    printf '[%s]\n' "${file##*/}" >>"$report"
+    awk '$1 ~ /^(auth|account|session)$/ {print}' "$file" |
+      sed -E 's/(password|token|secret|api[_-]?key)=[^[:space:]]+/\\1=[REDACTED]/Ig' >>"$report"
+  done
 fi
 
 section 'System session launch metadata (Name, Exec, TryExec only)'
@@ -301,15 +316,48 @@ for dir in /usr/share/wayland-sessions /usr/share/xsessions; do
   else note 'directory missing'; fi
 done
 
-section 'System-level default browser MIME associations'
+section 'System and active-user default browser associations (selected MIME keys only)'
 for file in /usr/share/applications/mimeapps.list /etc/xdg/mimeapps.list /usr/local/share/applications/mimeapps.list; do
   if [[ -r $file ]]; then
     printf '[%s]\n' "$file" >>"$report"
     awk '/^\[Default Applications\]/{p=1;next} /^\[/{p=0} p && /^(text\/html|x-scheme-handler\/http|x-scheme-handler\/https)=/{print}' "$file" >>"$report"
   fi
 done
-note 'Per-user MIME defaults and browser preferences are intentionally not inspected.'
-if have journalctl; then journalctl --disk-usage --no-pager 2>&1 >>"$report" || true; fi
+if have xdg-mime; then
+  for mime in text/html x-scheme-handler/http x-scheme-handler/https; do
+    printf 'active_user_default[%s]=' "$mime" >>"$report"
+    xdg-mime query default "$mime" 2>/dev/null | head -n 1 >>"$report" || true
+  done
+else note 'xdg-mime unavailable; active-user MIME defaults not queried.'; fi
+if have xdg-settings; then
+  printf 'active_user_default_web_browser=' >>"$report"
+  xdg-settings get default-web-browser 2>/dev/null | head -n 1 >>"$report" || true
+fi
+note 'Only selected browser association keys are queried; browser profiles, cookies, history and credentials are not inspected.'
+if have journalctl; then journalctl --disk-usage --no-pager >>"$report" 2>&1 || true; fi
+
+section 'User desktop autostart metadata (selected keys only)'
+for dir in "$HOME/.config/autostart" /etc/xdg/autostart; do
+  printf '\n-- %s --\n' "$dir" >>"$report"
+  if [[ -d $dir ]]; then
+    while IFS= read -r -d '' file; do
+      printf '[%s]\n' "$(basename "$file")" >>"$report"
+      grep -E '^(Name|Exec|TryExec|Hidden|OnlyShowIn|NotShowIn|X-GNOME-Autostart-enabled)=' "$file" 2>/dev/null |
+        sed -E 's/([Tt][Oo][Kk][Ee][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Pp][Ii][_-]?[Kk][Ee][Yy])=[^ ;]+/\\1=[REDACTED]/g' >>"$report" || true
+    done < <(find "$dir" -maxdepth 1 -type f -name '*.desktop' -print0 2>/dev/null)
+  else note 'directory missing'; fi
+done
+section 'Hyprland startup directives (selected directives only)'
+hypr_config="$HOME/.config/hypr/hyprland.conf"
+if [[ -r $hypr_config ]]; then
+  grep -E '^[[:space:]]*(exec(-once)?|source|env)[[:space:]]*=' "$hypr_config" |
+    sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|ACCESS[_-]?KEY)[^=]*=)[^ ,;]+/\\1[REDACTED]/Ig' >>"$report" || true
+else note 'Primary Hyprland config not found/readable at standard path.'; fi
+section 'Quickshell/Caelestia config inventory (names and file types only)'
+for dir in "$HOME/.config/quickshell" "$HOME/.config/caelestia" "$HOME/.config/hypr" "$HOME/.local/share/caelestia"; do
+  printf '\n-- %s --\n' "$dir" >>"$report"
+  if [[ -d $dir ]]; then find "$dir" -maxdepth 2 -mindepth 1 -printf '%y %P\n' 2>/dev/null | head -n 100 >>"$report"; else note 'directory missing'; fi
+done
 
 section 'Audit boundaries and interpretation'
 cat >>"$report" <<'BOUNDARIES'
@@ -320,8 +368,9 @@ cat >>"$report" <<'BOUNDARIES'
 - Persistent swap, persistent logs/coredumps, lingering user services, and unisolated writable paths must be addressed in the Guest design.
 - Browser package presence does not prove which browser is configured as the default or launched automatically.
 - User-manager unit names/status, session IDs and mount paths may be identifying; review/redact before sharing.
-- System desktop-file Exec values and MIME defaults do not prove the actual per-user launch path.
-- Per-user MIME defaults, Caelestia/Hyprland dotfiles, browser profiles and user autostart are intentionally not inspected.
+- Selected Hyprland startup directives, desktop autostart entries, PAM module chains and browser MIME defaults are included for design analysis; review/redact before sharing.
+- Browser profiles, cookies, history, credentials and general user documents are not inspected.
+- Quickshell/Caelestia configuration contents are not dumped; only bounded file/directory names are inventoried.
 - This collector does not inspect remote/server-side activity, network device logs, or removable media.
 - No settings, packages, services, mounts, swap devices, boot entries, permissions, or existing files were changed.
 BOUNDARIES
