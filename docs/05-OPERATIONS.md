@@ -8,6 +8,28 @@ Gunakan dokumentasi/upstream resmi untuk paket dan dependensi yang berubah. Jang
 
 `scripts/k41-enable-caelestia-autologin.sh` adalah opsi Stage 5, bukan default instalasi. Ia mengaktifkan passwordless autologin hanya pada `getty@tty1`, lalu memulai Hyprland dari Bash login dan meminta Caelestia mengunci sesi setelah IPC siap. Autologin menghilangkan autentikasi TTY1; lock screen grafis baru aktif setelah compositor dan shell berjalan. Ini bukan pengganti full-disk encryption. Jangan aktifkan pada perangkat dengan risiko akses fisik tanpa enkripsi disk, dan selalu simpan jalur rollback. TTY selain tty1 tetap memakai login normal.
 
+### Audit kondisi boot aktual
+
+Sebelum merancang Plymouth atau TPM2 auto-unlock, kumpulkan bukti dari sistem yang sedang berjalan:
+
+```bash
+git pull --ff-only
+sudo bash scripts/audit-x280-boot.sh
+```
+
+Collector membuat `reports/boot-audit/<UTC timestamp>/boot-audit.txt`. Jalankan dari checkout repository pada laptop yang akan diaudit. Script bersifat read-only: tidak mengubah UKI, mkinitcpio, crypttab, TPM, LUKS keyslot, service, package, atau firmware. Data yang dikumpulkan meliputi status UEFI/Secure Boot, systemd-boot, kernel command line, mkinitcpio hooks, UKI, mount ESP, crypttab, mapping LUKS, metadata LUKS2, TPM2 discovery, versi paket, unit Plymouth, dan error boot.
+
+Sebagian identifier disamarkan otomatis, tetapi redaksi tidak dijamin sempurna. Periksa report secara manual sebelum commit/push. Jangan pernah mengunggah passphrase, keyfile, recovery key, token, atau output yang mengandung rahasia. Setelah review:
+
+```bash
+git status --short
+git add reports/boot-audit/
+git commit -m "Add X280 boot audit report"
+git push
+```
+
+Kirimkan commit/report tersebut untuk ditinjau. Hasil audit adalah snapshot satu boot, bukan bukti bahwa TPM unlock atau splash screen sudah berfungsi.
+
 ## Tahap 6 — Desktop & Hardware Optimization
 
 Tahap ini baru dimulai setelah tahap 4 (functional validation) dan tahap 5 (customization) diterima.
