@@ -36,9 +36,7 @@ Audit fisik telah dikumpulkan dan direview. TPM2 tersedia, tetapi belum memiliki
 
 Langkah aktif berikutnya: pull commit terbaru, review script, siapkan backup header LUKS di disk fisik terpisah, jalankan `sudo bash scripts/k41-configure-boot-experience.sh`, lalu verifikasi token metadata. Setelah itu lakukan reboot fisik. Acceptance: splash muncul selama early boot dan tetap menutup proses startup; TPM membuka root tanpa prompt passphrase; lock screen Caelestia adalah tampilan pertama tanpa banner/login TTY atau desktop Hyprland terlihat; Hyprlock menjadi fallback; kegagalan lock menghentikan tty1 autologin setelah timeout; passphrase lama tetap dapat dipakai sebagai recovery jika TPM unlock gagal. Semua ini masih NOT TESTED/NOT VERIFIED pada perangkat setelah perubahan.
 
-Jangan menghapus keyslot passphrase. Secure Boot masih disabled; PCR 7 saja bukan bukti verifikasi boot penuh. Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6.
-
-Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6. Hindari animasi/efek berat pada Intel UHD 620.
+Jangan menghapus keyslot passphrase. Secure Boot masih disabled; PCR 7 saja bukan bukti verifikasi boot penuh. Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6. Hindari animasi/efek berat pada Intel UHD 620.
 
 ## Bukti tahap 4
 
