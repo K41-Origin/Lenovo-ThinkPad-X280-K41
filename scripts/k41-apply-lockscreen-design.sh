@@ -143,6 +143,7 @@ for name in Content.qml Center.qml; do
     if [[ -e $target_root/$name ]]; then chmod --reference="$target_root/$name" "$tmp"; fi
     mv -f -- "$tmp" "$target_root/$name"
 done
+restore_on_failure=0
 
 info 'QML overrides installed under ~/.config/quickshell/caelestia/modules/lock/.'
 info 'Upstream LockSurface.qml, wallpaper selection/blur, WlSessionLock and PAM components remain untouched.'
