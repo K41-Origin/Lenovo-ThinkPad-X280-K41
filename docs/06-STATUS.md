@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan dan pengguna mengonfirmasi perubahan. Workflow opt-in autologin + Caelestia lock screen telah diperkuat agar memverifikasi status `isLocked` dan menggunakan Hyprlock sebagai fallback; belum diuji pada laptop. |
+| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan. Pengguna mengonfirmasi script konfigurasi boot experience selesai dijalankan tanpa melaporkan error. Hasil reboot, TPM auto-unlock, dan handoff visual ke lock screen belum dikonfirmasi. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -25,18 +25,18 @@
 | `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
 | `scripts/k41-enable-caelestia-autologin.sh` + `scripts/k41-lock-caelestia-after-start.sh` | Opt-in tty1 autologin + verified Caelestia lock startup + Hyprlock fallback | IMPLEMENTED — NOT TESTED ON DEVICE |
 | `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED (`reports/boot-audit/20261109T103304Z/`) |
-| `scripts/k41-configure-boot-experience.sh` + `scripts/k41-plymouth-quit-after-lock.sh` | Plymouth BGRT, quiet splash, lock-aware TTY1 handoff, additive TPM2/PCR7 enrollment | IMPLEMENTED — NOT TESTED ON DEVICE |
+| `scripts/k41-configure-boot-experience.sh` + `scripts/k41-plymouth-quit-after-lock.sh` | Plymouth BGRT, quiet splash, lock-aware TTY1 handoff, additive TPM2/PCR7 enrollment | IMPLEMENTED — SCRIPT RUN CONFIRMED BY USER; REBOOT ACCEPTANCE PENDING |
 | `tests/test-boot-experience.sh` | Static syntax and safety-invariant test for boot setup | IMPLEMENTED — NOT RUN IN THIS SESSION |
 
 ## Prioritas saat ini
 
 **CURRENT — Tahap 5: Desktop Customization / boot experience.**
 
-Audit fisik telah dikumpulkan dan direview. TPM2 tersedia, tetapi belum memiliki token; LUKS2 hanya memiliki passphrase keyslot 0; Plymouth belum terpasang; Secure Boot disabled. Berdasarkan bukti tersebut, ditambahkan workflow opt-in Plymouth BGRT yang menahan splash sampai Caelestia lock terverifikasi, serta TPM2 auto-unlock yang mempertahankan passphrase sebagai recovery path.
+Audit perangkat yang tersedia sebelumnya menunjukkan TPM2 terdeteksi, belum ada token TPM2 pada saat audit, LUKS2 menggunakan passphrase keyslot 0, Plymouth belum terpasang, dan Secure Boot disabled. Script konfigurasi boot experience telah dijalankan oleh pengguna dan pengguna mengonfirmasi proses berhasil. Konfirmasi ini hanya mencatat keberhasilan eksekusi script; bukan bukti bahwa konfigurasi telah lolos reboot atau semua fitur bekerja.
 
-Langkah aktif berikutnya: pull commit terbaru, review script, siapkan backup header LUKS di disk fisik terpisah, jalankan `sudo bash scripts/k41-configure-boot-experience.sh`, lalu verifikasi token metadata. Setelah itu lakukan reboot fisik. Acceptance: splash muncul selama early boot dan tetap menutup proses startup; TPM membuka root tanpa prompt passphrase; lock screen Caelestia adalah tampilan pertama tanpa banner/login TTY atau desktop Hyprland terlihat; Hyprlock menjadi fallback; kegagalan lock menghentikan tty1 autologin setelah timeout; passphrase lama tetap dapat dipakai sebagai recovery jika TPM unlock gagal. Semua ini masih NOT TESTED/NOT VERIFIED pada perangkat setelah perubahan.
+Langkah aktif berikutnya: verifikasi metadata token LUKS tanpa menampilkan secret, periksa status bootloader, lalu lakukan reboot fisik. Acceptance: splash muncul selama early boot dan menutupi proses startup; TPM membuka root tanpa prompt passphrase; Caelestia lock screen menjadi tampilan pertama tanpa banner/login TTY atau desktop Hyprland terlihat; Hyprlock menjadi fallback; kegagalan lock menghentikan tty1 autologin setelah timeout; passphrase lama tetap dapat dipakai sebagai recovery jika TPM unlock gagal. Seluruh hasil tersebut masih NOT VERIFIED sampai ada bukti pemeriksaan setelah reboot.
 
-Jangan menghapus keyslot passphrase. Secure Boot masih disabled; PCR 7 saja bukan bukti verifikasi boot penuh. Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6. Hindari animasi/efek berat pada Intel UHD 620.
+Jangan menghapus keyslot passphrase. Secure Boot masih disabled pada snapshot audit; PCR 7 saja bukan bukti verifikasi boot penuh. Jangan mencampur pekerjaan tahap 5 dengan optimasi daya/termal tahap 6. Hindari animasi/efek berat pada Intel UHD 620.
 
 ## Bukti tahap 4
 
