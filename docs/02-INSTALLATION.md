@@ -24,7 +24,7 @@ Setelah readiness PASS dan laporan direview, jalankan:
 bash scripts/k41-install-basic-arch.sh
 ```
 
-Wrapper meneruskan ke implementasi `scripts/install-arch-x280.sh`. Proses ini destruktif dan mengganti isi SSD internal target. Sebelum konfirmasi:
+Wrapper meneruskan ke implementasi `scripts/install-arch-x280.sh`. Proses ini destruktif dan mengganti isi SSD internal target. Peta implementasi, layout, dependensi, recovery, log, dan test Stage 2 berada di [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md). Sebelum konfirmasi:
 - pastikan backup dan recovery media tersedia;
 - identifikasi SSD berdasarkan model, kapasitas, identitas stabil, transport, mount, dan swap;
 - review rencana partisi/enkripsi yang ditampilkan installer;
