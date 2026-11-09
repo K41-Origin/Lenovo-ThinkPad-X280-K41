@@ -210,7 +210,7 @@ After=getty@tty1.service
 [Service]
 ExecStart=
 ExecStart=$ROOT_HELPER "$USER_HOME/.cache/k41/boot-lock-ready"
-TimeoutStartSec=130
+TimeoutStartSec=85
 EOF
 chown root:root /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
 chmod 0644 /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
@@ -232,8 +232,9 @@ WantedBy=multi-user.target
 EOF
 chown root:root /etc/systemd/system/k41-plymouth-deactivate.service
 chmod 0644 /etc/systemd/system/k41-plymouth-deactivate.service
-systemctl enable k41-plymouth-deactivate.service
 systemctl daemon-reload
+systemd-analyze verify k41-plymouth-deactivate.service plymouth-quit.service getty@tty1.service
+systemctl enable k41-plymouth-deactivate.service
 
 printf '\nTPM2 enrollment adds a new LUKS unlock method. It does NOT remove or replace the existing passphrase keyslot.\n'
 printf 'Enter the current LUKS passphrase when systemd-cryptenroll asks for it.\n'
