@@ -86,7 +86,7 @@ selected_file_config() {
 }
 package_filter() {
   if have pacman; then
-    pacman -Q 2>/dev/null | grep -Ei '^(hyprland|caelestia|quickshell|firefox|chromium|brave|google-chrome|floorp|librewolf|zen-browser|xdg-desktop-portal|uwsm|seatd|polkit|pipewire|wireplumber)([[:space:]-]|$)' >>"$report" || true
+    pacman -Q 2>/dev/null | grep -Ei '^(hyprland|caelestia|quickshell|firefox|chromium|brave|google-chrome|floorp|librewolf|zen-browser|vivaldi|opera|xdg-desktop-portal|uwsm|seatd|polkit|pipewire|wireplumber|sddm|greetd|ly|gdm|lightdm)([[:space:]-]|$)' >>"$report" || true
   else note 'pacman unavailable'; fi
 }
 {
@@ -101,6 +101,10 @@ package_filter() {
   printf 'No home content, browser profiles, credentials, document contents, or user-specific config are read.\n'
   printf 'Review/redact host-specific information before sharing.\n'
 } >>"$report"
+
+section 'Systemd and package manager versions'
+if have systemctl; then systemctl --version 2>&1 | head -n 1 >>"$report"; else note 'systemctl unavailable'; fi
+if have pacman; then pacman --version 2>&1 | head -n 1 >>"$report"; else note 'pacman unavailable'; fi
 
 section 'Memory capacity and pressure snapshot'
 if have free; then free -b >>"$report" 2>&1; else note 'free unavailable'; fi
