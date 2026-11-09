@@ -45,7 +45,7 @@ install -d -m 0700 "$backup_root"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup="$backup_root/$stamp"
 n=0
-while ! install -d -m 0700 "$backup" 2>/dev/null; do
+while ! mkdir -m 0700 -- "$backup" 2>/dev/null; do
     n=$((n + 1))
     backup="$backup_root/$stamp-$n"
 done
