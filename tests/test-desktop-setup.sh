@@ -34,6 +34,7 @@ pass 'desktop setup script and resolver pass bash -n'
 DESKTOP_ENTRY="$ROOT/scripts/k41-install-desktop.sh"
 [[ -f $DESKTOP_ENTRY ]] || fail 'canonical desktop entry point missing'
 bash -n "$DESKTOP_ENTRY" || fail 'canonical desktop entry point syntax invalid'
+# shellcheck disable=SC2016 # Literal contract string checked by grep.
 grep -Fq 'exec bash "$ROOT/scripts/setup-desktop-x280.sh" "$@"' "$DESKTOP_ENTRY" ||
   fail 'canonical desktop entry point does not delegate to the existing setup implementation'
 pass 'canonical desktop entry point passes syntax and delegation checks'
