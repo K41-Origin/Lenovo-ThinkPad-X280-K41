@@ -95,8 +95,9 @@ command -v hyprlock >/dev/null 2>&1 || die 'hyprlock is required as a fail-safe 
 command -v start-hyprland >/dev/null 2>&1 || die 'start-hyprland is required.'
 /usr/bin/systemctl is-enabled --quiet getty@tty1.service || die 'getty@tty1.service must already be enabled.'
 for manager in gdm sddm ly greetd; do
-    if /usr/bin/systemctl is-enabled --quiet "$manager.service"; then
-        die "A display manager is already enabled: $manager.service"
+    if /usr/bin/systemctl is-enabled --quiet "$manager.service" ||
+       /usr/bin/systemctl is-active --quiet "$manager.service"; then
+        die "A display manager is already enabled or active: $manager.service"
     fi
 done
 command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
