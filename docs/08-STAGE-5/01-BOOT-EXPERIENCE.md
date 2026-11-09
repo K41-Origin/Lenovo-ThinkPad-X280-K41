@@ -85,6 +85,12 @@ Utamakan mekanisme upstream Arch/Plymouth/systemd. Hindari arbitrary sleep, unit
 - Tidak ada unit gagal baru, loop boot, timeout, boot regression, atau regression shutdown.
 - Bukti mencatat perangkat, kernel/boot entry, konfigurasi, hasil test, dan konfirmasi visual pengguna.
 
+## Catatan hasil perangkat — 2026-11-09
+
+**BOOTING BERHASIL — dikonfirmasi pengguna.** Pengguna menyatakan bahwa ThinkPad X280 sudah berhasil boot.
+
+Ruang lingkup konfirmasi ini sengaja dibatasi pada keberhasilan sistem melakukan startup. Tidak ada klaim tambahan bahwa TPM2 auto-unlock telah terverifikasi, tampilan splash K41 sudah sesuai desain, visual Hyprland tidak lagi bocor, atau reboot dan poweroff telah lulus. Keempat hal tersebut tetap memerlukan konfirmasi/pengujian terpisah. Isu desain visual yang belum sesuai tetap terbuka dan tidak dianggap selesai hanya karena sistem berhasil boot.
+
 ## Rollback dan keselamatan
 
 Sebelum perubahan, simpan konfigurasi mkinitcpio, kernel command line, Plymouth config/theme, unit/drop-in, dan artefak boot yang relevan. Pastikan `/efi` benar-benar ter-mount. Simpan passphrase LUKS dan media recovery yang dapat diakses.
