@@ -14,6 +14,10 @@ fi
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_root="$ROOT/reports/boot-audit"
 mkdir -p -- "$report_root"
+if [[ -n ${SUDO_UID:-} && ${SUDO_UID} =~ ^[0-9]+$ ]] && (( SUDO_UID >= 1000 )); then
+  chown "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$report_root"
+  chmod 0755 "$report_root"
+fi
 report_dir="$report_root/$timestamp"
 suffix=0
 while ! mkdir -- "$report_dir" 2>/dev/null; do
@@ -76,7 +80,7 @@ section 'CRYPTTAB (KEYFILE FIELD REDACTED)'
 if [[ -r /etc/crypttab ]]; then
   awk 'NF && $1 !~ /^#/ { $3="[KEYFILE-REDACTED]"; print; next } { print }' /etc/crypttab | redact >>"$report"
 else
-  printf 'UNAVAILABLE: /etc/crypttab (file may not exist)\\n' >>"$report"
+  printf 'UNAVAILABLE: /etc/crypttab (file may not exist)\n' >>"$report"
 fi
 capture 'ROOT MOUNT SOURCE' findmnt -no SOURCE,FSTYPE,OPTIONS /
 capture 'CRYPTROOT MAPPER STATUS' cryptsetup status cryptroot
