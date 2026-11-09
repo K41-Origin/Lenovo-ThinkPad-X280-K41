@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 # Supplemental Arch ISO evidence collector; canonical readiness logic lives in
-# scripts/k41-live-validation.sh. Detailed inventory and this repository-local
+# stages/stage-1-live-readiness/scripts/k41-live-validation.sh. Detailed inventory and this repository-local
 # report are retained for physical-hardware investigation.
 set -Eeuo pipefail
 umask 077
 
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-VALIDATOR="$ROOT/scripts/k41-live-validation.sh"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
+VALIDATOR="$ROOT/stages/stage-1-live-readiness/scripts/k41-live-validation.sh"
 
 usage() {
   cat <<'USAGE'
-Usage: bash scripts/x280-archiso-test.sh
+Usage: bash stages/stage-1-live-readiness/scripts/x280-archiso-test.sh
 
 Run from a checkout on the ThinkPad X280 booted into the official Arch ISO.
 This supplemental collector records detailed block-device, mount, swap, DMI,
 and kernel observations in a private repository report, then delegates all readiness,
 DMI identity, dependency, test-suite, and SSD topology checks to
-scripts/k41-live-validation.sh.
+stages/stage-1-live-readiness/scripts/k41-live-validation.sh.
 
 It does NOT partition, format, encrypt, mount, install packages, change
 services/firmware, or write to the selected installation target. The report

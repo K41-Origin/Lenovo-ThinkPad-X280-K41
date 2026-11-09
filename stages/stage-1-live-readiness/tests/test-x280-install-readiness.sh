@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-CANONICAL="$ROOT/scripts/k41-live-validation.sh"
-READINESS_WRAPPER="$ROOT/scripts/x280-install-readiness.sh"
-DIAGNOSTICS_WRAPPER="$ROOT/scripts/live-validation.sh"
-SUPPLEMENTAL="$ROOT/scripts/x280-archiso-test.sh"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
+CANONICAL="$ROOT/stages/stage-1-live-readiness/scripts/k41-live-validation.sh"
+READINESS_WRAPPER="$ROOT/stages/stage-1-live-readiness/scripts/x280-install-readiness.sh"
+DIAGNOSTICS_WRAPPER="$ROOT/stages/stage-1-live-readiness/scripts/live-validation.sh"
+SUPPLEMENTAL="$ROOT/stages/stage-1-live-readiness/scripts/x280-archiso-test.sh"
 
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$1"; }
@@ -32,7 +32,7 @@ for required in \
   '/sys/firmware/efi' \
   'ThinkPad X280 DMI identity' \
   'bash tests/run.sh' \
-  'bash scripts/validate-live-storage.sh' \
+  'bash stages/stage-1-live-readiness/scripts/validate-live-storage.sh' \
   'reports/live-readiness' \
   'reports/live-validation' \
   'summary.md' \
@@ -54,7 +54,7 @@ grep -Fq 'k41-live-validation.sh" --readiness' "$READINESS_WRAPPER" || fail "rea
 grep -Fq 'k41-live-validation.sh" --diagnostics-only' "$DIAGNOSTICS_WRAPPER" || fail "diagnostics compatibility wrapper does not delegate to canonical validator"
 pass "legacy entry points delegate without maintaining duplicate implementations"
 
-grep -Fq 'scripts/k41-live-validation.sh' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not reference canonical validator"
+grep -Fq 'stages/stage-1-live-readiness/scripts/k41-live-validation.sh' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not reference canonical validator"
 grep -Fq 'bash "$VALIDATOR" --readiness' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not delegate readiness to canonical validator"
 grep -Fq 'reports/x280-archiso-test' "$SUPPLEMENTAL" || fail "supplemental report is not stored inside the repository"
 if grep -Fq '/run/x280-archiso-storage-test-' "$SUPPLEMENTAL"; then

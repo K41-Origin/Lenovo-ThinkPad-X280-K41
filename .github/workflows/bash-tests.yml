@@ -60,7 +60,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          shfmt -d -i 2 scripts/k41-live-validation.sh scripts/live-validation.sh scripts/x280-install-readiness.sh scripts/x280-archiso-test.sh tests/run.sh tests/helpers/storage-fixtures.sh tests/test-native-storage-handle.sh
+          shfmt -d -i 2 stages/stage-1-live-readiness/scripts/k41-live-validation.sh stages/stage-1-live-readiness/scripts/live-validation.sh stages/stage-1-live-readiness/scripts/x280-install-readiness.sh stages/stage-1-live-readiness/scripts/x280-archiso-test.sh tests/run.sh tests/helpers/storage-fixtures.sh tests/test-native-storage-handle.sh
 
       - name: Run repository test suite
         shell: bash

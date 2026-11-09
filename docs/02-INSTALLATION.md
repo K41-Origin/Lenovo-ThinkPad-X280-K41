@@ -7,7 +7,7 @@ Dokumen ini mengatur tahap 1–3. Ikuti entry point kanonis; jangan menjalankan 
 Boot ISO resmi Arch Linux pada ThinkPad X280 dalam mode UEFI, siapkan koneksi jaringan dan checkout repository pada filesystem live. Jalankan:
 
 ```bash
-bash scripts/k41-live-validation.sh
+bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh
 ```
 
 Tanpa argumen, script menjalankan mode `--readiness`. Ini satu-satunya entry point yang perlu dijalankan untuk validasi kesiapan instalasi dasar. Baca laporan di `reports/live-readiness/` dan `reports/live-validation/`. PASS hanya menyatakan snapshot kesiapan pada checkout/host tersebut; bukan izin otomatis menghapus disk.

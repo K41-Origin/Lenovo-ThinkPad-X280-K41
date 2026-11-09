@@ -3,12 +3,12 @@
 set -Eeuo pipefail
 umask 077
 
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 cd "$ROOT"
 
 usage() {
   cat <<'USAGE'
-Usage: bash scripts/k41-live-validation.sh [--readiness|--diagnostics-only]
+Usage: bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh [--readiness|--diagnostics-only]
 
   --readiness        Strict Arch ISO / ThinkPad X280 readiness gate (default).
   --diagnostics-only Broad read-only diagnostics for any checked-out host.
@@ -228,8 +228,8 @@ check_syntax() {
   printf '%s shell files passed bash -n.\n' "${#shell_files[@]}"
 }
 check_shfmt() {
-  shfmt -d -i 2 scripts/k41-live-validation.sh scripts/live-validation.sh \
-    scripts/x280-install-readiness.sh scripts/x280-archiso-test.sh tests/run.sh tests/helpers/storage-fixtures.sh
+  shfmt -d -i 2 stages/stage-1-live-readiness/scripts/k41-live-validation.sh stages/stage-1-live-readiness/scripts/live-validation.sh \
+    stages/stage-1-live-readiness/scripts/x280-install-readiness.sh stages/stage-1-live-readiness/scripts/x280-archiso-test.sh tests/run.sh tests/helpers/storage-fixtures.sh
 }
 finalize_report() {
   local rc="$1" result finished
@@ -349,7 +349,7 @@ fi
 run_check "Canonical repository test suite" bash tests/run.sh
 
 if [[ "$mode" == readiness ]]; then
-  run_check "X280 SSD identity and live topology (read-only)" bash scripts/validate-live-storage.sh
+  run_check "X280 SSD identity and live topology (read-only)" bash stages/stage-1-live-readiness/scripts/validate-live-storage.sh
 fi
 
 run_check "installer --help" ./installer --help

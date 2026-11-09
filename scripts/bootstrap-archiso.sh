@@ -59,13 +59,14 @@ review_files=(
   scripts/k41-install-basic-arch.sh
   scripts/install-arch-x280.sh
   scripts/configure-arch-x280.sh
-  scripts/k41-live-validation.sh
+  stages/stage-1-live-readiness/scripts/k41-live-validation.sh
   scripts/k41-install-desktop.sh
   scripts/setup-desktop-x280.sh
-  scripts/x280-install-readiness.sh
-  scripts/live-validation.sh
+  stages/stage-1-live-readiness/scripts/x280-install-readiness.sh
+  stages/stage-1-live-readiness/scripts/live-validation.sh
   scripts/x280-first-boot-check.sh
-  scripts/validate-live-storage.sh
+  stages/stage-1-live-readiness/scripts/validate-live-storage.sh
+  stages/stage-1-live-readiness/tests/test-x280-install-readiness.sh
   tests/run.sh
   tests/helpers/storage-fixtures.sh
   lib/common.sh
@@ -106,7 +107,7 @@ IFS= read -r acknowledgement </dev/tty
   die "Source review acknowledgement did not match; readiness check was not launched."
 
 info "Source review acknowledged for commit $commit_sha. Running the read-only readiness gate."
-if ! (cd "$repo_dir" && bash scripts/k41-live-validation.sh --readiness); then
+if ! (cd "$repo_dir" && bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh --readiness); then
   die "Read-only readiness failed. Review reports/live-readiness and reports/live-validation; the destructive installer was not launched."
 fi
 

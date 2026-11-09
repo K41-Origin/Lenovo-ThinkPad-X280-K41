@@ -12,7 +12,7 @@ Manifest test dan urutannya hanya didefinisikan di `tests/run.sh`; cakupan suite
 
 ## Gate tujuh tahap
 
-1. **Live readiness:** `bash scripts/k41-live-validation.sh` berakhir PASS; laporan dan identitas target direview.
+1. **Live readiness:** `bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh` berakhir PASS; laporan dan identitas target direview.
 2. **Basic Arch installation:** target SSD dikonfirmasi eksplisit; instalasi fisik, firmware boot, LUKS unlock, dan sistem dasar diperiksa sesuai bukti. First-boot collector opsional.
 3. **Desktop installation:** `sudo bash scripts/k41-install-desktop.sh` selesai. Exit 0 bukan acceptance desktop.
 4. **Desktop functional validation:** jalankan `bash scripts/k41-desktop-validation.sh` dari sesi Hyprland sebagai user biasa. Hasil PASS/WARN/FAIL/SKIP hanya mencakup pemeriksaan otomatis yang benar-benar dijalankan. Jika perlu, jalankan repair terbatas dan review ulang.

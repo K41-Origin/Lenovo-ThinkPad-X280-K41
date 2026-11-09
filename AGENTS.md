@@ -10,7 +10,7 @@
 
 ## Canonical entry points
 
-1. `scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
+1. `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
 2. `scripts/k41-install-basic-arch.sh` — instalasi dasar Arch; destruktif.
 3. `scripts/k41-install-desktop.sh` — setup desktop dari Arch terpasang melalui TTY.
 4. `scripts/k41-desktop-validation.sh` — validasi desktop read-only; jalankan sebagai user biasa dalam sesi Hyprland.

@@ -2,7 +2,7 @@
 
 ## Urutan kerja proyek
 
-1. **Live readiness:** dari Arch Linux Live ISO jalankan `bash scripts/k41-live-validation.sh`. Lihat [peta Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
+1. **Live readiness:** dari Arch Linux Live ISO jalankan `bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh`. Lihat [peta Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 2. **Basic Arch installation:** setelah readiness PASS dan rencana/target direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Operasi ini destruktif.
 3. **Desktop installation:** setelah boot ke Arch terpasang dan login TTY sebagai user biasa, jalankan `sudo bash scripts/k41-install-desktop.sh`.
 4. **Desktop validation:** dari sesi Hyprland sebagai user biasa jalankan `bash scripts/k41-desktop-validation.sh`. Stage 4 telah diterima; bukti ringkas dan batasnya tercatat di [Status](06-STATUS.md).
@@ -16,7 +16,7 @@ Tidak ada perpindahan otomatis antar tahap.
 
 | Entry point | Fungsi |
 |---|---|
-| `scripts/k41-live-validation.sh` | Readiness Arch ISO |
+| `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` | Readiness Arch ISO |
 | `scripts/k41-install-basic-arch.sh` | Instalasi dasar Arch; delegasi ke `install-arch-x280.sh` |
 | `scripts/k41-install-desktop.sh` | Instalasi desktop; delegasi ke `setup-desktop-x280.sh` |
 | `scripts/k41-desktop-validation.sh` | Validasi fungsional desktop |

@@ -6,7 +6,7 @@ Proyek ini membangun instalasi Arch Linux yang modular, aman, reproducible, dan 
 
 | Tahap | Lingkungan | Entry point |
 |---|---|---|
-| 1. Live readiness | Arch Linux Live ISO | `bash scripts/k41-live-validation.sh` · [Peta Stage 1](stages/stage-1-live-readiness/README.md) |
+| 1. Live readiness | Arch Linux Live ISO | `bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh` · [Peta Stage 1](stages/stage-1-live-readiness/README.md) |
 | 2. Basic Arch installation | Arch Linux Live ISO | `bash scripts/k41-install-basic-arch.sh` |
 | 3. Desktop installation | Arch Linux terpasang, TTY | `sudo bash scripts/k41-install-desktop.sh` |
 | 4. Desktop functional validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` |
@@ -42,4 +42,4 @@ Tahap 1 tidak mengubah konfigurasi sistem atau menulis ke SSD instalasi target, 
 
 First-boot collector bersifat opsional, bukan gerbang wajib sebelum tahap 3. BlackArch bersifat opt-in dan selektif.
 
-Struktur utama: `scripts/`, `lib/`, `config/`, `tests/`, `reports/`, dan `docs/`. Laporan runtime baru lokal secara default; kebijakan arsip ada di [reports/README.md](reports/README.md). Lisensi: [LICENSE](LICENSE).
+Struktur utama: `scripts/`, `lib/`, `config/`, `tests/`, `reports/`, `docs/`, dan `stages/`. Laporan runtime baru lokal secara default; kebijakan arsip ada di [reports/README.md](reports/README.md). Lisensi: [LICENSE](LICENSE).

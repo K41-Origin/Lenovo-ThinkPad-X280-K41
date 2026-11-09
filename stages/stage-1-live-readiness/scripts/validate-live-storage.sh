@@ -2,7 +2,7 @@
 # Read-only live validation for the known ThinkPad X280 internal NVMe SSD.
 set -Eeuo pipefail
 
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 cd "$ROOT"
 
 EXPECTED_MODEL='WDC PC SN730'

@@ -27,7 +27,7 @@ Penerimaan Workstream 1 tidak boleh ditafsirkan sebagai klaim bahwa setiap detai
 
 ## Entry point kanonis
 
-- `scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
+- `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 - `scripts/k41-install-basic-arch.sh` → delegasi internal `scripts/install-arch-x280.sh`
 - `scripts/k41-install-desktop.sh` → delegasi internal `scripts/setup-desktop-x280.sh`
 - `scripts/k41-desktop-validation.sh`
@@ -51,7 +51,8 @@ Wrapper harus tetap tipis dan tidak menggandakan implementasi.
 - `config/`: konfigurasi target.
 - `tests/`: automated checks.
 - `reports/`: output lokal dan arsip bukti historis.
-- `docs/`: panduan aktif dan histori.
+- `docs/`: panduan umum proyek dan histori.
+- `stages/`: dokumentasi dan script yang dimiliki masing-masing tahap.
 
 ## Terminologi status
 
