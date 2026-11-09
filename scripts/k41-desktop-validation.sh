@@ -484,6 +484,12 @@ fi
   printf -- '- Repository commit: %s\n' "$(git rev-parse HEAD 2>/dev/null || printf unknown)"
   printf -- '- Result: **%s**\n' "$result"
   printf -- '- Checks: %s PASS, %s WARN, %s FAIL, %s SKIP\n' "$pass_count" "$warn_count" "$fail_count" "$skip_count"
+  printf '\n## Findings requiring review\n\n'
+  if (( warn_count + fail_count + skip_count > 0 )); then
+    awk -F '\t' '$1 == "WARN" || $1 == "FAIL" || $1 == "SKIP" { printf "- **%s** — %s: %s\n", $1, $2, $3 }' "$checks"
+  else
+    printf 'No WARN, FAIL, or SKIP findings.\n'
+  fi
   printf '\n## Interpretation\n\n'
   printf 'This is automated software/runtime/log validation only. It cannot prove that the panel, launcher, widgets, keyboard, TrackPoint, touchpad, speakers, microphone, brightness keys, Wi-Fi reconnect, screenshot flow, or lock screen behave correctly in real interaction. No physical or visual test is claimed. A PASS means only that no configured automated failure condition was detected in this snapshot.\n'
   printf '\n## Report files\n\n'
