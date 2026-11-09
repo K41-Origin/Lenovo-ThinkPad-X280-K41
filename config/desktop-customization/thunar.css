@@ -82,8 +82,8 @@
     background-color: alpha(#c4c4c9, 0.10);
     color: #f2f2f0;
 }
-.thunar button:focus-visible,
-.thunar .view:focus-visible {
+.thunar button:focus,
+.thunar .view:focus {
     outline: 1px solid #c4c4c9;
     outline-offset: 2px;
 }
