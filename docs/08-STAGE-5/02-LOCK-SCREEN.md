@@ -25,7 +25,7 @@ Termasuk layout, jam/tanggal/hari, wallpaper aktif dan blur, password prompt, in
 
 Tidak termasuk perubahan PAM atau kebijakan autentikasi, perubahan password, LUKS, TPM, penggantian arsitektur shell, atau Guest Mode. **Guest Mode ditunda dan tidak boleh dirancang/diimplementasikan sampai pengguna secara eksplisit menyatakan custom lock screen berhasil diterima.**
 
-Fingerprint dan Howdy yang sudah terpasang boleh tetap tersedia hanya jika jalur autentikasi aktif saat ini membuktikan dukungannya. Jangan mengaktifkan, menonaktifkan, atau mengubah autentikasi hanya demi tampilan.
+Fingerprint dan Howdy yang sudah terpasang boleh tetap tersedia hanya jika jalur autentikasi aktif saat ini membuktikan dukungannya. Jangan mengaktifkan, menonaktifkan, atau mengubah autentikasi hanya demi tampilan.\n\nGuest Mode tetap fitur terpisah dan belum diimplementasikan. Atas instruksi eksplisit pengguna, audit read-only untuk storage/persistence Guest Mode boleh berjalan sebelum custom lock screen diterima; implementasi Guest Mode tetap tidak boleh dimulai tanpa keputusan desain dan acceptance terpisah.
 
 ## Model kolaborasi dan siklus kerja
 
@@ -355,3 +355,20 @@ Setelah installer selesai, jalankan restart dari terminal Hyprland aktif sebagai
 ### Guest Mode — BELUM DIIMPLEMENTASIKAN
 
 Guest Mode **belum memiliki implementasi**. Statusnya **NOT IMPLEMENTED / DEFERRED**, bukan fitur aktif, bukan fitur yang sudah diuji, dan bukan bagian dari acceptance lock screen saat ini. Jangan membuat desain, akun guest, session workflow, atau perubahan permission/policy terkait Guest Mode sampai pengguna secara eksplisit menyatakan custom lock screen telah diterima. Setelah persetujuan tersebut, Guest Mode harus diaudit dan dirancang sebagai workstream terpisah dengan batas keamanan, isolasi data, persistence, dan cleanup yang jelas.
+
+
+## Guest Mode — audit storage/persistence (read-only)
+
+Guest Mode masih **NOT IMPLEMENTED**. Pengguna telah mengarahkan pekerjaan audit Guest Mode untuk dilanjutkan secara terpisah; hal ini belum berarti custom lock screen diterima atau Guest Mode siap digunakan.
+
+Gunakan collector terfokus berikut dari clone repository pada ThinkPad X280 sebagai user desktop biasa, tanpa sudo:
+
+```bash
+git pull --ff-only origin main
+bash -n scripts/k41-guest-storage-audit.sh
+bash scripts/k41-guest-storage-audit.sh
+```
+
+Collector membuat satu report baru di `reports/guest-mode-audit/<timestamp>-audit.txt`. Ia memeriksa RAM/memory counters, root mount, swap aktif dan metadata `/swapfile`, parameter resume/hibernation, zram, konfigurasi efektif journald/coredump (hanya directive terpilih), mount path yang relevan, dan state unit systemd. Ia tidak membaca isi home/browser profile, tidak memerlukan sudo, dan tidak mengubah konfigurasi, service, package, permission, swap, boot, atau storage.
+
+Tinjau dan redaksi report sebelum push. Script mencetak perintah Git untuk menambahkan hanya report tersebut, memeriksa staged diff, commit dengan `git commit --only`, dan push ke `main`. Jangan force-push. Hasil audit menjadi input desain; tidak ada OverlayFS, tmpfs policy, perubahan swap, atau guest account yang dipasang oleh collector ini.
