@@ -16,4 +16,10 @@ fi
 grep -Fq 'cannot prove that the panel' "$SCRIPT" || fail 'validator must state the limits of log-based acceptance'
 grep -Fq 'chmod 0700 "$run_dir"' "$SCRIPT" || fail 'report directory must be private'
 grep -Fq 'chmod 0600 "$log" "$checks"' "$SCRIPT" || fail 'report files must be private'
+diag_line="$(grep -n '^diagnostics="$run_dir/diagnostics.tsv"pass 'desktop validator passes syntax and safety-contract checks'
+ "$SCRIPT" | cut -d: -f1)"
+chmod_line="$(grep -n '^chmod 0600 "$run_dir"/\\*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"pass 'desktop validator passes syntax and safety-contract checks'
+ "$SCRIPT" | cut -d: -f1)"
+[[ -n $diag_line && -n $chmod_line ]] || fail 'diagnostic report initialization/permission block missing'
+(( diag_line < chmod_line )) || fail 'diagnostic permissions are applied before initialization'
 pass 'desktop validator passes syntax and safety-contract checks'
