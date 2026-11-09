@@ -413,12 +413,12 @@ diagnostic() {
   printf '\n===== %s =====\nCOMMAND:' "$label" >>"$diagnostics_log"
   printf ' %q' "$@" >>"$diagnostics_log"
   printf '\n' >>"$diagnostics_log"
-  if "$@" >"$tmp/$output_file" 2>&1; then
+  if "$@" >"$run_dir/$output_file" 2>&1; then
     rc=0
   else
     rc=$?
   fi
-  cat -- "$tmp/$output_file" >>"$diagnostics_log"
+  cat -- "$run_dir/$output_file" >>"$diagnostics_log"
   printf 'COMMAND EXIT: %s\n' "$rc" >>"$diagnostics_log"
   printf 'CAPTURED\t%s\t%s\t%s\n' "$label" "$rc" "$output_file" >>"$diagnostics"
 }
