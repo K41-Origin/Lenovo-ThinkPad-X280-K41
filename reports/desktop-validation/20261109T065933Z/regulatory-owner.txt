@@ -1,0 +1,1 @@
+/usr/lib/firmware/regulatory.db is owned by wireless-regdb 2026.09.03-1

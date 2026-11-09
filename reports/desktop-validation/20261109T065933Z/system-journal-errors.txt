@@ -1,0 +1,23 @@
+Nov 09 11:29:39 archlinux kernel: virt/tdx: TDX not supported by the host platform
+Nov 09 11:33:55 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 11:33:55 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 11:33:55 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 12:50:25 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 12:50:25 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 12:50:26 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 12:50:29 x280 qs[1662]: PAM _pam_init_handlers: no default config other
+Nov 09 12:56:08 x280 qs[1799]: PAM _pam_init_handlers: no default config other
+Nov 09 13:09:12 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:09:12 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:09:14 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 13:09:19 x280 qs[2877]: PAM _pam_init_handlers: no default config other
+Nov 09 13:27:26 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:27:26 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:27:27 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 13:27:28 x280 qs[3913]: PAM _pam_init_handlers: no default config other
+Nov 09 13:44:05 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:44:05 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:44:06 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 13:44:06 x280 qs[4913]: PAM _pam_init_handlers: no default config other
+Nov 09 13:49:15 x280 qs[10272]: PAM _pam_init_handlers: no default config other
+Nov 09 13:54:16 x280 qs[10306]: PAM _pam_init_handlers: no default config other
