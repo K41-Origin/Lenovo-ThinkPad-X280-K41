@@ -192,9 +192,11 @@ printf 'Upstream repository: %s\nUpstream revision: %s\nPackage version: %s\n' \
 
 staging="$(mktemp -d "$config_root/quickshell/.k41-caelestia-stage.XXXXXX")"
 old_root="$config_root/quickshell/.k41-caelestia-old-$stamp"
+[[ ! -e $old_root && ! -L $old_root ]] || die "Refusing existing deployment staging path: $old_root"
 replace_started=0
 cleanup() {
     local rc=$?
+    trap - EXIT
     if (( rc != 0 && replace_started == 1 )); then
         info 'Deployment failed after replacement began; restoring the previous user shell directory.'
         rm -rf -- "$target_root"
