@@ -9,7 +9,7 @@ Proyek membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapa
 | 1. Live Readiness | Arch Linux Live ISO | `bash scripts/k41-live-validation.sh` |
 | 2. Basic Arch Installation | Arch Linux Live ISO | `bash scripts/k41-install-basic-arch.sh` |
 | 3. Desktop Installation | Basic Arch Linux, TTY | `sudo bash scripts/k41-install-desktop.sh` |
-| 4. Desktop Functional Validation | Sesi desktop | [Checklist desktop](docs/03-DESKTOP.md) |
+| 4. Desktop Functional Validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` |
 | 5. Desktop Customization | Desktop yang telah diterima | [Panduan desktop](docs/03-DESKTOP.md) |
 | 6. Desktop & Hardware Optimization | Desktop yang telah dikustomisasi | [Operasional](docs/05-OPERATIONS.md) |
 | 7. Release | Setelah seluruh gate lulus | [Status](docs/06-STATUS.md) |
