@@ -251,7 +251,7 @@ chown "$USER_UID:$USER_GID" "$HYPRLAND_LUA"
 cat > "$GETTY_DROPIN" <<EOF
 [Service]
 ExecStart=
-ExecStart=-/usr/bin/agetty --noreset --noclear --autologin $USER_NAME - \\${TERM}
+ExecStart=-/usr/bin/agetty --noreset --noclear --autologin $USER_NAME - \${TERM}
 EOF
 chown root:root "$GETTY_DROPIN"
 chmod 0644 "$GETTY_DROPIN"
