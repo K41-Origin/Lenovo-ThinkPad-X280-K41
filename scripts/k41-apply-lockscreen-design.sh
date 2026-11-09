@@ -121,9 +121,6 @@ if [[ ${1:-} == --rollback ]]; then
     [[ $# -eq 2 ]] || { usage >&2; exit 2; }
     mode=rollback
     rollback_dir=$2
-elif [[ ${1:-} == --no-restart ]]; then
-    [[ $# -eq 1 ]] || { usage >&2; exit 2; }
-    restart=no
 elif [[ $# -ne 0 ]]; then
     usage >&2
     exit 2
