@@ -66,7 +66,7 @@ Pengujian utama dilakukan pada ThinkPad X280 fisik. Static test dan inspeksi kon
 
 `start-hyprland` sebelumnya dijalankan langsung dari `.bash_profile`, sehingga output stdout/stderr dapat tertinggal pada buffer TTY1 dan terlihat kembali saat transisi compositor/shutdown. K41 launcher mengalihkan kedua stream ke file log privat, tanpa memutus stdin atau mengganti TTY. Ini menargetkan teks startup terminal; bukan pengganti pengaturan `misc.disable_hyprland_logo` atau `misc.disable_splash_rendering`, yang merupakan kontrol visual compositor terpisah.
 
-Lokasi log: `~/.local/state/k41/hyprland-startup.log`. Log diputar menjadi `.1` ketika file aktif telah mencapai 1 MiB. Kegagalan launcher atau executable upstream dilaporkan ke stderr wrapper.
+Lokasi log: `~/.local/state/k41/hyprland-startup.log`. Log diputar menjadi `.1` ketika file aktif telah mencapai 1 MiB. Kegagalan launcher atau executable upstream dilaporkan ke stderr wrapper. Untuk instalasi autologin lama, migrasikan managed profile dengan `sudo bash scripts/k41-install-hyprland-launcher.sh`; script membuat backup `.bash_profile` dan launcher sebelumnya sebelum mengubahnya. Instalasi autologin baru memasang launcher secara otomatis melalui `k41-enable-caelestia-autologin.sh`.
 
 ## Hipotesis dan diagnosis visual
 
