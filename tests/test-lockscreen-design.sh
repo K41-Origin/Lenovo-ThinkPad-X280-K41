@@ -7,14 +7,20 @@ center="$root/config/quickshell/caelestia/modules/lock/Center.qml"
 installer="$root/scripts/k41-apply-lockscreen-design.sh"
 reporter="$root/scripts/k41-report-lockscreen-session.sh"
 permission_audit="$root/scripts/k41-report-lockscreen-permissions.sh"
+failure_reporter="$root/scripts/k41-report-lockscreen-failure.sh"
 
-for file in "$content" "$center" "$installer" "$reporter" "$permission_audit"; do
+for file in "$content" "$center" "$installer" "$reporter" "$permission_audit" "$failure_reporter"; do
     [[ -s $file ]] || { printf 'FAIL: missing/empty %s\n' "$file" >&2; exit 1; }
 done
 
 bash -n "$installer"
 bash -n "$reporter"
 bash -n "$permission_audit"
+bash -n "$failure_reporter"
+grep -Fq 'Latest deployment logs (full last 500 lines each, newest 3)' "$failure_reporter"
+grep -Fq 'Latest session restart logs (full last 300 lines each, newest 2)' "$failure_reporter"
+grep -Fq 'Collector is read-only' "$failure_reporter"
+! grep -Eq '(^|[[:space:]])(chmod|chown|rm -rf|sudo[[:space:]])' "$failure_reporter"
 grep -Fq 'Jalankan sebagai user desktop biasa, tanpa sudo' "$permission_audit"
 grep -Fq 'namei -l' "$permission_audit"
 grep -Fq 'getfacl -cp' "$permission_audit"
