@@ -143,24 +143,31 @@ else
 fi
 
 # 4. Caelestia/Quickshell runtime and IPC.
+caelestia_running=0
 if pgrep -af '[q]s.*caelestia|[q]uickshell.*caelestia|[c]aelestia shell' >/dev/null 2>&1; then
+  caelestia_running=1
   record PASS 'Caelestia process' 'Matching process detected'
 else
   record FAIL 'Caelestia process' 'No matching Caelestia/Quickshell process'
 fi
-if capture 'Caelestia IPC target discovery' "$tmp/caelestia-ipc" caelestia shell -s && [[ -s $tmp/caelestia-ipc ]]; then
-  record PASS 'Caelestia IPC' 'IPC target list returned data'
-else
-  record FAIL 'Caelestia IPC' 'IPC discovery failed or returned no targets'
-fi
-if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
-  if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|Source file does not exist|BlueZ system service is not available|RTKit error' "$tmp/caelestia-log"; then
-    record WARN 'Caelestia runtime log' 'Potential runtime/QML/module errors found; inspect validation.log'
+if (( caelestia_running == 1 )); then
+  if capture 'Caelestia IPC target discovery' "$tmp/caelestia-ipc" caelestia shell -s && [[ -s $tmp/caelestia-ipc ]]; then
+    record PASS 'Caelestia IPC' 'IPC target list returned data'
   else
-    record PASS 'Caelestia runtime log' 'No matching fatal/critical/QML-load error pattern found'
+    record FAIL 'Caelestia IPC' 'IPC discovery failed or returned no targets'
+  fi
+  if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
+    if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|Source file does not exist|BlueZ system service is not available|RTKit error' "$tmp/caelestia-log"; then
+      record WARN 'Caelestia runtime log' 'Potential runtime/QML/module errors found; inspect validation.log'
+    else
+      record PASS 'Caelestia runtime log' 'No matching fatal/critical/QML-load error pattern found'
+    fi
+  else
+    record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
   fi
 else
-  record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
+  record SKIP 'Caelestia IPC' 'Skipped because no Caelestia process is running'
+  record SKIP 'Caelestia runtime log' 'Skipped because no Caelestia process is running'
 fi
 
 # 5. User services and portals.
@@ -348,11 +355,16 @@ else
   record WARN 'Supplemental desktop inventory' 'Collector returned non-zero; inspect its report/log'
 fi
 printf '\n===== Supplemental Caelestia collector =====\n' >>"$log"
-if K41_REPORT_DIR="$run_dir/caelestia" bash "$ROOT/scripts/test-caelestia-x280.sh" >>"$log" 2>&1; then
-  record PASS 'Supplemental Caelestia inventory' 'Collector completed; this is not UI acceptance'
+if (( caelestia_running == 1 )); then
+  if K41_REPORT_DIR="$run_dir/caelestia" bash "$ROOT/scripts/test-caelestia-x280.sh" >>"$log" 2>&1; then
+    record PASS 'Supplemental Caelestia inventory' 'Collector completed; running shell was left untouched'
+  else
+    record WARN 'Supplemental Caelestia inventory' 'Collector returned non-zero'
+  fi
 else
-  record WARN 'Supplemental Caelestia inventory' 'Collector returned non-zero'
+  record SKIP 'Supplemental Caelestia inventory' 'Skipped to avoid starting Caelestia during a read-only validation run'
 fi
+
 capture 'User journal errors (last 100)' "$tmp/user-journal" journalctl --user -b -p err --no-pager -n 100 || true
 capture 'System journal errors (last 100; permission may be limited)' "$tmp/system-journal" journalctl -b -p err --no-pager -n 100 || true
 capture 'Recent kernel warnings/errors (last 100)' "$tmp/kernel-journal" journalctl -k -b -p warning --no-pager -n 100 || true
@@ -365,7 +377,7 @@ for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journ
     record WARN "Journal: $journal_name" 'No entries returned or journal access unavailable'
   elif grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
     record FAIL "Journal: $journal_name" 'Critical kernel/memory failure signature found; inspect saved journal'
-  elif grep -Eiq 'segfault|coredump|Failed to start|Failed to activate|QML.*Error|error:' "$journal_file"; then
+  elif grep -Eiq 'segfault|coredump|Failed|failed|failure|QML.*Error|error:' "$journal_file"; then
     record WARN "Journal: $journal_name" 'Potential application/service errors found; inspect saved journal'
   else
     record PASS "Journal: $journal_name" 'No configured critical/error signatures detected'
