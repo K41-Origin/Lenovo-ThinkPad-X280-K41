@@ -12,7 +12,7 @@ bash scripts/k41-live-validation.sh
 
 Tanpa argumen, script menjalankan mode `--readiness`. Ini satu-satunya entry point yang perlu dijalankan untuk validasi kesiapan instalasi dasar. Baca laporan di `reports/live-readiness/` dan `reports/live-validation/`. PASS hanya menyatakan snapshot kesiapan pada checkout/host tersebut; bukan izin otomatis menghapus disk.
 
-Untuk penjelasan terperinci mengenai mode, wrapper, supplemental collector, call graph, library, storage checks, test coverage, laporan, dan batas efek samping, lihat [Stage 1 — Live Readiness](09-STAGE-1-LIVE-READINESS.md).
+Untuk penjelasan terperinci mengenai mode, wrapper, supplemental collector, call graph, library, storage checks, test coverage, laporan, dan batas efek samping, lihat [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 
 `scripts/bootstrap-archiso.sh` adalah orkestrator opsional yang melakukan review source, readiness, lalu meminta otorisasi untuk meluncurkan installer. Script ini bukan bagian dari urutan standar tujuh tahap. Jika mengikuti tahap 1 dan 2 secara manual seperti di atas, jangan jalankan bootstrap karena readiness akan diperiksa lagi dan installer dapat diluncurkan dari dalamnya.
 
