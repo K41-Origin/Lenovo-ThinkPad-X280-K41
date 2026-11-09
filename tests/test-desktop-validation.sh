@@ -7,7 +7,7 @@ pass() { printf 'PASS: %s\n' "$*"; }
 
 [[ -f $SCRIPT ]] || fail 'canonical desktop validator missing'
 bash -n "$SCRIPT" || fail 'desktop validator syntax invalid'
-for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' "grep -q '[^[:space:]]' \"\$tmp/hypr-config-errors\"" 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'Sinks:' 'Sources:' 'permission denied' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'caelestia_running' 'PASS_WITH_WARNINGS' 'fail_count' 'k41_classify_caelestia_log' 'scheme_file=' 'stale scheme startup and optional .face warnings are excluded only when their conditions are met' 'recognized informational platform/driver messages detected' 'diagnostics.tsv' 'diagnostics.log' 'CPU vulnerability mitigations' 'PCI devices and bound drivers' 'Regulatory database package ownership' 'Bluetooth service properties' 'Thermal hardware monitor inventory' 'ThinkPad ACPI interface' 'Relevant installed package versions'; do
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' "grep -q '[^[:space:]]' \"\$tmp/hypr-config-errors\"" 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'Sinks:' 'Sources:' 'permission denied' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'caelestia_running' 'PASS_WITH_WARNINGS' 'fail_count' 'k41_classify_caelestia_log' 'k41_classify_journal' 'scheme_file=' 'stale scheme startup and optional .face warnings are excluded only when their conditions are met' 'recognized informational platform/driver messages detected' 'diagnostics.tsv' 'diagnostics.log' 'CPU vulnerability mitigations' 'PCI devices and bound drivers' 'Regulatory database package ownership' 'Bluetooth service properties' 'Thermal hardware monitor inventory' 'ThinkPad ACPI interface' 'Relevant installed package versions'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "validator missing expected health check: $token"
 done
 if grep -Eq '(^|[[:space:]])sudo[[:space:]]|pacman -S|systemctl (enable|disable|start|stop)|mkfs\.|cryptsetup luksFormat|wipefs|parted' "$SCRIPT"; then
@@ -66,5 +66,27 @@ findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file" 1 1)"
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file" 1 0)"
 [[ $findings == rtkit-package-missing ]] || fail "missing RTKit package was not classified: $findings"
 
+
+: >"$log_file"
+classification="$(k41_classify_journal "$log_file" 0 0)"
+[[ $classification == no-error-entries ]] || fail "empty successful journal query was not treated as clean: $classification"
+classification="$(k41_classify_journal "$log_file" 1 0)"
+[[ $classification == query-failed ]] || fail "failed empty journal query was not distinguished: $classification"
+
+printf '%s\n' 'kernel: faux_driver regulatory: Direct firmware load for regulatory.db failed with error -2' >"$log_file"
+classification="$(k41_classify_journal "$log_file" 0 1)"
+[[ $classification == no-configured-signature ]] || fail "resolved regulatory database warning remained actionable: $classification"
+classification="$(k41_classify_journal "$log_file" 0 0)"
+[[ $classification == actionable ]] || fail "missing regulatory database warning was not actionable: $classification"
+
+printf '%s\n' 'kernel: virt/tdx: TDX not supported by the host platform' 'app[123]: error: unrelated application failure' >"$log_file"
+classification="$(k41_classify_journal "$log_file" 0 0)"
+[[ $classification == unclassified-error ]] || fail "informational journal line masked an unrelated error: $classification"
+
+printf '%s\n' 'kernel: Kernel panic - not syncing' >"$log_file"
+classification="$(k41_classify_journal "$log_file" 0 0)"
+[[ $classification == critical ]] || fail "critical kernel signature was not prioritized: $classification"
+
+pass 'Journal classifier regression fixtures (empty queries, resolved firmware, mixed informational/error, and critical signatures)'
 pass 'Caelestia log classifier regression fixtures (stale scheme, optional avatar, missing resource, real QML errors, BlueZ, and RTKit)'
 
