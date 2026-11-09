@@ -36,7 +36,7 @@ k41_classify_caelestia_log() {
 # Classify journal query results without treating an empty error-priority
 # query as a fault. Arguments: FILE QUERY_EXIT_CODE REGULATORY_DB_PRESENT
 k41_classify_journal() {
-  local journal_file=$1 query_rc=$2 regulatory_db_present=$3 filtered
+  local journal_file=$1 query_rc=$2 regulatory_db_present=$3 cpu_vulnerability_dir=${4:-/sys/devices/system/cpu/vulnerabilities} filtered cpu_attention=0
   if (( query_rc != 0 )); then
     printf '%s\n' 'query-failed'
     return 0
@@ -64,7 +64,25 @@ k41_classify_journal() {
     mv -- "$filtered.tmp" "$filtered"
   fi
 
-  if grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\.db failed|MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$filtered"; then
+  # CPU boot notices describe detected hardware, not necessarily an
+  # unmitigated vulnerability. Correlate each with its live sysfs state.
+  # Missing/unknown state remains actionable (fail conservative).
+  local cpu_patterns=('MDS CPU bug present' 'MMIO Stale Data CPU bug present' 'VMSCAPE:')
+  local cpu_files=(mds mmio_stale_data vmscape)
+  local index cpu_state_file
+  for index in "${!cpu_patterns[@]}"; do
+    if grep -Fqi -- "${cpu_patterns[$index]}" "$filtered"; then
+      cpu_state_file="$cpu_vulnerability_dir/${cpu_files[$index]}"
+      if [[ ! -r $cpu_state_file ]] ||
+         grep -Eiq 'Vulnerable|SMT vulnerable' "$cpu_state_file" ||
+         ! grep -Eiq 'Mitigation:|Not affected' "$cpu_state_file"; then
+        cpu_attention=1
+      fi
+    fi
+  done
+
+  if grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\\.db failed' "$filtered" ||
+     (( cpu_attention == 1 )); then
     printf '%s\n' 'actionable'
   elif grep -Eiq 'Failed|failed|failure|QML.*Error|error:' "$filtered"; then
     printf '%s\n' 'unclassified-error'
