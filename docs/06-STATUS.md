@@ -9,7 +9,7 @@
 | 1. Arch ISO — Live Readiness | IMPLEMENTED | `scripts/k41-live-validation.sh` adalah entry point kanonis. |
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer destruktif; penerimaan boot fisik tetap dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
-| 4. Desktop Functional Validation | IN PROGRESS | Laporan X280 terbaru yang tersedia menunjukkan 52 PASS, 4 WARN, 0 FAIL, 0 SKIP. Audit lanjutan menemukan false-positive pada warning startup Caelestia yang sudah stale dan query journal kosong; classifier diperketat dan diberi regression fixtures. CI repository dan Bash validation lulus pada commit `a93671071bb069019d954a10039dfc08c6893650`. Gate tetap menunggu rerun pada X280 dengan classifier terbaru. |
+| 4. Desktop Functional Validation | IN PROGRESS | Laporan X280 terbaru sebelum perubahan validator saat ini (`20261109T072936Z`) menunjukkan 54 PASS, 2 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`. Audit lanjutan menemukan false-positive pada warning startup Caelestia yang sudah stale dan query journal kosong; classifier diperketat dan diberi regression fixtures. CI repository dan Bash validation lulus pada commit `a93671071bb069019d954a10039dfc08c6893650`. Gate tetap menunggu rerun pada X280 dengan classifier terbaru. |
 | 5. Desktop Customization | PLANNED | Desain sudah ditetapkan; menunggu gate tahap 4 terbaru. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh gate, regression, dokumentasi, dan bukti final. |
@@ -43,13 +43,13 @@ Langkah penutup: tarik `main`, jalankan `bash scripts/k41-desktop-repair.sh` dar
 
 ## Bukti terbaru yang tersedia
 
-- Desktop validation terbaru `reports/desktop-validation/20261109T065933Z/`: 52 PASS, 4 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`.
+- Desktop validation terbaru yang tersedia `reports/desktop-validation/20261109T072936Z/`: 54 PASS, 2 WARN, 0 FAIL, 0 SKIP; hasil `PASS_WITH_WARNINGS`. Laporan dibuat pada commit `a5330ab6bbc089b9b3d59184e27a8e13b7bab54b`, sebelum perubahan validator/repair pada sesi ini.
 - Repair terbaru `reports/desktop-repair/20261109T065932Z/`: 7 PASS, 3 WARN, 0 FAIL, 5 SKIP. Scheme Caelestia sudah ada; BlueZ, bluez-utils, wireless-regdb, dan rtkit terpasang; `bluetooth.service` aktif; `regulatory.db` tersedia.
-- Caelestia scheme ada pada post-repair snapshot. Runtime log validator lama masih membaca warning yang tercatat sebelum scheme dibuat, serta `.face` opsional; classifier baru ditujukan untuk menghindari false-positive tersebut dan perlu dikonfirmasi dengan rerun.
-- PAM `/etc/pam.d/other` terdeteksi readable, dimiliki `pambase`, dan pemeriksaan `pacman -Qkk pambase` pada repair terbaru lulus. Penyebab warning PAM runtime tetap belum terbukti; jangan menulis ulang PAM hanya untuk menghilangkan pesan tersebut.
-- Bluetooth HCI negotiation dan CPU mitigation MDS/MMIO/VMSCAPE tetap diagnostik-only. Log tidak membuktikan fungsi fisik Bluetooth atau efektivitas setiap mitigasi.
+- Pada laporan `072936Z`, Caelestia runtime berstatus PASS; warning scheme startup dan `.face` tidak lagi menjadi WARN. Ini mengonfirmasi classifier yang ada pada commit laporan tersebut, bukan perubahan baru sesi ini.
+- PAM `/etc/pam.d/other` terdeteksi readable, dimiliki `pambase`, dan pemeriksaan `pacman -Qkk pambase` pada repair `065932Z` lulus. User journal pada validasi `072936Z` berisi `-- No entries --`; warning PAM runtime sebelumnya tidak terulang pada snapshot ini, tetapi itu belum membuktikan akar masalahnya telah diperbaiki. Jangan menulis ulang PAM.
+- Bluetooth HCI negotiation masih menghasilkan signature `Reading supported features failed (-16)` dan unsupported HCI LE Coded PHY. CPU sysfs pada `072936Z` menunjukkan MDS dan MMIO Stale Data dengan `SMT vulnerable`; VMSCAPE menunjukkan `Mitigation: IBPB before exit to userspace`. MDS/MMIO tetap temuan actionable; VMSCAPE tidak boleh otomatis diperlakukan sebagai vulnerability aktif. Jangan mengubah SMT/kernel parameters hanya untuk menghilangkan pesan.
 - Tidak ada visual/physical acceptance yang diklaim. Log/runtime validation tidak dapat membuktikan tampilan panel, input fisik, audio output, microphone, suspend/resume, atau interaksi UI.
-- CI **SUCCESS** pada commit `a1881b76363b9dcfa1ba43920cedad7eff506ff5`: Repository validation (run `42578669696`) dan Bash validation (run `42578669698`) selesai sukses. Kedua workflow menyelesaikan Bash syntax, ShellCheck, dan repository test suite; workflow Bash juga menyelesaikan formatting step. Ini memvalidasi kode classifier, regression fixtures, dan dokumentasi pada commit tersebut; belum membuktikan perilaku baru pada sesi desktop X280.
+- CI **SUCCESS** pada commit `a1881b76363b9dcfa1ba43920cedad7eff506ff5`: Repository validation (run `42578669696`) dan Bash validation (run `42578669698`) selesai sukses untuk kode saat itu. Perubahan classifier/repair/tests pada sesi ini belum memiliki hasil CI yang dapat diverifikasi dari bukti yang tersedia; jangan anggap sudah TESTED sampai workflow terbaru selesai.
 
 ## Keputusan dan batas
 
