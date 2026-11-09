@@ -163,7 +163,7 @@ if pacman -Q pambase >"$report_dir/pambase-version.txt" 2>&1; then
     record WARN 'PAM fallback policy' 'fallback file missing/unreadable; package integrity and ownership evidence saved; policy not rewritten'
   fi
 else
-  printf 'pambase package is not installed\\n' >"$pam_integrity"
+  printf 'pambase package is not installed\n >"$pam_integrity"
   record FAIL 'PAM fallback policy' 'pambase package missing; automatic PAM changes prohibited'
 fi
 
