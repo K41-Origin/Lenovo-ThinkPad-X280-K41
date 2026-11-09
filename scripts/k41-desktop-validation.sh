@@ -538,10 +538,10 @@ diagnostic 'Bluetooth package integrity' 'bluetooth-package-integrity.txt' pacma
 # Pairing readiness is a configuration snapshot, not proof of a successful
 # pairing transaction. Discoverable may be intentionally off outside pairing.
 if [[ -s $run_dir/bluetooth-controller.txt ]]; then
-  if grep -Eiq '^Pairable:[[:space:]]*no' "$run_dir/bluetooth-controller.txt"; then
-    record WARN 'Bluetooth pairing readiness' 'BlueZ reports Pairable=no; inspect D-Bus properties and configuration evidence; no settings changed'
-  elif grep -Eiq '^Pairable:[[:space:]]*yes' "$run_dir/bluetooth-controller.txt"; then
-    if grep -Eiq '^Discoverable:[[:space:]]*no' "$run_dir/bluetooth-controller.txt"; then
+  if grep -Eiq '^[[:space:]]*Pairable:[[:space:]]*no' "$run_dir/bluetooth-controller.txt"; then
+    record WARN 'Bluetooth pairing readiness' 'BlueZ reports Pairable=no; incoming pairing requests are rejected; inspect D-Bus properties and configuration evidence; no settings changed'
+  elif grep -Eiq '^[[:space:]]*Pairable:[[:space:]]*yes' "$run_dir/bluetooth-controller.txt"; then
+    if grep -Eiq '^[[:space:]]*Discoverable:[[:space:]]*no' "$run_dir/bluetooth-controller.txt"; then
       record WARN 'Bluetooth discovery readiness' 'Pairable=yes but Discoverable=no; discovery may be intentionally disabled; inspect settings before changing them'
     else
       record PASS 'Bluetooth pairing readiness' 'BlueZ reports Pairable=yes; real pairing still requires a manual test'
