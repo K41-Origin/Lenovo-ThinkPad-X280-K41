@@ -44,8 +44,13 @@ for cmd in date mkdir chmod uname pacman grep awk find pgrep sed git head tr; do
 done
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$repo_root/reports/lockscreen-audit"
+report_parent="$repo_root/reports"
+report_root="$report_parent/lockscreen-audit"
 mkdir -p -- "$report_root"
+if (( EUID == 0 )); then
+  chown "$audit_uid:$audit_gid" "$report_parent" "$report_root"
+  chmod 0700 "$report_parent" "$report_root"
+fi
 run_dir="$report_root/$timestamp"
 suffix=0
 while ! mkdir -- "$run_dir" 2>/dev/null; do
