@@ -3,6 +3,7 @@
 # TPM enrollment is additive: the existing LUKS passphrase slot is retained.
 set -Eeuo pipefail
 umask 077
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
@@ -37,6 +38,21 @@ grep -Eq 'default_uki=.*arch-linux\.efi' /etc/mkinitcpio.d/linux.preset ||
 tpm_list="$(systemd-cryptenroll --tpm2-device=list 2>&1)" || die "TPM2 discovery failed: $tpm_list"
 grep -q '/dev/tpmrm0' <<<"$tpm_list" || die "TPM2 resource-manager device /dev/tpmrm0 was not discovered."
 
+[[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die "Run this script with sudo from the desktop account."
+USER_NAME=$SUDO_USER
+[[ $USER_NAME =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] || die "Unsupported desktop account name."
+USER_ENTRY="$(getent passwd "$USER_NAME")" || die "Cannot resolve desktop account."
+IFS=: read -r _ _ USER_UID USER_GID _ USER_HOME USER_SHELL <<<"$USER_ENTRY"
+[[ $USER_UID =~ ^[0-9]+$ && $USER_GID =~ ^[0-9]+$ && -d $USER_HOME ]] || die "Desktop account metadata is invalid."
+GETTY_DROPIN="/etc/systemd/system/getty@tty1.service.d/k41-autologin.conf"
+BASH_PROFILE="$USER_HOME/.bash_profile"
+HELPER_TARGET="$USER_HOME/.local/bin/k41-lock-caelestia-after-start"
+[[ -f $GETTY_DROPIN ]] && grep -Fq -- "--autologin $USER_NAME" "$GETTY_DROPIN" ||
+  die "The existing K41 tty1 autologin configuration was not found; enable the approved Caelestia autologin first."
+[[ -f $BASH_PROFILE ]] && grep -Fq '# K41 HYPRLAND AUTOLOGIN START' "$BASH_PROFILE" &&
+  grep -Fq 'start-hyprland' "$BASH_PROFILE" || die "The K41 tty1 Hyprland login block was not found."
+[[ -f $HELPER_TARGET ]] || die "The installed Caelestia lock helper was not found."
+
 printf '\nK41 boot-experience setup\n'
 printf 'Root LUKS device: %s\n' "$crypt_device"
 printf 'TPM2 device: /dev/tpmrm0\n'
@@ -56,6 +72,24 @@ if [[ -e /etc/plymouth/plymouthd.conf ]]; then
   cp -a /etc/plymouth/plymouthd.conf "$backup_dir/plymouthd.conf"
   : >"$backup_dir/plymouthd.conf.present"
 fi
+mkdir -p "$backup_dir/files"
+backup_file() {
+  local source=$1 relative=$2
+  if [[ -e $source ]]; then
+    printf 'present %s\\n' "$relative" >>"$backup_dir/manifest"
+    mkdir -p "$backup_dir/files/$(dirname -- "$relative")"
+    cp -a "$source" "$backup_dir/files/$relative"
+  else
+    printf 'absent %s\\n' "$relative" >>"$backup_dir/manifest"
+  fi
+}
+backup_file "$GETTY_DROPIN" "etc/systemd/system/getty@tty1.service.d/k41-autologin.conf"
+backup_file "$BASH_PROFILE" "home/$USER_NAME/.bash_profile"
+backup_file "$HELPER_TARGET" "home/$USER_NAME/.local/bin/k41-lock-caelestia-after-start"
+backup_file "/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf" "etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf"
+backup_file "/etc/systemd/system/k41-plymouth-deactivate.service" "etc/systemd/system/k41-plymouth-deactivate.service"
+backup_file "/usr/local/libexec/k41-plymouth-quit-after-lock" "usr/local/libexec/k41-plymouth-quit-after-lock"
+backup_file "/etc/plymouth/plymouthd.conf" "etc/plymouth/plymouthd.conf"
 printf '%s\n' "$crypt_device" >"$backup_dir/luks-device"
 chmod 0600 "$backup_dir/luks-device"
 
@@ -122,6 +156,84 @@ if ! mkinitcpio -P; then
   exit 1
 fi
 [[ -s /efi/EFI/Linux/arch-linux.efi ]] || die "The expected UKI is missing after mkinitcpio."
+
+# Install the lock-aware Plymouth handoff. The splash remains until Caelestia
+# reports a verified lock state; on timeout, tty1 autologin is stopped fail-closed.
+ROOT_HELPER="/usr/local/libexec/k41-plymouth-quit-after-lock"
+install -D -m 0755 "$SCRIPT_DIR/k41-plymouth-quit-after-lock.sh" "$ROOT_HELPER"
+install -D -m 0755 "$SCRIPT_DIR/k41-lock-caelestia-after-start.sh" "$HELPER_TARGET"
+chown "$USER_UID:$USER_GID" "$HELPER_TARGET"
+
+python3 - "$BASH_PROFILE" <<'PY'
+import pathlib
+import re
+import sys
+
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+start = "# K41 HYPRLAND AUTOLOGIN START"
+end = "# K41 HYPRLAND AUTOLOGIN END"
+if text.count(start) != 1 or text.count(end) != 1:
+    raise SystemExit("Expected exactly one managed K41 login block.")
+a = text.index(start)
+b = text.index(end, a) + len(end)
+block = text[a:b]
+launch = re.search(r"(?m)^(\\s*)start-hyprland\\s*$", block)
+if not launch:
+    raise SystemExit("Managed K41 login block does not contain a plain start-hyprland command.")
+marker = '    mkdir -p "$HOME/.cache/k41"\\n    rm -f -- "$HOME/.cache/k41/boot-lock-ready"\\n'
+if "boot-lock-ready" not in block:
+    block = block[:launch.start()] + marker + block[launch.start():]
+path.write_text(text[:a] + block + text[b:], encoding="utf-8")
+PY
+chown "$USER_UID:$USER_GID" "$BASH_PROFILE"
+
+cat >"$GETTY_DROPIN" <<EOF
+[Unit]
+After=
+After=systemd-user-sessions.service getty-pre.target k41-plymouth-deactivate.service
+
+[Service]
+Type=simple
+ExecStart=
+ExecStart=-/usr/bin/agetty --noreset --noclear --noissue --nohostname --autologin $USER_NAME - \${TERM}
+TTYVTDisallocate=no
+EOF
+chown root:root "$GETTY_DROPIN"
+chmod 0644 "$GETTY_DROPIN"
+
+install -d -m 0755 /etc/systemd/system/plymouth-quit.service.d
+cat >/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf <<EOF
+[Unit]
+After=getty@tty1.service
+
+[Service]
+ExecStart=
+ExecStart=$ROOT_HELPER "$USER_HOME/.cache/k41/boot-lock-ready"
+TimeoutStartSec=130
+EOF
+chown root:root /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
+chmod 0644 /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
+
+cat >/etc/systemd/system/k41-plymouth-deactivate.service <<'EOF'
+[Unit]
+Description=Release Plymouth display ownership before K41 Hyprland startup
+Wants=plymouth-start.service
+After=plymouth-start.service
+Before=getty@tty1.service
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/plymouth deactivate
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+chown root:root /etc/systemd/system/k41-plymouth-deactivate.service
+chmod 0644 /etc/systemd/system/k41-plymouth-deactivate.service
+systemctl enable k41-plymouth-deactivate.service
+systemctl daemon-reload
 
 printf '\nTPM2 enrollment adds a new LUKS unlock method. It does NOT remove or replace the existing passphrase keyslot.\n'
 printf 'Enter the current LUKS passphrase when systemd-cryptenroll asks for it.\n'
