@@ -39,7 +39,7 @@ mkdir -p "$fixture/bin"
 cat >"$fixture/bin/caelestia" <<'MOCK'
 #!/usr/bin/env bash
 printf '%s\n' "$*" >>"$K41_MOCK_LOG"
-if [[ $* == '-s' ]]; then
+if [[ $* == 'shell -s' ]]; then
   printf 'target lock\n  function lock(): void\n'
   exit 0
 fi
