@@ -9,7 +9,7 @@
 | 1. Arch ISO — Live Readiness | IMPLEMENTED | `scripts/k41-live-validation.sh` adalah entry point kanonis; default readiness mode. |
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer destruktif lama. Tetap perlu physical install/boot acceptance sesuai gate. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup lama. Exit 0 bukan UI acceptance. |
-| 4. Desktop Functional Validation | NOT TESTED | Tahap aktif. Bukti diagnostik tersedia; checklist penerimaan fisik belum disetujui. |
+| 4. Desktop Functional Validation | IN PROGRESS | Instalasi desktop dan inventory diagnostik telah dijalankan; Hyprland/Quickshell/IPC terdeteksi. Kepemilikan `~/.cache` telah VERIFIED setelah perbaikan. Restart Caelestia pascaperbaikan dan pemeriksaan cache runtime serta checklist fisik/UI masih NOT TESTED. Lihat bukti di bagian berikut dan jalankan `scripts/k41-desktop-validation.sh`. |
 | 5. Desktop Customization | PLANNED | Menunggu gate tahap 4. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5; baseline dan tuning terukur diperlukan. |
 | 7. Release | PLANNED | Menunggu seluruh gate, regression, dokumentasi, dan bukti final. |
@@ -34,7 +34,12 @@ Jangan mulai customization sebelum checklist tahap 4 diterima. Jangan mulai tuni
 
 - First Boot historis: 14 PASS, 0 FAIL, 0 SKIP pada snapshot laporan yang tercatat; collector bukan gerbang wajib tahap 3.
 - Desktop setup historis: exit 0; tidak membuktikan seluruh UI berfungsi.
-- Hyprland/driver/PipeWire terdeteksi pada snapshot diagnostik sebelumnya; Caelestia/Quickshell UI acceptance belum dibuktikan secara penuh.
-- Bluetooth dan beberapa fungsi fisik tetap perlu diuji sesuai kebutuhan.
-- Status CI untuk commit terbaru tidak dinyatakan di sini; periksa workflow run pada commit yang relevan.
+- Desktop setup: TESTED — script selesai dengan exit 0 pada laporan `reports/desktop/20261108T190308Z/`; ini bukan bukti penerimaan UI.
+- Hyprland/driver/PipeWire: TESTED pada inventory `reports/desktop-diagnostics/20261108T192834Z/`; konfigurasi Hyprland tidak melaporkan error pada snapshot itu.
+- Caelestia/Quickshell: TESTED — proses, konfigurasi/QML, dan IPC terdeteksi pada `reports/caelestia-diagnostics/20261108T193701Z/` dan `194633Z/`; panel/UI interaktif belum VERIFIED.
+- Cache ownership: VERIFIED — `~/.cache` berubah dari root-owned menjadi user-owned pada `reports/caelestia-permissions-diagnostics/20261108T194621Z/`. Tidak ada perubahan rekursif.
+- Cache runtime setelah restart: NOT TESTED — runtime yang tercatat berjalan sebelum ownership repair dan tidak di-restart. Entry point validasi terpadu kini menangani pemeriksaan terarah ini.
+- Manual UI dan hardware acceptance: NOT TESTED — isi `reports/desktop-validation/<timestamp>/manual-checklist.md` harus dilengkapi pada perangkat fisik.
+- Bluetooth/BlueZ: NOT TESTED — BlueZ tidak tersedia pada snapshot; uji hanya jika fitur ini dibutuhkan.
+- CI pada HEAD `d647cca2aa8aac1a06437d881e093da6f35d1348`: Repository Validation dan Bash Validation SUCCESS menurut audit repository terakhir; hasil ini hanya berlaku untuk commit tersebut.
 
