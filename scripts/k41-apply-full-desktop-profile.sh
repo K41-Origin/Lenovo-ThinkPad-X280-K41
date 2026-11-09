@@ -36,7 +36,7 @@ fi
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
 [[ -n ${HOME:-} && -d $HOME ]] || die 'HOME must point to an existing directory.'
-for cmd in python3 timeout caelestia cp mkdir date tee cmp; do
+for cmd in python3 timeout caelestia cp mkdir date tee cmp chmod grep; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 
