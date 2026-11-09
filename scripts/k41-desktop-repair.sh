@@ -143,14 +143,28 @@ else
   record SKIP 'Bluetooth service' 'controller or BlueZ package prerequisites unavailable'
 fi
 
-# PAM is security-critical: collect package integrity, never synthesize policy.
-if [[ -r /etc/pam.d/other ]]; then
-  record PASS 'PAM fallback policy' '/etc/pam.d/other readable'
-elif pacman -Q pambase >/dev/null 2>&1; then
-  pacman -Qkk pambase >"$report_dir/pambase-integrity.txt" 2>&1 || true
-  record WARN 'PAM fallback policy' 'file missing/unreadable; pambase integrity saved; policy not rewritten'
+# PAM is security-critical: always capture package integrity and ownership; never rewrite policy.
+pam_integrity="$report_dir/pambase-integrity.txt"
+pam_owner="$report_dir/pam-other-owner.txt"
+if pacman -Q pambase >"$report_dir/pambase-version.txt" 2>&1; then
+  if pacman -Qkk pambase >"$pam_integrity" 2>&1; then
+    integrity_ok=1
+  else
+    integrity_ok=0
+  fi
+  pacman -Qo /etc/pam.d/other >"$pam_owner" 2>&1 || true
+  if [[ -r /etc/pam.d/other ]]; then
+    if (( integrity_ok == 1 )) && grep -Fq 'pambase' "$pam_owner"; then
+      record PASS 'PAM fallback policy' 'file readable, owned by pambase, and package integrity check passed'
+    else
+      record WARN 'PAM fallback policy' 'file readable but package ownership/integrity needs review; evidence saved; policy not rewritten'
+    fi
+  else
+    record WARN 'PAM fallback policy' 'fallback file missing/unreadable; package integrity and ownership evidence saved; policy not rewritten'
+  fi
 else
-  record FAIL 'PAM fallback policy' 'pambase or /etc/pam.d/other missing; automatic PAM changes prohibited'
+  printf 'pambase package is not installed\\n' >"$pam_integrity"
+  record FAIL 'PAM fallback policy' 'pambase package missing; automatic PAM changes prohibited'
 fi
 
 if [[ -e $HOME/.face ]]; then
