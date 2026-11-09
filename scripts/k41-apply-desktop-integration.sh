@@ -24,7 +24,7 @@ backup_root="$state_root/k41/desktop-integration/backups"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
-for cmd in python3 install cp mkdir date; do
+for cmd in python3 install cp mkdir date timeout chmod; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 command -v caelestia >/dev/null 2>&1 || die 'Caelestia CLI is required.'
