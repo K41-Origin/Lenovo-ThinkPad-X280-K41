@@ -152,7 +152,7 @@ kernel_reports=("$ROOT"/reports/desktop-validation/*/kernel-journal-warnings.txt
 system_reports=("$ROOT"/reports/desktop-validation/*/system-journal-errors.txt)
 user_reports=("$ROOT"/reports/desktop-validation/*/user-journal-errors.txt)
 if ((${#kernel_reports[@]} > 0)); then
-  latest_kernel_report="${kernel_reports[$(("${#kernel_reports[@]}" - 1))]}"
+  latest_kernel_report="${kernel_reports[${#kernel_reports[@]}-1]}"
   if grep -Eiq 'Bluetooth: hci[0-9]+: Reading supported features failed|HCI LE Coded PHY feature bit is set' "$latest_kernel_report"; then
     record WARN 'Bluetooth HCI negotiation' 'latest kernel report contains controller feature errors; BlueZ cannot repair controller/driver firmware'
   else
@@ -167,7 +167,7 @@ else
   record SKIP 'Kernel warning classification' 'no committed kernel journal report available'
 fi
 if ((${#system_reports[@]} > 0)); then
-  latest_system_report="${system_reports[$(("${#system_reports[@]}" - 1))]}"
+  latest_system_report="${system_reports[${#system_reports[@]}-1]}"
   if grep -Eiq 'nl80211: kernel reports: multicast RX registrations are not supported' "$latest_system_report"; then
     record SKIP 'Wi-Fi multicast RX warning' 'driver/kernel informational warning; no network reset performed'
   else
@@ -175,7 +175,7 @@ if ((${#system_reports[@]} > 0)); then
   fi
 fi
 if ((${#user_reports[@]} > 0)); then
-  latest_user_report="${user_reports[$(("${#user_reports[@]}" - 1))]}"
+  latest_user_report="${user_reports[${#user_reports[@]}-1]}"
   if grep -Fq 'PAM _pam_init_handlers: no default config other' "$latest_user_report"; then
     record WARN 'PAM runtime warning' 'Quickshell journal contains PAM fallback warning; inspect pambase-integrity.txt; PAM policy was not rewritten'
   fi
