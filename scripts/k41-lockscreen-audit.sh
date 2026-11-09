@@ -34,12 +34,11 @@ have() { command -v "$1" >/dev/null 2>&1; }
   printf 'K41 Lock Screen Read-only Audit\n'
   printf 'Captured UTC: %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf 'Repository commit: %s\n' "$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf unknown)"
-  printf 'User: %s\n' "$(id -un)"
   printf 'Kernel: %s\n' "$(uname -sr)"
   printf 'Session: %s\n' "${XDG_SESSION_TYPE:-unknown}"
   printf 'Wayland session: %s\n' "$([[ -n ${WAYLAND_DISPLAY:-} ]] && printf present || printf absent)"
   printf 'Hyprland session marker: %s\n' "$([[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] && printf present || printf absent)"
-  printf 'Report directory: %s\n' "$run_dir"
+  printf 'Report directory: reports/lockscreen-audit/%s\n' "$(basename -- "$run_dir")"
 } >> "$report"
 
 section 'Installed package versions'
@@ -74,7 +73,7 @@ done
 
 section 'Hyprland live lock-related bindings'
 if have hyprctl && [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
-  if ! hyprctl binds 2>/dev/null | grep -iE -C 2 '(^|[^[:alnum:]_])(lock|hyprlock|swaylock)([^[:alnum:]_]|$)' >> "$report"; then
+  if ! hyprctl binds 2>/dev/null | grep -iE -C 2 '(^|[^[:alnum:]_])(lock|hyprlock|swaylock)([^[:alnum:]_]|$)' | sed "s|$HOME|~|g" >> "$report"; then
     printf 'No matching lock-related binding found, or query unavailable.\n' >> "$report"
   fi
   printf '\nMonitor summary:\n' >> "$report"
@@ -93,7 +92,7 @@ found_config=0
 for cfg in "${config_candidates[@]}"; do
   [[ -f $cfg ]] || continue
   found_config=1
-  printf 'Config file: %s\n' "$cfg" >> "$report"
+  printf 'Config file: %s\n' "${cfg#"$HOME"/}" >> "$report"
   if have python; then
     python - "$cfg" >> "$report" 2>&1 <<'PY'
 import json, pathlib, sys
@@ -129,7 +128,7 @@ section 'Relevant configuration file inventory (paths only)'
 for base in "$HOME/.config/hypr" "$HOME/.config/caelestia" "$HOME/.config/quickshell" /etc/xdg/caelestia /usr/share/caelestia /usr/lib/caelestia; do
   [[ -d $base ]] || continue
   printf '\n[%s]\n' "$base" >> "$report"
-  find "$base" -maxdepth 4 -type f \( -iname '*lock*' -o -iname '*.qml' -o -iname 'hyprland.lua' -o -iname 'hyprland.conf' \) -printf '%p\n' 2>/dev/null | head -n 150 >> "$report" || true
+  find "$base" -maxdepth 4 -type f \( -iname '*lock*' -o -iname '*.qml' -o -iname 'hyprland.lua' -o -iname 'hyprland.conf' \) -printf '%P\n' 2>/dev/null | head -n 150 >> "$report" || true
   printf 'Files containing lock-related configuration keywords (paths only):\n' >> "$report"
   grep -RIlE 'lock|hyprlock|swaylock' "$base" 2>/dev/null | sed "s|^$base/||" | head -n 100 >> "$report" || true
 done
@@ -167,5 +166,5 @@ note '- Wallpaper identity, actual lock/unlock, wrong-password behavior, fingerp
 note '- Report is stored inside the Git repository for review and push.'
 note '- Review before pushing; redact machine-specific identifiers or sensitive local configuration details if present.'
 
-printf 'Audit selesai. Laporan: %s\n' "$report"
+printf 'Audit selesai. Laporan: %s\n' "${report#"$repo_root"/}"
 printf 'Collector bersifat read-only; jalankan tanpa sudo.\n'
