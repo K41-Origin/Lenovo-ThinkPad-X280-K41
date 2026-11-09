@@ -185,6 +185,26 @@ if systemctl is-active --quiet NetworkManager.service; then
 else
   record WARN 'NetworkManager service' 'not active'
 fi
+if capture 'Failed system units' "$tmp/failed-system-units" systemctl --failed --no-legend --plain; then
+  failed_units="$(awk 'NF && $0 !~ /^0 loaded units listed/ {print}' "$tmp/failed-system-units")"
+  if [[ -z $failed_units ]]; then
+    record PASS 'System failed units' 'No failed system units reported'
+  else
+    record WARN 'System failed units' 'One or more failed units; inspect validation.log'
+  fi
+else
+  record WARN 'System failed units' 'Could not query system unit state'
+fi
+if capture 'Failed user units' "$tmp/failed-user-units" systemctl --user --failed --no-legend --plain; then
+  failed_user_units="$(awk 'NF && $0 !~ /^0 loaded units listed/ {print}' "$tmp/failed-user-units")"
+  if [[ -z $failed_user_units ]]; then
+    record PASS 'User failed units' 'No failed user units reported'
+  else
+    record WARN 'User failed units' 'One or more failed user units; inspect validation.log'
+  fi
+else
+  record WARN 'User failed units' 'Could not query user unit state'
+fi
 
 # 6. Audio graph, network adapter, radio state.
 if command -v wpctl >/dev/null 2>&1 && capture 'PipeWire graph' "$tmp/wpctl" wpctl status && grep -qE 'Audio|Sinks|Sources' "$tmp/wpctl"; then
@@ -192,7 +212,7 @@ if command -v wpctl >/dev/null 2>&1 && capture 'PipeWire graph' "$tmp/wpctl" wpc
 else
   record WARN 'PipeWire graph' 'wpctl unavailable or no graph data'
 fi
-if command -v pactl >/dev/null 2>&1 && capture 'PulseAudio compatibility server' "$tmp/pactl" bash -c 'pactl info | sed -E "/^Cookie:/d"'; then
+if command -v pactl >/dev/null 2>&1 && capture 'PulseAudio compatibility server' "$tmp/pactl" bash -o pipefail -c 'pactl info | sed -E "/^Cookie:/d"'; then
   record PASS 'PulseAudio compatibility' 'pactl info succeeded'
 else
   record WARN 'PulseAudio compatibility' 'pactl unavailable or server query failed'
@@ -216,7 +236,23 @@ else
   record WARN 'Radio block state' 'rfkill unavailable or query failed'
 fi
 
-# 7. Storage capacity, battery health snapshot, and thermal snapshot.
+# 7. Resource and storage capacity snapshots.
+if command -v free >/dev/null 2>&1 && free -b >"$tmp/memory" 2>&1; then
+  available="$(awk '/^Mem:/ {print $7}' "$tmp/memory")"
+  total="$(awk '/^Mem:/ {print $2}' "$tmp/memory")"
+  if [[ $available =~ ^[0-9]+$ && $total =~ ^[0-9]+$ ]] && (( total > 0 )); then
+    available_pct=$((available * 100 / total))
+    if (( available_pct >= 10 )); then
+      record PASS 'Memory availability' "$((available / 1024 / 1024)) MiB available (${available_pct}%)"
+    else
+      record WARN 'Memory availability' "$((available / 1024 / 1024)) MiB available (${available_pct}%)"
+    fi
+  else
+    record WARN 'Memory availability' 'Could not parse free output'
+  fi
+else
+  record WARN 'Memory availability' 'free command unavailable or query failed'
+fi
 if df -P "$ROOT" >"$tmp/df" 2>&1; then
   usage="$(awk 'NR==2 {gsub(/%/, "", $5); print $5}' "$tmp/df")"
   if [[ $usage =~ ^[0-9]+$ ]] && (( usage < 90 )); then
@@ -297,6 +333,18 @@ capture 'Recent kernel warnings/errors (last 100)' "$tmp/kernel-journal" journal
 cp -- "$tmp/user-journal" "$run_dir/user-journal-errors.txt" 2>/dev/null || :
 cp -- "$tmp/system-journal" "$run_dir/system-journal-errors.txt" 2>/dev/null || :
 cp -- "$tmp/kernel-journal" "$run_dir/kernel-journal-warnings.txt" 2>/dev/null || :
+for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journal"; do
+  journal_name=${journal_file##*/}
+  if [[ ! -s $journal_file ]]; then
+    record WARN "Journal: $journal_name" 'No entries returned or journal access unavailable'
+  elif grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
+    record FAIL "Journal: $journal_name" 'Critical kernel/memory failure signature found; inspect saved journal'
+  elif grep -Eiq 'segfault|coredump|Failed to start|Failed to activate|QML.*Error|error:' "$journal_file"; then
+    record WARN "Journal: $journal_name" 'Potential application/service errors found; inspect saved journal'
+  else
+    record PASS "Journal: $journal_name" 'No configured critical/error signatures detected'
+  fi
+done
 chmod 0600 "$run_dir"/*.txt "$log" "$checks"
 
 result=PASS
