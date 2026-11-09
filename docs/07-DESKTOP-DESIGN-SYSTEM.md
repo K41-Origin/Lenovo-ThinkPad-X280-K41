@@ -204,12 +204,12 @@ Audit terbaru berasal dari `reports/desktop-customization-audit/20261109T084605Z
 - Quickshell menggunakan sekitar 12.3% RAM dan Hyprland sekitar 3.3% RAM pada satu pengambilan.
 - Nilai CPU tidak digunakan sebagai baseline karena proses `ps` milik audit sendiri tampil sebagai proses CPU tertinggi. Pengukuran komparatif perlu dilakukan setelah baseline visual dan dengan metode yang tidak mengukur collector itu sendiri.
 
-### Outstanding before implementation
+### Outstanding after first implementation commit
 
 - Baseline screenshot desktop, launcher, dashboard, dan lock screen belum tersedia.
 - Executable launcher yang benar-benar tersedia dan keybind runtime perlu diverifikasi.
 - Icon theme, cursor theme, dan wallpaper visual belum dapat dipastikan hanya dari inventaris teks.
-- Jangan menghapus `hyprland.conf` secara otomatis; cukup perlakukan sebagai file legacy yang tidak aktif sampai pengguna memutuskan pembersihan.
+- Caelestia scheme dan token overrides perlu ditangani melalui opsi upstream yang benar; jangan mengedit file paket atau mengasumsikan custom scheme didukung.\n- Jangan menghapus `hyprland.conf` secara otomatis; perlakukan sebagai file legacy yang tidak aktif.
 
 ## 11. Implementation workflow
 
