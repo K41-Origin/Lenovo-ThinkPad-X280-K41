@@ -33,6 +33,7 @@ elif [[ $# -ne 0 ]]; then
 fi
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
+[[ $config_root == /* && $state_root == /* ]] || die 'XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.'
 for cmd in mkdir cp mv mktemp date pacman; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
@@ -57,6 +58,8 @@ check_path_components "$config_root/quickshell"
 check_path_components "$config_root/quickshell/caelestia"
 check_path_components "$config_root/quickshell/caelestia/modules"
 check_path_components "$target_root"
+check_path_components "$state_root"
+check_path_components "$backup_root"
 
 if [[ $mode == rollback ]]; then
     [[ -d $rollback_dir && ! -L $rollback_dir && -f $rollback_dir/manifest ]] ||
@@ -90,9 +93,29 @@ backup_dir="$backup_root/$stamp"
 suffix=0
 while ! mkdir -- "$backup_dir" 2>/dev/null; do
     suffix=$((suffix + 1))
-    backup_dir="$backup_root/$stamp-$((++suffix))"
+    backup_dir="$backup_root/$stamp-$suffix"
 done
 mkdir -p -- "$backup_dir/files"
+restore_on_failure=0
+restore_backup() {
+    local rc=$? state name target tmp
+    trap - EXIT
+    if (( rc != 0 && restore_on_failure == 1 )); then
+        info "Installation failed; restoring previous override state from $backup_dir."
+        while IFS=' ' read -r state name; do
+            target="$target_root/$name"
+            if [[ $state == present && -f $backup_dir/files/$name ]]; then
+                tmp="$(mktemp "$target_root/.k41-recovery.XXXXXX")"
+                cp -- "$backup_dir/files/$name" "$tmp"
+                mv -f -- "$tmp" "$target"
+            elif [[ $state == absent ]]; then
+                rm -f -- "$target"
+            fi
+        done < "$backup_dir/manifest"
+    fi
+    exit "$rc"
+}
+trap restore_backup EXIT
 
 for name in Content.qml Center.qml; do
     target="$target_root/$name"
