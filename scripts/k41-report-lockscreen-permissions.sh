@@ -3,7 +3,7 @@
 # Only writes a new report under reports/lockscreen-apply/.
 set -Eeuo pipefail
 
-die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
+die() { printf 'ERROR: %s| sed -n '1,250p'n' "$*" >&2; exit 2; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
@@ -38,7 +38,7 @@ while [[ -e $report || -L $report ]]; do
 done
 ( set -o noclobber; : > "$report" ) 2>/dev/null || die 'Tidak dapat membuat report baru.'
 
-section() { printf '\n========== %s ==========\n' "$1" >> "$report"; }
+section() { printf '| sed -n '1,250p'n========== %s ==========| sed -n '1,250p'n' "$1" >> "$report"; }
 path_info() {
     local p=$1
     if [[ -L $p ]]; then
@@ -47,29 +47,29 @@ path_info() {
     elif [[ -e $p ]]; then
         stat -c '%A owner=%U:%G uid=%u gid=%g path=%n' -- "$p" 2>&1
     else
-        printf 'MISSING path=%s\n' "$p"
+        printf 'MISSING path=%s| sed -n '1,250p'n' "$p"
     fi
 }
 tree_info() {
     local base=$1
     if [[ -d $base && ! -L $base ]]; then
-        printf '\n-- tree: %s --\n' "$base"
-        find "$base" -maxdepth 5 -printf '%y %M uid=%U gid=%G %p\n' 2>&1 | head -n 250
+        printf '| sed -n '1,250p'n-- tree: %s --| sed -n '1,250p'n' "$base"
+        find "$base" -maxdepth 5 -printf '%y %M uid=%U gid=%G %p| sed -n '1,250p'n' 2>&1 || sed -n '1,250p'
     else
-        printf '\n-- tree unavailable: %s --\n' "$base"
+        printf '| sed -n '1,250p'n-- tree unavailable: %s --| sed -n '1,250p'n' "$base"
     fi
 }
 
 {
-    printf 'K41 Lock Screen Deployment Permission Audit\n'
-    printf 'Timestamp UTC: %s\n' "$stamp"
-    printf 'User: %s UID=%s GID=%s\n' "$(id -un)" "$EUID" "$(id -g)"
-    printf 'HOME: %s\n' "$HOME"
-    printf 'Repository: %s\n' "$repo_root"
-    printf 'Branch: %s\n' "$(git -C "$repo_root" branch --show-current)"
-    printf 'HEAD: %s\n' "$(git -C "$repo_root" rev-parse HEAD)"
-    printf 'Kernel: %s\n' "$(uname -sr)"
-    printf 'This collector does not change permissions, ownership, configuration, packages, services, PAM, Git index, branch, or HEAD.\n'
+    printf 'K41 Lock Screen Deployment Permission Audit| sed -n '1,250p'n'
+    printf 'Timestamp UTC: %s| sed -n '1,250p'n' "$stamp"
+    printf 'User: %s UID=%s GID=%s| sed -n '1,250p'n' "$(id -un)" "$EUID" "$(id -g)"
+    printf 'HOME: %s| sed -n '1,250p'n' "$HOME"
+    printf 'Repository: %s| sed -n '1,250p'n' "$repo_root"
+    printf 'Branch: %s| sed -n '1,250p'n' "$(git -C "$repo_root" branch --show-current)"
+    printf 'HEAD: %s| sed -n '1,250p'n' "$(git -C "$repo_root" rev-parse HEAD)"
+    printf 'Kernel: %s| sed -n '1,250p'n' "$(uname -sr)"
+    printf 'This collector does not change permissions, ownership, configuration, packages, services, PAM, Git index, branch, or HEAD.| sed -n '1,250p'n'
 } >> "$report"
 
 config="$HOME/.config"
@@ -88,7 +88,7 @@ done
 section 'Path traversal and symlink inspection'
 for p in "$config" "$quickshell" "$target" "$state" "$k41state" "$lockstate" "$backups"; do
     if have namei; then
-        printf '\n-- namei -l %s --\n' "$p" >> "$report"
+        printf '| sed -n '1,250p'n-- namei -l %s --| sed -n '1,250p'n' "$p" >> "$report"
         namei -l -- "$p" >> "$report" 2>&1 || true
     fi
 done
@@ -97,20 +97,20 @@ section 'ACL metadata (read-only)'
 if have getfacl; then
     for p in "$config" "$quickshell" "$target" "$state" "$k41state" "$lockstate" "$backups"; do
         [[ -e $p ]] || continue
-        printf '\n-- getfacl %s --\n' "$p" >> "$report"
+        printf '| sed -n '1,250p'n-- getfacl %s --| sed -n '1,250p'n' "$p" >> "$report"
         getfacl -cp -- "$p" >> "$report" 2>&1 || true
     done
 else
-    printf 'getfacl unavailable; ACL entries were not inspected.\n' >> "$report"
+    printf 'getfacl unavailable; ACL entries were not inspected.| sed -n '1,250p'n' >> "$report"
 fi
 
 section 'Existing user Caelestia tree (metadata and paths only)'
 tree_info "$target" >> "$report"
-printf '\nExpected user entry point: %s/shell.qml\n' "$target" >> "$report"
-[[ -f $target/shell.qml ]] && printf 'User shell.qml: PRESENT\n' >> "$report" || printf 'User shell.qml: MISSING\n' >> "$report"
+printf '| sed -n '1,250p'nExpected user entry point: %s/shell.qml| sed -n '1,250p'n' "$target" >> "$report"
+[[ -f $target/shell.qml ]] && printf 'User shell.qml: PRESENT| sed -n '1,250p'n' >> "$report" || printf 'User shell.qml: MISSING| sed -n '1,250p'n' >> "$report"
 [[ -f /etc/xdg/quickshell/caelestia/shell.qml ]] &&
-    printf 'Package shell.qml: PRESENT (/etc/xdg/quickshell/caelestia/shell.qml)\n' >> "$report" ||
-    printf 'Package shell.qml: MISSING\n' >> "$report"
+    printf 'Package shell.qml: PRESENT (/etc/xdg/quickshell/caelestia/shell.qml)| sed -n '1,250p'n' >> "$report" ||
+    printf 'Package shell.qml: MISSING| sed -n '1,250p'n' >> "$report"
 
 section 'Backup tree (metadata and paths only)'
 tree_info "$backups" >> "$report"
@@ -119,43 +119,43 @@ section 'Relevant package and deployment versions'
 if have pacman; then
     pacman -Q caelestia-shell caelestia-cli quickshell-git 2>&1 >> "$report" || true
 else
-    printf 'pacman unavailable.\n' >> "$report"
+    printf 'pacman unavailable.| sed -n '1,250p'n' >> "$report"
 fi
 if have git && [[ -d $target/.git ]]; then
-    printf '\nUser source HEAD: %s\n' "$(git -C "$target" rev-parse HEAD 2>&1 || true)" >> "$report"
-    printf 'User source origin: %s\n' "$(git -C "$target" remote get-url origin 2>&1 || true)" >> "$report"
+    printf '| sed -n '1,250p'nUser source HEAD: %s| sed -n '1,250p'n' "$(git -C "$target" rev-parse HEAD 2>&1 || true)" >> "$report"
+    printf 'User source origin: %s| sed -n '1,250p'n' "$(git -C "$target" remote get-url origin 2>&1 || true)" >> "$report"
     printf 'User source tracked changes: ' >> "$report"
-    if git -C "$target" diff --quiet; then printf 'none\n' >> "$report"; else printf 'present\n' >> "$report"; fi
+    if git -C "$target" diff --quiet; then printf 'none| sed -n '1,250p'n' >> "$report"; else printf 'present| sed -n '1,250p'n' >> "$report"; fi
 else
-    printf 'User source Git checkout: absent\n' >> "$report"
+    printf 'User source Git checkout: absent| sed -n '1,250p'n' >> "$report"
 fi
 
 section 'Recent deployment reports (last 10 filenames and summaries)'
 if [[ -d $report_root ]]; then
-    find "$report_root" -maxdepth 1 -type f -name '*-apply.log' -printf '%T@ %f\n' 2>/dev/null |
-        sort -nr | head -n 10 | cut -d' ' -f2- >> "$report" || true
+    find "$report_root" -maxdepth 1 -type f -name '*-apply.log' -printf '%T@ %f| sed -n '1,250p'n' 2>/dev/null |
+        sort -nr || sed -n '1,10p' | cut -d' ' -f2- >> "$report" || true
     while IFS= read -r f; do
         [[ -n $f ]] || continue
-        printf '\n-- %s --\n' "$f" >> "$report"
+        printf '| sed -n '1,250p'n-- %s --| sed -n '1,250p'n' "$f" >> "$report"
         grep -E '^(ERROR:|INFO:|Exit code:|Result[[:space:]]*:|Log file[[:space:]]*:)' "$report_root/$f" 2>/dev/null |
             tail -n 25 >> "$report" || true
-    done < <(find "$report_root" -maxdepth 1 -type f -name '*-apply.log' -printf '%T@ %f\n' 2>/dev/null |
-        sort -nr | head -n 3 | cut -d' ' -f2-)
+    done < <(find "$report_root" -maxdepth 1 -type f -name '*-apply.log' -printf '%T@ %f| sed -n '1,250p'n' 2>/dev/null |
+        sort -nr || sed -n '1,3p' | cut -d' ' -f2-)
 fi
 
 section 'Diagnosis hints (no automatic repair performed)'
-printf '%s\n' \
-  '- Compare UID/GID and mode for ~/.config, ~/.config/quickshell, and ~/.config/quickshell/caelestia.' \
-  '- Check namei output for a non-traversable parent or symlink.' \
-  '- Check ACL output if owner/mode appear correct but access still fails.' \
-  '- The previous installer deliberately stopped on unexpected owner; this audit does not change it.' \
-  '- Do not run recursive chown/chmod. Repair must target only the confirmed managed path after review.' \
+printf '%s| sed -n '1,250p'n' | sed -n '1,250p'
+  '- Compare UID/GID and mode for ~/.config, ~/.config/quickshell, and ~/.config/quickshell/caelestia.' | sed -n '1,250p'
+  '- Check namei output for a non-traversable parent or symlink.' | sed -n '1,250p'
+  '- Check ACL output if owner/mode appear correct but access still fails.' | sed -n '1,250p'
+  '- The previous installer deliberately stopped on unexpected owner; this audit does not change it.' | sed -n '1,250p'
+  '- Do not run recursive chown/chmod. Repair must target only the confirmed managed path after review.' | sed -n '1,250p'
   '- The local shell entry point must exist before Quickshell can select the K41 user source tree.' >> "$report"
 
-printf 'Audit selesai: %s\n' "$report"
-printf 'Audit hanya membaca metadata; tidak mengubah permission/ownership atau konfigurasi.\n'
-printf '\nTinjau report, lalu push dengan perintah berikut:\n'
-printf 'git -C %q add -- %q\n' "$repo_root" "${report#"$repo_root"/}"
-printf 'git -C %q diff --cached --check\n' "$repo_root"
-printf 'git -C %q commit --only -m %q -- %q\n' "$repo_root" 'audit(lockscreen): add deployment permission report' "${report#"$repo_root"/}"
-printf 'git -C %q push origin main\n' "$repo_root"
+printf 'Audit selesai: %s| sed -n '1,250p'n' "$report"
+printf 'Audit hanya membaca metadata; tidak mengubah permission/ownership atau konfigurasi.| sed -n '1,250p'n'
+printf '| sed -n '1,250p'nTinjau report, lalu push dengan perintah berikut:| sed -n '1,250p'n'
+printf 'git -C %q add -- %q| sed -n '1,250p'n' "$repo_root" "${report#"$repo_root"/}"
+printf 'git -C %q diff --cached --check| sed -n '1,250p'n' "$repo_root"
+printf 'git -C %q commit --only -m %q -- %q| sed -n '1,250p'n' "$repo_root" 'audit(lockscreen): add deployment permission report' "${report#"$repo_root"/}"
+printf 'git -C %q push origin main| sed -n '1,250p'n' "$repo_root"
