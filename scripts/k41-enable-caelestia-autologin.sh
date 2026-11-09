@@ -65,7 +65,7 @@ for manager in gdm sddm ly greetd; do
 done
 command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
 command -v grep >/dev/null 2>&1 || die 'grep is required.'
-CAELESTIA_CONFIG="${XDG_CONFIG_HOME:-$USER_HOME/.config}/caelestia/shell.json"
+CAELESTIA_CONFIG="$USER_HOME/.config/caelestia/shell.json"
 [[ -r $CAELESTIA_CONFIG ]] || die 'Caelestia shell.json is missing.'
 python3 - "$CAELESTIA_CONFIG" <<'PY'
 import json, pathlib, sys
