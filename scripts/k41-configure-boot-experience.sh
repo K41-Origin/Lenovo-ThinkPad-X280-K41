@@ -201,7 +201,7 @@ EOF
 chown root:root /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
 chmod 0644 /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
 
-cat >/etc/systemd/system/k41-plymouth-release.service <<'EOF'
+cat >/etc/systemd/system/k41-plymouth-release.service <<EOF
 [Unit]
 Description=Retain splash frame and release Plymouth display ownership before K41 Hyprland startup
 Wants=plymouth-start.service
