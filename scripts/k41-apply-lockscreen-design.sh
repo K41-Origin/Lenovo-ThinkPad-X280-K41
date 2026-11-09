@@ -212,8 +212,10 @@ if [[ -f $target_root/shell.qml ]]; then
         die 'Other tracked source files have local changes; refusing to overwrite local work.'
     [[ -z $(git -C "$target_root" ls-files --others --exclude-standard) ]] ||
         die 'Untracked files exist in the local shell tree; refusing to overwrite local work.'
-    [[ -f $target_root/modules/lock/Content.qml && -f $target_root/modules/lock/Center.qml &&
-       -f $target_root/modules/lock/center/PasswordInput.qml ]] ||
+    [[ -d $target_root/modules/lock/center && ! -L $target_root/modules/lock/center &&
+       -f $target_root/modules/lock/Content.qml && ! -L $target_root/modules/lock/Content.qml &&
+       -f $target_root/modules/lock/Center.qml && ! -L $target_root/modules/lock/Center.qml &&
+       -f $target_root/modules/lock/center/PasswordInput.qml && ! -L $target_root/modules/lock/center/PasswordInput.qml ]] ||
         die 'One or more managed lock override targets are missing; inspect the local shell tree.'
     if cmp -s "$target_root/modules/lock/Content.qml" "$source_root/Content.qml" &&
        cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" &&
