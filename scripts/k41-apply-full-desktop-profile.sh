@@ -211,12 +211,12 @@ python3 - "$wallpaper_source" "$wallpaper_target" <<'PY'
 import base64, pathlib, sys
 source, target = map(pathlib.Path, sys.argv[1:])
 data = base64.b64decode(source.read_text(encoding="ascii"), validate=True)
-if not data.startswith(b"\\xff\\xd8\\xff"):
+if not data.startswith(b"\xff\xd8\xff"):
     raise SystemExit("Wallpaper payload is not a JPEG file.")
 target.parent.mkdir(parents=True, exist_ok=True)
 target.write_bytes(data)
 with target.open("rb") as stream:
-    if stream.read(3) != b"\\xff\\xd8\\xff":
+    if stream.read(3) != b"\xff\xd8\xff":
         raise SystemExit("Written wallpaper failed JPEG signature verification.")
 print(f"PASS: decoded JPEG wallpaper ({len(data)} bytes).")
 PY
