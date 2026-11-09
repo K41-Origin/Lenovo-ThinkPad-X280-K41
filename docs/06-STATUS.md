@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS** | Pengguna mengonfirmasi pada 2026-11-09 bahwa sistem ThinkPad X280 sudah berhasil boot. Konfirmasi ini mencatat keberhasilan startup/masuk ke sistem, tetapi tidak dengan sendirinya membuktikan TPM2 auto-unlock, kualitas visual splash, reboot, poweroff, atau handoff lock-screen. Sebelumnya pengguna melaporkan visual Hyprland masih bocor pada power-on, reboot, dan poweroff; desain K41 juga belum memenuhi hasil visual yang disepakati. Karena itu boot dasar dinyatakan berhasil, sedangkan acceptance visual dan jalur reboot/poweroff tetap terbuka. Tahap ini nantinya menjadi pedoman perbaikan alur instalasi serta kustomisasi dari kondisi nol; perbaikan tahap-tahap sebelumnya dijadwalkan sebelum tahap 7. |
+| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna dalam percakapan proyek. Workstream 2 (lock screen) aktif. Desain C — Floating Password Card telah disetujui sebagai arah visual; implementasi dan penerimaan visual belum dilakukan. Collector audit read-only tersedia di `scripts/k41-lockscreen-audit.sh`; hasil aktual perangkat masih menunggu dijalankan dan dikirim pengguna. Guest Mode ditunda sampai pengguna menyatakan lock screen kustom berhasil diterima. Perbaikan tahap-tahap instalasi sebelumnya tetap dijadwalkan sebelum tahap 7. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -36,7 +36,7 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 | `scripts/k41-install-basic-arch.sh` | Basic Arch installation | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | Desktop installation | IMPLEMENTED |
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
-| `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
+| `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |\n| `scripts/k41-lockscreen-audit.sh` | Read-only lock-screen inventory and evidence collector | IMPLEMENTED — NOT YET RUN ON DEVICE |
 | `scripts/k41-enable-caelestia-autologin.sh` + `scripts/k41-lock-caelestia-after-start.sh` | Opt-in tty1 autologin + verified Caelestia lock startup + Hyprlock fallback | IMPLEMENTED — NOT TESTED ON DEVICE |
 | `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED |
 | `scripts/k41-configure-boot-experience.sh` + `scripts/k41-plymouth-quit-after-lock.sh` | Plymouth K41 theme, quiet splash, lock-aware TTY1 handoff, additive TPM2/PCR7 enrollment | IMPLEMENTED — ORIGINAL SCRIPT RUN CONFIRMED |
@@ -48,7 +48,7 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5, Workstream 1: boot experience (power-on, reboot, poweroff).** Visual leakage Hyprland masih merupakan known issue dan investigasi/perbaikannya adalah pekerjaan aktif. Setelah workstream ini diterima, lanjutkan berurutan ke lock screen, dashboard, taskbar/panel, launcher, sidebar, lalu utilities. Elemen lintas-komponen (design tokens, typography, icons/cursor, wallpaper, notifications/OSD, window appearance, terminal, GTK/Qt) dijaga konsisten saat komponen terkait dikerjakan. Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 tetap ditunda sampai sebelum Tahap 7.
+**CURRENT — Tahap 5, Workstream 2: lock screen.** Pengguna memilih desain C — Floating Password Card: hanya clock/date/day/password, wallpaper desktop yang sama dengan blur, dan kartu password kecil yang mengambang di bawah informasi waktu. Audit read-only perangkat adalah langkah berikutnya; implementasi menunggu bukti runtime dan audit upstream Caelestia. Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna. Setelah lock screen diterima, lanjutkan berurutan ke dashboard, taskbar/panel, launcher, sidebar, lalu utilities. Elemen lintas-komponen (design tokens, typography, icons/cursor, wallpaper, notifications/OSD, window appearance, terminal, GTK/Qt) dijaga konsisten saat komponen terkait dikerjakan. Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 tetap ditunda sampai sebelum Tahap 7.
 
 ### Konfirmasi keberhasilan boot sistem
 
