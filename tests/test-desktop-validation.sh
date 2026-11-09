@@ -37,6 +37,7 @@ printf '%s\n' 'QML FileView: Read of /tmp/unrelated/scheme.json failed: File doe
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 [[ $findings == runtime-error ]] || fail "unrelated missing scheme path was incorrectly ignored: $findings"
 rm -f -- "$scheme_file"
+printf 'QML FileView: Read of %s failed: File does not exist.\n' "$scheme_file" >"$log_file"
 findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
 [[ $findings == scheme-missing ]] || fail "missing scheme was not classified precisely: $findings"
 
