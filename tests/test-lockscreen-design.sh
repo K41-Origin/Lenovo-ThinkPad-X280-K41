@@ -6,13 +6,22 @@ content="$root/config/quickshell/caelestia/modules/lock/Content.qml"
 center="$root/config/quickshell/caelestia/modules/lock/Center.qml"
 installer="$root/scripts/k41-apply-lockscreen-design.sh"
 reporter="$root/scripts/k41-report-lockscreen-session.sh"
+permission_audit="$root/scripts/k41-report-lockscreen-permissions.sh"
 
-for file in "$content" "$center" "$installer" "$reporter"; do
+for file in "$content" "$center" "$installer" "$reporter" "$permission_audit"; do
     [[ -s $file ]] || { printf 'FAIL: missing/empty %s\n' "$file" >&2; exit 1; }
 done
 
 bash -n "$installer"
 bash -n "$reporter"
+bash -n "$permission_audit"
+grep -Fq 'Jalankan sebagai user desktop biasa, tanpa sudo' "$permission_audit"
+grep -Fq 'namei -l' "$permission_audit"
+grep -Fq 'getfacl -cp' "$permission_audit"
+grep -Fq 'stat -c' "$permission_audit"
+! grep -Eq '(^|[[:space:]])(chmod|chown|install -o|umask)([[:space:]]|$)' "$permission_audit"
+! grep -Fq 'git add' "$permission_audit"
+
 grep -Fq 'Center {' "$content"
 grep -Fq 'Clock {' "$center"
 grep -Fq 'PasswordInput {' "$center"
@@ -45,5 +54,5 @@ grep -Fq 'caelestia shell -r -d' "$reporter"
 grep -Fq 'PIPESTATUS[0]' "$reporter"
 grep -Fq 'Selected config path check' "$reporter"
 grep -Fq 'FAIL_SYSTEM_FALLBACK' "$reporter"
-printf 'PASS: lock-screen layout structure, installer/reporter Bash syntax, pinned-source deployment and rollback guards.\n'
+printf 'PASS: lock-screen layout, installer/reporter/audit Bash syntax, pinned-source deployment and read-only permission audit guards.\n'
 printf 'NOTE: installer execution, QML loading, lock/unlock and visual behavior require the target X280.\n'
