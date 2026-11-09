@@ -55,7 +55,7 @@ HELPER_TARGET="$USER_HOME/.local/bin/k41-lock-caelestia-after-start"
 HYPRLAND_CONFIG="$USER_HOME/.config/hypr/hyprland.lua"
 [[ -r $HYPRLAND_CONFIG ]] || die "Expected Hyprland config is missing: $HYPRLAND_CONFIG"
 command -v qs >/dev/null 2>&1 || die "Quickshell (qs) is required for the K41 graphical handoff."
-[[ -x "$SCRIPT_DIR/k41-install-animated-boot-splash.sh" ]] || die "The K41 Quickshell handoff installer is missing."
+[[ -r "$SCRIPT_DIR/k41-install-animated-boot-splash.sh" ]] || die "The K41 Quickshell handoff installer is missing or unreadable."
 
 printf '\nK41 boot-experience setup\n'
 printf 'Root LUKS device: %s\n' "$crypt_device"
