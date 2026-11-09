@@ -1,0 +1,37 @@
+--- Desktop diagnostics ---
+Diagnostic report created: /home/kai/Lenovo-ThinkPad-X280-K41/reports/desktop-validation/20261109T055623Z/desktop
+Review before sharing, then commit/push this report directory.
+Collection completed; physical hardware acceptance remains NOT TESTED until the checklist is filled in.
+Desktop collector: PASS (collection completed)
+
+--- Caelestia diagnostics ---
+Caelestia diagnostic report created: /home/kai/Lenovo-ThinkPad-X280-K41/reports/desktop-validation/20261109T055623Z/caelestia
+Review diagnostics.txt, summary.md, and manual-checklist.md before committing/pushing.
+The script does not stop Caelestia; it leaves the shell running for visual checks.
+Caelestia collector: PASS (collection completed)
+Restarting Caelestia shell...
+Killed bm1pw7ot
+[32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/si19i08ot/log.qslog"
+[33m  WARN[97m quickshell.dbus.objectmanager[0m: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+[32m  INFO[0m: Configuration Loaded
+
+===== Cache directory ownership after restart =====
+/home/kai/.cache | type=directory | owner=kai:kai | mode=755
+/home/kai/.cache/mesa_shader_cache | type=directory | owner=kai:kai | mode=700
+/home/kai/.cache/caelestia | type=directory | owner=kai:kai | mode=755
+/home/kai/.cache/caelestia/imagecache | type=directory | owner=kai:kai | mode=755
+/home/kai/.cache/ddcutil | type=directory | owner=kai:kai | mode=755
+
+===== Fresh Caelestia runtime log =====
+[32m  INFO[0m: Launching config: "/etc/xdg/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "16ee85225c9ea7a19fa3635391847b72" Path ID "16ee85225c9ea7a19fa3635391847b72"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/si19i08ot/log.qslog"
+[33m  WARN[97m quickshell.dbus.objectmanager[0m: Failed to create DBusObjectManagerInterface for "org.bluez" "/" : QDBusError("", "")
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[97m scene[0m: QML FileView at @services/Colours.qml[116:5]: Read of /home/kai/.local/state/caelestia/scheme.json failed: File does not exist.
+
+===== Recent user errors =====
+Nov 09 12:50:29 x280 qs[1662]: PAM _pam_init_handlers: no default config other
+Nov 09 12:56:08 x280 qs[1799]: PAM _pam_init_handlers: no default config other
