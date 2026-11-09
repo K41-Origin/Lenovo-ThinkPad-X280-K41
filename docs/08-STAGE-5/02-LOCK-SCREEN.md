@@ -99,11 +99,24 @@ Status **VERIFIED** memerlukan uji lock/unlock nyata, regression startup/session
 
 ## Collector audit
 
-Jalankan script dari clone repository pada ThinkPad X280. Script menentukan root repository berdasarkan lokasi file script (bukan direktori terminal saat ini), memvalidasi bahwa root tersebut adalah working tree Git, dan mendukung eksekusi dengan `sudo`:
+Jalankan script dari clone repository pada ThinkPad X280 sebagai user desktop biasa, **tanpa sudo**. Script menentukan root repository berdasarkan lokasi file script (bukan direktori terminal saat ini) dan memvalidasi bahwa root tersebut adalah working tree Git:
 
 ```bash
-sudo bash scripts/k41-lockscreen-audit.sh
+bash scripts/k41-lockscreen-audit.sh
 ```
+
+### Insiden permission collector — kebijakan wajib
+
+**REGRESSION DITEMUKAN DAN DIPERBAIKI.** Versi collector sebelumnya memakai `umask 077`, `chmod 0700` pada direktori laporan, `chmod 0600` pada file laporan, serta jalur `sudo` dengan `chown`. Walaupun dimaksudkan untuk membatasi akses laporan, perubahan mode dan ownership tersebut mengubah metadata filesystem di dalam working tree dan dapat menghambat akses/pengelolaan artefak audit saat pengguna meninjau atau melakukan Git add/commit/push. Pengguna melaporkan gangguan push setelah menjalankan collector; insiden ini dicatat sebagai regresi yang menjadi tanggung jawab perubahan script.
+
+Mulai versi perbaikan:
+- **Dilarang menjalankan collector dengan sudo/root.** Script menolak EUID 0 sebelum membuat laporan.
+- Collector **tidak boleh menjalankan `chmod`, `chown`, `install -o/-g`, `umask` khusus, atau operasi lain yang mengubah permission/ownership** pada working tree maupun artefak.
+- Direktori dan file laporan dibuat sebagai user pemilik checkout dengan permission default yang ditentukan oleh umask sesi pengguna; collector tidak memaksakan mode.
+- Jangan memakai alasan keamanan laporan untuk mengubah permission repository. Jika laporan mengandung data sensitif, redaksi kontennya sebelum commit; jangan mengunci akses filesystem sebagai pengganti redaksi.
+- Perubahan ini tidak memperbaiki permission yang mungkin sudah terlanjur berubah dari run sebelumnya. Sebelum melakukan pemulihan, periksa owner/mode target secara spesifik; jangan menjalankan `chmod -R` atau `chown -R` pada repository.
+
+Ini adalah acceptance invariant untuk collector berikutnya: **audit tidak mengubah permission atau ownership, dan seluruh artefak dibuat oleh user biasa yang menjalankan Git.**
 
 Script juga dapat dipanggil melalui path absolut dari direktori lain. Ini penting: proses script tidak dapat mengubah direktori kerja terminal induk. Karena itu, menjalankan `git add` atau `git push` biasa setelah memanggil script melalui path absolut dari luar clone akan menghasilkan `fatal: not a git repository`. Versi collector ini menghindari masalah tersebut dengan mencetak perintah Git memakai opsi `git -C <repo_root>`; jalankan perintah yang dicetak script setelah meninjau dan menyunting laporan.
 
@@ -116,4 +129,4 @@ git -C "/path/ke/clone" rebase origin/main
 
 Ganti `/path/ke/clone` dengan path repository yang dicetak oleh script. Jangan gunakan `git push --force`. Jika rebase berhenti karena konflik, jangan push; simpan pesan error untuk ditinjau. Pada sesi berikutnya, gunakan `git -C "/path/ke/clone" fetch origin` lalu `git -C "/path/ke/clone" merge --ff-only origin/main` sebelum mulai bekerja.
 
-Laporan disimpan di `reports/lockscreen-audit/<timestamp>/audit.txt`. Direktori laporan dibuat dengan kepemilikan akun pemanggil agar dapat dibaca dan di-commit tanpa sudo. Collector tidak mengubah branch, HEAD, index, working tree, konfigurasi, service, package, PAM, atau autentikasi. Walaupun collector menghindari username dan credential, periksa laporan sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib.
+Laporan disimpan di `reports/lockscreen-audit/<timestamp>/audit.txt`, dibuat oleh user yang menjalankan collector dengan permission default sesi. Collector tidak mengubah branch, HEAD, index, permission, ownership, konfigurasi, service, package, PAM, atau autentikasi. Walaupun collector menghindari username dan credential, periksa laporan sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib.
