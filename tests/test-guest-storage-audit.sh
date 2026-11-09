@@ -24,7 +24,10 @@ for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
   '/etc/xdg/autostart' 'findmnt -T' 'getfacl -cpn' 'checkout path omitted' '/etc/sudoers.d' \
   'Filesystem topology, capacity and volatile mount limits' 'memory.max' 'user manager unit names/status' \
   'display-manager.service' '/etc/pam.d' 'System session launch metadata' \
-  'System-level default browser MIME associations' 'journalctl --disk-usage' \
+  'System and active-user default browser associations' 'active_user_default_web_browser' \
+  'journalctl --disk-usage' 'Complete mounted filesystem topology' \
+  'Selected PAM auth/account/session module chains' 'Hyprland startup directives' \
+  'Quickshell/Caelestia config inventory' 'memory.swap.max' \
   'systemctl --version' 'sddm|greetd|ly|gdm|lightdm'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "missing audit/safety scope: $token"
 done
