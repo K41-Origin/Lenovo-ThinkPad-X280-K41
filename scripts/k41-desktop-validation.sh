@@ -468,6 +468,85 @@ diagnostic 'Relevant installed package versions' 'desktop-package-versions.txt' 
 diagnostic 'Systemd failed unit details' 'failed-units-detail.txt' systemctl --failed --no-pager --full
 diagnostic 'User systemd failed unit details' 'failed-user-units-detail.txt' systemctl --user --failed --no-pager --full
 
+# 10. Targeted Stage 4 evidence: CPU security, Bluetooth HCI, and PAM.
+# Read-only only. The selected performance policy keeps SMT enabled; this
+# collector does not alter kernel parameters, firmware, services, or PAM.
+diagnostic 'CPU SMT state and topology' 'cpu-smt-state.txt' bash -c '
+  printf "smt_control="; cat /sys/devices/system/cpu/smt/control 2>/dev/null || printf "unavailable\\n"
+  printf "smt_active="; cat /sys/devices/system/cpu/smt/active 2>/dev/null || printf "unavailable\\n"
+  printf "\\nCPU topology:\\n"
+  lscpu -e=CPU,CORE,SOCKET,ONLINE 2>&1 || true
+'
+diagnostic 'CPU microcode revision and relevant flags' 'cpu-microcode.txt' bash -c '
+  grep -m1 -E "^(vendor_id|model name|microcode|flags)[[:space:]]*:" /proc/cpuinfo
+  printf "\\nPer-CPU microcode revisions:\\n"
+  awk -F ": " "/^processor[[:space:]]*:|^microcode[[:space:]]*:/ {print}" /proc/cpuinfo
+'
+diagnostic 'CPU vulnerability sysfs detail' 'cpu-vulnerability-detail.txt' bash -c '
+  for f in /sys/devices/system/cpu/vulnerabilities/*; do
+    [[ -r $f ]] || continue
+    printf "%s: " "${f##*/}"
+    cat "$f"
+  done
+'
+diagnostic 'Bluetooth controller summary' 'bluetooth-controller.txt' timeout 12 bluetoothctl show
+diagnostic 'Bluetooth management controller information' 'bluetooth-btmgmt-info.txt' timeout 12 btmgmt info
+diagnostic 'Bluetooth HCI sysfs and udev identity' 'bluetooth-hci-identity.txt' bash -c '
+  for hci in /sys/class/bluetooth/hci*; do
+    [[ -e $hci ]] || continue
+    printf "HCI=%s\\n" "$hci"
+    printf "DEVICE_PATH="
+    readlink -f "$hci/device" 2>/dev/null || true
+    udevadm info --query=all --path="$hci/device" 2>&1 || true
+    for attr in address name type modalias; do
+      [[ -r $hci/$attr ]] || continue
+      printf "%s=" "$attr"
+      cat "$hci/$attr"
+    done
+  done
+'
+diagnostic 'Bluetooth driver module metadata' 'bluetooth-driver.txt' modinfo btusb
+diagnostic 'Installed Intel Bluetooth firmware candidates' 'intel-bluetooth-firmware.txt' bash -c '
+  for d in /usr/lib/firmware/intel /lib/firmware/intel; do
+    [[ -d $d ]] || continue
+    printf "DIRECTORY=%s\\n" "$d"
+    find "$d" -maxdepth 1 -type f \\( -name "ibt-*.sfi" -o -name "ibt-*.ddc" \\) -printf "%f\\n" 2>/dev/null | sort -u
+  done
+'
+diagnostic 'Bluetooth kernel boot messages' 'bluetooth-kernel-log.txt' bash -c '
+  journalctl -k -b --no-pager 2>&1 | grep -Ei "Bluetooth:|btusb|btintel|ibt-|hci[0-9]|firmware.*(bluetooth|intel)" || true
+'
+diagnostic 'Bluetooth package integrity' 'bluetooth-package-integrity.txt' pacman -Qkk bluez bluez-utils linux-firmware
+diagnostic 'PAM base and Linux-PAM package integrity' 'pam-package-integrity.txt' pacman -Qkk pambase linux-pam
+diagnostic 'PAM fallback policy metadata and content' 'pam-other-policy.txt' bash -c '
+  if [[ -e /etc/pam.d/other ]]; then
+    stat /etc/pam.d/other
+    printf "\\n--- /etc/pam.d/other ---\\n"
+    sed -n "1,160p" /etc/pam.d/other
+    printf "\\n--- package ownership ---\\n"
+    pacman -Qo /etc/pam.d/other 2>&1 || true
+  else
+    printf "/etc/pam.d/other is missing\\n"
+  fi
+  printf "\\n--- path permissions ---\\n"
+  namei -l /etc/pam.d/other 2>&1 || true
+'
+diagnostic 'Caelestia packaged PAM asset inventory' 'caelestia-pam-assets.txt' bash -c '
+  pacman -Ql caelestia-shell 2>&1 | awk "$2 ~ /pam[.]d/ {print $2}" |
+  while IFS= read -r file; do
+    [[ -n $file ]] || continue
+    printf "\\n===== %s =====\\n" "$file"
+    stat -c "mode=%a owner=%U:%G size=%s" "$file" 2>&1 || true
+    if [[ -f $file ]]; then sed -n "1,160p" "$file"; fi
+  done
+'
+diagnostic 'PAM and Quickshell user journal messages' 'pam-user-journal.txt' bash -c '
+  journalctl --user -b --no-pager 2>&1 | grep -Ei "PAM|pam_[a-z0-9_]+|_pam_init_handlers|quickshell|qs\\[" || true
+'
+diagnostic 'PAM and authentication system journal messages' 'pam-system-journal.txt' bash -c '
+  journalctl -b --no-pager 2>&1 | grep -Ei "PAM|pam_[a-z0-9_]+|_pam_init_handlers|polkit" | tail -n 250 || true
+'
+
 # Do not capture nmcli connection profiles, Wi-Fi SSIDs, MAC addresses from
 # network configuration, environment variables, or full process command lines.
 chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"
