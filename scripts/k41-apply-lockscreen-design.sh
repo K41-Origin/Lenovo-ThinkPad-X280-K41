@@ -231,7 +231,7 @@ if [[ -f $target_root/shell.qml ]]; then
     cp -a -- "$target_root/modules/lock/Content.qml" "$target_root/modules/lock/Center.qml" "$update_backup/"
     mkdir -- "$update_backup/center"
     cp -a -- "$target_root/modules/lock/center/PasswordInput.qml" "$update_backup/center/"
-    printf 'Upstream revision: %s\\nOverlay update backup for existing managed source tree.\\n' "$UPSTREAM_REVISION" > "$update_backup/manifest"
+    printf 'Upstream revision: %s\nOverlay update backup for existing managed source tree.\n' "$UPSTREAM_REVISION" > "$update_backup/manifest"
     cp -- "$source_root/Content.qml" "$target_root/modules/lock/Content.qml"
     cp -- "$source_root/Center.qml" "$target_root/modules/lock/Center.qml"
     cp -- "$password_override" "$target_root/modules/lock/center/PasswordInput.qml"
@@ -306,8 +306,10 @@ done
 
 cp -- "$source_root/Content.qml" "$staging/modules/lock/Content.qml"
 cp -- "$source_root/Center.qml" "$staging/modules/lock/Center.qml"
+cp -- "$password_override" "$staging/modules/lock/center/PasswordInput.qml"
 cmp -s "$staging/modules/lock/Content.qml" "$source_root/Content.qml" || die 'Content override verification failed.'
 cmp -s "$staging/modules/lock/Center.qml" "$source_root/Center.qml" || die 'Center override verification failed.'
+cmp -s "$staging/modules/lock/center/PasswordInput.qml" "$password_override" || die 'PasswordInput override verification failed.'
 
 info 'Complete upstream QML source tree fetched and pinned; K41 lock overrides applied.'
 info 'This fixes the previous inert two-file directory: the local shell.qml is now present, so Quickshell can resolve the user-local config instead of falling back to /etc/xdg.'
