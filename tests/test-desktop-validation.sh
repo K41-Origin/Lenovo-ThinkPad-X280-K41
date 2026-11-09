@@ -11,15 +11,13 @@ for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks
   grep -Fq -- "$token" "$SCRIPT" || fail "validator missing expected health check: $token"
 done
 if grep -Eq '(^|[[:space:]])sudo[[:space:]]|pacman -S|systemctl (enable|disable|start|stop)|mkfs\.|cryptsetup luksFormat|wipefs|parted' "$SCRIPT"; then
-  fail 'desktop validator must not install packages, mutate services, or perform storage operations'
+  fail 'desktop validator must remain read-only'
 fi
-grep -Fq 'cannot prove that the panel' "$SCRIPT" || fail 'validator must state the limits of log-based acceptance'
+grep -Fq 'cannot prove that the panel' "$SCRIPT" || fail 'validator must state log-validation limits'
 grep -Fq 'chmod 0700 "$run_dir"' "$SCRIPT" || fail 'report directory must be private'
-grep -Fq 'chmod 0600 "$log" "$checks"' "$SCRIPT" || fail 'report files must be private'
-diag_line="$(grep -n '^diagnostics="$run_dir/diagnostics.tsv"pass 'desktop validator passes syntax and safety-contract checks'
- "$SCRIPT" | cut -d: -f1)"
-chmod_line="$(grep -n '^chmod 0600 "$run_dir"/\\*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"pass 'desktop validator passes syntax and safety-contract checks'
- "$SCRIPT" | cut -d: -f1)"
+grep -Fq 'chmod 0600 "$log" "$checks"' "$SCRIPT" || fail 'base report files must be private'
+diag_line="$(grep -nF 'diagnostics="$run_dir/diagnostics.tsv"' "$SCRIPT" | cut -d: -f1)"
+chmod_line="$(grep -nF 'chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnostics" "$diagnostics_log"' "$SCRIPT" | cut -d: -f1)"
 [[ -n $diag_line && -n $chmod_line ]] || fail 'diagnostic report initialization/permission block missing'
 (( diag_line < chmod_line )) || fail 'diagnostic permissions are applied before initialization'
-pass 'desktop validator passes syntax and safety-contract checks'
+pass 'desktop validator syntax, read-only contract, and diagnostic initialization order'
