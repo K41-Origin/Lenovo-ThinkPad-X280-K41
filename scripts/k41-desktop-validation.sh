@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# One-command functional validation for the active ThinkPad X280 Hyprland session.
+# Automated health validation for the K41 ThinkPad X280 Hyprland desktop.
+# Read-only: writes private reports only. It cannot validate physical/UI behavior.
 set -Eeuo pipefail
 umask 077
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
-fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
-if (( EUID == 0 )); then
-  fail 'run as the regular desktop user; do not use sudo.'
-fi
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
+(( EUID != 0 )) || die 'Run as the regular desktop user; never use sudo.'
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -n ${WAYLAND_DISPLAY:-} ]] ||
-  fail 'run from a terminal inside the active Hyprland session.'
-for command_name in bash date mkdir chmod stat qs caelestia sleep pgrep journalctl; do
-  command -v "$command_name" >/dev/null 2>&1 || fail "required command is missing: $command_name"
+  die 'Run from a terminal inside the active Hyprland session.'
+
+for required in bash date mkdir chmod stat uname pacman systemctl journalctl grep awk sed pgrep; do
+  command -v "$required" >/dev/null 2>&1 || die "Required command missing: $required"
 done
-[[ -f "$ROOT/scripts/test-desktop-x280.sh" ]] || fail 'desktop diagnostic collector file is missing.'
-[[ -f "$ROOT/scripts/test-caelestia-x280.sh" ]] || fail 'Caelestia diagnostic collector file is missing.'
+[[ -f "$ROOT/scripts/test-desktop-x280.sh" ]] || die 'Desktop diagnostic collector is missing.'
+[[ -f "$ROOT/scripts/test-caelestia-x280.sh" ]] || die 'Caelestia diagnostic collector is missing.'
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_root="$ROOT/reports/desktop-validation"
@@ -28,154 +28,297 @@ while ! mkdir -- "$run_dir" 2>/dev/null; do
   run_dir="$report_root/$timestamp-$suffix"
 done
 chmod 0700 "$run_dir"
-summary="$run_dir/summary.md"
-checklist="$run_dir/manual-checklist.md"
 log="$run_dir/validation.log"
-: >"$summary"
-: >"$checklist"
+checks="$run_dir/checks.tsv"
+summary="$run_dir/summary.md"
 : >"$log"
-chmod 0600 "$summary" "$checklist" "$log"
+: >"$checks"
+chmod 0600 "$log" "$checks"
 
-overall_rc=0
-desktop_rc=0
-caelestia_rc=0
-restart_result='NOT TESTED — operator declined or skipped restart'
-cache_result='NOT TESTED — Caelestia restart was not performed'
+pass_count=0
+warn_count=0
+fail_count=0
+skip_count=0
+record() {
+  local status=$1 name=$2 detail=$3
+  printf '%s\t%s\t%s\n' "$status" "$name" "$detail" >>"$checks"
+  printf '[%s] %s — %s\n' "$status" "$name" "$detail"
+  case "$status" in
+    PASS) pass_count=$((pass_count + 1)) ;;
+    WARN) warn_count=$((warn_count + 1)) ;;
+    FAIL) fail_count=$((fail_count + 1)) ;;
+    SKIP) skip_count=$((skip_count + 1)) ;;
+  esac
+}
+capture() {
+  local label=$1 output_file=$2 rc
+  shift 2
+  {
+    printf '\n===== %s =====\nCOMMAND:' "$label"
+    printf ' %q' "$@"
+    printf '\n'
+  } >>"$log"
+  if "$@" >"$output_file" 2>&1; then
+    rc=0
+  else
+    rc=$?
+  fi
+  cat -- "$output_file" >>"$log"
+  printf 'COMMAND EXIT: %s\n' "$rc" >>"$log"
+  return "$rc"
+}
+command_path() { command -v "$1" 2>/dev/null || true; }
 
-printf 'K41 desktop functional validation\n'
-printf 'Report: %s\n\n' "$run_dir"
-printf '%s\n' 'This script collects diagnostics and performs a controlled Caelestia restart only after your confirmation.'
-printf '%s\n' 'Save your work. Restarting Caelestia briefly closes its panel/widgets; Hyprland itself is not restarted.'
-printf '\n'
+tmp="$run_dir/.tmp"
+mkdir -m 0700 -- "$tmp"
+trap 'rm -rf -- "$tmp"' EXIT
 
-printf '%s\n' '--- Desktop diagnostics ---' | tee -a "$log"
-if K41_REPORT_DIR="$run_dir/desktop" bash "$ROOT/scripts/test-desktop-x280.sh" >>"$log" 2>&1; then
-  printf 'Desktop collector: PASS (collection completed)\n' | tee -a "$log"
+printf 'K41 X280 automated desktop validation\nReport: %s\n' "$run_dir"
+{
+  printf 'Captured UTC: %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+  printf 'Repository commit: %s\n' "$(git rev-parse HEAD 2>/dev/null || printf unknown)"
+  printf 'Kernel: %s\n' "$(uname -sr)"
+  printf 'Architecture: %s\n' "$(uname -m)"
+  printf 'User: %s\n' "$(id -un)"
+  printf 'Session type: %s\n' "${XDG_SESSION_TYPE:-unknown}"
+  printf 'Wayland display: present (value omitted)\n'
+  printf 'Hyprland instance: present (value omitted)\n'
+} >"$run_dir/environment.txt"
+
+# 1. Platform and session contract.
+[[ -r /etc/arch-release ]] && record PASS 'Arch Linux' 'Arch release marker present' ||
+  record FAIL 'Arch Linux' 'Expected /etc/arch-release'
+[[ $(uname -m) == x86_64 ]] && record PASS 'Architecture' 'x86_64' ||
+  record FAIL 'Architecture' "Unsupported architecture: $(uname -m)"
+[[ ${XDG_SESSION_TYPE:-} == wayland ]] && record PASS 'Wayland session' 'XDG_SESSION_TYPE=wayland' ||
+  record WARN 'Wayland session' "XDG_SESSION_TYPE=${XDG_SESSION_TYPE:-unset}"
+command -v hyprctl >/dev/null 2>&1 && record PASS 'Hyprland CLI' "$(command_path hyprctl)" ||
+  record FAIL 'Hyprland CLI' 'hyprctl not found'
+command -v qs >/dev/null 2>&1 && record PASS 'Quickshell CLI' "$(command_path qs)" ||
+  record FAIL 'Quickshell CLI' 'qs not found'
+command -v caelestia >/dev/null 2>&1 && record PASS 'Caelestia CLI' "$(command_path caelestia)" ||
+  record FAIL 'Caelestia CLI' 'caelestia not found'
+
+# 2. Required package inventory. Optional utilities are warnings, not hard failures.
+required_packages=(hyprland quickshell-git caelestia-shell caelestia-cli pipewire wireplumber pipewire-pulse xdg-desktop-portal xdg-desktop-portal-hyprland)
+for package in "${required_packages[@]}"; do
+  if pacman -Q "$package" >"$tmp/package" 2>&1; then
+    record PASS "Package: $package" "$(cat "$tmp/package")"
+  else
+    record FAIL "Package: $package" 'Not installed according to pacman'
+  fi
+done
+for package in mesa vulkan-intel brightnessctl upower networkmanager; do
+  if pacman -Q "$package" >"$tmp/package" 2>&1; then
+    record PASS "Optional package: $package" "$(cat "$tmp/package")"
+  else
+    record WARN "Optional package: $package" 'Not installed; feature coverage may be reduced'
+  fi
+done
+
+# 3. Hyprland live state and configuration.
+if capture 'Hyprland configuration errors' "$tmp/hypr-config-errors" hyprctl configerrors; then
+  if [[ ! -s $tmp/hypr-config-errors ]]; then
+    record PASS 'Hyprland configuration' 'hyprctl configerrors returned no errors'
+  else
+    record FAIL 'Hyprland configuration' 'hyprctl configerrors returned diagnostics; inspect validation.log'
+  fi
 else
-  desktop_rc=$?
-  overall_rc=1
-  printf 'Desktop collector: FAIL (exit %s)\n' "$desktop_rc" | tee -a "$log"
+  record FAIL 'Hyprland configuration query' 'hyprctl configerrors failed'
+fi
+if capture 'Hyprland monitor state' "$tmp/monitors" hyprctl monitors && [[ -s $tmp/monitors ]]; then
+  record PASS 'Monitor enumeration' 'Hyprland returned at least one monitor'
+else
+  record FAIL 'Monitor enumeration' 'No monitor data returned'
+fi
+if capture 'Hyprland input device state' "$tmp/devices" hyprctl devices && [[ -s $tmp/devices ]]; then
+  record PASS 'Input device enumeration' 'Hyprland returned input-device data'
+else
+  record WARN 'Input device enumeration' 'No input-device data returned'
+fi
+if pgrep -x Hyprland >/dev/null 2>&1; then
+  record PASS 'Hyprland process' 'Hyprland process exists'
+else
+  record WARN 'Hyprland process' 'Process name not found; session may use a different launcher/process title'
 fi
 
-printf '\n%s\n' '--- Caelestia diagnostics ---' | tee -a "$log"
-if K41_REPORT_DIR="$run_dir/caelestia" bash "$ROOT/scripts/test-caelestia-x280.sh" >>"$log" 2>&1; then
-  printf 'Caelestia collector: PASS (collection completed)\n' | tee -a "$log"
+# 4. Caelestia/Quickshell runtime and IPC.
+if pgrep -af '[q]s.*caelestia|[q]uickshell.*caelestia|[c]aelestia shell' >/dev/null 2>&1; then
+  record PASS 'Caelestia process' 'Matching process detected'
 else
-  caelestia_rc=$?
-  overall_rc=1
-  printf 'Caelestia collector: FAIL (exit %s)\n' "$caelestia_rc" | tee -a "$log"
+  record FAIL 'Caelestia process' 'No matching Caelestia/Quickshell process'
+fi
+if capture 'Caelestia IPC target discovery' "$tmp/caelestia-ipc" caelestia shell -s && [[ -s $tmp/caelestia-ipc ]]; then
+  record PASS 'Caelestia IPC' 'IPC target list returned data'
+else
+  record FAIL 'Caelestia IPC' 'IPC discovery failed or returned no targets'
+fi
+if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
+  if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*Error|failed to load.*(QML|plugin|module)' "$tmp/caelestia-log"; then
+    record WARN 'Caelestia runtime log' 'Potential runtime/QML/module errors found; inspect validation.log'
+  else
+    record PASS 'Caelestia runtime log' 'No matching fatal/critical/QML-load error pattern found'
+  fi
+else
+  record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
 fi
 
-printf '\n'
-if [[ -t 0 ]]; then
-  read -r -p 'Restart Caelestia now to verify cache creation and fresh runtime logs? [y/N] ' answer
+# 5. User services and portals.
+for unit in pipewire.service wireplumber.service; do
+  if systemctl --user is-active --quiet "$unit"; then
+    record PASS "User service: $unit" 'active'
+  elif systemctl --user is-active --quiet "${unit%.service}.socket"; then
+    record PASS "User service: $unit" 'socket active; service may be socket-activated'
+  else
+    record WARN "User service: $unit" 'not active; inspect service logs and audio behavior'
+  fi
+done
+for unit in xdg-desktop-portal.service xdg-desktop-portal-hyprland.service; do
+  if systemctl --user is-active --quiet "$unit"; then
+    record PASS "Portal service: $unit" 'active'
+  else
+    record WARN "Portal service: $unit" 'not active at check time; portals may be D-Bus activated on demand'
+  fi
+done
+if systemctl is-active --quiet NetworkManager.service; then
+  record PASS 'NetworkManager service' 'active'
 else
-  answer='n'
+  record WARN 'NetworkManager service' 'not active'
 fi
 
-if [[ $answer =~ ^[Yy]$ ]]; then
-  printf '%s\n' 'Restarting Caelestia shell...' | tee -a "$log"
-  if qs -c caelestia kill >>"$log" 2>&1; then
-    sleep 2
-    if caelestia shell -d >>"$log" 2>&1; then
-      sleep 5
-      if pgrep -af '[q]uickshell.*caelestia|[q]s.*caelestia|[c]aelestia shell' >/dev/null 2>&1; then
-        restart_result='PASS — Caelestia process detected after restart'
-      else
-        restart_result='FAIL — start command returned success but no Caelestia process was detected'
-        overall_rc=1
-      fi
+# 6. Audio graph, network adapter, radio state.
+if command -v wpctl >/dev/null 2>&1 && capture 'PipeWire graph' "$tmp/wpctl" wpctl status && grep -qE 'Audio|Sinks|Sources' "$tmp/wpctl"; then
+  record PASS 'PipeWire graph' 'wpctl returned audio graph sections'
+else
+  record WARN 'PipeWire graph' 'wpctl unavailable or no graph data'
+fi
+if command -v pactl >/dev/null 2>&1 && capture 'PulseAudio compatibility server' "$tmp/pactl" bash -c 'pactl info | sed -E "/^Cookie:/d"'; then
+  record PASS 'PulseAudio compatibility' 'pactl info succeeded'
+else
+  record WARN 'PulseAudio compatibility' 'pactl unavailable or server query failed'
+fi
+if command -v nmcli >/dev/null 2>&1 && capture 'Network device state' "$tmp/network" nmcli -t -f DEVICE,TYPE,STATE device status; then
+  if grep -qE 'wifi:connected|ethernet:connected' "$tmp/network"; then
+    record PASS 'Network connectivity state' 'At least one Wi-Fi/Ethernet device reports connected'
+  else
+    record WARN 'Network connectivity state' 'No connected Wi-Fi/Ethernet device; may be intentional'
+  fi
+else
+  record WARN 'Network device state' 'nmcli unavailable or query failed'
+fi
+if command -v rfkill >/dev/null 2>&1 && capture 'Radio block state' "$tmp/rfkill" rfkill list; then
+  if grep -q 'Soft blocked: yes' "$tmp/rfkill" || grep -q 'Hard blocked: yes' "$tmp/rfkill"; then
+    record WARN 'Radio block state' 'At least one radio is blocked; review whether intentional'
+  else
+    record PASS 'Radio block state' 'No soft/hard radio blocks reported'
+  fi
+else
+  record WARN 'Radio block state' 'rfkill unavailable or query failed'
+fi
+
+# 7. Storage capacity, battery health snapshot, and thermal snapshot.
+if df -P "$ROOT" >"$tmp/df" 2>&1; then
+  usage="$(awk 'NR==2 {gsub(/%/, "", $5); print $5}' "$tmp/df")"
+  if [[ $usage =~ ^[0-9]+$ ]] && (( usage < 90 )); then
+    record PASS 'Repository filesystem capacity' "${usage}% used"
+  elif [[ $usage =~ ^[0-9]+$ ]] && (( usage < 97 )); then
+    record WARN 'Repository filesystem capacity' "${usage}% used"
+  else
+    record FAIL 'Repository filesystem capacity' "At least 97% used or usage could not be parsed: ${usage:-unknown}"
+  fi
+else
+  record WARN 'Repository filesystem capacity' 'df query failed'
+fi
+battery_found=0
+for battery in /sys/class/power_supply/BAT*; do
+  [[ -d $battery ]] || continue
+  battery_found=1
+  if [[ -r $battery/capacity ]]; then
+    capacity="$(<"$battery/capacity")"
+    if [[ $capacity =~ ^[0-9]+$ ]] && (( capacity >= 10 )); then
+      record PASS 'Battery charge snapshot' "${battery##*/}: ${capacity}%"
+    elif [[ $capacity =~ ^[0-9]+$ ]]; then
+      record WARN 'Battery charge snapshot' "${battery##*/}: ${capacity}% (low charge)"
     else
-      restart_result='FAIL — caelestia shell -d returned non-zero'
-      overall_rc=1
+      record WARN 'Battery charge snapshot' "${battery##*/}: capacity unreadable"
     fi
   else
-    restart_result='FAIL — qs -c caelestia kill returned non-zero'
-    overall_rc=1
+    record WARN 'Battery charge snapshot' "${battery##*/}: capacity field unavailable"
   fi
-
-  {
-    printf '\n===== Cache directory ownership after restart =====\n'
-    for cache_path in "$HOME/.cache" "$HOME/.cache/mesa_shader_cache" "$HOME/.cache/caelestia" "$HOME/.cache/caelestia/imagecache" "$HOME/.cache/ddcutil"; do
-      if [[ -e $cache_path || -L $cache_path ]]; then
-        stat -c '%n | type=%F | owner=%U:%G | mode=%a' -- "$cache_path"
+  if [[ -r $battery/energy_full && -r $battery/energy_full_design ]]; then
+    full="$(<"$battery/energy_full")"
+    design="$(<"$battery/energy_full_design")"
+    if [[ $full =~ ^[0-9]+$ && $design =~ ^[0-9]+$ ]] && (( design > 0 )); then
+      health=$((full * 100 / design))
+      if (( health >= 70 )); then
+        record PASS 'Battery capacity health estimate' "${battery##*/}: ${health}% of design capacity"
       else
-        printf 'ABSENT (not automatically a failure): %s\n' "$cache_path"
+        record WARN 'Battery capacity health estimate' "${battery##*/}: ${health}% of design capacity"
       fi
-    done
-    printf '\n===== Fresh Caelestia runtime log =====\n'
-    qs -c caelestia log
-    printf '\n===== Recent user errors =====\n'
-    journalctl --user -b -p err --no-pager -n 60
-  } >>"$log" 2>&1 || {
-    cache_result='INCOMPLETE — one or more cache/log inspection commands failed; inspect validation.log'
-    overall_rc=1
-  }
-  if [[ $restart_result == PASS* ]]; then
-    cache_result='COLLECTED — inspect validation.log for ownership, permission errors, and cache paths; directory absence alone is not a failure'
+    fi
   fi
-else
-  printf '%s\n' 'Caelestia restart skipped by operator.' | tee -a "$log"
-fi
+done
+(( battery_found == 1 )) || record WARN 'Battery telemetry' 'No BAT* sysfs device found'
+thermal_found=0
+for zone in /sys/class/thermal/thermal_zone*; do
+  [[ -r $zone/temp ]] || continue
+  raw="$(<"$zone/temp")"
+  [[ $raw =~ ^-?[0-9]+$ ]] || continue
+  thermal_found=1
+  celsius=$((raw / 1000))
+  zone_type=unknown
+  [[ -r $zone/type ]] && zone_type="$(<"$zone/type")"
+  if (( celsius < 85 )); then
+    record PASS "Thermal: $zone_type" "${celsius}°C"
+  elif (( celsius < 100 )); then
+    record WARN "Thermal: $zone_type" "${celsius}°C (elevated; inspect under load)"
+  else
+    record FAIL "Thermal: $zone_type" "${celsius}°C (critical threshold)"
+  fi
+done
+(( thermal_found == 1 )) || record WARN 'Thermal telemetry' 'No readable thermal zones found'
 
+# 8. Supplemental inventories and journal evidence.
+printf '\n===== Supplemental desktop collector =====\n' >>"$log"
+if K41_REPORT_DIR="$run_dir/desktop" bash "$ROOT/scripts/test-desktop-x280.sh" >>"$log" 2>&1; then
+  record PASS 'Supplemental desktop inventory' 'Collector completed; command-level errors remain in the report'
+else
+  record WARN 'Supplemental desktop inventory' 'Collector returned non-zero; inspect its report/log'
+fi
+printf '\n===== Supplemental Caelestia collector =====\n' >>"$log"
+if K41_REPORT_DIR="$run_dir/caelestia" bash "$ROOT/scripts/test-caelestia-x280.sh" >>"$log" 2>&1; then
+  record PASS 'Supplemental Caelestia inventory' 'Collector completed; this is not UI acceptance'
+else
+  record WARN 'Supplemental Caelestia inventory' 'Collector returned non-zero'
+fi
+capture 'User journal errors (last 100)' "$tmp/user-journal" journalctl --user -b -p err --no-pager -n 100 || true
+capture 'System journal errors (last 100; permission may be limited)' "$tmp/system-journal" journalctl -b -p err --no-pager -n 100 || true
+capture 'Recent kernel warnings/errors (last 100)' "$tmp/kernel-journal" journalctl -k -b -p warning --no-pager -n 100 || true
+cp -- "$tmp/user-journal" "$run_dir/user-journal-errors.txt" 2>/dev/null || :
+cp -- "$tmp/system-journal" "$run_dir/system-journal-errors.txt" 2>/dev/null || :
+cp -- "$tmp/kernel-journal" "$run_dir/kernel-journal-warnings.txt" 2>/dev/null || :
+chmod 0600 "$run_dir"/*.txt "$log" "$checks"
+
+result=PASS
+(( fail_count == 0 )) || result=FAIL
 {
-  printf '# K41 ThinkPad X280 desktop validation\n\n'
+  printf '# K41 ThinkPad X280 automated desktop validation\n\n'
   printf -- '- Captured (UTC): %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf -- '- Repository commit: %s\n' "$(git rev-parse HEAD 2>/dev/null || printf unknown)"
-  printf -- '- Kernel: %s\n' "$(uname -sr)"
-  printf -- '- Desktop collector exit: %s\n' "$desktop_rc"
-  printf -- '- Caelestia collector exit: %s\n' "$caelestia_rc"
-  printf -- '- Caelestia restart: %s\n' "$restart_result"
-  printf -- '- Cache/runtime evidence: %s\n' "$cache_result"
-  printf -- '- Automated collection: COMPLETED WITH REVIEW REQUIRED\n'
-  printf '\nCollection does not prove physical hardware or UI acceptance. Complete manual-checklist.md and inspect all reports before sharing. Reports may contain device, network, host, and log information; do not push them without review/redaction.\n'
-  printf '\n## Report contents\n\n- `desktop/`: desktop inventory and generated checklist\n- `caelestia/`: Caelestia runtime diagnostics and generated checklist\n- `validation.log`: collector output and post-restart cache/runtime evidence\n- `manual-checklist.md`: consolidated physical acceptance checklist\n'
-} >>"$summary"
-
-cat >"$checklist" <<'CHECKLIST'
-# Manual ThinkPad X280 desktop acceptance
-
-For each row, replace NOT TESTED with PASS or FAIL and add concise evidence. If a feature is not required or unavailable, leave NOT TESTED and explain why. Do not mark a feature PASS merely because a device or process was detected.
-
-| Check | Result | Notes / reproduction steps |
-|---|---|---|
-| Hyprland starts and remains stable | NOT TESTED | |
-| Display resolution, scaling, refresh rate | NOT TESTED | |
-| External display (if available) | NOT TESTED | |
-| Keyboard typing and function/media keys | NOT TESTED | |
-| TrackPoint pointer and buttons | NOT TESTED | |
-| Touchpad pointer, click, tap, scroll, gestures | NOT TESTED | |
-| Brightness keys and brightness control | NOT TESTED | |
-| Volume/mute keys and speaker output | NOT TESTED | |
-| Microphone input and recording/playback | NOT TESTED | |
-| Wi-Fi disconnect/reconnect | NOT TESTED | |
-| Bluetooth (only if required) | NOT TESTED | |
-| Terminal opens and accepts input | NOT TESTED | |
-| File manager opens and basic navigation works | NOT TESTED | |
-| Launcher opens and accepts keyboard input | NOT TESTED | |
-| Caelestia panel appears and remains responsive | NOT TESTED | |
-| Caelestia dashboard, widgets, and indicators | NOT TESTED | |
-| Notifications appear and dismiss | NOT TESTED | |
-| Wallpaper/theme display | NOT TESTED | |
-| Screenshot portal (if required) | NOT TESTED | |
-| Screen-sharing portal (if required) | NOT TESTED | |
-| Screen lock and unlock | NOT TESTED | |
-| Logout returns to a usable TTY; login works again | NOT TESTED | |
-| No repeated critical errors or crashes during normal use | NOT TESTED | |
-
-## Overall Stage 4 result
-
-NOT TESTED
-
-## Failure details
-
-None recorded. Add exact symptoms, reproduction steps, and approximate UTC time for each failure.
-CHECKLIST
-
-chmod 0600 "$summary" "$checklist" "$log"
-printf '\nValidation report created: %s\n' "$run_dir"
-printf '1. Complete: %s\n' "$checklist"
-printf '2. Inspect and redact: %s\n' "$run_dir"
-printf '3. Share only this reviewed report directory in your next push.\n'
-printf 'Automated collection exit: %s (physical acceptance remains manual).\n' "$overall_rc"
-exit "$overall_rc"
+  printf -- '- Result: **%s**\n' "$result"
+  printf -- '- Checks: %s PASS, %s WARN, %s FAIL, %s SKIP\n' "$pass_count" "$warn_count" "$fail_count" "$skip_count"
+  printf '\n## Interpretation\n\n'
+  printf 'This is automated software/runtime/log validation only. It cannot prove that the panel, launcher, widgets, keyboard, TrackPoint, touchpad, speakers, microphone, brightness keys, Wi-Fi reconnect, screenshot flow, or lock screen behave correctly in real interaction. No physical or visual test is claimed. A PASS means only that no configured automated failure condition was detected in this snapshot.\n'
+  printf '\n## Report files\n\n'
+  printf -- '- checks.tsv: machine-readable PASS/WARN/FAIL/SKIP results\n'
+  printf -- '- validation.log: command output and detailed diagnostic collection\n'
+  printf -- '- environment.txt: host/session metadata\n'
+  printf -- '- desktop/ and caelestia/: supplemental diagnostic collectors\n'
+  printf -- '- *-journal*.txt: recent journal evidence; may be permission-limited\n'
+  printf '\nReview/redact all reports before pushing. Reports may contain usernames, hostnames, device identifiers, network state, paths, and log messages.\n'
+} >"$summary"
+chmod 0600 "$summary"
+printf '\n--- Summary ---\n'
+cat "$summary"
+printf '\nReport: %s\n' "$run_dir"
+(( fail_count == 0 ))
