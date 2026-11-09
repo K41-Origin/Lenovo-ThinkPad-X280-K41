@@ -161,7 +161,7 @@ Arah pengelolaan:
 - Lock screen appearance.
 - Foot terminal appearance.
 - GTK/Qt consistency where maintainable.
-- Screenshot comparison, visual review, functional regression, and rollback.
+- On-device visual review by the user, functional regression, and rollback; screenshots are not required.
 
 ### Out of scope — Stage 5
 
@@ -286,6 +286,6 @@ Hal yang belum diputuskan dan harus diverifikasi:
 
 ---
 
-**Status keseluruhan: DESIGN DIRECTION APPROVED — IMPLEMENTATION NOT STARTED.**
+**Status keseluruhan: DESIGN DIRECTION APPROVED — FIRST CONFIGURATION BATCH COMMITTED; DEVICE APPLICATION AND VALIDATION PENDING.**
 
 Dokumen ini menjadi acuan utama untuk keputusan desain dan review perubahan selama tahap 5. Setiap penyimpangan material harus memiliki alasan teknis dan persetujuan sebelum implementasi.
