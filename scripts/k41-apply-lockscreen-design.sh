@@ -14,7 +14,7 @@ repo_root="$(cd -- "$script_dir/.." && pwd -P)"
 source_root="$repo_root/config/quickshell/caelestia/modules/lock"
 
 # Require sudo at entry, then drop privileges before touching user files.
-# All config/backup/log writes run as SUDO_USER, never as root.
+# All config/backup/report writes run as SUDO_USER, never as root.
 if [[ $EUID -eq 0 ]]; then
     [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] ||
         die 'Run with sudo from your regular desktop account (sudo bash scripts/k41-apply-lockscreen-design.sh).'
@@ -30,8 +30,7 @@ if [[ $EUID -eq 0 ]]; then
     command -v install >/dev/null 2>&1 || die 'install command is required.'
     target_config="$target_home/.config/quickshell/caelestia/modules/lock"
     target_state="$target_home/.local/state/k41/lockscreen/backups"
-    target_logs="$target_home/.local/state/k41/lockscreen/logs"
-    for path in "$target_config" "$target_state" "$target_logs"; do
+    for path in "$target_config" "$target_state"; do
         current=
         IFS=/ read -r -a parts <<<"$path"
         for part in "${parts[@]}"; do
@@ -41,14 +40,13 @@ if [[ $EUID -eq 0 ]]; then
         done
     done
     target_gid="$(id -g "$SUDO_USER")"
-    install -d -o "$target_uid" -g "$target_gid" -- "$target_config" "$target_state" "$target_logs"
-    chown "$target_uid:$target_gid" -- "$target_config" "$target_state" "$target_logs"
+    install -d -o "$target_uid" -g "$target_gid" -- "$target_config" "$target_state"
+    chown "$target_uid:$target_gid" -- "$target_config" "$target_state"
 
     exec runuser --user "$SUDO_USER" -- env \
         HOME="$target_home" \
         XDG_CONFIG_HOME="$target_home/.config" \
         XDG_STATE_HOME="$target_home/.local/state" \
-        K41_LOG_DIR="$target_logs" \
         K41_SUDO_REEXEC=1 \
         bash "$0" "$@"
 fi
@@ -56,15 +54,28 @@ fi
 [[ ${K41_SUDO_REEXEC:-} == 1 ]] || die 'This installer must be started with sudo.'
 [[ $EUID -ne 0 ]] || die 'Refusing to perform user-file operations as root.'
 
-# Start a persistent transcript after privilege drop. The same output remains
-# visible in the terminal and is appended to a timestamped user-owned log.
-log_dir="${K41_LOG_DIR:-}"
-[[ $log_dir == "$HOME/.local/state/k41/lockscreen/logs" ]] ||
-    die 'Unexpected log directory; refusing to write outside the invoking user state directory.'
+# Save the complete run transcript INSIDE the Git repository so the user
+# can review, git-add, commit, and push the report with the project changes.
+log_dir="$repo_root/reports/lockscreen-apply"
+check_report_path() {
+    local path=$1 current=
+    IFS=/ read -r -a parts <<<"$path"
+    for part in "${parts[@]}"; do
+        [[ -z $part ]] && continue
+        current="$current/$part"
+        [[ ! -L $current ]] || die "Refusing symlink report path component: $current"
+    done
+}
+check_report_path "$repo_root/reports"
+check_report_path "$log_dir"
+mkdir -p -- "$log_dir"
 [[ -d $log_dir && ! -L $log_dir && -w $log_dir ]] ||
-    die "Log directory is missing, unsafe, or not writable: $log_dir"
-log_file="$log_dir/apply-lockscreen-$(date -u +'%Y%m%dT%H%M%SZ')-$$.log"
-: > "$log_file" || die "Cannot create log file: $log_file"
+    die "Report directory is missing, unsafe, or not writable: $log_dir"
+[[ $(stat -c %u "$repo_root") == "$EUID" ]] ||
+    die "Repository checkout is not owned by the invoking user: $repo_root"
+log_file="$log_dir/$(date -u +'%Y%m%dT%H%M%SZ')-apply.log"
+[[ ! -e $log_file && ! -L $log_file ]] || die "Refusing to overwrite existing report: $log_file"
+: > "$log_file" || die "Cannot create report file: $log_file"
 exec > >(tee -a "$log_file") 2>&1
 
 log_finished=0
@@ -89,7 +100,7 @@ printf 'Started  : %s\n' "$(date --iso-8601=seconds)"
 printf 'User     : %s (UID %s)\n' "$USER" "$EUID"
 printf 'Host     : %s\n' "$(hostname)"
 printf 'Repo     : %s\n' "$repo_root"
-printf 'Log file : %s\n\n' "$log_file"
+printf 'Report   : %s\n\n' "$log_file"
 
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
