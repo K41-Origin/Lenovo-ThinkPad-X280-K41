@@ -85,7 +85,7 @@ Audit upstream pada revision yang benar-benar terpasang mengonfirmasi bahwa:
 Perubahan repository:
 - `config/quickshell/caelestia/modules/lock/Content.qml`: mengganti tiga kolom widget dengan satu komponen Center di tengah.
 - `config/quickshell/caelestia/modules/lock/Center.qml`: hanya menampilkan Clock, tanggal/hari, PasswordInput, dan StateMessage. ProfilePic serta widget samping dihilangkan. StateMessage dipertahankan untuk feedback autentikasi/keyboard.
-- `scripts/k41-apply-lockscreen-design.sh`: installer sudo-aware dengan pemeriksaan paket dan layout upstream, backup, instalasi atomik, rollback, serta pilihan restart Caelestia. Script menerima `sudo`, membaca identitas pemanggil dari `SUDO_USER`, lalu menurunkan privilege menggunakan `runuser` sebelum menyentuh konfigurasi/backup. Tidak ada operasi tulis file pengguna yang dijalankan sebagai root; tidak mengubah PAM, service sistem, package, atau file upstream.
+- `scripts/k41-apply-lockscreen-design.sh`: installer sudo-aware dengan pemeriksaan paket dan layout upstream, backup, instalasi atomik, dan rollback. Restart shell dilakukan terpisah dari terminal sesi desktop aktif, bukan dari proses installer yang lingkungannya disanitasi oleh `runuser`. Script menerima `sudo`, membaca identitas pemanggil dari `SUDO_USER`, lalu menurunkan privilege menggunakan `runuser` sebelum menyentuh konfigurasi/backup. Tidak ada operasi tulis file pengguna yang dijalankan sebagai root; tidak mengubah PAM, service sistem, package, atau file upstream.
 - `tests/test-lockscreen-design.sh`: pemeriksaan statis struktur override dan sintaks Bash.
 
 Override tidak mengganti `LockSurface.qml` atau `Lock.qml`; wallpaper aktif, blur, WlSessionLock, PAM, dan protokol lock tetap berasal dari upstream. Layout visual belum dapat dinilai hanya dari source code.
@@ -115,7 +115,7 @@ git push origin main
 
 Jika log menunjukkan kegagalan, jangan anggap instalasi berhasil. Jangan mengedit atau menghapus bukti error sebelum dianalisis; jika perlu, jalankan ulang setelah perbaikan sehingga setiap percobaan memiliki file report tersendiri.
 
-Installer memerlukan `SUDO_USER`. Sebelum berpindah kembali ke UID pengguna dengan `runuser`, tahap sudo hanya membuat/memastikan dua direktori leaf yang dikelola installer (`~/.config/quickshell/caelestia/modules/lock` dan `~/.local/state/k41/lockscreen/backups`) dan menetapkan ownership kedua direktori tersebut kepada pengguna desktop. Parent seperti `~/.config`, `~/.config/quickshell`, dan `~/.local` tidak di-chown secara rekursif. Jika parent path tidak dapat ditelusuri pengguna atau ada komponen symlink, installer berhenti dengan pesan error. Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
+Installer memerlukan `SUDO_USER`. Sebelum berpindah kembali ke UID pengguna dengan `runuser`, tahap sudo hanya membuat/memastikan dua direktori leaf yang dikelola installer (`~/.config/quickshell/caelestia/modules/lock` dan `~/.local/state/k41/lockscreen/backups`) dan menetapkan ownership kedua direktori tersebut kepada pengguna desktop. Parent seperti `~/.config`, `~/.config/quickshell`, dan `~/.local` tidak di-chown secara rekursif. Jika parent path tidak dapat ditelusuri pengguna atau ada komponen symlink, installer berhenti dengan pesan error. Setujui prompt apply. Installer sengaja tidak me-restart Caelestia karena prosesnya dijalankan ulang melalui `runuser` dengan environment minimal; proses itu tidak memiliki jaminan `WAYLAND_DISPLAY` dan `HYPRLAND_INSTANCE_SIGNATURE` dari sesi Hyprland aktif. Setelah installer selesai, buka/ gunakan terminal di sesi desktop yang sedang aktif sebagai user biasa (tanpa sudo), lalu jalankan `caelestia shell -r -d`. Alternatifnya, logout/login. Script mencetak lokasi backup dan perintah rollback.
 
 Rollback juga dijalankan melalui sudo:
 
@@ -135,6 +135,32 @@ Perbaikan di repository:
 - Test statis ditambah untuk memastikan metadata host tidak lagi bergantung pada executable opsional tersebut.
 
 Report gagal asli tetap dipertahankan sebagai bukti dan **bukan** bukti instalasi berhasil. Setelah menarik perbaikan, jalankan ulang installer. Setiap percobaan menghasilkan report baru; tinjau report terbaru dan pastikan exit code `0` sebelum menyimpulkan proses instalasi berhasil.
+
+### Audit report penerapan — 2026-11-09 22:17:30 +07:00
+
+Report `reports/lockscreen-apply/20261109T151730Z-apply.log` mencatat:
+- File override berhasil disalin ke `~/.config/quickshell/caelestia/modules/lock/`.
+- Backup dibuat di `~/.local/state/k41/lockscreen/backups/20261109T151730Z`.
+- Installer berakhir dengan exit code `0` (`SUCCESS`).
+- Perintah `caelestia shell -r -d` yang dipanggil dari proses installer mengeluarkan sejumlah warning. Karena installer menurunkan privilege melalui `runuser` dan hanya meneruskan `HOME`/XDG variables, proses restart tersebut tidak mewarisi environment sesi desktop secara andal.
+
+Klasifikasi warning:
+1. **Environment sesi tidak tersedia:** `HYPRLAND_INSTANCE_SIGNATURE is unset`, gagal menghubungkan Hyprland socket, dan `Failed to create wl_display`. Ini bukti kuat bahwa proses Quickshell yang diluncurkan dari installer tidak memiliki konteks sesi Wayland/Hyprland yang benar.
+2. **Efek lanjutan yang mungkin terkait:** kegagalan attached object `WlrLayershell`, `failed to create variant`, dan `QQmlComponent: Component is not ready`. Karena `wl_display` gagal dibuat, jangan menyimpulkan ini sebagai bug QML override sebelum shell dijalankan kembali dari sesi Wayland yang benar.
+3. **Integrasi compositor belum terverifikasi:** `hyprland_global_shortcuts_v1` dan `ext-idle-notify-v1` dilaporkan tidak didukung. Warning ini harus diperiksa ulang setelah Quickshell dijalankan dalam sesi aktif; jika tetap muncul, verifikasi compositor/protokol yang benar-benar berjalan dan versi terkait. Jangan menyembunyikan warning atau menambah dependency secara spekulatif.
+4. **Notification D-Bus sudah terdaftar:** kemungkinan ada instance shell lain yang masih memiliki nama layanan ketika proses baru diluncurkan. Ini bukan bukti bahwa lock screen berhasil atau gagal; hindari meluncurkan instance kedua dari environment yang salah.
+
+`Configuration Loaded` dan exit code `0` hanya membuktikan command installer/restart berakhir tanpa exit error yang terdeteksi; keduanya **tidak** membuktikan seluruh komponen Wayland berhasil dibuat atau lock screen bekerja. Tidak ada bukti dalam report ini bahwa user telah menguji lock/unlock.
+
+### Perbaikan installer untuk restart
+
+**IMPLEMENTED di repository.** Installer tidak lagi menjalankan `caelestia shell -r -d` dari proses `runuser` yang environment-nya disanitasi. Setelah file override berhasil dipasang, script mencetak instruksi agar restart dijalankan dari terminal sesi desktop aktif sebagai user biasa:
+
+```bash
+caelestia shell -r -d
+```
+
+Ini menjaga agar Quickshell mewarisi environment Wayland/Hyprland dari sesi yang benar. Perbaikan ini tidak mengubah autentikasi, PAM, atau konfigurasi compositor. Test statis juga memastikan installer tidak lagi menjalankan restart dari konteks tersebut.
 
 ### Validasi yang harus dilakukan di perangkat
 
