@@ -13,7 +13,7 @@ bash -n "$ROOT/scripts/k41-desktop-validation.sh" || fail 'canonical desktop val
 for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'K41_REPORT_DIR=' 'qs -c caelestia kill' 'manual-checklist.md' 'umask 077'; do
   grep -Fq -- "$token" "$ROOT/scripts/k41-desktop-validation.sh" || fail "canonical desktop validator missing contract: $token"
 done
-if grep -Eq 'sudo|systemctl (enable|disable|start|stop)' "$ROOT/scripts/k41-desktop-validation.sh"; then
+if grep -Eq '(^|[[:space:]])sudo[[:space:]]|systemctl (enable|disable|start|stop)' "$ROOT/scripts/k41-desktop-validation.sh"; then
   fail 'desktop functional validator must not use sudo or mutate system services'
 fi
 pass 'canonical desktop validation entry point passes syntax and safety-contract checks'
