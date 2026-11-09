@@ -1,0 +1,90 @@
+K41 Lock Screen Deployment Permission Audit| sed -n 1,250pnTimestamp UTC: 20261109T154000Z| sed -n 1,250pnUser: kai UID=1000 GID=1000| sed -n 1,250pnHOME: /home/kai| sed -n 1,250pnRepository: /home/kai/Lenovo-ThinkPad-X280-K41| sed -n 1,250pnBranch: main| sed -n 1,250pnHEAD: de0baa8c461b407728626216f5b0e77feb4fead0| sed -n 1,250pnKernel: Linux 7.2.14-arch1-1| sed -n 1,250pnThis collector does not change permissions, ownership, configuration, packages, services, PAM, Git index, branch, or HEAD.| sed -n 1,250pn| sed -n 1,250pn========== Expected managed path metadata ==========| sed -n 1,250pndrwx------ owner=kai:kai uid=1000 gid=1000 path=/home/kai
+drwxr-x--x owner=kai:kai uid=1000 gid=1000 path=/home/kai/.config
+drwxr-xr-x owner=root:root uid=0 gid=0 path=/home/kai/.config/quickshell
+drwxr-xr-x owner=root:root uid=0 gid=0 path=/home/kai/.config/quickshell/caelestia
+drwxr-x--x owner=kai:kai uid=1000 gid=1000 path=/home/kai/.local/state
+drwx------ owner=kai:kai uid=1000 gid=1000 path=/home/kai/.local/state/k41
+drwx------ owner=kai:kai uid=1000 gid=1000 path=/home/kai/.local/state/k41/lockscreen
+drwxr-xr-x owner=kai:kai uid=1000 gid=1000 path=/home/kai/.local/state/k41/lockscreen/backups
+drwx------ owner=kai:kai uid=1000 gid=1000 path=/home/kai/Lenovo-ThinkPad-X280-K41
+drwx------ owner=kai:kai uid=1000 gid=1000 path=/home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply
+| sed -n 1,250pn========== Path traversal and symlink inspection ==========| sed -n 1,250pn| sed -n 1,250pn-- namei -l /home/kai/.config --| sed -n 1,250pnf: /home/kai/.config
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .config
+| sed -n 1,250pn-- namei -l /home/kai/.config/quickshell --| sed -n 1,250pnf: /home/kai/.config/quickshell
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .config
+drwxr-xr-x root root quickshell
+| sed -n 1,250pn-- namei -l /home/kai/.config/quickshell/caelestia --| sed -n 1,250pnf: /home/kai/.config/quickshell/caelestia
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .config
+drwxr-xr-x root root quickshell
+drwxr-xr-x root root caelestia
+| sed -n 1,250pn-- namei -l /home/kai/.local/state --| sed -n 1,250pnf: /home/kai/.local/state
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .local
+drwxr-x--x kai  kai  state
+| sed -n 1,250pn-- namei -l /home/kai/.local/state/k41 --| sed -n 1,250pnf: /home/kai/.local/state/k41
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .local
+drwxr-x--x kai  kai  state
+drwx------ kai  kai  k41
+| sed -n 1,250pn-- namei -l /home/kai/.local/state/k41/lockscreen --| sed -n 1,250pnf: /home/kai/.local/state/k41/lockscreen
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .local
+drwxr-x--x kai  kai  state
+drwx------ kai  kai  k41
+drwx------ kai  kai  lockscreen
+| sed -n 1,250pn-- namei -l /home/kai/.local/state/k41/lockscreen/backups --| sed -n 1,250pnf: /home/kai/.local/state/k41/lockscreen/backups
+dr-xr-xr-x root root /
+drwxr-xr-x root root home
+drwx------ kai  kai  kai
+drwxr-x--x kai  kai  .local
+drwxr-x--x kai  kai  state
+drwx------ kai  kai  k41
+drwx------ kai  kai  lockscreen
+drwxr-xr-x kai  kai  backups
+| sed -n 1,250pn========== ACL metadata (read-only) ==========| sed -n 1,250pn| sed -n 1,250pn-- getfacl /home/kai/.config --| sed -n 1,250pnuser::rwx
+group::r-x
+other::--x
+
+| sed -n 1,250pn-- getfacl /home/kai/.config/quickshell --| sed -n 1,250pnuser::rwx
+group::r-x
+other::r-x
+
+| sed -n 1,250pn-- getfacl /home/kai/.config/quickshell/caelestia --| sed -n 1,250pnuser::rwx
+group::r-x
+other::r-x
+
+| sed -n 1,250pn-- getfacl /home/kai/.local/state --| sed -n 1,250pnuser::rwx
+group::r-x
+other::--x
+
+| sed -n 1,250pn-- getfacl /home/kai/.local/state/k41 --| sed -n 1,250pnuser::rwx
+group::---
+other::---
+
+| sed -n 1,250pn-- getfacl /home/kai/.local/state/k41/lockscreen --| sed -n 1,250pnuser::rwx
+group::---
+other::---
+
+| sed -n 1,250pn-- getfacl /home/kai/.local/state/k41/lockscreen/backups --| sed -n 1,250pnuser::rwx
+group::r-x
+other::r-x
+
+| sed -n 1,250pn========== Existing user Caelestia tree (metadata and paths only) ==========| sed -n 1,250pn| sed -n 1,250pn-- tree: /home/kai/.config/quickshell/caelestia --| sed -n 1,250pnd drwxr-xr-x uid=0 gid=0 /home/kai/.config/quickshell/caelestia| sed -n 1,250pnd drwxr-xr-x uid=0 gid=0 /home/kai/.config/quickshell/caelestia/modules| sed -n 1,250pnd drwxr-xr-x uid=1000 gid=1000 /home/kai/.config/quickshell/caelestia/modules/lock| sed -n 1,250pnf -rw------- uid=1000 gid=1000 /home/kai/.config/quickshell/caelestia/modules/lock/Content.qml| sed -n 1,250pnf -rw------- uid=1000 gid=1000 /home/kai/.config/quickshell/caelestia/modules/lock/Center.qml| sed -n 1,250pn| sed -n 1,250pnExpected user entry point: /home/kai/.config/quickshell/caelestia/shell.qml| sed -n 1,250pnUser shell.qml: MISSING| sed -n 1,250pnPackage shell.qml: PRESENT (/etc/xdg/quickshell/caelestia/shell.qml)| sed -n 1,250pn| sed -n 1,250pn========== Backup tree (metadata and paths only) ==========| sed -n 1,250pn| sed -n 1,250pn-- tree: /home/kai/.local/state/k41/lockscreen/backups --| sed -n 1,250pnd drwxr-xr-x uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups| sed -n 1,250pnd drwx------ uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T150858Z| sed -n 1,250pnd drwx------ uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T150858Z/files| sed -n 1,250pnf -rw------- uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T150858Z/manifest| sed -n 1,250pnd drwx------ uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z| sed -n 1,250pnd drwx------ uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z/files| sed -n 1,250pnf -rw------- uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z/files/Content.qml| sed -n 1,250pnf -rw------- uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z/files/Center.qml| sed -n 1,250pnf -rw------- uid=1000 gid=1000 /home/kai/.local/state/k41/lockscreen/backups/20261109T151730Z/manifest| sed -n 1,250pn| sed -n 1,250pn========== Relevant package and deployment versions ==========| sed -n 1,250pncaelestia-shell 2.5.0-1
+caelestia-cli 1.1.3-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+User source Git checkout: absent| sed -n 1,250pn| sed -n 1,250pn========== Recent deployment reports (last 10 filenames and summaries) ==========| sed -n 1,250pn| sed -n 1,250pn-- 1794237455.5715715890 20261109T151730Z-apply.log| sed -n 1,250pn1794237265.6795734230 20261109T151425Z-apply.log| sed -n 1,250pn --| sed -n 1,250pn| sed -n 1,250pn========== Diagnosis hints (no automatic repair performed) ==========| sed -n 1,250pn
