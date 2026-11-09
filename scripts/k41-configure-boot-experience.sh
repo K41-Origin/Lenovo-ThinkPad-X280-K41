@@ -224,7 +224,7 @@ Before=getty@tty1.service
 
 [Service]
 Type=oneshot
-ExecStart=-/usr/bin/plymouth deactivate
+ExecStart=-/usr/bin/plymouth quit --retain-splash
 RemainAfterExit=yes
 
 [Install]
