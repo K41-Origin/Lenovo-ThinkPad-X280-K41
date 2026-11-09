@@ -319,7 +319,7 @@ The approved direction has now been translated into project-owned configuration 
 
 ### Wallpaper and rollback
 
-The repository includes assets/wallpapers/k41-obsidian-1920x1080.svg. The full profile script installs it into the Caelestia wallpaper directory and asks Caelestia CLI to activate it. SVG decoding by the device's exact Qt/CLI build is not yet verified; this remains an explicit runtime acceptance item.
+The editable vector source is assets/wallpapers/k41-obsidian-1920x1080.svg. The applied wallpaper is stored as base64 text at assets/wallpapers/k41-obsidian-1280x720.jpg.base64; the script decodes it to a 1280x720 JPEG and activates it with Caelestia CLI. Upstream CLI source accepts JPEG, PNG, WebP, TIFF and GIF image extensions. The device-side visual quality of scaling this 1280x720 abstract wallpaper to the 1920x1080 panel remains part of acceptance.
 
 Two scripts separate the shell profile from cross-application integration:
 - scripts/k41-apply-full-desktop-profile.sh
