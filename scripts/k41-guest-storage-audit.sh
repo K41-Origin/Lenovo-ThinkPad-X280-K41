@@ -92,7 +92,7 @@ package_filter() {
 {
   printf 'K41 Guest Mode — Extended Read-only Audit\n'
   printf 'Timestamp UTC: %s\n' "$stamp"
-  printf 'Repository: %s\n' "$repo_root"
+  printf 'Repository: checkout path omitted (privacy)\n'
   printf 'Branch: %s\n' "$(git -C "$repo_root" branch --show-current)"
   printf 'Commit: %s\n' "$(git -C "$repo_root" rev-parse HEAD)"
   printf 'Kernel: %s\n' "$(uname -sr)"
@@ -151,16 +151,26 @@ effective_config systemd/coredump.conf 'Storage|Compress|ProcessSizeMax|External
 section 'Coredump paths and unit state'
 mount_for_path /var/lib/systemd/coredump
 if have systemctl; then
-  for unit in systemd-coredump.socket systemd-coredump@.service; do systemctl show "$unit" -p LoadState -p ActiveState -p SubState --no-pager >>"$report" 2>&1 || true; done
+  systemctl show systemd-coredump.socket -p LoadState -p ActiveState -p SubState --no-pager >>"$report" 2>&1 || true
 fi
 note 'Empty directive output is not equivalent to disabled coredumps; defaults apply.'
 
 section 'Relevant mount destinations and directory metadata'
 for path in /home /root /tmp /var/tmp /var/log /var/log/journal /run/log/journal /var/lib/systemd/coredump /var/cache /run /run/user; do mount_for_path "$path"; done
-section 'Home top-level metadata only (no contents)'
+section 'Home directory metadata and ACLs (no contents or names)'
 for path in /home /root; do
-  if [[ -e $path ]]; then stat -c '%n type=%F mode=%a owner_uid=%u group_gid=%g' "$path" >>"$report" 2>&1; else note "$path: MISSING"; fi
+  if [[ -e $path ]]; then
+    stat -c 'path=%n type=%F mode=%a owner_uid=%u group_gid=%g' "$path" >>"$report" 2>&1
+    if have getfacl; then getfacl -cpn "$path" 2>/dev/null | grep -v '^#' >>"$report" || true; fi
+  else note "$path: MISSING"; fi
 done
+if [[ -d /home ]]; then
+  for path in /home/*; do
+    [[ -d $path ]] || continue
+    stat -c 'home_entry type=%F mode=%a owner_uid=%u group_gid=%g' "$path" >>"$report" 2>&1 || true
+    if have getfacl; then getfacl -cpn "$path" 2>/dev/null | grep -v '^#' >>"$report" || true; fi
+  done
+fi
 
 section 'systemd-logind effective session policy'
 effective_config systemd/logind.conf 'KillUserProcesses|KillOnlyUsers|KillExcludeUsers|UserStopDelaySec|RemoveIPC|NAutoVTs|ReserveVT|InhibitDelayMaxSec|RuntimeDirectorySize|UserTasksMax'
@@ -188,9 +198,11 @@ section 'Sudo policy indicators (no policy file contents)'
 if have getent; then
   for group in wheel sudo; do getent group "$group" 2>/dev/null | awk -F: -v g="$group" '{print "group=" g " gid=" $3 " member_count=" (split($4,a,",") && $4!="" ? length(a) : 0)}' >>"$report" || true; done
 fi
-if [[ -d /etc/sudoers.d ]]; then
-  find /etc/sudoers.d -maxdepth 1 -type f -printf 'sudoers_include_file=%f mode=%m owner=%U\n' 2>/dev/null | sort >>"$report"
-else note '/etc/sudoers.d missing'; fi
+for path in /etc/sudoers /etc/sudoers.d; do
+  if [[ -e $path ]]; then stat -c 'sudo_policy_path=%n type=%F mode=%a owner_uid=%u group_gid=%g' "$path" >>"$report" 2>&1
+  else note "$path: MISSING"; fi
+done
+note 'Sudo policy contents are intentionally not read; group membership is only an indicator, not a complete sudo authorization check.'
 
 section 'Installed desktop, portal, and browser packages'
 package_filter
