@@ -9,7 +9,7 @@
 | 1. Arch ISO — Live Readiness | IMPLEMENTED | `scripts/k41-live-validation.sh` adalah entry point kanonis; default readiness mode. |
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer destruktif lama. Tetap perlu physical install/boot acceptance sesuai gate. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup lama. Exit 0 bukan UI acceptance. |
-| 4. Desktop Functional Validation | IN PROGRESS | Instalasi desktop dan inventory diagnostik telah dijalankan; Hyprland/Quickshell/IPC terdeteksi. Kepemilikan `~/.cache` telah VERIFIED setelah perbaikan. Restart Caelestia pascaperbaikan dan pemeriksaan cache runtime serta checklist fisik/UI masih NOT TESTED. Lihat bukti di bagian berikut dan jalankan `scripts/k41-desktop-validation.sh`. |
+| 4. Desktop Functional Validation | IN PROGRESS | Instalasi desktop dan inventory diagnostik telah dijalankan; Hyprland/Quickshell/IPC terdeteksi. Validator otomatis berbasis log yang lebih lengkap telah IMPLEMENTED, tetapi belum TESTED pada X280 setelah perubahan terbaru. Gate tahap 4 kini menggunakan bukti otomatis PASS/WARN/FAIL/SKIP; interaksi visual/fisik berada di luar cakupan gate dan tidak akan diklaim VERIFIED. |
 | 5. Desktop Customization | PLANNED | Menunggu gate tahap 4. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5; baseline dan tuning terukur diperlukan. |
 | 7. Release | PLANNED | Menunggu seluruh gate, regression, dokumentasi, dan bukti final. |
@@ -21,7 +21,7 @@
 | `scripts/k41-live-validation.sh` | — | IMPLEMENTED |
 | `scripts/k41-install-basic-arch.sh` | `scripts/install-arch-x280.sh` | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | `scripts/setup-desktop-x280.sh` | IMPLEMENTED |
-| `scripts/k41-desktop-validation.sh` | Desktop/Caelestia collectors + operator-approved runtime restart | IMPLEMENTED; physical acceptance pending |
+| `scripts/k41-desktop-validation.sh` | Paket, proses, konfigurasi, service, portal, audio, jaringan, baterai, thermal, journal + supplemental collectors | IMPLEMENTED; runtime test pending |
 
 Nama implementasi lama masih ada dan tidak perlu dijalankan terpisah. Bootstrap ISO juga telah diarahkan untuk mereview entry point kanonis dan menjalankan basic-install wrapper.
 
@@ -29,7 +29,7 @@ Nama implementasi lama masih ada dan tidak perlu dijalankan terpisah. Bootstrap 
 
 **CURRENT — Tahap 4: Desktop Functional Validation.**
 
-Jangan mulai customization sebelum checklist tahap 4 diterima. Jangan mulai tuning daya/hardware sebelum tahap 5 selesai. Jangan menandai RELEASED sebelum seluruh acceptance dan regression gate lulus.
+Jangan mulai customization sebelum validator terbaru dijalankan, seluruh FAIL diselesaikan, dan WARN ditinjau/diterima berdasarkan bukti. Jangan mulai tuning daya/hardware sebelum tahap 5 selesai. Jangan menandai RELEASED sebelum seluruh acceptance dan regression gate lulus.
 
 ## Bukti historis dan batas
 
