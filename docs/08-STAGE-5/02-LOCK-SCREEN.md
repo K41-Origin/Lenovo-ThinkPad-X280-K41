@@ -290,3 +290,27 @@ sudo bash scripts/k41-apply-lockscreen-design.sh --rollback "/home/<user>/.local
 ### Batas validasi
 
 Perubahan installer, source pin, dan static tests telah **IMPLEMENTED di GitHub**. Belum ada bukti installer baru dijalankan pada X280, QML dimuat dari source lokal, lock/unlock berhasil, atau visual memenuhi desain. Tes runtime dan validasi visual tetap **NOT TESTED / NOT VERIFIED**.
+
+
+## Audit permission deployment terbaru — 2026-11-09
+
+Report terbaru menunjukkan installer berhenti dengan `Existing managed directory has unexpected owner` pada `~/.config/quickshell/caelestia`. Jangan menebak owner yang benar dan jangan menjalankan `chown -R`. Collector read-only baru ditambahkan untuk mengumpulkan:
+- UID/GID/mode setiap direktori terkait dari home sampai target dan backup;
+- path traversal dan symlink melalui `namei -l`;
+- ACL jika `getfacl` tersedia;
+- inventory metadata/path tree konfigurasi lokal dan backup;
+- keberadaan `shell.qml` lokal dibanding entry point package di `/etc/xdg`;
+- versi package dan metadata Git source lokal;
+- ringkasan report installer sebelumnya.
+
+Collector tidak memperbaiki apa pun, tidak mengubah permission/ownership, tidak memanggil sudo, tidak mengubah package/service/PAM, dan tidak mengubah Git state. Ia hanya membuat report baru di repository.
+
+Jalankan setelah pull, dari sesi user desktop biasa:
+
+```bash
+bash scripts/k41-report-lockscreen-permissions.sh
+```
+
+Script akan mencetak perintah `git -C ...` untuk menambahkan hanya report baru, memeriksa staged diff, commit hanya file report tersebut, dan push ke `main`. Ikuti perintah yang dicetak setelah meninjau report. Tidak perlu menjalankan command diagnostik manual atau mengirim screenshot.
+
+Setelah report masuk ke GitHub, audit metadata tersebut terlebih dahulu. Baru setelah penyebab ownership/ACL/path terbukti, perbaiki installer secara sempit dan aman. Tidak ada permission yang boleh diubah berdasarkan dugaan.
