@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# Install/rollback the K41 Caelestia lock-screen QML overrides for the regular user.
+set -Eeuo pipefail
+umask 077
+
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*"; }
+usage() {
+    printf 'Usage:\n  bash %s [--no-restart]\n  bash %s --rollback BACKUP_DIRECTORY\n' "$0" "$0"
+}
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(cd -- "$script_dir/.." && pwd -P)"
+source_root="$repo_root/config/quickshell/caelestia/modules/lock"
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
+state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
+target_root="$config_root/quickshell/caelestia/modules/lock"
+backup_root="$state_root/k41/lockscreen/backups"
+mode=apply
+restart=ask
+rollback_dir=""
+
+if [[ ${1:-} == --rollback ]]; then
+    [[ $# -eq 2 ]] || { usage >&2; exit 2; }
+    mode=rollback
+    rollback_dir=$2
+elif [[ ${1:-} == --no-restart ]]; then
+    [[ $# -eq 1 ]] || { usage >&2; exit 2; }
+    restart=no
+elif [[ $# -ne 0 ]]; then
+    usage >&2
+    exit 2
+fi
+
+[[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
+for cmd in mkdir cp mv mktemp date pacman; do
+    command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
+done
+pacman -Q caelestia-shell >/dev/null 2>&1 || die 'caelestia-shell package is not installed.'
+[[ -f /etc/xdg/quickshell/caelestia/modules/lock/Content.qml ]] ||
+    die 'Expected upstream Caelestia QML package layout is missing; refusing to install overrides.'
+for name in Content.qml Center.qml; do
+    [[ -f $source_root/$name && ! -L $source_root/$name ]] || die "Override source is missing or unsafe: $name"
+done
+
+check_path_components() {
+    local path=$1 current=
+    IFS=/ read -r -a parts <<<"$path"
+    for part in "${parts[@]}"; do
+        [[ -z $part ]] && continue
+        current="$current/$part"
+        [[ ! -L $current ]] || die "Refusing symlink path component: $current"
+    done
+}
+check_path_components "$config_root"
+check_path_components "$config_root/quickshell"
+check_path_components "$config_root/quickshell/caelestia"
+check_path_components "$config_root/quickshell/caelestia/modules"
+check_path_components "$target_root"
+
+if [[ $mode == rollback ]]; then
+    [[ -d $rollback_dir && ! -L $rollback_dir && -f $rollback_dir/manifest ]] ||
+        die 'Invalid backup directory or missing manifest.'
+    [[ $rollback_dir == "$backup_root/"* ]] || die 'Backup is outside the managed K41 backup root.'
+    [[ $(stat -c %u "$rollback_dir") == "$EUID" ]] || die 'Backup must be owned by the current user.'
+    while IFS=' ' read -r state name; do
+        case "$name" in Content.qml|Center.qml) ;; *) die "Unexpected manifest entry: $name" ;; esac
+        target="$target_root/$name"
+        case "$state" in
+            present)
+                [[ -f $rollback_dir/files/$name && ! -L $rollback_dir/files/$name ]] ||
+                    die "Backup file missing or unsafe: $name"
+                mkdir -p -- "$target_root"
+                tmp="$(mktemp "$target_root/.k41-rollback.XXXXXX")"
+                cp -- "$rollback_dir/files/$name" "$tmp"
+                if [[ -e $target ]]; then chmod --reference="$target" "$tmp"; fi
+                mv -f -- "$tmp" "$target"
+                ;;
+            absent) rm -f -- "$target" ;;
+            *) die "Invalid backup state for $name" ;;
+        esac
+    done < "$rollback_dir/manifest"
+    info 'Rollback complete. Restart Caelestia or log out/in to reload the original layout.'
+    exit 0
+fi
+
+mkdir -p -- "$target_root" "$backup_root"
+stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+backup_dir="$backup_root/$stamp"
+suffix=0
+while ! mkdir -- "$backup_dir" 2>/dev/null; do
+    suffix=$((suffix + 1))
+    backup_dir="$backup_root/$stamp-$((++suffix))"
+done
+mkdir -p -- "$backup_dir/files"
+
+for name in Content.qml Center.qml; do
+    target="$target_root/$name"
+    if [[ -L $target || ( -e $target && ! -f $target ) ]]; then
+        die "Refusing non-regular override target: $target"
+    fi
+    if [[ -f $target ]]; then
+        printf 'present %s\n' "$name" >> "$backup_dir/manifest"
+        cp -a -- "$target" "$backup_dir/files/$name"
+    else
+        printf 'absent %s\n' "$name" >> "$backup_dir/manifest"
+    fi
+done
+
+printf 'This installs two user-level QML overrides only. No package, PAM, authentication, system service, or upstream file is changed.\n'
+printf 'Backup: %s\n' "$backup_dir"
+printf 'Apply K41 minimal Floating Password Card layout? [y/N] '
+IFS= read -r answer
+[[ $answer =~ ^[Yy]([Ee][Ss])?$ ]] || die 'Cancelled; backup retained and active configuration unchanged.'
+
+for name in Content.qml Center.qml; do
+    tmp="$(mktemp "$target_root/.k41-install.XXXXXX")"
+    cp -- "$source_root/$name" "$tmp"
+    if [[ -e $target_root/$name ]]; then chmod --reference="$target_root/$name" "$tmp"; fi
+    mv -f -- "$tmp" "$target_root/$name"
+done
+
+info 'QML overrides installed under ~/.config/quickshell/caelestia/modules/lock/.'
+info 'Upstream LockSurface.qml, wallpaper selection/blur, WlSessionLock and PAM components remain untouched.'
+info "Rollback: bash scripts/k41-apply-lockscreen-design.sh --rollback '$backup_dir'"
+
+if [[ $restart == ask ]]; then
+    printf 'Restart the running Caelestia shell now? This briefly closes/reloads shell widgets. [y/N] '
+    IFS= read -r restart_answer
+    if [[ $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
+        if command -v timeout >/dev/null 2>&1 && command -v caelestia >/dev/null 2>&1; then
+            if timeout 15s caelestia shell -r -d; then
+                info 'Restart command returned successfully; inspect the lock screen and runtime log.'
+            else
+                info 'WARNING: restart command failed or timed out; overrides remain installed. Log out/in or rollback.'
+            fi
+        else
+            info 'WARNING: timeout/caelestia CLI unavailable; log out/in to load the overrides.'
+        fi
+    else
+        info 'Restart skipped. Log out/in or restart Caelestia when ready.'
+    fi
+fi
+
+info 'No visual/runtime acceptance is claimed until lock/unlock and visual checks pass on the X280.'
