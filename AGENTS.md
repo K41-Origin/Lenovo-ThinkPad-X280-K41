@@ -26,7 +26,9 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Instruksi AI, safety, workflow perubahan | `AGENTS.md` |
 | Navigasi dan sumber kebenaran | `docs/00-START-HERE.md` |
 | Tujuan, tahapan, arsitektur | `docs/01-PROJECT.md` |
-| Tahap 1–3 instalasi | `docs/02-INSTALLATION.md` |
+| Tahap 1–3: ringkasan prosedur instalasi | `docs/02-INSTALLATION.md` |
+| Stage 1: peta readiness dan ownership | `stages/stage-1-live-readiness/README.md` |
+| Stage 2: peta installer dasar, storage safety, recovery, dan test | `stages/stage-2-basic-arch-install/README.md` |
 | Desktop tahap 3–5 dan handoff | `docs/03-DESKTOP.md` |
 | Test suite dan acceptance gate | `docs/04-TESTING.md`, `tests/README.md` |
 | Security, recovery, optimasi tahap 6 | `docs/05-OPERATIONS.md` |
