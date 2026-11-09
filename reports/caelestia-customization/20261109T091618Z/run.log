@@ -1,0 +1,9 @@
+INFO: K41 Caelestia customization started (UTC 20261109T091618Z)
+INFO: Changes: Rubik UI typography, CaskaydiaCove Mono, Caelestia dark monochrome scheme.
+INFO: No shell tokens, wallpaper, package, service, or upstream package files are modified.
+Apply this profile? [y/N] INFO: Private backup created: .local/state/k41/caelestia/backups/20261109T091618Z
+PASS: merged typography settings verified.
+INFO: Caelestia profile applied and scheme variant verified.
+INFO: If the shell does not update live, restart it manually with: caelestia shell -r
+INFO: Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>
+INFO: Report: reports/caelestia-customization/20261109T091618Z/
