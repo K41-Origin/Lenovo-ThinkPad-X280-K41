@@ -99,7 +99,7 @@ Status **VERIFIED** memerlukan uji lock/unlock nyata, regression startup/session
 
 ## Collector audit
 
-Jalankan script dari clone repository pada ThinkPad X280 sebagai user desktop biasa, **tanpa sudo**. Script menentukan root repository berdasarkan lokasi file script (bukan direktori terminal saat ini), memvalidasi working tree Git, menolak eksekusi sebagai root, dan memastikan checkout dimiliki UID user yang menjalankan audit. Sebelum menulis, script menolak komponen path laporan yang berupa symlink/non-direktori. Setiap run memesan direktori timestamp secara atomik dengan `mkdir`, sehingga dua proses bersamaan tidak menimpa laporan satu sama lain. File laporan dibuat baru tanpa overwrite. Script tidak mengubah umask, permission, ownership, Git index, branch, atau HEAD:
+Jalankan script dari clone repository pada ThinkPad X280 sebagai user desktop biasa, **tanpa sudo**. Script menentukan root repository berdasarkan lokasi file script (bukan direktori terminal saat ini), memvalidasi working tree Git, menolak eksekusi sebagai root, dan memastikan checkout dimiliki UID user yang menjalankan audit. Sebelum menulis, script menolak komponen path laporan yang berupa symlink/non-direktori. Script hanya berjalan pada branch `main`. Setiap run memesan direktori timestamp secara atomik dengan `mkdir`, sehingga dua proses bersamaan tidak menimpa laporan satu sama lain. File laporan dibuat baru tanpa overwrite. Script tidak mengubah umask, permission, ownership, Git index, branch, atau HEAD. Perintah commit yang dicetak memakai `git commit --only` agar file lain yang kebetulan sudah staged tidak ikut ter-commit:
 
 ```bash
 bash scripts/k41-lockscreen-audit.sh
