@@ -101,9 +101,44 @@ Jalankan sebagai user biasa dari root repository, tanpa sudo. Script tidak mengu
 
 Review `config-snapshot.json` sebelum push. Push direktori laporan tersebut ke GitHub agar konfigurasi aktual dapat diaudit tanpa mengetik atau menyalin log manual.
 
-**Alasan audit terlebih dahulu:** dokumentasi upstream menetapkan `~/.config/caelestia/shell.json` sebagai konfigurasi utama dan menyediakan `shell-tokens.json` untuk token internal tingkat lanjut. Upstream memperingatkan agar tidak menyalin seluruh contoh konfigurasi dan agar token internal tidak diubah tanpa pemahaman. Karena versi Caelestia yang terpasang dan konfigurasi aktual harus menjadi acuan, batch berikutnya belum akan menulis override warna/token atau mengubah wallpaper sebelum hasil audit diperiksa.
+### Hasil audit perangkat — 2026-11-09
 
-Status: launcher Fuzzel telah diuji pengguna; integrasi Caelestia masih PLANNED.
+Laporan pengguna: `reports/caelestia-audit/20261109T091310Z/`.
+- Caelestia Shell 2.5.0-1, CLI 1.1.3-1, Quickshell 0.3.2 aktif.
+- `shell.json` valid; konfigurasi pengguna saat ini hanya memiliki bagian `bar` dan `dashboard`.
+- `shell-tokens.json` tidak ada; tidak perlu membuat override token internal.
+- Font Rubik, CaskaydiaCove Nerd Font, dan Material Symbols Rounded tersedia.
+- Skema aktif `caelestia/dark/tonalspot` masih menggunakan aksen teal.
+- CLI terpasang menyediakan variant `monochrome`; skema custom tidak diasumsikan tersedia sebagai nama CLI. Tidak ada perubahan pada perangkat selama audit.
+
+### Profil Caelestia Graphite — batch pertama disiapkan
+
+Profil `config/desktop-customization/caelestia-shell.json` hanya mengatur tipografi menggunakan font yang sudah terdeteksi tersedia:
+- UI: Rubik.
+- Monospace: CaskaydiaCove NF.
+
+Script `scripts/k41-apply-caelestia-profile.sh` menggabungkan profil secara recursive ke `shell.json` sehingga pengaturan bar/dashboard lain tetap dipertahankan, lalu meminta CLI upstream mengatur scheme `caelestia/dark/monochrome`. Sebelum perubahan, script membuat backup privat untuk `shell.json` dan `scheme.json`; bila apply gagal, file dipulihkan. Tidak ada perubahan shell tokens, wallpaper, paket, service, atau file paket upstream.
+
+Jalankan setelah pull sebagai user biasa, tanpa sudo:
+
+```bash
+bash scripts/k41-apply-caelestia-profile.sh
+```
+
+Setujui prompt untuk menerapkan. Laporan ada di `reports/caelestia-customization/<timestamp>/`. Jika shell tidak memperbarui tampilan otomatis, jalankan:
+
+```bash
+caelestia shell -r
+```
+
+Rollback menggunakan path backup yang dicatat oleh script:
+
+```bash
+bash scripts/k41-apply-caelestia-profile.sh --rollback /path/ke/direktori-backup
+caelestia shell -r
+```
+
+Push laporan `reports/caelestia-customization/` agar hasil apply dan scheme aktual dapat diaudit. Tinjau isi laporan sebelum push. Profil ini belum diuji pada perangkat; hasil visual belum dinyatakan diterima.
 
 ## Tahap 6 — Optimization
 
