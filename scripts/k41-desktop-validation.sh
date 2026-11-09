@@ -15,8 +15,8 @@ fi
 for command_name in bash date mkdir chmod stat qs caelestia sleep pgrep journalctl; do
   command -v "$command_name" >/dev/null 2>&1 || fail "required command is missing: $command_name"
 done
-[[ -x "$ROOT/scripts/test-desktop-x280.sh" ]] || fail 'desktop diagnostic collector is missing.'
-[[ -x "$ROOT/scripts/test-caelestia-x280.sh" ]] || fail 'Caelestia diagnostic collector is missing.'
+[[ -f "$ROOT/scripts/test-desktop-x280.sh" ]] || fail 'desktop diagnostic collector file is missing.'
+[[ -f "$ROOT/scripts/test-caelestia-x280.sh" ]] || fail 'Caelestia diagnostic collector file is missing.'
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_root="$ROOT/reports/desktop-validation"
