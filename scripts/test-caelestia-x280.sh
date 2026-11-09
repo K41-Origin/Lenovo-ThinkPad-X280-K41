@@ -95,8 +95,9 @@ fi
   printf -- '- Caelestia start action: %s\n' "$start_result"
   printf -- '- Caelestia/Quickshell process detected after check: %s\n' "$running_after"
   printf -- '- Started by this test: %s\n' "$([[ $started_by_test == 1 ]] && printf yes || printf no)"
-  printf -- '- Collection result: **COMPLETED** (not a full UI/physical PASS)\n'
-  printf '\nReview all files for private information before committing. No configuration or package files are changed. If Caelestia was not running, the script attempts to start it and leaves it running for interactive testing.\n'
+  printf -- '- Collection result: **COMPLETED** (not a visual/physical PASS)\n'
+  printf -- '- Coverage limits: coverage-limitations.md\n'
+  printf '\nReview all files for private information before committing. No configuration or package files are changed. If Caelestia was not running, the script attempts to start it for runtime/log collection; no visual or physical test is performed.\n'
 } >>"$summary"
 
 {
