@@ -213,7 +213,7 @@ note '- Review before pushing; redact machine-specific identifiers or sensitive 
 
 printf 'Audit selesai. Laporan: %s\n' "$report"
 printf 'Collector read-only terhadap sistem; sudo digunakan hanya untuk pengumpulan informasi yang memerlukan hak istimewa.\n'
-printf '\\nPerintah Git berikut dapat dijalankan dari direktori terminal mana pun:\\n'
-printf 'git -C %q add -- %q\\n' "$repo_root" "${report#"$repo_root"/}"
-printf 'git -C %q commit -m %q\\n' "$repo_root" 'test(lockscreen): add X280 audit report'
-printf 'git -C %q push origin main\\n' "$repo_root"
+printf '\nPerintah Git berikut dapat dijalankan dari direktori terminal mana pun:\n'
+printf 'git -C %q add -- %q\n' "$repo_root" "${report#"$repo_root"/}"
+printf 'git -C %q commit -m %q\n' "$repo_root" 'test(lockscreen): add X280 audit report'
+printf 'git -C %q push origin main\n' "$repo_root"
