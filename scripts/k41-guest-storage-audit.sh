@@ -300,7 +300,7 @@ if [[ -d /etc/pam.d ]]; then
     [[ -r $file ]] || continue
     printf '[%s]\n' "${file##*/}" >>"$report"
     awk '$1 ~ /^(auth|account|session)$/ {print}' "$file" |
-      sed -E 's/(password|token|secret|api[_-]?key)=[^[:space:]]+/\\1=[REDACTED]/Ig' >>"$report"
+      sed -E 's/(password|token|secret|api[_-]?key)=[^[:space:]]+/\1=[REDACTED]/Ig' >>"$report"
   done
 fi
 
@@ -343,7 +343,7 @@ for dir in "$HOME/.config/autostart" /etc/xdg/autostart; do
     while IFS= read -r -d '' file; do
       printf '[%s]\n' "$(basename "$file")" >>"$report"
       grep -E '^(Name|Exec|TryExec|Hidden|OnlyShowIn|NotShowIn|X-GNOME-Autostart-enabled)=' "$file" 2>/dev/null |
-        sed -E 's/([Tt][Oo][Kk][Ee][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Pp][Ii][_-]?[Kk][Ee][Yy])=[^ ;]+/\\1=[REDACTED]/g' >>"$report" || true
+        sed -E 's/([Tt][Oo][Kk][Ee][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Pp][Ii][_-]?[Kk][Ee][Yy])=[^ ;]+/\1=[REDACTED]/g' >>"$report" || true
     done < <(find "$dir" -maxdepth 1 -type f -name '*.desktop' -print0 2>/dev/null)
   else note 'directory missing'; fi
 done
@@ -351,7 +351,7 @@ section 'Hyprland startup directives (selected directives only)'
 hypr_config="$HOME/.config/hypr/hyprland.conf"
 if [[ -r $hypr_config ]]; then
   grep -E '^[[:space:]]*(exec(-once)?|source|env)[[:space:]]*=' "$hypr_config" |
-    sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|ACCESS[_-]?KEY)[^=]*=)[^ ,;]+/\\1[REDACTED]/Ig' >>"$report" || true
+    sed -E 's/((TOKEN|PASSWORD|SECRET|API[_-]?KEY|ACCESS[_-]?KEY)[^=]*=)[^ ,;]+/\1[REDACTED]/Ig' >>"$report" || true
 else note 'Primary Hyprland config not found/readable at standard path.'; fi
 section 'Quickshell/Caelestia config inventory (names and file types only)'
 for dir in "$HOME/.config/quickshell" "$HOME/.config/caelestia" "$HOME/.config/hypr" "$HOME/.local/share/caelestia"; do
