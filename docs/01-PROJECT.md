@@ -1,24 +1,41 @@
 # Proyek dan Arsitektur
 
-## Tujuan dan cakupan
-Membangun instalasi Arch Linux modular, aman, reproducible, dan testable untuk ThinkPad X280. Desktop: Hyprland, Caelestia Shell, Quickshell sesuai dependensi upstream. Installer Arch dan setup desktop pasca-instalasi adalah workflow terpisah. BlackArch opsional dan selektif.
+## Tujuan
 
-## Keputusan
-- Login manual dari TTY lalu `start-hyprland`; tanpa display manager/autologin.
-- Jangan menambah autostart Caelestia duplikat.
-- NetworkManager untuk jaringan; hindari power manager bersaing karena PPD telah terdeteksi aktif.
+Membangun instalasi Arch Linux yang modular, aman, reproducible, dan testable untuk ThinkPad X280. Desktop menggunakan Hyprland, Quickshell, dan Caelestia Shell sesuai dependensi upstream. Integrasi BlackArch bersifat opsional dan selektif; bukan tahap wajib.
+
+## Alur resmi — tujuh tahap
+
+1. **Arch Linux Live ISO — Readiness Validation.** Satu script memeriksa apakah ISO, mode boot, perangkat X280, dependensi, repository, test suite, dan storage memenuhi prasyarat instalasi dasar.
+2. **Arch Linux Live ISO — Basic Arch Installation.** Satu script menjalankan instalasi dasar Arch Linux pada SSD internal setelah pemeriksaan dan konfirmasi target.
+3. **Basic Arch Linux — Desktop Installation.** Dari TTY sistem Arch yang sudah terpasang, jalankan desktop installer. First-boot diagnostic bukan gerbang wajib.
+4. **Desktop Environment Begin — Functional Validation.** Buktikan sesi, input, display, audio, jaringan, portal, Caelestia/Quickshell, lock, dan recovery bekerja.
+5. **Desktop Environment Customization.** Setelah tahap 4 diterima, bentuk tampilan minimal, monoton/monochromatic, elegan, dan premium dengan keterbacaan serta performa terjaga.
+6. **Desktop Environment Optimization.** Setelah customization diterima, optimalkan desktop dan perangkat: CPU, GPU, termal/fan, daya/baterai, suspend/hibernate/resume, dan stabilitas.
+7. **Release.** Tandai rilis hanya setelah acceptance seluruh tahap, regression test, dokumentasi, dan bukti rilis lengkap.
+
+Tidak ada perpindahan otomatis antar tahap. Hasil PASS dan review operator menjadi gate. Tahap 4 adalah tahap aktif saat dokumen ini diperbarui.
+
+## Entry point kanonis
+
+- `scripts/k41-live-validation.sh`
+- `scripts/k41-install-basic-arch.sh` → delegasi ke `scripts/install-arch-x280.sh`
+- `scripts/k41-install-desktop.sh` → delegasi ke `scripts/setup-desktop-x280.sh`
+
+Implementasi lama tetap dipertahankan sampai migrasi internal dilakukan secara terpisah. Jangan menggandakan logika di wrapper.
+
+## Keputusan sistem
+
+- Login desktop manual dari TTY; tidak ada display manager/autologin.
+- NetworkManager untuk jaringan.
+- Hindari power manager yang saling bersaing; audit service aktif sebelum perubahan.
 - Review AUR recipe dan build sebagai user non-root.
-- Hardware, thermal, power/battery, suspend/resume, dan stability adalah tahap terakhir.
+- Jangan menganggap script exit 0, proses berjalan, atau file konfigurasi hadir sebagai bukti acceptance fungsional.
 
-## Urutan tahap
-1. **Desktop Functional Validation** — sesi, input, display, audio, jaringan, portal, lock, recovery.
-2. **Desktop Customization** — minimal, elegan, premium, monochromatic dengan kontras baik.
-3. **Optional Software Integration** — hanya komponen yang dipilih eksplisit.
-4. **Final Hardware & System Customization** — CPU/GPU, thermal, power, battery, suspend/hibernate/resume, stability.
+## Struktur
 
-Jangan lanjut sebelum acceptance tahap aktif disetujui.
+`scripts/` entry point dan workflow; `lib/` modul; `config/` konfigurasi target; `tests/` automated checks; `reports/` bukti; `docs/` panduan aktif dan arsip.
 
-## Arsitektur
-`installer`/`scripts/`: workflow; `lib/`: modul; `config/`: target; `tests/`: pengujian; `reports/`: bukti; `docs/`: dokumen aktif dan arsip.
+## Status
 
-Status: **PLANNED** belum dibuat; **IMPLEMENTED** tersedia; **TESTED** test dijalankan; **VERIFIED** bukti mengonfirmasi; **RELEASED** masuk rilis; **NOT TESTED** belum diuji.
+**PLANNED** belum dibuat; **IMPLEMENTED** tersedia; **TESTED** test dijalankan; **VERIFIED** perilaku dibuktikan sesuai gate; **RELEASED** masuk rilis; **NOT TESTED** belum diuji. Status berlaku hanya pada commit, lingkungan, dan bukti yang disebut.
