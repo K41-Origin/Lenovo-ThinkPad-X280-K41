@@ -78,10 +78,10 @@ Status **VERIFIED** memerlukan uji lock/unlock nyata, regression startup/session
 
 ## Collector audit
 
-Jalankan dari terminal dalam sesi Hyprland sebagai user biasa (tanpa sudo):
+Jalankan dari terminal pada ThinkPad X280. Script mendukung eksekusi dengan `sudo` dan akan menggunakan HOME, konfigurasi, serta konteks sesi milik akun yang memanggil sudo:
 
 ```bash
-bash scripts/k41-lockscreen-audit.sh
+sudo bash scripts/k41-lockscreen-audit.sh
 ```
 
-Laporan dibuat langsung di repository pada `reports/lockscreen-audit/<timestamp>/audit.txt` dengan permission direktori/file privat. Setelah meninjau dan menyunting data sensitif, pengguna dapat menjalankan `git add reports/lockscreen-audit/ && git commit && git push` untuk mengirim bukti audit bersama repository. Collector read-only; ia tidak mengubah konfigurasi, service, package, PAM, atau autentikasi. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib. Walaupun collector menghindari username dan credential, laporan tetap harus diperiksa sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM.
+Jangan jalankan dari login root langsung; gunakan sudo dari akun desktop biasa. Jika sesi Hyprland aktif, script mencoba memulihkan penanda instance compositor dari proses Hyprland agar query live dapat diarahkan ke sesi yang benar. Laporan dibuat langsung di repository pada `reports/lockscreen-audit/<timestamp>/audit.txt`. Direktori dan file laporan dikembalikan kepemilikannya ke akun pemanggil agar bisa dibaca dan di-commit tanpa sudo. Setelah meninjau dan menyunting data sensitif, pengguna dapat menjalankan `git add reports/lockscreen-audit/ && git commit && git push` untuk mengirim bukti audit bersama repository. Collector read-only; ia tidak mengubah konfigurasi, service, package, PAM, atau autentikasi. Walaupun dijalankan melalui sudo untuk membaca informasi sistem yang memerlukan hak istimewa, file output tetap dimiliki akun pemanggil. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib. Walaupun collector menghindari username dan credential, laporan tetap harus diperiksa sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM.
