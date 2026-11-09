@@ -4,7 +4,7 @@
 set -Eeuo pipefail
 umask 077
 
-die() { printf 'ERROR: %s\\n' "$*" >&2; exit 2; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 if (( EUID == 0 )); then
@@ -21,9 +21,9 @@ if (( EUID == 0 )); then
   if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
     hypr_pid="$(pgrep -u "$audit_uid" -x Hyprland | head -n 1 || true)"
     if [[ -n $hypr_pid && -r /proc/$hypr_pid/environ ]]; then
-      session_env="$(tr '\\0' '\\n' < "/proc/$hypr_pid/environ")"
-      HYPRLAND_INSTANCE_SIGNATURE="$(printf '%s\\n' "$session_env" | sed -n 's/^HYPRLAND_INSTANCE_SIGNATURE=//p' | head -n 1)"
-      WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-$(printf '%s\\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)}"
+      session_env="$(tr '\0' '\n' < "/proc/$hypr_pid/environ")"
+      HYPRLAND_INSTANCE_SIGNATURE="$(printf '%s\n' "$session_env" | sed -n 's/^HYPRLAND_INSTANCE_SIGNATURE=//p' | head -n 1)"
+      WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-$(printf '%s\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)}"
       XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
       export HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_SESSION_TYPE
     fi
@@ -43,7 +43,6 @@ for cmd in date mkdir chmod uname pacman grep awk find pgrep sed head tr; do
   command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
 done
 
-timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_parent="$repo_root/reports"
 report_root="$report_parent/lockscreen-audit"
 if (( EUID == 0 )); then
@@ -211,4 +210,4 @@ note '- Report is stored inside the Git repository for review and push.'
 note '- Review before pushing; redact machine-specific identifiers or sensitive local configuration details if present.'
 
 printf 'Audit selesai. Laporan: %s\n' "${report#"$repo_root"/}"
-printf 'Collector bersifat read-only; jalankan tanpa sudo.\n'
+printf 'Collector read-only terhadap sistem; sudo digunakan hanya untuk pengumpulan informasi yang memerlukan hak istimewa.\n'
