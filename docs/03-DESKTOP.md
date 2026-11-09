@@ -147,7 +147,7 @@ bash scripts/k41-apply-caelestia-profile.sh --rollback /path/ke/direktori-backup
 caelestia shell -r
 ```
 
-### Hasil runtime sebelumnya — 2026-11-09
+### Hasil runtime sebelumnya — masalah diagnosis (sudah diperbaiki)
 
 Laporan pengguna: `reports/caelestia-customization/20261109T092153Z/`.
 - Profile typography dan scheme berhasil diverifikasi.
@@ -157,7 +157,7 @@ Laporan pengguna: `reports/caelestia-customization/20261109T092153Z/`.
 - Script lama menjalankan `caelestia shell -r` (foreground) di dalam `timeout 30s`. Exit 124 menghentikan proses foreground; ini merupakan kesalahan implementasi diagnostik dan dapat menjelaskan mengapa pemeriksaan proses Quickshell berikutnya menghasilkan 0. Restart diperbaiki ke pola detached upstream `caelestia shell -r -d`.
 - Penghitung lama mencari kata WARN/ERROR/FATAL di seluruh pesan, sehingga turut menghitung teks INFO script sendiri. Pada laporan ini, angka WARN 8 terlalu tinggi; angka ERROR 1 dan FATAL 1 adalah false positive dari baris INFO "Review WARN/WARNING/ERROR/FATAL counts". Parser baru hanya menghitung level log di awal baris. Log runtime sebenarnya menunjukkan 6 baris WARN (5 terkait `~/.face`, 1 terkait QML CachingImage), 0 ERROR, dan 0 FATAL.
 
-Hasil visual tetap dinilai langsung oleh pengguna pada perangkat. Perbaikan diagnostik terbaru belum dianggap teruji sampai script baru dijalankan dan laporan barunya diaudit. Review isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan.
+Hasil visual tetap dinilai langsung oleh pengguna pada perangkat. Perbaikan diagnostik telah dijalankan dan diaudit melalui laporan `reports/caelestia-customization/20261109T093038Z/`. Hasil terbaru: **SUCCESS**, restart `CONFIRMED`, runtime log `OK`, 3 entri `Configuration Loaded`, 1 proses Quickshell teramati, dan 0 WARN/ERROR/FATAL. Ini memverifikasi apply, restart detached, dan collector log; belum menggantikan review visual pengguna. Review isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan.
 
 ## Tahap 6 — Optimization
 
