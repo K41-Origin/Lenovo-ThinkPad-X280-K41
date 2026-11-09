@@ -71,9 +71,54 @@ Revision Caelestia `d999d4878ee4cec134168e60d913714566a8cfa6` memuat `WlSessionL
 
 Konsekuensi: konfigurasi `shell.json` yang terlihat pada laporan dapat mengaktifkan wallpaper dan menyembunyikan notifikasi, tetapi tidak menyediakan kontrol konfigurasi yang cukup untuk menghapus seluruh widget samping/profile picture dan membentuk Floating Password Card sesuai desain C. Perubahan QML terarah kemungkinan diperlukan. Jangan edit file paket AUR langsung; gunakan mekanisme override/local Quickshell config yang sesuai setelah lokasi file paket dan jalur startup aktual dipastikan.
 
-### Status analisis
+### Implementasi batch 1 — minimal Floating Password Card
 
-**ANALYZE — PARTIALLY COMPLETED.** Belum ada perubahan visual, autentikasi, PAM, atau startup. Langkah berikutnya adalah melengkapi collector agar menemukan instance Hyprland melalui `hyprctl instances` (bukan mengandalkan environment marker dari `/proc`), menginventarisasi lokasi file QML paket, dan memastikan apakah startup Caelestia berasal dari konfigurasi Hyprland atau mekanisme opsional autologin. Setelah itu baru siapkan override QML minimal beserta backup/rollback.
+**IMPLEMENTED di repository; belum diuji pada perangkat.**
+
+Audit upstream pada revision yang benar-benar terpasang mengonfirmasi bahwa:
+- `LockSurface.qml` menyediakan `WlSessionLockSurface`, pemilihan wallpaper aktif melalui `Wallpapers.current`, blur `MultiEffect`, animasi, dan autentikasi PAM.
+- `Content.qml` upstream menyusun Weather, Fetch, Media, Center, Resources, dan NotifDock.
+- `Center.qml` upstream menyusun Clock, tanggal/hari, ProfilePic, PasswordInput, dan StateMessage.
+- `PasswordInput.qml` sudah merupakan `StyledRect` berbentuk kartu dengan field input, indikator autentikasi, tombol submit, dan pengelolaan keyboard focus.
+- CMake upstream memasang shell ke `/etc/xdg/quickshell/caelestia`; dokumentasi upstream mendukung konfigurasi Quickshell lokal di `~/.config/quickshell/caelestia`. Karena itu, jangan mengedit file AUR/upstream.
+
+Perubahan repository:
+- `config/quickshell/caelestia/modules/lock/Content.qml`: mengganti tiga kolom widget dengan satu komponen Center di tengah.
+- `config/quickshell/caelestia/modules/lock/Center.qml`: hanya menampilkan Clock, tanggal/hari, PasswordInput, dan StateMessage. ProfilePic serta widget samping dihilangkan. StateMessage dipertahankan untuk feedback autentikasi/keyboard.
+- `scripts/k41-apply-lockscreen-design.sh`: installer user-level dengan pemeriksaan paket dan layout upstream, backup, instalasi atomik, rollback, serta pilihan restart Caelestia. Tidak menggunakan sudo dan tidak mengubah PAM, service sistem, package, atau file upstream.
+- `tests/test-lockscreen-design.sh`: pemeriksaan statis struktur override dan sintaks Bash.
+
+Override tidak mengganti `LockSurface.qml` atau `Lock.qml`; wallpaper aktif, blur, WlSessionLock, PAM, dan protokol lock tetap berasal dari upstream. Layout visual belum dapat dinilai hanya dari source code.
+
+### Penerapan pada ThinkPad X280
+
+Dari clone repository yang sudah diperbarui, jalankan sebagai user desktop biasa:
+
+```bash
+bash scripts/k41-apply-lockscreen-design.sh
+```
+
+Setujui prompt apply. Ketika ditanya restart Caelestia, pilih `y` hanya jika siap shell desktop dimuat ulang; jika tidak, pilih `n` dan lakukan logout/login saat siap. Script mencetak lokasi backup dan perintah rollback.
+
+Rollback:
+
+```bash
+bash scripts/k41-apply-lockscreen-design.sh --rollback "/path/backup-yang-dicetak-script"
+```
+
+Jangan menjalankan dengan sudo. Jangan menguji lock dengan menyimpan password dalam log atau command line.
+
+### Validasi yang harus dilakukan di perangkat
+
+1. Pastikan shell hidup tanpa QML load error setelah restart; periksa `caelestia shell -l`.
+2. Tekan shortcut lock Caelestia yang aktif atau jalankan mekanisme lock yang memang sudah digunakan sebelumnya.
+3. Pastikan layar terkunci dan menampilkan hanya jam, tanggal/hari, serta kartu password di tengah.
+4. Pastikan wallpaper sama dengan desktop dan blur terlihat; tidak ada dashboard, media, resources, profile picture, notification dock, atau panel lain.
+5. Uji keyboard focus, password salah (sesi tetap terkunci dan pesan error tampil), lalu password benar (sesi terbuka).
+6. Uji screen blank/wake dan lock kembali. Pastikan desktop tidak sempat terlihat sebelum lock aktif dan tidak ada notifikasi/konten sensitif yang bocor.
+7. Jika shell gagal dimuat atau layout tidak dapat digunakan, rollback dari TTY atau terminal yang masih dapat diakses. Jangan mengubah PAM sebagai workaround.
+
+Jangan mengklaim visual, autentikasi, atau runtime berhasil sebelum pengujian tersebut dilakukan. `qmllint`/Quickshell load, lock/unlock, wake, dan penilaian visual X280 belum dijalankan dalam sesi implementasi ini.
 
 ## Acceptance criteria
 
