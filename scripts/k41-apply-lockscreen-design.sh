@@ -259,6 +259,6 @@ info "Rollback: bash scripts/k41-apply-lockscreen-design.sh --rollback '$backup_
 # variables, so launching Quickshell here would create a broken second instance.
 info 'Shell restart was not attempted from the sanitized installer process.'
 info 'After this script exits, restart Caelestia from a terminal inside the active desktop session as the regular user:'
-printf '  caelestia shell -r -d\\n'
+printf '  caelestia shell -r -d\n'
 info 'If the shell is not available afterward, log out/in or use the documented rollback command.'
 info 'No visual/runtime acceptance is claimed until lock/unlock and visual checks pass on the X280.'
