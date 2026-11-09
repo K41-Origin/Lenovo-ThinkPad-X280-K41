@@ -1,0 +1,436 @@
+K41 Lock Screen Read-only Audit
+Captured UTC: 2026-11-09T14:50:12Z
+Kernel: Linux 7.2.14-arch1-1
+Session: wayland
+Wayland session marker: present
+Hyprland session marker: present
+Report path (repository-relative): reports/lockscreen-audit/20261109T145012Z
+
+===== Installed package versions =====
+caelestia-shell 2.5.0-1
+caelestia-cli 1.1.3-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+hyprland 0.57.1-1
+hyprlock 0.9.7-2
+error: package 'swaylock' was not found
+swaylock: not installed (or package name differs)
+error: package 'gtklock' was not found
+gtklock: not installed (or package name differs)
+error: package 'greetd' was not found
+greetd: not installed (or package name differs)
+error: package 'fprintd' was not found
+fprintd: not installed (or package name differs)
+error: package 'pam_fprintd' was not found
+pam_fprintd: not installed (or package name differs)
+error: package 'howdy' was not found
+howdy: not installed (or package name differs)
+
+===== Relevant executable paths and versions =====
+caelestia: /usr/bin/caelestia
+Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (package: caelestia-shell)
+
+Quickshell:
+    Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+qs: /usr/bin/qs
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+quickshell: /usr/bin/quickshell
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+hyprctl: /usr/bin/hyprctl
+usage: hyprctl [flags] <command> [args...|--help]
+
+commands:
+    activewindow        → Gets the active window name and its properties
+    activeworkspace     → Gets the active workspace and its properties
+    animations          → Gets the current config'd info about animations
+                          and beziers
+    binds               → Lists all registered binds
+    clients             → Lists all windows with their properties
+    configerrors        → Lists all current config parsing errors
+    cursorpos           → Gets the current cursor position in global layout
+                          coordinates
+    decorations <window_regex> → Lists all decorations and their info
+    devices             → Lists all connected keyboards and mice
+    dismissnotify [amount] → Dismisses all or up to AMOUNT notifications
+    dispatch <dispatcher> [args] → Issue a dispatch to call a keybind
+                          dispatcher with arguments
+    eval <code>         → Issue a Lua string to execute
+    getoption <option>  → Gets the config option status (values)
+    globalshortcuts     → Lists all global shortcuts
+    hyprpaper ...       → Issue a hyprpaper request
+    hyprsunset ...      → Issue a hyprsunset request
+    instances           → Lists all running instances of Hyprland with
+                          their info
+    keyword <name> <value> → Issue a keyword to call a config keyword
+                          dynamically
+    kill                → Issue a kill to get into a kill mode, where you can
+                          kill an app by clicking on it. You can exit it
+                          with ESCAPE
+    layers              → Lists all the surface layers
+    layouts             → Lists all layouts available (including plugin'd ones)
+    monitors            → Lists active outputs with their properties,
+                          'monitors all' lists active and inactive outputs
+    notify ...          → Sends a notification using the built-in Hyprland
+                          notification system
+    output ...          → Allows you to add and remove fake outputs to your
+                          preferred backend
+    plugin ...          → Issue a plugin request
+    reload [config-only] → Issue a reload to force reload the config. Pass
+                          'config-only' to disable monitor reload
+    repl [code]         → Enter interactive Lua REPL mode (^D to exit)
+                          or issue a Lua string and print the result
+    rollinglog          → Prints tail of the log. Also supports -f/--follow
+                          option
+    setcursor <theme> <size> → Sets the cursor theme and reloads the cursor
+                          manager
+    seterror <color> <message...> → Sets the hyprctl error string. Color has
+                          the same format as in colors in config. Will reset
+                          when Hyprland's config is reloaded
+    setprop ...         → Sets a window property
+    getprop ...         → Gets a window property
+    splash              → Get the current splash
+    status              → Get internal status information
+    switchxkblayout ... → Sets the xkb layout index for a keyboard
+    systeminfo          → Get system info
+    version             → Prints the hyprland version, meaning flags, commit
+                          and branch of build.
+    workspacerules      → Lists all workspace rules
+    workspaces          → Lists all workspaces with their properties
+
+flags:
+    -j                  → Output in JSON
+    -r                  → Refresh state after issuing command (e.g. for
+                          updating variables)
+    --batch             → Execute a batch of commands, separated by ';'
+    --instance (-i)     → use a specific instance. Can be either signature or
+                          index in hyprctl instances (0, 1, etc)
+    --quiet (-q)        → Disable the output of hyprctl
+
+--help:
+    Can be used to print command's arguments that did not fit into this page
+    (three dots)
+version flag unsupported
+hyprlock: /usr/bin/hyprlock
+Hyprlock version v0.9.7
+swaylock: not found in PATH
+gtklock: not found in PATH
+loginctl: /usr/bin/loginctl
+fprintd: not found in PATH
+howdy: not found in PATH
+
+===== Lock-related process names (arguments and PIDs intentionally omitted) =====
+Hyprland: running
+quickshell: not detected
+qs: running
+caelestia: not detected
+hyprlock: not detected
+swaylock: not detected
+gtklock: not detected
+fprintd: not detected
+
+===== Hyprland live instances and lock-related bindings =====
+instance acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794235602_1208256320:
+	time: 1794235602
+	pid: 562
+	wl socket: wayland-1
+Live binding query skipped: expected exactly one discoverable Hyprland instance; found 0.
+
+===== Caelestia user configuration: selected lock and wallpaper fields only =====
+Config file: .config/caelestia/shell.json
+appearance.font.clock = 'Rubik'
+background.wallpaperEnabled = True
+bar.clock = <dict>
+bar.clock.background = False
+bar.clock.showDate = True
+bar.clock.showIcon = False
+launcher.maxWallpapers = 9
+launcher.useFuzzy.wallpapers = False
+lock = <dict>
+lock.enableFprint = True
+lock.enableHowdy = True
+lock.enabled = True
+lock.hideNotifs = True
+lock.maxFprintTries = 3
+lock.maxHowdyTries = 3
+lock.recolourLogo = False
+lock.triggerHowdyOnWake = True
+lock.useWallpaper = True
+nexus.wallpapersPerRow = 3
+paths.wallpaperDir = '~/Pictures/Wallpapers'
+services.clockFormat = 'Auto'
+utilities.toasts.capsLockChanged = True
+utilities.toasts.numLockChanged = True
+
+===== Caelestia package source inventory (paths only) =====
+caelestia-shell /etc/
+caelestia-shell /etc/xdg/
+caelestia-shell /etc/xdg/quickshell/
+caelestia-shell /etc/xdg/quickshell/caelestia/
+caelestia-shell /etc/xdg/quickshell/caelestia/LICENSE
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/bongocat.gif
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/dino.png
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/google-sans-flex/
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/google-sans-flex/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/google-sans-flex/LICENSE
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/kurukuru.gif
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/logo.svg
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/pam.d/
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/pam.d/fprint
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/pam.d/howdy
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/pam.d/passwd
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/wallpaper.webp
+caelestia-shell /etc/xdg/quickshell/caelestia/assets/wrap_term_launch.sh
+caelestia-shell /etc/xdg/quickshell/caelestia/components/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/AnchorAnim.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/Anim.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/AnimLoader.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/CAnim.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/Logo.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/MaterialIcon.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/ScreenState.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/StateLayer.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/StyledClippingRect.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/StyledRect.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/StyledText.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/containers/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/containers/StyledFlickable.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/containers/StyledListView.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/containers/StyledWindow.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/containers/VerticalFadeFlickable.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/containers/VerticalFadeListView.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/ButtonBase.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/CircularIndicator.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/CircularProgress.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/CustomMouseArea.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/FilledSlider.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/IconButton.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/IconTextButton.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/LoadingIndicator.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/Menu.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/MenuItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/SearchBar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/SplitButton.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledProgressBar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledRadioButton.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledScrollBar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledSlider.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledSpinBox.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledSwitch.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/StyledTextField.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/TextButton.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/controls/TextFieldBase.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/effects/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/effects/ColouredIcon.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/effects/Colouriser.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/effects/Elevation.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/effects/Mask.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/CurrentItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/DialogButtons.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/FileDialog.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/FolderContents.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/HeaderBar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/Sidebar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/filedialog/Sizes.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/images/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/images/CachingIconImage.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/images/CachingImage.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/images/FadeImage.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/misc/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/misc/CustomShortcut.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/misc/Ref.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/widgets/
+caelestia-shell /etc/xdg/quickshell/caelestia/components/widgets/CoverArt.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/widgets/ExtraIndicator.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/components/widgets/WavyTopRect.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/BatteryMonitor.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/GSFLoader.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/IdleMonitors.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/ServiceLoader.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/Shortcuts.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/areapicker/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/areapicker/AreaPicker.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/areapicker/Picker.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/background/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/background/Background.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/background/DesktopClock.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/background/Visualiser.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/background/Wallpaper.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/Bar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/BarWrapper.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/ActiveWindow.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/Clock.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/OsIcon.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/Power.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/StatusIcons.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/Tray.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/TrayItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/status/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/status/BatteryStatus.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/status/BluetoothStatus.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/status/LockStatus.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/ActiveIndicator.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/GapMarkers.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/OccupiedBg.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/SpecialWorkspaces.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/Workspace.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/components/workspaces/Workspaces.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/ActiveWindow.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/AudioPopout.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/Battery.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/Bluetooth.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/ClipWrapper.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/Content.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/LockStatus.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/Network.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/PopoutState.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/TrayMenu.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/WirelessPassword.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/Wrapper.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/kblayout/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/kblayout/KbLayout.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/bar/popouts/kblayout/KbLayoutModel.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/Content.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/Dash.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/Media.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/Performance.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/Tabs.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/WeatherTab.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/Wrapper.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/Calendar.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/DateTime.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/Media.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/Resources.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/SmallWeather.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/dash/User.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/BackgroundShapes.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/CoverVisualiser.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/Details.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/LyricList.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/LyricsAndSelector.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/media/LyricsInfo.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/performance/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/performance/BatteryTank.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/performance/HeroCard.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/performance/MemoryCard.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/performance/NetworkCard.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/dashboard/performance/StorageCard.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/ContentWindow.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/Drawers.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/Exclusions.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/Interactions.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/Panels.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/drawers/Regions.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/AppList.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/Content.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/ContentList.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/WallpaperList.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/Wrapper.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/ActionItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/AppItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/CalcItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/SchemeItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/VariantItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/items/WallpaperItem.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/services/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/services/Actions.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/services/Apps.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/services/M3Variants.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/launcher/services/Schemes.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Center.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Content.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Fetch.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Lock.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/LockSurface.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Media.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/NotifDock.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/NotifGroup.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Pam.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/Resources.qml
+caelestia-shell /etc/xdg/quickshell/caelestia/modules/lock/WeatherInfo.qml
+
+===== Relevant configuration file inventory (paths only) =====
+
+[/home/kai/.config/hypr]
+hyprland.conf
+hyprland.lua
+Files containing lock-related configuration keywords (paths only):
+hyprland.conf
+hyprland.lua
+
+[/home/kai/.config/caelestia]
+Files containing lock-related configuration keywords (paths only):
+shell.json
+
+[/home/kai/.config/quickshell]
+k41-boot-splash/shell.qml
+Files containing lock-related configuration keywords (paths only):
+
+[/usr/lib/caelestia]
+Files containing lock-related configuration keywords (paths only):
+
+===== PAM auth stack: module names only; no options or credentials =====
+
+[/etc/pam.d/hyprlock]
+auth include login
+
+[/etc/pam.d/login]
+auth requisite pam_nologin.so
+auth include system-local-login
+
+[/etc/pam.d/system-local-login]
+auth include system-login
+
+[/etc/pam.d/system-auth]
+auth required pam_faillock.so
+auth [success=1 default=bad]
+auth [default=die] pam_faillock.so
+auth optional pam_permit.so
+auth required pam_env.so
+auth required pam_faillock.so
+
+[/etc/pam.d/sudo]
+auth include system-auth
+
+===== Relevant user and system services =====
+caelestia.service: inactive
+inactive/not found
+quickshell.service: inactive
+inactive/not found
+hyprlock.service: inactive
+inactive/not found
+fprintd.service: inactive
+inactive/not found
+greetd.service: inactive
+inactive/not found
+display-manager.service: inactive
+inactive/not found
+
+===== Audit limitations and manual checks =====
+- Collector tidak mengubah konfigurasi, service, package, PAM, autentikasi, permission, ownership, Git index, branch, atau HEAD.
+- Process arguments, environment values, passwords, tokens, PIDs, dan opsi PAM lengkap sengaja tidak dikumpulkan.
+- Static inventory tidak membuktikan lock implementation yang benar-benar dipanggil saat runtime.
+- Wallpaper identity, lock/unlock, wrong-password behavior, fingerprint/Howdy, wake behavior, notification leakage, dan visual layout memerlukan validasi manual/runtime.
+- Periksa dan redaksi laporan sebelum commit; laporan dapat memuat versi package/kernel, model monitor, nama file, binding, dan nama modul PAM.
