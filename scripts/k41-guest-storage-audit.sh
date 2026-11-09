@@ -239,6 +239,9 @@ if have systemctl; then
     systemctl show "$unit" -p LoadState -p ActiveState -p UnitFileState --no-pager >>"$report" 2>&1 || true
   done
   systemctl list-units --type=swap --all --no-legend --no-pager 2>&1 | redact_ids >>"$report" || true
+  printf '\\n-- Running system service unit names only --\\n' >>"$report"
+  systemctl list-units --type=service --state=running --no-legend --no-pager 2>&1 |
+    awk '{print $1}' | sort -u >>"$report" || true
 else note 'systemctl unavailable'; fi
 
 section 'Filesystem topology, capacity and volatile mount limits'
@@ -390,11 +393,11 @@ done
 section 'Audit boundaries and interpretation'
 cat >>"$report" <<'BOUNDARIES'
 - Snapshot only: this does not prove every application write path or filesystem permission boundary.
-- No user home contents, browser profiles, cookies, credentials, documents, or personal configuration are read or listed.
+- Home directories are not enumerated. Only selected desktop startup directives, autostart keys and bounded path names are read; browser profiles, cookies, credentials, history and documents are not read.
 - Session IDs and system paths may be identifying; review/redact before sharing.
 - Empty systemd directive output means defaults may apply, not that a feature is disabled.
 - Persistent swap, persistent logs/coredumps, lingering user services, and unisolated writable paths must be addressed in the Guest design.
-- Browser package presence does not prove which browser is configured as the default or launched automatically.
+- Browser MIME defaults and desktop launchers are collected, but they do not prove which browser process will launch in every session.
 - User-manager unit names/status, session IDs and mount paths may be identifying; review/redact before sharing.
 - Selected Hyprland startup directives, desktop autostart entries, PAM module chains and browser MIME defaults are included for design analysis; review/redact before sharing.
 - Browser profiles, cookies, history, credentials and general user documents are not inspected.
