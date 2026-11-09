@@ -180,7 +180,7 @@ config/desktop-customization/caelestia-shell.json sekarang mengatur:
 
 ### Wallpaper
 
-Aset vector assets/wallpapers/k41-obsidian-1920x1080.svg ditambahkan. Script full profile menyalinnya ke ~/Pictures/Wallpapers/ dan menggunakan command wallpaper resmi caelestia wallpaper -f. Dukungan format SVG pada build lokal tetap perlu dikonfirmasi saat uji perangkat; bila CLI menolak SVG, script akan gagal pada tahap aktivasi wallpaper dan mengembalikan file konfigurasi serta scheme dari backup.
+Aset desain vector assets/wallpapers/k41-obsidian-1920x1080.svg disimpan sebagai sumber editable. Untuk penerapan, assets/wallpapers/k41-obsidian-1280x720.jpg.base64 berisi JPEG 1280x720; script mendekodekannya ke ~/Pictures/Wallpapers/ lalu menjalankan caelestia wallpaper -f. JPEG termasuk format yang diterima oleh upstream Caelestia CLI. Resolusi 1280x720 akan di-scale ke panel 1920x1080; visual quality tetap perlu diterima saat uji perangkat.
 
 ### GTK, Thunar, Foot, Qt, icon dan cursor
 
