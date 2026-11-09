@@ -24,9 +24,13 @@
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
 | `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
 | `scripts/k41-enable-caelestia-autologin.sh` + `scripts/k41-lock-caelestia-after-start.sh` | Opt-in tty1 autologin + verified Caelestia lock startup + Hyprlock fallback | IMPLEMENTED — NOT TESTED ON DEVICE |
-| `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED (`reports/boot-audit/20261109T103304Z/`) |
-| `scripts/k41-configure-boot-experience.sh` + `scripts/k41-plymouth-quit-after-lock.sh` | Plymouth K41 theme, quiet splash, lock-aware TTY1 handoff, additive TPM2/PCR7 enrollment | IMPLEMENTED — ORIGINAL SCRIPT RUN CONFIRMED; THEME REBUILD PENDING USER RUN |
-| `tests/test-boot-experience.sh` | Static syntax and safety-invariant test for boot setup | IMPLEMENTED — NOT RUN IN THIS SESSION |\n| `scripts/k41-install-plymouth-theme.sh` + `themes/plymouth/k41/` | Install native K41 theme, verify Arch reboot/poweroff/halt units, rebuild initramfs/UKI | IMPLEMENTED — DEVICE TEST PENDING |\n| `tests/test-plymouth-k41-theme.sh` | Static checks for Plymouth theme and installer | IMPLEMENTED — NOT RUN IN THIS SESSION |\n| `scripts/k41-install-animated-boot-splash.sh` + `config/quickshell/k41-boot-splash/shell.qml` | Animated K41 Quickshell overlay during Hyprland/Caelestia handoff | IMPLEMENTED — DEVICE TEST PENDING |\n| `tests/test-animated-boot-splash.sh` | Static syntax and safety-invariant test for animated handoff + Hyprland visual suppression | IMPLEMENTED — NOT RUN IN THIS SESSION |
+| `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED |
+| `scripts/k41-configure-boot-experience.sh` + `scripts/k41-plymouth-quit-after-lock.sh` | Plymouth K41 theme, quiet splash, lock-aware TTY1 handoff, additive TPM2/PCR7 enrollment | IMPLEMENTED — ORIGINAL SCRIPT RUN CONFIRMED |
+| `tests/test-boot-experience.sh` | Static syntax and safety-invariant test for boot setup | IMPLEMENTED — NOT RUN IN THIS SESSION |
+| `scripts/k41-install-plymouth-theme.sh` + `themes/plymouth/k41/` | Install native K41 theme, verify Arch reboot/poweroff/halt units, rebuild initramfs/UKI | IMPLEMENTED — DEVICE TEST PENDING |
+| `tests/test-plymouth-k41-theme.sh` | Static checks for Plymouth theme and installer | IMPLEMENTED — NOT RUN IN THIS SESSION |
+| `scripts/k41-install-animated-boot-splash.sh` + `config/quickshell/k41-boot-splash/shell.qml` | Animated K41 Quickshell overlay and Hyprland visual configuration | IMPLEMENTED — KNOWN VISUAL LEAK ON DEVICE |
+| `tests/test-animated-boot-splash.sh` | Static syntax and safety-invariant test for animated handoff | IMPLEMENTED — NOT RUN IN THIS SESSION |
 
 ## Prioritas saat ini
 
