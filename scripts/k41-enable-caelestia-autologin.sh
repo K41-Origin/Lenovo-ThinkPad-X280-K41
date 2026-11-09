@@ -37,8 +37,10 @@ USER_NAME=$SUDO_USER
 USER_ENTRY="$(getent passwd "$USER_NAME")" || die "Cannot resolve account: $USER_NAME"
 IFS=: read -r _ _ USER_UID USER_GID _ USER_HOME USER_SHELL <<<"$USER_ENTRY"
 [[ $USER_UID =~ ^[0-9]+$ && $USER_GID =~ ^[0-9]+$ && -d $USER_HOME ]] || die 'Desktop account metadata is invalid.'
+[[ -x /usr/bin/systemctl ]] || die 'systemctl is unavailable.'
+BACKUP_ROOT="/var/lib/k41/autologin/$USER_NAME/backups"
 if [[ $MODE == rollback ]]; then
-    [[ -d $ROLLBACK_DIR && -f $ROLLBACK_DIR/manifest ]] || die 'Invalid backup directory.'
+    [[ -d $ROLLBACK_DIR && ! -L $ROLLBACK_DIR && -f $ROLLBACK_DIR/manifest ]] || die 'Invalid backup directory.'
     [[ $ROLLBACK_DIR == "$BACKUP_ROOT/"* ]] || die 'Rollback directory is outside the managed backup root.'
     [[ $(stat -c %u "$ROLLBACK_DIR") == 0 ]] || die 'Rollback backup must be root-owned.'
     # Accept only the exact paths this installer manages; never trust arbitrary manifest paths.
@@ -74,7 +76,6 @@ fi
 
 [[ $USER_SHELL == */bash ]] || die "The desktop account must use Bash for this TTY autostart method (found: $USER_SHELL)."
 [[ -x /usr/bin/agetty ]] || die 'Expected /usr/bin/agetty is unavailable.'
-[[ -x /usr/bin/systemctl ]] || die 'systemctl is unavailable.'
 [[ -r $HELPER_SOURCE ]] || die 'Caelestia lock helper is missing from the repository.'
 
 CONFIG_DIR="$USER_HOME/.config/hypr"
@@ -84,7 +85,6 @@ LOCAL_BIN="$USER_HOME/.local/bin"
 HELPER_TARGET="$LOCAL_BIN/k41-lock-caelestia-after-start"
 GETTY_DROPIN_DIR="/etc/systemd/system/getty@tty1.service.d"
 GETTY_DROPIN="$GETTY_DROPIN_DIR/k41-autologin.conf"
-BACKUP_ROOT="/var/lib/k41/autologin/$USER_NAME/backups"
 BACKUP_DIR=""
 
 [[ -d $CONFIG_DIR && -f $HYPRLAND_LUA ]] || die 'Active Hyprland Lua config not found; refusing to modify an unknown configuration.'
