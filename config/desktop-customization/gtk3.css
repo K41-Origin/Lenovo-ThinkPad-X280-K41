@@ -1,0 +1,22 @@
+/* K41 Obsidian — GTK3 Graphite palette */
+@define-color accent_color #c4c4c9;
+@define-color accent_fg_color #0a0a0b;
+@define-color accent_bg_color #c4c4c9;
+@define-color window_bg_color #0a0a0b;
+@define-color window_fg_color #f2f2f0;
+@define-color headerbar_bg_color #141416;
+@define-color headerbar_fg_color #f2f2f0;
+@define-color popover_bg_color #141416;
+@define-color popover_fg_color #f2f2f0;
+@define-color view_bg_color #0a0a0b;
+@define-color view_fg_color #f2f2f0;
+@define-color card_bg_color #141416;
+@define-color card_fg_color #f2f2f0;
+@define-color sidebar_bg_color #101012;
+@define-color sidebar_fg_color #a1a1a6;
+@define-color sidebar_border_color #29292e;
+@define-color sidebar_backdrop_color #101012;
+@define-color theme_selected_bg_color alpha(#c4c4c9, 0.18);
+@define-color theme_selected_fg_color #f2f2f0;
+
+@import "thunar.css";
