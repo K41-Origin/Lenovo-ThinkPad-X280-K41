@@ -200,5 +200,39 @@ print("PASS: merged typography settings verified.")
 PY
 
 info 'Caelestia profile applied and scheme variant verified.'
-info 'If the shell does not update live, restart it manually with: caelestia shell -r'
+
+printf 'Restart Caelestia now and collect its runtime log? [Y/n] '
+IFS= read -r restart_answer
+if [[ -z $restart_answer || $restart_answer =~ ^[Yy]([Ee][Ss])?$ ]]; then
+    info 'Restarting Caelestia; stdout/stderr will be saved to run.log.'
+    set +e
+    timeout 30s caelestia shell -r 2>&1 | tee -a "$log_file"
+    restart_rc=${PIPESTATUS[0]}
+    set -e
+    if (( restart_rc == 0 )); then
+        restart_status="OK"
+        info 'Caelestia restart command completed.'
+    else
+        restart_status="FAILED (exit $restart_rc)"
+        info "WARNING: Caelestia restart command returned $restart_rc; profile files remain applied."
+    fi
+
+    info 'Collecting Caelestia runtime log with: caelestia shell -l'
+    set +e
+    timeout 20s caelestia shell -l 2>&1 | tee -a "$log_file"
+    shell_log_rc=${PIPESTATUS[0]}
+    set -e
+    if (( shell_log_rc == 0 )); then
+        shell_log_status="OK"
+    else
+        shell_log_status="FAILED (exit $shell_log_rc)"
+        info "WARNING: Caelestia runtime log collector returned $shell_log_rc."
+    fi
+else
+    restart_status="SKIPPED_BY_USER"
+    shell_log_status="SKIPPED_BY_USER"
+    info 'Shell restart and runtime log collection skipped by user.'
+fi
+
+info 'Review WARN/ERROR lines in this terminal and in the generated run.log.'
 info 'Rollback command: bash scripts/k41-apply-caelestia-profile.sh --rollback <backup-directory>'
