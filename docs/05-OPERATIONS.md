@@ -22,6 +22,21 @@ Temuan penting dari snapshot tersebut:
 
 Report adalah snapshot saat audit, bukan jaminan kondisi perangkat saat ini.
 
+### Animated K41 handoff splash (Quickshell)
+
+Setelah konfigurasi Plymouth/TPM2 yang sudah ada, jalankan dari checkout terbaru:
+
+```bash
+git pull --ff-only
+bash -n scripts/k41-install-animated-boot-splash.sh
+sudo bash scripts/k41-install-animated-boot-splash.sh
+bash tests/test-animated-boot-splash.sh
+```
+
+Installer menyalin konfigurasi Quickshell ke `~/.config/quickshell/k41-boot-splash/`, memasang helper lock terbaru, lalu menambahkan pemanggilan overlay pada callback Hyprland-start yang sudah ada. Overlay hitam dengan teks K41 dan spinner ringan diminta sebelum Caelestia mulai; helper menutup proses Quickshell hanya setelah status lock Caelestia terverifikasi. Installer ini tidak mengubah LUKS, TPM, UKI, mkinitcpio, atau bootloader. Untuk membatalkan, hapus blok bertanda `K41 ANIMATED BOOT SPLASH START/END` dari `~/.config/hypr/hyprland.lua` dan direktori `~/.config/quickshell/k41-boot-splash`; helper lock dapat dipulihkan dari backup autologin jika diperlukan.
+
+**Batas implementasi saat ini:** animasi Quickshell hanya mencakup handoff sejak Hyprland mulai mengambil alih display. Plymouth early-boot masih memakai tema BGRT yang telah dipilih sebelumnya, sehingga logo K41 animasi belum tampil sejak Lenovo firmware logo menghilang. Layer-shell stacking terhadap lockscreen Caelestia dan transisi tanpa flicker wajib diuji langsung di X280; jangan menganggap hasil visual telah VERIFIED sebelum reboot fisik.
+
 ### Plymouth splash + TPM2 auto-unlock
 
 Jalankan dari checkout terbaru setelah membaca script:
