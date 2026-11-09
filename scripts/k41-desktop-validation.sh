@@ -12,7 +12,7 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -n ${WAYLAND_DISPLAY:-} ]] ||
   die 'Run from a terminal inside the active Hyprland session.'
 
-for required in bash date mkdir chmod stat uname pacman systemctl journalctl grep awk sed pgrep; do
+for required in bash date mkdir chmod uname pacman systemctl journalctl grep awk sed pgrep cp cat id df git; do
   command -v "$required" >/dev/null 2>&1 || die "Required command missing: $required"
 done
 [[ -f "$ROOT/scripts/test-desktop-x280.sh" ]] || die 'Desktop diagnostic collector is missing.'
