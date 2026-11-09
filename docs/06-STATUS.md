@@ -22,7 +22,8 @@
 | `scripts/k41-install-basic-arch.sh` | Basic Arch installation | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | Desktop installation | IMPLEMENTED |
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
-| `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |\n| `scripts/k41-enable-caelestia-autologin.sh` | Opt-in tty1 autologin + Hyprland + Caelestia lock startup | IMPLEMENTED — NOT TESTED ON DEVICE |
+| `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
+| `scripts/k41-enable-caelestia-autologin.sh` | Opt-in tty1 autologin + Hyprland + Caelestia lock startup | IMPLEMENTED — NOT TESTED ON DEVICE |
 
 ## Prioritas saat ini
 
