@@ -14,7 +14,7 @@ repo_root="$(cd -- "$script_dir/.." && pwd -P)"
 source_root="$repo_root/config/quickshell/caelestia/modules/lock"
 
 # Require sudo at entry, then drop privileges before touching user files.
-# All config/backup writes run as SUDO_USER, never as root.
+# All config/backup/log writes run as SUDO_USER, never as root.
 if [[ $EUID -eq 0 ]]; then
     [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] ||
         die 'Run with sudo from your regular desktop account (sudo bash scripts/k41-apply-lockscreen-design.sh).'
@@ -25,13 +25,13 @@ if [[ $EUID -eq 0 ]]; then
     [[ $target_uid =~ ^[0-9]+$ && $target_uid -ne 0 && $target_home == /* ]] ||
         die 'Could not safely resolve a non-root user home directory.'
 
-    # Bootstrap only the two managed leaf directories as root, then hand
-    # ownership of those leaves to the desktop user. Do not chown ~/.config,
-    # ~/.local, or any existing parent tree.
+    # Bootstrap only managed leaf directories as root, then hand ownership
+    # to the desktop user. Never recursively chown existing parent trees.
     command -v install >/dev/null 2>&1 || die 'install command is required.'
     target_config="$target_home/.config/quickshell/caelestia/modules/lock"
     target_state="$target_home/.local/state/k41/lockscreen/backups"
-    for path in "$target_config" "$target_state"; do
+    target_logs="$target_home/.local/state/k41/lockscreen/logs"
+    for path in "$target_config" "$target_state" "$target_logs"; do
         current=
         IFS=/ read -r -a parts <<<"$path"
         for part in "${parts[@]}"; do
@@ -40,18 +40,57 @@ if [[ $EUID -eq 0 ]]; then
             [[ ! -L $current ]] || die "Refusing symlink path component: $current"
         done
     done
-    install -d -o "$target_uid" -g "$(id -g "$SUDO_USER")" -- "$target_config" "$target_state"
-    chown "$target_uid:$(id -g "$SUDO_USER")" -- "$target_config" "$target_state"
+    target_gid="$(id -g "$SUDO_USER")"
+    install -d -o "$target_uid" -g "$target_gid" -- "$target_config" "$target_state" "$target_logs"
+    chown "$target_uid:$target_gid" -- "$target_config" "$target_state" "$target_logs"
 
     exec runuser --user "$SUDO_USER" -- env \
         HOME="$target_home" \
         XDG_CONFIG_HOME="$target_home/.config" \
         XDG_STATE_HOME="$target_home/.local/state" \
+        K41_LOG_DIR="$target_logs" \
         K41_SUDO_REEXEC=1 \
         bash "$0" "$@"
 fi
 
 [[ ${K41_SUDO_REEXEC:-} == 1 ]] || die 'This installer must be started with sudo.'
+[[ $EUID -ne 0 ]] || die 'Refusing to perform user-file operations as root.'
+
+# Start a persistent transcript after privilege drop. The same output remains
+# visible in the terminal and is appended to a timestamped user-owned log.
+log_dir="${K41_LOG_DIR:-}"
+[[ $log_dir == "$HOME/.local/state/k41/lockscreen/logs" ]] ||
+    die 'Unexpected log directory; refusing to write outside the invoking user state directory.'
+[[ -d $log_dir && ! -L $log_dir && -w $log_dir ]] ||
+    die "Log directory is missing, unsafe, or not writable: $log_dir"
+log_file="$log_dir/apply-lockscreen-$(date -u +'%Y%m%dT%H%M%SZ')-$$.log"
+: > "$log_file" || die "Cannot create log file: $log_file"
+exec > >(tee -a "$log_file") 2>&1
+
+log_finished=0
+finish_log() {
+    local rc=$1
+    (( log_finished == 0 )) || return 0
+    log_finished=1
+    printf '\n========== EXECUTION SUMMARY ==========\n'
+    printf 'Finished : %s\n' "$(date --iso-8601=seconds)"
+    printf 'Exit code: %s\n' "$rc"
+    if (( rc == 0 )); then
+        printf 'Result   : SUCCESS\n'
+    else
+        printf 'Result   : FAILED\n'
+    fi
+    printf 'Log file : %s\n' "$log_file"
+}
+trap 'finish_log "$?"' EXIT
+
+printf '========== K41 LOCKSCREEN INSTALLER ==========\n'
+printf 'Started  : %s\n' "$(date --iso-8601=seconds)"
+printf 'User     : %s (UID %s)\n' "$USER" "$EUID"
+printf 'Host     : %s\n' "$(hostname)"
+printf 'Repo     : %s\n' "$repo_root"
+printf 'Log file : %s\n\n' "$log_file"
+
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
 target_root="$config_root/quickshell/caelestia/modules/lock"
@@ -72,7 +111,6 @@ elif [[ $# -ne 0 ]]; then
     exit 2
 fi
 
-[[ $EUID -ne 0 ]] || die 'Refusing to perform user-file operations as root.'
 [[ $config_root == "$HOME/.config" && $state_root == "$HOME/.local/state" ]] ||
     die 'Unexpected XDG path; this sudo installer intentionally targets the invoking user home.'
 [[ -d $target_root && ! -L $target_root ]] || die "Invalid target directory: $target_root"
@@ -86,7 +124,7 @@ fi
 [[ -x $state_root && -x $state_root/k41 && -x $state_root/k41/lockscreen ]] ||
     die "A parent directory in the backup path is not traversable by $USER; inspect ownership/mode before proceeding."
 [[ $config_root == /* && $state_root == /* ]] || die 'XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.'
-for cmd in mkdir cp mv mktemp date pacman stat rm chmod; do
+for cmd in mkdir cp mv mktemp date pacman stat rm chmod tee hostname; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
 done
 pacman -Q caelestia-shell >/dev/null 2>&1 || die 'caelestia-shell package is not installed.'
@@ -151,7 +189,6 @@ mkdir -p -- "$backup_dir/files"
 restore_on_failure=0
 restore_backup() {
     local rc=$? state name target tmp
-    trap - EXIT
     if (( rc != 0 && restore_on_failure == 1 )); then
         info "Installation failed; restoring previous override state from $backup_dir."
         while IFS=' ' read -r state name; do
@@ -165,6 +202,7 @@ restore_backup() {
             fi
         done < "$backup_dir/manifest"
     fi
+    finish_log "$rc"
     exit "$rc"
 }
 trap restore_backup EXIT
