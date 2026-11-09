@@ -1,284 +1,55 @@
 # Desktop Environment — Hyprland, Quickshell, Caelestia
 
-## Tahap 3 — Instalasi
+Dokumen ini adalah handoff ringkas untuk desktop tahap 3–5. Detail yang memiliki prosedur khusus dimiliki dokumen terkait; jangan menjadikan catatan historis sebagai instruksi baru.
 
-Jalankan dari TTY Basic Arch Linux sebagai user biasa:
+## Tahap 3 — Instalasi desktop
+
+Jalankan dari Arch Linux yang telah terpasang, melalui TTY, sebagai user biasa:
 
 ```bash
 sudo bash scripts/k41-install-desktop.sh
 ```
 
-Entry point ini mendelegasikan ke `scripts/setup-desktop-x280.sh`. Setup memasang stack Wayland/Hyprland, audio, portal, utilitas, dan opsi Caelestia sesuai pilihan operator. Default setelah instalasi adalah login manual dari TTY; installer tidak mengaktifkan display manager atau autologin. Otomatisasi login baru merupakan opsi terpisah pada tahap 5.
+Jangan jalankan dari Arch ISO, chroot, atau sesi grafis. Entry point ini adalah wrapper kanonis untuk desktop setup.
 
-Exit code 0 bukan acceptance desktop. Lanjutkan ke tahap 4.
+## Tahap 4 — Functional validation
 
-## Tahap 4 — Desktop Functional Validation (SELESAI)
-
-Gate tahap 4 adalah validasi otomatis berbasis kondisi sistem, proses, konfigurasi, service, IPC, dan log. Pemeriksaan visual/fisik tidak termasuk gate ini sesuai keputusan proyek.
-
-Jalankan dari terminal sesi Hyprland sebagai user biasa, tanpa sudo:
+Jalankan dari terminal sesi Hyprland sebagai user biasa:
 
 ```bash
 bash scripts/k41-desktop-validation.sh
 ```
 
-Validator bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfigurasi, mengaktifkan/menonaktifkan service, me-restart desktop, atau men-start Caelestia jika prosesnya tidak berjalan. Jika Caelestia tidak aktif, pemeriksaan IPC/log dan collector terkait di-SKIP agar validator tidak mengubah kondisi yang diuji. Laporan disimpan secara privat.
+Jika hasil memuat WARN/FAIL, tinjau bukti dan gunakan `bash scripts/k41-desktop-repair.sh` hanya untuk remediation yang didukung. Repair tidak menyediakan mode `--apply` dan tidak mengubah PAM, kernel parameters, SMT, atau firmware.
 
-Cakupan otomatis meliputi:
-- Platform/session, executable dan paket Hyprland/Quickshell/Caelestia.
-- Konfigurasi, monitor, input device, proses dan IPC.
-- Caelestia runtime log dan pola QML/load-error.
-- PipeWire, WirePlumber, portal, NetworkManager, audio graph dan konektivitas.
-- Driver Intel i915, backlight, RAM, filesystem, baterai dan thermal zones.
-- Failed system/user units dan triage journal.
-- Diagnostik tambahan desktop, Caelestia, Bluetooth, PAM dan CPU.
+Penerimaan Stage 4 tercatat sebagai **54 PASS, 3 WARN, 0 FAIL, 0 SKIP** (PASS_WITH_WARNINGS, exit 0). Pengguna juga mengonfirmasi pairing Bluetooth berhasil. Ini adalah snapshot historis, bukan klaim bahwa kondisi perangkat hari ini identik.
 
-Jika hasil menunjukkan WARN/FAIL, jalankan remediation audit terbatas dari terminal sesi yang sama:
+Bukti tersimpan dalam snapshot historis:
+- [Desktop validation summary](https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41/blob/02f6194ed04c8f13ea64eda35b7afb94f7006504/reports/archive/2026-11/desktop-validation/20261109T081724Z/summary.md)
+- [Desktop repair summary](https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41/blob/02f6194ed04c8f13ea64eda35b7afb94f7006504/reports/archive/2026-11/desktop-repair/20261109T081723Z/summary.md)
+- [Manual acceptance record](https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41/blob/02f6194ed04c8f13ea64eda35b7afb94f7006504/reports/archive/2026-11/desktop-validation/20261109T081724Z/manual-acceptance.md)
 
-```bash
-bash scripts/k41-desktop-repair.sh
-```
+## Tahap 5 — Desktop customization
 
-Repair dapat memasang paket prasyarat yang memang belum tersedia, mengaktifkan Bluetooth bila prasyarat terpenuhi, dan membuka pairing window sementara. Untuk Bluetooth, Pairable dan Discoverable disetel selama 180 detik; tidak ada konfigurasi permanen always-discoverable. Repair tidak mengubah PAM, kernel parameters, SMT policy, firmware controller, atau konfigurasi desktop. Tidak ada full system upgrade. Setelah tindakan, validator dijalankan ulang otomatis.
+Status terkini dan prioritas hanya dicatat di [06 — Status](06-STATUS.md).
 
-Satu run menghasilkan `reports/desktop-validation/<timestamp>/` berisi ringkasan, hasil pemeriksaan, log, metadata lingkungan, dan collector tambahan. Repair menghasilkan laporan di `reports/desktop-repair/<timestamp>/`. Review dan redaksi laporan sebelum push karena dapat memuat username, hostname, identitas perangkat, status jaringan, path, dan log.
+Urutan resmi:
+1. [Boot Experience — COMPLETED / USER ACCEPTED](08-STAGE-5/01-BOOT-EXPERIENCE.md)
+2. [Lock Screen — IN PROGRESS](08-STAGE-5/02-LOCK-SCREEN.md)
+3. [Dashboard](08-STAGE-5/03-DASHBOARD.md)
+4. [Taskbar/Panel](08-STAGE-5/04-TASKBAR-PANEL.md)
+5. [Launcher](08-STAGE-5/05-LAUNCHER.md)
+6. [Sidebar](08-STAGE-5/06-SIDEBAR.md)
+7. [Utilities](08-STAGE-5/07-UTILITIES.md)
 
-### Bukti penerimaan terakhir
+Arah visual kanonis adalah **K41 Obsidian Minimalism / Graphite Monochrome**. Gunakan [Design System index](07-DESKTOP-DESIGN-SYSTEM.md) dan dokumen spesifiknya. Jangan menyalin ulang token atau keputusan desain ke dokumen workstream.
 
-- Validasi otomatis: `reports/desktop-validation/20261109T081724Z/`.
-- Hasil: **PASS_WITH_WARNINGS — 54 PASS, 3 WARN, 0 FAIL, 0 SKIP**, exit code 0.
-- Repair: `reports/desktop-repair/20261109T081723Z/`; 8 PASS, 4 WARN, 0 FAIL, 5 SKIP.
-- BlueZ melaporkan `Pairable=yes`, `Discoverable=yes`, masing-masing dengan timeout 180 detik. Firmware Intel termuat dan RFKill tidak memblokir adapter.
-- Pengguna mengonfirmasi pairing Bluetooth berhasil setelah repair. Konfirmasi ini dicatat sebagai uji manual pengguna; laporan otomatis sendiri hanya memeriksa readiness dan tidak menjalankan transaksi pairing.
-- Caelestia lock screen sebelumnya dikonfirmasi dapat dibuka dengan password.
-- Tiga WARN journal tetap tercatat. Temuan HCI Bluetooth masih muncul pada log kernel meskipun pairing berhasil. Status SMT vulnerable pada sebagian mitigasi CPU merupakan risiko residual yang secara eksplisit diterima pengguna dengan mempertahankan SMT aktif. Tidak ada perubahan PAM/SMT/kernel/firmware untuk menghilangkan warning.
-- Catatan uji manual: `reports/desktop-validation/20261109T081724Z/manual-acceptance.md`.
+### Kebijakan review visual
 
-### Batas interpretasi
+Screenshot tidak digunakan, tidak diminta, dan bukan syarat acceptance. Pengguna melakukan review visual dan interaksi langsung pada display X280. Catat keputusan/hasil secara tekstual tanpa meminta gambar.
 
-PASS atau PASS_WITH_WARNINGS hanya mencerminkan pemeriksaan otomatis yang tersedia. Hasil tersebut tidak membuktikan panel, launcher, tombol fisik, speaker, microphone, suspend/resume, atau seluruh interaksi UI. Tidak ada klaim visual/fisik yang dibuat.
+## Batas Stage 5
 
-**Keputusan gate:** tahap 4 diterima dan ditutup berdasarkan exit code 0, nol FAIL, seluruh WARN ditinjau dan risiko residualnya dicatat, serta konfirmasi manual pairing dari pengguna. Pemeriksaan visual/fisik yang berada di luar cakupan tahap 4 tidak menghalangi dimulainya tahap 5.
+Stage 5 berfokus pada shell, tampilan, interaksi, dan integrasi aplikasi. Optimasi CPU/GPU, thermal/fan, baterai, power policy, dan suspend/resume merupakan Stage 6.
 
-## Tahap 5 — Desktop Environment Customization (DESIGN APPROVED)
-
-Status terkini: workstream 1 (boot experience) ditutup berdasarkan konfirmasi pengguna; workstream 2 (lock screen) masih **IN PROGRESS**. Override dan installer lock screen tersedia di repository, tetapi runtime QML, lock/unlock, wake, dan penerimaan visual belum diverifikasi pada X280. **Guest Mode BELUM DIIMPLEMENTASIKAN** dan ditunda sampai custom lock screen diterima pengguna. Lihat [indeks workstream](08-STAGE-5/README.md), [panduan lock screen](08-STAGE-5/02-LOCK-SCREEN.md), dan [status](06-STATUS.md).
-
-Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. Spesifikasi dan design tokens tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md).
-
-Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu mengambil atau mengunggah screenshot; penilaian visual dilakukan langsung pada display ThinkPad X280 oleh pengguna.
-
-### Urutan workstream Tahap 5
-
-Pekerjaan customization dibagi agar tiap kelompok dapat diaudit, diterapkan, dan diterima sebelum melanjutkan ke kelompok berikutnya:
-
-1. **Boot experience — power-on, reboot, poweroff.** Samakan identitas visual firmware-to-userspace sejauh platform mendukung, Plymouth, transisi session, dan handoff menuju lock screen. Workstream 1 dinyatakan selesai oleh pengguna; isu visual leakage yang tercatat dalam histori harus dibaca bersama status terbaru di [06 — Status](06-STATUS.md), bukan dianggap sebagai pekerjaan aktif tanpa bukti baru.
-2. **Lock screen.** Wallpaper, jam/tanggal, layout, prompt autentikasi, indikator, notifikasi saat terkunci, serta jalur unlock/recovery. Jangan mengubah PAM, autentikasi, atau keyslot sebagai pekerjaan kosmetik.
-3. **Dashboard.** Hierarki informasi, layout, media, resource/system information, kalender, dan perilaku buka/tutup.
-4. **Taskbar/panel.** Workspace, active window, tray, clock/date, status indikator, ukuran, posisi, dan perilaku interaksi.
-5. **Launcher.** Satu launcher utama, tampilan hasil, kategori/action, keyboard navigation, serta safe defaults.
-6. **Sidebar.** Panel samping, navigasi, quick access, ukuran, dan perilaku tampil/sembunyi.
-7. **Utilities.** Quick toggles dan kontrol seperti jaringan, Bluetooth, audio, microphone, brightness, DND, game mode, dan settings—hanya yang didukung serta berguna pada perangkat.
-
-Setiap workstream memiliki panduan operasional khusus di [docs/08-STAGE-5/](08-STAGE-5/README.md). Ikuti urutan dan gate pada panduan tersebut. Keputusan pengguna: **customization global dan penyelarasan tampilan lintas-komponen baru dikerjakan setelah ketujuh workstream selesai**. Karena itu, selama tujuh workstream berlangsung, batasi perubahan visual pada komponen yang sedang dikerjakan dan hanya sejauh diperlukan untuk fungsi serta acceptance criteria komponen tersebut. Jangan memulai redesign global palette, typography, iconography/cursor, wallpaper, window/compositor, notifications/OSD, terminal, GTK/Qt, atau aplikasi umum sebagai pekerjaan paralel. Setelah workstream 7 ditutup, buat rencana fase global terpisah berdasarkan audit aktual dan minta persetujuan sebelum implementasi.
-
-Setiap workstream ditutup dengan: (a) audit konfigurasi dan dependensi upstream yang benar-benar aktif; (b) backup/rollback; (c) perubahan sekecil mungkin; (d) pemeriksaan syntax/runtime dan fungsi; (e) review visual pengguna di perangkat; dan (f) pencatatan status IMPLEMENTED/TESTED/VERIFIED secara terpisah. Komponen yang tidak relevan atau tidak didukung boleh dinyatakan tidak berlaku dengan alasan, bukan dipaksakan.
-
-### Fondasi tampilan — SUDAH DITERAPKAN
-
-Script `scripts/k41-apply-desktop-customization.sh` menerapkan overlay appearance Hyprland, mengalihkan launcher `SUPER + R` ke Fuzzel, dan memasang konfigurasi Fuzzel Graphite. Script dijalankan sebagai user biasa, tanpa sudo:
-
-```bash
-bash scripts/k41-apply-desktop-customization.sh
-```
-
-Bukti run pengguna:
-- Laporan: `reports/desktop-customization/20261109T090739Z/`.
-- Status script: `SUCCESS`; backup privat dibuat dan konfigurasi diperbarui.
-- Pengguna mengonfirmasi `SUPER + R` berhasil dijalankan.
-- Hasil ini memverifikasi jalur launcher secara manual, bukan seluruh tampilan Stage 5. Pemeriksaan visual tetap dilakukan pengguna langsung pada perangkat.
-
-Setiap run menghasilkan `run.log` dan `summary.txt`. Backup disimpan privat di `~/.local/state/k41/desktop-customization/backups/`. Rollback:
-
-```bash
-bash scripts/k41-apply-desktop-customization.sh --rollback /path/ke/direktori-backup
-```
-
-### Audit Caelestia sebelum integrasi
-
-Sebelum mengubah shell, lakukan audit read-only terhadap versi runtime, package versions, font resolution, konfigurasi aktif, skema warna, dan proses:
-
-```bash
-bash scripts/k41-audit-caelestia.sh
-```
-
-Jalankan sebagai user biasa dari root repository, tanpa sudo. Script tidak mengubah konfigurasi, paket, service, wallpaper, maupun proses shell. Laporan berada di `reports/caelestia-audit/<timestamp>/`:
-- `run.log`: versi, hasil CLI, font resolution, file konfigurasi, dan proses.
-- `summary.txt`: status dan daftar artefak.
-- `config-snapshot.json`: bagian konfigurasi Caelestia yang relevan; path personal dan lokasi cuaca disamarkan.
-
-Review `config-snapshot.json` sebelum push. Push direktori laporan tersebut ke GitHub agar konfigurasi aktual dapat diaudit tanpa mengetik atau menyalin log manual.
-
-### Hasil audit perangkat — 2026-11-09
-
-Laporan pengguna: `reports/caelestia-audit/20261109T091310Z/`.
-- Caelestia Shell 2.5.0-1, CLI 1.1.3-1, Quickshell 0.3.2 aktif.
-- `shell.json` valid; konfigurasi pengguna saat ini hanya memiliki bagian `bar` dan `dashboard`.
-- `shell-tokens.json` tidak ada; tidak perlu membuat override token internal.
-- Font Rubik, CaskaydiaCove Nerd Font, dan Material Symbols Rounded tersedia.
-- Skema aktif `caelestia/dark/tonalspot` masih menggunakan aksen teal.
-- CLI terpasang menyediakan variant `monochrome`; skema custom tidak diasumsikan tersedia sebagai nama CLI. Tidak ada perubahan pada perangkat selama audit.
-
-### Profil Caelestia Graphite — batch pertama diterapkan
-
-Profil `config/desktop-customization/caelestia-shell.json` hanya mengatur tipografi menggunakan font yang telah terdeteksi tersedia:
-- UI: Rubik.
-- Monospace: CaskaydiaCove NF.
-
-Script `scripts/k41-apply-caelestia-profile.sh` menggabungkan profil secara recursive ke `shell.json` sehingga pengaturan bar/dashboard lain tetap dipertahankan, lalu meminta CLI upstream mengatur scheme `caelestia/dark/monochrome`. Sebelum perubahan, script membuat backup privat untuk `shell.json` dan `scheme.json`; bila apply gagal, file dipulihkan. Tidak ada perubahan shell tokens, wallpaper, paket, service, atau file paket upstream.
-
-Jalankan setelah pull sebagai user biasa, tanpa sudo:
-
-```bash
-bash scripts/k41-apply-caelestia-profile.sh
-```
-
-Setujui prompt apply. Setelah konfigurasi dan scheme diverifikasi, script menawarkan restart Caelestia. Pilih **Y** (default). Restart menggunakan `caelestia shell -r -d` dengan batas 10 detik agar shell diluncurkan detached dan script tidak membunuh proses foreground yang harus tetap hidup. Pola `-r -d` digunakan upstream pada proses post-update Caelestia. Setelah itu script mengambil runtime log melalui `caelestia shell -l` dan mencari entri `Configuration Loaded`. Jika perintah restart gagal, pengambilan log gagal, atau konfigurasi tidak terkonfirmasi, status dilaporkan sebagai warning.
-
-Output command ditangkap sekali melalui `run.log`. Ringkasan menghapus ANSI color sequences dan hanya menghitung WARN/WARNING, ERROR, dan FATAL yang berada di awal baris sebagai level log; kata-kata tersebut di dalam pesan INFO script tidak ikut dihitung. Jumlah proses Quickshell juga dicatat sebagai informasi diagnostik, bukan satu-satunya bukti keberhasilan.
-
-Laporan `reports/caelestia-customization/<timestamp>/` memuat:
-- `run.log`: output apply, restart, dan runtime log.
-- `summary.txt`: status apply/restart/log collector, jumlah WARN/WARNING, ERROR, FATAL, entri configuration-loaded, dan proses Quickshell.
-- Backup privat tetap disimpan di `~/.local/state/k41/caelestia/backups/`.
-
-Jika memilih skip atau log collector gagal, pengumpulan log dapat dicoba manual:
-
-```bash
-caelestia shell -l
-```
-
-Rollback menggunakan path backup yang dicatat oleh script:
-
-```bash
-bash scripts/k41-apply-caelestia-profile.sh --rollback /path/ke/direktori-backup
-caelestia shell -r
-```
-
-### Hasil runtime sebelumnya — masalah diagnosis (sudah diperbaiki)
-
-Laporan pengguna: `reports/caelestia-customization/20261109T092153Z/`.
-- Profile typography dan scheme berhasil diverifikasi.
-- Log memuat `Configuration Loaded` dua kali dan tidak memuat baris ERROR/FATAL.
-- Warning `~/.face` tidak ditemukan berulang kali; ini memengaruhi gambar profil pengguna, bukan bukti kegagalan shell.
-- Pesan `Object or context destroyed during incubation` pada StyledProgressBar dan Media tercatat sebagai INFO, bukan ERROR.
-- Script lama menjalankan `caelestia shell -r` (foreground) di dalam `timeout 30s`. Exit 124 menghentikan proses foreground; ini merupakan kesalahan implementasi diagnostik dan dapat menjelaskan mengapa pemeriksaan proses Quickshell berikutnya menghasilkan 0. Restart diperbaiki ke pola detached upstream `caelestia shell -r -d`.
-- Penghitung lama mencari kata WARN/ERROR/FATAL di seluruh pesan, sehingga turut menghitung teks INFO script sendiri. Pada laporan ini, angka WARN 8 terlalu tinggi; angka ERROR 1 dan FATAL 1 adalah false positive dari baris INFO "Review WARN/WARNING/ERROR/FATAL counts". Parser baru hanya menghitung level log di awal baris. Log runtime sebenarnya menunjukkan 6 baris WARN (5 terkait `~/.face`, 1 terkait QML CachingImage), 0 ERROR, dan 0 FATAL.
-
-Hasil visual tetap dinilai langsung oleh pengguna pada perangkat. Perbaikan diagnostik telah dijalankan dan diaudit melalui laporan `reports/caelestia-customization/20261109T093038Z/`. Hasil terbaru: **SUCCESS**, restart `CONFIRMED`, runtime log `OK`, 3 entri `Configuration Loaded`, 1 proses Quickshell teramati, dan 0 WARN/ERROR/FATAL. Ini memverifikasi apply, restart detached, dan collector log; belum menggantikan review visual pengguna. Review isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan.
-
-## Tahap 6 — Optimization
-
-Optimasi perangkat dan sistem dilakukan setelah tampilan diterima. Rencana dan batasnya ada di [05 — Operations](05-OPERATIONS.md). Jangan melakukan tuning agresif sebelum baseline terukur.
-
-## Tahap 5 — Full Graphite implementation (IMPLEMENTED IN REPOSITORY; DEVICE APPLY PENDING)
-
-Batch pertama Caelestia sebelumnya hanya mengganti font dan scheme; itu **bukan** redesign komponen. Implementasi repository berikut memperluas profil ke seluruh konfigurasi komponen Caelestia yang tersedia pada Shell **v2.5.0** dan menambahkan integrasi aplikasi desktop.
-
-### Cakupan profil Caelestia
-
-config/desktop-customization/caelestia-shell.json sekarang mengatur:
-- Appearance scale, spacing, padding, rounding, typography, dan animasi yang lebih hemat.
-- Bar/taskbar: urutan elemen, workspace indicator, active-window compact, tray, clock/date, status icons; logo dekoratif dihilangkan.
-- Dashboard: media dan resource monitor; interval polling diperlonggar untuk mengurangi aktivitas periodik.
-- Launcher: jumlah hasil lebih banyak dan fuzzy search untuk aplikasi/actions; dangerous actions tetap disabled.
-- Lock screen: menggunakan wallpaper Obsidian, menyembunyikan notifikasi saat terkunci. Pengaturan autentikasi fingerprint/Howdy yang sebelumnya aktif dipertahankan; tidak ada perubahan PAM.
-- Sidebar, notification grouping, OSD, utilities quick toggles, dan paths wallpaper.
-- Scheme caelestia/dark/monochrome; smart dynamic scheme dimatikan agar wallpaper tidak mengubah identitas monochrome.
-
-### Wallpaper
-
-Aset desain vector assets/wallpapers/k41-obsidian-1920x1080.svg disimpan sebagai sumber editable. Untuk penerapan, assets/wallpapers/k41-obsidian-1280x720.jpg.base64 berisi JPEG 1280x720; script mendekodekannya ke ~/Pictures/Wallpapers/ lalu menjalankan caelestia wallpaper -f. JPEG termasuk format yang diterima oleh upstream Caelestia CLI. Resolusi 1280x720 akan di-scale ke panel 1920x1080; visual quality tetap perlu diterima saat uji perangkat.
-
-### GTK, Thunar, Foot, Qt, icon dan cursor
-
-Konfigurasi proyek:
-- gtk-settings.ini: Adwaita-dark, icon/cursor Adwaita, Rubik, prefer-dark.
-- gtk3.css dan gtk4.css: token Graphite untuk surface, text, selection, dan sidebar.
-- thunar.css: mempertahankan struktur layout Thunar yang diaudit, menghapus teal dan animasi entrance, serta menjaga focus indication.
-- foot.ini: CaskaydiaCove NF, palette Graphite, cursor beam non-blinking, dan padding terminal.
-- caelestia-cli.json: meminta generator upstream mengaktifkan tema GTK dan Qt serta icon theme Adwaita. Tema Hyprland, Fuzzel, dan Foot tidak didelegasikan ke generator agar tidak bertabrakan dengan konfigurasi proyek yang dikelola terpisah.
-
-Script integrasi:
-scripts/k41-apply-desktop-integration.sh
-
-### Urutan penerapan pada laptop
-
-Setelah commit tersedia di branch lokal, dari root repository jalankan sebagai user biasa, tanpa sudo:
-
-~~~bash
-bash scripts/k41-apply-desktop-customization.sh
-bash scripts/k41-apply-full-desktop-profile.sh
-bash scripts/k41-apply-desktop-integration.sh
-hyprctl reload
-~~~
-
-Setujui prompt masing-masing script. Jalankan desktop-customization lebih dahulu untuk memperbarui overlay Hyprland secara idempotent, shortcut Fuzzel, dan XCURSOR_THEME. Full profile melakukan merge recursive ke shell.json, menerapkan monochrome, mendekode dan mengaktifkan wallpaper JPEG, restart Caelestia detached, lalu mengumpulkan runtime log. Script integrasi membuat backup, merge cli.json, menjalankan generator theme upstream, memasang GTK/Thunar/Foot, dan restart Caelestia. Jalankan hyprctl reload, lalu tutup dan buka kembali aplikasi GTK/Foot agar konfigurasi barunya terbaca.
-
-### Backup dan rollback
-
-- Hyprland/Fuzzel/cursor: backup ~/.local/state/k41/desktop-customization/backups/; rollback memakai scripts/k41-apply-desktop-customization.sh --rollback BACKUP_DIRECTORY.
-- Full Caelestia: backup ~/.local/state/k41/desktop-profile/backups/; rollback memakai scripts/k41-apply-full-desktop-profile.sh --rollback BACKUP_DIRECTORY.
-- GTK/Thunar/Foot/CLI: backup ~/.local/state/k41/desktop-integration/backups/; rollback memakai scripts/k41-apply-desktop-integration.sh --rollback BACKUP_DIRECTORY.
-- Rollback full profile mengembalikan shell.json dan scheme.json; pemilihan wallpaper sebelumnya perlu dipulihkan manual melalui >wallpaper.
-- Rollback integrasi mengembalikan file yang memang sudah ada sebelum penerapan. File baru yang sebelumnya tidak ada dibiarkan dan perlu dihapus manual bila pengguna ingin kembali ke kondisi tanpa file tersebut.
-- Semua script berjalan sebagai user biasa dan tidak memasang paket, mengubah service sistem, atau mengedit shell-tokens.json.
-
-### Status validasi
-
-- **IMPLEMENTED:** profil, wallpaper SVG, GTK3/GTK4, Thunar, Foot, CLI theme preferences, dan dua script apply/rollback telah dikomit ke main.
-- **STATIC REVIEW:** JSON profile dibangun dan diparse sebagai JSON sebelum commit; field Caelestia dipilih dari dokumentasi upstream tag v2.5.0.
-- **NOT TESTED:** bash -n, ShellCheck, eksekusi script, parsing CSS/Foot pada versi lokal, dukungan SVG oleh wallpaper CLI, dan runtime/visual behavior belum dijalankan di laptop.
-- **DEVICE APPLY PENDING:** pengguna perlu pull commit, menjalankan dua script, lalu menguji komponen secara langsung. Jangan tandai Stage 5 selesai sebelum uji fungsi dan visual diterima.
-
-
-## Audit hasil uji laptop — 2026-11-09
-
-Audit terhadap commit pengguna `4c3433274112b597822b1173dfa2f9cab23f59b5` menemukan bahwa penerapan **belum berhasil pada Caelestia component profile**:
-
-- `reports/desktop-customization/20261109T095812Z`: SUCCESS. Ini hanya menerapkan layer Hyprland appearance, Fuzzel, dan cursor.
-- `reports/caelestia-customization/20261109T094136Z`: SUCCESS. Script lama hanya mengubah typography dan scheme monochrome, bukan redesign komponen.
-- `reports/desktop-profile/20261109T095832Z`: FAILED. Merge profile sempat berjalan, tetapi decoder wallpaper menolak base64 karena newline akhir file dibaca bersama payload. Script lalu mengembalikan `shell.json` dan `scheme.json` dari backup. Jadi perubahan bar/dashboard/launcher/lock/sidebar/utilities dari full profile **tidak bertahan**.
-- Tidak ditemukan report eksekusi `k41-apply-desktop-integration.sh` pada commit uji tersebut; penerapan GTK/Thunar/Foot/Qt belum terbukti.
-
-Perbaikan decoder sudah dikomit: script sekarang melakukan `.strip()` pada payload base64 dan memvalidasi wallpaper sebelum backup/perubahan konfigurasi. Aset diuji secara statis: base64 valid, JPEG signature valid, 1280x720. Profile Caelestia juga dicocokkan dengan contoh schema upstream v2.5.0: tidak ada key asing. Ini belum menggantikan uji runtime.
-
-**Status saat audit:** Hyprland layer = APPLIED; typography/scheme Caelestia lama = APPLIED; full Caelestia component profile = NOT APPLIED (percobaan sebelumnya rollback otomatis); GTK/Thunar/Foot integration = NOT VERIFIED. Jalankan ulang full profile dan integration setelah mengambil commit perbaikan terbaru.
-
-
-### Otomatisasi boot — TTY1 autologin + Caelestia lock screen (OPT-IN)
-
-Setelah tampilan dan lock screen Caelestia sudah diterima, sesi dapat dibuat otomatis saat laptop dinyalakan. Desain implementasinya sengaja tidak memasang display manager:
-
-1. systemd `getty@tty1` melakukan autologin hanya untuk akun desktop yang menjalankan installer.
-2. Bash login profile memanggil `start-hyprland` hanya pada TTY1. TTY lain tetap meminta kredensial normal.
-3. Hook `hyprland.start` mempertahankan autostart Caelestia yang sudah ada; jika tidak ditemukan di konfigurasi Hyprland, hook akan memulainya.
-4. Helper menunggu Caelestia IPC siap, lalu memanggil target `lock` / fungsi `lock()`. Jika IPC tidak siap setelah 45 detik, helper menjalankan `hyprlock` sebagai fail-safe agar sesi tidak dibiarkan terbuka.
-
-Jalankan dari root repository pada sesi desktop yang sedang aktif:
-
-```bash
-sudo bash scripts/k41-enable-caelestia-autologin.sh
-```
-
-Script meminta konfirmasi eksplisit, membuat backup root-only di `/var/lib/k41/autologin/USER/backups/`, menambahkan systemd drop-in khusus tty1, memperbarui `~/.bash_profile` dan konfigurasi aktif `~/.config/hypr/hyprland.lua`, serta memasang helper ke `~/.local/bin/`. Script tidak mengubah default boot target, tidak memasang/mengaktifkan display manager, tidak me-restart getty saat sesi aktif, dan tidak mengubah konfigurasi PAM. Perubahan berlaku setelah reboot.
-
-Rollback (gunakan path backup yang dicetak installer):
-
-```bash
-sudo bash scripts/k41-enable-caelestia-autologin.sh --rollback /var/lib/k41/autologin/USER/backups/TIMESTAMP
-```
-
-Rollback mengembalikan file yang dikelola ke kondisi sebelum instalasi; reboot diperlukan agar getty membaca ulang konfigurasi.
-
-**Batas keamanan:** agetty autologin melewati password login TTY1. Caelestia lock screen mengunci sesi grafis setelah shell siap, tetapi bukan pengganti enkripsi disk, dan ada jeda boot sebelum lock screen aktif. Jangan gunakan opsi ini pada laptop yang perlu tetap aman ketika hilang/dicuri tanpa full-disk encryption. Jangan tinggalkan sesi autologin terbuka setelah Caelestia gagal start; pertahankan password login di TTY lain dan ketahui prosedur rollback. Pengujian fisik wajib memastikan boot berakhir di Caelestia lock screen, password membuka sesi, fallback `hyprlock` bekerja saat Caelestia gagal, dan reboot kedua tidak menghasilkan login loop.
+Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan menganggap collector audit Guest sebagai implementasi fitur.

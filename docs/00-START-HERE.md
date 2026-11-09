@@ -1,37 +1,51 @@
 # Panduan Awal
 
-## Alur kerja utama
+## Urutan kerja proyek
 
-1. **Arch Linux Live ISO — Readiness:** jalankan `bash scripts/k41-live-validation.sh`.
-2. **Arch Linux Live ISO — Basic Arch:** setelah readiness PASS dan hasilnya direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Tahap ini menghapus SSD target.
-3. **Basic Arch Linux — Desktop setup:** setelah boot ke TTY Arch Linux, login sebagai user biasa lalu jalankan `sudo bash scripts/k41-install-desktop.sh`.
-4. **Desktop Functional Validation:** jalankan `bash scripts/k41-desktop-validation.sh`, tinjau semua WARN/FAIL, dan simpan laporan. Tahap 4 telah diterima pada snapshot 2026-11-09; bukti ada di `reports/desktop-validation/20261109T081724Z/`.
-5. **Desktop Customization:** tahap aktif; workstream 1 (boot experience) ditutup menurut konfirmasi pengguna, workstream 2 (lock screen) masih berjalan dan belum lolos verifikasi runtime/visual. Ikuti [indeks workstream](08-STAGE-5/README.md). Guest Mode belum diimplementasikan.
-6. **Desktop & Hardware Optimization:** optimasi desktop, CPU/GPU, termal, daya, baterai, dan sleep/resume setelah customization diterima.
-7. **Release:** hanya setelah seluruh acceptance gate dan regression checks lulus.
+1. **Live readiness:** dari Arch Linux Live ISO jalankan `bash scripts/k41-live-validation.sh`.
+2. **Basic Arch installation:** setelah readiness PASS dan rencana/target direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Operasi ini destruktif.
+3. **Desktop installation:** setelah boot ke Arch terpasang dan login TTY sebagai user biasa, jalankan `sudo bash scripts/k41-install-desktop.sh`.
+4. **Desktop validation:** dari sesi Hyprland sebagai user biasa jalankan `bash scripts/k41-desktop-validation.sh`. Stage 4 telah diterima; bukti ringkas dan batasnya tercatat di [Status](06-STATUS.md).
+5. **Desktop customization:** Stage 5 aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED**. Workstream 2 — Lock Screen sedang dikerjakan. Ikuti [indeks Stage 5](08-STAGE-5/README.md).
+6. **Desktop & hardware optimization:** PLANNED setelah customization diterima; lihat [Operations](05-OPERATIONS.md).
+7. **Release:** PLANNED setelah seluruh gate dan regression lulus.
 
-## Entry point dan implementasi
+Tidak ada perpindahan otomatis antar tahap.
 
-| Entry point kanonis | Implementasi yang dipakai saat ini |
+## Entry point kanonis
+
+| Entry point | Fungsi |
 |---|---|
-| `k41-live-validation.sh` | Implementasi langsung |
-| `k41-install-basic-arch.sh` | `install-arch-x280.sh` |
-| `k41-install-desktop.sh` | `setup-desktop-x280.sh` |
-| `k41-desktop-validation.sh` | Menjalankan collector desktop/Caelestia dan membuat satu laporan validasi terpadu |
+| `scripts/k41-live-validation.sh` | Readiness Arch ISO |
+| `scripts/k41-install-basic-arch.sh` | Instalasi dasar Arch; delegasi ke `install-arch-x280.sh` |
+| `scripts/k41-install-desktop.sh` | Instalasi desktop; delegasi ke `setup-desktop-x280.sh` |
+| `scripts/k41-desktop-validation.sh` | Validasi fungsional desktop |
+| `scripts/k41-desktop-repair.sh` | Repair terbatas berbasis hasil validasi |
 
-Gunakan entry point kanonis. Nama lama dipertahankan agar perubahan antarmuka tidak memaksa pemindahan besar pada implementasi yang sudah ada.
+Gunakan wrapper kanonis, bukan wrapper dan implementasi internal sekaligus.
 
 ## Sumber kebenaran
 
-Kode branch `main` adalah implementasi. Test runner dan hasil test aktual adalah sumber hasil test. `reports/` menyimpan bukti untuk commit dan lingkungan yang tercatat. Dokumen aktif menjelaskan workflow saat ini; `docs/archive/` adalah histori, bukan instruksi operasional.
+- Implementasi: branch `main`.
+- Status proyek: [06 — Status](06-STATUS.md).
+- Prosedur dan batas tahap: dokumen pemilik yang tercantum di bawah.
+- Test aktual: `tests/run.sh` dan hasil eksekusi yang benar-benar tersedia.
+- Bukti historis: snapshot commit `02f6194ed04c8f13ea64eda35b7afb94f7006504`; lihat [indeks arsip](../reports/archive/2026-11/README.md).
+- `docs/archive/` hanya histori; bukan instruksi operasional aktif.
 
-## Pemilik topik
+Laporan runtime baru disimpan lokal di `reports/<category>/<timestamp>/` dan tidak dikomit otomatis.
+
+## Dokumen pemilik
 
 | Topik | Dokumen |
 |---|---|
-| Tujuan, 7 tahap, arsitektur | [01 — Proyek](01-PROJECT.md) |
-| Live readiness, instalasi dasar, boot | [02 — Instalasi](02-INSTALLATION.md) |
-| Desktop install, validasi, customization | [03 — Desktop](03-DESKTOP.md), [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md), dan [08 — Stage 5 workstreams](08-STAGE-5/README.md) |
-| Test suite dan acceptance/release gate | [04 — Testing](04-TESTING.md) |
-| Security, recovery, optimasi hardware | [05 — Operations](05-OPERATIONS.md) |
-| Status aktual dan prioritas | [06 — Status](06-STATUS.md) |
+| Tujuan, tahapan, arsitektur | [01 — Proyek](01-PROJECT.md) |
+| Tahap 1–3 | [02 — Instalasi](02-INSTALLATION.md) |
+| Desktop tahap 3–5 | [03 — Desktop](03-DESKTOP.md) |
+| Automated tests dan acceptance | [04 — Testing](04-TESTING.md) |
+| Security, recovery, tahap 6 | [05 — Operations](05-OPERATIONS.md) |
+| Status dan prioritas terkini | [06 — Status](06-STATUS.md) |
+| Design System | [07 — Design System](07-DESKTOP-DESIGN-SYSTEM.md) |
+| Stage 5 workstreams | [08 — Stage 5](08-STAGE-5/README.md) |
+
+Untuk perubahan, baca status dan dokumen pemilik terlebih dahulu. Jangan memulai refactoring atau konsolidasi besar sebelum audit implementasi dan dependensinya selesai.

@@ -1,94 +1,102 @@
 # AI Development Instructions
 
-## Source of truth and workflow
+## Source of truth
 
-The current repository on branch `main` is the source of truth. At the start of substantial work, inspect the current implementation, owning document, tests, branch, and available working-tree state. Preserve unrelated work. Never infer current behavior from conversation history alone.
+- Branch `main` dan implementasi repository adalah sumber kebenaran kode.
+- `docs/06-STATUS.md` adalah sumber status proyek terkini.
+- Setiap topik memiliki satu dokumen pemilik; dokumen lain harus merangkum singkat dan menautkan pemiliknya.
+- `docs/archive/` berisi histori, bukan prosedur aktif. Jangan membaca arsip untuk tugas rutin kecuali dokumen aktif secara eksplisit memerlukan bukti historis.
+- Jangan menyimpulkan kondisi perangkat saat ini dari laporan lama atau percakapan sebelumnya.
 
-Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `docs/06-STATUS.md`. The canonical script entry points are:
+## Canonical entry points
 
 1. `scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
-2. `scripts/k41-install-basic-arch.sh` — Arch base installation; destructive.
-3. `scripts/k41-install-desktop.sh` — desktop setup from installed Arch TTY.
-4. `scripts/k41-desktop-validation.sh` — read-only automated package, process, configuration, service, portal, audio, network, battery, thermal, and journal health checks from the active Hyprland session; run as the regular user, never with sudo.
-5. `scripts/k41-desktop-repair.sh` — Stage 4 remediation utility; applies narrowly scoped evidence-based repairs, has no `--apply` mode, captures PAM package-integrity evidence without rewriting PAM, and reruns validation.
+2. `scripts/k41-install-basic-arch.sh` — instalasi dasar Arch; destruktif.
+3. `scripts/k41-install-desktop.sh` — setup desktop dari Arch terpasang melalui TTY.
+4. `scripts/k41-desktop-validation.sh` — validasi desktop read-only; jalankan sebagai user biasa dalam sesi Hyprland.
+5. `scripts/k41-desktop-repair.sh` — remediasi terbatas berbasis bukti.
 
-The remaining project stages are: Stage 5 desktop customization, Stage 6 desktop and hardware optimization, and Stage 7 release.
-
-The Stage 2 and Stage 3 entry points currently delegate to legacy implementation scripts. Keep wrappers thin; do not duplicate implementation. First-boot diagnostics are optional and are not a required gate between Stages 2 and 3.
+Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplikasi logika atau menjalankan wrapper dan implementasinya secara berurutan untuk pekerjaan yang sama.
 
 ## Documentation ownership
 
-- `README.md`: concise project entry and canonical workflow.
-- `AGENTS.md`: AI workflow, repository editing, safety, and reporting rules.
-- `docs/00-START-HERE.md`: navigation and source-of-truth index.
-- `docs/01-PROJECT.md`: purpose, seven stages, architecture, decisions.
-- `docs/02-INSTALLATION.md`: Stage 1–3 live readiness, basic Arch installation, and desktop installation handoff.
-- `docs/03-DESKTOP.md`: desktop setup, Stage 4 functional acceptance, Stage 5 customization overview.
-- `docs/08-STAGE-5/README.md` and its seven workstream documents: Stage 5 execution order, component-specific decisions, acceptance, and implementation history; `02-LOCK-SCREEN.md` owns lock-screen and Guest Mode status.
-- `docs/04-TESTING.md` and `tests/README.md`: automated test and acceptance principles.
-- `docs/05-OPERATIONS.md`: security, recovery, Stage 6 optimization.
-- `docs/06-STATUS.md`: current stage, status, evidence, and priorities.
-- `docs/archive/`: historical material only; never cite archived instructions as current procedures.
-- `reports/README.md` and `reports/archive/2026-11/README.md`: report retention, privacy, and historical archive policy.
+| Topik | Dokumen pemilik |
+|---|---|
+| Ringkasan dan alur kanonis | `README.md` |
+| Instruksi AI, safety, workflow perubahan | `AGENTS.md` |
+| Navigasi dan sumber kebenaran | `docs/00-START-HERE.md` |
+| Tujuan, tahapan, arsitektur | `docs/01-PROJECT.md` |
+| Tahap 1–3 instalasi | `docs/02-INSTALLATION.md` |
+| Desktop tahap 3–5 dan handoff | `docs/03-DESKTOP.md` |
+| Test suite dan acceptance gate | `docs/04-TESTING.md`, `tests/README.md` |
+| Security, recovery, optimasi tahap 6 | `docs/05-OPERATIONS.md` |
+| Status aktual dan prioritas | `docs/06-STATUS.md` |
+| Design System | `docs/07-DESKTOP-DESIGN-SYSTEM.md` sebagai indeks; rincian berada di `docs/07-DESIGN-SYSTEM/` |
+| Eksekusi Stage 5 | `docs/08-STAGE-5/README.md` dan dokumen workstream terkait |
+| Workstream 1 | `docs/08-STAGE-5/01-BOOT-EXPERIENCE.md` |
+| Workstream 2 dan gate Guest Mode | `docs/08-STAGE-5/02-LOCK-SCREEN.md`; spesifikasi Guest Mode di `03-GUEST-MODE.md` |
 
-Each topic has one owning document. Keep other documents concise and link to the owner. Guest Mode must consistently be described as **NOT IMPLEMENTED** and deferred until the user explicitly accepts the custom lock screen; do not imply it exists or is ready. When workflow or implementation changes, update affected owners, summaries, tests, and cross-references together. Do not restore references to archived paths as active instructions.
+Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Update dokumen pemilik dan hanya ringkasan/cross-reference yang terdampak.
+
+## Current project decisions
+
+- Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED pada 2026-11-10**. Jangan membuka kembali berdasarkan catatan historis yang lebih lama; evaluasi ulang hanya bila ada laporan masalah baru dari pengguna.
+- Workstream 2 — Lock Screen adalah pekerjaan aktif. Status implementasi dan pengujian tercatat di `docs/06-STATUS.md`.
+- Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan membuat akun, service, mount, storage policy, atau workflow Guest tanpa keputusan eksplisit baru.
+- Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek. Review visual dilakukan langsung oleh pengguna pada display X280 dan hasilnya dicatat dalam teks.
+- Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
+- Hasil Stage 5 akan menjadi input evaluasi tahap instalasi sebelum Stage 7. Refactoring instalasi menyeluruh belum menjadi pekerjaan aktif.
 
 ## Required change process
 
-Before edits:
-1. Inspect current branch and repository state where available.
-2. Read the owning document, affected implementation, and relevant tests.
-3. Identify requirements, interfaces, safety constraints, and acceptance criteria.
-4. Keep changes focused and preserve unrelated work.
-5. Ask only when an ambiguity changes safety, scope, or a material architecture decision.
+Sebelum mengubah repository:
+1. Periksa branch, HEAD, tree, dan file yang akan disentuh.
+2. Baca dokumen pemilik, implementasi, dan test relevan.
+3. Tetapkan tujuan, acceptance criteria, interface, dan batas safety.
+4. Pertahankan pekerjaan yang tidak terkait; jangan menghapus file hanya karena tidak ditemukan referensi langsung.
+5. Gunakan perubahan kecil dan fokus. Tanyakan hanya bila ambiguitas memengaruhi safety atau arsitektur.
 
-After edits:
-1. Fetch/read every changed file again to verify the write.
-2. Run relevant safe tests and report exact commands/results.
-3. Review references and documentation consistency.
-4. Update `docs/06-STATUS.md` when project state materially changes.
-5. Report changed files, commit evidence, tests not run, limitations, and next gate.
+Setelah perubahan:
+1. Baca ulang semua file yang diubah untuk memverifikasi hasil.
+2. Jalankan pemeriksaan aman yang relevan dan laporkan perintah serta hasil sebenarnya.
+3. Periksa tautan, path, status, dan konsistensi lintas-dokumen.
+4. Perbarui `docs/06-STATUS.md` bila status proyek berubah.
+5. Laporkan file, commit, validasi, hal yang belum diuji, risiko, dan langkah berikutnya.
 
 ## Reports and generated artifacts
 
-- Runtime output under `reports/<category>/` is local-only by default and ignored by Git; do not commit every diagnostic or test run.
-- Historical reports already tracked before the retention policy are preserved under `reports/archive/2026-11/`. Preserve them unless an explicitly authorized retention review says otherwise.
-- **Do not enumerate, fetch, summarize, or otherwise read `reports/archive/` during routine tasks.** Read only a specific archived artifact when historical evidence is explicitly required or a current owning document links to it.
-- Treat reports as potentially sensitive: inspect and redact device identifiers, serials, usernames, paths, journal excerpts, and network metadata before sharing. Never store credentials, passwords, LUKS recovery material, tokens, or cookies.
-- Keep only minimal, reviewed, redacted evidence in the active documentation; current status belongs in the owning document, not in a bulk report dump.
+- Output runtime `reports/<category>/` lokal secara default dan diabaikan Git.
+- Snapshot laporan historis November 2026 disimpan dalam Git history pada commit `02f6194ed04c8f13ea64eda35b7afb94f7006504`; indeks aktif: `reports/archive/2026-11/README.md`.
+- Jangan enumerate atau membaca seluruh arsip laporan untuk tugas rutin. Buka hanya laporan tertentu bila diperlukan oleh dokumen pemilik.
+- Laporan dapat memuat serial, username, path, journal, dan metadata jaringan. Redaksi sebelum dibagikan. Jangan pernah menyimpan password, passphrase LUKS, recovery key, token, cookie, atau credential.
 
-## Truth and status
+## Status vocabulary
 
-Use these labels precisely:
-- **PLANNED**: not implemented.
-- **IMPLEMENTED**: code exists and repository state confirms it.
-- **TESTED**: named tests were actually executed.
-- **VERIFIED**: behavior was confirmed with appropriate evidence.
-- **RELEASED**: incorporated into an explicitly designated release.
-- **NOT TESTED**: no adequate test evidence.
+- **PLANNED** — belum diimplementasikan.
+- **IMPLEMENTED** — kode/perubahan tersedia di repository.
+- **TESTED** — test yang disebutkan benar-benar dijalankan.
+- **VERIFIED** — perilaku dibuktikan dengan metode yang sesuai.
+- **COMPLETED / USER ACCEPTED** — pengguna secara eksplisit menerima dan menutup workstream; tidak otomatis mengklaim setiap detail teknis telah diukur.
+- **RELEASED** — masuk rilis yang ditetapkan.
+- **NOT TESTED** — belum ada pengujian memadai.
+- **BLOCKED** — prasyarat menghalangi pekerjaan.
 
-A file existing or wrapper delegating does not prove runtime behavior. Syntax checks do not prove correct execution. Automated desktop log/runtime checks do not prove visual or physical interaction; fixture tests do not prove physical hardware compatibility. Never fabricate repository content, test output, upstream compatibility, or successful GitHub operations.
+Jangan menyamakan keberadaan file, exit code 0, syntax check, automated fixture, atau konfirmasi satu fungsi dengan verifikasi seluruh sistem.
 
-## Safety and security
+## Safety and engineering
 
-- Never perform destructive disk operations without explicit user authorization and verified target identity.
-- Keep storage operations fail-closed. Uncertain prerequisites, target identity, integrity, or configuration must stop the operation.
-- Stage 1 readiness is read-only. Stage 2 installation can erase the selected internal SSD and requires backup, source review, target review, and explicit confirmations.
-- Stage 3 desktop setup must run from installed Arch Linux TTY as the regular user via sudo; it must not run from the ISO, chroot, or graphical session.
-- First-boot diagnostics are optional; do not reintroduce them as a mandatory gate before Stage 3.
-- Never disable package signature/integrity verification or pipe remotely retrieved scripts directly into a shell.
-- Build AUR packages as an unprivileged user after reviewing their recipe.
-- Never place passwords, LUKS passphrases, recovery keys, tokens, cookies, or credentials in logs/reports.
-- Do not execute privileged operations, change real system configuration, or perform destructive actions merely to validate a design.
-- Do not use virtual machines for project validation; the user has explicitly ruled out VM testing.
-- Use deterministic fixtures, mocks, static checks, and disposable loop-backed devices only for bounded automated tests. They do not replace physical X280 validation.
-
-## Architecture and engineering
-
-Use Bash unless another language has a documented material advantage. Quote expansions, validate inputs, handle errors, limit privileges, and use ShellCheck where available. Add tests alongside behavior changes where feasible. Keep canonical entry points thin and single-purpose. Avoid duplicated logic, unnecessary dependencies, and competing power-management services.
-
-Verify version-sensitive package names, dependencies, and installation methods against official upstream documentation. Preserve the policy that bootstrap retrieves latest `main`, displays its resolved commit SHA, requires source review, and applies separate readiness and installer acknowledgements. A SHA identifies a revision; it does not prove safety.
+- Jangan melakukan operasi disk destruktif tanpa izin eksplisit dan identifikasi target yang terverifikasi.
+- Storage operation harus fail-closed.
+- Stage 1 readiness read-only; Stage 2 dapat menghapus SSD target.
+- Stage 3 desktop setup dijalankan dari Arch terpasang, TTY, sebagai user biasa melalui sudo; bukan dari ISO, chroot, atau sesi grafis.
+- First-boot diagnostics opsional, bukan gate wajib.
+- Jangan menonaktifkan signature/integrity verification atau pipe script remote langsung ke shell.
+- Build AUR sebagai user non-root setelah meninjau PKGBUILD.
+- Jangan menjalankan privileged operation atau mengubah sistem nyata hanya untuk memvalidasi rancangan.
+- VM tidak digunakan untuk validasi proyek.
+- Gunakan Bash kecuali bahasa lain memiliki alasan teknis yang jelas. Quote ekspansi, validasi input, error handling, privilege minimal, dan ShellCheck.
+- Verifikasi package/dependency/version terhadap dokumentasi upstream resmi.
 
 ## Scope and reporting
 
-Do only the work requested. Do not merge pull requests, create releases/tags, or perform other consequential repository actions unless explicitly authorized. Never claim tests ran unless they actually ran. Report what changed, what was verified, what was not tested, risks, and the next concrete stage.
+Kerjakan hanya permintaan yang diberikan. Jangan merge PR, membuat release/tag, atau melakukan tindakan consequential lain tanpa izin eksplisit. Jangan mengklaim test atau operasi berhasil jika tidak dilakukan.

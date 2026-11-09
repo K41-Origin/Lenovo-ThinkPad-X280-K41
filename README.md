@@ -1,36 +1,45 @@
 # Lenovo ThinkPad X280 — Arch Linux
 
-Proyek membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji untuk ThinkPad X280, dengan Hyprland, Quickshell, dan Caelestia Shell.
+Proyek ini membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji untuk ThinkPad X280, dengan Hyprland, Quickshell, dan Caelestia Shell.
 
 ## Alur kerja kanonis
 
 | Tahap | Lingkungan | Entry point |
 |---|---|---|
-| 1. Live Readiness | Arch Linux Live ISO | `bash scripts/k41-live-validation.sh` |
-| 2. Basic Arch Installation | Arch Linux Live ISO | `bash scripts/k41-install-basic-arch.sh` |
-| 3. Desktop Installation | Basic Arch Linux, TTY | `sudo bash scripts/k41-install-desktop.sh` |
-| 4. Desktop Functional Validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` |
-| 5. Desktop Customization | Desktop yang telah diterima | [Panduan desktop](docs/03-DESKTOP.md) dan [workstream](docs/08-STAGE-5/README.md) |
-| 6. Desktop & Hardware Optimization | Desktop yang telah dikustomisasi | [Operasional](docs/05-OPERATIONS.md) |
+| 1. Live readiness | Arch Linux Live ISO | `bash scripts/k41-live-validation.sh` |
+| 2. Basic Arch installation | Arch Linux Live ISO | `bash scripts/k41-install-basic-arch.sh` |
+| 3. Desktop installation | Arch Linux terpasang, TTY | `sudo bash scripts/k41-install-desktop.sh` |
+| 4. Desktop functional validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` |
+| 5. Desktop customization | Desktop hasil tahap 4 | [Workstream](docs/08-STAGE-5/README.md) · [Design System](docs/07-DESKTOP-DESIGN-SYSTEM.md) |
+| 6. Desktop & hardware optimization | Setelah customization diterima | [Operations](docs/05-OPERATIONS.md) |
 | 7. Release | Setelah seluruh gate lulus | [Status](docs/06-STATUS.md) |
 
-Ketiga nama script di atas adalah entry point kanonis. Script lama dipertahankan sebagai implementasi internal/backward compatibility; jangan menjalankan keduanya secara berurutan untuk tugas yang sama.
+Gunakan entry point kanonis. Script implementasi lama yang dipanggil oleh wrapper bukan entry point tambahan; jangan menjalankan keduanya untuk tugas yang sama.
 
 ## Mulai di sini
 
 1. Baca [AGENTS.md](AGENTS.md) dan [Panduan Awal](docs/00-START-HERE.md).
 2. Ikuti [alur instalasi](docs/02-INSTALLATION.md).
-3. Periksa [status dan gate aktif](docs/06-STATUS.md).
+3. Periksa [status aktual](docs/06-STATUS.md) sebelum mengubah kode atau konfigurasi.
+4. Untuk Stage 5, ikuti urutan [workstream](docs/08-STAGE-5/README.md) dan gunakan [Design System](docs/07-DESKTOP-DESIGN-SYSTEM.md).
 
-## Status fitur
+## Status proyek
 
-- Lock screen kustom: implementasi QML dan deployment installer tersedia; validasi runtime, lock/unlock, wake, dan visual pada X280 masih **belum diverifikasi**. Lihat [status proyek](docs/06-STATUS.md) dan [panduan lock screen](docs/08-STAGE-5/02-LOCK-SCREEN.md).
-- **Guest Mode: DESAIN KONSEPTUAL DISETUJUI; BELUM DIIMPLEMENTASIKAN.** Akun terpisah `guest`, memakai Hyprland + Caelestia yang sudah ada, browser otomatis Incognito/Private, session tracking, ephemeral storage, dan boot-time verification/cleanup. Implementasi menunggu penerimaan lock screen dan audit/desain storage final. Lihat [spesifikasi Guest Mode](docs/08-STAGE-5/03-GUEST-MODE.md).
+- Stage 1–4: implementasi tersedia; Stage 4 telah diterima berdasarkan hasil validasi dan konfirmasi pengguna.
+- Stage 5: aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED**. Workstream 2 — Lock Screen adalah pekerjaan aktif.
+- Guest Mode: **NOT IMPLEMENTED** dan ditunda sebagai fitur opsional. Lihat [spesifikasi Guest Mode](docs/08-STAGE-5/03-GUEST-MODE.md).
+- Stage 6–7: PLANNED.
+
+Penerimaan Workstream 1 adalah keputusan pengguna pada 2026-11-10. Catatan lebih lama tentang isu visual boot merupakan histori sebelum keputusan penutupan, bukan backlog aktif.
+
+## Kebijakan bukti visual
+
+Tidak menggunakan screenshot sebagai persyaratan, gate, ataupun artefak penerimaan. Review visual dilakukan langsung oleh pengguna pada ThinkPad X280. Dokumentasi cukup mencatat hasil/keputusan pengguna, kondisi pengujian, dan isu yang benar-benar dilaporkan.
 
 ## Keselamatan
 
-Tahap 1 bersifat read-only dan memvalidasi kesiapan lingkungan serta target. Tahap 2 **destruktif**: installer menghapus SSD internal target setelah identitas, rencana, dan konfirmasi eksplisit diverifikasi. Backup wajib tersedia. Jangan menebak device path, melewati signature verification, atau menjalankan remote script melalui pipe ke shell.
+Tahap 1 bersifat read-only. Tahap 2 bersifat destruktif terhadap SSD target dan memerlukan identifikasi target, backup, review rencana, serta konfirmasi eksplisit. Jangan menebak device path, melewati signature verification, atau menjalankan remote script melalui pipe ke shell.
 
-`./installer --preflight` tetap hanya diagnostik. First-boot collector tersedia sebagai alat diagnosis opsional, bukan gerbang wajib sebelum tahap 3.
+First-boot collector bersifat opsional, bukan gerbang wajib sebelum tahap 3. BlackArch bersifat opt-in dan selektif.
 
-Struktur utama: `scripts/`, `lib/`, `config/`, `tests/`, `reports/`, `docs/`. Laporan runtime baru bersifat lokal secara default; laporan historis tersimpan di [arsip laporan](reports/archive/2026-11/README.md). Lisensi: [LICENSE](LICENSE).
+Struktur utama: `scripts/`, `lib/`, `config/`, `tests/`, `reports/`, dan `docs/`. Laporan runtime baru lokal secara default; kebijakan arsip ada di [reports/README.md](reports/README.md). Lisensi: [LICENSE](LICENSE).
