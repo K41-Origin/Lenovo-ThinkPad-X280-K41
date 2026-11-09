@@ -38,8 +38,8 @@ Script akan:
 2. Meminta path backup header LUKS pada filesystem di disk fisik lain. Jangan simpan satu-satunya backup pada SSD yang sama.
 3. Memasang paket resmi `plymouth` melalui pacman, memilih tema BGRT, menambahkan hook `plymouth` setelah `systemd` dan sebelum `sd-encrypt`, lalu menambahkan `quiet splash` ke command line UKI.
 4. Membangun ulang UKI melalui `mkinitcpio -P`.
-5. Mengubah TTY1 autologin menjadi mode senyap (`--noissue --nohostname`), melepaskan DRM ownership Plymouth sebelum Hyprland dimulai, dan menahan unit `plymouth-quit.service` sampai helper Caelestia memverifikasi status lock. Setelah lock aktif, Plymouth dilepas sehingga layar lock menjadi tampilan pertama.
-6. Jika Caelestia tidak dapat dikunci, helper mencoba Hyprlock. Jika tidak ada marker lock yang valid dalam 75 detik, helper root menghentikan `getty@tty1.service` sebelum menutup Plymouth; ini mencegah autologin TTY dibiarkan terbuka.
+5. Mengubah TTY1 autologin menjadi mode senyap (`--noissue --nohostname`), menjalankan `plymouth quit --retain-splash` sebelum Hyprland agar DRM dilepas tetapi frame terakhir splash tetap tertahan, dan menahan unit `plymouth-quit.service` sampai helper Caelestia memverifikasi status lock. Compositor kemudian menggambar lock screen sebagai tampilan pertama yang terlihat. Animasi splash dapat berhenti pada frame terakhir selama handoff.
+6. Jika Caelestia tidak dapat dikunci, helper mencoba Hyprlock. Jika tidak ada marker lock yang valid dalam 75 detik, helper root menghentikan `getty@tty1.service` dan berpindah ke TTY2; ini mencegah autologin TTY dibiarkan terbuka.
 7. Meminta konfirmasi terpisah sebelum menambahkan TPM2 token menggunakan PCR 7. Saat diminta, masukkan passphrase LUKS yang sekarang.
 
 TPM2 enrollment bersifat **additive**: script tidak menghapus passphrase/keyslot yang ada. Jika TPM tidak dapat membuka volume, passphrase lama tetap menjadi recovery path dan Plymouth seharusnya menampilkan prompt unlock. Jangan menghapus keyslot passphrase setelah enrollment.
