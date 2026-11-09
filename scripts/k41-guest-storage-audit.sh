@@ -61,7 +61,6 @@ mount_for_path() {
   if [[ -e $path ]]; then
     findmnt -T "$path" -n -o TARGET,SOURCE,FSTYPE,OPTIONS 2>&1 | redact_ids >>"$report" || true
     stat -c 'object_type=%F mode=%a owner_uid=%u group_gid=%g' "$path" >>"$report" 2>&1 || true
-    if have namei; then namei -om "$path" 2>&1 | sed -E 's/[^[:space:]\/]+/component/g' >>"$report" || true; fi
   else note 'PATH MISSING'; fi
 }
 effective_config() {
@@ -167,7 +166,7 @@ section 'systemd-logind effective session policy'
 effective_config systemd/logind.conf 'KillUserProcesses|KillOnlyUsers|KillExcludeUsers|UserStopDelaySec|RemoveIPC|NAutoVTs|ReserveVT|InhibitDelayMaxSec|RuntimeDirectorySize|UserTasksMax'
 section 'Active login sessions (user names omitted)'
 if have loginctl; then
-  loginctl list-sessions --no-legend --no-pager 2>/dev/null | awk '{print "session_id=" $1 " uid=" $2 " seat=" $3 " tty=" $4}' >>"$report" || true
+  loginctl list-sessions --no-legend --no-pager 2>/dev/null | awk '{print "session_id=" $1 " uid=" $2 " seat=" $4 " tty=" $5}' >>"$report" || true
   loginctl show-user guest -p UID -p GID -p State -p Sessions -p Linger -p RuntimePath --no-pager >>"$report" 2>&1 || true
 else note 'loginctl unavailable'; fi
 section 'Guest account and privilege indicators'
