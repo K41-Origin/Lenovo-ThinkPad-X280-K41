@@ -1,0 +1,13 @@
+{
+  "appearance": {
+    "font": {
+      "clock": "Rubik",
+      "workspaces": "Rubik",
+      "headline": { "family": "Rubik" },
+      "title": { "family": "Rubik" },
+      "body": { "family": "Rubik" },
+      "label": { "family": "Rubik" },
+      "mono": { "family": "CaskaydiaCove NF" }
+    }
+  }
+}
