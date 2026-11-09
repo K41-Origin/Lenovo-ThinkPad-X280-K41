@@ -59,11 +59,11 @@ k41_classify_journal() {
   }
   cp -- "$journal_file" "$filtered"
   if [[ $regulatory_db_present == 1 ]]; then
-    grep -Eiv 'Direct firmware load for regulatory\\.db failed' "$filtered" >"$filtered.tmp" || :
+    grep -Eiv 'Direct firmware load for regulatory\.db failed' "$filtered" >"$filtered.tmp" || :
     mv -- "$filtered.tmp" "$filtered"
   fi
 
-  if grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\\.db failed|MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$filtered"; then
+  if grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\.db failed|MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$filtered"; then
     printf '%s\\n' 'actionable'
   elif grep -Eiq 'Failed|failed|failure|QML.*Error|error:' "$filtered"; then
     printf '%s\\n' 'unclassified-error'
