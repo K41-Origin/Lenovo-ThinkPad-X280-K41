@@ -81,7 +81,7 @@ k41_classify_journal() {
     fi
   done
 
-  if grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\\.db failed' "$filtered" ||
+  if grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\.db failed' "$filtered" ||
      (( cpu_attention == 1 )); then
     printf '%s\n' 'actionable'
   elif grep -Eiq 'Failed|failed|failure|QML.*Error|error:' "$filtered"; then
