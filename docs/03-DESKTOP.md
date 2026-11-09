@@ -14,14 +14,21 @@ Exit code 0 bukan acceptance desktop. Lanjutkan ke tahap 4.
 
 ## Tahap 4 — Desktop Environment Begin: functional validation (TAHAP AKTIF)
 
-Validasi pada ThinkPad X280 secara fisik. Collector diagnostik:
+Validasi otomatis dan checklist fisik dijalankan melalui satu entry point, dari terminal di sesi Hyprland sebagai user biasa (tanpa sudo):
 
 ```bash
-bash scripts/test-desktop-x280.sh
-bash scripts/test-caelestia-x280.sh
+bash scripts/k41-desktop-validation.sh
 ```
 
-Jalankan collector sesuai konteks yang diminta script (desktop collector sebagai user desktop dari sesi Hyprland). Lengkapi checklist manual yang dibuat di `reports/desktop-diagnostics/<timestamp>/manual-checklist.md`.
+Script menjalankan dua collector yang sudah ada, lalu meminta konfirmasi sebelum me-restart Caelestia untuk memeriksa cache dan log runtime yang baru. Restart hanya menyentuh instance Caelestia/Quickshell, bukan Hyprland. Simpan pekerjaan sebelum menyetujui restart. Jawab `y` untuk melakukan restart atau Enter/`n` untuk melewatinya.
+
+Semua bukti untuk satu kali eksekusi disatukan dalam satu direktori `reports/desktop-validation/<timestamp>/`:
+- `summary.md`: metadata dan hasil collector.
+- `validation.log`: output collector, hasil restart, cache ownership, log Caelestia, dan user journal.
+- `desktop/` dan `caelestia/`: detail diagnostik masing-masing.
+- `manual-checklist.md`: checklist fisik gabungan.
+
+Selesaikan checklist, lalu tinjau dan redaksi informasi host, perangkat, jaringan, dan log sebelum membagikan laporan. Script tidak melakukan instalasi paket, perubahan konfigurasi, atau perintah privileged. Collector lama tetap dapat dijalankan sendiri untuk diagnosis terarah.
 
 | Area | Kriteria penerimaan |
 |---|---|
