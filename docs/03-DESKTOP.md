@@ -31,6 +31,20 @@ Script bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfig
 - Status failed system/user units, penggunaan RAM, serta journal user/system/kernel dengan triage pola error kritis.
 - Collector diagnostik desktop dan Caelestia yang sudah ada.
 
+Jika hasil menunjukkan WARN/FAIL, jalankan remediation audit otomatis dari terminal sesi yang sama:
+
+```bash
+bash scripts/k41-desktop-repair.sh
+```
+
+Mode default hanya mengaudit dan membuat laporan privat di `reports/desktop-repair/<timestamp>/`; tidak mengubah sistem. Untuk mengizinkan satu tindakan terbatas—mengaktifkan dan menjalankan `bluetooth.service` yang paket/unit-nya memang sudah terpasang—gunakan:
+
+```bash
+bash scripts/k41-desktop-repair.sh --apply
+```
+
+Tindakan tersebut tetap meminta konfirmasi interaktif dan memakai sudo hanya untuk `systemctl enable --now bluetooth.service`. Script tidak memasang/memperbarui paket, tidak mengubah PAM, tidak membuat `scheme.json` atau foto profil palsu, tidak mengubah konfigurasi desktop/kernel/firmware, dan tidak menganggap error HCI sebagai sesuatu yang dapat diselesaikan dengan restart service. Setelah audit/perbaikan, validator dijalankan ulang otomatis; gunakan `--no-validate` hanya bila memang ingin melewati validasi ulang.
+
 Satu run menghasilkan `reports/desktop-validation/<timestamp>/`:
 - `summary.md`: hasil agregat PASS/WARN/FAIL/SKIP dan batas interpretasi.
 - `checks.tsv`: hasil setiap pemeriksaan yang dapat diproses.
