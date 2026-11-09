@@ -60,23 +60,36 @@ PASS atau PASS_WITH_WARNINGS hanya mencerminkan pemeriksaan otomatis yang tersed
 
 **Keputusan gate:** tahap 4 diterima dan ditutup berdasarkan exit code 0, nol FAIL, seluruh WARN ditinjau dan risiko residualnya dicatat, serta konfirmasi manual pairing dari pengguna. Pemeriksaan visual/fisik yang berada di luar cakupan tahap 4 tidak menghalangi dimulainya tahap 5.
 
-### Pengumpulan baseline visual
-
-Agar operator tidak perlu mengetik rangkaian command panjang, gunakan satu script dari terminal sesi Hyprland sebagai user biasa:
-
-```bash
-bash scripts/k41-desktop-baseline.sh
-```
-
-Script bersifat read-only. Script mengumpulkan executable launcher, keybind terkait, opsi wallpaper Hyprland, monitor, dan config errors. Jika `grim` tersedia, script memandu pengambilan screenshot desktop kosong, launcher, dan dashboard Caelestia. Operator cukup menyiapkan tampilan yang diminta lalu menekan Enter. Jika `grim` tidak tersedia, laporan diagnostik tetap dibuat; jangan memasang paket hanya untuk menjalankan audit ini tanpa keputusan terpisah.
-
-Laporan dibuat di `reports/desktop-customization-baseline/<timestamp>/` dengan permission privat (direktori 0700, file 0600). **Jangan push laporan atau screenshot ke repository publik.** Tinjau isi dan kirim laporan/screenshot secara privat di percakapan proyek. Screenshot lock screen tidak diambil menggunakan `grim`; bila diperlukan, gunakan foto kamera eksternal dan kirim secara privat.
-
 ## Tahap 5 — Desktop Environment Customization (DESIGN APPROVED)
 
-Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. Spesifikasi visual, design tokens awal, cakupan, batas performa, workflow, dan acceptance criteria tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md). Dokumen tersebut menjadi acuan utama customization tahap 5.
+Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. Spesifikasi dan design tokens tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md).
 
-Status implementasi: **audit konfigurasi aktif selesai; baseline visual dan implementasi belum dimulai**. Audit `reports/desktop-customization-audit/20261109T084605Z/` telah memastikan Hyprland 0.57.1 menggunakan `~/.config/hypr/hyprland.lua`; `hyprland.conf` adalah file legacy dan tidak boleh dijadikan target perubahan. Runtime values cocok dengan Lua config. Caelestia 2.5.0 berjalan di atas Quickshell 0.3.2. Temuan rinci, batas interpretasi, dan komponen yang belum terverifikasi tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md). Langkah berikutnya adalah baseline screenshot dan verifikasi launcher/runtime binds sebelum merancang patch modular. Jangan menghapus file legacy atau mengubah konfigurasi aktif sebelum backup serta rencana rollback siap. Implementasikan bertahap; hindari efek berat pada Intel UHD 620. Acceptance memerlukan screenshot before/after, review visual pada perangkat, interaksi tetap berfungsi, dan tidak ada regresi fungsional tahap 4.
+Implementasi dilakukan bertahap melalui script repository. Operator tidak perlu mengambil atau mengunggah screenshot; penilaian visual dilakukan langsung pada display ThinkPad X280 oleh pengguna.
+
+### Implementasi pertama — fondasi tampilan
+
+Setelah pull commit yang memuat script dan konfigurasi tahap 5, jalankan sebagai user biasa dari root repository, bukan dengan sudo:
+
+```bash
+bash scripts/k41-apply-desktop-customization.sh
+```
+
+Script meminta konfirmasi, membuat backup privat konfigurasi aktif, lalu:
+- Menambahkan appearance overlay ringan ke `~/.config/hypr/hyprland.lua`.
+- Mengubah launcher `SUPER + R` dari executable `hyprlauncher` yang tidak tersedia menjadi Fuzzel yang sudah terpasang.
+- Mengganti konfigurasi Fuzzel yang memiliki duplikasi blok warna dengan palet Graphite.
+- Mempertahankan keybind lain, input, monitor, workspace, window rules, dan autostart yang sudah ada.
+- Tidak memasang paket atau mengubah konfigurasi Caelestia, GTK, daya, maupun hardware.
+
+Backup disimpan di `~/.local/state/k41/desktop-customization/backups/`. Script menampilkan lokasi backup dan perintah rollback. Untuk rollback:
+
+```bash
+bash scripts/k41-apply-desktop-customization.sh --rollback /path/ke/direktori-backup
+```
+
+Setelah penerapan, jalankan `hyprctl reload` dan uji launcher dengan `SUPER + R`. Jika terjadi masalah, gunakan backup sebelum melanjutkan. Jangan menjalankan script dengan sudo.
+
+**Status implementasi pertama:** konfigurasi dan script telah ditambahkan ke repository; belum diterapkan atau diuji pada perangkat. Tahap berikutnya adalah memvalidasi runtime Hyprland/launcher, lalu melanjutkan integrasi Caelestia dan aplikasi lain. Penerimaan visual tetap menjadi keputusan pengguna berdasarkan tampilan langsung di perangkat.
 
 ## Tahap 6 — Optimization
 
