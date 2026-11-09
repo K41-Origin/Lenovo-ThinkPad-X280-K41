@@ -22,6 +22,11 @@ Ketiga nama script di atas adalah entry point kanonis. Script lama dipertahankan
 2. Ikuti [alur instalasi](docs/02-INSTALLATION.md).
 3. Periksa [status dan gate aktif](docs/06-STATUS.md).
 
+## Status fitur
+
+- Lock screen kustom: implementasi QML dan deployment installer tersedia; validasi runtime, lock/unlock, wake, dan visual pada X280 masih **belum diverifikasi**. Lihat [status proyek](docs/06-STATUS.md) dan [panduan lock screen](docs/08-STAGE-5/02-LOCK-SCREEN.md).
+- **Guest Mode: BELUM DIIMPLEMENTASIKAN.** Fitur ini ditunda sampai lock screen kustom diterima pengguna; belum ada implementasi atau jaminan keamanan Guest Mode.
+
 ## Keselamatan
 
 Tahap 1 bersifat read-only dan memvalidasi kesiapan lingkungan serta target. Tahap 2 **destruktif**: installer menghapus SSD internal target setelah identitas, rencana, dan konfirmasi eksplisit diverifikasi. Backup wajib tersedia. Jangan menebak device path, melewati signature verification, atau menjalankan remote script melalui pipe ke shell.
