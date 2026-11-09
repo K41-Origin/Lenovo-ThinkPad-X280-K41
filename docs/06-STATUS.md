@@ -24,7 +24,9 @@
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
 | `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
 | `scripts/k41-enable-caelestia-autologin.sh` + `scripts/k41-lock-caelestia-after-start.sh` | Opt-in tty1 autologin + verified Caelestia lock startup + Hyprlock fallback | IMPLEMENTED — NOT TESTED ON DEVICE |
-| `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED (`reports/boot-audit/20261109T103304Z/`) |\n| `scripts/k41-configure-boot-experience.sh` | Plymouth BGRT + quiet splash + additive TPM2/PCR7 LUKS enrollment | IMPLEMENTED — NOT TESTED ON DEVICE |\n| `tests/test-boot-experience.sh` | Static syntax and safety-invariant test for boot setup | IMPLEMENTED — NOT RUN IN THIS SESSION |
+| `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED (`reports/boot-audit/20261109T103304Z/`) |
+| `scripts/k41-configure-boot-experience.sh` | Plymouth BGRT + quiet splash + additive TPM2/PCR7 LUKS enrollment | IMPLEMENTED — NOT TESTED ON DEVICE |
+| `tests/test-boot-experience.sh` | Static syntax and safety-invariant test for boot setup | IMPLEMENTED — NOT RUN IN THIS SESSION |
 
 ## Prioritas saat ini
 
