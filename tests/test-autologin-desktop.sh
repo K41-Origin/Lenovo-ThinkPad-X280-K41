@@ -52,4 +52,20 @@ PATH="$fixture/bin:$PATH" K41_LOCK_RETRIES=1 K41_LOCK_INTERVAL=0 bash "$HELPER" 
 grep -Fxq 'shell -s' "$K41_MOCK_LOG" || fail 'helper did not inspect Caelestia IPC'
 grep -Fxq 'shell lock lock' "$K41_MOCK_LOG" || fail 'helper did not invoke lock IPC'
 pass 'Caelestia lock helper passes mocked IPC readiness and lock invocation'
+
+# If Caelestia IPC never exposes the lock target, the helper must fail closed.
+cat >"$fixture/bin/caelestia" <<'MOCK'
+#!/usr/bin/env bash
+[[ $* == 'shell -s' ]] && printf 'target notifs\\n'
+exit 0
+MOCK
+cat >"$fixture/bin/hyprlock" <<'MOCK'
+#!/usr/bin/env bash
+printf 'fallback\\n' >"$K41_FALLBACK_LOG"
+MOCK
+chmod 0755 "$fixture/bin/caelestia" "$fixture/bin/hyprlock"
+export K41_FALLBACK_LOG="$fixture/fallback.log"
+PATH="$fixture/bin:$PATH" K41_LOCK_RETRIES=1 K41_LOCK_INTERVAL=0 bash "$HELPER" || fail 'Hyprlock fallback did not run'
+grep -Fxq 'fallback' "$K41_FALLBACK_LOG" || fail 'helper did not invoke Hyprlock fallback'
+pass 'Caelestia lock helper passes fail-safe Hyprlock fallback fixture'
 printf '%s\n' 'Autologin desktop tests passed.'
