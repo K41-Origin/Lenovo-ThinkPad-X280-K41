@@ -9,7 +9,7 @@ repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 if (( EUID == 0 )); then
   [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die 'Gunakan sudo dari akun desktop biasa (bukan login root langsung).'
-  for cmd in getent chown id; do
+  for cmd in getent chown id install; do
     command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
   done
   passwd_entry="$(getent passwd "$SUDO_USER")" || die "Tidak dapat menemukan akun pemanggil: $SUDO_USER"
@@ -39,18 +39,24 @@ else
   audit_home="$HOME"
 fi
 
-for cmd in date mkdir chmod uname pacman grep awk find pgrep sed git head tr; do
+for cmd in date mkdir chmod uname pacman grep awk find pgrep sed head tr; do
   command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
 done
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_parent="$repo_root/reports"
 report_root="$report_parent/lockscreen-audit"
-mkdir -p -- "$report_root"
 if (( EUID == 0 )); then
-  chown "$audit_uid:$audit_gid" "$report_parent" "$report_root"
-  chmod 0700 "$report_parent" "$report_root"
+  if [[ ! -d $report_parent ]]; then
+    install -d -o "$audit_uid" -g "$audit_gid" -m 0755 -- "$report_parent"
+  fi
+  install -d -o "$audit_uid" -g "$audit_gid" -m 0700 -- "$report_root"
+else
+  mkdir -p -- "$report_root"
+  chmod 0700 "$report_root"
 fi
+
+timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 run_dir="$report_root/$timestamp"
 suffix=0
 while ! mkdir -- "$run_dir" 2>/dev/null; do
@@ -72,7 +78,6 @@ have() { command -v "$1" >/dev/null 2>&1; }
 {
   printf 'K41 Lock Screen Read-only Audit\n'
   printf 'Captured UTC: %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-  printf 'Repository commit: %s\n' "$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf unknown)"
   printf 'Kernel: %s\n' "$(uname -sr)"
   printf 'Session: %s\n' "${XDG_SESSION_TYPE:-unknown}"
   printf 'Wayland session: %s\n' "$([[ -n ${WAYLAND_DISPLAY:-} ]] && printf present || printf absent)"
