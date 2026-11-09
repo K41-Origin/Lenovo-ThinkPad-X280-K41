@@ -245,7 +245,7 @@ Setelah tampilan dan lock screen Caelestia sudah diterima, sesi dapat dibuat oto
 1. systemd `getty@tty1` melakukan autologin hanya untuk akun desktop yang menjalankan installer.
 2. Bash login profile memanggil `start-hyprland` hanya pada TTY1. TTY lain tetap meminta kredensial normal.
 3. Hook `hyprland.start` mempertahankan autostart Caelestia yang sudah ada; jika tidak ditemukan di konfigurasi Hyprland, hook akan memulainya.
-4. Helper menunggu Caelestia IPC siap, lalu memanggil target `lock` / fungsi `lock()`. Boot tidak dianggap selesai hanya karena compositor muncul; lock screen harus benar-benar tampil dan menerima password.
+4. Helper menunggu Caelestia IPC siap, lalu memanggil target `lock` / fungsi `lock()`. Jika IPC tidak siap setelah 45 detik, helper menjalankan `hyprlock` sebagai fail-safe agar sesi tidak dibiarkan terbuka.
 
 Jalankan dari root repository pada sesi desktop yang sedang aktif:
 
@@ -263,4 +263,4 @@ sudo bash scripts/k41-enable-caelestia-autologin.sh --rollback /var/lib/k41/auto
 
 Rollback mengembalikan file yang dikelola ke kondisi sebelum instalasi; reboot diperlukan agar getty membaca ulang konfigurasi.
 
-**Batas keamanan:** agetty autologin melewati password login TTY1. Caelestia lock screen mengunci sesi grafis setelah shell siap, tetapi bukan pengganti enkripsi disk, dan ada jeda boot sebelum lock screen aktif. Jangan gunakan opsi ini pada laptop yang perlu tetap aman ketika hilang/dicuri tanpa full-disk encryption. Jangan tinggalkan sesi autologin terbuka setelah Caelestia gagal start; pertahankan password login di TTY lain dan ketahui prosedur rollback. Pengujian fisik wajib memastikan boot berakhir di Caelestia lock screen, password membuka sesi, dan reboot kedua tidak menghasilkan login loop.
+**Batas keamanan:** agetty autologin melewati password login TTY1. Caelestia lock screen mengunci sesi grafis setelah shell siap, tetapi bukan pengganti enkripsi disk, dan ada jeda boot sebelum lock screen aktif. Jangan gunakan opsi ini pada laptop yang perlu tetap aman ketika hilang/dicuri tanpa full-disk encryption. Jangan tinggalkan sesi autologin terbuka setelah Caelestia gagal start; pertahankan password login di TTY lain dan ketahui prosedur rollback. Pengujian fisik wajib memastikan boot berakhir di Caelestia lock screen, password membuka sesi, fallback `hyprlock` bekerja saat Caelestia gagal, dan reboot kedua tidak menghasilkan login loop.
