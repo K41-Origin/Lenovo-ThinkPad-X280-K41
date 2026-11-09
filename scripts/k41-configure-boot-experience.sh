@@ -248,6 +248,6 @@ fi
 info "The animated K41 Plymouth theme is configured and the UKI was rebuilt."
 info "TPM2 token is present in LUKS2 metadata; the original passphrase remains available."
 info "Config backup: $backup_dir"
-info "LUKS header backup: $header_backup"
+info "LUKS header backup: skipped by request; no external header backup was created."
 warn "Physical reboot testing is still required. No LUKS header backup was created; keep the existing passphrase safe."
 warn "If TPM2 unlock fails, enter the existing passphrase through the Plymouth prompt; press Esc to reveal boot messages."
