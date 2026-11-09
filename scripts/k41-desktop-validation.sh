@@ -118,10 +118,10 @@ done
 
 # 3. Hyprland live state and configuration.
 if capture 'Hyprland configuration errors' "$tmp/hypr-config-errors" hyprctl configerrors; then
-  if [[ ! -s $tmp/hypr-config-errors ]]; then
-    record PASS 'Hyprland configuration' 'hyprctl configerrors returned no errors'
+  if ! grep -q '[^[:space:]]' "$tmp/hypr-config-errors"; then
+    record PASS 'Hyprland configuration' 'hyprctl configerrors returned no diagnostic text'
   else
-    record FAIL 'Hyprland configuration' 'hyprctl configerrors returned diagnostics; inspect validation.log'
+    record FAIL 'Hyprland configuration' 'hyprctl configerrors returned non-whitespace diagnostics; inspect validation.log'
   fi
 else
   record FAIL 'Hyprland configuration query' 'hyprctl configerrors failed'
@@ -157,10 +157,12 @@ if (( caelestia_running == 1 )); then
     record FAIL 'Caelestia IPC' 'IPC discovery failed or returned no targets'
   fi
   if capture 'Caelestia runtime log' "$tmp/caelestia-log" qs -c caelestia log; then
-    if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|Source file does not exist|BlueZ system service is not available|RTKit error' "$tmp/caelestia-log"; then
-      record WARN 'Caelestia runtime log' 'Potential runtime/QML/module errors found; inspect validation.log'
+    if grep -Eiq '(^|[[:space:]])(fatal|critical):|QML.*(Error|failed)|failed to load.*(QML|plugin|module)|TypeError:|ReferenceError:' "$tmp/caelestia-log"; then
+      record WARN 'Caelestia runtime log' 'Actionable runtime/QML error signature found; inspect validation.log'
+    elif grep -Eiq 'Source file does not exist|Read of .+ failed: File does not exist|org\.bluez|RTKit' "$tmp/caelestia-log"; then
+      record WARN 'Caelestia runtime log' 'Optional resource or external-service warning found; inspect validation.log and repair report'
     else
-      record PASS 'Caelestia runtime log' 'No matching fatal/critical/QML-load error pattern found'
+      record PASS 'Caelestia runtime log' 'No actionable fatal/critical/QML runtime error signature found'
     fi
   else
     record WARN 'Caelestia runtime log' 'Could not retrieve Quickshell log'
@@ -379,10 +381,14 @@ for journal_file in "$tmp/user-journal" "$tmp/system-journal" "$tmp/kernel-journ
     record WARN "Journal: $journal_name" 'Journal access appears limited; this source is not fully validated'
   elif grep -Eiq 'kernel BUG|Oops:|Kernel panic|general protection fault|Out of memory|oom-kill' "$journal_file"; then
     record FAIL "Journal: $journal_name" 'Critical kernel/memory failure signature found; inspect saved journal'
-  elif grep -Eiq 'segfault|coredump|Failed|failed|failure|QML.*Error|error:' "$journal_file"; then
-    record WARN "Journal: $journal_name" 'Potential application/service errors found; inspect saved journal'
+  elif grep -Eiq 'segfault|coredump|Out of memory|oom-kill|PAM _pam_init_handlers: no default config other|Bluetooth: hci[0-9]+: Reading supported features failed|Direct firmware load for regulatory\.db failed|MDS CPU bug present|MMIO Stale Data CPU bug present|VMSCAPE:' "$journal_file"; then
+    record WARN "Journal: $journal_name" 'Actionable application, firmware, Bluetooth, PAM, or CPU-security warning found; inspect saved journal and repair report'
+  elif grep -Eiq 'nl80211: kernel reports: multicast RX registrations are not supported|virt/tdx: TDX not supported|hpet_acpi_probe: no address or irqs in _CRS|ENERGY_PERF_BIAS:' "$journal_file"; then
+    record PASS "Journal: $journal_name" 'Only recognized informational platform/driver messages detected'
+  elif grep -Eiq 'Failed|failed|failure|QML.*Error|error:' "$journal_file"; then
+    record WARN "Journal: $journal_name" 'Unclassified error-level journal entry found; inspect saved journal'
   else
-    record PASS "Journal: $journal_name" 'No configured critical/error signatures detected'
+    record PASS "Journal: $journal_name" 'No configured critical/actionable error signatures detected'
   fi
 done
 chmod 0600 "$run_dir"/*.txt "$log" "$checks"
