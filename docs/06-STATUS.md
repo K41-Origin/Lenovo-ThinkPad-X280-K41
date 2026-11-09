@@ -27,7 +27,7 @@
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5: Desktop Customization.**
+**CURRENT — Tahap 5: Desktop Customization / boot audit.**\n\nCollector audit boot telah ditambahkan. Jalankan pada laptop, review report privasi, lalu commit/push hasilnya sebelum keputusan desain Plymouth dan TPM2 dibuat.
 
 Arah desain telah disetujui dan perubahan tampilan utama telah diterapkan pada perangkat. Langkah aktif berikutnya adalah uji workflow boot otomatis: pull commit, review script, jalankan installer opt-in, reboot, pastikan Caelestia langsung terkunci, uji password unlock, dan validasi rollback. Workflow baru berstatus IMPLEMENTED, belum TESTED/VERIFIED pada perangkat.
 
