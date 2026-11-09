@@ -1,0 +1,1094 @@
+
+===== Kernel command line =====
+COMMAND: cat /proc/cmdline
+rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw
+COMMAND EXIT: 0
+
+===== CPU model and topology =====
+COMMAND: lscpu
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           39 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  8
+On-line CPU(s) list:                     0-7
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
+CPU family:                              6
+Model:                                   142
+Thread(s) per core:                      2
+Core(s) per socket:                      4
+Socket(s):                               1
+Stepping:                                10
+Microcode version:                       0xf6
+CPU(s) scaling MHz:                      25%
+CPU max MHz:                             3400.0000
+CPU min MHz:                             400.0000
+BogoMIPS:                                3600.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb pti ssbd ibrs ibpb stibp tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust sgx bmi1 avx2 smep bmi2 erms invpcid mpx rdseed adx smap clflushopt intel_pt xsaveopt xsavec xgetbv1 xsaves dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp vnmi md_clear flush_l1d arch_capabilities
+Virtualization:                          VT-x
+L1d cache:                               128 KiB (4 instances)
+L1i cache:                               128 KiB (4 instances)
+L2 cache:                                1 MiB (4 instances)
+L3 cache:                                6 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-7
+Vulnerability Gather data sampling:      Mitigation; Microcode
+Vulnerability Ghostwrite:                Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             KVM: Mitigation: Split huge pages
+Vulnerability L1tf:                      Mitigation; PTE Inversion; VMX conditional cache flushes, SMT vulnerable
+Vulnerability Mds:                       Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Meltdown:                  Mitigation; PTI
+Vulnerability Mmio stale data:           Mitigation; Clear CPU buffers; SMT vulnerable
+Vulnerability Old microcode:             Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Mitigation; IBRS
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; IBRS; IBPB conditional; STIBP conditional; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                     Mitigation; Microcode
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Not affected
+Vulnerability Vmscape:                   Mitigation; IBPB before exit to userspace
+COMMAND EXIT: 0
+
+===== CPU vulnerability mitigations =====
+COMMAND: bash -c for\ f\ in\ /sys/devices/system/cpu/vulnerabilities/\*\;\ do\ \[\[\ -r\ \$f\ \]\]\ \|\|\ continue\;\ printf\ \"%s:\ \"\ \"\$\{f##\*/\}\"\;\ cat\ \"\$f\"\;\ done
+gather_data_sampling: Mitigation: Microcode
+ghostwrite: Not affected
+indirect_target_selection: Not affected
+itlb_multihit: KVM: Mitigation: Split huge pages
+l1tf: Mitigation: PTE Inversion; VMX: conditional cache flushes, SMT vulnerable
+mds: Mitigation: Clear CPU buffers; SMT vulnerable
+meltdown: Mitigation: PTI
+mmio_stale_data: Mitigation: Clear CPU buffers; SMT vulnerable
+old_microcode: Not affected
+reg_file_data_sampling: Not affected
+retbleed: Mitigation: IBRS
+spec_rstack_overflow: Not affected
+spec_store_bypass: Mitigation: Speculative Store Bypass disabled via prctl
+spectre_v1: Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+spectre_v2: Mitigation: IBRS; IBPB: conditional; STIBP: conditional; RSB filling; PBRSB-eIBRS: Not affected; BHI: Not affected
+srbds: Mitigation: Microcode
+tsa: Not affected
+tsx_async_abort: Not affected
+vmscape: Mitigation: IBPB before exit to userspace
+COMMAND EXIT: 0
+
+===== PCI devices and bound drivers =====
+COMMAND: lspci -nnk
+00:00.0 Host bridge [0600]: Intel Corporation Xeon E3-1200 v6/7th Gen Core Processor Host Bridge/DRAM Registers [8086:5914] (rev 08)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: skl_uncore
+00:02.0 VGA compatible controller [0300]: Intel Corporation Kaby Lake-R GT2 [UHD Graphics 620] [8086:5917] (rev 07)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: i915
+	Kernel modules: i915
+00:04.0 Signal processing controller [1180]: Intel Corporation Xeon E3-1200 v5/E3-1500 v5/6th Gen Core Processor Thermal Subsystem [8086:1903] (rev 08)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: proc_thermal
+	Kernel modules: processor_thermal_device_pci_legacy
+00:08.0 System peripheral [0880]: Intel Corporation Xeon E3-1200 v5/v6 / E3-1500 v5 / 6th/7th/8th Gen Core Processor Gaussian Mixture Model [8086:1911]
+	Subsystem: Lenovo Device [17aa:2256]
+00:14.0 USB controller [0c03]: Intel Corporation Sunrise Point-LP USB 3.0 xHCI Controller [8086:9d2f] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: xhci_hcd
+	Kernel modules: xhci_pci
+00:14.2 Signal processing controller [1180]: Intel Corporation Sunrise Point-LP Thermal subsystem [8086:9d31] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: intel_pch_thermal
+	Kernel modules: intel_pch_thermal
+00:16.0 Communication controller [0780]: Intel Corporation Sunrise Point-LP CSME HECI #1 [8086:9d3a] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: mei_me
+	Kernel modules: mei_me
+00:1c.0 PCI bridge [0604]: Intel Corporation Sunrise Point-LP PCI Express Root Port #1 [8086:9d10] (rev f1)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+00:1c.2 PCI bridge [0604]: Intel Corporation Sunrise Point-LP PCI Express Root Port #3 [8086:9d12] (rev f1)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+00:1c.4 PCI bridge [0604]: Intel Corporation Sunrise Point-LP PCI Express Root Port #5 [8086:9d14] (rev f1)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+00:1f.0 ISA bridge [0601]: Intel Corporation Sunrise Point LPC/eSPI Controller [8086:9d4e] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+00:1f.2 Memory controller [0580]: Intel Corporation Sunrise Point-LP PMC [8086:9d21] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+00:1f.3 Audio device [0403]: Intel Corporation Sunrise Point-LP HD Audio [8086:9d71] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: snd_hda_intel
+	Kernel modules: snd_soc_avs, snd_hda_intel
+00:1f.4 SMBus [0c05]: Intel Corporation Sunrise Point-LP SMBus [8086:9d23] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: i801_smbus
+	Kernel modules: i2c_i801
+00:1f.6 Ethernet controller [0200]: Intel Corporation Ethernet Connection (4) I219-V [8086:15d8] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: e1000e
+	Kernel modules: e1000e
+02:00.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+03:00.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+03:01.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+03:02.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+04:00.0 System peripheral [0880]: Intel Corporation JHL6240 Thunderbolt 3 NHI (Low Power) [Alpine Ridge LP 2016] [8086:15bf] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: thunderbolt
+	Kernel modules: thunderbolt
+3a:00.0 USB controller [0c03]: Intel Corporation JHL6240 Thunderbolt 3 USB 3.1 Controller (Low Power) [Alpine Ridge LP 2016] [8086:15c1] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: xhci_hcd
+	Kernel modules: xhci_pci
+3b:00.0 Network controller [0280]: Intel Corporation Wireless 8265 / 8275 [8086:24fd] (rev 78)
+	Subsystem: Intel Corporation Dual Band Wireless-AC 8265 [Windstorm Peak] [8086:0010]
+	Kernel driver in use: iwlwifi
+	Kernel modules: iwlwifi
+3c:00.0 Non-Volatile memory controller [0108]: Sandisk Corp SanDisk Extreme Pro / WD Black SN750 / PC SN730 / Red SN700 NVMe SSD [15b7:5006]
+	Subsystem: Sandisk Corp SanDisk Extreme Pro / WD Black SN750 / PC SN730 / Red SN700 NVMe SSD [15b7:5006]
+	Kernel driver in use: nvme
+	Kernel modules: nvme
+COMMAND EXIT: 0
+
+===== USB device inventory =====
+SKIPPED: command not installed (lsusb)
+
+===== Loaded kernel modules relevant to desktop =====
+COMMAND: bash -c grep\ -E\ \"\^\(i915\|xe\|iwlwifi\|btusb\|bluetooth\|thinkpad_acpi\|snd_hda_intel\|snd_sof\|nvme\)\ \"\ /proc/modules\ \|\|\ true
+snd_hda_intel 73728 1 - Live 0x0000000000000000
+btusb 86016 0 - Live 0x0000000000000000
+iwlwifi 622592 1 iwlmvm, Live 0x0000000000000000
+bluetooth 1220608 34 rfcomm,bnep,btusb,btmtk,btrtl,btbcm,btintel, Live 0x0000000000000000
+i915 5099520 35 - Live 0x0000000000000000
+nvme 77824 2 - Live 0x0000000000000000
+thinkpad_acpi 200704 0 - Live 0x0000000000000000
+COMMAND EXIT: 0
+
+===== Firmware package metadata =====
+COMMAND: pacman -Qi linux-firmware
+Name            : linux-firmware
+Version         : 20261019-1
+Description     : Firmware files for Linux - Default set
+Architecture    : any
+URL             : https://gitlab.com/kernel-firmware/linux-firmware
+Licenses        : CC0-1.0
+Groups          : None
+Provides        : None
+Depends On      : linux-firmware-amd  linux-firmware-amdgpu  linux-firmware-atheros  linux-firmware-broadcom  linux-firmware-cirrus  linux-firmware-intel  linux-firmware-mediatek  linux-firmware-nvidia  linux-firmware-other  linux-firmware-radeon  linux-firmware-realtek  linux-firmware-ti
+Optional Deps   : linux-firmware-liquidio: Firmware for Cavium LiquidIO server adapters
+                  linux-firmware-marvell: Firmware for Marvell devices
+                  linux-firmware-mellanox: Firmware for Mellanox Spectrum switches
+                  linux-firmware-nfp: Firmware for Netronome Flow Processors
+                  linux-firmware-qcom: Firmware for Qualcomm SoCs
+                  linux-firmware-qlogic: Firmware for QLogic devices
+Required By     : None
+Optional For    : linux
+Conflicts With  : None
+Replaces        : None
+Installed Size  : 0.00 B
+Packager        : Jan Alexander Steffens (heftig) <heftig@archlinux.org>
+Build Date      : Tue Oct 20 06:57:43 2026
+Install Date    : Mon Nov  9 01:57:44 2026
+Install Reason  : Explicitly installed
+Install Script  : No
+Validated By    : Signature
+
+COMMAND EXIT: 0
+
+===== Regulatory database package ownership =====
+COMMAND: pacman -Qo /usr/lib/firmware/regulatory.db
+/usr/lib/firmware/regulatory.db is owned by wireless-regdb 2026.09.03-1
+COMMAND EXIT: 0
+
+===== Bluetooth package metadata =====
+COMMAND: pacman -Qi bluez bluez-utils
+Name            : bluez
+Version         : 5.87-2
+Description     : Daemons for the bluetooth protocol stack
+Architecture    : x86_64
+URL             : http://www.bluez.org/
+Licenses        : GPL-2.0-only
+Groups          : None
+Provides        : None
+Depends On      : systemd-libs  dbus  glib2  alsa-lib  glibc
+Optional Deps   : None
+Required By     : None
+Optional For    : networkmanager
+Conflicts With  : None
+Replaces        : None
+Installed Size  : 1770.23 KiB
+Packager        : Robin Candau <antiz@archlinux.org>
+Build Date      : Sat Jul  4 18:24:16 2026
+Install Date    : Mon Nov  9 13:44:31 2026
+Install Reason  : Explicitly installed
+Install Script  : No
+Validated By    : Signature
+
+Name            : bluez-utils
+Version         : 5.87-2
+Description     : Development and debugging utilities for the bluetooth protocol stack
+Architecture    : x86_64
+URL             : http://www.bluez.org/
+Licenses        : GPL-2.0-only
+Groups          : None
+Provides        : bluez-plugins
+Depends On      : dbus  systemd-libs  glib2  glibc  readline
+Optional Deps   : ell: for btpclient
+                  perl: for parse_companies.pl [installed]
+Required By     : None
+Optional For    : None
+Conflicts With  : None
+Replaces        : bluez-plugins
+Installed Size  : 3.69 MiB
+Packager        : Robin Candau <antiz@archlinux.org>
+Build Date      : Sat Jul  4 18:24:16 2026
+Install Date    : Mon Nov  9 13:44:31 2026
+Install Reason  : Explicitly installed
+Install Script  : No
+Validated By    : Signature
+
+COMMAND EXIT: 0
+
+===== Bluetooth service properties =====
+COMMAND: systemctl show bluetooth.service -p LoadState -p ActiveState -p SubState -p UnitFileState -p FragmentPath
+LoadState=loaded
+ActiveState=active
+SubState=running
+FragmentPath=/usr/lib/systemd/system/bluetooth.service
+UnitFileState=enabled
+COMMAND EXIT: 0
+
+===== NetworkManager service properties =====
+COMMAND: systemctl show NetworkManager.service -p LoadState -p ActiveState -p SubState -p UnitFileState
+LoadState=loaded
+ActiveState=active
+SubState=running
+UnitFileState=enabled
+COMMAND EXIT: 0
+
+===== Power profile service properties =====
+COMMAND: systemctl show power-profiles-daemon.service -p LoadState -p ActiveState -p SubState -p UnitFileState
+LoadState=loaded
+ActiveState=active
+SubState=running
+UnitFileState=disabled
+COMMAND EXIT: 0
+
+===== Thermal hardware monitor inventory =====
+COMMAND: bash -c for\ d\ in\ /sys/class/hwmon/hwmon\*\;\ do\ \[\[\ -d\ \$d\ \]\]\ \|\|\ continue\;\ printf\ \"DEVICE\ %s\\n\"\ \"\$d\"\;\ \[\[\ -r\ \$d/name\ \]\]\ \&\&\ cat\ \"\$d/name\"\;\ for\ f\ in\ \"\$d\"/temp\*_input\ \"\$d\"/fan\*_input\ \"\$d\"/power\*_input\;\ do\ \[\[\ -r\ \$f\ \]\]\ \|\|\ continue\;\ printf\ \"%s=\"\ \"\$\{f##\*/\}\"\;\ cat\ \"\$f\"\;\ done\;\ done
+DEVICE /sys/class/hwmon/hwmon0
+AC
+DEVICE /sys/class/hwmon/hwmon1
+acpitz
+temp1_input=40000
+DEVICE /sys/class/hwmon/hwmon2
+BAT0
+power1_input=3263000
+DEVICE /sys/class/hwmon/hwmon3
+nvme
+temp1_input=24850
+DEVICE /sys/class/hwmon/hwmon4
+thinkpad
+temp1_input=40000
+temp2_input=cat: /sys/class/hwmon/hwmon4/temp2_input: No such device or address
+temp3_input=0
+temp4_input=0
+temp5_input=0
+temp6_input=0
+temp7_input=0
+temp8_input=0
+fan1_input=0
+DEVICE /sys/class/hwmon/hwmon5
+pch_skylake
+temp1_input=42000
+DEVICE /sys/class/hwmon/hwmon6
+ucsi_source_psy_USBC000:001
+DEVICE /sys/class/hwmon/hwmon7
+coretemp
+temp1_input=42000
+temp2_input=42000
+temp3_input=42000
+temp4_input=41000
+temp5_input=42000
+DEVICE /sys/class/hwmon/hwmon8
+iwlwifi_1
+temp1_input=35000
+DEVICE /sys/class/hwmon/hwmon9
+ucsi_source_psy_USBC000:002
+COMMAND EXIT: 0
+
+===== ThinkPad ACPI interface =====
+COMMAND: bash -c for\ f\ in\ /sys/devices/platform/thinkpad_acpi/\{fan_control\,hotkey_mask\,hotkey_all_mask\}\;\ do\ \[\[\ -r\ \$f\ \]\]\ \|\|\ continue\;\ printf\ \"%s=\"\ \"\$f\"\;\ cat\ \"\$f\"\;\ done
+/sys/devices/platform/thinkpad_acpi/hotkey_mask=0xff8c7ffb
+/sys/devices/platform/thinkpad_acpi/hotkey_all_mask=0xfffffffb
+COMMAND EXIT: 0
+
+===== PAM other policy metadata =====
+COMMAND: stat /etc/pam.d/other
+  File: /etc/pam.d/other
+  Size: 274       	Blocks: 8          IO Block: 4096   regular file
+Device: 253,0	Inode: 5767247     Links: 1
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2026-11-09 01:58:51.585622244 +0700
+Modify: 2026-06-16 11:40:03.000000000 +0700
+Change: 2026-11-09 01:57:35.405444507 +0700
+ Birth: 2026-11-09 01:57:35.405268266 +0700
+COMMAND EXIT: 0
+
+===== Relevant installed package versions =====
+COMMAND: pacman -Q hyprland quickshell-git caelestia-shell caelestia-cli pipewire wireplumber bluez bluez-utils linux-firmware
+hyprland 0.57.1-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+caelestia-shell 2.5.0-1
+caelestia-cli 1.1.3-1
+pipewire 1:1.6.10-1
+wireplumber 0.5.18-1
+bluez 5.87-2
+bluez-utils 5.87-2
+linux-firmware 20261019-1
+COMMAND EXIT: 0
+
+===== Systemd failed unit details =====
+COMMAND: systemctl --failed --no-pager --full
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+COMMAND EXIT: 0
+
+===== User systemd failed unit details =====
+COMMAND: systemctl --user --failed --no-pager --full
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+COMMAND EXIT: 0
+
+===== CPU SMT state and topology =====
+COMMAND: bash -c $'\n  printf "smt_control="; cat /sys/devices/system/cpu/smt/control 2>/dev/null || printf "unavailable\\\\n"\n  printf "smt_active="; cat /sys/devices/system/cpu/smt/active 2>/dev/null || printf "unavailable\\\\n"\n  printf "\\\\nCPU topology:\\\\n"\n  lscpu -e=CPU,CORE,SOCKET,ONLINE 2>&1 || true\n'
+smt_control=on
+smt_active=1
+
+CPU topology:
+CPU CORE SOCKET ONLINE
+  0    0      0    yes
+  1    1      0    yes
+  2    2      0    yes
+  3    3      0    yes
+  4    0      0    yes
+  5    1      0    yes
+  6    2      0    yes
+  7    3      0    yes
+COMMAND EXIT: 0
+
+===== CPU microcode revision and relevant flags =====
+COMMAND: bash -c $'\n  grep -m1 "^model name" /proc/cpuinfo || true\n  grep -m1 "^microcode" /proc/cpuinfo || true\n  grep -m1 "^flags" /proc/cpuinfo || true\n  printf "\\\\nPer-CPU microcode revisions:\\\\n"\n  awk -F ": " "/^processor[[:space:]]*:|^microcode[[:space:]]*:/ {print}" /proc/cpuinfo\n'
+model name	: Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
+microcode	: 0xf6
+flags		: fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb pti ssbd ibrs ibpb stibp tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust sgx bmi1 avx2 smep bmi2 erms invpcid mpx rdseed adx smap clflushopt intel_pt xsaveopt xsavec xgetbv1 xsaves dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp vnmi md_clear flush_l1d arch_capabilities
+
+Per-CPU microcode revisions:
+processor	: 0
+microcode	: 0xf6
+processor	: 1
+microcode	: 0xf6
+processor	: 2
+microcode	: 0xf6
+processor	: 3
+microcode	: 0xf6
+processor	: 4
+microcode	: 0xf6
+processor	: 5
+microcode	: 0xf6
+processor	: 6
+microcode	: 0xf6
+processor	: 7
+microcode	: 0xf6
+COMMAND EXIT: 0
+
+===== CPU vulnerability sysfs detail =====
+COMMAND: bash -c $'\n  for f in /sys/devices/system/cpu/vulnerabilities/*; do\n    [[ -r $f ]] || continue\n    printf "%s: " "${f##*/}"\n    cat "$f"\n  done\n'
+gather_data_sampling: Mitigation: Microcode
+ghostwrite: Not affected
+indirect_target_selection: Not affected
+itlb_multihit: KVM: Mitigation: Split huge pages
+l1tf: Mitigation: PTE Inversion; VMX: conditional cache flushes, SMT vulnerable
+mds: Mitigation: Clear CPU buffers; SMT vulnerable
+meltdown: Mitigation: PTI
+mmio_stale_data: Mitigation: Clear CPU buffers; SMT vulnerable
+old_microcode: Not affected
+reg_file_data_sampling: Not affected
+retbleed: Mitigation: IBRS
+spec_rstack_overflow: Not affected
+spec_store_bypass: Mitigation: Speculative Store Bypass disabled via prctl
+spectre_v1: Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+spectre_v2: Mitigation: IBRS; IBPB: conditional; STIBP: conditional; RSB filling; PBRSB-eIBRS: Not affected; BHI: Not affected
+srbds: Mitigation: Microcode
+tsa: Not affected
+tsx_async_abort: Not affected
+vmscape: Mitigation: IBPB before exit to userspace
+COMMAND EXIT: 0
+
+===== Bluetooth controller summary =====
+COMMAND: bash -c timeout\ 12\ bluetoothctl\ show\ \|\ sed\ -E\ \"s/Controller\ \[0-9A-Fa-f:\]\{17\}/Controller\ \[REDACTED\]/\"
+Controller [REDACTED] (public)
+	Manufacturer: 0x0002 (2)
+	Version: 0x08 (8)
+	Name: x280
+	Alias: x280
+	Class: 0x006c010c (7078156)
+	Powered: yes
+	PowerState: on
+	Discoverable: no
+	DiscoverableTimeout: 0x000000b4 (180)
+	Pairable: no
+	UUID: A/V Remote Control        (0000110e-0000-1000-8000-00805f9b34fb)
+	UUID: Handsfree Audio Gateway   (0000111f-0000-1000-8000-00805f9b34fb)
+	UUID: PnP Information           (00001200-0000-1000-8000-00805f9b34fb)
+	UUID: Audio Sink                (0000110b-0000-1000-8000-00805f9b34fb)
+	UUID: Audio Source              (0000110a-0000-1000-8000-00805f9b34fb)
+	UUID: A/V Remote Control Target (0000110c-0000-1000-8000-00805f9b34fb)
+	UUID: Generic Access Profile    (00001800-0000-1000-8000-00805f9b34fb)
+	UUID: Generic Attribute Profile (00001801-0000-1000-8000-00805f9b34fb)
+	UUID: Device Information        (0000180a-0000-1000-8000-00805f9b34fb)
+	UUID: Vendor specific           (03b80e5a-ede8-4b33-a751-6ce34ec4c700)
+	UUID: Handsfree                 (0000111e-0000-1000-8000-00805f9b34fb)
+	Modalias: usb:v1D6Bp0246d0557
+	Discovering: no
+	Roles: central
+	Roles: peripheral
+Advertising Features:
+	ActiveInstances: 0x00 (0)
+	SupportedInstances: 0x05 (5)
+	SupportedIncludes: tx-power
+	SupportedIncludes: appearance
+	SupportedIncludes: local-name
+	SupportedCapabilities.MaxAdvLen: 0x1f (31)
+	SupportedCapabilities.MaxScnRspLen: 0x1f (31)
+COMMAND EXIT: 0
+
+===== Bluetooth management controller information =====
+COMMAND: bash -c timeout\ 12\ btmgmt\ info\ 2\>\&1\ \|\ sed\ -E\ \"s/\(\[\[:xdigit:\]\]\{2\}:\)\{5\}\[\[:xdigit:\]\]\{2\}/\[REDACTED\]/g\"
+Index list with 1 item
+hci0:	Primary controller
+	addr [REDACTED] version 8 manufacturer 2 class 0x6c010c
+	supported settings: powered connectable fast-connectable discoverable bondable link-security ssp br/edr le advertising secure-conn debug-keys privacy configuration static-addr phy-configuration wide-band-speech ll-privacy 
+	current settings: powered connectable ssp br/edr le secure-conn wide-band-speech ll-privacy 
+	name x280
+	short name 
+hci0:	Configuration options
+	supported options: public-address 
+	missing options: 
+COMMAND EXIT: 0
+
+===== Bluetooth rfkill state =====
+COMMAND: rfkill list bluetooth
+0: tpacpi_bluetooth_sw: Bluetooth
+	Soft blocked: no
+	Hard blocked: no
+3: hci0: Bluetooth
+	Soft blocked: no
+	Hard blocked: no
+COMMAND EXIT: 0
+
+===== BlueZ adapter D-Bus state =====
+COMMAND: bash -c $'\n  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Powered 2>&1 || true\n  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Pairable 2>&1 || true\n  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 PairableTimeout 2>&1 || true\n  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Discoverable 2>&1 || true\n  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 DiscoverableTimeout 2>&1 || true\n  busctl --system get-property org.bluez /org/bluez/hci0 org.bluez.Adapter1 Discovering 2>&1 || true\n'
+b true
+b false
+u 0
+b false
+u 180
+b false
+COMMAND EXIT: 0
+
+===== BlueZ adapter configuration overrides =====
+COMMAND: bash -c $'\n  for f in /etc/bluetooth/main.conf /etc/bluetooth/main.conf.d/*.conf; do\n    [[ -r $f ]] || continue\n    printf "\\\\n===== %s =====\\\\n" "$f"\n    awk "/^[[:space:]]*\\\\[/ {print; next} /^[[:space:]]*(DiscoverableTimeout|PairableTimeout|AutoEnable|ControllerMode|Privacy|FastConnectable|Experimental|KernelExperimental)[[:space:]]*=/ {print}" "$f"\n  done\n'
+
+===== /etc/bluetooth/main.conf =====
+[General]
+[BR]
+[LE]
+[GATT]
+[ChannelSounding]
+[CSIS]
+[AVDTP]
+[AVRCP]
+[Policy]
+[AdvMon]
+COMMAND EXIT: 0
+
+===== Bluetooth daemon journal =====
+COMMAND: bash -c journalctl\ -u\ bluetooth.service\ -b\ --no-pager\ -n\ 300\ 2\>\&1\ \|\ sed\ -E\ \"s/\(\[\[:xdigit:\]\]\{2\}:\)\{5\}\[\[:xdigit:\]\]\{2\}/\[REDACTED\]/g\"
+Nov 09 14:26:33 x280 systemd[1]: Starting Bluetooth service...
+Nov 09 14:26:33 x280 bluetoothd[561]: Bluetooth daemon 5.87
+Nov 09 14:26:33 x280 bluetoothd[561]: Starting SDP server
+Nov 09 14:26:33 x280 systemd[1]: Started Bluetooth service.
+Nov 09 14:26:33 x280 bluetoothd[561]: Bluetooth management interface 1.23 initialized
+Nov 09 14:26:34 x280 bluetoothd[561]: Battery Provider Manager created
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/ldac
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aptx_hd
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_hd
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aptx
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aac
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aac
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_g
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_g
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/sbc
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/sbc
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_1
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_0
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_duplex_1
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_duplex_0
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/faststream
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/faststream_duplex
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_05
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_05
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_05_duplex
+Nov 09 14:26:51 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_05_duplex
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/ldac
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aptx_hd
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_hd
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aptx
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aac
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aac
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_g
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_g
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/sbc
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/sbc
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_1
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_0
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_duplex_1
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_duplex_0
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/faststream
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/faststream_duplex
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_05
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_05
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_05_duplex
+Nov 09 14:47:29 x280 bluetoothd[561]: Endpoint unregistered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_05_duplex
+Nov 09 14:47:29 x280 bluetoothd[561]: Battery Provider Manager destroyed
+Nov 09 14:47:31 x280 bluetoothd[561]: Battery Provider Manager created
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/ldac
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aptx_hd
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_hd
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aptx
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/aac
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aac
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_g
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_g
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/sbc
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/sbc
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_1
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_0
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_duplex_1
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/aptx_ll_duplex_0
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/faststream
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/faststream_duplex
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_05
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_05
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSink/opus_05_duplex
+Nov 09 14:47:31 x280 bluetoothd[561]: Endpoint registered: sender=:1.24 path=/MediaEndpoint/A2DPSource/opus_05_duplex
+COMMAND EXIT: 0
+
+===== Bluetooth HCI sysfs and udev identity =====
+COMMAND: bash -c $'\n  for hci in /sys/class/bluetooth/hci*; do\n    [[ -e $hci ]] || continue\n    printf "HCI=%s\\\\n" "$hci"\n    printf "DEVICE_PATH="\n    readlink -f "$hci/device" 2>/dev/null || true\n    udevadm info --query=all --path="$hci/device" 2>&1 || true\n    for attr in name type modalias; do\n      [[ -r $hci/$attr ]] || continue\n      printf "%s=" "$attr"\n      cat "$hci/$attr"\n    done\n  done\n'
+HCI=/sys/class/bluetooth/hci0
+DEVICE_PATH=/sys/devices/pci0000:00/0000:00:14.0/usb1/1-7/1-7:1.0
+P: /devices/pci0000:00/0000:00:14.0/usb1/1-7/1-7:1.0
+M: 1-7:1.0
+R: 0
+J: +usb:1-7:1.0
+U: usb
+T: usb_interface
+V: btusb
+E: DEVPATH=/devices/pci0000:00/0000:00:14.0/usb1/1-7/1-7:1.0
+E: DEVTYPE=usb_interface
+E: DRIVER=btusb
+E: PRODUCT=8087/a2b/10
+E: TYPE=224/1/1
+E: INTERFACE=224/1/1
+E: MODALIAS=usb:v8087p0A2Bd0010dcE0dsc01dp01icE0isc01ip01in00
+E: SUBSYSTEM=usb
+E: USEC_INITIALIZED=14220305
+E: ID_USB_CLASS_FROM_DATABASE=Wireless
+E: ID_USB_SUBCLASS_FROM_DATABASE=Radio Frequency
+E: ID_USB_PROTOCOL_FROM_DATABASE=Bluetooth
+E: ID_VENDOR_FROM_DATABASE=Intel Corp.
+E: ID_MODEL_FROM_DATABASE=Bluetooth wireless interface
+E: ID_PATH_WITH_USB_REVISION=pci-0000:00:14.0-usbv2-0:7:1.0
+E: ID_PATH=pci-0000:00:14.0-usb-0:7:1.0
+E: ID_PATH_TAG=pci-0000_00_14_0-usb-0_7_1_0
+
+COMMAND EXIT: 0
+
+===== Bluetooth driver module metadata =====
+COMMAND: modinfo btusb
+filename:       /lib/modules/7.2.14-arch1-1/kernel/drivers/bluetooth/btusb.ko.zst
+license:        GPL
+version:        0.8
+description:    Generic Bluetooth USB driver ver 0.8
+author:         Marcel Holtmann <marcel@holtmann.org>
+srcversion:     41C5C860D271172C8C85AC1
+alias:          usb:v8087p0A5Ad*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v0930p*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v413Cp*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v13D3p*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v050Dp*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v0B05p*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v0A5Cp*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v04CAp*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v0489p*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v0BB4p*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v105Bp*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v19FFp0239d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v0C10p0000d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v0BDBp1002d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v044Ep3002d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v044Ep3001d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v04BFp030Ad*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v057Cp3800d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp8281d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp821Ad*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp821Fd*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp821Bd*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp8218d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp8215d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp8213d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v0A5Cp21E1d*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v0E8Dp763Fd*dc*dsc*dp*ic*isc*ip*in*
+alias:          usb:v05ACp*d*dc*dsc*dp*icFFisc01ip01in*
+alias:          usb:v*p*d*dc*dsc*dp*icE0isc01ip01in*
+alias:          usb:v*p*d*dcE0dsc01dp04ic*isc*ip*in*
+alias:          usb:v*p*d*dcE0dsc01dp01ic*isc*ip*in*
+alias:          usb:v0471p0215d*dc*dsc*dp*icFFiscFFipFFin*
+alias:          of:N*T*Cusb4ca,301aC*
+alias:          of:N*T*Cusb4ca,301a
+alias:          of:N*T*Cusbcf3,e300C*
+alias:          of:N*T*Cusbcf3,e300
+alias:          of:N*T*Cusb1286,204eC*
+alias:          of:N*T*Cusb1286,204e
+depends:        bluetooth,btmtk,btintel,btrtl,btbcm
+intree:         Y
+name:           btusb
+retpoline:      Y
+vermagic:       7.2.14-arch1-1 SMP preempt mod_unload 
+sig_id:         PKCS#7
+signer:         Build time autogenerated kernel key
+sig_key:        64:13:CE:63:85:ED:13:52:02:CF:6D:56:1E:21:EC:55:13:C9:3F:1C
+sig_hashalgo:   sha512
+signature:      30:65:02:30:74:C3:1D:17:52:8C:7E:0C:F8:DE:28:0C:77:64:AC:E6:
+		DE:96:C6:F0:4F:C9:58:D6:7E:E0:E6:B9:42:02:FC:78:A3:57:53:1A:
+		29:A9:F8:3A:0B:67:F0:8E:02:C5:BC:6F:02:31:00:DD:0E:13:C9:14:
+		30:CC:2A:8B:06:33:06:AC:37:91:04:85:9C:03:42:78:E8:B1:FD:38:
+		C6:7A:11:8D:8B:24:88:DB:4F:F6:53:3D:B0:39:9F:A0:87:AF:8C:15:
+		4E:CE:DA
+parm:           disable_scofix:Disable fixup of wrong SCO buffer size (bool)
+parm:           force_scofix:Force fixup of wrong SCO buffers size (bool)
+parm:           enable_autosuspend:Enable USB autosuspend by default (bool)
+parm:           reset:Send HCI reset command on initialization (bool)
+COMMAND EXIT: 0
+
+===== Installed Intel Bluetooth firmware package and files =====
+COMMAND: bash -c $'\n  pacman -Qi linux-firmware-intel\n  printf "\\\\n--- Intel Bluetooth firmware files ---\\\\n"\n  pacman -Ql linux-firmware-intel | grep -E "/ibt-[^/]+[.](sfi|ddc)([.]zst)?$" || true\n'
+Name            : linux-firmware-intel
+Version         : 20261019-1
+Description     : Firmware files for Linux - Firmware for Intel devices
+Architecture    : any
+URL             : https://gitlab.com/kernel-firmware/linux-firmware
+Licenses        : LicenseRef-WHENCE  Apache-2.0  GPL-2.0-only  LicenseRef-intel
+Groups          : None
+Provides        : None
+Depends On      : linux-firmware-whence
+Optional Deps   : None
+Required By     : linux-firmware
+Optional For    : gpu-screen-recorder
+Conflicts With  : None
+Replaces        : None
+Installed Size  : 142.24 MiB
+Packager        : Jan Alexander Steffens (heftig) <heftig@archlinux.org>
+Build Date      : Tue Oct 20 06:57:43 2026
+Install Date    : Mon Nov  9 01:57:44 2026
+Install Reason  : Installed as a dependency for another package
+Install Script  : No
+Validated By    : Signature
+
+
+--- Intel Bluetooth firmware files ---
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1020.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1020.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-2120.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-2120.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0041-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0041-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0291.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0291.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0041-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0041-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0041-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-01a1-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-01a1-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-01a1-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0291-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0291-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0291-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-usb.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-usb.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-usb.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-usb.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0291-0291.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0291-0291.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1020.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1020.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-2120.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-2120.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-11-5.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-11-5.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-usb.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-usb.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-01a1-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-01a1-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-01a1-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-12-16.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-12-16.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-0-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-0-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-16-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-16-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-2.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-2.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-0-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-0-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-16-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-16-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-2.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-2.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-0.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-0.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-3.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-3.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-16-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-16-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-0.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-0.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-0-3.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-0-3.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-3.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-3.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-4.sfi.zst
+COMMAND EXIT: 0
+
+===== Bluetooth kernel boot messages =====
+COMMAND: bash -c $'\n  journalctl -k -b --no-pager 2>&1 | grep -Ei "Bluetooth:|btusb|btintel|ibt-|hci[0-9]|firmware.*(bluetooth|intel)" || true\n'
+Nov 09 14:26:32 x280 kernel: Bluetooth: Core ver 2.22
+Nov 09 14:26:32 x280 kernel: Bluetooth: HCI device and connection manager initialized
+Nov 09 14:26:32 x280 kernel: Bluetooth: HCI socket layer initialized
+Nov 09 14:26:32 x280 kernel: Bluetooth: L2CAP socket layer initialized
+Nov 09 14:26:32 x280 kernel: Bluetooth: SCO socket layer initialized
+Nov 09 14:26:33 x280 kernel: usbcore: registered new interface driver btusb
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: Bootloader revision 0.0 build 26 week 38 2015
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: Device revision is 16
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: Secure boot is enabled
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: OTP lock is enabled
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: API lock is enabled
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: Debug lock is disabled
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: Minimum firmware build 1 week 10 2014
+Nov 09 14:26:33 x280 kernel: Bluetooth: hci0: Found device firmware: intel/ibt-12-16.sfi
+Nov 09 14:26:33 x280 kernel: Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+Nov 09 14:26:33 x280 kernel: Bluetooth: BNEP filters: protocol multicast
+Nov 09 14:26:33 x280 kernel: Bluetooth: BNEP socket layer initialized
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Waiting for firmware download to complete
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Firmware loaded in 1775301 usecs
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Waiting for device to boot
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Device booted in 12686 usecs
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Found Intel DDC parameters: intel/ibt-12-16.ddc
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Applying Intel DDC parameters completed
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Firmware revision 0.1 build 19 week 44 2021
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Error reading debug features
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported.
+Nov 09 14:26:34 x280 kernel: Bluetooth: MGMT ver 1.23
+Nov 09 14:26:51 x280 kernel: Bluetooth: RFCOMM TTY layer initialized
+Nov 09 14:26:51 x280 kernel: Bluetooth: RFCOMM socket layer initialized
+Nov 09 14:26:51 x280 kernel: Bluetooth: RFCOMM ver 1.11
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: Bootloader revision 0.0 build 26 week 38 2015
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: Device revision is 16
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: Secure boot is enabled
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: OTP lock is enabled
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: API lock is enabled
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: Debug lock is disabled
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: Minimum firmware build 1 week 10 2014
+Nov 09 14:47:29 x280 kernel: Bluetooth: hci0: Found device firmware: intel/ibt-12-16.sfi
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Waiting for firmware download to complete
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Firmware loaded in 1918821 usecs
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Waiting for device to boot
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Device booted in 12608 usecs
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Found Intel DDC parameters: intel/ibt-12-16.ddc
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Applying Intel DDC parameters completed
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Firmware revision 0.1 build 19 week 44 2021
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Error reading debug features
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported.
+Nov 09 14:47:31 x280 kernel: Bluetooth: MGMT ver 1.23
+COMMAND EXIT: 0
+
+===== Bluetooth package integrity =====
+COMMAND: pacman -Qkk bluez bluez-utils linux-firmware-intel
+bluez: 37 total files, 0 altered files
+bluez-utils: 122 total files, 0 altered files
+linux-firmware-intel: 887 total files, 0 altered files
+COMMAND EXIT: 0
+
+===== PAM base and Linux-PAM package integrity =====
+COMMAND: pacman -Qkk pambase pam
+pambase: 8 total files, 0 altered files
+pam: 605 total files, 0 altered files
+COMMAND EXIT: 0
+
+===== PAM fallback policy metadata and content =====
+COMMAND: bash -c $'\n  if [[ -e /etc/pam.d/other ]]; then\n    stat /etc/pam.d/other\n    printf "\\\\n--- /etc/pam.d/other ---\\\\n"\n    sed -n "1,160p" /etc/pam.d/other\n    printf "\\\\n--- package ownership ---\\\\n"\n    pacman -Qo /etc/pam.d/other 2>&1 || true\n  else\n    printf "/etc/pam.d/other is missing\\\\n"\n  fi\n  printf "\\\\n--- path permissions ---\\\\n"\n  namei -l /etc/pam.d/other 2>&1 || true\n'
+  File: /etc/pam.d/other
+  Size: 274       	Blocks: 8          IO Block: 4096   regular file
+Device: 253,0	Inode: 5767247     Links: 1
+Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2026-11-09 01:58:51.585622244 +0700
+Modify: 2026-06-16 11:40:03.000000000 +0700
+Change: 2026-11-09 01:57:35.405444507 +0700
+ Birth: 2026-11-09 01:57:35.405268266 +0700
+
+--- /etc/pam.d/other ---
+#%PAM-1.0
+auth      required   pam_deny.so
+auth      required   pam_warn.so
+account   required   pam_deny.so
+account   required   pam_warn.so
+password  required   pam_deny.so
+password  required   pam_warn.so
+session   required   pam_deny.so
+session   required   pam_warn.so
+
+--- package ownership ---
+/etc/pam.d/other is owned by pambase 20260616-1
+
+--- path permissions ---
+f: /etc/pam.d/other
+dr-xr-xr-x root root /
+drwxr-xr-x root root etc
+drwxr-xr-x root root pam.d
+-rw-r--r-- root root other
+COMMAND EXIT: 0
+
+===== Caelestia packaged PAM asset inventory =====
+COMMAND: bash -c $'\n  pacman -Ql caelestia-shell 2>&1 |\n  while read -r package file; do\n    [[ $file == *pam.d* ]] || continue\n    printf "\\\\n===== %s =====\\\\n" "$file"\n    stat -c "mode=%a owner=%U:%G size=%s" "$file" 2>&1 || true\n    if [[ -f $file ]]; then sed -n "1,160p" "$file"; fi\n  done\n'
+
+===== /etc/xdg/quickshell/caelestia/assets/pam.d/ =====
+mode=755 owner=root:root size=4096
+
+===== /etc/xdg/quickshell/caelestia/assets/pam.d/fprint =====
+mode=644 owner=root:root size=59
+#%PAM-1.0
+
+auth    required    pam_fprintd.so  max-tries=1
+
+===== /etc/xdg/quickshell/caelestia/assets/pam.d/howdy =====
+mode=644 owner=root:root size=59
+#%PAM-1.0
+
+auth    required    pam_howdy.so    max-tries=1
+
+===== /etc/xdg/quickshell/caelestia/assets/pam.d/passwd =====
+mode=644 owner=root:root size=268
+#%PAM-1.0
+
+auth    required                    pam_faillock.so     preauth
+auth    [success=1 default=bad]     pam_unix.so         nullok
+auth    [default=die]               pam_faillock.so     authfail
+auth    required                    pam_faillock.so     authsucc
+COMMAND EXIT: 0
+
+===== PAM and Quickshell user journal messages =====
+COMMAND: bash -c $'\n  journalctl --user -b --no-pager 2>&1 | grep -Ei "PAM|pam_[a-z0-9_]+|_pam_init_handlers|quickshell|qs\\\\[" || true\n'
+Nov 09 14:29:24 x280 sudo[1014]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:29:25 x280 sudo[1014]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:29:55 x280 sudo[1407]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:29:55 x280 sudo[1407]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:30:49 x280 sudo[1413]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:30:49 x280 sudo[1413]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:47:44 x280 qs[2158]: PAM _pam_init_handlers: no default config other
+Nov 09 14:47:59 x280 sudo[2164]: pam_unix(sudo:auth): authentication failure; logname=kai uid=1000 euid=0 tty=/dev/pts/0 ruser=kai rhost=  user=kai
+Nov 09 14:48:06 x280 sudo[2164]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:48:08 x280 sudo[2164]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:48:53 x280 sudo[2287]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:48:53 x280 sudo[2287]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:49:04 x280 sudo[2293]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:49:04 x280 sudo[2293]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:51:08 x280 sudo[2335]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:51:09 x280 sudo[2335]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:51:27 x280 sudo[2844]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:51:27 x280 sudo[2844]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:51:37 x280 sudo[2850]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:51:37 x280 sudo[2850]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:00:13 x280 qs[2928]: PAM _pam_init_handlers: no default config other
+Nov 09 15:00:21 x280 sudo[2937]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:00:22 x280 sudo[2937]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:00:43 x280 sudo[3421]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:00:43 x280 sudo[3421]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:00:58 x280 sudo[3429]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:00:58 x280 sudo[3429]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:03:13 x280 sudo[3474]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:03:14 x280 sudo[3474]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:03:35 x280 sudo[3962]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:03:35 x280 sudo[3962]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:03:48 x280 sudo[3972]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:03:48 x280 sudo[3972]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:09:22 x280 sudo[4476]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:09:23 x280 sudo[4476]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:11:32 x280 sudo[4785]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:11:32 x280 sudo[4785]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:11:43 x280 sudo[4795]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:11:45 x280 sudo[4795]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:12:08 x280 sudo[4815]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:12:09 x280 sudo[4815]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:05 x280 sudo[4833]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:05 x280 sudo[4833]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:16 x280 sudo[4839]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:16 x280 sudo[4839]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:26 x280 sudo[4845]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:27 x280 sudo[4845]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:37 x280 sudo[4859]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:38 x280 sudo[4859]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:51 x280 sudo[4875]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:51 x280 sudo[4875]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:14:27 x280 sudo[4920]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:14:28 x280 sudo[4920]: pam_unix(sudo:session): session closed for user root
+COMMAND EXIT: 0
+
+===== PAM and authentication system journal messages =====
+COMMAND: bash -c $'\n  journalctl -b --no-pager 2>&1 | grep -Ei "PAM|pam_[a-z0-9_]+|_pam_init_handlers|polkit" | tail -n 250 || true\n'
+Nov 09 14:26:19 archlinux systemd[1]: systemd 262.1-1-arch running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA +IPE +SMACK +SECCOMP +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF +XKBCOMMON +UTMP +LIBARCHIVE)
+Nov 09 14:26:32 x280 systemd[1]: systemd 262.1-1-arch running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA +IPE +SMACK +SECCOMP +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF +XKBCOMMON +UTMP +LIBARCHIVE)
+Nov 09 14:26:40 x280 login[605]: pam_unix(login:session): session opened for user kai(uid=1000) by kai(uid=0)
+Nov 09 14:26:40 x280 (systemd)[643]: pam_warn(systemd-user:setcred): function=[pam_sm_setcred] flags=0x8002 service=[systemd-user] terminal=[] user=[kai] ruser=[<unknown>] rhost=[<unknown>]
+Nov 09 14:26:40 x280 (systemd)[643]: pam_unix(systemd-user:session): session opened for user kai(uid=1000) by kai(uid=0)
+Nov 09 14:26:46 x280 polkitd[722]: Started polkitd version 128
+Nov 09 14:29:24 x280 sudo[1014]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:29:25 x280 sudo[1014]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:29:55 x280 sudo[1407]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:29:55 x280 sudo[1407]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:30:49 x280 sudo[1413]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:30:49 x280 sudo[1413]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:47:44 x280 qs[2158]: PAM _pam_init_handlers: no default config other
+Nov 09 14:47:59 x280 sudo[2164]: pam_unix(sudo:auth): authentication failure; logname=kai uid=1000 euid=0 tty=/dev/pts/0 ruser=kai rhost=  user=kai
+Nov 09 14:48:06 x280 sudo[2164]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:48:08 x280 sudo[2164]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:48:53 x280 sudo[2287]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:48:53 x280 sudo[2287]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:49:04 x280 sudo[2293]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:49:04 x280 sudo[2293]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:51:08 x280 sudo[2335]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:51:09 x280 sudo[2335]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:51:27 x280 sudo[2844]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:51:27 x280 sudo[2844]: pam_unix(sudo:session): session closed for user root
+Nov 09 14:51:37 x280 sudo[2850]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 14:51:37 x280 sudo[2850]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:00:13 x280 qs[2928]: PAM _pam_init_handlers: no default config other
+Nov 09 15:00:21 x280 sudo[2937]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:00:22 x280 sudo[2937]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:00:43 x280 sudo[3421]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:00:43 x280 sudo[3421]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:00:58 x280 sudo[3429]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:00:58 x280 sudo[3429]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:03:13 x280 sudo[3474]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:03:14 x280 sudo[3474]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:03:35 x280 sudo[3962]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:03:35 x280 sudo[3962]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:03:48 x280 sudo[3972]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:03:48 x280 sudo[3972]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:09:22 x280 sudo[4476]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:09:23 x280 sudo[4476]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:11:32 x280 sudo[4785]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:11:32 x280 sudo[4785]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:11:43 x280 sudo[4795]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:11:45 x280 sudo[4795]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:12:08 x280 sudo[4815]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:12:09 x280 sudo[4815]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:05 x280 sudo[4833]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:05 x280 sudo[4833]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:16 x280 sudo[4839]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:16 x280 sudo[4839]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:26 x280 sudo[4845]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:27 x280 sudo[4845]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:37 x280 sudo[4859]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:38 x280 sudo[4859]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:13:51 x280 sudo[4875]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:13:51 x280 sudo[4875]: pam_unix(sudo:session): session closed for user root
+Nov 09 15:14:27 x280 sudo[4920]: pam_unix(sudo:session): session opened for user root(uid=0) by kai(uid=1000)
+Nov 09 15:14:28 x280 sudo[4920]: pam_unix(sudo:session): session closed for user root
+COMMAND EXIT: 0

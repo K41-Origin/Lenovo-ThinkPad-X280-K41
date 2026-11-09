@@ -1,0 +1,12 @@
+Nov 09 14:26:19 archlinux kernel: MDS CPU bug present and SMT on, data leak possible. See https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/mds.html for more details.
+Nov 09 14:26:19 archlinux kernel: MMIO Stale Data CPU bug present and SMT on, data leak possible. See https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/processor_mmio_stale_data.html for more details.
+Nov 09 14:26:19 archlinux kernel: VMSCAPE: SMT on, STIBP is required for full protection. See https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/vmscape.html for more details.
+Nov 09 14:26:19 archlinux kernel: virt/tdx: TDX not supported by the host platform
+Nov 09 14:26:19 archlinux kernel: hpet_acpi_probe: no address or irqs in _CRS
+Nov 09 14:26:19 archlinux kernel: ENERGY_PERF_BIAS: Set to 'normal', was 'performance'
+Nov 09 14:26:32 x280 kernel: resource: resource sanity check: requesting [mem 0x00000000fed10000-0x00000000fed15fff], which spans more than PNP0C02:05 [mem 0xfed10000-0xfed13fff]
+Nov 09 14:26:32 x280 kernel: caller snb_uncore_imc_init_box+0x83/0xd0 [intel_uncore] mapping multiple BARs
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 14:26:34 x280 kernel: Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported.
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 14:47:31 x280 kernel: Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported.

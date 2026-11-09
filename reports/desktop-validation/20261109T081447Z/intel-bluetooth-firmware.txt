@@ -1,0 +1,137 @@
+Name            : linux-firmware-intel
+Version         : 20261019-1
+Description     : Firmware files for Linux - Firmware for Intel devices
+Architecture    : any
+URL             : https://gitlab.com/kernel-firmware/linux-firmware
+Licenses        : LicenseRef-WHENCE  Apache-2.0  GPL-2.0-only  LicenseRef-intel
+Groups          : None
+Provides        : None
+Depends On      : linux-firmware-whence
+Optional Deps   : None
+Required By     : linux-firmware
+Optional For    : gpu-screen-recorder
+Conflicts With  : None
+Replaces        : None
+Installed Size  : 142.24 MiB
+Packager        : Jan Alexander Steffens (heftig) <heftig@archlinux.org>
+Build Date      : Tue Oct 20 06:57:43 2026
+Install Date    : Mon Nov  9 01:57:44 2026
+Install Reason  : Installed as a dependency for another package
+Install Script  : No
+Validated By    : Signature
+
+
+--- Intel Bluetooth firmware files ---
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1020.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1020.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-2120.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-2120.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0040-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0041-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0041-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0291.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-0291.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0093-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0041-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0041-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0041-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-01a1-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-01a1-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-01a1-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0291-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0291-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-00a0-0291-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0180-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-usb.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0041-usb.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-usb.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291-usb.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0190-0291.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0291-0291.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-0291-0291.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-0041.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-0041.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1020.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1020.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1050.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-1050.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-2120.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-2120.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-4150.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1040-4150.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-11-5.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-11-5.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-usb.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-0041-usb.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-01a1-iml.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-01a1-pci.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-1190-01a1-pci.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-12-16.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-12-16.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-0-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-0-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-16-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-16-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-2.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-17-2.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-0-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-0-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-16-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-16-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-2.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-18-2.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-0.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-0.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-3.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-3.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-0-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-16-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-16-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-240-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-0.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-0.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-1.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-1.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-19-32-4.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-0-3.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-0-3.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-3.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-3.sfi.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-4.ddc.zst
+linux-firmware-intel /usr/lib/firmware/intel/ibt-20-1-4.sfi.zst

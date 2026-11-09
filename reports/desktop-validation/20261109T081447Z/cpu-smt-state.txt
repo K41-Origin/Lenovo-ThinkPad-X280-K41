@@ -1,0 +1,13 @@
+smt_control=on
+smt_active=1
+
+CPU topology:
+CPU CORE SOCKET ONLINE
+  0    0      0    yes
+  1    1      0    yes
+  2    2      0    yes
+  3    3      0    yes
+  4    0      0    yes
+  5    1      0    yes
+  6    2      0    yes
+  7    3      0    yes
