@@ -161,7 +161,7 @@ mkdir -p reports/lockscreen-apply
 restart_log="reports/lockscreen-apply/$(date -u +'%Y%m%dT%H%M%SZ')-session-restart.log"
 set -o pipefail
 caelestia shell -r -d 2>&1 | tee "$restart_log"
-printf 'Restart command exit code: %s\\n' "$?"
+printf 'Restart command exit code: %s\n' "$?"
 ```
 
 Simpan report restart tersebut ke Git setelah meninjau isinya. Jalankan dari terminal dalam sesi Hyprland aktif, tanpa `sudo`; jangan menjalankan command itu dari TTY, SSH, atau proses installer yang kehilangan environment sesi. Ini menjaga agar Quickshell mewarisi environment Wayland/Hyprland dari sesi yang benar. Perbaikan ini tidak mengubah autentikasi, PAM, atau konfigurasi compositor. Test statis juga memastikan installer tidak lagi menjalankan restart dari konteks tersebut.
