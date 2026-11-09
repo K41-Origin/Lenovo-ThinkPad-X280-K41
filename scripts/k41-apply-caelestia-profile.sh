@@ -104,6 +104,12 @@ write_summary() {
 }
 on_exit() {
     local rc=$?
+    trap - EXIT
+    if (( rc != 0 )) && [[ -n $backup_dir && -f $backup_dir/shell.json && -f $backup_dir/scheme.json ]]; then
+        info 'Failure detected after backup; restoring original Caelestia files.'
+        cp -- "$backup_dir/shell.json" "$shell_file" || true
+        cp -- "$backup_dir/scheme.json" "$scheme_file" || true
+    fi
     write_summary "$rc"
     info "Report: reports/caelestia-customization/$(basename -- "$report_dir")/"
 }
