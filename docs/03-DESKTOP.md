@@ -27,7 +27,7 @@ Script bersifat read-only terhadap sistem: tidak memasang paket, mengubah konfig
 - Caelestia: proses, IPC target, runtime log, QML/load-error pattern.
 - Service user: PipeWire, WirePlumber, portal; service NetworkManager.
 - Audio graph, status konektivitas NetworkManager, dan radio block state.
-- Kapasitas filesystem repository, telemetry baterai/estimasi health, temperatur thermal zones.
+- Driver GPU Intel i915, backlight telemetry, kapasitas filesystem, RAM, telemetry baterai/estimasi health, dan temperatur thermal zones.
 - Status failed system/user units, penggunaan RAM, serta journal user/system/kernel dengan triage pola error kritis.
 - Collector diagnostik desktop dan Caelestia yang sudah ada.
 
