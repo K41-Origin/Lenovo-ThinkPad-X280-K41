@@ -133,7 +133,7 @@ done
 shopt -u nullglob
 
 # Check for an existing Caelestia autostart anywhere in the active Hyprland config tree.
-if grep -RIlE 'caelestia shell -d|qs[[:space:]]+-c[[:space:]]+caelestia' "$CONFIG_DIR" 2>/dev/null | grep -q .; then
+if grep -RIlE --include='*.lua' 'caelestia shell -d|qs[[:space:]]+-c[[:space:]]+caelestia' "$CONFIG_DIR" 2>/dev/null | grep -q .; then
     SHELL_ALREADY_AUTOSTARTED=1
 else
     SHELL_ALREADY_AUTOSTARTED=0
