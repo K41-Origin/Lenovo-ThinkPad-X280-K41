@@ -24,6 +24,25 @@ if [[ $EUID -eq 0 ]]; then
     IFS=: read -r _ _ target_uid _ _ target_home _ <<<"$passwd_entry"
     [[ $target_uid =~ ^[0-9]+$ && $target_uid -ne 0 && $target_home == /* ]] ||
         die 'Could not safely resolve a non-root user home directory.'
+
+    # Bootstrap only the two managed leaf directories as root, then hand
+    # ownership of those leaves to the desktop user. Do not chown ~/.config,
+    # ~/.local, or any existing parent tree.
+    command -v install >/dev/null 2>&1 || die 'install command is required.'
+    target_config="$target_home/.config/quickshell/caelestia/modules/lock"
+    target_state="$target_home/.local/state/k41/lockscreen/backups"
+    for path in "$target_config" "$target_state"; do
+        current=
+        IFS=/ read -r -a parts <<<"$path"
+        for part in "${parts[@]}"; do
+            [[ -z $part ]] && continue
+            current="$current/$part"
+            [[ ! -L $current ]] || die "Refusing symlink path component: $current"
+        done
+    done
+    install -d -o "$target_uid" -g "$(id -g "$SUDO_USER")" -- "$target_config" "$target_state"
+    chown "$target_uid:$(id -g "$SUDO_USER")" -- "$target_config" "$target_state"
+
     exec runuser --user "$SUDO_USER" -- env \
         HOME="$target_home" \
         XDG_CONFIG_HOME="$target_home/.config" \
@@ -56,13 +75,16 @@ fi
 [[ $EUID -ne 0 ]] || die 'Refusing to perform user-file operations as root.'
 [[ $config_root == "$HOME/.config" && $state_root == "$HOME/.local/state" ]] ||
     die 'Unexpected XDG path; this sudo installer intentionally targets the invoking user home.'
-for managed_root in "$config_root" "$state_root"; do
-    if [[ -e $managed_root ]]; then
-        [[ -d $managed_root && ! -L $managed_root ]] || die "Invalid user directory: $managed_root"
-        [[ $(stat -c %u "$managed_root") == "$EUID" ]] ||
-            die "Directory is not owned by the invoking user: $managed_root (no ownership changes made)."
-    fi
-done
+[[ -d $target_root && ! -L $target_root ]] || die "Invalid target directory: $target_root"
+[[ -d $backup_root && ! -L $backup_root ]] || die "Invalid backup directory: $backup_root"
+[[ $(stat -c %u "$target_root") == "$EUID" ]] ||
+    die "Managed lock directory is not owned by the invoking user: $target_root"
+[[ $(stat -c %u "$backup_root") == "$EUID" ]] ||
+    die "Managed backup directory is not owned by the invoking user: $backup_root"
+[[ -x $config_root && -x $config_root/quickshell && -x $config_root/quickshell/caelestia && -x $config_root/quickshell/caelestia/modules ]] ||
+    die "A parent directory in the config path is not traversable by $USER; inspect ownership/mode before proceeding."
+[[ -x $state_root && -x $state_root/k41 && -x $state_root/k41/lockscreen ]] ||
+    die "A parent directory in the backup path is not traversable by $USER; inspect ownership/mode before proceeding."
 [[ $config_root == /* && $state_root == /* ]] || die 'XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.'
 for cmd in mkdir cp mv mktemp date pacman stat rm chmod; do
     command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
