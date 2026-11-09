@@ -41,7 +41,11 @@ k41_classify_journal() {
     printf '%s\n' 'query-failed'
     return 0
   fi
-  if [[ ! -s $journal_file ]] || grep -Eiq '^[[:space:]]*-- No entries --[[:space:]]*  if grep -Eiq 'not seeing messages|permission denied|failed to open.*journal|No journal files were found' "$journal_file"; then
+  if [[ ! -s $journal_file ]] || grep -Eiq '^[[:space:]]*-- No entries --[[:space:]]*$' "$journal_file"; then
+    printf '%s\n' 'no-error-entries'
+    return 0
+  fi
+  if grep -Eiq 'not seeing messages|permission denied|failed to open.*journal|No journal files were found' "$journal_file"; then
     printf '%s\n' 'access-limited'
     return 0
   fi
