@@ -5,12 +5,14 @@ root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 content="$root/config/quickshell/caelestia/modules/lock/Content.qml"
 center="$root/config/quickshell/caelestia/modules/lock/Center.qml"
 installer="$root/scripts/k41-apply-lockscreen-design.sh"
+reporter="$root/scripts/k41-report-lockscreen-session.sh"
 
-for file in "$content" "$center" "$installer"; do
+for file in "$content" "$center" "$installer" "$reporter"; do
     [[ -s $file ]] || { printf 'FAIL: missing/empty %s\n' "$file" >&2; exit 1; }
 done
 
 bash -n "$installer"
+bash -n "$reporter"
 grep -Fq 'Center {' "$content"
 grep -Fq 'Clock {' "$center"
 grep -Fq 'PasswordInput {' "$center"
@@ -37,5 +39,10 @@ grep -Fq 'Shell restart was not attempted from the sanitized installer process' 
 grep -Fq 'caelestia shell -r -d' "$installer"
 grep -Fq "printf '  caelestia shell -r -d\\n'" "$installer"
 ! grep -Fq 'timeout 15s caelestia shell -r -d' "$installer"
-printf 'PASS: lock-screen override structure, installer syntax, and in-repository report logging checks.\n'
+grep -Fq 'Do not run with sudo' "$reporter"
+grep -Fq 'WAYLAND_DISPLAY' "$reporter"
+grep -Fq 'caelestia shell -r -d' "$reporter"
+grep -Fq 'PIPESTATUS[0]' "$reporter"
+grep -Fq 'umask 077' "$reporter"
+printf 'PASS: lock-screen override structure, installer/reporter syntax, and in-repository report logging checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
