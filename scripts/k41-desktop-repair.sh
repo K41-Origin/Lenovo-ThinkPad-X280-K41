@@ -90,6 +90,9 @@ fi
 if [[ ! -r /usr/lib/firmware/regulatory.db ]] && ! pacman -Q wireless-regdb >/dev/null 2>&1; then
   missing_packages+=(wireless-regdb)
 fi
+if pacman -Q pipewire >/dev/null 2>&1 && ! pacman -Q rtkit >/dev/null 2>&1; then
+  missing_packages+=(rtkit)
+fi
 if ((${#missing_packages[@]})); then
   log "ACTION: install missing packages: ${missing_packages[*]}"
   if privileged pacman -S --needed --noconfirm "${missing_packages[@]}"; then
@@ -105,6 +108,12 @@ if ((${#missing_packages[@]})); then
   fi
 else
   [[ -d /sys/class/bluetooth/hci0 ]] && record PASS 'Bluetooth packages' 'bluez and bluez-utils already installed'
+fi
+
+if pacman -Q rtkit >/dev/null 2>&1; then
+  record PASS 'RealtimeKit' 'rtkit package installed; D-Bus activation remains on demand'
+else
+  record WARN 'RealtimeKit' 'rtkit unavailable; PipeWire may use its lower-priority fallback'
 fi
 
 if [[ -r /usr/lib/firmware/regulatory.db ]]; then
@@ -187,6 +196,7 @@ record SKIP 'lsusb utility' 'diagnostic-only utility, not a desktop runtime depe
 {
   printf 'Captured UTC: %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
   printf '\nBlueZ packages:\n'; pacman -Q bluez bluez-utils 2>&1 || true
+  printf '\nRealtimeKit package:\n'; pacman -Q rtkit 2>&1 || true
   printf '\nBluetooth service:\n'; systemctl show bluetooth.service -p LoadState -p ActiveState -p SubState -p UnitFileState 2>&1 || true
   printf '\nRegulatory database:\n'; stat /usr/lib/firmware/regulatory.db 2>&1 || true
   printf '\nCaelestia scheme:\n'; [[ -s $scheme_file ]] && stat "$scheme_file" || printf 'missing\n'
