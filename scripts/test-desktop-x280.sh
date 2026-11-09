@@ -12,14 +12,19 @@ if (( EUID == 0 )); then
 fi
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/desktop-diagnostics"
-mkdir -p -- "$report_root"
-run_dir="$report_root/$timestamp"
-suffix=0
-while ! mkdir -- "$run_dir" 2>/dev/null; do
-  suffix=$((suffix + 1))
-  run_dir="$report_root/$timestamp-$suffix"
-done
+if [[ -n ${K41_REPORT_DIR:-} ]]; then
+  run_dir=$K41_REPORT_DIR
+  mkdir -p -- "$run_dir"
+else
+  report_root="$ROOT/reports/desktop-diagnostics"
+  mkdir -p -- "$report_root"
+  run_dir="$report_root/$timestamp"
+  suffix=0
+  while ! mkdir -- "$run_dir" 2>/dev/null; do
+    suffix=$((suffix + 1))
+    run_dir="$report_root/$timestamp-$suffix"
+  done
+fi
 chmod 0700 "$run_dir"
 diag="$run_dir/diagnostics.txt"
 summary="$run_dir/summary.md"
@@ -41,10 +46,10 @@ capture() {
   if [[ $label == 'PulseAudio compatibility server' ]]; then
     # pactl info includes the local PulseAudio authentication cookie; never publish it.
     if "$@" 2>&1 | sed -E '/^Cookie:/d' >>"$diag"; then
-      printf 'COMMAND EXIT: 0\\n' >>"$diag"
+      printf 'COMMAND EXIT: 0\n' >>"$diag"
     else
       rc=$?
-      printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\\n' "$rc" >>"$diag"
+      printf 'COMMAND EXIT: %s (diagnostic unavailable or command reported an error)\n' "$rc" >>"$diag"
     fi
   elif "$@" >>"$diag" 2>&1; then
     printf 'COMMAND EXIT: 0\\n' >>"$diag"
