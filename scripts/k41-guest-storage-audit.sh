@@ -59,7 +59,9 @@ redact_ids() {
     -e 's/(rd\.luks\.name=)[^ ]+/\1[REDACTED]/g' \
     -e 's/(cryptdevice=)[^ ]+/\1[REDACTED]/g' \
     -e 's/(nvme\.eui\.)[[:alnum:]]+/\1[REDACTED]/g' \
-    -e 's/(SERIAL=)[^ ,]+/\1[REDACTED]/g'
+    -e 's/(SERIAL=)[^ ,]+/\1[REDACTED]/g' \
+    -e 's#(/dev/disk/by-uuid/)[[:alnum:]-]+#\1[REDACTED]#g' \
+    -e 's#(/dev/disk/by-partuuid/)[[:alnum:]-]+#\1[REDACTED]#g'
 }
 mount_for_path() {
   local path="$1"
@@ -275,9 +277,9 @@ fi
 if have systemctl; then
   systemctl show "user@$EUID.service" "user-$EUID.slice" -p Id -p LoadState -p ActiveState -p SubState -p ControlGroup --no-pager >>"$report" 2>&1 || true
   printf '\n-- User manager service/socket/target names and states only --\n' >>"$report"
-  systemctl --user list-units --type=service --type=socket --type=target --all --no-legend --no-pager 2>&1 | awk '{print $1 " " $2 " " $3}' >>"$report" || true
+  systemctl --user list-units --type=service,socket,target --all --no-legend --no-pager 2>&1 | awk '{print $1 " " $2 " " $3}' >>"$report" || true
   printf '\n-- User manager service/socket unit-file names and states --\n' >>"$report"
-  systemctl --user list-unit-files --type=service --type=socket --no-legend --no-pager 2>&1 | awk '{print $1 " " $2}' >>"$report" || true
+  systemctl --user list-unit-files --type=service,socket --no-legend --no-pager 2>&1 | awk '{print $1 " " $2}' >>"$report" || true
 fi
 if [[ -e /var/lib/systemd/linger/"$EUID" ]]; then note "collector_user_linger=yes uid=$EUID"; else note "collector_user_linger=no uid=$EUID"; fi
 if have ps; then
@@ -338,7 +340,7 @@ for file in /etc/firefox/policies/policies.json /usr/lib/firefox/distribution/po
   [[ -r $file ]] || continue
   printf '[%s]\n' "${file#/}" >>"$report"
   grep -Ei 'DisablePrivateBrowsing|IncognitoModeAvailability|BrowserGuestModeEnabled|PrivateBrowsingMode' "$file" |
-    sed -E 's/("?(password|token|secret|api[_-]?key)"?[[:space:]]*:[[:space:]]*)"[^"]*"/\\1"[REDACTED]"/Ig' >>"$report" || true
+    sed -E 's/("?(password|token|secret|api[_-]?key)"?[[:space:]]*:[[:space:]]*)"[^"]*"/\1"[REDACTED]"/Ig' >>"$report" || true
 done
 section 'System and active-user default browser associations (selected MIME keys only)'
 for file in /usr/share/applications/mimeapps.list /etc/xdg/mimeapps.list /usr/local/share/applications/mimeapps.list; do
