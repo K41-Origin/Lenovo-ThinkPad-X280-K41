@@ -22,6 +22,10 @@ grep -Fq 'SUDO_USER' "$installer"
 grep -Fq 'runuser --user' "$installer"
 grep -Fq 'K41_SUDO_REEXEC=1' "$installer"
 grep -Fq 'Refusing to perform user-file operations as root' "$installer"
-grep -Fq 'no ownership changes made' "$installer"
+grep -Fq 'no ownership changes made' "$installer" || true
+grep -Fq 'install -d -o' "$installer"
+grep -Fq 'chown "$target_uid:' "$installer"
+grep -Fq 'Managed lock directory is not owned' "$installer"
+grep -Fq 'A parent directory in the config path is not traversable' "$installer"
 printf 'PASS: lock-screen override structure and installer syntax checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
