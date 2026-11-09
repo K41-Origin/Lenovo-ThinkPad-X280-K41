@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna. Workstream 2: desain C disetujui; audit perangkat dan audit upstream revision Caelestia terpasang selesai; override QML minimal, installer backup/rollback, dan static test telah ditambahkan ke `main`. **Belum TESTED/VERIFIED pada X280**: perlu apply, cek QML runtime, lock/unlock, wake, dan penerimaan visual. Guest Mode tetap ditunda sampai lock screen kustom diterima pengguna. Perbaikan tahap instalasi sebelumnya tetap dijadwalkan sebelum tahap 7. |
+| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna. Workstream 2: desain C disetujui; audit perangkat dan audit upstream revision Caelestia terpasang selesai; override QML minimal, installer backup/rollback dengan sudo handoff ke user desktop, dan static test telah ditambahkan ke `main`. **Static test belum dijalankan; belum TESTED/VERIFIED pada X280**: perlu apply, cek QML runtime, lock/unlock, wake, dan penerimaan visual. Guest Mode tetap ditunda sampai lock screen kustom diterima pengguna. Perbaikan tahap instalasi sebelumnya tetap dijadwalkan sebelum tahap 7. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -39,7 +39,7 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 | `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
 | `scripts/k41-lockscreen-audit.sh` | Read-only lock-screen inventory and evidence collector | IMPLEMENTED — REPORT COLLECTED; runtime lock path still needs device confirmation |
 | `config/quickshell/caelestia/modules/lock/{Content,Center}.qml` | User-level Caelestia QML overrides for Floating Password Card | IMPLEMENTED — NOT TESTED ON DEVICE |
-| `scripts/k41-apply-lockscreen-design.sh` | Install/rollback QML overrides with backup; optional shell restart | IMPLEMENTED — NOT TESTED ON DEVICE |
+| `scripts/k41-apply-lockscreen-design.sh` | Sudo entry with SUDO_USER privilege drop; install/rollback QML overrides as desktop user | IMPLEMENTED — STATIC TEST NOT RUN; DEVICE NOT TESTED |
 | `tests/test-lockscreen-design.sh` | Static override structure and Bash syntax checks | IMPLEMENTED — NOT RUN |
 | `scripts/k41-enable-caelestia-autologin.sh` + `scripts/k41-lock-caelestia-after-start.sh` | Opt-in tty1 autologin + verified Caelestia lock startup + Hyprlock fallback | IMPLEMENTED — NOT TESTED ON DEVICE |
 | `scripts/audit-x280-boot.sh` | Read-only boot/UKI/LUKS/TPM2/Plymouth state collector | IMPLEMENTED — REPORT COLLECTED |
@@ -52,7 +52,7 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 
 ## Prioritas saat ini
 
-**CURRENT — Tahap 5, Workstream 2: lock screen.** Desain C — Floating Password Card telah diimplementasikan sebagai dua QML override lokal dengan installer backup/rollback. Jalur wallpaper/blur dan autentikasi upstream dipertahankan. Statusnya IMPLEMENTED, bukan TESTED: pengguna perlu menerapkan pada X280, memeriksa runtime QML, menguji lock/unlock dan wake, lalu menilai visual. Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna. Setelah lock screen diterima, lanjutkan berurutan ke dashboard, taskbar/panel, launcher, sidebar, lalu utilities. Elemen lintas-komponen (design tokens, typography, icons/cursor, wallpaper, notifications/OSD, window appearance, terminal, GTK/Qt) dijaga konsisten saat komponen terkait dikerjakan. Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 tetap ditunda sampai sebelum Tahap 7.
+**CURRENT — Tahap 5, Workstream 2: lock screen.** Desain C — Floating Password Card telah diimplementasikan sebagai dua QML override lokal dengan installer backup/rollback yang menerima sudo lalu menjalankan seluruh operasi file sebagai user desktop. Jalur wallpaper/blur dan autentikasi upstream dipertahankan. Statusnya IMPLEMENTED, bukan TESTED: pengguna perlu menerapkan pada X280, memeriksa runtime QML, menguji lock/unlock dan wake, lalu menilai visual. Workstream 1 (boot experience) telah dinyatakan selesai oleh pengguna. Setelah lock screen diterima, lanjutkan berurutan ke dashboard, taskbar/panel, launcher, sidebar, lalu utilities. Elemen lintas-komponen (design tokens, typography, icons/cursor, wallpaper, notifications/OSD, window appearance, terminal, GTK/Qt) dijaga konsisten saat komponen terkait dikerjakan. Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 tetap ditunda sampai sebelum Tahap 7.
 
 ### Konfirmasi keberhasilan boot sistem
 
