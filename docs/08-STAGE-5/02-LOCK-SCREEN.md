@@ -78,10 +78,21 @@ Status **VERIFIED** memerlukan uji lock/unlock nyata, regression startup/session
 
 ## Collector audit
 
-Jalankan dari terminal pada ThinkPad X280. Script mendukung eksekusi dengan `sudo` dan akan menggunakan HOME, konfigurasi, serta konteks sesi milik akun yang memanggil sudo:
+Jalankan script dari clone repository pada ThinkPad X280. Script menentukan root repository berdasarkan lokasi file script (bukan direktori terminal saat ini), memvalidasi bahwa root tersebut adalah working tree Git, dan mendukung eksekusi dengan `sudo`:
 
 ```bash
 sudo bash scripts/k41-lockscreen-audit.sh
 ```
 
-Jangan jalankan dari login root langsung; gunakan sudo dari akun desktop biasa. Jika sesi Hyprland aktif, script mencoba memulihkan penanda instance compositor dari proses Hyprland agar query live dapat diarahkan ke sesi yang benar. Laporan dibuat langsung di repository pada `reports/lockscreen-audit/<timestamp>/audit.txt`. Direktori laporan dibuat dengan kepemilikan akun pemanggil (tanpa mengubah permission direktori `reports` yang sudah ada), agar bisa dibaca dan di-commit tanpa sudo. Collector tidak menjalankan perintah Git yang mengubah branch, HEAD, index, atau working tree. Setelah meninjau dan menyunting data sensitif, pengguna dapat menjalankan `git add reports/lockscreen-audit/ && git commit -m "test(lockscreen): add X280 audit report" && git push` untuk mengirim bukti audit. **Sinkronisasi satu kali untuk sesi audit ini:** karena `main` di GitHub telah menerima pembaruan setelah commit laporan lokal dibuat, jalankan `git fetch origin && git rebase origin/main` sebelum menjalankan collector/commit berikutnya. Rebase ini mempertahankan commit laporan lokal dan menempatkannya di atas `origin/main`; jangan gunakan `git push --force`. Jika rebase berhenti karena konflik, jangan push—simpan pesan error dan minta bantuan untuk menyelesaikannya. Setelah sinkronisasi satu kali selesai, sebelum setiap sesi kerja baru jalankan `git fetch origin && git merge --ff-only origin/main`, lalu jalankan collector, commit laporan, dan `git push`. Collector read-only; ia tidak mengubah konfigurasi, service, package, PAM, atau autentikasi. Walaupun dijalankan melalui sudo untuk membaca informasi sistem yang memerlukan hak istimewa, file output tetap dimiliki akun pemanggil. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib. Walaupun collector menghindari username dan credential, laporan tetap harus diperiksa sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM.
+Script juga dapat dipanggil melalui path absolut dari direktori lain. Ini penting: proses script tidak dapat mengubah direktori kerja terminal induk. Karena itu, menjalankan `git add` atau `git push` biasa setelah memanggil script melalui path absolut dari luar clone akan menghasilkan `fatal: not a git repository`. Versi collector ini menghindari masalah tersebut dengan mencetak perintah Git memakai opsi `git -C <repo_root>`; jalankan perintah yang dicetak script setelah meninjau dan menyunting laporan.
+
+Jika sebelumnya sudah ada commit laporan lokal dan `main` di GitHub menerima commit baru, sinkronkan dahulu dari direktori mana pun dengan:
+
+```bash
+git -C "/path/ke/clone" fetch origin
+git -C "/path/ke/clone" rebase origin/main
+```
+
+Ganti `/path/ke/clone` dengan path repository yang dicetak oleh script. Jangan gunakan `git push --force`. Jika rebase berhenti karena konflik, jangan push; simpan pesan error untuk ditinjau. Pada sesi berikutnya, gunakan `git -C "/path/ke/clone" fetch origin` lalu `git -C "/path/ke/clone" merge --ff-only origin/main` sebelum mulai bekerja.
+
+Laporan disimpan di `reports/lockscreen-audit/<timestamp>/audit.txt`. Direktori laporan dibuat dengan kepemilikan akun pemanggil agar dapat dibaca dan di-commit tanpa sudo. Collector tidak mengubah branch, HEAD, index, working tree, konfigurasi, service, package, PAM, atau autentikasi. Walaupun collector menghindari username dan credential, periksa laporan sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib.
