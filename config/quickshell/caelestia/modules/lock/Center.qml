@@ -19,7 +19,6 @@ ColumnLayout {
 
     Clock {
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Tokens.padding.large
         centerScale: root.centerScale
     }
 
@@ -34,7 +33,6 @@ ColumnLayout {
     // Keep StateMessage directly below it for authentication and keyboard feedback.
     PasswordInput {
         Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: Tokens.spacing.large
         centerScale: Math.max(0.8, root.centerScale)
         centerWidth: root.centerWidth
         lock: root.lock
@@ -42,7 +40,6 @@ ColumnLayout {
 
     StateMessage {
         Layout.fillWidth: true
-        Layout.topMargin: Tokens.spacing.small
         pam: root.lock.pam
     }
 }
