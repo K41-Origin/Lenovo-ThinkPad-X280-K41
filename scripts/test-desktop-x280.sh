@@ -158,7 +158,7 @@ reconnection, Bluetooth pairing, portal UI interaction, or lock-screen interacti
 No physical/visual PASS is claimed. Stage 4 remains limited to automated runtime/log
 evidence; hardware tuning and suspend/resume are separate later-stage work.
 COVERAGE
-chmod 0600 "$diag" "$summary" "$checklist"
+chmod 0600 "$diag" "$summary" "$coverage"
 printf 'Diagnostic report created: %s\n' "$run_dir"
 printf 'Review diagnostics, summary, and coverage limitations before sharing.\n'
 printf 'Collection completed; Stage 4 reports automated evidence only and makes no physical/visual acceptance claim.\n'
