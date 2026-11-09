@@ -233,3 +233,26 @@ git -C "/path/ke/clone" rebase origin/main
 Ganti `/path/ke/clone` dengan path repository yang dicetak oleh script. Jangan gunakan `git push --force`. Jika rebase berhenti karena konflik, jangan push; simpan pesan error untuk ditinjau. Pada sesi berikutnya, gunakan `git -C "/path/ke/clone" fetch origin` lalu `git -C "/path/ke/clone" merge --ff-only origin/main` sebelum mulai bekerja.
 
 Laporan disimpan di `reports/lockscreen-audit/<timestamp>/audit.txt`, dibuat oleh user yang menjalankan collector dengan permission default sesi. Collector tidak mengubah branch, HEAD, index, permission, ownership, konfigurasi, service, package, PAM, atau autentikasi. Walaupun collector menghindari username dan credential, periksa laporan sebelum push karena dapat memuat versi kernel/package, model monitor, binding, nama file konfigurasi, dan nama modul PAM. Output statis tidak membuktikan perilaku runtime atau visual; skenario manual tetap wajib.
+
+## Laporan restart sesi Caelestia
+
+Untuk mengumpulkan bukti restart dari lingkungan Wayland/Hyprland yang benar, gunakan collector terpisah berikut sebagai user desktop biasa dari clone repository (tanpa sudo):
+
+```bash
+bash scripts/k41-report-lockscreen-session.sh
+```
+
+Collector memvalidasi `WAYLAND_DISPLAY`, `XDG_RUNTIME_DIR`, keberadaan perintah `caelestia`, dan socket Wayland. Collector kemudian menjalankan `caelestia shell -r -d` pada sesi aktif dan menyimpan stdout/stderr serta exit code ke `reports/lockscreen-apply/<timestamp>-session-restart.log`. Nilai environment yang berpotensi sensitif tidak dicetak; hanya status keberadaan signature Hyprland yang dicatat. Collector tidak menggunakan sudo, tidak mengubah permission/ownership, tidak mengubah Git index/branch/HEAD, dan tidak melakukan commit atau push. Permission file mengikuti umask user saat menjalankan script.
+
+Setelah script selesai, tinjau laporan dan redaksi informasi personal bila diperlukan. Lalu dari root repository:
+
+```bash
+git status --short
+git add reports/lockscreen-apply/
+git commit -m "Add lockscreen session restart report"
+git push origin main
+```
+
+Jika Git menolak push karena remote memiliki commit baru, jangan force-push. Sinkronkan dengan `git pull --ff-only origin main` bila working tree bersih dan branch dapat fast-forward; jika ada commit lokal yang belum ada di remote, hentikan dan kirim pesan error/status untuk ditinjau. Setelah laporan berhasil di-push, asisten dapat memeriksa laporan langsung dari `main`.
+
+Exit code 0 hanya membuktikan perintah restart selesai tanpa error yang dilaporkan proses. Itu **belum** membuktikan lock screen tampil benar atau lock/unlock aman; verifikasi visual dan fungsional tetap dilakukan pada ThinkPad X280.
