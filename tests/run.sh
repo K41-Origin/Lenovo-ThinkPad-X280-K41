@@ -14,6 +14,7 @@ tests=(
   tests/test-desktop-validation.sh
   tests/test-desktop-repair.sh
   tests/test-hardware-audit.sh
+  tests/test-guest-storage-audit.sh
   tests/test-power-management-audit.sh
   tests/test-power-profile-selector.sh
   tests/test-bootstrap-archiso.sh
