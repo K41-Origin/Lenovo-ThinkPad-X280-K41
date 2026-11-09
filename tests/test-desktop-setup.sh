@@ -20,14 +20,19 @@ pass 'canonical desktop validation entry point passes syntax and safety-contract
 [[ -f $ROOT/scripts/test-desktop-x280.sh ]] || fail 'desktop diagnostic collector missing'
 bash -n "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop diagnostic collector syntax invalid'
 grep -Fq 'K41_REPORT_DIR' "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop collector does not support consolidated report output'
-if grep -Fq 'Suspend and resume' "$ROOT/scripts/test-desktop-x280.sh"; then
-  fail 'suspend/resume belongs to Stage 6, not Stage 4'
+grep -Fq 'coverage-limitations.md' "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop collector must document automated coverage limits'
+if grep -Fq 'manual-checklist.md' "$ROOT/scripts/test-desktop-x280.sh"; then
+  fail 'Stage 4 must not request manual hardware/visual acceptance'
 fi
-pass 'desktop diagnostic collector passes syntax, report, and Stage 4 scope checks'
+pass 'desktop diagnostic collector passes syntax, report, and automated Stage 4 scope checks'
 [[ -f $ROOT/scripts/test-caelestia-x280.sh ]] || fail 'Caelestia diagnostic collector missing'
 bash -n "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia diagnostic collector syntax invalid'
 grep -Fq 'K41_REPORT_DIR' "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector does not support consolidated report output'
-pass 'Caelestia diagnostic collector passes syntax and consolidated report contract'
+grep -Fq 'coverage-limitations.md' "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector must document automated coverage limits'
+if grep -Fq 'manual-checklist.md' "$ROOT/scripts/test-caelestia-x280.sh"; then
+  fail 'Caelestia collector must not request manual visual acceptance'
+fi
+pass 'Caelestia diagnostic collector passes syntax and automated coverage contract'
 [[ -f $ROOT/scripts/fix-caelestia-cache-permissions-x280.sh ]] || fail 'Caelestia cache repair script missing'
 bash -n "$ROOT/scripts/fix-caelestia-cache-permissions-x280.sh" || fail 'Caelestia cache repair script syntax invalid'
 for token in '--apply' 'EUID == 0' '! -L $cache' 'owner != 0:0' 'sudo chown --no-dereference' 'new_owner'; do
