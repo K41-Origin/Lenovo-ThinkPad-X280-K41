@@ -71,8 +71,13 @@ capture_file 'RUNNING KERNEL COMMAND LINE (/proc/cmdline)' /proc/cmdline
 capture 'MKINITCPIO CONFIGURATION — HOOKS' grep -nE '^[[:space:]]*HOOKS=' /etc/mkinitcpio.conf
 capture 'MKINITCPIO PRESETS' find /etc/mkinitcpio.d -maxdepth 1 -type f -name '*.preset' -print
 capture 'UKI FILES ON EFI PARTITION' find /efi/EFI/Linux /boot/EFI/Linux -maxdepth 1 -type f -name '*.efi' -printf '%p (%s bytes)\n'
-capture 'EFI AND BOOT MOUNTS' findmnt -T /efi; findmnt -T /boot
-capture_file 'CRYPTTAB (KEYFILE FIELD REDACTED)' /etc/crypttab
+capture 'EFI AND BOOT MOUNTS' bash -c 'findmnt -T /efi; findmnt -T /boot'
+section 'CRYPTTAB (KEYFILE FIELD REDACTED)'
+if [[ -r /etc/crypttab ]]; then
+  awk 'NF && $1 !~ /^#/ { $3="[KEYFILE-REDACTED]"; print; next } { print }' /etc/crypttab | redact >>"$report"
+else
+  printf 'UNAVAILABLE: /etc/crypttab (file may not exist)\\n' >>"$report"
+fi
 capture 'ROOT MOUNT SOURCE' findmnt -no SOURCE,FSTYPE,OPTIONS /
 capture 'CRYPTROOT MAPPER STATUS' cryptsetup status cryptroot
 capture 'BLOCK DEVICE TOPOLOGY (UUIDS AND SERIALS OMITTED)' lsblk -e7 -o NAME,PATH,TYPE,SIZE,FSTYPE,MOUNTPOINTS,MODEL,TRAN
