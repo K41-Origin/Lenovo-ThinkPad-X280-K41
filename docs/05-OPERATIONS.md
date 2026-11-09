@@ -6,7 +6,7 @@ Gunakan dokumentasi/upstream resmi untuk paket dan dependensi yang berubah. Jang
 
 ### Autologin dan lock screen
 
-`scripts/k41-enable-caelestia-autologin.sh` adalah opsi Stage 5, bukan default instalasi. Ia mengaktifkan passwordless autologin hanya pada `getty@tty1`, lalu memulai Hyprland dari Bash login dan meminta Caelestia mengunci sesi setelah IPC siap. Autologin menghilangkan autentikasi TTY1; lock screen grafis baru aktif setelah compositor dan shell berjalan. Ini bukan pengganti full-disk encryption. Jangan aktifkan pada perangkat dengan risiko akses fisik tanpa enkripsi disk, dan selalu simpan jalur rollback. TTY selain tty1 tetap memakai login normal.
+`scripts/k41-enable-caelestia-autologin.sh` adalah opsi Stage 5, bukan default instalasi. Ia mengaktifkan passwordless autologin hanya pada `getty@tty1`, lalu memulai Hyprland dari Bash login dan meminta Caelestia mengunci sesi setelah IPC siap. Helper memeriksa target IPC `lock`, meminta penguncian, lalu memverifikasi `lock isLocked` bernilai `true`; exit code perintah saja tidak dianggap bukti layar sudah terkunci. Jika IPC tidak siap atau status terkunci tidak terverifikasi dalam batas waktu, helper menjalankan Hyprlock sebagai fallback. Autologin menghilangkan autentikasi TTY1; lock screen grafis baru aktif setelah compositor dan shell berjalan. Ini bukan pengganti full-disk encryption. Jangan aktifkan pada perangkat dengan risiko akses fisik tanpa enkripsi disk, dan selalu simpan jalur rollback. TTY selain tty1 tetap memakai login normal.
 
 ### Audit kondisi boot aktual
 
