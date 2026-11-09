@@ -315,7 +315,7 @@ The approved direction has now been translated into project-owned configuration 
 - Thunar retains the audited layout intent but drops the previous teal palette and entrance animation.
 - Foot uses the CaskaydiaCove NF font, Graphite background, high-contrast foreground, restrained semantic ANSI colors, and a non-blinking beam cursor.
 - Caelestia CLI is configured to generate GTK and Qt themes with the Adwaita icon theme. Hyprland, Fuzzel and Foot are managed by project-owned settings to avoid competing generators.
-- GTK icon/cursor preferences use Adwaita, which was present in the prior device audit. This is a conservative fallback, not a custom monochrome icon pack.
+- GTK icon/cursor preferences use Adwaita, which was present in the prior device audit. The Hyprland Lua overlay also sets XCURSOR_THEME=Adwaita, using the existing hl.env API found in the active config. This is a conservative fallback, not a custom monochrome icon pack.
 
 ### Wallpaper and rollback
 
