@@ -36,7 +36,8 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 | `scripts/k41-install-basic-arch.sh` | Basic Arch installation | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | Desktop installation | IMPLEMENTED |
 | `scripts/k41-desktop-validation.sh` | Read-only desktop health validation | IMPLEMENTED |
-| `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |\n| `scripts/k41-lockscreen-audit.sh` | Read-only lock-screen inventory and evidence collector | IMPLEMENTED — REPORT COLLECTED; runtime lock path still needs device confirmation |
+| `scripts/k41-desktop-repair.sh` | Scoped repair and evidence collection | IMPLEMENTED |
+| `scripts/k41-lockscreen-audit.sh` | Read-only lock-screen inventory and evidence collector | IMPLEMENTED — REPORT COLLECTED; runtime lock path still needs device confirmation |
 | `config/quickshell/caelestia/modules/lock/{Content,Center}.qml` | User-level Caelestia QML overrides for Floating Password Card | IMPLEMENTED — NOT TESTED ON DEVICE |
 | `scripts/k41-apply-lockscreen-design.sh` | Install/rollback QML overrides with backup; optional shell restart | IMPLEMENTED — NOT TESTED ON DEVICE |
 | `tests/test-lockscreen-design.sh` | Static override structure and Bash syntax checks | IMPLEMENTED — NOT RUN |
