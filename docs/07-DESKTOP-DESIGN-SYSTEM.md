@@ -4,7 +4,7 @@
 
 - **Project:** Lenovo ThinkPad X280 K41
 - **Stage:** 5 — Desktop Environment Customization
-- **Design status:** APPROVED DIRECTION; active configuration audited; baseline visual capture pending
+- **Design status:** APPROVED DIRECTION; active configuration audited; first implementation committed, device application pending
 - **Specification version:** 1.0
 - **Last updated:** 2026-11-09
 
@@ -83,7 +83,7 @@ Pemilihan final bergantung pada ketersediaan paket, rendering aktual, keterbacaa
 - Animasi harus singkat, subtle, dan memiliki tujuan fungsional.
 - Hindari animasi dekoratif terus-menerus, parallax, dan efek yang tidak menambah kejelasan.
 
-Nilai numerik gaps, radius, ukuran panel, durasi animasi, dan opacity akan ditetapkan setelah audit konfigurasi aktif serta review screenshot baseline. Jangan menebak atau menyalin angka sebelum mengetahui konfigurasi dan perilaku upstream yang berlaku.
+Nilai awal gaps, radius, border, dan efek compositor ditetapkan konservatif berdasarkan audit konfigurasi aktif. Nilai tersebut merupakan starting point dan dapat disesuaikan setelah pengguna menilai tampilan langsung pada perangkat. Jangan menebak atau menyalin angka sebelum mengetahui konfigurasi dan perilaku upstream yang berlaku.
 
 ## 5. Wallpaper direction
 
@@ -238,12 +238,24 @@ Tahap 5 dapat diterima jika:
 - [ ] Caelestia dan Hyprland berjalan tanpa regresi konfigurasi/runtime baru yang kritis.
 - [ ] Audio, brightness, media, notification, lock screen, portal, dan interaksi utama tetap berfungsi sesuai cakupan perangkat.
 - [ ] Tidak ada service, launcher, atau widget duplikat yang tidak diperlukan.
-- [ ] Screenshot before/after ditinjau pada display fisik X280.
+- [ ] Pengguna telah menilai tampilan langsung pada display fisik X280.
 - [ ] Performa dibandingkan dengan baseline dalam kondisi yang sebanding; tidak ada regresi yang tidak dapat diterima.
 - [ ] Backup dan rollback telah diuji atau setidaknya langkah pemulihannya diverifikasi.
 - [ ] Dokumentasi dan bukti pengujian diperbarui.
 
 Automated validation saja tidak cukup untuk menyatakan visual acceptance. Persetujuan visual akhir memerlukan review pengguna pada perangkat.
+
+## 12A. First implementation — repository state
+
+Committed implementation files:
+- `config/desktop-customization/palette.json` — canonical Graphite Monochrome tokens.
+- `config/desktop-customization/hyprland-appearance.lua` — low-cost visual overlay.
+- `config/desktop-customization/fuzzel.ini` — single-block Fuzzel palette and layout.
+- `scripts/k41-apply-desktop-customization.sh` — guarded apply and explicit rollback workflow.
+
+The apply script modifies only the active Hyprland Lua file and Fuzzel config. It backs up both before writing. It changes the audited launcher declaration from missing `hyprlauncher` to installed `fuzzel`, appends an appearance-only block, disables compositor blur to limit GPU cost, and disables the default Hyprland logo/wallpaper behavior. It does not rewrite keybinds, input, monitor layout, workspace rules, window rules, or autostart.
+
+**Validation status:** repository files committed; no shell syntax test, Lua runtime validation, or device execution has been performed yet. Do not treat the configuration as tested or visually accepted until the operator applies it and reports runtime results.
 
 ## 13. Decision log
 
