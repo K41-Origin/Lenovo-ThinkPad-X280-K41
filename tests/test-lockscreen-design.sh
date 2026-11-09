@@ -18,5 +18,10 @@ grep -Fq 'StateMessage {' "$center"
 ! grep -Eq 'WeatherInfo|Fetch \{|Media \{|Resources \{|NotifDock|ProfilePic' "$content" "$center"
 grep -Fq '/etc/xdg/quickshell/caelestia/modules/lock/Content.qml' "$installer"
 grep -Fq -- '--rollback' "$installer"
+grep -Fq 'SUDO_USER' "$installer"
+grep -Fq 'runuser --user' "$installer"
+grep -Fq 'K41_SUDO_REEXEC=1' "$installer"
+grep -Fq 'Refusing to perform user-file operations as root' "$installer"
+grep -Fq 'no ownership changes made' "$installer"
 printf 'PASS: lock-screen override structure and installer syntax checks.\n'
 printf 'NOTE: qmllint, Quickshell load, lock/unlock, and visual behavior require the target X280.\n'
