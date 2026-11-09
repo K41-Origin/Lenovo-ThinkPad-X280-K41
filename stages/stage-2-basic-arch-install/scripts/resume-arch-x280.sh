@@ -7,8 +7,8 @@ umask 077
 ROOT="$(cd -- "$(dirname -- "$0")/.." && pwd -P)"
 # shellcheck source=lib/common.sh
 source "$ROOT/lib/common.sh"
-# shellcheck source=lib/base-system.sh
-source "$ROOT/lib/base-system.sh"
+# shellcheck source=stages/stage-2-basic-arch-install/lib/base-system.sh
+source "$ROOT/stages/stage-2-basic-arch-install/lib/base-system.sh"
 
 EXPECTED_MODEL='WDC PC SN730 SDBQNTY-256G-1001'
 EXPECTED_SERIAL='193839803177'
@@ -143,7 +143,7 @@ set_stage target-configuration 'Continue the interactive target configuration'
 ram_kib="$(awk '/^MemTotal:/ {print $2}' /proc/meminfo)"
 [[ $ram_kib =~ ^[0-9]+$ ]] || die 'Could not determine live RAM size for the planned swapfile.'
 swap_bytes=$((ram_kib * 1024 + 2 * 1024 * 1024 * 1024))
-install -m 0700 "$ROOT/scripts/configure-arch-x280.sh" "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
+install -m 0700 "$ROOT/stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh" "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
 arch-chroot "$ROOT_MOUNT" /root/k41-configure-arch-x280.sh "$swap_bytes" || die 'Interactive target configuration failed; inspect partial configuration before retrying.'
 rm -f -- "$ROOT_MOUNT/root/k41-configure-arch-x280.sh"
 install -D -m 0755 "$ROOT/scripts/x280-first-boot-check.sh" "$ROOT_MOUNT/usr/local/sbin/x280-first-boot-check"

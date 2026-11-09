@@ -17,7 +17,7 @@ Tidak ada perpindahan otomatis antar tahap.
 | Entry point | Fungsi |
 |---|---|
 | `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` | Readiness Arch ISO |
-| `scripts/k41-install-basic-arch.sh` | Instalasi dasar Arch; delegasi ke `install-arch-x280.sh` |
+| `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` | Entry point instalasi dasar Arch |
 | `scripts/k41-install-desktop.sh` | Instalasi desktop; delegasi ke `setup-desktop-x280.sh` |
 | `scripts/k41-desktop-validation.sh` | Validasi fungsional desktop |
 | `scripts/k41-desktop-repair.sh` | Repair terbatas berbasis hasil validasi |

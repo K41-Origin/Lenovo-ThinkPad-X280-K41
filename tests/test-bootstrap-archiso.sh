@@ -14,7 +14,7 @@ for entry in k41-install-basic-arch.sh k41-install-desktop.sh; do
   [[ -f $path ]] || fail "canonical entry point is missing: $entry"
   bash -n "$path" || fail "canonical entry point has a Bash syntax error: $entry"
 done
-grep -Fq 'exec bash "$ROOT/scripts/install-arch-x280.sh" "$@"' "$ROOT/scripts/k41-install-basic-arch.sh" ||
+grep -Fq 'exec bash "$ROOT/stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh" "$@"' "$ROOT/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh" ||
   fail "basic Arch entry point does not delegate to the existing installer"
 grep -Fq 'exec bash "$ROOT/scripts/setup-desktop-x280.sh" "$@"' "$ROOT/scripts/k41-install-desktop.sh" ||
   fail "desktop entry point does not delegate to the existing setup implementation"
@@ -36,9 +36,9 @@ required=(
   'docs/04-TESTING.md'
   'docs/05-OPERATIONS.md'
   'docs/06-STATUS.md'
-  'scripts/k41-install-basic-arch.sh'
-  'scripts/install-arch-x280.sh'
-  'scripts/configure-arch-x280.sh'
+  'stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh'
+  'stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh'
+  'stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh'
   'config/hardware/thinkpad-x280.conf'
   'scripts/bootstrap-archiso.sh'
   'stages/stage-1-live-readiness/scripts/k41-live-validation.sh'

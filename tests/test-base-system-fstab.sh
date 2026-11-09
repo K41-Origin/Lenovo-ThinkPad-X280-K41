@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-# shellcheck source=../lib/base-system.sh
-source "$ROOT/lib/base-system.sh"
+# shellcheck source=../stages/stage-2-basic-arch-install/lib/base-system.sh
+source "$ROOT/stages/stage-2-basic-arch-install/lib/base-system.sh"
 
 if (( EUID != 0 )); then
   command -v sudo >/dev/null 2>&1 || {

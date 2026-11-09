@@ -9,14 +9,14 @@ Dokumen ini adalah sumber utama untuk pemetaan implementasi, alur instalasi, dep
 Entry point kanonis saat ini:
 
 ```bash
-bash scripts/k41-install-basic-arch.sh
+bash stages/stage-2-basic-arch-install/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh
 ```
 
 Wrapper tersebut meneruskan seluruh argumen ke implementasi:
 
 ```text
 scripts/k41-install-basic-arch.sh
-  └── scripts/install-arch-x280.sh
+  └── stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh
 ```
 
 Jalankan dari root checkout pada **Arch Linux Live ISO**, sebagai root, dalam mode UEFI. Installer memverifikasi keberadaan `/run/archiso`, filesystem checkout (`overlay` atau `tmpfs`), root privilege, UEFI, profil hardware X280, dan prasyarat command.
@@ -34,15 +34,15 @@ Stage 1 PASS adalah bukti readiness pada satu snapshot, bukan otorisasi menghapu
 
 ## 2. Peta file dan kepemilikan
 
-File Stage 2 saat ini masih berada di lokasi repository umum. Pemetaan ini menetapkan peran dan dependensinya tanpa memindahkan file atau mengubah implementasi.
+File yang eksklusif untuk Stage 2 dikelompokkan di direktori tahap ini. Modul storage bersama, orchestrator lintas tahap, dan test runner global tetap berada di lokasi bersama.
 
-| Path saat ini | Peran | Kepemilikan |
+| Path | Peran | Kepemilikan |
 |---|---|---|
 | `scripts/k41-install-basic-arch.sh` | Entry point kanonis yang tipis | Khusus Stage 2 |
 | `scripts/install-arch-x280.sh` | Orkestrasi instalasi destruktif dari preflight sampai validasi artefak boot | Khusus Stage 2 |
-| `scripts/configure-arch-x280.sh` | Helper interaktif yang disalin dan dijalankan di dalam `arch-chroot` target | Khusus Stage 2 |
-| `scripts/resume-arch-x280.sh` | Utility continuation lama untuk checkpoint pasca-pacstrap | **LEGACY — bukan recovery path aktif; jangan dijalankan** |
-| `lib/base-system.sh` | Validasi mount, instalasi paket dasar, dan penulisan fstab | Modul Stage 2 |
+| `stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh` | Helper interaktif yang disalin dan dijalankan di dalam `arch-chroot` target | Khusus Stage 2 |
+| `stages/stage-2-basic-arch-install/scripts/resume-arch-x280.sh` | Utility continuation lama untuk checkpoint pasca-pacstrap | **LEGACY — bukan recovery path aktif; jangan dijalankan** |
+| `stages/stage-2-basic-arch-install/lib/base-system.sh` | Validasi mount, instalasi paket dasar, dan penulisan fstab | Modul Stage 2 |
 | `lib/storage-plan.sh` | Perhitungan layout dan binding target/profile | Modul storage; dipakai workflow Stage 2 dan test storage |
 | `lib/storage-prerequisites.sh` | Snapshot prasyarat live read-only dan pengikatan evidence | Modul storage Stage 2 |
 | `lib/storage-confirmation.sh` | Review plan, exact confirmation, final revalidation, one-shot gate | Modul storage Stage 2 |
@@ -240,3 +240,8 @@ Stage 2 hanya menyediakan base Arch. Komponen berikut berada di tahap berikutnya
 - Secure Boot.
 
 Tidak ada reboot otomatis. Periksa hasil sebelum melakukan unmount `/mnt/efi`, unmount `/mnt`, dan menutup mapper `cryptroot` secara manual.
+
+## Catatan
+
+Catatan: stage 1 dan stage 2 akan menjadi gerbang dalam pembuatan proyek selanjutnya Custom Arch ISO, sebuah proyek kostumisasi ISO resmi dari arch sehingga saat di burn ke flashdisk dan di boot akan didalamnha sudah ada script costum milik Kai.
+Ingetin gua nanti tahun 2027 kalo ga mager baru gue buat

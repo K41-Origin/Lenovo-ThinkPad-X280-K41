@@ -56,9 +56,9 @@ review_files=(
   docs/06-STATUS.md
   config/hardware/thinkpad-x280.conf
   scripts/bootstrap-archiso.sh
-  scripts/k41-install-basic-arch.sh
-  scripts/install-arch-x280.sh
-  scripts/configure-arch-x280.sh
+  stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh
+  stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh
+  stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh
   stages/stage-1-live-readiness/scripts/k41-live-validation.sh
   scripts/k41-install-desktop.sh
   scripts/setup-desktop-x280.sh
@@ -77,7 +77,7 @@ review_files=(
   lib/storage-plan.sh
   lib/storage-prerequisites.sh
   lib/storage-confirmation.sh
-  lib/base-system.sh
+  stages/stage-2-basic-arch-install/lib/base-system.sh
 )
 
 mapfile -t test_files < <(git -C "$repo_dir" ls-files 'tests/*.sh')

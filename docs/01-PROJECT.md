@@ -28,7 +28,7 @@ Penerimaan Workstream 1 tidak boleh ditafsirkan sebagai klaim bahwa setiap detai
 ## Entry point kanonis
 
 - `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
-- `scripts/k41-install-basic-arch.sh` → delegasi internal `scripts/install-arch-x280.sh`; peta rinci: [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md)
+- `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` → delegasi internal `install-arch-x280.sh`; peta rinci: [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md)
 - `scripts/k41-install-desktop.sh` → delegasi internal `scripts/setup-desktop-x280.sh`
 - `scripts/k41-desktop-validation.sh`
 - `scripts/k41-desktop-repair.sh`

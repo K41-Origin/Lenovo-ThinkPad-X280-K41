@@ -33,7 +33,7 @@ jobs:
 
       - name: ShellCheck installer changes
         run: |
-          shellcheck --severity=error -e SC1091 scripts/k41-install-basic-arch.sh scripts/k41-install-desktop.sh tests/test-bootstrap-archiso.sh scripts/install-arch-x280.sh scripts/configure-arch-x280.sh tests/test-arch-installer-script.sh tests/test-arch-config-script.sh tests/test-pinned-device-path.sh tests/test-desktop-setup.sh tests/test-desktop-validation.sh tests/test-desktop-repair.sh scripts/k41-desktop-repair.sh scripts/setup-desktop-x280.sh scripts/k41-desktop-validation.sh scripts/test-desktop-x280.sh scripts/test-caelestia-x280.sh scripts/test-caelestia-permissions-x280.sh scripts/fix-caelestia-cache-permissions-x280.sh scripts/audit-x280-hardware.sh tests/test-hardware-audit.sh scripts/audit-x280-power-management.sh tests/test-power-management-audit.sh
+          shellcheck --severity=error -e SC1091 scripts/k41-install-basic-arch.sh scripts/k41-install-desktop.sh tests/test-bootstrap-archiso.sh stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh tests/test-arch-installer-script.sh tests/test-arch-config-script.sh tests/test-pinned-device-path.sh tests/test-desktop-setup.sh tests/test-desktop-validation.sh tests/test-desktop-repair.sh scripts/k41-desktop-repair.sh scripts/setup-desktop-x280.sh scripts/k41-desktop-validation.sh scripts/test-desktop-x280.sh scripts/test-caelestia-x280.sh scripts/test-caelestia-permissions-x280.sh scripts/fix-caelestia-cache-permissions-x280.sh scripts/audit-x280-hardware.sh tests/test-hardware-audit.sh scripts/audit-x280-power-management.sh tests/test-power-management-audit.sh
 
       - name: Run repository test suite
         run: bash tests/run.sh
