@@ -6,7 +6,7 @@ marker=${1:?Usage: k41-plymouth-quit-after-lock MARKER_PATH}
 [[ $marker == /* && $marker != */ ]] || exit 2
 [[ ! -L $marker ]] || exit 2
 
-timeout_seconds=${K41_PLYMOUTH_LOCK_TIMEOUT:-120}
+timeout_seconds=${K41_PLYMOUTH_LOCK_TIMEOUT:-75}
 [[ $timeout_seconds =~ ^[1-9][0-9]*$ ]] || exit 2
 
 for ((second = 0; second < timeout_seconds; second++)); do
