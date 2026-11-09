@@ -1,0 +1,594 @@
+# Environment and session
+Captured (UTC): 2026-11-09T06:27:56Z
+Repository commit: 6019290819623cd0fc22162d5fd336db008de71f
+Kernel: Linux 7.2.14-arch1-1
+Architecture: x86_64
+
+
+===== Installed desktop packages =====
+COMMAND: pacman -Q hyprland quickshell quickshell-git caelestia-shell caelestia-cli pipewire pipewire-audio pipewire-pulse wireplumber xdg-desktop-portal xdg-desktop-portal-hyprland xdg-desktop-portal-gtk mesa vulkan-intel
+hyprland 0.57.1-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+caelestia-shell 2.5.0-1
+caelestia-cli 1.1.3-1
+pipewire 1:1.6.10-1
+pipewire-audio 1:1.6.10-1
+pipewire-pulse 1:1.6.10-1
+wireplumber 0.5.18-1
+xdg-desktop-portal 1.22.1-2
+xdg-desktop-portal-hyprland 1.5.0-1
+xdg-desktop-portal-gtk 1.15.3-2
+mesa 1:26.2.6-1
+vulkan-intel 1:26.2.6-1
+COMMAND EXIT: 0
+
+===== Executable availability =====
+FOUND: start-hyprland -> /usr/bin/start-hyprland
+FOUND: Hyprland -> /usr/bin/Hyprland
+FOUND: hyprctl -> /usr/bin/hyprctl
+FOUND: qs -> /usr/bin/qs
+FOUND: caelestia -> /usr/bin/caelestia
+FOUND: foot -> /usr/bin/foot
+FOUND: thunar -> /usr/bin/thunar
+FOUND: wofi -> /usr/bin/wofi
+FOUND: wpctl -> /usr/bin/wpctl
+FOUND: pactl -> /usr/bin/pactl
+FOUND: nmcli -> /usr/bin/nmcli
+FOUND: rfkill -> /usr/bin/rfkill
+FOUND: lspci -> /usr/bin/lspci
+MISSING: lsusb
+FOUND: brightnessctl -> /usr/bin/brightnessctl
+FOUND: upower -> /usr/bin/upower
+
+===== Hyprland system information =====
+COMMAND: hyprctl systeminfo
+Hyprland 0.57.1 built from branch v0.57.1 at commit acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9 clean ([gha] Nix: update inputs).
+Date: Tue Nov 3 09:45:48 2026
+Tag: v0.57.1, commits: 7993
+
+Libraries:
+Hyprgraphics: built against 0.6.0, system has 0.6.0
+Hyprutils: built against 0.14.3, system has 0.14.3
+Hyprcursor: built against 0.1.13, system has 0.1.13
+Hyprlang: built against 0.6.8, system has 0.6.8
+Aquamarine: built against 0.16.0, system has 0.16.0
+
+Version ABI string: acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_aq_0.16_hu_0.14_hg_0.6_hc_0.1_hlg_0.6
+no flags were set
+
+
+System Information:
+System name: Linux
+Node name: x280
+Release: 7.2.14-arch1-1
+Version: #1 SMP PREEMPT_DYNAMIC Fri, 30 Oct 2026 14:32:40 +0000
+
+Libraries:
+Hyprgraphics: built against 0.6.0, system has 0.6.0
+Hyprutils: built against 0.14.3, system has 0.14.3
+Hyprcursor: built against 0.1.13, system has 0.1.13
+Hyprlang: built against 0.6.8, system has 0.6.8
+Aquamarine: built against 0.16.0, system has 0.16.0
+
+
+
+GPU information: 
+00:02.0 VGA compatible controller [0300]: Intel Corporation Kaby Lake-R GT2 [UHD Graphics 620] [8086:5917] (rev 07) (prog-if 00 [VGA controller])
+
+
+os-release: NAME="Arch Linux"
+PRETTY_NAME="Arch Linux"
+ID=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://archlinux.org/"
+DOCUMENTATION_URL="https://wiki.archlinux.org/"
+SUPPORT_URL="https://bbs.archlinux.org/"
+BUG_REPORT_URL="https://gitlab.archlinux.org/groups/archlinux/-/issues"
+PRIVACY_POLICY_URL="https://terms.archlinux.org/docs/privacy-policy/"
+LOGO=archlinux-logo
+
+
+plugins:
+
+Explicit sync: supported
+GL ver: 3.2
+FP16: supported
+Backend: drm
+
+Monitor info:
+	Panel eDP-1: 1920x1080, eDP-1 InfoVision Optoelectronics (Kunshan) Co.,Ltd China 0x04E6  -> backend drm
+		explicit ✔️
+		edid:
+			hdr ❌
+			chroma ✔️
+			bt2020 ❌
+		vrr capable ❌
+		non-desktop ❌
+		
+
+State:
+
+configProvider: lua
+backend: drm
+
+
+
+COMMAND EXIT: 0
+
+===== Connected monitors =====
+COMMAND: hyprctl monitors
+Monitor eDP-1 (ID 0):
+	1920x1080@60.00100 at 0x0
+	description: InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6
+	make: InfoVision Optoelectronics (Kunshan) Co.,Ltd China
+	model: 0x04E6
+	physical size (mm): 280x160
+	serial: 
+	active workspace: 1 (1)
+	special workspace:  ()
+	reserved: 60 10 10 10
+	scale: 1.5
+	transform: 0
+	focused: yes
+	dpmsStatus: 1
+	vrr: false
+	solitary: 0
+	solitaryBlockedBy: windowed mode,missing candidate
+	activelyTearing: false
+	tearingBlockedBy: next frame is not torn,user settings,missing candidate
+	directScanoutTo: 0
+	directScanoutBlockedBy: user settings,missing candidate
+	disabled: false
+	currentFormat: XRGB8888
+	mirrorOf: none
+	availableModes: 1920x1080@60.00Hz 
+	colorManagementPreset: srgb
+	sdrBrightness: 1
+	sdrSaturation: 1
+	sdrMinLuminance: 0.2
+	sdrMaxLuminance: 80
+	hardwareCursorsInUse: true
+	hardwareDetails:
+		backend: drm
+		hdr: no
+		chroma: yes
+		bt2020: no
+		vrrCapable: no
+
+
+COMMAND EXIT: 0
+
+===== Input devices =====
+COMMAND: hyprctl devices
+mice:
+	Mouse at 558d8f1e6460:
+		synaptics-tm3381-002
+			default speed: 0.00000
+			scroll factor: -1.00
+	Mouse at 558d8f1e5480:
+		tpps/2-elan-trackpoint
+			default speed: 0.00000
+			scroll factor: -1.00
+
+
+Keyboards:
+	Keyboard at 558d8e2b31f0:
+		video-bus
+			rules: r "", m "", l "us", v "", o ""
+			active layout index: 0
+			active keymap: English (US)
+			capsLock: no
+			numLock: no
+			main: no
+	Keyboard at 558d8f1fee10:
+		power-button
+			rules: r "", m "", l "us", v "", o ""
+			active layout index: 0
+			active keymap: English (US)
+			capsLock: no
+			numLock: no
+			main: no
+	Keyboard at 558d8f23a1d0:
+		sleep-button
+			rules: r "", m "", l "us", v "", o ""
+			active layout index: 0
+			active keymap: English (US)
+			capsLock: no
+			numLock: no
+			main: no
+	Keyboard at 558d8f018430:
+		at-translated-set-2-keyboard
+			rules: r "", m "", l "us", v "", o ""
+			active layout index: 0
+			active keymap: English (US)
+			capsLock: no
+			numLock: no
+			main: yes
+	Keyboard at 558d8f296d00:
+		thinkpad-extra-buttons
+			rules: r "", m "", l "us", v "", o ""
+			active layout index: 0
+			active keymap: English (US)
+			capsLock: no
+			numLock: no
+			main: no
+
+
+Tablets:
+
+
+Touch:
+
+
+Switches:
+	Switch Device at 558d8e331430:
+		Lid Switch
+
+COMMAND EXIT: 0
+
+===== Hyprland configuration validation =====
+COMMAND: hyprctl configerrors
+
+
+COMMAND EXIT: 0
+
+===== Quickshell processes =====
+COMMAND: pgrep -af quickshell
+COMMAND EXIT: 1 (diagnostic unavailable or command reported an error)
+
+===== Caelestia processes =====
+COMMAND: pgrep -af caelestia
+1972 qs -c caelestia -n -d
+COMMAND EXIT: 0
+
+===== User audio devices and PipeWire graph =====
+COMMAND: wpctl status
+PipeWire 'pipewire-0' [1.6.10, kai@x280, cookie:3754289484]
+ └─ Clients:
+        32. xdg-desktop-portal                  [1.6.10, kai@x280, pid:690]
+        33. WirePlumber                         [1.6.10, kai@x280, pid:756]
+        39. xdg-desktop-portal-hyprland         [1.6.10, kai@x280, pid:764]
+        43. WirePlumber [client]                [1.6.10, kai@x280, pid:756]
+        63. quickshell                          [1.6.10, kai@x280, pid:1972]
+        64. pipewire                            [1.6.10, kai@x280, pid:1669]
+        65. Hyprland                            [1.6.10, kai@x280, pid:636]
+        66. wpctl                               [1.6.10, kai@x280, pid:4090]
+
+Audio
+ ├─ Devices:
+ │      44. Built-in Audio                      [alsa]
+ │  
+ ├─ Sinks:
+ │  *   53. Built-in Audio Analog Stereo        [vol: 0.40]
+ │  
+ ├─ Sources:
+ │  *   54. Built-in Audio Analog Stereo        [vol: 1.00]
+ │  
+ ├─ Filters:
+ │  
+ └─ Streams:
+
+Video
+ ├─ Devices:
+ │      51. Integrated Camera                   [v4l2]
+ │      52. Integrated Camera                   [v4l2]
+ │  
+ ├─ Sinks:
+ │  
+ ├─ Sources:
+ │  *   61. Integrated Camera (V4L2)           
+ │  
+ ├─ Filters:
+ │  
+ └─ Streams:
+
+Settings
+ └─ Default Configured Devices:
+COMMAND EXIT: 0
+
+===== PulseAudio compatibility server =====
+COMMAND: pactl info
+Server String: /run/user/1000/pulse/native
+Library Protocol Version: 35
+Server Protocol Version: 35
+Is Local: yes
+Client Index: 141
+Tile Size: 65472
+User Name: kai
+Host Name: x280
+Server Name: PulseAudio (on PipeWire 1.6.10)
+Server Version: 15.0.0
+Default Sample Specification: float32le 2ch 48000Hz
+Default Channel Map: front-left,front-right
+Default Sink: alsa_output.pci-0000_00_1f.3.analog-stereo
+Default Source: alsa_input.pci-0000_00_1f.3.analog-stereo
+COMMAND EXIT: 0
+
+===== User PipeWire/WirePlumber service state =====
+COMMAND: systemctl --user --no-pager --plain status pipewire.service pipewire-pulse.service wireplumber.service
+● pipewire.service - PipeWire Multimedia Service
+     Loaded: loaded (/usr/lib/systemd/user/pipewire.service; disabled; preset: enabled)
+     Active: active (running) since Mon 2026-11-09 11:34:08 WIB; 1h 53min ago
+ Invocation: fd6633682f5445ebbace151433e1459e
+TriggeredBy: ● pipewire.socket
+   Main PID: 755 (pipewire)
+      Tasks: 3 (limit: 9194)
+     Memory: 5.9M (peak: 8.6M)
+        CPU: 510ms
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/pipewire.service
+             └─755 /usr/bin/pipewire
+
+Nov 09 11:34:08 x280 systemd[604]: Started PipeWire Multimedia Service.
+Nov 09 11:34:08 x280 pipewire[755]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 11:34:08 x280 pipewire[755]: mod.rt: RTKit does not give us MaxRealtimePriority, using 1
+Nov 09 11:34:08 x280 pipewire[755]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 11:34:08 x280 pipewire[755]: mod.rt: RTKit does not give us MinNiceLevel, using 0
+Nov 09 11:34:08 x280 pipewire[755]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 11:34:08 x280 pipewire[755]: mod.rt: RTKit does not give us RTTimeUSecMax, using -1
+
+● pipewire-pulse.service - PipeWire PulseAudio
+     Loaded: loaded (/usr/lib/systemd/user/pipewire-pulse.service; disabled; preset: enabled)
+     Active: active (running) since Mon 2026-11-09 12:50:35 WIB; 37min ago
+ Invocation: cc2fa1e9920c4aab88e332f806938930
+TriggeredBy: ● pipewire-pulse.socket
+   Main PID: 1669 (pipewire-pulse)
+      Tasks: 3 (limit: 9194)
+     Memory: 8.1M (peak: 9.5M)
+        CPU: 265ms
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/pipewire-pulse.service
+             └─1669 /usr/bin/pipewire-pulse
+
+Nov 09 12:50:35 x280 systemd[604]: Started PipeWire PulseAudio.
+Nov 09 12:50:35 x280 pipewire-pulse[1669]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 12:50:35 x280 pipewire-pulse[1669]: mod.rt: RTKit does not give us MaxRealtimePriority, using 1
+Nov 09 12:50:35 x280 pipewire-pulse[1669]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 12:50:35 x280 pipewire-pulse[1669]: mod.rt: RTKit does not give us MinNiceLevel, using 0
+Nov 09 12:50:35 x280 pipewire-pulse[1669]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 12:50:35 x280 pipewire-pulse[1669]: mod.rt: RTKit does not give us RTTimeUSecMax, using -1
+
+● wireplumber.service - Multimedia Service Session Manager
+     Loaded: loaded (/usr/lib/systemd/user/wireplumber.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-11-09 11:34:08 WIB; 1h 53min ago
+ Invocation: 13d8d4b513844716aa34e14829b16b95
+   Main PID: 756 (wireplumber)
+      Tasks: 9 (limit: 9194)
+     Memory: 14.9M (peak: 16.7M)
+        CPU: 1.264s
+     CGroup: /user.slice/user-1000.slice/user@1000.service/session.slice/wireplumber.service
+             └─756 /usr/bin/wireplumber
+
+Nov 09 11:34:08 x280 wireplumber[756]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 11:34:08 x280 wireplumber[756]: mod.rt: RTKit does not give us MaxRealtimePriority, using 1
+Nov 09 11:34:08 x280 wireplumber[756]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 11:34:08 x280 wireplumber[756]: mod.rt: RTKit does not give us MinNiceLevel, using 0
+Nov 09 11:34:08 x280 wireplumber[756]: mod.rt: RTKit error: org.freedesktop.DBus.Error.ServiceUnknown
+Nov 09 11:34:08 x280 wireplumber[756]: mod.rt: RTKit does not give us RTTimeUSecMax, using -1
+Nov 09 11:34:08 x280 wireplumber[756]: default: Failed to get percentage from UPower: org.freedesktop.DBus.Error.NameHasNoOwner
+Nov 09 11:34:08 x280 wireplumber[756]: spa.bluez5: BlueZ system service is not available
+Nov 09 11:34:08 x280 wireplumber[756]: wp-device: SPA handle 'api.libcamera.enum.manager' could not be loaded; is it installed?
+Nov 09 11:34:08 x280 wireplumber[756]: s-monitors-libcamera: PipeWire's libcamera SPA plugin is missing or broken. Some camera types may not be supported.
+COMMAND EXIT: 0
+
+===== Network device state (connection names omitted) =====
+COMMAND: nmcli -t -f DEVICE\,TYPE\,STATE device status
+wlp59s0:wifi:connected
+lo:loopback:connected (externally)
+p2p-dev-wlp59s0:wifi-p2p:disconnected
+enp0s31f6:ethernet:unavailable
+COMMAND EXIT: 0
+
+===== Radio block state =====
+COMMAND: rfkill list
+0: tpacpi_bluetooth_sw: Bluetooth
+	Soft blocked: no
+	Hard blocked: no
+2: phy0: Wireless LAN
+	Soft blocked: no
+	Hard blocked: no
+5: hci0: Bluetooth
+	Soft blocked: no
+	Hard blocked: no
+COMMAND EXIT: 0
+
+===== PCI graphics, network, and audio hardware =====
+COMMAND: lspci -nnk
+00:00.0 Host bridge [0600]: Intel Corporation Xeon E3-1200 v6/7th Gen Core Processor Host Bridge/DRAM Registers [8086:5914] (rev 08)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: skl_uncore
+00:02.0 VGA compatible controller [0300]: Intel Corporation Kaby Lake-R GT2 [UHD Graphics 620] [8086:5917] (rev 07)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: i915
+	Kernel modules: i915
+00:04.0 Signal processing controller [1180]: Intel Corporation Xeon E3-1200 v5/E3-1500 v5/6th Gen Core Processor Thermal Subsystem [8086:1903] (rev 08)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: proc_thermal
+	Kernel modules: processor_thermal_device_pci_legacy
+00:08.0 System peripheral [0880]: Intel Corporation Xeon E3-1200 v5/v6 / E3-1500 v5 / 6th/7th/8th Gen Core Processor Gaussian Mixture Model [8086:1911]
+	Subsystem: Lenovo Device [17aa:2256]
+00:14.0 USB controller [0c03]: Intel Corporation Sunrise Point-LP USB 3.0 xHCI Controller [8086:9d2f] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: xhci_hcd
+	Kernel modules: xhci_pci
+00:14.2 Signal processing controller [1180]: Intel Corporation Sunrise Point-LP Thermal subsystem [8086:9d31] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: intel_pch_thermal
+	Kernel modules: intel_pch_thermal
+00:16.0 Communication controller [0780]: Intel Corporation Sunrise Point-LP CSME HECI #1 [8086:9d3a] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: mei_me
+	Kernel modules: mei_me
+00:1c.0 PCI bridge [0604]: Intel Corporation Sunrise Point-LP PCI Express Root Port #1 [8086:9d10] (rev f1)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+00:1c.2 PCI bridge [0604]: Intel Corporation Sunrise Point-LP PCI Express Root Port #3 [8086:9d12] (rev f1)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+00:1c.4 PCI bridge [0604]: Intel Corporation Sunrise Point-LP PCI Express Root Port #5 [8086:9d14] (rev f1)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+00:1f.0 ISA bridge [0601]: Intel Corporation Sunrise Point LPC/eSPI Controller [8086:9d4e] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+00:1f.2 Memory controller [0580]: Intel Corporation Sunrise Point-LP PMC [8086:9d21] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+00:1f.3 Audio device [0403]: Intel Corporation Sunrise Point-LP HD Audio [8086:9d71] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: snd_hda_intel
+	Kernel modules: snd_soc_avs, snd_hda_intel
+00:1f.4 SMBus [0c05]: Intel Corporation Sunrise Point-LP SMBus [8086:9d23] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: i801_smbus
+	Kernel modules: i2c_i801
+00:1f.6 Ethernet controller [0200]: Intel Corporation Ethernet Connection (4) I219-V [8086:15d8] (rev 21)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: e1000e
+	Kernel modules: e1000e
+02:00.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+03:00.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+03:01.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+03:02.0 PCI bridge [0604]: Intel Corporation JHL6240 Thunderbolt 3 Bridge (Low Power) [Alpine Ridge LP 2016] [8086:15c0] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: pcieport
+	Kernel modules: shpchp
+04:00.0 System peripheral [0880]: Intel Corporation JHL6240 Thunderbolt 3 NHI (Low Power) [Alpine Ridge LP 2016] [8086:15bf] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: thunderbolt
+	Kernel modules: thunderbolt
+3a:00.0 USB controller [0c03]: Intel Corporation JHL6240 Thunderbolt 3 USB 3.1 Controller (Low Power) [Alpine Ridge LP 2016] [8086:15c1] (rev 01)
+	Subsystem: Device [2222:1111]
+	Kernel driver in use: xhci_hcd
+	Kernel modules: xhci_pci
+3b:00.0 Network controller [0280]: Intel Corporation Wireless 8265 / 8275 [8086:24fd] (rev 78)
+	Subsystem: Intel Corporation Dual Band Wireless-AC 8265 [Windstorm Peak] [8086:0010]
+	Kernel driver in use: iwlwifi
+	Kernel modules: iwlwifi
+3c:00.0 Non-Volatile memory controller [0108]: Sandisk Corp SanDisk Extreme Pro / WD Black SN750 / PC SN730 / Red SN700 NVMe SSD [15b7:5006]
+	Subsystem: Sandisk Corp SanDisk Extreme Pro / WD Black SN750 / PC SN730 / Red SN700 NVMe SSD [15b7:5006]
+	Kernel driver in use: nvme
+	Kernel modules: nvme
+COMMAND EXIT: 0
+
+===== USB devices =====
+COMMAND: lsusb
+/home/kai/Lenovo-ThinkPad-X280-K41/scripts/test-desktop-x280.sh: line 54: lsusb: command not found
+COMMAND EXIT: 127 (diagnostic unavailable or command reported an error)
+
+===== Brightness device inventory =====
+COMMAND: brightnessctl -l
+Available devices:
+Device 'intel_backlight' of class 'backlight':
+	Current brightness: 167 (11%)
+	Max brightness: 1515
+
+Device 'platform::mute' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 1
+
+Device 'phy0-led' of class 'leds':
+	Current brightness: 1 (100%)
+	Max brightness: 1
+
+Device 'tpacpi::thinklight' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 1
+
+Device 'tpacpi::power' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 255
+
+Device 'input3::numlock' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 1
+
+Device 'tpacpi::lid_logo_dot' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 255
+
+Device 'tpacpi::standby' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 255
+
+Device 'input3::capslock' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 1
+
+Device 'tpacpi::thinkvantage' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 255
+
+Device 'input3::scrolllock' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 1
+
+Device 'platform::micmute' of class 'leds':
+	Current brightness: 0 (0%)
+	Max brightness: 1
+
+COMMAND EXIT: 0
+
+===== Power supply device list =====
+COMMAND: upower -e
+/org/freedesktop/UPower/devices/battery_BAT0
+/org/freedesktop/UPower/devices/line_power_AC
+/org/freedesktop/UPower/devices/line_power_ucsi_source_psy_USBC000o001
+/org/freedesktop/UPower/devices/line_power_ucsi_source_psy_USBC000o002
+/org/freedesktop/UPower/devices/DisplayDevice
+COMMAND EXIT: 0
+
+===== Battery and thermal sysfs snapshot =====
+[BAT0]
+status: Discharging
+capacity: 85
+energy_now: 37030000
+energy_full: 43660000
+power_now: 3392000
+voltage_now: 12202000
+thermal_zone0 (acpitz): 37000 millidegrees C
+thermal_zone1 (pch_skylake): 38500 millidegrees C
+thermal_zone2 (INT3400 Thermal): 20000 millidegrees C
+thermal_zone3 (SEN1): 35050 millidegrees C
+thermal_zone4 (B0D4): 37050 millidegrees C
+thermal_zone5 (x86_pkg_temp): 38000 millidegrees C
+thermal_zone6 (iwlwifi_1): 33000 millidegrees C
+
+===== User journal errors from this boot (last 60) =====
+COMMAND: journalctl --user -b -p err --no-pager -n 60
+Nov 09 12:50:29 x280 qs[1662]: PAM _pam_init_handlers: no default config other
+Nov 09 12:56:08 x280 qs[1799]: PAM _pam_init_handlers: no default config other
+Nov 09 13:09:19 x280 qs[2877]: PAM _pam_init_handlers: no default config other
+Nov 09 13:27:28 x280 qs[3913]: PAM _pam_init_handlers: no default config other
+COMMAND EXIT: 0
+
+===== System journal errors from this boot (last 60; may be permission-limited) =====
+COMMAND: journalctl -b -p err --no-pager -n 60
+Nov 09 11:29:39 archlinux kernel: virt/tdx: TDX not supported by the host platform
+Nov 09 11:33:55 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 11:33:55 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 11:33:55 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 12:50:25 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 12:50:25 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 12:50:26 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 12:50:29 x280 qs[1662]: PAM _pam_init_handlers: no default config other
+Nov 09 12:56:08 x280 qs[1799]: PAM _pam_init_handlers: no default config other
+Nov 09 13:09:12 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:09:12 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:09:14 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 13:09:19 x280 qs[2877]: PAM _pam_init_handlers: no default config other
+Nov 09 13:27:26 x280 wpa_supplicant[584]: wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:27:26 x280 wpa_supplicant[584]: p2p-dev-wlp59s0: nl80211: kernel reports: multicast RX registrations are not supported
+Nov 09 13:27:27 x280 kernel: Bluetooth: hci0: Reading supported features failed (-16)
+Nov 09 13:27:28 x280 qs[3913]: PAM _pam_init_handlers: no default config other
+COMMAND EXIT: 0
