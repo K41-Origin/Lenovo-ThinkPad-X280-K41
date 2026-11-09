@@ -1,0 +1,11 @@
+========== K41 LOCKSCREEN SOURCE DEPLOYMENT ==========
+User     : kai (UID 1000)
+Repo     : /home/kai/Lenovo-ThinkPad-X280-K41
+Report   : /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T160058Z-apply.log
+INFO: Updated K41 lock overrides in the pinned local source tree. Backup: /home/kai/.local/state/k41/lockscreen/backups/20261109T160058Z-overlay-update
+
+========== EXECUTION SUMMARY ==========
+Finished : 2026-11-09T23:00:58+07:00
+Exit code: 0
+Result   : SUCCESS
+Log file : /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T160058Z-apply.log

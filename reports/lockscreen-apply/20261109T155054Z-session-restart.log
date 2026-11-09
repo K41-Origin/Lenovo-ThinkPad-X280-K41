@@ -1,0 +1,22 @@
+========== K41 CAELESTIA SESSION RESTART ==========
+Timestamp (UTC): 20261109T155054Z
+User UID: 1000
+Kernel: Linux 7.2.14-arch1-1
+Wayland session: present
+Hyprland session signature: present
+Wayland socket: present
+
+========== RESTART OUTPUT ==========
+[32m  INFO[0m: Launching config: "/home/kai/.config/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "069ea8c6e9889cca46d05922bc04af46" Path ID "069ea8c6e9889cca46d05922bc04af46"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/ft3v0s8ot/log.qslog"
+[33m  WARN[97m quickshell.service.notifications[0m: Could not register notification server at org.freedesktop.Notifications, presumably because one is already registered.
+[33m  WARN[97m quickshell.service.notifications[0m: Registration will be attempted again if the active service is unregistered.
+[32m  INFO[0m: Configuration Loaded
+
+========== SUMMARY ==========
+Expected user shell: /home/kai/.config/quickshell/caelestia/shell.qml
+Selected config path check: PASS
+Restart command exit code: 0
+Command result: EXITED SUCCESSFULLY (runtime behavior still requires visual/functional verification)
+Report file: /home/kai/Lenovo-ThinkPad-X280-K41/reports/lockscreen-apply/20261109T155054Z-session-restart.log

@@ -1,0 +1,129 @@
+K41 Guest Mode — Storage/Persistence Audit
+Timestamp UTC: 20261109T162256Z
+Repository: /home/kai/Lenovo-ThinkPad-X280-K41
+Branch: main
+Commit: b597db817c1d71ad6ac7cfb29979f7faf9368c51
+Kernel: Linux 7.2.14-arch1-1
+User: UID=1000 (username omitted)
+
+Scope: read-only persistence-path inspection; not a Guest Mode test.
+No home-directory contents, credentials, browser profiles, or file listings are collected.
+Report may still contain host-specific paths and package/service state; review before sharing.
+
+========== Memory capacity and pressure snapshot ==========
+COMMAND: free -b
+               total        used        free      shared  buff/cache   available
+Mem:      8069128192  3740065792  2724499456   749723648  2024988672  4329062400
+Swap:    10216632320           0 10216632320
+COMMAND EXIT: 0
+
+========== Selected memory counters ==========
+MemTotal:        7880008 kB
+MemAvailable:    4227600 kB
+Cached:          1877628 kB
+SwapCached:            0 kB
+SwapTotal:       9977180 kB
+SwapFree:        9977180 kB
+Shmem:            732152 kB
+
+========== Root filesystem ==========
+COMMAND: findmnt -n -o TARGET\,SOURCE\,FSTYPE\,OPTIONS /
+/ /dev/mapper/cryptroot ext4 rw,relatime
+COMMAND EXIT: 0
+
+========== Active swap devices (path/type/size/usage only) ==========
+COMMAND: swapon --show --noheadings --raw --output NAME\,TYPE\,SIZE\,USED\,PRIO
+/swapfile file 9.5G 0B -1  
+COMMAND EXIT: 0
+
+========== Swapfile metadata (no file contents read) ==========
+type=regular file size_bytes=10216636416 mode=600 owner_uid=0 group_gid=0 path=/swapfile
+
+========== Relevant fstab entries ==========
+/swapfile none swap defaults 0 0
+
+========== Kernel resume/hibernate parameters ==========
+
+-- selected resume tokens: /etc/kernel/cmdline --
+
+========== Initramfs resume hook indicators ==========
+/etc/mkinitcpio.conf:MODULES=()
+/etc/mkinitcpio.conf:HOOKS=(base systemd plymouth autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+
+========== Kernel hibernation interface ==========
+/sys/power/state: freeze mem disk
+/sys/power/disk: [platform] shutdown reboot suspend test_resume
+
+========== ZRAM inventory ==========
+No zram block devices detected.
+
+========== Effective journald settings (selected keys only) ==========
+
+========== Effective coredump settings (selected keys only) ==========
+
+========== Relevant mount destinations ==========
+
+-- /home --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+-- /tmp --
+/tmp tmpfs tmpfs rw,nosuid,nodev,nr_inodes=1048576,inode64,huge=advise,usrquota
+
+-- /var/tmp --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+-- /var/log --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+-- /var/log/journal --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+-- /run/log/journal --
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+
+-- /var/lib/systemd/coredump --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+-- /var/cache --
+/ /dev/mapper/cryptroot ext4 rw,relatime
+
+-- /run --
+/run tmpfs tmpfs rw,nosuid,nodev,size=1576004k,nr_inodes=819200,mode=755,inode64,huge=advise
+
+========== Relevant systemd unit state ==========
+
+[systemd-journald.service]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+[systemd-coredump.socket]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+[systemd-tmpfiles-clean.timer]
+LoadState=loaded
+ActiveState=active
+UnitFileState=static
+
+[logrotate.timer]
+LoadState=not-found
+ActiveState=inactive
+UnitFileState=
+
+[swapfile.swap]
+LoadState=loaded
+ActiveState=active
+UnitFileState=generated
+
+Active swap units:
+  swapfile.swap loaded active active /swapfile
+
+========== Assessment boundaries ==========
+- This report describes the system at collection time; it does not prove all application write paths.
+- Active swap on a persistent filesystem is a Guest Mode design blocker until a safe policy is selected.
+- A swapfile inside LUKS remains persistent across reboot; encryption is not ephemerality.
+- Volatile journald/coredump settings do not by themselves make every log/cache volatile.
+- This collector does not inspect browser profiles, user files, network/router logs, remote DNS, or server-side records.
+- No settings, packages, services, mounts, swap devices, boot entries, or files were changed.
