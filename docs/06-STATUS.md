@@ -10,7 +10,7 @@
 | 2. Arch ISO — Basic Arch Installation | IMPLEMENTED | Entry point `k41-install-basic-arch.sh` mendelegasikan ke installer; penerimaan boot fisik dibuktikan terpisah. |
 | 3. Basic Arch — Desktop Installation | IMPLEMENTED | Entry point `k41-install-desktop.sh` mendelegasikan ke desktop setup; exit 0 bukan penerimaan UI. |
 | 4. Desktop Functional Validation | **COMPLETED** | Laporan terbaru 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. WARN ditinjau dan risiko residual didokumentasikan. Pengguna mengonfirmasi pairing Bluetooth berhasil. Batas visual/fisik tetap eksplisit di luar gate. |
-| 5. Desktop Customization | **IN PROGRESS** | Profil visual Caelestia/Hyprland telah diterapkan. Script konfigurasi boot experience (`scripts/k41-configure-boot-experience.sh`) akan dijalankan sebagai pengujian nyata pada perangkat fisik; script ini mengubah hook mkinitcpio/kernel command line, membangun ulang UKI, memasang Plymouth dan handoff TTY1, serta menawarkan enrollment TPM2 PCR 7. Hasil TPM2 auto-unlock dan pengujian fisik power-on/reboot/poweroff belum dinyatakan lulus. Quickshell K41 memakai desain ring 12 titik yang disamakan dengan Plymouth; installer mengatur opsi visual Hyprland untuk handoff. Namun pengguna mengonfirmasi tampilan Hyprland masih bocor pada power-on, reboot, dan poweroff. Tema Plymouth K41 serta pemeriksaan unit reboot/poweroff/halt telah diimplementasikan, tetapi konsistensi visual perangkat BELUM TERCAPAI. Pengujian nyata workstream boot experience menjadi pekerjaan aktif; tidak digantikan oleh preview atau static test. Tahap ini nantinya juga menjadi pedoman untuk menyederhanakan dan memperbaiki alur instalasi serta kustomisasi dari kondisi nol; perbaikan tahap-tahap sebelumnya dijadwalkan sebelum tahap 7. |
+| 5. Desktop Customization | **IN PROGRESS** | Pengguna mengonfirmasi pada 2026-11-09 bahwa sistem ThinkPad X280 sudah berhasil boot. Konfirmasi ini mencatat keberhasilan startup/masuk ke sistem, tetapi tidak dengan sendirinya membuktikan TPM2 auto-unlock, kualitas visual splash, reboot, poweroff, atau handoff lock-screen. Sebelumnya pengguna melaporkan visual Hyprland masih bocor pada power-on, reboot, dan poweroff; desain K41 juga belum memenuhi hasil visual yang disepakati. Karena itu boot dasar dinyatakan berhasil, sedangkan acceptance visual dan jalur reboot/poweroff tetap terbuka. Tahap ini nantinya menjadi pedoman perbaikan alur instalasi serta kustomisasi dari kondisi nol; perbaikan tahap-tahap sebelumnya dijadwalkan sebelum tahap 7. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu tahap 5 dan baseline terukur. |
 | 7. Release | PLANNED | Menunggu seluruh acceptance gate, regression, dokumentasi, dan bukti final. |
 
@@ -49,6 +49,12 @@ Ini merupakan keputusan perencanaan (**PLANNED**), bukan perubahan installer yan
 ## Prioritas saat ini
 
 **CURRENT — Tahap 5, Workstream 1: boot experience (power-on, reboot, poweroff).** Visual leakage Hyprland masih merupakan known issue dan investigasi/perbaikannya adalah pekerjaan aktif. Setelah workstream ini diterima, lanjutkan berurutan ke lock screen, dashboard, taskbar/panel, launcher, sidebar, lalu utilities. Elemen lintas-komponen (design tokens, typography, icons/cursor, wallpaper, notifications/OSD, window appearance, terminal, GTK/Qt) dijaga konsisten saat komponen terkait dikerjakan. Refactoring tahap instalasi sebelumnya berdasarkan hasil Tahap 5 tetap ditunda sampai sebelum Tahap 7.
+
+### Konfirmasi keberhasilan boot sistem
+
+Pada 2026-11-09 pengguna mengonfirmasi: **booting sudah berhasil** pada ThinkPad X280. Catatan ini berarti sistem berhasil melewati proses startup dan mencapai sistem yang dapat digunakan menurut konfirmasi pengguna. Rincian seperti cold boot berulang, metode unlock root (TPM2 atau passphrase), durasi boot, serta hasil pengamatan visual tidak disimpulkan karena tidak disertakan dalam konfirmasi tersebut.
+
+Keberhasilan boot dasar ini tidak sama dengan penerimaan penuh workstream boot experience. Isu visual K41/Hyprland masih dicatat terpisah, dan keberhasilan reboot serta poweroff belum dikonfirmasi dalam catatan ini.
 
 ### Status faktual visual boot
 
