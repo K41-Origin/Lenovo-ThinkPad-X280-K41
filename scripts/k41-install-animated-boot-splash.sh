@@ -26,13 +26,8 @@ install -d -m 0755 -o "$uid" -g "$gid" "$local_bin"
 install -m 0755 -o "$uid" -g "$gid" "$source_helper" "$local_bin/k41-lock-caelestia-after-start"
 
 lua="$home/.config/hypr/hyprland.lua"
-if grep -Fq "$marker" "$lua"; then
-    printf 'K41 animated splash hook already exists; no duplicate inserted.\n'
-    exit 0
-fi
-
 python3 - "$lua" <<'PY'
-import os, pathlib, stat, sys, tempfile
+import json, os, pathlib, stat, sys, tempfile
 p = pathlib.Path(sys.argv[1])
 text = p.read_text(encoding="utf-8")
 splash_marker = "-- K41 ANIMATED BOOT SPLASH START"
@@ -62,13 +57,8 @@ if visual_marker not in text:
     text = text[:position] + visual_block + text[position:]
 
 if splash_marker not in text:
-    launch = (
-        hook + "\\n"
-        + "    hl.exec_cmd(\\"sh -c 'mkdir -p \\\\"$HOME/.cache/k41\\\\"; "
-        + "qs -c k41-boot-splash >/dev/null 2>&1 & "
-        + "echo $! > \\\\"$HOME/.cache/k41/boot-splash.pid\\\\"'\\")\\n"
-        + "    " + splash_marker + "\\n"
-    )
+    command = "sh -c 'mkdir -p \\"$HOME/.cache/k41\\"; qs -c k41-boot-splash >/dev/null 2>&1 & echo $! > \\"$HOME/.cache/k41/boot-splash.pid\\"'"
+    launch = hook + "\\n" + "    hl.exec_cmd(" + json.dumps(command) + ")\\n" + "    " + splash_marker + "\\n"
     text = text.replace(hook, launch, 1)
 
 fd, tmp = tempfile.mkstemp(prefix=".k41-boot-visuals-", dir=p.parent)
