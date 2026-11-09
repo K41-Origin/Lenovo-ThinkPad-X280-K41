@@ -145,19 +145,24 @@ pattern = re.compile(r"""^([ \t]*local[ \t]+menu[ \t]*=[ \t]*)(["'])([^"'\n]+)\2
 matches = list(pattern.finditer(hypr_text))
 if len(matches) != 1:
     raise SystemExit("Launcher declaration changed between preflight and apply; refusing to write.")
-if "K41_OBSIDIAN_APPEARANCE_BEGIN" in hypr_text:
-    raise SystemExit("K41 appearance marker already exists; refusing to write.")
 if not overlay or not fuzzel_text:
     raise SystemExit("A source configuration is empty; refusing to write.")
 
 m = matches[0]
 replacement = f'{m.group(1)}"fuzzel"{m.group(4)}'
 hypr_text = hypr_text[:m.start()] + replacement + hypr_text[m.end():]
-hypr_text += (
-    "\n\n-- K41_OBSIDIAN_APPEARANCE_BEGIN\n"
-    + overlay
-    + "\n-- K41_OBSIDIAN_APPEARANCE_END\n"
-)
+begin_marker = "-- K41_OBSIDIAN_APPEARANCE_BEGIN"
+end_marker = "-- K41_OBSIDIAN_APPEARANCE_END"
+begins, ends = hypr_text.count(begin_marker), hypr_text.count(end_marker)
+new_block = begin_marker + "\n" + overlay + "\n" + end_marker
+if begins == 0 and ends == 0:
+    hypr_text += "\n\n" + new_block + "\n"
+elif begins == 1 and ends == 1:
+    start = hypr_text.index(begin_marker)
+    end = hypr_text.index(end_marker) + len(end_marker)
+    hypr_text = hypr_text[:start] + new_block + hypr_text[end:]
+else:
+    raise SystemExit("K41 appearance markers are unbalanced; refusing to write.")
 
 def atomic_write(path: pathlib.Path, content: str) -> None:
     mode = stat.S_IMODE(path.stat().st_mode)
