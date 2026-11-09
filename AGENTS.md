@@ -9,7 +9,7 @@ Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `d
 1. `scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
 2. `scripts/k41-install-basic-arch.sh` — Arch base installation; destructive.
 3. `scripts/k41-install-desktop.sh` — desktop setup from installed Arch TTY.
-4. `scripts/k41-desktop-validation.sh` — read-only diagnostics plus operator-approved Caelestia restart and physical checklist from the active Hyprland session; run as the regular user, never with sudo.
+4. `scripts/k41-desktop-validation.sh` — read-only automated package, process, configuration, service, portal, audio, network, battery, thermal, and journal health checks from the active Hyprland session; run as the regular user, never with sudo.
 5. Desktop customization.
 6. Desktop and hardware optimization.
 7. Release.
@@ -57,7 +57,7 @@ Use these labels precisely:
 - **RELEASED**: incorporated into an explicitly designated release.
 - **NOT TESTED**: no adequate test evidence.
 
-A file existing or wrapper delegating does not prove runtime behavior. Syntax checks do not prove correct execution. Fixture tests do not prove physical hardware compatibility. Never fabricate repository content, test output, upstream compatibility, or successful GitHub operations.
+A file existing or wrapper delegating does not prove runtime behavior. Syntax checks do not prove correct execution. Automated desktop log/runtime checks do not prove visual or physical interaction; fixture tests do not prove physical hardware compatibility. Never fabricate repository content, test output, upstream compatibility, or successful GitHub operations.
 
 ## Safety and security
 
