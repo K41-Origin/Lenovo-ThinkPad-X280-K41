@@ -9,68 +9,32 @@ repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 command -v git >/dev/null 2>&1 || die 'Git tidak tersedia; audit harus dijalankan dari clone repository.'
 git -C "$repo_root" rev-parse --show-toplevel >/dev/null 2>&1 || die "Direktori script bukan working tree Git yang valid: $repo_root"
 
-if (( EUID == 0 )); then
-  [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die 'Gunakan sudo dari akun desktop biasa (bukan login root langsung).'
-  for cmd in getent chown id install; do
-    command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
-  done
-  passwd_entry="$(getent passwd "$SUDO_USER")" || die "Tidak dapat menemukan akun pemanggil: $SUDO_USER"
-  IFS=: read -r audit_user _ audit_uid audit_gid _ audit_home _ <<< "$passwd_entry"
-  [[ -n $audit_home && -d $audit_home ]] || die 'HOME akun pemanggil tidak valid.'
-  export HOME="$audit_home" USER="$audit_user" LOGNAME="$audit_user"
-  export XDG_RUNTIME_DIR="/run/user/$audit_uid"
-  # HYPRLAND_INSTANCE_SIGNATURE is not guaranteed to exist in /proc/<pid>/environ:
-  # Hyprland may create it after process startup. Discover instances via hyprctl instead.
-  if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
-    hypr_pid="$(pgrep -u "$audit_uid" -x Hyprland | head -n 1 || true)"
-    if [[ -n $hypr_pid && -r /proc/$hypr_pid/environ ]]; then
-      session_env="$(tr '\0' '\n' < "/proc/$hypr_pid/environ")"
-      WAYLAND_DISPLAY="$(printf '%s\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)"
-      export WAYLAND_DISPLAY
-      [[ -n ${XDG_SESSION_TYPE:-} ]] || export XDG_SESSION_TYPE=wayland
-    fi
-  fi
-  if [[ -S $XDG_RUNTIME_DIR/bus ]]; then
-    export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
-  fi
-else
-  audit_user="$(id -un)"
-  audit_uid="$(id -u)"
-  audit_gid="$(id -g)"
-  [[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
-  audit_home="$HOME"
-fi
+# This collector must run as the desktop user. Never use sudo: creating/changing
+# ownership or mode bits inside a Git working tree can make audit artifacts
+# inaccessible to the user and interfere with review/commit/push.
+(( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
+audit_user="$(id -un)"
+audit_uid="$(id -u)"
+[[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
+audit_home="$HOME"
 
-for cmd in date mkdir chmod uname pacman grep awk find pgrep sed head tr; do
+for cmd in date mkdir uname pacman grep awk find pgrep sed head tr; do
   command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
 done
 
-report_parent="$repo_root/reports"
-report_root="$report_parent/lockscreen-audit"
-if (( EUID == 0 )); then
-  if [[ ! -d $report_parent ]]; then
-    install -d -o "$audit_uid" -g "$audit_gid" -m 0755 -- "$report_parent"
-  fi
-  install -d -o "$audit_uid" -g "$audit_gid" -m 0700 -- "$report_root"
-else
-  mkdir -p -- "$report_root"
-  chmod 0700 "$report_root"
-fi
+report_root="$repo_root/reports/lockscreen-audit"
+mkdir -p -- "$report_root"
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 run_dir="$report_root/$timestamp"
 suffix=0
-while ! mkdir -- "$run_dir" 2>/dev/null; do
+while [[ -e $run_dir ]]; do
   suffix=$((suffix + 1))
   run_dir="$report_root/$timestamp-$suffix"
 done
-chmod 0700 "$run_dir"
+mkdir -- "$run_dir"
 report="$run_dir/audit.txt"
 : > "$report"
-chmod 0600 "$report"
-if (( EUID == 0 )); then
-  chown "$audit_uid:$audit_gid" "$run_dir" "$report"
-fi
 
 section() { printf '\n===== %s =====\n' "$1" >> "$report"; }
 note() { printf '%s\n' "$*" >> "$report"; }
