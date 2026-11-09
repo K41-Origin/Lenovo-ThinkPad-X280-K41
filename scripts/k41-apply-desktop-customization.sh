@@ -5,6 +5,12 @@ umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
+display_path() {
+    case "$1" in
+        "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;;
+        *) printf '%s' "$1" ;;
+    esac
+}
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
@@ -37,7 +43,7 @@ on_exit() {
         printf 'Timestamp UTC: %s\n' "$timestamp"
         printf 'Status: %s\n' "$run_status"
         printf 'Detected launcher declaration: %s\n' "$detected_launcher"
-        printf 'Backup: %s\n' "$backup_dir"
+        printf 'Backup: %s\n' "$(display_path "$backup_dir")"
         printf 'Log: reports/desktop-customization/%s/run.log\n' "$(basename -- "$report_dir")"
     } >"$summary_file"
     printf 'INFO: Run report: reports/desktop-customization/%s/\n' "$(basename -- "$report_dir")"
@@ -60,7 +66,7 @@ if [[ ${1:-} == --rollback ]]; then
     backup_dir=$2
     [[ -d $backup_dir && -f $backup_dir/hyprland.lua && -f $backup_dir/fuzzel.ini ]] || die 'Backup directory is incomplete.'
     [[ -f $hypr_target && -f $fuzzel_target ]] || die 'Current target configuration is missing.'
-    printf 'Restore Hyprland and Fuzzel configuration from: %s\n' "$backup_dir"
+    printf 'Restore Hyprland and Fuzzel configuration from: %s\n' "$(display_path "$backup_dir")"
     read -r -p 'Continue? [y/N] ' answer
     [[ $answer == [yY] ]] || die 'Rollback cancelled.'
     cp -a -- "$backup_dir/hyprland.lua" "$hypr_target"
@@ -70,7 +76,7 @@ if [[ ${1:-} == --rollback ]]; then
 fi
 
 [[ $# -eq 0 ]] || die 'Unknown argument. Run without arguments to apply, or use --rollback BACKUP_DIRECTORY.'
-[[ -f $hypr_target ]] || die "Active Hyprland Lua config not found: $hypr_target"
+[[ -f $hypr_target ]] || die 'Active Hyprland Lua config not found at ~/.config/hypr/hyprland.lua or configured XDG_CONFIG_HOME.'
 [[ -f $fuzzel_target ]] || die "Existing Fuzzel config not found: $fuzzel_target"
 
 # Discover the single local menu declaration rather than assuming its old value.
