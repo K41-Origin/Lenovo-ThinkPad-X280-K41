@@ -40,7 +40,8 @@ Satu run menghasilkan `reports/desktop-validation/<timestamp>/`:
 - `*-journal*.txt`: snapshot journal yang dapat diakses user.
 
 **Interpretasi hasil:**
-- PASS: kondisi yang diperiksa memenuhi aturan otomatis pada saat snapshot.
+- PASS: semua pemeriksaan yang dijalankan memenuhi aturan otomatis dan tidak ada WARN/FAIL.
+- PASS_WITH_WARNINGS: tidak ada FAIL, tetapi satu atau lebih WARN harus ditinjau sebelum gate diterima.
 - WARN: kondisi belum tentu rusak, tetapi perlu ditinjau (misalnya service on-demand, jaringan tidak tersambung, atau telemetry opsional).
 - FAIL: prasyarat/health check yang ditetapkan tidak terpenuhi; jangan lanjut ke tahap berikutnya sebelum dianalisis.
 - SKIP: pemeriksaan tidak dijalankan; bukan PASS.
@@ -49,7 +50,7 @@ Validasi log tidak dapat membuktikan bahwa panel terlihat, launcher menerima inp
 
 Laporan dapat memuat username, hostname, identitas perangkat, status jaringan, path, dan log. Review/redaksi sebelum push. Jangan menganggap log journal sebagai bukti lengkap jika akses journal dibatasi.
 
-**Gate tahap 4:** script selesai dengan exit 0, tidak ada FAIL yang belum diselesaikan, seluruh WARN ditinjau dan diberi alasan/keputusan, dan laporan direview. Tahap 5 dapat dimulai setelah gate berbasis bukti log ini disetujui. Penerimaan visual/interaksi tetap berada di luar cakupan gate ini dan tidak boleh diklaim VERIFIED.
+**Gate tahap 4:** script selesai dengan exit 0, tidak ada FAIL, seluruh WARN (jika ada) ditinjau dan diberi alasan/keputusan, dan laporan direview. Ringkasan dapat berstatus PASS atau PASS_WITH_WARNINGS. Tahap 5 dapat dimulai setelah gate berbasis bukti log ini disetujui. Penerimaan visual/interaksi tetap berada di luar cakupan gate ini dan tidak boleh diklaim VERIFIED.
 
 ## Tahap 5 — Desktop Environment Customization
 
