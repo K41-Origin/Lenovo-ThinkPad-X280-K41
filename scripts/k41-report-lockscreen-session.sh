@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Capture a Caelestia restart from the active Wayland session.
 set -Eeuo pipefail
-umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
