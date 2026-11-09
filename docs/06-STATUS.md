@@ -21,6 +21,7 @@
 | `scripts/k41-live-validation.sh` | — | IMPLEMENTED |
 | `scripts/k41-install-basic-arch.sh` | `scripts/install-arch-x280.sh` | IMPLEMENTED |
 | `scripts/k41-install-desktop.sh` | `scripts/setup-desktop-x280.sh` | IMPLEMENTED |
+| `scripts/k41-desktop-validation.sh` | Desktop/Caelestia collectors + operator-approved runtime restart | IMPLEMENTED; physical acceptance pending |
 
 Nama implementasi lama masih ada dan tidak perlu dijalankan terpisah. Bootstrap ISO juga telah diarahkan untuk mereview entry point kanonis dan menjalankan basic-install wrapper.
 
