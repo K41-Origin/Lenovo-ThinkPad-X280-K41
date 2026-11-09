@@ -12,7 +12,7 @@ if (( EUID == 0 )); then
 fi
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -n ${WAYLAND_DISPLAY:-} ]] ||
   fail 'run from a terminal inside the active Hyprland session.'
-for command_name in bash date mkdir chmod stat qs caelestia sleep; do
+for command_name in bash date mkdir chmod stat qs caelestia sleep pgrep journalctl; do
   command -v "$command_name" >/dev/null 2>&1 || fail "required command is missing: $command_name"
 done
 [[ -x "$ROOT/scripts/test-desktop-x280.sh" ]] || fail 'desktop diagnostic collector is missing.'
