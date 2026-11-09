@@ -29,6 +29,7 @@ The Stage 2 and Stage 3 entry points currently delegate to legacy implementation
 - `docs/05-OPERATIONS.md`: security, recovery, Stage 6 optimization.
 - `docs/06-STATUS.md`: current stage, status, evidence, and priorities.
 - `docs/archive/`: historical material only; never cite archived instructions as current procedures.
+- `reports/README.md` and `reports/archive/2026-11/README.md`: report retention, privacy, and historical archive policy.
 
 Each topic has one owning document. Keep other documents concise and link to the owner. Guest Mode must consistently be described as **NOT IMPLEMENTED** and deferred until the user explicitly accepts the custom lock screen; do not imply it exists or is ready. When workflow or implementation changes, update affected owners, summaries, tests, and cross-references together. Do not restore references to archived paths as active instructions.
 
@@ -47,6 +48,14 @@ After edits:
 3. Review references and documentation consistency.
 4. Update `docs/06-STATUS.md` when project state materially changes.
 5. Report changed files, commit evidence, tests not run, limitations, and next gate.
+
+## Reports and generated artifacts
+
+- Runtime output under `reports/<category>/` is local-only by default and ignored by Git; do not commit every diagnostic or test run.
+- Historical reports already tracked before the retention policy are preserved under `reports/archive/2026-11/`. Preserve them unless an explicitly authorized retention review says otherwise.
+- **Do not enumerate, fetch, summarize, or otherwise read `reports/archive/` during routine tasks.** Read only a specific archived artifact when historical evidence is explicitly required or a current owning document links to it.
+- Treat reports as potentially sensitive: inspect and redact device identifiers, serials, usernames, paths, journal excerpts, and network metadata before sharing. Never store credentials, passwords, LUKS recovery material, tokens, or cookies.
+- Keep only minimal, reviewed, redacted evidence in the active documentation; current status belongs in the owning document, not in a bulk report dump.
 
 ## Truth and status
 

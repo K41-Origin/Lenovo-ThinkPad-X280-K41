@@ -10,7 +10,7 @@ Gunakan dokumentasi/upstream resmi untuk paket dan dependensi yang berubah. Jang
 
 ### Audit kondisi boot aktual
 
-Collector read-only `scripts/audit-x280-boot.sh` menghasilkan snapshot UEFI, UKI, LUKS2, TPM2, Plymouth, dan journal. Audit perangkat yang telah direview tersimpan di `reports/boot-audit/20261109T103304Z/boot-audit.txt`.
+Collector read-only `scripts/audit-x280-boot.sh` menghasilkan snapshot UEFI, UKI, LUKS2, TPM2, Plymouth, dan journal. Audit perangkat yang telah direview tersimpan di `reports/archive/2026-11/boot-audit/20261109T103304Z/boot-audit.txt`.
 
 Temuan penting dari snapshot tersebut:
 

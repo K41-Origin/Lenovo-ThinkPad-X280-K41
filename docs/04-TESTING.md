@@ -24,4 +24,4 @@ Manifest dan urutan test hanya didefinisikan di `tests/run.sh`; cakupan test dij
 
 PASS hanya berlaku untuk test, commit, dan lingkungan yang dicatat. SKIP bukan PASS. Bash syntax check bukan runtime correctness. Setup exit 0 bukan UI acceptance. UKI bukan bukti firmware boot. Automated runtime/log validation bukan bukti interaksi visual/fisik; hasilnya hanya berlaku pada checks yang benar-benar dapat diobservasi. Jangan klaim CI PASS tanpa memeriksa workflow pada commit terkait.
 
-Laporan test berada di `reports/test-runs/`; review dan redaksi informasi sensitif sebelum share.
+Output test baru tetap ditulis ke `reports/test-runs/` secara lokal dan tidak dikomit otomatis. Laporan historis yang sudah ada dipertahankan di [arsip November 2026](../reports/archive/2026-11/README.md); review dan redaksi informasi sensitif sebelum membagikan bukti.

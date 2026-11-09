@@ -33,4 +33,4 @@ Tahap 1 bersifat read-only dan memvalidasi kesiapan lingkungan serta target. Tah
 
 `./installer --preflight` tetap hanya diagnostik. First-boot collector tersedia sebagai alat diagnosis opsional, bukan gerbang wajib sebelum tahap 3.
 
-Struktur utama: `scripts/`, `lib/`, `config/`, `tests/`, `reports/`, `docs/`. Lisensi: [LICENSE](LICENSE).
+Struktur utama: `scripts/`, `lib/`, `config/`, `tests/`, `reports/`, `docs/`. Laporan runtime baru bersifat lokal secara default; laporan historis tersimpan di [arsip laporan](reports/archive/2026-11/README.md). Lisensi: [LICENSE](LICENSE).

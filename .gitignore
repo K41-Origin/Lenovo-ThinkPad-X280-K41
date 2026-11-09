@@ -1,0 +1,4 @@
+# Runtime-generated diagnostics and test output stay local by default.
+/reports/*
+!/reports/README.md
+!/reports/archive/
