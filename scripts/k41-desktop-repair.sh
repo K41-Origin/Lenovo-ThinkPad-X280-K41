@@ -106,8 +106,8 @@ if ((${#missing_packages[@]})); then
   else
     record FAIL 'Package installation' "failed: ${missing_packages[*]}"
   fi
-else
-  [[ -d /sys/class/bluetooth/hci0 ]] && record PASS 'Bluetooth packages' 'bluez and bluez-utils already installed'
+elif [[ -d /sys/class/bluetooth/hci0 ]]; then
+  record PASS 'Bluetooth packages' 'bluez and bluez-utils already installed'
 fi
 
 if pacman -Q rtkit >/dev/null 2>&1; then
@@ -153,9 +153,11 @@ else
   record FAIL 'PAM fallback policy' 'pambase or /etc/pam.d/other missing; automatic PAM changes prohibited'
 fi
 
-[[ -e $HOME/.face ]] &&
-  record PASS 'Caelestia profile image' 'optional image exists' ||
+if [[ -e $HOME/.face ]]; then
+  record PASS 'Caelestia profile image' 'optional image exists'
+else
   record SKIP 'Caelestia profile image' 'optional; no placeholder generated'
+fi
 shopt -s nullglob
 kernel_reports=("$ROOT"/reports/desktop-validation/*/kernel-journal-warnings.txt)
 system_reports=("$ROOT"/reports/desktop-validation/*/system-journal-errors.txt)
