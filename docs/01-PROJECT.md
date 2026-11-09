@@ -9,12 +9,12 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan testable un
 1. **Arch Linux Live ISO — Readiness Validation.** Satu script memeriksa apakah ISO, mode boot, perangkat X280, dependensi, repository, test suite, dan storage memenuhi prasyarat instalasi dasar.
 2. **Arch Linux Live ISO — Basic Arch Installation.** Satu script menjalankan instalasi dasar Arch Linux pada SSD internal setelah pemeriksaan dan konfirmasi target.
 3. **Basic Arch Linux — Desktop Installation.** Dari TTY sistem Arch yang sudah terpasang, jalankan desktop installer. First-boot diagnostic bukan gerbang wajib.
-4. **Desktop Environment Begin — Functional Validation.** Buktikan sesi, input, display, audio, jaringan, portal, Caelestia/Quickshell, lock, dan recovery bekerja.
+4. **Desktop Environment — Automated Functional Health Validation.** Kumpulkan bukti otomatis atas sesi, konfigurasi, proses, IPC, service, audio graph, jaringan, driver, baterai, thermal, dan journal. Gate ini tidak mengklaim penerimaan visual atau pengujian fisik perangkat.
 5. **Desktop Environment Customization.** Setelah tahap 4 diterima, bentuk tampilan minimal, monoton/monochromatic, elegan, dan premium dengan keterbacaan serta performa terjaga.
 6. **Desktop Environment Optimization.** Setelah customization diterima, optimalkan desktop dan perangkat: CPU, GPU, termal/fan, daya/baterai, suspend/hibernate/resume, dan stabilitas.
 7. **Release.** Tandai rilis hanya setelah acceptance seluruh tahap, regression test, dokumentasi, dan bukti rilis lengkap.
 
-Tidak ada perpindahan otomatis antar tahap. Hasil PASS dan review operator menjadi gate. Tahap 4 adalah tahap aktif saat dokumen ini diperbarui.
+Tidak ada perpindahan otomatis antar tahap. Hasil otomatis, klasifikasi WARN/FAIL, dan review bukti menjadi gate. Tahap 4 hanya menilai kondisi yang dapat diamati otomatis; visual dan interaksi fisik tidak termasuk dan tidak boleh diklaim VERIFIED. Tahap 4 adalah tahap aktif sampai validasi ulang pada perangkat mengonfirmasi perubahan validator/repair terakhir.
 
 ## Entry point kanonis
 
