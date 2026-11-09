@@ -6,29 +6,31 @@ REPAIR="$ROOT/scripts/k41-desktop-repair.sh"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$*"; }
 
-[[ -f $VALIDATOR ]] || fail 'desktop validator missing'
-[[ -f $REPAIR ]] || fail 'desktop repair script missing'
-bash -n "$VALIDATOR" || fail 'desktop validator syntax invalid'
-bash -n "$REPAIR" || fail 'desktop repair syntax invalid'
-for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' "grep -q '[^[:space:]]'" 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'Sinks:' 'Sources:' 'permission denied' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'caelestia_running' 'PASS_WITH_WARNINGS' 'fail_count' 'Actionable runtime/QML error signature' 'recognized informational platform/driver messages detected'; do
-  grep -Fq -- "$token" "$VALIDATOR" || fail "validator missing expected health check/classification: $token"
+[[ -f $VALIDATOR && -f $REPAIR ]] || fail 'canonical validator or repair script missing'
+bash -n "$VALIDATOR" || fail 'validator syntax invalid'
+bash -n "$REPAIR" || fail 'repair syntax invalid'
+
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'diagnostics.tsv' 'diagnostics.log' 'CPU vulnerability mitigations' 'PCI devices and bound drivers' 'Regulatory database package ownership' 'Bluetooth service properties' 'Thermal hardware monitor inventory' 'ThinkPad ACPI interface'; do
+  grep -Fq -- "$token" "$VALIDATOR" || fail "validator missing diagnostic coverage: $token"
 done
 if grep -Eq '(^|[[:space:]])sudo[[:space:]]|pacman -S|systemctl (enable|disable|start|stop)|mkfs\.|cryptsetup luksFormat|wipefs|parted' "$VALIDATOR"; then
-  fail 'desktop validator must remain read-only'
+  fail 'validator must remain read-only'
 fi
-grep -Fq 'cannot prove that the panel' "$VALIDATOR" || fail 'validator must state log-validation limits'
-grep -Fq 'chmod 0700 "$run_dir"' "$VALIDATOR" || fail 'validator report directory must be private'
-grep -Fq 'chmod 0600 "$log" "$checks"' "$VALIDATOR" || fail 'validator report files must be private'
-pass 'desktop validator syntax and safety contract'
+diag_line="$(grep -n '^diagnostics="\$run_dir/diagnostics.tsv"$' "$VALIDATOR" | cut -d: -f1)"
+chmod_line="$(grep -n '^chmod 0600 "\$run_dir"/\*.txt "\$log" "\$checks" "\$diagnostics" "\$diagnostics_log"$' "$VALIDATOR" | cut -d: -f1)"
+[[ -n $diag_line && -n $chmod_line ]] || fail 'diagnostic report initialization/permission block missing'
+(( diag_line < chmod_line )) || fail 'diagnostic report chmod occurs before report files are initialized'
+pass 'validator syntax, read-only contract, and diagnostic initialization order'
 
-for token in '--apply' 'systemctl cat bluetooth.service' 'sudo systemctl enable --now bluetooth.service' 'pacman -Q bluez' '/usr/lib/firmware/regulatory.db' '/etc/pam.d/other' 'No package installation' 'HCI feature errors'; do
-  grep -Fq -- "$token" "$REPAIR" || fail "repair script missing expected guarded audit/remediation: $token"
+for token in 'umask 077' 'scheme set -n caelestia' 'bluez-utils' 'wireless-regdb' 'pacman -S --needed --noconfirm' 'systemctl enable --now bluetooth.service' 'pacman -Qkk pambase' 'pambase-integrity.txt' 'k41-desktop-validation.sh' 'actions.tsv' 'post-repair-state.txt'; do
+  grep -Fq -- "$token" "$REPAIR" || fail "repair script missing expected scoped behavior: $token"
 done
-if grep -Eq 'pacman -S|mkfs\.|cryptsetup luksFormat|wipefs|parted|systemctl (disable|stop)' "$REPAIR"; then
-  fail 'repair script contains an unsupported package/storage/service-destructive operation'
+if grep -Eq -- '--apply|--no-validate|read -r -p|systemctl (disable|stop)|pacman -Syu|mkfs\.|cryptsetup luksFormat|wipefs|parted|tee /etc/pam.d|> ?/etc/pam.d' "$REPAIR"; then
+  fail 'repair script contains a forbidden option, prompt, broad upgrade, destructive operation, or PAM rewrite'
 fi
-grep -Fq 'sudo systemctl enable --now bluetooth.service' "$REPAIR" || fail 'Bluetooth service action must be explicit and scoped'
-grep -Fq 'if [[ -t 0 ]] && read -r -p' "$REPAIR" || fail 'repair action must require interactive approval'
-grep -Fq 'chmod 0700 "$report_dir"' "$REPAIR" || fail 'repair report directory must be private'
-grep -Fq 'chmod 0600 "$report"' "$REPAIR" || fail 'repair report must be private'
-pass 'desktop repair syntax, approval gate, and safety contract'
+grep -Fq 'privileged systemctl enable --now bluetooth.service' "$REPAIR" || fail 'Bluetooth action must be scoped and use privilege helper'
+grep -Fq 'chmod 0700 "$report_dir"' "$REPAIR" && grep -Fq 'chmod 0600 "$log_file" "$actions_file"' "$REPAIR" ||
+  fail 'repair reports must use private permissions'
+grep -Fq 'No synthetic file written' "$REPAIR" || fail 'Caelestia state must not be fabricated'
+grep -Fq 'no forced overwrite' "$REPAIR" || fail 'installed firmware package must not be overwritten blindly'
+pass 'automatic repair syntax, bounded actions, and safety contract'
