@@ -171,7 +171,9 @@ for name in Content.qml Center.qml; do
     [[ -s $source_root/$name && ! -L $source_root/$name ]] || die "Override source missing or unsafe: $name"
 done
 password_override="$source_root/center/PasswordInput.qml"
+locksurface_override="$source_root/LockSurface.qml"
 [[ -s $password_override && ! -L $password_override ]] || die 'PasswordInput override source missing or unsafe.'
+[[ -s $locksurface_override && ! -L $locksurface_override ]] || die 'LockSurface override source missing or unsafe.'
 
 if [[ $mode == rollback ]]; then
     [[ -d $rollback_dir && ! -L $rollback_dir && -d $rollback_dir/preexisting && ! -L $rollback_dir/preexisting ]] ||
@@ -186,7 +188,11 @@ if [[ $mode == rollback ]]; then
         die 'Content.qml has local changes; refusing destructive rollback.'
     cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" ||
         die 'Center.qml has local changes; refusing destructive rollback.'
-    git -C "$target_root" diff --quiet -- . ':!modules/lock/Content.qml' ':!modules/lock/Center.qml' ||
+    cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override" ||
+        die 'PasswordInput.qml has local changes; refusing destructive rollback.'
+    cmp -s "$target_root/modules/lock/LockSurface.qml" "$locksurface_override" ||
+        die 'LockSurface.qml has local changes; refusing destructive rollback.'
+    git -C "$target_root" diff --quiet -- . ':!modules/lock/Content.qml' ':!modules/lock/Center.qml' ':!modules/lock/center/PasswordInput.qml' ':!modules/lock/LockSurface.qml' ||
         die 'Other tracked source files have local changes; refusing destructive rollback.'
     [[ -z $(git -C "$target_root" ls-files --others --exclude-standard) ]] ||
         die 'Untracked files exist in the local shell tree; refusing destructive rollback.'
@@ -208,18 +214,20 @@ if [[ -f $target_root/shell.qml ]]; then
         die 'A shell.qml already exists but is not the expected pinned upstream checkout; inspect it before replacing anything.'
     [[ $(git -C "$target_root" remote get-url origin 2>/dev/null || true) == "$UPSTREAM_REPO" ]] ||
         die 'The existing local shell has an unexpected upstream remote; refusing to modify it.'
-    git -C "$target_root" diff --quiet -- . ':!modules/lock/Content.qml' ':!modules/lock/Center.qml' ':!modules/lock/center/PasswordInput.qml' ||
+    git -C "$target_root" diff --quiet -- . ':!modules/lock/Content.qml' ':!modules/lock/Center.qml' ':!modules/lock/center/PasswordInput.qml' ':!modules/lock/LockSurface.qml' ||
         die 'Other tracked source files have local changes; refusing to overwrite local work.'
     [[ -z $(git -C "$target_root" ls-files --others --exclude-standard) ]] ||
         die 'Untracked files exist in the local shell tree; refusing to overwrite local work.'
     [[ -d $target_root/modules/lock/center && ! -L $target_root/modules/lock/center &&
        -f $target_root/modules/lock/Content.qml && ! -L $target_root/modules/lock/Content.qml &&
        -f $target_root/modules/lock/Center.qml && ! -L $target_root/modules/lock/Center.qml &&
-       -f $target_root/modules/lock/center/PasswordInput.qml && ! -L $target_root/modules/lock/center/PasswordInput.qml ]] ||
+       -f $target_root/modules/lock/center/PasswordInput.qml && ! -L $target_root/modules/lock/center/PasswordInput.qml &&
+       -f $target_root/modules/lock/LockSurface.qml && ! -L $target_root/modules/lock/LockSurface.qml ]] ||
         die 'One or more managed lock override targets are missing; inspect the local shell tree.'
     if cmp -s "$target_root/modules/lock/Content.qml" "$source_root/Content.qml" &&
        cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" &&
-       cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override"; then
+       cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override" &&
+       cmp -s "$target_root/modules/lock/LockSurface.qml" "$locksurface_override"; then
         info 'The pinned local Caelestia source and all K41 lock overrides are already installed; no files changed.'
         exit 0
     fi
@@ -233,13 +241,16 @@ if [[ -f $target_root/shell.qml ]]; then
     cp -a -- "$target_root/modules/lock/Content.qml" "$target_root/modules/lock/Center.qml" "$update_backup/"
     mkdir -- "$update_backup/center"
     cp -a -- "$target_root/modules/lock/center/PasswordInput.qml" "$update_backup/center/"
+    cp -a -- "$target_root/modules/lock/LockSurface.qml" "$update_backup/"
     printf 'Upstream revision: %s\nOverlay update backup for existing managed source tree.\n' "$UPSTREAM_REVISION" > "$update_backup/manifest"
     cp -- "$source_root/Content.qml" "$target_root/modules/lock/Content.qml"
     cp -- "$source_root/Center.qml" "$target_root/modules/lock/Center.qml"
     cp -- "$password_override" "$target_root/modules/lock/center/PasswordInput.qml"
+    cp -- "$locksurface_override" "$target_root/modules/lock/LockSurface.qml"
     cmp -s "$target_root/modules/lock/Content.qml" "$source_root/Content.qml" &&
         cmp -s "$target_root/modules/lock/Center.qml" "$source_root/Center.qml" &&
-        cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override" ||
+        cmp -s "$target_root/modules/lock/center/PasswordInput.qml" "$password_override" &&
+        cmp -s "$target_root/modules/lock/LockSurface.qml" "$locksurface_override" ||
         die 'Lock override deployment verification failed; restore from the reported overlay backup.'
     info "Updated K41 lock overrides in the pinned local source tree. Backup: $update_backup"
     exit 0
@@ -302,16 +313,18 @@ git -C "$staging" fetch --quiet --depth 1 origin "$UPSTREAM_REVISION"
 git -C "$staging" checkout --quiet --detach FETCH_HEAD
 [[ $(git -C "$staging" rev-parse HEAD) == "$UPSTREAM_REVISION" ]] ||
     die 'Fetched upstream revision does not match the audited revision.'
-for required in shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml; do
+for required in shell.qml modules/lock/Lock.qml modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml modules/lock/LockSurface.qml; do
     [[ -s $staging/$required && ! -L $staging/$required ]] || die "Upstream source is missing required file: $required"
 done
 
 cp -- "$source_root/Content.qml" "$staging/modules/lock/Content.qml"
 cp -- "$source_root/Center.qml" "$staging/modules/lock/Center.qml"
 cp -- "$password_override" "$staging/modules/lock/center/PasswordInput.qml"
+cp -- "$locksurface_override" "$staging/modules/lock/LockSurface.qml"
 cmp -s "$staging/modules/lock/Content.qml" "$source_root/Content.qml" || die 'Content override verification failed.'
 cmp -s "$staging/modules/lock/Center.qml" "$source_root/Center.qml" || die 'Center override verification failed.'
 cmp -s "$staging/modules/lock/center/PasswordInput.qml" "$password_override" || die 'PasswordInput override verification failed.'
+cmp -s "$staging/modules/lock/LockSurface.qml" "$locksurface_override" || die 'LockSurface override verification failed.'
 
 info 'Complete upstream QML source tree fetched and pinned; K41 lock overrides applied.'
 info 'This fixes the previous inert two-file directory: the local shell.qml is now present, so Quickshell can resolve the user-local config instead of falling back to /etc/xdg.'
