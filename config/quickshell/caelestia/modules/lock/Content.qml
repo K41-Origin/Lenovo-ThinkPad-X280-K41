@@ -1,6 +1,6 @@
 // K41 lock-screen override for Caelestia Shell 2.5.0.
 // Keep the upstream LockSurface, PAM handler, session-lock protocol and wallpaper blur.
-// Replace only the three-column content with the approved minimal center layout.
+// Fill the available lock-content area so Center can position its content geometrically.
 import QtQuick
 import Caelestia.Config
 import qs.services
@@ -11,9 +11,7 @@ Item {
     required property var lock
 
     Center {
-        anchors.centerIn: parent
-        width: centerWidth
-        height: implicitHeight
+        anchors.fill: parent
         lock: root.lock
     }
 }
