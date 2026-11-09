@@ -7,7 +7,7 @@ pass() { printf 'PASS: %s\n' "$*"; }
 
 [[ -f $SCRIPT ]] || fail 'canonical desktop validator missing'
 bash -n "$SCRIPT" || fail 'desktop validator syntax invalid'
-for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' "grep -q '[^[:space:]]' \"\$tmp/hypr-config-errors\"" 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'Sinks:' 'Sources:' 'permission denied' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'caelestia_running' 'PASS_WITH_WARNINGS' 'fail_count' 'Actionable runtime/QML error signature' 'scheme_file=' 'non-optional QML resource is missing' 'optional .face and resolved service warnings are ignored' 'recognized informational platform/driver messages detected' 'diagnostics.tsv' 'diagnostics.log' 'CPU vulnerability mitigations' 'PCI devices and bound drivers' 'Regulatory database package ownership' 'Bluetooth service properties' 'Thermal hardware monitor inventory' 'ThinkPad ACPI interface' 'Relevant installed package versions'; do
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'WAYLAND_DISPLAY' 'umask 077' 'checks.tsv' 'validation.log' 'hyprctl configerrors' "grep -q '[^[:space:]]' \"\$tmp/hypr-config-errors\"" 'hyprctl monitors' 'caelestia shell -s' 'qs -c caelestia log' 'wpctl status' 'Sinks:' 'Sources:' 'permission denied' 'nmcli -t' 'rfkill list' '/sys/class/thermal/thermal_zone*' 'energy_full_design' 'journalctl --user' 'systemctl --failed' 'systemctl --user --failed' 'free -b' 'Kernel panic' 'Kernel driver in use: i915' '/sys/class/backlight/*' 'K41_REPORT_DIR=' 'caelestia_running' 'PASS_WITH_WARNINGS' 'fail_count' 'k41_classify_caelestia_log' 'scheme_file=' 'non-optional QML resource is missing' 'optional .face and resolved service warnings are ignored' 'recognized informational platform/driver messages detected' 'diagnostics.tsv' 'diagnostics.log' 'CPU vulnerability mitigations' 'PCI devices and bound drivers' 'Regulatory database package ownership' 'Bluetooth service properties' 'Thermal hardware monitor inventory' 'ThinkPad ACPI interface' 'Relevant installed package versions'; do
   grep -Fq -- "$token" "$SCRIPT" || fail "validator missing expected health check: $token"
 done
 if grep -Eq '(^|[[:space:]])sudo[[:space:]]|pacman -S|systemctl (enable|disable|start|stop)|mkfs\.|cryptsetup luksFormat|wipefs|parted' "$SCRIPT"; then
@@ -21,3 +21,37 @@ chmod_line="$(grep -nF 'chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnosti
 [[ -n $diag_line && -n $chmod_line ]] || fail 'diagnostic report initialization/permission block missing'
 (( diag_line < chmod_line )) || fail 'diagnostic permissions are applied before initialization'
 pass 'desktop validator syntax, read-only contract, and diagnostic initialization order'
+
+# Regression fixtures for the Caelestia runtime classifier.
+source "$ROOT/scripts/lib/k41-log-classifiers.sh"
+fixture_dir="$(mktemp -d)"
+trap 'rm -rf -- "$fixture_dir"' EXIT
+log_file="$fixture_dir/runtime.log"
+scheme_file="$fixture_dir/scheme.json"
+: >"$scheme_file"
+
+printf '%s\\n' 'QML FileView: Read of /home/test/.local/state/caelestia/scheme.json failed: File does not exist.' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
+[[ -z $findings ]] || fail "resolved stale scheme warning was classified: $findings"
+rm -f -- "$scheme_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
+[[ $findings == scheme-missing ]] || fail "missing scheme was not classified precisely: $findings"
+
+: >"$scheme_file"
+printf '%s\\n' 'Source file does not exist: /home/test/.face' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
+[[ -z $findings ]] || fail "optional .face warning was classified: $findings"
+
+printf '%s\\n' 'Source file does not exist: /opt/caelestia/qml/Required.qml' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
+[[ $findings == missing-resource ]] || fail "non-optional missing resource was not classified: $findings"
+
+printf '%s\\n' 'QML Error: TypeError: cannot read property' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
+[[ $findings == runtime-error ]] || fail "real QML runtime error was not classified: $findings"
+
+printf '%s\\n' 'QML FileView: Read of /home/test/.local/state/caelestia/scheme.json failed: File does not exist.' 'QML Error: TypeError: invalid object' >"$log_file"
+findings="$(k41_classify_caelestia_log "$log_file" "$scheme_file")"
+[[ $findings == runtime-error ]] || fail "real QML error was hidden by stale scheme warning: $findings"
+pass 'Caelestia log classifier regression fixtures (stale scheme, optional avatar, missing resource, and real QML errors)'
+
