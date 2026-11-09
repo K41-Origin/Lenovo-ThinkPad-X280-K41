@@ -1,17 +1,48 @@
 #!/usr/bin/env bash
 # Read-only lock-screen inventory for the K41 ThinkPad X280.
-# Run as the regular user inside the active Hyprland session; never use sudo.
+# Supports sudo while collecting the invoking desktop user's session/configuration.
 set -Eeuo pipefail
 umask 077
 
-die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
-(( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, bukan root/sudo.'
-[[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in date mkdir chmod uname pacman grep awk find pgrep sed git head; do
+die() { printf 'ERROR: %s\\n' "$*" >&2; exit 2; }
+repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+
+if (( EUID == 0 )); then
+  [[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die 'Gunakan sudo dari akun desktop biasa (bukan login root langsung).'
+  for cmd in getent chown id; do
+    command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
+  done
+  passwd_entry="$(getent passwd "$SUDO_USER")" || die "Tidak dapat menemukan akun pemanggil: $SUDO_USER"
+  IFS=: read -r audit_user _ audit_uid audit_gid _ audit_home _ <<< "$passwd_entry"
+  [[ -n $audit_home && -d $audit_home ]] || die 'HOME akun pemanggil tidak valid.'
+  export HOME="$audit_home" USER="$audit_user" LOGNAME="$audit_user"
+  export XDG_RUNTIME_DIR="/run/user/$audit_uid"
+  # sudo may drop Hyprland's instance marker; recover it from the user's compositor.
+  if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+    hypr_pid="$(pgrep -u "$audit_uid" -x Hyprland | head -n 1 || true)"
+    if [[ -n $hypr_pid && -r /proc/$hypr_pid/environ ]]; then
+      session_env="$(tr '\\0' '\\n' < "/proc/$hypr_pid/environ")"
+      HYPRLAND_INSTANCE_SIGNATURE="$(printf '%s\\n' "$session_env" | sed -n 's/^HYPRLAND_INSTANCE_SIGNATURE=//p' | head -n 1)"
+      WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-$(printf '%s\\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)}"
+      XDG_SESSION_TYPE="${XDG_SESSION_TYPE:-wayland}"
+      export HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY XDG_SESSION_TYPE
+    fi
+  fi
+  if [[ -S $XDG_RUNTIME_DIR/bus ]]; then
+    export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
+  fi
+else
+  audit_user="$(id -un)"
+  audit_uid="$(id -u)"
+  audit_gid="$(id -g)"
+  [[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
+  audit_home="$HOME"
+fi
+
+for cmd in date mkdir chmod uname pacman grep awk find pgrep sed git head tr; do
   command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
 done
 
-repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report_root="$repo_root/reports/lockscreen-audit"
 mkdir -p -- "$report_root"
@@ -25,6 +56,9 @@ chmod 0700 "$run_dir"
 report="$run_dir/audit.txt"
 : > "$report"
 chmod 0600 "$report"
+if (( EUID == 0 )); then
+  chown "$audit_uid:$audit_gid" "$run_dir" "$report"
+fi
 
 section() { printf '\n===== %s =====\n' "$1" >> "$report"; }
 note() { printf '%s\n' "$*" >> "$report"; }
