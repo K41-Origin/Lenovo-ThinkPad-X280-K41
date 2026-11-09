@@ -127,7 +127,7 @@ done
 chmod 0700 "$backup_dir"
 cp -a -- "$hypr_target" "$backup_dir/hyprland.lua"
 cp -a -- "$fuzzel_target" "$backup_dir/fuzzel.ini"
-info 'Private backup created.'
+info "Private backup created at: $(display_path "$backup_dir")"
 
 python3 - "$hypr_target" "$fuzzel_target" "$hypr_source" "$fuzzel_source" <<'PY'
 import os
