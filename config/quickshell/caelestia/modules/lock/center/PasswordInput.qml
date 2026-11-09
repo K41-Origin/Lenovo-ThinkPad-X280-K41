@@ -1,6 +1,6 @@
 // K41 floating password input override for Caelestia Shell 2.5.0.
 // Keep upstream PAM, keyboard handling, focus behavior and input controls;
-// remove only the visible pill surface so the password entry floats.
+// preserve the password field's own rounded surface and border.
 pragma ComponentBehavior: Bound
 
 import QtQuick
@@ -24,9 +24,8 @@ StyledRect {
     }
     implicitHeight: input.implicitHeight + Tokens.padding.small
 
-    // No card fill or outline: the input contents remain visible and interactive.
-    color: "transparent"
-    border.width: 0
+    // Keep the password field's own surface; only the surrounding group is borderless.
+    color: Colours.tPalette.m3surfaceContainer
     radius: Tokens.rounding.full
 
     focus: true
