@@ -111,9 +111,9 @@ Laporan pengguna: `reports/caelestia-audit/20261109T091310Z/`.
 - Skema aktif `caelestia/dark/tonalspot` masih menggunakan aksen teal.
 - CLI terpasang menyediakan variant `monochrome`; skema custom tidak diasumsikan tersedia sebagai nama CLI. Tidak ada perubahan pada perangkat selama audit.
 
-### Profil Caelestia Graphite — batch pertama disiapkan
+### Profil Caelestia Graphite — batch pertama diterapkan
 
-Profil `config/desktop-customization/caelestia-shell.json` hanya mengatur tipografi menggunakan font yang sudah terdeteksi tersedia:
+Profil `config/desktop-customization/caelestia-shell.json` hanya mengatur tipografi menggunakan font yang telah terdeteksi tersedia:
 - UI: Rubik.
 - Monospace: CaskaydiaCove NF.
 
@@ -125,23 +125,19 @@ Jalankan setelah pull sebagai user biasa, tanpa sudo:
 bash scripts/k41-apply-caelestia-profile.sh
 ```
 
-Setujui prompt untuk menerapkan. Setelah konfigurasi dan scheme diverifikasi, script menawarkan restart Caelestia. Pilih **Y** (default) agar stdout/stderr restart ditampilkan langsung dan disimpan ke `run.log`; script kemudian menjalankan `caelestia shell -l` untuk mengambil runtime log Quickshell. Pengumpulan log dibatasi waktu dan kegagalannya tidak membatalkan konfigurasi yang sudah berhasil diterapkan.
+Setujui prompt apply. Setelah konfigurasi dan scheme diverifikasi, script menawarkan restart Caelestia. Pilih **Y** (default). Perintah restart diberi batas 30 detik; beberapa CLI menjalankan shell sebagai proses foreground yang memang tidak segera selesai. Karena itu, exit 124 tidak langsung dikategorikan sebagai kegagalan. Script kemudian mengambil runtime log melalui `caelestia shell -l`. Jika restart mencapai batas waktu, status dikonfirmasi secara terpisah menggunakan keberadaan `Configuration Loaded` pada log dan jumlah proses `quickshell`. Bila bukti tersebut tidak tersedia, hasil ditandai belum terkonfirmasi.
+
+Output command ditangkap sekali melalui `run.log` (tanpa pipeline tee ganda). Ringkasan menghitung baris WARN/WARNING, ERROR, dan FATAL setelah menghapus ANSI color sequences, serta menghitung entri `Configuration Loaded` dan proses Quickshell yang teramati.
 
 Laporan `reports/caelestia-customization/<timestamp>/` memuat:
-- `run.log`: output apply, restart, dan runtime log termasuk baris WARN/ERROR.
-- `summary.txt`: status apply, status restart/log collector, dan jumlah baris WARN/ERROR.
+- `run.log`: output apply, restart, dan runtime log.
+- `summary.txt`: status apply/restart/log collector, jumlah WARN/WARNING, ERROR, FATAL, entri configuration-loaded, dan proses Quickshell.
 - Backup privat tetap disimpan di `~/.local/state/k41/caelestia/backups/`.
 
 Jika memilih skip atau log collector gagal, pengumpulan log dapat dicoba manual:
 
 ```bash
 caelestia shell -l
-```
-
-Perintah restart manual bila diperlukan:
-
-```bash
-caelestia shell -r
 ```
 
 Rollback menggunakan path backup yang dicatat oleh script:
@@ -151,7 +147,17 @@ bash scripts/k41-apply-caelestia-profile.sh --rollback /path/ke/direktori-backup
 caelestia shell -r
 ```
 
-Push laporan `reports/caelestia-customization/` agar hasil apply, runtime log, dan warning dapat diaudit. Tinjau isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan. Status `SUCCESS_WITH_WARNINGS` berarti file profil berhasil diterapkan, tetapi restart/log mengeluarkan warning atau gagal; jangan menyimpulkan semua warning sebagai harmless tanpa membaca konteksnya. Hasil visual tetap dinilai langsung oleh pengguna pada perangkat.
+### Hasil runtime sebelumnya — 2026-11-09
+
+Laporan pengguna: `reports/caelestia-customization/20261109T092153Z/`.
+- Profile typography dan scheme berhasil diverifikasi.
+- Log memuat `Configuration Loaded` dua kali dan tidak memuat baris ERROR/FATAL.
+- Warning `~/.face` tidak ditemukan berulang kali; ini memengaruhi gambar profil pengguna, bukan bukti kegagalan shell.
+- Pesan `Object or context destroyed during incubation` pada StyledProgressBar dan Media tercatat sebagai INFO, bukan ERROR.
+- `caelestia shell -r` mencapai timeout 30 detik (exit 124). Runtime log tetap dapat dikumpulkan; bukti ini tidak cukup untuk menyebut restart gagal ataupun memastikan proses shell tetap berjalan setelah timeout.
+- Ringkasan lama hanya melaporkan satu WARN/ERROR line meskipun log berisi beberapa warning. Karena itu penghitung log diperbaiki pada versi script berikutnya.
+
+Hasil visual tetap dinilai langsung oleh pengguna pada perangkat. Perbaikan diagnostik terbaru belum dianggap teruji sampai script baru dijalankan dan laporan barunya diaudit. Review isi laporan sebelum push karena runtime log dapat memuat path atau detail lingkungan.
 
 ## Tahap 6 — Optimization
 
