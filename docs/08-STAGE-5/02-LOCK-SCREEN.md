@@ -69,7 +69,7 @@ Laporan aktual tersedia di `reports/lockscreen-audit/20261109T141943Z/audit.txt`
 
 Revision Caelestia `d999d4878ee4cec134168e60d913714566a8cfa6` memuat `WlSessionLock` dan PAM handler di modul lock. `LockSurface.qml` memilih background dari wallpaper aktif ketika `lock.useWallpaper=true`, atau screencopy desktop jika false; background memakai `MultiEffect` blur. Layout bawaan `Content.qml` masih memuat Weather, Fetch, Media, Center, Resources, dan Notification Dock. `Center.qml` memuat Clock, tanggal/hari, ProfilePic, PasswordInput, dan StateMessage.
 
-Konsekuensi: konfigurasi `shell.json` yang terlihat pada laporan dapat mengaktifkan wallpaper dan menyembunyikan notifikasi, tetapi tidak menyediakan kontrol konfigurasi yang cukup untuk menghapus seluruh widget samping/profile picture dan membentuk Floating Password Card sesuai desain C. Perubahan QML terarah kemungkinan diperlukan. Jangan edit file paket AUR langsung; gunakan mekanisme override/local Quickshell config yang sesuai setelah lokasi file paket dan jalur startup aktual dipastikan.
+Konsekuensi: konfigurasi `shell.json` tidak cukup untuk membentuk layout ini. QML harus berasal dari source tree Caelestia yang benar-benar dipakai Quickshell. Jangan mengedit file paket AUR; upstream secara eksplisit menyarankan instalasi manual/local source untuk modifikasi.
 
 ### Implementasi batch 1 — minimal Floating Password Card
 
@@ -83,12 +83,12 @@ Audit upstream pada revision yang benar-benar terpasang mengonfirmasi bahwa:
 - CMake upstream memasang shell ke `/etc/xdg/quickshell/caelestia`; dokumentasi upstream mendukung konfigurasi Quickshell lokal di `~/.config/quickshell/caelestia`. Karena itu, jangan mengedit file AUR/upstream.
 
 Perubahan repository:
-- `config/quickshell/caelestia/modules/lock/Content.qml`: mengganti tiga kolom widget dengan satu komponen Center di tengah.
-- `config/quickshell/caelestia/modules/lock/Center.qml`: hanya menampilkan Clock, tanggal/hari, PasswordInput, dan StateMessage. ProfilePic serta widget samping dihilangkan. StateMessage dipertahankan untuk feedback autentikasi/keyboard.
-- `scripts/k41-apply-lockscreen-design.sh`: installer sudo-aware dengan pemeriksaan paket dan layout upstream, backup, instalasi atomik, dan rollback. Restart shell dilakukan terpisah dari terminal sesi desktop aktif, bukan dari proses installer yang lingkungannya disanitasi oleh `runuser`. Script menerima `sudo`, membaca identitas pemanggil dari `SUDO_USER`, lalu menurunkan privilege menggunakan `runuser` sebelum menyentuh konfigurasi/backup. Tidak ada operasi tulis file pengguna yang dijalankan sebagai root; tidak mengubah PAM, service sistem, package, atau file upstream.
-- `tests/test-lockscreen-design.sh`: pemeriksaan statis struktur override dan sintaks Bash.
+- `config/quickshell/caelestia/modules/lock/Content.qml`: layout hanya satu komponen Center di tengah.
+- `config/quickshell/caelestia/modules/lock/Center.qml`: hanya Clock, tanggal/hari, PasswordInput, dan StateMessage.
+- `scripts/k41-apply-lockscreen-design.sh`: sekarang mengambil **seluruh source tree upstream** pada revision `d999d4878ee4cec134168e60d913714566a8cfa6`, memverifikasi package `caelestia-shell 2.5.0-1`, menimpa dua QML pada staging, lalu memasang tree lengkap ke `~/.config/quickshell/caelestia`. Script menolak file lokal lain yang tidak dikenal, menyimpan snapshot direktori sebelumnya, dan menyediakan rollback yang menolak menghapus perubahan lokal.
+- `tests/test-lockscreen-design.sh`: pemeriksaan struktur QML, Bash syntax, pin upstream, dan guard deployment.
 
-Override tidak mengganti `LockSurface.qml` atau `Lock.qml`; wallpaper aktif, blur, WlSessionLock, PAM, dan protokol lock tetap berasal dari upstream. Layout visual belum dapat dinilai hanya dari source code.
+**Koreksi penting atas implementasi batch pertama:** installer sebelumnya hanya menaruh dua file QML di `~/.config/quickshell/caelestia/modules/lock`, tanpa `shell.qml` dan tanpa source tree pendukung. Karena itu Quickshell tidak memiliki konfigurasi lokal lengkap untuk dipilih dan fallback ke `/etc/xdg/quickshell/caelestia/shell.qml`. Restart report membuktikan fallback tersebut. File override pertama tidak pernah menjadi source aktif; itulah sebabnya tampilan tidak berubah. Implementasi awal tersebut tidak berhasil mencapai tujuan dan tidak boleh disebut berhasil.
 
 ### Penerapan pada ThinkPad X280
 
@@ -115,9 +115,9 @@ git push origin main
 
 Jika log menunjukkan kegagalan, jangan anggap instalasi berhasil. Jangan mengedit atau menghapus bukti error sebelum dianalisis; jika perlu, jalankan ulang setelah perbaikan sehingga setiap percobaan memiliki file report tersendiri.
 
-Installer memerlukan `SUDO_USER`. Sebelum berpindah kembali ke UID pengguna dengan `runuser`, tahap sudo hanya membuat/memastikan dua direktori leaf yang dikelola installer (`~/.config/quickshell/caelestia/modules/lock` dan `~/.local/state/k41/lockscreen/backups`) dan menetapkan ownership kedua direktori tersebut kepada pengguna desktop. Parent seperti `~/.config`, `~/.config/quickshell`, dan `~/.local` tidak di-chown secara rekursif. Jika parent path tidak dapat ditelusuri pengguna atau ada komponen symlink, installer berhenti dengan pesan error. Setujui prompt apply. Installer sengaja tidak me-restart Caelestia karena prosesnya dijalankan ulang melalui `runuser` dengan environment minimal; proses itu tidak memiliki jaminan `WAYLAND_DISPLAY` dan `HYPRLAND_INSTANCE_SIGNATURE` dari sesi Hyprland aktif. Setelah installer selesai, buka/ gunakan terminal di sesi desktop yang sedang aktif sebagai user biasa (tanpa sudo), lalu jalankan `caelestia shell -r -d`. Alternatifnya, logout/login. Script mencetak lokasi backup dan perintah rollback.
+Installer memerlukan `SUDO_USER`. Tahap sudo hanya menyiapkan direktori target dan backup yang dikelola, lalu menurunkan privilege dengan `runuser`; operasi source checkout, backup, dan konfigurasi dilakukan sebagai user desktop. Tidak ada `chown -R` pada parent atau home. Installer mengambil source upstream pada revision yang dipin, tidak menjalankan script remote, dan tidak mengubah file package di `/etc/xdg`. Ia hanya menerima direktori lokal lama yang berisi dua file override buatan installer sebelumnya (atau direktori kosong); jika menemukan file lain, proses berhenti agar tidak menimpa pekerjaan lokal. Setelah deployment, jalankan `caelestia shell -r -d` dari terminal Hyprland aktif sebagai user biasa. Restart report berikutnya **harus** menunjukkan path `~/.config/quickshell/caelestia/shell.qml`; jika masih menunjukkan `/etc/xdg/quickshell/caelestia/shell.qml`, jangan lanjut menguji tampilan.
 
-Rollback juga dijalankan melalui sudo:
+Rollback juga dijalankan melalui sudo. Perintah ini memulihkan snapshot direktori lokal sebelum deployment, dan menolak rollback jika source tree saat ini memiliki perubahan lokal selain dua override K41:
 
 ```bash
 sudo bash scripts/k41-apply-lockscreen-design.sh --rollback "/home/<user>/.local/state/k41/lockscreen/backups/<timestamp>"
@@ -256,3 +256,37 @@ git push origin main
 Jika Git menolak push karena remote memiliki commit baru, jangan force-push. Sinkronkan dengan `git pull --ff-only origin main` bila working tree bersih dan branch dapat fast-forward; jika ada commit lokal yang belum ada di remote, hentikan dan kirim pesan error/status untuk ditinjau. Setelah laporan berhasil di-push, asisten dapat memeriksa laporan langsung dari `main`.
 
 Exit code 0 hanya membuktikan perintah restart selesai tanpa error yang dilaporkan proses. Itu **belum** membuktikan lock screen tampil benar atau lock/unlock aman; verifikasi visual dan fungsional tetap dilakukan pada ThinkPad X280.
+
+
+## Koreksi akar masalah deployment — 2026-11-09
+
+**ROOT CAUSE TERIDENTIFIKASI:** report restart `20261109T152417Z-session-restart.log` secara eksplisit menyatakan Quickshell meluncurkan `/etc/xdg/quickshell/caelestia/shell.qml`. Direktori lokal sebelumnya hanya memiliki dua file di `modules/lock`, tidak memiliki `shell.qml` dan tidak memiliki seluruh komponen QML yang diperlukan. Quickshell karena itu tetap menjalankan konfigurasi package system; perubahan K41 tidak pernah dimuat. Exit code restart 0 dan `Configuration Loaded` hanya mengonfirmasi shell system berhasil dimuat, bukan override K41.
+
+### Perbaikan deployment
+
+Upstream README menyatakan jangan mengedit file yang dipasang paket AUR untuk kustomisasi; metode manual adalah menyediakan source tree Caelestia di `$XDG_CONFIG_HOME/quickshell/caelestia`. Installer K41 sekarang mengikuti model itu: fetch revision upstream yang sama dengan baseline perangkat, verifikasi SHA dan versi package, salin dua override K41 ke tree staging, lalu pasang tree lengkap di lokasi user config. Package files di `/etc/xdg` tidak diubah. Referensi: [upstream installation instructions](https://github.com/caelestia-dots/shell#manual-installation).
+
+### Urutan eksekusi baru
+
+```bash
+git pull --ff-only origin main
+sudo bash scripts/k41-apply-lockscreen-design.sh
+```
+
+Setujui prompt hanya setelah report menunjukkan revision dan package version yang sesuai. Setelah installer exit 0, dari terminal Hyprland aktif (tanpa sudo):
+
+```bash
+bash scripts/k41-report-lockscreen-session.sh
+```
+
+Periksa report restart. **Path shell yang benar adalah** `/home/<user>/.config/quickshell/caelestia/shell.qml` (home user aktual), bukan `/etc/xdg/quickshell/caelestia/shell.qml`. Jangan menganggap desain diterapkan sampai path lokal terkonfirmasi dan lock screen benar-benar memuatnya.
+
+Rollback menggunakan path backup yang dicetak installer:
+
+```bash
+sudo bash scripts/k41-apply-lockscreen-design.sh --rollback "/home/<user>/.local/state/k41/lockscreen/backups/<timestamp>"
+```
+
+### Batas validasi
+
+Perubahan installer, source pin, dan static tests telah **IMPLEMENTED di GitHub**. Belum ada bukti installer baru dijalankan pada X280, QML dimuat dari source lokal, lock/unlock berhasil, atau visual memenuhi desain. Tes runtime dan validasi visual tetap **NOT TESTED / NOT VERIFIED**.
