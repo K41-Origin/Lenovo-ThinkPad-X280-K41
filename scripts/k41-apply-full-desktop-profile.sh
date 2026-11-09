@@ -13,7 +13,7 @@ usage() {
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/.." && pwd -P)"
 profile_file="$repo_root/config/desktop-customization/caelestia-shell.json"
-wallpaper_source="$repo_root/assets/wallpapers/k41-obsidian-1920x1080.svg"
+wallpaper_source="$repo_root/assets/wallpapers/k41-obsidian-1280x720.jpg.base64"
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
 shell_file="$config_root/caelestia/shell.json"
@@ -203,13 +203,23 @@ scheme_output="$(timeout 8s caelestia scheme get 2>&1)" || die 'Could not read a
 grep -Eiq 'Variant:[[:space:]]*monochrome' <<<"$scheme_output" || die 'Active scheme did not report monochrome.'
 
 # Avoid overwriting an existing wallpaper with the same name.
-wallpaper_target="$wallpaper_dir/k41-obsidian-1920x1080.svg"
-if [[ -e $wallpaper_target ]] && ! cmp -s -- "$wallpaper_source" "$wallpaper_target"; then
-    wallpaper_target="$wallpaper_dir/k41-obsidian-1920x1080-$timestamp.svg"
+wallpaper_target="$wallpaper_dir/k41-obsidian-1280x720.jpg"
+if [[ -e $wallpaper_target ]]; then
+    wallpaper_target="$wallpaper_dir/k41-obsidian-1280x720-$timestamp.jpg"
 fi
-if [[ ! -e $wallpaper_target ]]; then
-    cp -- "$wallpaper_source" "$wallpaper_target"
-fi
+python3 - "$wallpaper_source" "$wallpaper_target" <<'PY'
+import base64, pathlib, sys
+source, target = map(pathlib.Path, sys.argv[1:])
+data = base64.b64decode(source.read_text(encoding="ascii"), validate=True)
+if not data.startswith(b"\\xff\\xd8\\xff"):
+    raise SystemExit("Wallpaper payload is not a JPEG file.")
+target.parent.mkdir(parents=True, exist_ok=True)
+target.write_bytes(data)
+with target.open("rb") as stream:
+    if stream.read(3) != b"\\xff\\xd8\\xff":
+        raise SystemExit("Written wallpaper failed JPEG signature verification.")
+print(f"PASS: decoded JPEG wallpaper ({len(data)} bytes).")
+PY
 info "Wallpaper asset installed at: $wallpaper_target"
 if ! timeout 25s caelestia wallpaper -f "$wallpaper_target"; then
     die 'Caelestia could not activate the wallpaper; original shell and scheme files will be restored.'
