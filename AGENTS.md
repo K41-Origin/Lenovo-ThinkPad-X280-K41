@@ -9,7 +9,7 @@ Follow the seven-stage workflow in `docs/01-PROJECT.md` and current status in `d
 1. `scripts/k41-live-validation.sh` — Arch ISO readiness, read-only.
 2. `scripts/k41-install-basic-arch.sh` — Arch base installation; destructive.
 3. `scripts/k41-install-desktop.sh` — desktop setup from installed Arch TTY.
-4. Desktop functional validation.
+4. `scripts/k41-desktop-validation.sh` — read-only diagnostics plus operator-approved Caelestia restart and physical checklist from the active Hyprland session; run as the regular user, never with sudo.
 5. Desktop customization.
 6. Desktop and hardware optimization.
 7. Release.
