@@ -7,14 +7,13 @@ umask 077
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, bukan root/sudo.'
 [[ -n ${HOME:-} && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in date mkdir chmod uname id pacman grep awk find pgrep sed git head; do
+for cmd in date mkdir chmod uname pacman grep awk find pgrep sed git head; do
   command -v "$cmd" >/dev/null 2>&1 || die "Perintah wajib tidak tersedia: $cmd"
 done
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
-report_root="$state_root/k41/lockscreen-audit"
+report_root="$repo_root/reports/lockscreen-audit"
 mkdir -p -- "$report_root"
 run_dir="$report_root/$timestamp"
 suffix=0
@@ -132,7 +131,7 @@ for base in "$HOME/.config/hypr" "$HOME/.config/caelestia" "$HOME/.config/quicks
   printf '\n[%s]\n' "$base" >> "$report"
   find "$base" -maxdepth 4 -type f \( -iname '*lock*' -o -iname '*.qml' -o -iname 'hyprland.lua' -o -iname 'hyprland.conf' \) -printf '%p\n' 2>/dev/null | head -n 150 >> "$report" || true
   printf 'Files containing lock-related configuration keywords (paths only):\n' >> "$report"
-  grep -RIlE 'lock|hyprlock|swaylock' "$base" 2>/dev/null | head -n 100 >> "$report" || true
+  grep -RIlE 'lock|hyprlock|swaylock' "$base" 2>/dev/null | sed "s|^$base/||" | head -n 100 >> "$report" || true
 done
 
 section 'PAM auth stack: module names only; no options or credentials'
@@ -165,7 +164,8 @@ note '- This collector does not change configuration, services, packages, PAM, o
 note '- Process arguments, environment values, passwords, tokens, and full PAM options are intentionally omitted.'
 note '- Static inventory cannot prove which lock implementation is invoked at runtime.'
 note '- Wallpaper identity, actual lock/unlock, wrong-password behavior, fingerprint/Howdy, wake behavior, notification leakage, and visual layout require separate manual/runtime validation.'
-note '- Review this report before sharing; redact personal paths/usernames if desired.'
+note '- Report is stored inside the Git repository for review and push.'
+note '- Review before pushing; redact machine-specific identifiers or sensitive local configuration details if present.'
 
 printf 'Audit selesai. Laporan: %s\n' "$report"
 printf 'Collector bersifat read-only; jalankan tanpa sudo.\n'
