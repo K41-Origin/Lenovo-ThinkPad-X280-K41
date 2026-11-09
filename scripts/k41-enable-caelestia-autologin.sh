@@ -1,5 +1,42 @@
-#!/usr/bin/e
+#!/usr/bin/env bash
+# Configure tty1 autologin, start Hyprland from Bash login, and lock Caelestia.
+set -Eeuo pipefail
+umask 077
 
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*"; }
+on_exit() {
+    local rc=$?
+    if (( rc != 0 )) && [[ -n ${BACKUP_DIR:-} && -d $BACKUP_DIR ]]; then
+        printf 'Recovery backup retained at: %s\n' "$BACKUP_DIR" >&2
+    fi
+}
+trap on_exit EXIT
+usage() {
+    printf 'Usage:\n  sudo bash %s\n  sudo bash %s --rollback BACKUP_DIRECTORY\n' "$0" "$0"
+}
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+HELPER_SOURCE="$SCRIPT_DIR/k41-lock-caelestia-after-start.sh"
+MODE=apply
+ROLLBACK_DIR=""
+
+if [[ ${1:-} == --rollback ]]; then
+    [[ $# -eq 2 ]] || { usage >&2; exit 2; }
+    MODE=rollback
+    ROLLBACK_DIR=$2
+elif [[ $# -ne 0 ]]; then
+    usage >&2
+    exit 2
+fi
+
+(( EUID == 0 )) || die 'Run with sudo from the regular desktop account.'
+[[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die 'SUDO_USER is missing; invoke with sudo from the desktop account.'
+USER_NAME=$SUDO_USER
+[[ $USER_NAME =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] || die "Unsupported desktop account name: $USER_NAME"
+USER_ENTRY="$(getent passwd "$USER_NAME")" || die "Cannot resolve account: $USER_NAME"
+IFS=: read -r _ _ USER_UID USER_GID _ USER_HOME USER_SHELL <<<"$USER_ENTRY"
+[[ $USER_UID =~ ^[0-9]+$ && $USER_GID =~ ^[0-9]+$ && -d $USER_HOME ]] || die 'Desktop account metadata is invalid.'
 if [[ $MODE == rollback ]]; then
     [[ -d $ROLLBACK_DIR && -f $ROLLBACK_DIR/manifest ]] || die 'Invalid backup directory.'
     [[ $ROLLBACK_DIR == "$BACKUP_ROOT/"* ]] || die 'Rollback directory is outside the managed backup root.'
@@ -75,46 +112,7 @@ except Exception as exc:
     raise SystemExit(f"Invalid Caelestia shell.json: {exc}")
 if not isinstance(config, dict) or not isinstance(config.get("lock"), dict) or config["lock"].get("enabled") is not True:
     raise SystemExit("Caelestia lock.enabled must be true before enabling automatic login.")
-PYnv bash
-# Configure tty1 autologin, start Hyprland from Bash login, and lock Caelestia.
-set -Eeuo pipefail
-umask 077
-
-die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
-info() { printf 'INFO: %s\n' "$*"; }
-on_exit() {
-    local rc=$?
-    if (( rc != 0 )) && [[ -n ${BACKUP_DIR:-} && -d $BACKUP_DIR ]]; then
-        printf 'Recovery backup retained at: %s\n' "$BACKUP_DIR" >&2
-    fi
-}
-trap on_exit EXIT
-usage() {
-    printf 'Usage:\n  sudo bash %s\n  sudo bash %s --rollback BACKUP_DIRECTORY\n' "$0" "$0"
-}
-
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-HELPER_SOURCE="$SCRIPT_DIR/k41-lock-caelestia-after-start.sh"
-MODE=apply
-ROLLBACK_DIR=""
-
-if [[ ${1:-} == --rollback ]]; then
-    [[ $# -eq 2 ]] || { usage >&2; exit 2; }
-    MODE=rollback
-    ROLLBACK_DIR=$2
-elif [[ $# -ne 0 ]]; then
-    usage >&2
-    exit 2
-fi
-
-(( EUID == 0 )) || die 'Run with sudo from the regular desktop account.'
-[[ -n ${SUDO_USER:-} && $SUDO_USER != root ]] || die 'SUDO_USER is missing; invoke with sudo from the desktop account.'
-USER_NAME=$SUDO_USER
-[[ $USER_NAME =~ ^[a-z_][a-z0-9_-]*[$]?$ ]] || die "Unsupported desktop account name: $USER_NAME"
-USER_ENTRY="$(getent passwd "$USER_NAME")" || die "Cannot resolve account: $USER_NAME"
-IFS=: read -r _ _ USER_UID USER_GID _ USER_HOME USER_SHELL <<<"$USER_ENTRY"
-[[ $USER_UID =~ ^[0-9]+$ && $USER_GID =~ ^[0-9]+$ && -d $USER_HOME ]] || die 'Desktop account metadata is invalid.'
-
+PY
 
 MARKER='-- K41 CAELESTIA AUTOLOCK START'
 PROFILE_MARKER='# K41 HYPRLAND AUTOLOGIN START'
