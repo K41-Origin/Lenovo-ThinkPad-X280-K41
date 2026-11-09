@@ -1,0 +1,12 @@
+{
+  "theme": {
+    "enableTerm": true,
+    "enableHypr": true,
+    "enableFuzzel": true,
+    "enableGtk": true,
+    "enableQt": true,
+    "iconTheme": "Adwaita",
+    "iconThemeLight": "Adwaita",
+    "iconThemeDark": "Adwaita"
+  }
+}
