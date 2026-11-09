@@ -55,8 +55,28 @@ BACKUP_DIR=""
 [[ -d $CONFIG_DIR && -f $HYPRLAND_LUA ]] || die 'Active Hyprland Lua config not found; refusing to modify an unknown configuration.'
 [[ ! -L $HYPRLAND_LUA && ! -L $BASH_PROFILE && ! -L $GETTY_DROPIN ]] || die 'Symlink targets are not supported for managed files.'
 [[ -r $HYPRLAND_LUA && -w $CONFIG_DIR ]] || die 'Hyprland configuration is not accessible.'
+command -v caelestia >/dev/null 2>&1 || die 'Caelestia CLI is required.'
+command -v start-hyprland >/dev/null 2>&1 || die 'start-hyprland is required.'
+/usr/bin/systemctl is-enabled --quiet getty@tty1.service || die 'getty@tty1.service must already be enabled.'
+for manager in gdm sddm ly greetd; do
+    if /usr/bin/systemctl is-enabled --quiet "$manager.service"; then
+        die "A display manager is already enabled: $manager.service"
+    fi
+done
 command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
 command -v grep >/dev/null 2>&1 || die 'grep is required.'
+CAELESTIA_CONFIG="${XDG_CONFIG_HOME:-$USER_HOME/.config}/caelestia/shell.json"
+[[ -r $CAELESTIA_CONFIG ]] || die 'Caelestia shell.json is missing.'
+python3 - "$CAELESTIA_CONFIG" <<'PY'
+import json, pathlib, sys
+path = pathlib.Path(sys.argv[1])
+try:
+    config = json.loads(path.read_text(encoding="utf-8"))
+except Exception as exc:
+    raise SystemExit(f"Invalid Caelestia shell.json: {exc}")
+if not isinstance(config, dict) or not isinstance(config.get("lock"), dict) or config["lock"].get("enabled") is not True:
+    raise SystemExit("Caelestia lock.enabled must be true before enabling automatic login.")
+PY
 
 MARKER='-- K41 CAELESTIA AUTOLOCK START'
 PROFILE_MARKER='# K41 HYPRLAND AUTOLOGIN START'
