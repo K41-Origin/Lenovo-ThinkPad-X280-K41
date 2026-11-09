@@ -26,7 +26,6 @@ install -d -m 0755 -o "$uid" -g "$gid" "$local_bin"
 install -m 0755 -o "$uid" -g "$gid" "$source_helper" "$local_bin/k41-lock-caelestia-after-start"
 
 lua="$home/.config/hypr/hyprland.lua"
-marker="-- K41 ANIMATED BOOT SPLASH START"
 if grep -Fq "$marker" "$lua"; then
     printf 'K41 animated splash hook already exists; no duplicate inserted.\n'
     exit 0
@@ -36,16 +35,43 @@ python3 - "$lua" <<'PY'
 import os, pathlib, stat, sys, tempfile
 p = pathlib.Path(sys.argv[1])
 text = p.read_text(encoding="utf-8")
-marker = "-- K41 ANIMATED BOOT SPLASH START"
+splash_marker = "-- K41 ANIMATED BOOT SPLASH START"
+visual_marker = "-- K41 BOOT VISUAL SUPPRESSION START"
 hook = 'hl.on("hyprland.start", function()'
-if marker in text:
-    raise SystemExit("K41 animated splash hook already exists.")
+
 if text.count(hook) < 1:
     raise SystemExit("No existing Hyprland-start callback found; refusing unsafe insertion.")
-# Insert before the existing callback body so the overlay is requested before Caelestia startup.
-insertion = hook + '\n    hl.exec_cmd("sh -c \'mkdir -p \\"$HOME/.cache/k41\\"; qs -c k41-boot-splash >/dev/null 2>&1 & echo $! > \\"$HOME/.cache/k41/boot-splash.pid\\"\'")\n    ' + marker + '\n'
-text = text.replace(hook, insertion, 1)
-fd, tmp = tempfile.mkstemp(prefix=".k41-boot-splash-", dir=p.parent)
+
+# Remove Hyprland's own mascot/logo and wallpaper during the Plymouth-to-lock handoff.
+# The black compositor background remains visible only until the opaque Quickshell
+# overlay is mapped; the overlay then stays above normal shell layers.
+if visual_marker not in text:
+    visual_block = (
+        visual_marker + '\n'
+        + 'hl.config({\n'
+        + '    misc = {\n'
+        + '        disable_hyprland_logo = true,\n'
+        + '        disable_splash_rendering = true,\n'
+        + '        force_default_wallpaper = 0,\n'
+        + '        background_color = 0x000000,\n'
+        + '    },\n'
+        + '})\n'
+        + '-- K41 BOOT VISUAL SUPPRESSION END\n\n'
+    )
+    position = text.index(hook)
+    text = text[:position] + visual_block + text[position:]
+
+if splash_marker not in text:
+    launch = (
+        hook + '\n'
+        + '    hl.exec_cmd("sh -c \'mkdir -p \\"$HOME/.cache/k41\\"; '
+        + 'qs -c k41-boot-splash >/dev/null 2>&1 & '
+        + 'echo $! > \\"$HOME/.cache/k41/boot-splash.pid\'")\n'
+        + '    ' + splash_marker + '\n'
+    )
+    text = text.replace(hook, launch, 1)
+
+fd, tmp = tempfile.mkstemp(prefix=".k41-boot-visuals-", dir=p.parent)
 try:
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(text)
