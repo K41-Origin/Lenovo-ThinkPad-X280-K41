@@ -7,7 +7,7 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji
 ## Tujuh tahap resmi
 
 1. **Live readiness:** validasi ISO, mode boot, perangkat, jaringan, dependensi, repository, test suite, dan prasyarat storage. Read-only dalam arti tidak mengubah sistem atau SSD target; validator tetap menulis laporan lokal dan test suite memakai disposable loop-backed image. Detail alur dan batasnya ada di [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
-2. **Basic Arch installation:** instalasi dasar Arch pada SSD target setelah pemeriksaan identitas dan konfirmasi eksplisit. Destruktif.
+2. **Basic Arch installation:** instalasi dasar Arch pada SSD target setelah pemeriksaan identitas dan konfirmasi eksplisit. Destruktif. Peta implementasi dan batas operasional: [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md).
 3. **Desktop installation:** setup desktop dari Arch terpasang melalui TTY.
 4. **Desktop functional validation:** pemeriksaan otomatis sesi, konfigurasi, proses, IPC, service, audio, jaringan, baterai, thermal, dan journal. Tidak menggantikan review interaksi pengguna.
 5. **Desktop customization:** tujuh workstream berurutan: (1) boot experience, (2) lock screen, (3) dashboard, (4) taskbar/panel, (5) launcher, (6) sidebar, (7) utilities. Arah desain lintas-komponen ada di [Design System](07-DESKTOP-DESIGN-SYSTEM.md).
@@ -28,7 +28,7 @@ Penerimaan Workstream 1 tidak boleh ditafsirkan sebagai klaim bahwa setiap detai
 ## Entry point kanonis
 
 - `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
-- `scripts/k41-install-basic-arch.sh` → delegasi internal `scripts/install-arch-x280.sh`
+- `scripts/k41-install-basic-arch.sh` → delegasi internal `scripts/install-arch-x280.sh`; peta rinci: [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md)
 - `scripts/k41-install-desktop.sh` → delegasi internal `scripts/setup-desktop-x280.sh`
 - `scripts/k41-desktop-validation.sh`
 - `scripts/k41-desktop-repair.sh`
