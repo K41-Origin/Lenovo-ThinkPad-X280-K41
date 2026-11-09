@@ -14,8 +14,9 @@ Run from the repository clone as the regular desktop user, without sudo.
 Collects storage/mount topology, swap/hibernate, volatile-memory limits,
 systemd persistence and user-session lifecycle, account/privilege metadata,
 login/session entry points, desktop/browser packages and system launchers.
-It does NOT enumerate home-directory contents, read browser profiles,
-credentials, document contents, or user-specific configuration files.
+It does NOT enumerate home-directory contents or read browser profiles,
+credentials, history, or documents. It reads only selected desktop startup
+directives, autostart metadata, and bounded configuration path names.
 
 The report may contain host paths, package versions, session IDs, device identifiers,
 and selected desktop/PAM configuration. Review and redact it before sharing.
@@ -330,6 +331,15 @@ if have flatpak; then
   flatpak list --app --columns=application,branch,installation >>"$report" 2>&1 || true
 fi
 
+section 'Browser private-mode policy indicators (selected policy keys only)'
+for file in /etc/firefox/policies/policies.json /usr/lib/firefox/distribution/policies.json \
+  /etc/chromium/policies/managed/*.json /etc/opt/chrome/policies/managed/*.json \
+  /etc/brave/policies/managed/*.json; do
+  [[ -r $file ]] || continue
+  printf '[%s]\n' "${file#/}" >>"$report"
+  grep -Ei 'DisablePrivateBrowsing|IncognitoModeAvailability|BrowserGuestModeEnabled|PrivateBrowsingMode' "$file" |
+    sed -E 's/("?(password|token|secret|api[_-]?key)"?[[:space:]]*:[[:space:]]*)"[^"]*"/\\1"[REDACTED]"/Ig' >>"$report" || true
+done
 section 'System and active-user default browser associations (selected MIME keys only)'
 for file in /usr/share/applications/mimeapps.list /etc/xdg/mimeapps.list /usr/local/share/applications/mimeapps.list; do
   if [[ -r $file ]]; then
