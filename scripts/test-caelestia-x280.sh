@@ -33,11 +33,11 @@ fi
 chmod 0700 "$run_dir"
 log="$run_dir/diagnostics.txt"
 summary="$run_dir/summary.md"
-checklist="$run_dir/manual-checklist.md"
+coverage="$run_dir/coverage-limitations.md"
 : >"$log"
 : >"$summary"
-: >"$checklist"
-chmod 0600 "$log" "$summary" "$checklist"
+: >"$coverage"
+chmod 0600 "$log" "$summary" "$coverage"
 
 capture() {
   local label=$1 rc
@@ -118,33 +118,19 @@ capture 'Caelestia process list' pgrep -af '[q]uickshell.*caelestia|[q]s.*caeles
 capture 'Caelestia shell runtime log' qs -c caelestia log
 capture 'Recent user journal errors' journalctl --user -b -p err --no-pager -n 80
 
-{
-  printf '# Manual Caelestia acceptance checklist\n\n'
-  printf 'Isi setiap item dengan PASS, FAIL, atau NOT TESTED. Untuk FAIL, catat gejala dan langkah reproduksi.\n\n'
-  cat <<'CHECKLIST'
-| Check | Result | Notes |
-|---|---|---|
-| Caelestia process remains running after startup | NOT TESTED | |
-| Top bar/panel appears and remains responsive | NOT TESTED | |
-| Launcher opens and accepts keyboard input | NOT TESTED | |
-| Dashboard/sidebar opens and closes | NOT TESTED | |
-| Notification display works | NOT TESTED | |
-| Quick settings/widgets render without QML errors | NOT TESTED | |
-| Wallpaper/theme integration works | NOT TESTED | |
-| Audio/network/battery indicators show plausible state | NOT TESTED | |
-| No repeated crash/restart or visible rendering glitches | NOT TESTED | |
+cat >"$coverage" <<'COVERAGE'
+# Caelestia automated diagnostic coverage limits
 
-## Overall Caelestia result
+This collector records process state, CLI/IPC availability, runtime logs, and journal
+evidence. It does not open UI elements or claim visual/interactive acceptance.
 
-NOT TESTED
-
-## Failure details
-
-None recorded.
-CHECKLIST
-} >>"$checklist"
+Panel rendering, launcher input, dashboard interaction, notifications, widget
+appearance, wallpaper rendering, and lock-screen interaction are intentionally not
+tested in this project stage. No manual checklist is requested and no visual PASS
+is claimed.
+COVERAGE
 
 chmod 0600 "$log" "$summary" "$checklist"
 printf 'Caelestia diagnostic report created: %s\n' "$run_dir"
-printf 'Review diagnostics.txt, summary.md, and manual-checklist.md before committing/pushing.\n'
-printf 'The script does not stop Caelestia; it leaves the shell running for visual checks.\n'
+printf 'Review diagnostics.txt, summary.md, and coverage-limitations.md before sharing.\n'
+printf 'The script does not stop Caelestia; it records runtime evidence only.\n'
