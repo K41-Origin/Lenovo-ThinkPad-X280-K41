@@ -10,6 +10,7 @@ tests=(
   tests/test-x280-first-boot-check.sh
   tests/test-desktop-setup.sh
   tests/test-desktop-validation.sh
+  tests/test-desktop-repair.sh
   tests/test-hardware-audit.sh
   tests/test-power-management-audit.sh
   tests/test-power-profile-selector.sh
