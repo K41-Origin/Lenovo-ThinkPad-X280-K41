@@ -11,10 +11,12 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan testable un
 3. **Basic Arch Linux — Desktop Installation.** Dari TTY sistem Arch yang sudah terpasang, jalankan desktop installer. First-boot diagnostic bukan gerbang wajib.
 4. **Desktop Environment — Automated Functional Health Validation.** Kumpulkan bukti otomatis atas sesi, konfigurasi, proses, IPC, service, audio graph, jaringan, driver, baterai, thermal, dan journal. Gate ini tidak mengklaim penerimaan visual atau pengujian fisik perangkat.
 5. **Desktop Environment Customization.** Setelah tahap 4 diterima, bentuk tampilan minimal, monoton/monochromatic, elegan, dan premium dengan keterbacaan serta performa terjaga.
+
+Tahap 5 dikerjakan berurutan dalam tujuh workstream: (1) boot experience — power-on, reboot, dan poweroff; (2) lock screen; (3) dashboard; (4) taskbar/panel; (5) launcher; (6) sidebar; dan (7) utilities. Setiap workstream memerlukan audit kondisi aktif, implementasi bertahap, pemeriksaan fungsi/regresi, review visual langsung pada X280, serta bukti dan rollback. Cakupan lintas-komponen yang juga harus konsisten dijelaskan pada dokumen Desktop dan Design System.
 6. **Desktop Environment Optimization.** Setelah customization diterima, optimalkan desktop dan perangkat: CPU, GPU, termal/fan, daya/baterai, suspend/hibernate/resume, dan stabilitas.
 7. **Release.** Tandai rilis hanya setelah acceptance seluruh tahap, regression test, dokumentasi, dan bukti rilis lengkap.
 
-Tidak ada perpindahan otomatis antar tahap. Hasil otomatis, klasifikasi WARN/FAIL, dan review bukti menjadi gate. Tahap 4 hanya menilai kondisi yang dapat diamati otomatis; visual dan interaksi fisik tidak termasuk dan tidak boleh diklaim VERIFIED. Tahap 4 adalah tahap aktif sampai validasi ulang pada perangkat mengonfirmasi perubahan validator/repair terakhir.
+Tidak ada perpindahan otomatis antar tahap. Hasil otomatis, klasifikasi WARN/FAIL, dan review bukti menjadi gate. Tahap 4 hanya menilai kondisi yang dapat diamati otomatis; visual dan interaksi fisik tidak termasuk dan tidak boleh diklaim VERIFIED. **Tahap 4 telah diterima dan ditutup** berdasarkan bukti pada `reports/desktop-validation/20261109T081724Z/`; Tahap 5 adalah tahap aktif.
 
 ## Entry point kanonis
 
