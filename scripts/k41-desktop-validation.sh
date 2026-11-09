@@ -461,6 +461,8 @@ fi
   printf '\n## Report files\n\n'
   printf -- '- checks.tsv: machine-readable PASS/WARN/FAIL/SKIP results\n'
   printf -- '- validation.log: command output and detailed diagnostic collection\n'
+  printf -- '- diagnostics.tsv and diagnostics.log: focused read-only hardware, package, firmware, service, and kernel evidence\n'
+  printf -- '- *.txt at report root: individual focused diagnostic captures\n'
   printf -- '- environment.txt: host/session metadata\n'
   printf -- '- desktop/ and caelestia/: supplemental diagnostic collectors\n'
   printf -- '- *-journal*.txt: recent journal evidence; may be permission-limited\n'
