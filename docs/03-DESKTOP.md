@@ -60,11 +60,11 @@ PASS atau PASS_WITH_WARNINGS hanya mencerminkan pemeriksaan otomatis yang tersed
 
 **Keputusan gate:** tahap 4 diterima dan ditutup berdasarkan exit code 0, nol FAIL, seluruh WARN ditinjau dan risiko residualnya dicatat, serta konfirmasi manual pairing dari pengguna. Pemeriksaan visual/fisik yang berada di luar cakupan tahap 4 tidak menghalangi dimulainya tahap 5.
 
-## Tahap 5 — Desktop Environment Customization (SIAP DIMULAI)
+## Tahap 5 — Desktop Environment Customization (DESIGN APPROVED)
 
-Arah desain: minimalis, monochromatic, elegan, dan premium. Jaga kontras, hirarki visual, keterbacaan, konsistensi, dan responsivitas. Cakupan: panel, launcher, dashboard, widget, notifikasi, wallpaper, typography, icon, border, radius, spacing, dan animasi.
+Arah desain **K41 Obsidian Minimalism / Graphite Monochrome** telah disetujui. Spesifikasi visual, design tokens awal, cakupan, batas performa, workflow, dan acceptance criteria tercatat di [07 — Desktop Design System](07-DESKTOP-DESIGN-SYSTEM.md). Dokumen tersebut menjadi acuan utama customization tahap 5.
 
-Kustomisasi dilakukan bertahap dengan backup dan rollback. Hindari efek berat pada Intel UHD 620. Acceptance tahap 5 memerlukan screenshot before/after, review visual pada perangkat, interaksi tetap berfungsi, dan tidak ada regresi fungsional tahap 4.
+Status implementasi: **belum dimulai**. Langkah berikutnya adalah audit konfigurasi aktif Hyprland, Caelestia/Quickshell, GTK/Qt, font, icon, cursor, dan wallpaper serta pengambilan baseline screenshot. Jangan mengubah konfigurasi sebelum audit dan backup selesai. Implementasikan bertahap dengan rollback. Hindari efek berat pada Intel UHD 620. Acceptance memerlukan screenshot before/after, review visual pada perangkat, interaksi tetap berfungsi, dan tidak ada regresi fungsional tahap 4.
 
 ## Tahap 6 — Optimization
 
