@@ -56,12 +56,12 @@ pass 'Caelestia lock helper passes mocked IPC readiness and lock invocation'
 # If Caelestia IPC never exposes the lock target, the helper must fail closed.
 cat >"$fixture/bin/caelestia" <<'MOCK'
 #!/usr/bin/env bash
-[[ $* == 'shell -s' ]] && printf 'target notifs\\n'
+[[ $* == 'shell -s' ]] && printf 'target notifs\n'
 exit 0
 MOCK
 cat >"$fixture/bin/hyprlock" <<'MOCK'
 #!/usr/bin/env bash
-printf 'fallback\\n' >"$K41_FALLBACK_LOG"
+printf 'fallback\n' >"$K41_FALLBACK_LOG"
 MOCK
 chmod 0755 "$fixture/bin/caelestia" "$fixture/bin/hyprlock"
 export K41_FALLBACK_LOG="$fixture/fallback.log"
