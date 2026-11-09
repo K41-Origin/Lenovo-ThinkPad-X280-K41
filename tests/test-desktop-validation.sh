@@ -113,6 +113,6 @@ rm -f "$cpu_dir/mds"
 classification="$(k41_classify_journal "$log_file" 0 0 "$cpu_dir")"
 [[ $classification == actionable ]] || fail "unknown MDS sysfs state was not handled conservatively: $classification"
 
-pass 'Journal classifier regression fixtures (empty queries, resolved firmware, mixed informational/error, and critical signatures)'
+pass 'Journal classifier regression fixtures (empty/access-limited queries, resolved firmware, mixed informational/error, CPU mitigation correlation, and critical signatures)'
 pass 'Caelestia log classifier regression fixtures (stale scheme, optional avatar, missing resource, real QML errors, BlueZ, and RTKit)'
 
