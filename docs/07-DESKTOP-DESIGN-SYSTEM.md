@@ -190,8 +190,9 @@ Audit terbaru berasal dari `reports/desktop-customization-audit/20261109T084605Z
 
 ### Shell, launcher, and appearance
 
-- Caelestia Shell 2.5.0 berjalan melalui Quickshell 0.3.2 (`qs -c caelestia -n -d`).
-- Caelestia CLI 1.1.3 tersedia.
+- Audit terbaru (`reports/caelestia-audit/20261109T091310Z/`) mengonfirmasi Caelestia Shell 2.5.0-1, CLI 1.1.3-1, dan Quickshell 0.3.2 aktif (`qs -c caelestia -n -d`).
+- `shell.json` valid dan hanya memiliki konfigurasi `bar` serta `dashboard`; `shell-tokens.json` tidak ada.
+- Rubik, CaskaydiaCove Nerd Font, dan Material Symbols Rounded terdeteksi tersedia. Inter/JetBrains Mono tidak diperlukan untuk profil ini.
 - Launcher variable di `hyprland.lua` mengarah ke `hyprlauncher`; executable availability belum diverifikasi. Wofi dan Fuzzel terpasang, tetapi belum ada proses launcher aktif pada saat audit.
 - Fuzzel config berisi dua blok `[colors]` dan nilai tema lama teal serta tema sebelumnya. File perlu dirapikan setelah launcher utama ditetapkan.
 - Rubik dan CaskaydiaCove Nerd Font tersedia. Inter dan JetBrains Mono tidak tersedia pada hasil `fc-match` dan fallback masing-masing adalah Noto Sans serta Noto Sans Mono.
@@ -204,12 +205,13 @@ Audit terbaru berasal dari `reports/desktop-customization-audit/20261109T084605Z
 - Quickshell menggunakan sekitar 12.3% RAM dan Hyprland sekitar 3.3% RAM pada satu pengambilan.
 - Nilai CPU tidak digunakan sebagai baseline karena proses `ps` milik audit sendiri tampil sebagai proses CPU tertinggi. Pengukuran komparatif perlu dilakukan setelah baseline visual dan dengan metode yang tidak mengukur collector itu sendiri.
 
-### Status setelah fondasi pertama diterapkan
+### Status setelah audit dan batch Caelestia pertama disiapkan
 
-- Script apply menghasilkan `SUCCESS` pada run `20261109T090739Z`; backup privat dibuat dan Hyprland/Fuzzel config diperbarui.
-- Pengguna mengonfirmasi `SUPER + R` berhasil. Launcher runtime: TESTED dan VERIFIED oleh konfirmasi pengguna.
-- `hyprctl configerrors`, visual review menyeluruh, icon/cursor theme, dan wallpaper aktif belum memiliki bukti terbaru pada run tersebut.
-- Caelestia configuration, scheme, and token integration remain PLANNED pending a read-only audit of the actual device config and installed version.
+- Hyprland/Fuzzel apply sukses pada run `20261109T090739Z`; pengguna mengonfirmasi `SUPER + R` berfungsi.
+- Audit Caelestia read-only selesai pada run `20261109T091310Z`; konfigurasi valid dan runtime aktif.
+- Profil tipografi Graphite dan pemilihan scheme upstream `caelestia/dark/monochrome` telah IMPLEMENTED di repository, tetapi belum dijalankan pada perangkat.
+- `shell-tokens.json` tetap tidak dibuat karena upstream menandai token internal sebagai advanced/unstable.
+- Visual review, wallpaper, icon/cursor, dan validasi runtime setelah profil Caelestia masih PENDING.
 - Jangan menghapus `hyprland.conf` secara otomatis; perlakukan sebagai file legacy yang tidak aktif.
 
 ## 11. Implementation workflow
@@ -286,6 +288,6 @@ Hal yang belum diputuskan dan harus diverifikasi:
 
 ---
 
-**Status keseluruhan: DESIGN DIRECTION APPROVED — FIRST HYPRLAND/FUZZEL BATCH APPLIED; LAUNCHER RUNTIME VERIFIED BY USER; CAELESTIA INTEGRATION AUDIT PENDING.**
+**Status keseluruhan: DESIGN DIRECTION APPROVED — HYPRLAND/FUZZEL LAUNCHER VERIFIED; CAELESTIA AUDITED; FIRST GRAPHITE PROFILE IMPLEMENTED, DEVICE APPLY PENDING.**
 
 Dokumen ini menjadi acuan utama untuk keputusan desain dan review perubahan selama tahap 5. Setiap penyimpangan material harus memiliki alasan teknis dan persetujuan sebelum implementasi.
