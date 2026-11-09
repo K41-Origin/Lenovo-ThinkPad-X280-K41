@@ -28,11 +28,11 @@ fi
 chmod 0700 "$run_dir"
 diag="$run_dir/diagnostics.txt"
 summary="$run_dir/summary.md"
-checklist="$run_dir/manual-checklist.md"
+coverage="$run_dir/coverage-limitations.md"
 : >"$diag"
 : >"$summary"
-: >"$checklist"
-chmod 0600 "$diag" "$summary" "$checklist"
+: >"$coverage"
+chmod 0600 "$diag" "$summary" "$coverage"
 
 capture() {
   local label=$1 rc
@@ -77,7 +77,7 @@ capture() {
   printf -- '- Hyprland instance detected: %s\n' "${HYPRLAND_INSTANCE_SIGNATURE:+yes}"
   printf -- '- Collection result: **COMPLETED** (this is not a hardware PASS)\n'
   printf -- '- Diagnostic details: diagnostics.txt\n'
-  printf -- '- Manual checks: manual-checklist.md\n'
+  printf -- '- Coverage limits: coverage-limitations.md\n'
   printf '\nThis collector is read-only: it does not install packages, change services, edit configuration, or run privileged commands. Review all files for private information before committing/pushing.\n'
 } >>"$summary"
 
@@ -146,42 +146,19 @@ capture 'Power supply device list' upower -e
 capture 'User journal errors from this boot (last 60)' journalctl --user -b -p err --no-pager -n 60
 capture 'System journal errors from this boot (last 60; may be permission-limited)' journalctl -b -p err --no-pager -n 60
 
-cat >"$checklist" <<'CHECKLIST'
-# Manual X280 desktop acceptance checklist
+cat >"$coverage" <<'COVERAGE'
+# Stage 4 desktop validation coverage limits
 
-Isi setiap item dengan PASS, FAIL, atau NOT TESTED. Untuk FAIL, tulis gejala dan langkah reproduksi singkat. Jangan menganggap pengumpulan diagnostik otomatis sebagai bukti hardware lulus.
+This collector gathers software, device-enumeration, service, and journal evidence only.
+It does not perform or request visual/physical acceptance checks.
 
-| Check | Result | Notes |
-|---|---|---|
-| Hyprland starts and remains running | NOT TESTED | |
-| Display resolution, scaling, external display (if available) | NOT TESTED | |
-| Keyboard and function/media keys | NOT TESTED | |
-| TrackPoint | NOT TESTED | |
-| Touchpad, click, tap, scrolling | NOT TESTED | |
-| Brightness keys and brightness control | NOT TESTED | |
-| Volume/mute keys and audio output | NOT TESTED | |
-| Microphone input | NOT TESTED | |
-| Wi-Fi connect, disconnect, reconnect | NOT TESTED | |
-| Bluetooth (only if needed) | NOT TESTED | |
-| Terminal and file manager launch | NOT TESTED | |
-| Caelestia shell/launcher/widgets (if installed) | NOT TESTED | |
-| Notifications | NOT TESTED | |
-| Screenshot portal | NOT TESTED | |
-| Screen sharing portal (if needed) | NOT TESTED | |
-| Screen lock and unlock | NOT TESTED | |
-| Logout returns to a usable TTY | NOT TESTED | |
-| Suspend and resume (optional; save work first) | NOT TESTED | |
-
-## Overall physical result
-
-NOT TESTED
-
-## Failure details
-
-None recorded.
-CHECKLIST
-
+The following behaviors are not established by this report: panel appearance, keyboard
+and pointing-device interaction, brightness/media keys, speaker/microphone I/O, Wi-Fi
+reconnection, Bluetooth pairing, portal UI interaction, or lock-screen interaction.
+No physical/visual PASS is claimed. Stage 4 remains limited to automated runtime/log
+evidence; hardware tuning and suspend/resume are separate later-stage work.
+COVERAGE
 chmod 0600 "$diag" "$summary" "$checklist"
 printf 'Diagnostic report created: %s\n' "$run_dir"
-printf 'Review before sharing, then commit/push this report directory.\n'
-printf 'Collection completed; physical hardware acceptance remains NOT TESTED until the checklist is filled in.\n'
+printf 'Review diagnostics, summary, and coverage limitations before sharing.\n'
+printf 'Collection completed; Stage 4 reports automated evidence only and makes no physical/visual acceptance claim.\n'
