@@ -27,9 +27,9 @@ if (( EUID == 0 )); then
       session_env="$(tr '\0' '\n' < "/proc/$hypr_pid/environ")"
       WAYLAND_DISPLAY="$(printf '%s\n' "$session_env" | sed -n 's/^WAYLAND_DISPLAY=//p' | head -n 1)"
       export WAYLAND_DISPLAY
+      [[ -n ${XDG_SESSION_TYPE:-} ]] || export XDG_SESSION_TYPE=wayland
     fi
   fi
-  [[ -n ${XDG_SESSION_TYPE:-} ]] || export XDG_SESSION_TYPE=wayland
   if [[ -S $XDG_RUNTIME_DIR/bus ]]; then
     export DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"
   fi
