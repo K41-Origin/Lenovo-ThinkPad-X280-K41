@@ -41,6 +41,40 @@ if [[ $EUID -eq 0 ]]; then
         done
     done
     target_gid="$(id -g "$SUDO_USER")"
+
+    # Repair only the exact legacy tree created by the earlier sudo-based
+    # deployment. Every path and owner is checked before these three
+    # directory entries are changed; never recurse into user files.
+    target_parent="$target_home/.config/quickshell"
+    if [[ -d $target_config && $(stat -c %u "$target_config") != "$target_uid" ]]; then
+        [[ -d $target_parent && ! -L $target_parent && $(stat -c %u "$target_parent") == 0 ]] ||
+            die "Unexpected owner/layout at $target_parent; refusing automatic repair."
+        [[ $(stat -c %u "$target_config") == 0 &&
+           -d $target_config/modules && ! -L $target_config/modules &&
+           $(stat -c %u "$target_config/modules") == 0 &&
+           -d $target_config/modules/lock && ! -L $target_config/modules/lock &&
+           $(stat -c %u "$target_config/modules/lock") == "$target_uid" ]] ||
+            die "Legacy lockscreen tree does not match the audited root-owned layout: $target_config"
+        [[ ! -L $target_config/modules/lock/Content.qml &&
+           ! -L $target_config/modules/lock/Center.qml &&
+           -f $target_config/modules/lock/Content.qml &&
+           -f $target_config/modules/lock/Center.qml &&
+           $(stat -c %u "$target_config/modules/lock/Content.qml") == "$target_uid" &&
+           $(stat -c %u "$target_config/modules/lock/Center.qml") == "$target_uid" ]] ||
+            die "Legacy lock override files have unexpected type/owner: $target_config/modules/lock"
+        mapfile -t legacy_entries < <(find "$target_config" -mindepth 1 -printf '%P\\n' | LC_ALL=C sort)
+        expected_entries=(
+            modules
+            modules/lock
+            modules/lock/Center.qml
+            modules/lock/Content.qml
+        )
+        [[ "${legacy_entries[*]}" == "${expected_entries[*]}" ]] ||
+            die "Legacy tree contains additional content; refusing ownership repair: $target_config"
+        info "Repairing verified legacy directory ownership (non-recursive): $target_parent, $target_config, and $target_config/modules."
+        chown "$target_uid:$target_gid" -- "$target_parent" "$target_config" "$target_config/modules"
+    fi
+
     for path in "$target_config" "$target_state"; do
         if [[ -e $path && ! -d $path ]]; then
             die "Managed path exists but is not a directory: $path"
