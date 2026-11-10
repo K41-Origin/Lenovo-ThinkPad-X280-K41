@@ -1,6 +1,6 @@
 # Stage 5 — Desktop Customization
 
-Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini hanya dimiliki oleh [docs/06-STATUS.md](../06-STATUS.md).** Dokumen ini menetapkan urutan dan cara kerja, bukan menyalin riwayat implementasi.
+Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini hanya dimiliki oleh [docs/06-STATUS.md](../../../docs/06-STATUS.md).** Dokumen ini menetapkan urutan dan cara kerja, bukan menyalin riwayat implementasi.
 
 ## Urutan workstream
 
@@ -14,18 +14,18 @@ Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini han
 | 6 | [Sidebar](06-SIDEBAR.md) |
 | 7 | [Utilities](07-UTILITIES.md) |
 
-Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [status proyek](../06-STATUS.md); jangan membuka kembali workstream yang telah diterima pengguna hanya berdasarkan catatan historis.
+Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [status proyek](../../../docs/06-STATUS.md); jangan membuka kembali workstream yang telah diterima pengguna hanya berdasarkan catatan historis.
 
 ## Peta implementasi repository
 
-Source runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../../stages/stage-5-desktop-customization/README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.
+Source runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.
 
 ## Dokumen acuan
 
-- [Project architecture](../01-PROJECT.md)
-- [Desktop handoff](../03-DESKTOP.md)
-- [Design System](../07-DESKTOP-DESIGN-SYSTEM.md)
-- [Current status](../06-STATUS.md)
+- [Project architecture](../../../docs/01-PROJECT.md)
+- [Desktop handoff](../../../docs/03-DESKTOP.md)
+- [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md)
+- [Current status](../../../docs/06-STATUS.md)
 
 Design System menentukan bahasa visual lintas-komponen. Implementasi global yang tidak diperlukan oleh komponen aktif ditunda sampai workstream komponen selesai. Setiap workstream tetap harus mengikuti token/prinsip desain yang relevan.
 
@@ -43,7 +43,7 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 
 ## Status
 
-Gunakan definisi status kanonis di [AGENTS.md](../../AGENTS.md). Status aktual dan prioritas tidak disalin di sini.
+Gunakan definisi status kanonis di [AGENTS.md](../../../AGENTS.md). Status aktual dan prioritas tidak disalin di sini.
 
 ## Guest Mode
 
