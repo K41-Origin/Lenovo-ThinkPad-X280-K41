@@ -9,7 +9,7 @@
 | 1. Live Readiness | IMPLEMENTED | Entry point kanonis: `stages/stage-1-live-readiness/scripts/k41-live-validation.sh`. |
 | 2. Basic Arch Installation | IMPLEMENTED | Entry point kanonis: `scripts/k41-install-basic-arch.sh`; operasi destruktif. Peta: [Stage 2](../stages/stage-2-basic-arch-install/README.md). |
 | 3. Desktop Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. Peta: [Stage 3](../stages/stage-3-desktop-install/README.md). |
-| 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot validasi: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. Pengguna mengonfirmasi pairing Bluetooth berhasil. |
+| 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot historis: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. Pengguna mengonfirmasi pairing Bluetooth berhasil. Peta: [Stage 4](../stages/stage-4-desktop-validation/README.md). |
 | 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 selesai dan diterima pengguna; Workstream 2 aktif. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu Stage 5 diterima dan baseline aktual. |
 | 7. Release | PLANNED | Menunggu seluruh gate dan regression lulus. |
