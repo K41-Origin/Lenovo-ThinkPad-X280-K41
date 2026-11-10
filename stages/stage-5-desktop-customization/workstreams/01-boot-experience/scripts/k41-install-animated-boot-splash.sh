@@ -14,9 +14,8 @@ command -v qs >/dev/null 2>&1 || die "Quickshell (qs) is not installed."
 command -v python3 >/dev/null 2>&1 || die "python3 is required."
 
 script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
-repo_root=$(cd -- "$script_dir/../../../.." && pwd -P)
 source_qml="$script_dir/../config/quickshell/k41-boot-splash/shell.qml"
-source_helper="$repo_root/scripts/k41-lock-caelestia-after-start.sh"
+source_helper="$script_dir/k41-lock-caelestia-after-start.sh"
 [[ -s $source_qml ]] || die "Missing K41 Quickshell configuration: $source_qml"
 target_dir="$home/.config/quickshell/k41-boot-splash"
 install -d -m 0755 -o "$uid" -g "$gid" "$target_dir"
