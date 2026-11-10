@@ -60,7 +60,7 @@ cmp -s "$global" "$tmp/global.before"
 cmp -s "$monitor" "$tmp/monitor.before"
 [[ ! -e $state/k41/caelestia-cleanup/backups ]]
 
-apply_output="$(printf 'yes\n' | run_cleanup --apply)"
+apply_output="$(run_cleanup --apply)"
 grep -q 'Dashboard disabled and JSON read-back verification passed' <<<"$apply_output"
 backup_dir="$(sed -n 's/^Backup: //p' <<<"$apply_output")"
 [[ -n $backup_dir && -d $backup_dir ]]
@@ -80,7 +80,7 @@ assert m["dashboard"]["showMedia"] is False
 assert m["bar"]["persistent"] is False
 PY
 
-rollback_output="$(printf 'yes\n' | run_cleanup --rollback "$backup_dir")"
+rollback_output="$(run_cleanup --rollback "$backup_dir")"
 grep -q 'Rollback completed' <<<"$rollback_output"
 cmp -s "$global" "$tmp/global.before"
 cmp -s "$monitor" "$tmp/monitor.before"
