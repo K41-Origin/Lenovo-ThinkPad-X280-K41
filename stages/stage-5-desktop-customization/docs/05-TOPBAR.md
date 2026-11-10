@@ -1,4 +1,4 @@
-# Workstream 4 — Topbar
+# Workstream 05 — Topbar
 
 ## Tujuan
 
@@ -25,7 +25,16 @@ Jangan menambahkan elemen hanya karena tersedia di upstream. Setiap elemen harus
 
 Termasuk layout topbar, elemen informasi/status yang disepakati, integrasi tray bila diperlukan, interaksi, visibility, dan perilaku terhadap fullscreen/fokus.
 
-Tidak termasuk workspace dock (Bottombar), launcher, dashboard (dihapus dari scope), sidebar, utilities panel terpisah, atau optimasi hardware Stage 6.
+Tidak termasuk workspace dock (Bottombar), launcher, dashboard (dinonaktifkan dari scope), sidebar, utilities panel terpisah, atau optimasi hardware Stage 6.
+
+## Pola implementasi
+
+Gunakan pola yang dipelajari dari Workstream 04 — K41Dock:
+- Source K41 disimpan terpisah dalam repository pada direktori workstream.
+- Runtime source dideploy ke bawah `~/.config/quickshell/` melalui installer.
+- Integrasi dengan Caelestia harus minimal dan tidak mengubah file upstream yang tidak diperlukan.
+- Installer harus memiliki preflight, backup, verifikasi pascaperubahan, dan rollback.
+- Komponen harus memiliki ownership dan interface yang jelas agar dapat diekstrak ke k41-shell.
 
 ## Prosedur
 
