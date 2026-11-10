@@ -13,7 +13,7 @@ info() { printf 'INFO: %s\n' "$*"; }
 [[ -n ${WAYLAND_DISPLAY:-} ]] || die "No Wayland session detected; run this from the active Hyprland desktop."
 [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || die "Hyprland session signature is missing; refusing to reload a non-active desktop."
 
-for command_name in realpath stat git cmp install mktemp date cp mv rm caelestia; do
+for command_name in realpath stat git cmp install mktemp date cp mv rm sha256sum caelestia; do
     command -v "$command_name" >/dev/null 2>&1 || die "Required command not found: $command_name"
 done
 
