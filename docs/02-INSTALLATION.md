@@ -4,7 +4,7 @@ Dokumen ini mengatur tahap 1–3. Ikuti entry point kanonis; jangan menjalankan 
 
 ## Tahap 1 — Arch Linux Live ISO: readiness
 
-Boot ISO resmi Arch Linux pada ThinkPad X280 dalam mode UEFI, siapkan koneksi jaringan dan checkout repository pada filesystem live. Jalankan:
+Boot ISO resmi Arch Linux pada ThinkPad X280 dalam mode UEFI, siapkan koneksi jaringan dan checkout repository pada filesystem live. Jalankan sebagai **root** dari root checkout:
 
 ```bash
 bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh
@@ -18,7 +18,7 @@ Untuk penjelasan terperinci mengenai mode, wrapper, supplemental collector, call
 
 ## Tahap 2 — Arch Linux Live ISO: basic installation
 
-Setelah readiness PASS dan laporan direview, jalankan:
+Setelah readiness PASS dan laporan direview, jalankan sebagai **root** dari root checkout Arch ISO:
 
 ```bash
 bash stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh
@@ -42,7 +42,7 @@ Setelah installer selesai, reboot dan masuk ke TTY sistem Arch Linux yang baru t
 sudo bash stages/stage-3-desktop-install/scripts/k41-install-desktop.sh
 ```
 
-Wrapper meneruskan ke `stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh`. Script harus dijalankan dari TTY, bukan dari Arch ISO, chroot, atau sesi grafis. Ikuti prompt instalasi dan review AUR recipe saat diminta. Peta file, AUR resolver, efek samping, laporan, dan test tersedia di [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md).
+Wrapper meneruskan ke `stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh`. Script harus dijalankan dari TTY, bukan dari Arch ISO, chroot, atau sesi grafis. Ikuti prompt instalasi dan review AUR recipe saat diminta. Untuk mengikuti kontrak Stage 4 yang sekarang, pilih pemasangan Caelestia pada prompt Stage 3: validator Stage 4 saat ini mewajibkan paket `quickshell-git`, `caelestia-shell`, dan `caelestia-cli`; jalur Quickshell resmi tanpa Caelestia belum memenuhi kontrak tersebut. Rincian dan keterbatasan ini dicatat di [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md) dan [Status proyek](06-STATUS.md).
 
 **Tidak ada first-boot validation wajib di antara tahap 2 dan 3.** First-boot collector `scripts/x280-first-boot-check.sh` tetap tersedia sebagai alat diagnosis read-only bila diperlukan, tetapi bukan prasyarat workflow dan bukan gerbang untuk menjalankan desktop installer.
 
