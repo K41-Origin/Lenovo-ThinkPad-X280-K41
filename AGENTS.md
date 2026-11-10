@@ -32,6 +32,7 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Stage 1: peta readiness dan ownership | `stages/stage-1-live-readiness/README.md` |
 | Stage 2: peta installer dasar, storage safety, recovery, dan test | `stages/stage-2-basic-arch-install/README.md` |
 | Stage 3: peta desktop installer, AUR resolver, side effects, dan test | `stages/stage-3-desktop-install/README.md` |
+| Stage 4: peta validator, repair, diagnostics, report, dan acceptance | `stages/stage-4-desktop-validation/README.md` |
 | Desktop tahap 3–5 dan handoff | `docs/03-DESKTOP.md` |
 | Test suite dan acceptance gate | `docs/04-TESTING.md`, `tests/README.md` |
 | Security, recovery, optimasi tahap 6 | `docs/05-OPERATIONS.md` |
