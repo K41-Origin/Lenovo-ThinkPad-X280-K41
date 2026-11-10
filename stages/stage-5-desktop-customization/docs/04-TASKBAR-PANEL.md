@@ -1,59 +1,50 @@
-# Workstream 4 — Taskbar dan Panel
+# Workstream 4 — Bottombar
 
 ## Tujuan
 
-Menyusun panel utama yang ringkas dan dapat dipindai, dengan status sesi dan akses fungsi yang relevan tanpa redundansi.
+Mempertahankan panel workspace horizontal yang ringkas di tepi bawah layar. Komponen ini menjadi **Bottombar**, terpisah dari Topbar.
+
+## Target desain
+
+- Posisi horizontal di tepi bawah layar.
+- Menampilkan indikator workspace saja; tidak menampilkan active window, tray, clock, status icons, atau power entry.
+- Floating/minimal dan auto-hide; muncul ketika pointer menyentuh area trigger bawah.
+- Menandai workspace aktif dan workspace yang berisi window; klik indikator berpindah ke workspace terkait.
+- Tidak mengambil exclusive workspace area secara permanen.
+- Latar gelap/transparan secukupnya, sudut membulat, dan transisi halus mengikuti Design System.
+- Tidak mengganggu fullscreen, fokus window, input, atau perpindahan workspace.
+
+Target ini meneruskan konsep dock yang sebelumnya diterima sebagai Taskbar/Panel. Perubahan nama menjadi Bottombar adalah keputusan terminologi; setiap perubahan implementasi lanjutan tetap harus diuji pada X280.
 
 ## Batas
 
-Termasuk posisi/ukuran panel, workspace indicator, active window bila diperlukan, tray, clock/date, indikator status, serta interaksi panel.
+Termasuk posisi, ukuran, workspace indicator, trigger edge, visibility, click-through, fullscreen behavior, dan integrasi Caelestia/Quickshell.
 
-Tidak termasuk redesign global compositor, global icon/cursor, notifications/OSD, utilities panel terpisah, atau aplikasi GTK/Qt.
-
-## Target desain yang disepakati
-
-- Dock horizontal di tepi bawah layar.
-- Floating/minimal: hanya indikator workspace; tidak menampilkan active window, tray, clock, status icons, atau power entry.
-- Auto-hide; dock muncul ketika pointer menyentuh area trigger di tepi bawah.
-- Tampilan ringkas dengan latar gelap/transparan secukupnya, sudut membulat, dan animasi halus.
-- Tidak mengambil ruang kerja secara permanen dan tidak mengganggu fullscreen, fokus window, atau perpindahan workspace.
-
-Ini adalah target desain, bukan klaim bahwa konfigurasi Caelestia saat ini sudah mendukung posisi/orientasi tersebut. Implementasi harus mengikuti API upstream yang terverifikasi. Jika layout vertikal bawaan tidak menyediakan opsi posisi/orientasi, perubahan QML harus dikelola sebagai source/patch yang terlacak dan dapat dipelihara saat upstream diperbarui.
-
-## Siklus audit dan implementasi
-
-Ikuti [alur kolaborasi Stage 5](00-COLLABORATION-WORKFLOW.md). Audit perangkat dilakukan melalui:
-
-```bash
-bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh
-```
-
-Audit menghasilkan laporan di `reports/stage-5-desktop-customization/caelestia-audit/<timestamp>/`, termasuk konfigurasi Caelestia terpilih, monitor/runtime Hyprland, inventory source Caelestia, proses Quickshell, dan validasi JSON. Periksa sanitasi laporan sebelum push. Audit tidak mengubah konfigurasi atau me-reload shell.
+Tidak termasuk clock, tray, system status, launcher, utilities, atau informasi yang menjadi tanggung jawab Topbar.
 
 ## Prosedur
 
-1. Audit panel aktif, konfigurasi Caelestia/Quickshell, versi/API upstream, output monitor, scaling/resolusi, tray host, widget, keybind, dan proses.
-2. Petakan elemen yang sudah tersedia dan fungsi yang tumpang tindih dengan dashboard/utilities.
-3. Tentukan informasi minimum yang harus selalu terlihat; pindahkan informasi sekunder ke komponen yang tepat.
-4. Backup konfigurasi dan terapkan satu perubahan layout/fungsi per iterasi.
-5. Uji workspace switching, active workspace, tray menu, clock/date, indikator, multi-window, dan perubahan fokus.
-6. Uji perilaku pada resolusi/scaling aktual serta aplikasi fullscreen/floating.
-7. Periksa runtime error dan resource; jangan menambah tray host atau panel kedua tanpa kebutuhan.
+1. Audit konfigurasi dan source aktif, versi Quickshell/Caelestia, monitor/scaling, panel yang berjalan, dan keybind terkait.
+2. Verifikasi apakah implementasi dock yang ada masih sesuai target; jangan mengasumsikan konfigurasi lokal belum berubah.
+3. Backup semua file yang akan disentuh dan siapkan rollback.
+4. Terapkan perubahan minimal. Gunakan API upstream yang terverifikasi; custom QML harus terlacak dan mudah dipelihara.
+5. Uji active/occupied workspace, klik, hover trigger, click-through, fullscreen, fokus, multi-window, dan shell restart.
+6. Periksa error QML/runtime dan konsumsi resource.
 
 ## Acceptance criteria
 
-- Dock horizontal hanya menampilkan indikator workspace sesuai target desain minimal; tidak ada tray, clock, active-window label, atau status widget.
-- Workspace aktif dan workspace berisi window ditampilkan secara benar; klik indikator memindahkan workspace sesuai ID yang dipilih.
-- Dock tersembunyi saat idle dan muncul ketika pointer menyentuh trigger bawah; transisi tidak mengganggu input.
-- Panel tidak mengambil exclusive workspace area secara permanen dan area transparan di luar dock/trigger meneruskan klik ke aplikasi.
-- Dock tidak mengganggu fullscreen, window focus, keybind, atau perpindahan workspace.
-- Tidak ada error QML/runtime kritis atau konsumsi resource yang tidak wajar.
-- Pengguna menyetujui visual dan interaksi langsung pada X280.
+- Bottombar berada di tepi bawah dan hanya menampilkan indikator workspace.
+- Workspace aktif/terisi ditampilkan benar dan klik berpindah ke workspace yang dipilih.
+- Bottombar tersembunyi saat idle dan muncul melalui trigger bawah.
+- Tidak ada exclusive zone permanen atau penghalangan input di luar area dock.
+- Fullscreen, fokus window, keybind, dan workspace switching tetap berfungsi.
+- Tidak ada error runtime kritis atau konsumsi resource yang tidak wajar.
+- Pengguna menerima perilaku langsung pada X280.
 
 ## Rollback dan bukti
 
-Backup konfigurasi panel dan catat elemen aktif, posisi, ukuran, scaling, test interaksi, log, dan review pengguna. Hapus data sensitif dari bukti.
+Backup konfigurasi dan source custom sebelum perubahan. Catat file, versi, test interaksi, log, dan hasil review pengguna. Jangan memasukkan data sensitif ke laporan.
 
-## Gate keluar
+## Status
 
-Workstream ini **COMPLETED / USER ACCEPTED pada 2026-11-11** berdasarkan persetujuan eksplisit pengguna. Penerimaan ini menutup workstream; jangan mengklaim pengujian runtime tambahan di luar bukti yang benar-benar tersedia. Jika muncul regresi, buka audit terarah sebagai pekerjaan baru. Workstream berikutnya adalah [Workstream 3 — Dashboard](03-DASHBOARD.md), lalu Workstream 5 — Launcher setelah Dashboard diterima.
+Implementasi dock sebelumnya telah **COMPLETED / USER ACCEPTED pada 2026-11-11** sebagai Taskbar/Panel. Workstream ini dibuka kembali secara terbatas untuk perubahan nama/penyesuaian yang diperlukan menjadi Bottombar; jangan mengklaim penerimaan baru sampai pengguna memeriksa hasil perubahan tersebut.
