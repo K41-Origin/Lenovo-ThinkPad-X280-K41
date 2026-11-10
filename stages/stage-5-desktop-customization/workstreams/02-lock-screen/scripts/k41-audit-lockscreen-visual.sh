@@ -52,6 +52,7 @@ import json
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 from datetime import datetime, timezone
 
@@ -140,9 +141,9 @@ for key in ("XDG_SESSION_TYPE", "XDG_CURRENT_DESKTOP", "DESKTOP_SESSION"):
 for key in ("WAYLAND_DISPLAY", "HYPRLAND_INSTANCE_SIGNATURE", "XDG_RUNTIME_DIR"):
     add(f"{key}: {'present' if os.environ.get(key) else 'absent'} (value intentionally omitted)")
 for binary in ("qs", "quickshell", "caelestia", "hyprctl", "loginctl", "pacman"):
-    rc, value = command(["bash", "-lc", f"command -v {binary}"])
-    add(f"{binary}: {value if rc == 0 else 'not found'}")
-    if rc == 0 and binary in ("qs", "quickshell", "caelestia", "hyprctl"):
+    value = shutil.which(binary)
+    add(f"{binary}: {value if value else 'not found'}")
+    if value and binary in ("qs", "quickshell", "caelestia", "hyprctl"):
         vrc, version = command([value, "--version"])
         add(f"  version: {version if version else 'no version output'}")
 rc, packages = command(["pacman", "-Q", "caelestia-shell", "caelestia-cli",
