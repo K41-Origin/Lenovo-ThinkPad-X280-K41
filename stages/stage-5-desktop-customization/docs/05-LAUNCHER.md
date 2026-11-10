@@ -1,4 +1,4 @@
-# Workstream 6 — Launcher
+# Workstream 5 — Launcher
 
 ## Tujuan
 
@@ -35,4 +35,4 @@ Backup konfigurasi launcher dan Hyprland keybind. Catat executable/version, keyb
 
 ## Gate keluar
 
-Status VERIFIED memerlukan uji peluncuran aplikasi nyata dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 7 — Sidebar](06-SIDEBAR.md).
+Status VERIFIED memerlukan uji peluncuran aplikasi nyata dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 6 — Sidebar](06-SIDEBAR.md).
