@@ -39,6 +39,21 @@ Source ini belum boleh dianggap sebagai paket lengkap atau langsung dipindahkan.
 
 Rincian tahapan dan acceptance kanonis: [Workstream 02 — Lock Screen](../../../../docs/02-LOCK-SCREEN.md).
 
+## Script audit visual
+
+Script audit read-only:
+`../scripts/k41-audit-lockscreen-visual.sh` (relative to workstream root: `workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh`).
+
+Jalankan dari root checkout pada X280 sebagai user biasa:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh
+```
+
+Laporan bertimestamp dibuat di `reports/lockscreen-visual-audit/`. Cakupannya meliputi penemuan source Caelestia, source QML terkait lock, legacy K41 overlay, aset, hash file, import/referensi, konfigurasi visual terpilih, dan metadata integrasi autentikasi/session-lock. Isi PAM/password dan nilai environment sensitif tidak dikumpulkan. Source text yang relevan dimasukkan ke report agar dependency dapat dianalisis sebelum implementasi.
+
+Script tidak mengubah sistem maupun Git state. Folder report di-ignore secara default; publikasi hasil memerlukan alur review/transfer yang disepakati. Report harus diperiksa karena dapat memuat source custom dan metadata mesin.
+
 ## Batas keamanan
 
 - Jangan mengubah tampilan yang telah disetujui tanpa persetujuan baru.
