@@ -2,6 +2,10 @@
 
 Stage 5 mengerjakan customization desktop secara bertahap dan satu workstream pada satu waktu. **Status terkini hanya dimiliki oleh [docs/06-STATUS.md](../../../docs/06-STATUS.md).** Dokumen ini menetapkan urutan dan cara kerja, bukan menyalin riwayat implementasi.
 
+## Batas fondasi k41-dots
+
+Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience tidak termasuk fondasi k41-dots**; boot splash ditangani Plymouth. Workstream 01 tetap tercatat sebagai pekerjaan boot proyek, tetapi tidak menjadi komponen, dependency, atau backlog k41-dots. Artefak Quickshell lama pada Workstream 01 tidak mengubah keputusan scope ini.
+
 ## Urutan workstream
 
 | Urutan | ID | Workstream | Status/arah |
