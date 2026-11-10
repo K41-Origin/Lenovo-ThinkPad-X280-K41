@@ -5,7 +5,7 @@
 1. **Live readiness:** dari Arch Linux Live ISO jalankan `bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh`. Lihat [peta Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 2. **Basic Arch installation:** setelah readiness PASS dan rencana/target direview, jalankan `bash scripts/k41-install-basic-arch.sh`. Operasi ini destruktif. Lihat [peta Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md).
 3. **Desktop installation:** setelah boot ke Arch terpasang dan login TTY sebagai user biasa, jalankan `sudo bash stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. Lihat [peta Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md).
-4. **Desktop validation:** dari sesi Hyprland sebagai user biasa jalankan `bash stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh`. Stage 4 telah diterima berdasarkan snapshot historis; peta implementasi dan batas bukti ada di [Stage 4 — Desktop Functional Validation](../stages/stage-4-desktop-validation/README.md).
+4. **Desktop validation:** dari sesi Hyprland sebagai user biasa jalankan `bash stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh`. Stage 4 telah diterima berdasarkan snapshot historis; peta implementasi dan batas bukti ada di [Stage 4 — Desktop Functional Validation](../stages/stage-4-desktop-validation/README.md).
 5. **Desktop customization:** Stage 5 aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED**. Workstream 2 — Lock Screen sedang dikerjakan. Ikuti [indeks Stage 5](08-STAGE-5/README.md).
 6. **Desktop & hardware optimization:** PLANNED setelah customization diterima; lihat [Operations](05-OPERATIONS.md).
 7. **Release:** PLANNED setelah seluruh gate dan regression lulus.
@@ -19,8 +19,8 @@ Tidak ada perpindahan otomatis antar tahap.
 | `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` | Readiness Arch ISO |
 | `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` | Entry point instalasi dasar Arch |
 | `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh` | Instalasi desktop; delegasi ke `stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh` |
-| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Validasi fungsional desktop |
-| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Repair terbatas berbasis hasil validasi; dapat mengubah sistem |
+| `stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Validasi fungsional desktop |
+| `stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Repair terbatas berbasis hasil validasi; dapat mengubah sistem |
 
 Gunakan wrapper kanonis, bukan wrapper dan implementasi internal sekaligus.
 
