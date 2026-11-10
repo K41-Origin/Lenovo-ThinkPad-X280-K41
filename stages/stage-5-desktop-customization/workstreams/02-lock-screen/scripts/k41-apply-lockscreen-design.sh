@@ -15,7 +15,7 @@ readonly EXPECTED_PACKAGE_VERSION="2.5.0-1"
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/../../../../.." && pwd -P)"
-source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock"
+source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock"
 
 # Require sudo at entry, then drop privileges before touching user files.
 if [[ $EUID -eq 0 ]]; then
@@ -130,6 +130,7 @@ printf '========== K41 LOCKSCREEN SOURCE DEPLOYMENT ==========\n'
 printf 'User     : %s (UID %s)\n' "$USER" "$EUID"
 printf 'Repo     : %s\n' "$repo_root"
 printf 'Report   : %s\n' "$log_file"
+info "K41-Dots canonical source: $source_root"
 
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
