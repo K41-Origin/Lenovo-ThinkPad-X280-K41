@@ -1,6 +1,6 @@
 # Status Proyek
 
-**Terakhir diperbarui: 2026-11-10.** Dokumen ini adalah satu-satunya sumber status proyek aktif. Bila ringkasan di dokumen lain berbeda, gunakan dokumen ini dan perbarui ringkasan yang keliru.
+**Terakhir diperbarui: 2026-11-11.** Dokumen ini adalah satu-satunya sumber status proyek aktif. Bila ringkasan di dokumen lain berbeda, gunakan dokumen ini dan perbarui ringkasan yang keliru.
 
 ## Status tahapan
 
@@ -10,7 +10,7 @@
 | 2. Basic Arch Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh`; operasi destruktif. Peta: [Stage 2](../stages/stage-2-basic-arch-install/README.md). |
 | 3. Desktop Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. Catatan: pilihan skip Caelestia belum kompatibel dengan kontrak package Stage 4 saat ini. Peta: [Stage 3](../stages/stage-3-desktop-install/README.md). |
 | 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot historis: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. Pengguna mengonfirmasi pairing Bluetooth berhasil. Peta: [Stage 4](../stages/stage-4-desktop-validation/README.md). |
-| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 4** | Workstream 1 dan 2 telah diterima pengguna. Workstream 4 — Taskbar/Panel sedang difinalisasi atas prioritas eksplisit pengguna; Workstream 3 — Dashboard tetap PLANNED dan ditunda sementara. Peta fisik: [Stage 5](../stages/stage-5-desktop-customization/README.md). |
+| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 3** | Workstream 1, 2, dan 4 telah diterima pengguna. Workstream 3 — Dashboard kini menjadi pekerjaan aktif setelah pengguna menyetujui Taskbar/Panel. Peta fisik: [Stage 5](../stages/stage-5-desktop-customization/README.md). |
 | 6. Desktop & Hardware Optimization | PLANNED | Audit/selector tools dipetakan di [Stage 6](../stages/stage-6-hardware-optimization/README.md); optimasi aktual menunggu Stage 5 diterima dan baseline X280 terbaru. |
 | 7. Release | PLANNED | Menunggu seluruh gate dan regression lulus. |
 
@@ -20,7 +20,7 @@
 
 ## Prioritas aktif
 
-**Stage 5 — Workstream 4: Taskbar/Panel.** Workstream 3 — Dashboard tetap PLANNED; urutan pengerjaan Taskbar didahulukan berdasarkan arahan eksplisit pengguna agar pekerjaan taskbar yang sudah dimulai dapat diselesaikan. Setelah Taskbar diterima, Dashboard menjadi pekerjaan Stage 5 berikutnya sebelum Launcher.
+**Stage 5 — Workstream 3: Dashboard.** Pengguna telah menyetujui hasil Taskbar/Panel pada 2026-11-11. Dashboard kini menjadi workstream aktif dan dikerjakan sebelum Launcher.
 
 - Desain: **C — Floating Password Card**.
 - Implementasi repository: override QML `Content.qml`, `Center.qml`, `PasswordInput.qml`, dan `LockSurface.qml`, serta installer deployment source tree Caelestia tersedia.
@@ -49,8 +49,8 @@ Dokumen pemilik: [Workstream 1 — Boot Experience](../stages/stage-5-desktop-cu
 |---|---|
 | 1. Boot Experience | **COMPLETED / USER ACCEPTED** |
 | 2. Lock Screen | **COMPLETED / USER ACCEPTED** |
-| 3. Dashboard | PLANNED — ditunda sampai Taskbar selesai |
-| 4. Taskbar/Panel | **IN PROGRESS — IMPLEMENTED, DEVICE VALIDATION PENDING** |
+| 3. Dashboard | **IN PROGRESS — AUDIT / REQUIREMENTS** |
+| 4. Taskbar/Panel | **COMPLETED / USER ACCEPTED — 2026-11-11** |
 | 5. Launcher | PLANNED |
 | 6. Sidebar | PLANNED |
 | 7. Utilities | PLANNED |
