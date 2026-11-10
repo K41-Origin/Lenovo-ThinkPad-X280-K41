@@ -2,7 +2,7 @@
 
 **Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul K41-dots.
 
-**Status migrasi: PLANNED.** Audit menyeluruh baru akan dimulai; modul baru belum diimplementasikan atau diverifikasi.
+**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status implementasi source K41: IMPLEMENTED. Status migrasi/runtime: PLANNED / NOT VERIFIED.** Source visual Floating Password Card telah diekstrak ke namespace `k41-dots/modules/lockscreen/`. Source lama dipertahankan sebagai pembanding dan rollback sampai migrasi terpisah selesai.
 
 ## Tujuan dan batas scope
 
@@ -27,11 +27,11 @@ Pengguna menetapkan batas partisipasi: **pengguna tidak ingin melakukan pekerjaa
 
 ## Urutan pengerjaan wajib
 
-1. **Audit visual read-only.** Audit menyeluruh semua source yang memengaruhi tampilan Lock Screen saat ini: QML, komponen UI, styling, animasi, aset, konfigurasi visual, resource, serta titik integrasi visual.
-2. **Audit dependency dan batas ownership.** Petakan dependency Quickshell/Caelestia, komponen autentikasi, session-lock, konfigurasi, dan resource yang diperlukan. Bedakan source visual milik K41 dari dependency upstream yang harus tetap disediakan Caelestia.
-3. **Ekstraksi source terpilih.** Ambil hanya source visual dan resource yang terbukti diperlukan. Pertahankan isi/tampilan yang telah disetujui; jangan melakukan redesign saat ekstraksi.
-4. **Rancang modul K41-dots.** Tetapkan struktur, interface, dependency, integrasi, strategi deployment, backup, validasi, dan rollback sebelum perubahan runtime.
-5. **Migrasi dan implementasi.** Buat script terpisah untuk penyiapan/migrasi dan integrasi modul. Script harus memiliki preflight, validasi input/path, penanganan error, backup, verifikasi pascaperubahan, dan recovery yang sesuai.
+1. **Audit visual read-only — COMPLETED.** Audit source visual pada report 20261110T192941Z telah menyediakan source QML, dependency visual, aset, dan konfigurasi terpilih. Report mengandung satu file di luar scope; file itu tidak dipakai sebagai input implementasi. Screenshot/runtime capture belum tersedia.
+2. **Audit dependency dan batas ownership — PARTIAL.** Dependency statis yang tampak pada QML sudah dicatat di README K41-dots. Kelengkapan dependency runtime masih menunggu pemeriksaan setelah modul dipasang.
+3. **Ekstraksi source terpilih — IMPLEMENTED.** Empat file QML visual tersedia di `k41-dots/modules/lockscreen/`. Source lama tetap dipertahankan; belum ada file upstream yang dihapus.
+4. **Rancang modul K41-dots — IMPLEMENTED AT SOURCE LEVEL.** Struktur dan kontrak komponen didokumentasikan di `k41-dots/README.md`; integrasi runtime, backup, validasi deployment, dan rollback belum diimplementasikan.
+5. **Migrasi dan implementasi runtime — PLANNED.** Berikutnya buat script migrasi terpisah dengan preflight, validasi input/path, backup, staging, verifikasi pascaperubahan, dan rollback. Jangan gunakan installer lama.
 6. **Testing dan validasi.** Jalankan pemeriksaan statis dan test otomatis yang dapat dilakukan di repository/CI. Runtime, lock/unlock, password salah, wake/resume, dan perilaku perangkat hanya boleh dinyatakan VERIFIED bila benar-benar diuji dengan bukti.
 7. **Audit pascamigrasi.** Pastikan modul K41 tidak lagi bergantung pada source visual Caelestia yang akan dibersihkan, sementara dependency upstream yang masih diperlukan tetap tersedia dan tercatat.
 8. **Cleanup source visual upstream.** Hanya setelah migrasi terbukti berfungsi dan pengguna menerima hasilnya, identifikasi serta hapus source visual upstream yang sudah tidak digunakan. Cleanup harus sempit, berdasarkan dependency graph, dan memiliki rencana rollback. Jangan menghapus komponen autentikasi atau dependency bersama.
