@@ -25,12 +25,7 @@ Gunakan entry point kanonis. Script implementasi lama yang dipanggil oleh wrappe
 
 ## Status proyek
 
-- Stage 1–4: implementasi tersedia; Stage 4 telah diterima berdasarkan hasil validasi dan konfirmasi pengguna.
-- Stage 5: aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED**. Workstream 2 — Lock Screen adalah pekerjaan aktif.
-- Guest Mode: **NOT IMPLEMENTED** dan ditunda sebagai fitur opsional. Lihat [spesifikasi Guest Mode](docs/08-STAGE-5/03-GUEST-MODE.md).
-- Stage 6–7: PLANNED.
-
-Penerimaan Workstream 1 adalah keputusan pengguna pada 2026-11-10. Catatan lebih lama tentang isu visual boot merupakan histori sebelum keputusan penutupan, bukan backlog aktif.
+Status tahapan, prioritas aktif, acceptance, dan keterbatasan integrasi hanya dicatat di [docs/06-STATUS.md](docs/06-STATUS.md). Gunakan dokumen tersebut sebagai sumber status tunggal; README ini hanya menyediakan navigasi dan ringkasan alur.
 
 ## Kebijakan bukti visual
 
