@@ -10,7 +10,7 @@
 | 2. Basic Arch Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh`; operasi destruktif. |
 | 3. Desktop Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. |
 | 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot historis: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. |
-| 5. Desktop Customization | **IN PROGRESS — TOPBAR / BOTTOMBAR REWORK** | Dashboard dihentikan. Bottombar dan Topbar menjadi arah UI aktif. Cleanup script sudah tersedia; audit terbaru dan eksekusi pada X280 masih menunggu. |
+| 5. Desktop Customization | **IN PROGRESS — TOPBAR / BOTTOMBAR REWORK** | Dashboard akan dihapus sepenuhnya dari implementasi. Bottombar dan Topbar menjadi arah UI aktif. Script pre-audit penghapusan Dashboard sedang disiapkan; laporan X280 terbaru masih menunggu. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu Stage 5 dan baseline X280 terbaru. |
 | 7. Release | PLANNED | Menunggu seluruh gate dan regression lulus. |
 
@@ -20,7 +20,7 @@ Keputusan terbaru pengguna pada 2026-11-11:
 1. **Dashboard dihapus dari scope.** Tidak perlu mendesain atau mengimplementasikan dashboard.
 2. **Taskbar/Panel berganti nama menjadi Bottombar.** Arah desain yang dipertahankan adalah dock horizontal minimal di bawah dengan indikator workspace saja. Implementasi sebelumnya pernah diterima sebagai Taskbar/Panel; perubahan dan verifikasi baru belum diterima.
 3. **Topbar akan dibuat.** Posisi atas dan orientasi horizontal telah diputuskan; daftar elemen, alignment, ukuran, dan perilaku visibility belum ditentukan.
-4. **Cleanup dashboard:** `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh` berstatus **IMPLEMENTED / CI TESTED — NOT TESTED ON X280**. Default dry-run; `--apply` menonaktifkan `dashboard.enabled` pada konfigurasi global/monitor setelah backup; `--rollback` memulihkan backup. Source QML upstream tidak dihapus.
+4. **Penghapusan Dashboard:** shared profile K41 tidak lagi mendefinisikan bagian `dashboard`; script `k41-apply-full-desktop-profile.sh` tidak lagi memaksakan `dashboard.enabled=false`. `k41-cleanup-caelestia.sh --audit` kini menghasilkan laporan inventaris read-only. Penghapusan file/config/keybind aktual BELUM DIIMPLEMENTASIKAN dan menunggu laporan terbaru agar target, package ownership, dirty Git checkout, serta referensi lintas-modul dapat ditinjau.
 
 Dokumen pemilik:
 - [Bottombar](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
@@ -42,7 +42,7 @@ Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual ada di [03 —
 
 ## Keputusan proyek yang masih berlaku
 
-1. Dashboard dihapus dari daftar workstream Stage 5; fungsi runtime sedang ditangani melalui cleanup script terpisah.
+1. Dashboard dihapus dari daftar workstream Stage 5; penghapusan runtime menunggu audit source dan referensi aktual.
 2. Hasil Stage 5 menjadi input evaluasi/perbaikan tahap instalasi sebelumnya.
 3. Refactoring integrasi instalasi dilakukan setelah Stage 5 cukup matang dan sebelum Stage 7 — Release.
 4. Screenshot tidak digunakan, tidak diminta, dan bukan acceptance gate.
