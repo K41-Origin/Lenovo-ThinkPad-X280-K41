@@ -51,4 +51,4 @@ Gunakan definisi status kanonis di [AGENTS.md](../../../AGENTS.md). Status aktua
 
 ## Guest Mode
 
-Guest Mode **NOT IMPLEMENTED / DEFERRED**. Fitur ini bukan bagian dari workstream lock screen saat ini. Lihat [spesifikasi Guest Mode](03-GUEST-MODE.md). Implementasi memerlukan keputusan teknis dan persetujuan baru setelah lock screen diterima.
+Guest Mode **NOT IMPLEMENTED / DEFERRED**. Fitur ini bukan bagian dari workstream lock screen dan tidak otomatis aktif setelah Lock Screen diterima. Lihat [spesifikasi Guest Mode](03-GUEST-MODE.md). Implementasi memerlukan keputusan teknis dan persetujuan eksplisit yang baru.
