@@ -40,15 +40,17 @@ stages/stage-1-live-readiness/
 
 Jalankan validator kanonis untuk workflow normal. Wrapper hanya dipertahankan untuk kompatibilitas. Collector tambahan bukan gate alternatif.
 
-## 3. Komponen bersama — tidak dipindahkan
+## 3. Komponen bersama — canonical di shared/
+
+Komponen berikut berada di `shared/` dan tidak disalin ke direktori Stage 1. Root-level `lib/` dan `config/` adalah symlink kompatibilitas sementara.
 
 File berikut dipakai lintas tahap atau merupakan entry point umum. File tetap berada di lokasi bersama dan tidak disalin ke direktori Stage 1.
 
 | Lokasi bersama | Fungsi dan alasan tetap di luar Stage 1 |
 |---|---|
-| `lib/storage.sh`, `lib/storage-topology.sh` | Discovery, stable identity, dan pemeriksaan topology; juga menjadi dependensi workflow storage Stage 2 |
-| `lib/preflight.sh`, `lib/inventory.sh`, `lib/common.sh` | Preflight, inventory hardware, dan helper umum untuk diagnostic installer |
-| `config/hardware/thinkpad-x280.conf` | Profil hardware deklaratif yang digunakan adapter inventory |
+| `shared/lib/storage.sh`, `shared/lib/storage-topology.sh` | Discovery, stable identity, dan pemeriksaan topology; juga menjadi dependensi workflow storage Stage 2 |
+| `shared/lib/preflight.sh`, `shared/lib/inventory.sh`, `shared/lib/common.sh` | Preflight, inventory hardware, dan helper umum untuk diagnostic installer |
+| `shared/config/hardware/thinkpad-x280.conf` | Profil hardware deklaratif yang digunakan adapter inventory |
 | `installer` | Entry point diagnostik repository `--help` dan `--preflight`; bukan milik eksklusif Stage 1 |
 | `tests/run.sh` dan test storage/preflight bersama | Manifest dan runner seluruh repository; test-test terkait dipakai lintas tahap |
 | `scripts/bootstrap-archiso.sh` | Orkestrator lintas Stage 1 dan Stage 2: review source, readiness, lalu otorisasi peluncuran installer |
@@ -91,12 +93,12 @@ x280-archiso-test.sh      ──> collects evidence, then readiness validator
 
 Terdapat dua jalur identitas yang berbeda:
 
-1. `lib/inventory.sh` membaca vendor, product name, CPU, dan RAM dari procfs/sysfs lalu membandingkan subset whitelist terhadap `config/hardware/thinkpad-x280.conf`.
+1. `shared/lib/inventory.sh` membaca vendor, product name, CPU, dan RAM dari procfs/sysfs lalu membandingkan subset whitelist terhadap `shared/config/hardware/thinkpad-x280.conf`.
 2. `scripts/validate-live-storage.sh` menetapkan model SSD `WDC PC SN730` dan serial target langsung di script, kemudian mensyaratkan tepat satu kandidat disk cocok.
 
 Metadata SSD pada hardware profile belum menjadi sumber serial aktif bagi live storage validator. Jangan menganggap seluruh metadata hardware telah dikonsolidasikan ke satu sumber konfigurasi.
 
-Storage validator menemukan kandidat whole-disk, memeriksa identitas dan atribut keselamatan, lalu melakukan discovery ulang sebelum validasi topology. `lib/storage-topology.sh` menelusuri partisi dan hubungan holder/slave melalui sysfs, membandingkan major:minor dengan mountinfo dan swap, serta memeriksa loop backing dan overlay backing. Keadaan yang tidak dapat dibuktikan ditolak (fail closed).
+Storage validator menemukan kandidat whole-disk, memeriksa identitas dan atribut keselamatan, lalu melakukan discovery ulang sebelum validasi topology. `shared/lib/storage-topology.sh` menelusuri partisi dan hubungan holder/slave melalui sysfs, membandingkan major:minor dengan mountinfo dan swap, serta memeriksa loop backing dan overlay backing. Keadaan yang tidak dapat dibuktikan ditolak (fail closed).
 
 **Batas operasi:** Stage 1 tidak mempartisi, memformat, membuka LUKS, me-mount, memasang paket, mengubah service/firmware, atau menulis ke SSD instalasi target. Pemeriksaan topology tidak menghilangkan seluruh risiko race condition atau kegagalan perangkat keras.
 

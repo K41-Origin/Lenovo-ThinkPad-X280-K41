@@ -70,6 +70,11 @@ Setelah perubahan:
 4. Perbarui `docs/06-STATUS.md` bila status proyek berubah.
 5. Laporkan file, commit, validasi, hal yang belum diuji, risiko, dan langkah berikutnya.
 
+## Shared components and compatibility paths
+
+- Canonical shared code/configuration: `shared/lib/` and `shared/config/`.
+- Root `lib/` and `config/` are compatibility symlinks only; new references must use `shared/`.
+
 ## Reports and generated artifacts
 
 - Output runtime `reports/<category>/` lokal secara default dan diabaikan Git.

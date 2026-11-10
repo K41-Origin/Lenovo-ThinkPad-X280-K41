@@ -34,7 +34,7 @@ Stage 1 PASS adalah bukti readiness pada satu snapshot, bukan otorisasi menghapu
 
 ## 2. Peta file dan kepemilikan
 
-File yang eksklusif untuk Stage 2 dikelompokkan di direktori tahap ini. Modul storage bersama, orchestrator lintas tahap, dan test runner global tetap berada di lokasi bersama.
+File yang eksklusif untuk Stage 2 dikelompokkan di direktori tahap ini. Modul storage bersama berada di `shared/lib/`; orchestrator lintas tahap dan test runner global tetap berada di lokasi repository bersama.
 
 | Path | Peran | Kepemilikan |
 |---|---|---|
@@ -43,17 +43,17 @@ File yang eksklusif untuk Stage 2 dikelompokkan di direktori tahap ini. Modul st
 | `stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh` | Helper interaktif yang disalin dan dijalankan di dalam `arch-chroot` target | Khusus Stage 2 |
 | `stages/stage-2-basic-arch-install/scripts/resume-arch-x280.sh` | Utility continuation lama untuk checkpoint pasca-pacstrap | **LEGACY — bukan recovery path aktif; jangan dijalankan** |
 | `stages/stage-2-basic-arch-install/lib/base-system.sh` | Validasi mount, instalasi paket dasar, dan penulisan fstab | Modul Stage 2 |
-| `lib/storage-plan.sh` | Perhitungan layout dan binding target/profile | Modul storage; dipakai workflow Stage 2 dan test storage |
-| `lib/storage-prerequisites.sh` | Snapshot prasyarat live read-only dan pengikatan evidence | Modul storage Stage 2 |
-| `lib/storage-confirmation.sh` | Review plan, exact confirmation, final revalidation, one-shot gate | Modul storage Stage 2 |
-| `lib/storage.sh`, `lib/storage-topology.sh` | Discovery disk, identitas stabil, dan topology | **Bersama Stage 1 dan Stage 2; jangan dipindahkan sebagai file eksklusif** |
-| `lib/common.sh`, `lib/preflight.sh`, `lib/inventory.sh` | Logging, command/boot checks, dan hardware inventory | Modul bersama |
+| `shared/lib/storage-plan.sh` | Perhitungan layout dan binding target/profile | Modul storage; dipakai workflow Stage 2 dan test storage |
+| `shared/lib/storage-prerequisites.sh` | Snapshot prasyarat live read-only dan pengikatan evidence | Modul storage Stage 2 |
+| `shared/lib/storage-confirmation.sh` | Review plan, exact confirmation, final revalidation, one-shot gate | Modul storage Stage 2 |
+| `shared/lib/storage.sh`, `shared/lib/storage-topology.sh` | Discovery disk, identitas stabil, dan topology | **Bersama Stage 1 dan Stage 2; jangan dipindahkan sebagai file eksklusif** |
+| `shared/lib/common.sh`, `shared/lib/preflight.sh`, `shared/lib/inventory.sh` | Logging, command/boot checks, dan hardware inventory | Modul bersama |
 | `scripts/bootstrap-archiso.sh` | Clone main, verifikasi checkout, source review, readiness, lalu otorisasi peluncuran | Orkestrator Stage 1–2 |
 | `scripts/x280-first-boot-check.sh` | Collector diagnostik setelah instalasi/boot pertama | Lintas tahap; bukan gate wajib Stage 2–3 |
 | `tests/run.sh` | Manifest dan runner seluruh repository | Global; jangan dipindahkan |
 | `tests/helpers/storage-fixtures.sh` | Fixture identitas/topology untuk test storage | Bersama |
 
-`lib/storage-execution-dry-run.sh` dan `lib/storage-execution-boundary.sh` adalah simulator/mock-only untuk pengujian desain execution boundary. Keduanya bukan jalur eksekusi yang dipanggil installer produksi. Komentar modul boundary mengaitkannya dengan Stage 7; jangan menyimpulkan installer aktual sudah menggunakan modul tersebut.
+`shared/lib/storage-execution-dry-run.sh` dan `shared/lib/storage-execution-boundary.sh` adalah simulator/mock-only untuk pengujian desain execution boundary. Keduanya bukan jalur eksekusi yang dipanggil installer produksi. Komentar modul boundary mengaitkannya dengan Stage 7; jangan menyimpulkan installer aktual sudah menggunakan modul tersebut.
 
 ### Status utility resume
 
