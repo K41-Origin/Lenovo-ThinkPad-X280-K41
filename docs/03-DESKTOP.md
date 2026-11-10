@@ -7,7 +7,7 @@ Dokumen ini adalah handoff ringkas untuk desktop tahap 3–5. Detail yang memili
 Jalankan dari Arch Linux yang telah terpasang, melalui TTY, sebagai user biasa:
 
 ```bash
-sudo bash scripts/k41-install-desktop.sh
+sudo bash stages/stage-3-desktop-install/scripts/k41-install-desktop.sh
 ```
 
 Jangan jalankan dari Arch ISO, chroot, atau sesi grafis. Entry point ini adalah wrapper kanonis untuk desktop setup. Peta implementasi Stage 3: [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md).
