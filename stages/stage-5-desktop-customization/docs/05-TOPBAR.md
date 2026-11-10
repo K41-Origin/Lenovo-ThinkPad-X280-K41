@@ -25,7 +25,7 @@ Jangan menambahkan elemen hanya karena tersedia di upstream. Setiap elemen harus
 
 Termasuk layout topbar, elemen informasi/status yang disepakati, integrasi tray bila diperlukan, interaksi, visibility, dan perilaku terhadap fullscreen/fokus.
 
-Tidak termasuk workspace dock (Bottombar), launcher, dashboard (sudah dihentikan), sidebar, utilities panel terpisah, atau optimasi hardware Stage 6.
+Tidak termasuk workspace dock (Bottombar), launcher, dashboard (dihapus dari scope), sidebar, utilities panel terpisah, atau optimasi hardware Stage 6.
 
 ## Prosedur
 
