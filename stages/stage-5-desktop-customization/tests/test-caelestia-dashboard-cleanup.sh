@@ -6,7 +6,7 @@ if [[ $EUID -eq 0 ]]; then
   exit 1
 fi
 
-root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../../../.." && pwd -P)"
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd -P)"
 script="$root/stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh"
 tmp="$(mktemp -d)"
 trap 'rm -rf -- "$tmp"' EXIT
