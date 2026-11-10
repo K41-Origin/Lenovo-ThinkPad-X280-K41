@@ -1,46 +1,88 @@
 #!/usr/bin/env bash
-# Phase 1 of Dashboard removal: generate a fresh read-only Caelestia audit.
-# Actual deletion is intentionally gated on review of the resulting report.
+# Remove the Caelestia Dashboard source module and its configuration.
+# Run as the regular desktop user. No audit/apply/rollback modes are provided.
 set -Eeuo pipefail
 umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*"; }
+
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
+[[ $# -eq 0 ]] || die 'This cleanup script takes no arguments.'
 
-script_dir="$(cd -- "$(dirname -- "$0")" && pwd -P)"
-repo_root="$(git -C "$script_dir" rev-parse --show-toplevel)"
-audit_script="$script_dir/k41-audit-caelestia.sh"
-[[ -f $audit_script && -r $audit_script ]] || die "Missing audit script: $audit_script"
+config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
+caelestia_config="$config_root/caelestia"
+source_root="$config_root/quickshell/caelestia"
+dashboard_dir="$source_root/modules/dashboard"
 
-case \${1:-} in
-    ""|--audit)
-        [[ $# -le 1 ]] || die 'Usage: k41-cleanup-caelestia.sh [--audit]'
-        ;;
-    --apply|--rollback)
-        die 'Deletion/apply is not available yet. Run the read-only audit first, push its report, and wait for target review.'
-        ;;
-    *)
-        die 'Usage: k41-cleanup-caelestia.sh [--audit]'
-        ;;
-esac
+command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
+[[ -d $caelestia_config ]] || die "Caelestia config directory not found: $caelestia_config"
 
-printf '%s\n' 'K41 Caelestia Dashboard removal — pre-audit phase'
-printf '%s\n' 'Mode: READ-ONLY'
-printf '%s\n' 'No configuration, source file, keybind, package, service, or runtime state will be changed.'
-printf '\n%s\n' 'Running the canonical Caelestia audit to inventory configuration, source roots, references, and keybind candidates...'
+# Never delete from a symlinked source path or a dirty Git checkout.
+if [[ -L $source_root || -L $dashboard_dir ]]; then
+    die 'Refusing to remove a symlinked Caelestia source path.'
+fi
+if [[ -d $source_root ]] && git -C "$source_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    if [[ -n $(git -C "$source_root" status --porcelain --untracked-files=all) ]]; then
+        die "Caelestia source checkout has local changes; refusing to delete files: $source_root"
+    fi
+fi
 
-audit_output="$(bash "$audit_script" 2>&1)" || {
-    printf '%s\n' "$audit_output" >&2
-    die 'Caelestia audit failed; inspect the error above. No removal was attempted.'
-}
-printf '%s\n' "$audit_output"
+# Remove only the Dashboard property from global and per-monitor shell.json.
+mapfile -d '' config_files < <(
+    find "$caelestia_config" -type f -name shell.json -print0
+)
+(("${#config_files[@]}" > 0)) || die "No shell.json found under $caelestia_config"
 
-report_rel="$(printf '%s\n' "$audit_output" | sed -n 's/^INFO: Report: //p' | tail -n 1)"
-[[ -n $report_rel ]] || die 'Audit completed without reporting its output directory.'
-report_dir="$repo_root/$report_rel"
-[[ -d $report_dir && -f $report_dir/summary.txt && -f $report_dir/run.log ]] \
-    || die "Expected audit report is incomplete: $report_dir"
+python3 - "${config_files[@]}" <<'PY'
+import json
+import os
+import pathlib
+import stat
+import sys
+import tempfile
 
-printf '\n%s\n' 'Dashboard removal pre-audit completed.'
-printf 'REPORT_DIR=%s\n' "$report_rel"
-printf '%s\n' 'Review and push this report directory. The next revision will implement deletion only after the source targets, package ownership, Git dirty state, and external references have been reviewed.'
+for raw in sys.argv[1:]:
+    path = pathlib.Path(raw)
+    if path.is_symlink() or not path.is_file():
+        raise SystemExit(f"Refusing non-regular config file: {path}")
+    original_mode = stat.S_IMODE(path.stat().st_mode)
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise SystemExit(f"Invalid JSON in {path}: {type(exc).__name__}: {exc}")
+    if not isinstance(data, dict):
+        raise SystemExit(f"Expected a JSON object in {path}")
+    if "dashboard" not in data:
+        print(f"UNCHANGED {path}: Dashboard setting absent")
+        continue
+    del data["dashboard"]
+    fd, temporary = tempfile.mkstemp(prefix=".k41-cleanup-", dir=path.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(data, stream, indent=2, ensure_ascii=False)
+            stream.write("\n")
+        os.chmod(temporary, original_mode)
+        os.replace(temporary, path)
+    except BaseException:
+        try:
+            os.unlink(temporary)
+        except FileNotFoundError:
+            pass
+        raise
+    print(f"UPDATED {path}: removed dashboard configuration")
+PY
+
+# Remove only the Dashboard module directory; preserve all sibling modules.
+if [[ -d $dashboard_dir ]]; then
+    resolved_source="$(realpath -e -- "$source_root")"
+    resolved_dashboard="$(realpath -e -- "$dashboard_dir")"
+    [[ $resolved_dashboard == "$resolved_source/modules/dashboard" ]] \
+        || die "Unexpected Dashboard path; refusing deletion: $resolved_dashboard"
+    rm -rf -- "$resolved_dashboard"
+    info "Removed Dashboard source module: $resolved_dashboard"
+else
+    info "Dashboard source module not found: $dashboard_dir"
+fi
+
+info 'Dashboard cleanup completed. Other Caelestia modules and settings were not targeted.'
