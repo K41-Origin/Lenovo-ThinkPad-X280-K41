@@ -25,7 +25,7 @@ Tidak termasuk redesign global typography/iconography atau penambahan launcher k
 - Pencarian dan navigasi keyboard bekerja konsisten.
 - Command/action dibatasi pada perilaku yang disetujui dan tidak mengeksekusi input secara tidak aman.
 - Tidak mengganggu fokus, fullscreen, atau komponen desktop lain.
-- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-shell.
+- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-dots.
 - Pengguna menerima hasil langsung pada X280.
 
 ## Status
