@@ -235,13 +235,16 @@ fi
 
 printf '\n## Caelestia Quickshell source inventory\n'
 : >"$source_file"
+declare -A inventoried_roots=()
 for candidate in \
     "$config_root/quickshell/caelestia" \
     "$config_root/Quickshell/caelestia" \
     "$HOME/.config/quickshell/caelestia" \
     /usr/share/caelestia \
     /usr/lib/caelestia; do
-    [[ -d $candidate ]] || continue
+    [[ -d $candidate && ! -L $candidate ]] || continue
+    [[ -z ${inventoried_roots[$candidate]:-} ]] || continue
+    inventoried_roots[$candidate]=1
     {
         printf 'SOURCE_ROOT %s\n' "${candidate#"$HOME"/}"
         for relative in \
@@ -318,7 +321,7 @@ for path in candidates:
                 record["status"] = "non-object-json"
             else:
                 section = data.get("dashboard")
-                if section is None:
+                if "dashboard" not in data:
                     record.update(status="valid-json", dashboard_section="absent")
                 elif not isinstance(section, dict):
                     record.update(status="valid-json", dashboard_section="invalid-type")
