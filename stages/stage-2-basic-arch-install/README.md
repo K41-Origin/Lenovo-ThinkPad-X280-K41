@@ -243,5 +243,4 @@ Tidak ada reboot otomatis. Periksa hasil sebelum melakukan unmount `/mnt/efi`, u
 
 ## Catatan
 
-Catatan: stage 1 dan stage 2 akan menjadi gerbang dalam pembuatan proyek selanjutnya Custom Arch ISO, sebuah proyek kostumisasi ISO resmi dari arch sehingga saat di burn ke flashdisk dan di boot akan didalamnha sudah ada script costum milik Kai.
-Ingetin gua nanti tahun 2027 kalo ga mager baru gue buat
+Pengembangan Custom Arch ISO dicatat sebagai ide di [dokumen proyek](../../docs/01-PROJECT.md). Ide tersebut belum menjadi bagian dari scope atau acceptance Stage 2.
