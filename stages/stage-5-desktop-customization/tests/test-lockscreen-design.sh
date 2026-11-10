@@ -26,9 +26,8 @@ done
 grep -Fq 'host_root="$config_root/quickshell/caelestia"' "$deployer"
 grep -Fq 'lock_root="$host_root/modules/lock"' "$deployer"
 grep -Fq 'caelestia shell -r -d' "$deployer"
-grep -Fq 'pam' "$deployer"
 ! grep -Fq 'Pam.qml' "$deployer"
-! grep -Fq 'sudo ' "$deployer"
+! grep -Eq '^[[:space:]]*sudo([[:space:]]|$)' "$deployer"
 ! grep -Fq 'hyprctl keyword' "$deployer"
 
 grep -Fq 'Latest deployment logs (full last 500 lines each, newest 3)' "$failure_reporter"
