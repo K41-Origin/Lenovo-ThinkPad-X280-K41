@@ -30,7 +30,7 @@ grep -Fq 'blurEnabled: true' "$surface"
 # The K41 source is an extraction of the accepted legacy visuals; the legacy
 # tree remains present until the separate migration and cleanup stages.
 grep -Fq 'K41 precisely centered lockscreen content.' "$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/Center.qml"
-grep -Fq 'K41 floating password input override' "$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/center/PasswordInput.qml"
+grep -Fq 'Floating Password Card field styling' "$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/center/PasswordInput.qml"
 
 printf 'PASS: K41 lockscreen visual module structure and Floating Password Card visual guards.\n'
 printf 'NOTE: QML runtime rendering and device acceptance are not tested by this static test.\n'
