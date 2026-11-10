@@ -1,6 +1,6 @@
 # Reports
 
-Direktori ini menyimpan arsip bukti historis yang memang dipilih untuk dipertahankan serta menjadi root output runtime lokal.
+Direktori ini menyimpan arsip bukti historis yang dipilih untuk dipertahankan serta menjadi root output runtime lokal.
 
 ## Ownership dan layout runtime
 
@@ -18,8 +18,10 @@ Laporan runtime dikelompokkan berdasarkan Stage pemilik:
 
 ## Policy
 
-- Runtime-generated reports adalah artefak lokal secara default dan diabaikan Git.
-- Jangan commit setiap diagnostic run. Simpan hanya bukti kecil yang telah direview dan disamarkan bila diperlukan untuk keputusan acceptance.
+- Runtime-generated reports tetap lokal dan diabaikan Git secara default.
+- **Pengecualian:** `reports/stage-5-desktop-customization/caelestia-audit/` diizinkan masuk Git karena laporan ini menjadi bukti kerja kolaboratif untuk implementasi taskbar/dock Stage 5.
+- Sebelum commit, periksa `summary.txt`, `config-snapshot.json`, `monitor-runtime.json`, `source-inventory.txt`, dan `run.log`. Pastikan tidak ada token, credential, serial number, identitas perangkat yang tidak diperlukan, lokasi pribadi, atau informasi sensitif lainnya.
+- Jangan commit semua diagnostic run tanpa seleksi. Commit hanya laporan yang relevan dengan investigasi/acceptance dan sudah ditinjau.
 - Snapshot historis yang telah dikomit dipertahankan di [archive/2026-11](archive/2026-11/README.md).
 - Snapshot historis bukan kondisi sistem saat ini.
 - Jangan pernah menyimpan password, LUKS passphrase/recovery key, token, cookie, atau credential.
