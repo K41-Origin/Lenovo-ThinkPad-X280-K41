@@ -13,8 +13,8 @@ embedded = source.split(start, 1)[1].split("\nPY", 1)[0]
 compile(embedded, "k41-install-animated-boot-splash.py", "exec")
 PY
 grep -Fq 'WlrLayershell.layer: WlrLayer.Overlay' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
-grep -Fq 'model: root.dotCount' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
-grep -Fq 'interval: 90' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
+grep -Fq 'model: root.rectangleCount' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
+grep -Fq 'interval: 100' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
 grep -Fq 'Timer {' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
 grep -Fq 'K41 ANIMATED BOOT SPLASH START' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-animated-boot-splash.sh"
 grep -Fq 'disable_hyprland_logo = true' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-animated-boot-splash.sh"
