@@ -1,42 +1,19 @@
-# Workstream 3 — Dashboard
+# Workstream 3 — Dashboard (Retired)
 
-## Tujuan
+## Keputusan
 
-Menyediakan dashboard yang informatif saat diminta, terstruktur, responsif, dan tidak memenuhi desktop ketika tidak digunakan.
+**CANCELLED / REMOVED FROM SCOPE — 2026-11-11.**
 
-## Batas
+Pengguna memutuskan bahwa dashboard tidak lagi diperlukan. Workstream ini dihentikan sebelum implementasi desain dashboard baru. Jangan melanjutkan layout, widget, keybind, atau acceptance dashboard.
 
-Termasuk layout dashboard, hierarki informasi, widget yang memang diperlukan, kalender/media/resource summary bila didukung, open/close behavior, keyboard/mouse interaction, dan integrasi dengan Caelestia/Quickshell yang aktif.
+## Rencana cleanup
 
-Tidak termasuk redesign global shell, perubahan taskbar, sidebar, utilities panel, atau optimasi CPU/thermal tahap 6.
+Pembersihan konfigurasi Caelestia akan ditangani oleh script:
 
-## Prosedur
+`stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`
 
-1. Jalankan audit read-only Caelestia/Quickshell pada X280:
-   ```bash
-   bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh
-   ```
-   Audit membuat laporan di `reports/stage-5-desktop-customization/caelestia-audit/<timestamp>/`. Periksa setidaknya `summary.txt`, `config-snapshot.json`, `source-inventory.txt`, dan `dashboard-keybinds.json` bila tersedia. Collector mencatat konfigurasi dashboard terpilih, keberadaan modul QML upstream, serta bind Hyprland yang secara eksplisit menyebut dashboard. Audit tidak mengubah konfigurasi atau me-reload shell. Tinjau dan sanitasi laporan sebelum push sesuai [alur kolaborasi](00-COLLABORATION-WORKFLOW.md).
-2. Inventarisasi fitur yang sudah disediakan upstream; jangan membuat widget duplikat.
-3. Catat kebutuhan informasi berdasarkan kegunaan. Hindari widget dekoratif atau data yang tidak membantu keputusan pengguna.
-4. Tetapkan layout, urutan, ukuran, dan trigger minimal untuk iterasi pertama.
-5. Backup konfigurasi dan lakukan perubahan terisolasi; prioritaskan schema dan API upstream.
-6. Uji dashboard tampil/tutup, fokus, keyboard navigation, data unavailable, refresh, dan perilaku saat shell restart.
-7. Periksa penggunaan resource secara proporsional; hindari polling agresif atau proses tambahan yang tidak perlu.
+Script tersebut **PLANNED** dan belum tersedia. Implementasinya harus didahului audit aktual, membuat backup yang dapat dipulihkan, membatasi perubahan pada konfigurasi/override K41 yang teridentifikasi, serta menyediakan mode pemeriksaan tanpa perubahan. Jangan menghapus source checkout upstream Caelestia atau file yang kepemilikannya belum dipastikan hanya untuk meniadakan dashboard.
 
-## Acceptance criteria
+## Status
 
-- Dashboard dapat dibuka dan ditutup secara konsisten.
-- Informasi penting mudah dipindai dan tidak berlebihan.
-- Widget menampilkan data yang benar atau status unavailable dengan jelas.
-- Tidak ada widget/proses duplikat yang tidak diperlukan.
-- Dashboard tidak mengganggu jendela kerja atau keybind penting.
-- Runtime stabil dan pengguna menerima tampilan serta interaksi pada X280.
-
-## Rollback dan bukti
-
-Backup file konfigurasi sebelum edit. Catat versi shell, widget yang dipakai, sumber data, keybind, test, log error, dan hasil review pengguna. Jangan memasukkan token/API key atau data personal ke laporan.
-
-## Gate keluar
-
-Status VERIFIED memerlukan pengujian runtime dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 5 — Launcher](05-LAUNCHER.md).
+Tidak ada dashboard baru yang akan dibuat. Dokumen ini dipertahankan sebagai catatan keputusan agar scope lama tidak diaktifkan kembali secara tidak sengaja.
