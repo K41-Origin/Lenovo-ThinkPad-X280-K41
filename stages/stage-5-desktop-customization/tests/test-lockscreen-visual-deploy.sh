@@ -45,14 +45,21 @@ cat > "$fakebin/git" <<'MOCKGIT'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 if [[ ${1:-} == -C ]]; then
-    shift
-    repo=$1
-    shift
-    case "${1:-} ${2:-} ${3:-}" in
-        "rev-parse --is-inside-work-tree") printf 'true\n'; exit 0 ;;
-        "remote get-url origin") printf 'https://github.com/caelestia-dots/shell.git\n'; exit 0 ;;
-        "rev-parse HEAD") printf 'd999d4878ee4cec134168e60d913714566a8cfa6\n'; exit 0 ;;
-        show\ HEAD:*)
+    repo=$2
+    shift 2
+    case ${1:-} in
+        rev-parse)
+            case ${2:-} in
+                --is-inside-work-tree) printf 'true\\n'; exit 0 ;;
+                HEAD) printf 'd999d4878ee4cec134168e60d913714566a8cfa6\\n'; exit 0 ;;
+            esac
+            ;;
+        remote)
+            [[ ${2:-} == get-url && ${3:-} == origin ]] || exit 1
+            printf 'https://github.com/caelestia-dots/shell.git\\n'
+            exit 0
+            ;;
+        show)
             file=${2#HEAD:}
             cat "$repo/$file"
             exit 0
