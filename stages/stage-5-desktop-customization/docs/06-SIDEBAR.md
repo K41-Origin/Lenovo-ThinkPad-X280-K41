@@ -1,4 +1,4 @@
-# Workstream 7 — Sidebar
+# Workstream 6 — Sidebar
 
 ## Tujuan
 
@@ -34,4 +34,4 @@ Backup konfigurasi terkait. Catat kebutuhan yang dipenuhi, fungsi yang dihindari
 
 ## Gate keluar
 
-Status VERIFIED atau NOT APPLICABLE yang disetujui harus dicatat sebelum lanjut ke [Workstream 8 — Utilities](07-UTILITIES.md).
+Status VERIFIED atau NOT APPLICABLE yang disetujui harus dicatat sebelum lanjut ke [Workstream 7 — Utilities](07-UTILITIES.md).
