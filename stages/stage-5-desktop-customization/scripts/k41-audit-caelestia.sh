@@ -6,6 +6,8 @@ umask 077
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
 
+[[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
+
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(git -C "$script_dir" rev-parse --show-toplevel)"
 report_root="$repo_root/reports/stage-5-desktop-customization/caelestia-audit"
@@ -44,7 +46,6 @@ on_exit() {
 }
 trap 'on_exit $?' EXIT
 
-[[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
 command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
 command -v tee >/dev/null 2>&1 || die 'tee is required.'
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
