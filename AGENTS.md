@@ -77,7 +77,7 @@ Setelah perubahan:
 
 ## Reports and generated artifacts
 
-- Output runtime `reports/<category>/` lokal secara default dan diabaikan Git.
+- Output runtime dikelompokkan di `reports/<stage>/<category>/`; artefak lintas-stage berada di `reports/shared/<category>/`. Semua output runtime lokal secara default dan diabaikan Git.
 - Snapshot laporan historis November 2026 disimpan dalam Git history pada commit `02f6194ed04c8f13ea64eda35b7afb94f7006504`; indeks aktif: `reports/archive/2026-11/README.md`.
 - Jangan enumerate atau membaca seluruh arsip laporan untuk tugas rutin. Buka hanya laporan tertentu bila diperlukan oleh dokumen pemilik.
 - Laporan dapat memuat serial, username, path, journal, dan metadata jaringan. Redaksi sebelum dibagikan. Jangan pernah menyimpan password, passphrase LUKS, recovery key, token, cookie, atau credential.
