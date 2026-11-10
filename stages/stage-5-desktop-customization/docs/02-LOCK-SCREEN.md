@@ -1,65 +1,91 @@
 # Workstream 02 — Lock Screen
 
-**Status desain: COMPLETED / USER ACCEPTED.** Desain Floating Password Card telah diterima. Pemindahan source dan deployment ke struktur K41-Dots yang baru masih PLANNED.
+**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul K41-dots.
 
-## Tujuan dan desain
+**Status migrasi: PLANNED.** Audit menyeluruh baru akan dimulai; modul baru belum diimplementasikan atau diverifikasi.
 
-Menyesuaikan tampilan Caelestia lock screen sambil mempertahankan autentikasi upstream.
+## Tujuan dan batas scope
 
-- Wallpaper dan efek blur upstream tetap menjadi latar.
-- Outer lock surface transparan.
-- Password input memiliki rounded surface tersendiri.
-- Clock/date/password menjadi satu kelompok yang terpusat.
-- PAM, password handling, fingerprint/Howdy policy, dan session-lock protocol tidak diubah untuk kosmetik.
+- Pertahankan tampilan Lock Screen yang saat ini telah disetujui. Jangan mengubah desain, layout, warna, typography, animasi, atau perilaku visual tanpa persetujuan baru.
+- Identifikasi dan ambil hanya source visual serta resource yang benar-benar diperlukan.
+- Pisahkan ownership source K41 dari source upstream Caelestia.
+- Pertahankan Caelestia sebagai host/runtime selama belum ada keputusan arsitektur baru.
+- Jangan mengubah autentikasi, PAM, password handling, fingerprint/Howdy policy, atau session-lock protocol sebagai bagian dari pekerjaan visual.
 
-Detail visual lintas-komponen: [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md).
+Detail bahasa visual lintas-komponen: [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md).
 
-## K41-Dots: struktur yang dituju
+## Protokol kolaborasi
 
-Lock Screen menjadi modul K41 bernama `lockscreen`, bukan override yang tinggal di dalam namespace Caelestia.
+Pengguna menetapkan batas partisipasi: **pengguna tidak ingin melakukan pekerjaan teknis selain `git pull` dan `git push`.**
 
-Runtime tujuan:
+| Pihak | Tanggung jawab |
+|---|---|
+| Assistant | Audit repository dan upstream; membuat serta memelihara script audit, ekstraksi/penyiapan, migrasi, implementasi, test, dan dokumentasi; memeriksa perubahan repository dan melaporkan bukti serta keterbatasannya. |
+| Pengguna | Hanya melakukan `git pull` dan `git push` untuk sinkronisasi perubahan sesuai alur yang disepakati. Tidak diminta mengedit file, menulis kode, menjalankan perintah manual, atau mengubah konfigurasi secara manual. |
+
+**Batasan eksekusi:** pull/push Git tidak menjalankan script dan tidak membuktikan perilaku runtime pada laptop. Karena pengguna membatasi aktivitasnya pada pull/push, rancangan alur otomatisasi harus memperhitungkan cara menjalankan dan mengumpulkan hasil pengujian tanpa membebankan langkah manual tambahan. Jangan mengklaim test lokal, deployment, atau runtime berhasil sebelum ada bukti nyata. Jika suatu validasi tidak dapat dilakukan dalam batasan ini, laporkan sebagai BLOCKED/NOT VERIFIED dan jelaskan alasan teknisnya; jangan diam-diam mengubah pembagian tanggung jawab.
+
+## Urutan pengerjaan wajib
+
+1. **Audit visual read-only.** Audit menyeluruh semua source yang memengaruhi tampilan Lock Screen saat ini: QML, komponen UI, styling, animasi, aset, konfigurasi visual, resource, serta titik integrasi visual.
+2. **Audit dependency dan batas ownership.** Petakan dependency Quickshell/Caelestia, komponen autentikasi, session-lock, konfigurasi, dan resource yang diperlukan. Bedakan source visual milik K41 dari dependency upstream yang harus tetap disediakan Caelestia.
+3. **Ekstraksi source terpilih.** Ambil hanya source visual dan resource yang terbukti diperlukan. Pertahankan isi/tampilan yang telah disetujui; jangan melakukan redesign saat ekstraksi.
+4. **Rancang modul K41-dots.** Tetapkan struktur, interface, dependency, integrasi, strategi deployment, backup, validasi, dan rollback sebelum perubahan runtime.
+5. **Migrasi dan implementasi.** Buat script terpisah untuk penyiapan/migrasi dan integrasi modul. Script harus memiliki preflight, validasi input/path, penanganan error, backup, verifikasi pascaperubahan, dan recovery yang sesuai.
+6. **Testing dan validasi.** Jalankan pemeriksaan statis dan test otomatis yang dapat dilakukan di repository/CI. Runtime, lock/unlock, password salah, wake/resume, dan perilaku perangkat hanya boleh dinyatakan VERIFIED bila benar-benar diuji dengan bukti.
+7. **Audit pascamigrasi.** Pastikan modul K41 tidak lagi bergantung pada source visual Caelestia yang akan dibersihkan, sementara dependency upstream yang masih diperlukan tetap tersedia dan tercatat.
+8. **Cleanup source visual upstream.** Hanya setelah migrasi terbukti berfungsi dan pengguna menerima hasilnya, identifikasi serta hapus source visual upstream yang sudah tidak digunakan. Cleanup harus sempit, berdasarkan dependency graph, dan memiliki rencana rollback. Jangan menghapus komponen autentikasi atau dependency bersama.
+9. **Penerimaan.** Hasil akhir harus mempertahankan desain yang disetujui dan memenuhi acceptance di bawah.
+
+Setiap tahap menghasilkan artefak dan bukti yang dapat ditinjau sebelum tahap berikutnya. Jangan melewati audit atau menggabungkan audit read-only dengan operasi tulis.
+
+## Struktur runtime tujuan
 
 ```text
-~/.config/quickshell/k41/modules/lockscreen/
+~/.config/quickshell/
+├── caelestia/                    # host/runtime dan dependency upstream
+└── k41/
+    └── modules/
+        └── lockscreen/
+            ├── ...
+            └── assets/
 ```
 
-Source repository untuk modul ini akan diselaraskan dengan struktur `quickshell/k41/modules/lockscreen/`. Audit harus lebih dahulu mengidentifikasi file QML, resource, konfigurasi, dependency upstream, dan titik integrasi lock screen yang benar-benar diperlukan. Script penyiapan kemudian mengambil bagian yang diperlukan ke modul K41; dependency upstream yang masih dipakai tetap dicatat dan tidak diduplikasi tanpa alasan.
+Source repository K41-dots akan ditata agar mencerminkan modul `lockscreen/`. Struktur final source repository ditetapkan setelah audit, bukan diasumsikan sebelum dependency dipahami.
 
 ## Kondisi repository saat ini
 
-Implementasi lama masih berada di:
+Implementasi terdahulu masih berada di:
 - Source: `workstreams/02-lock-screen/k41-dots/modules/lock/`
 - Installer lama: `workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
 - Target lama: `~/.config/quickshell/caelestia/modules/lock/`
 
-Path dan installer tersebut adalah kondisi transisi, **bukan struktur K41-Dots yang dituju**. Jangan menjalankan installer lama sebagai langkah migrasi ke struktur baru. Source, audit, script penyiapan, dan test akan disesuaikan setelah audit fitur selesai.
+Path dan installer tersebut adalah kondisi lama/transisi. **Jangan menjalankan installer lama sebagai migrasi ke struktur baru.** Source lama harus diaudit dan dibandingkan dengan upstream aktif sebelum diputuskan untuk dipertahankan, diekstrak, atau diganti.
 
-## Audit dan dependency
+## Artefak audit yang sudah ada
 
-Audit Caelestia saat ini:
-`stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh`
-
-Audit khusus lock screen yang sudah ada:
+Script berikut sudah ada di repository dan perlu diperiksa sebelum digunakan atau diganti:
 - `workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`
 - `workstreams/02-lock-screen/scripts/k41-report-lockscreen-session.sh`
 - `workstreams/02-lock-screen/scripts/k41-report-lockscreen-failure.sh`
 - `workstreams/02-lock-screen/scripts/k41-report-lockscreen-permissions.sh`
 
-Audit berikutnya perlu disederhanakan agar fokus mengumpulkan source dan dependency yang terkait fitur lock screen, bukan membangun inventory shell yang luas. Audit bersifat read-only.
+Keberadaan script tidak membuktikan audit terbaru sudah dilakukan. Audit baru harus memverifikasi source/revision Caelestia yang benar-benar digunakan dan berfokus pada tampilan serta dependency terkait. Audit bersifat read-only dan harus menghasilkan laporan yang dapat ditinjau.
 
-## Acceptance
+## Acceptance criteria
 
-Penerimaan desain sebelumnya tetap berlaku untuk tampilan yang diserahkan. Setelah migrasi modul, verifikasi ulang:
-- Modul ditempatkan pada namespace K41 yang benar.
-- Dependency upstream yang diperlukan tersedia.
-- QML dimuat tanpa error kritis.
-- Lock/unlock, password salah, dan wake/resume bekerja.
-- PAM dan session-lock protocol tetap tidak berubah.
-- Pengguna menerima hasil pada X280.
+- Tampilan hasil migrasi tetap sesuai desain Lock Screen yang telah disetujui; tidak ada perubahan visual tanpa persetujuan.
+- Source visual K41 berada pada namespace K41, terpisah dari direktori internal Caelestia.
+- Seluruh file, aset, dependency, konfigurasi, dan titik integrasi yang diperlukan telah diidentifikasi.
+- Tidak ada dependency tersembunyi pada source visual upstream yang dihapus.
+- PAM, autentikasi, password handling, fingerprint/Howdy policy, dan session-lock protocol tidak diubah oleh migrasi visual.
+- Script audit read-only; script migrasi/implementasi terpisah, aman, dapat diulang, dan menyediakan backup/recovery.
+- Pemeriksaan statis/otomatis lulus sesuai cakupan yang dilaporkan.
+- Runtime dan perilaku pada ThinkPad X280 hanya dinyatakan VERIFIED setelah ada bukti pengujian aktual.
+- Pengguna menerima hasil akhir.
 
-Jangan mengklaim runtime baru sudah diverifikasi sebelum pengujian perangkat benar-benar dilakukan. Screenshot bukan acceptance gate.
+Screenshot bukan acceptance gate.
 
-## Guest Mode
+## Status Guest Mode
 
-Guest Mode **NOT IMPLEMENTED / DEFERRED** dan bukan bagian dari acceptance lock screen.
+Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan bagian dari scope atau acceptance Lock Screen.
