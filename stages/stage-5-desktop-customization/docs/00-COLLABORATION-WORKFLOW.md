@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Dokumen ini menetapkan alur kerja antara maintainer repository dan pengguna ThinkPad X280 untuk implementasi, pengujian, dan verifikasi Stage 5. Setiap komponen dibangun bertahap; hasil Stage 5 menjadi fondasi teknis dan pengalaman untuk proyek lanjutan **k41-dots**.
+Dokumen ini menetapkan alur kerja antara maintainer repository dan pengguna ThinkPad X280 untuk implementasi, pengujian, dan verifikasi Stage 5. Stage 5 menjadi fondasi bertahap **k41-dots**, bukan proyek shell mandiri berskala besar. Workstream 01 — Boot Experience dikecualikan dari scope k41-dots karena boot/splash ditangani Plymouth; workstream tersebut tetap menjadi bagian dari proyek utama.
 
 ## Pembagian tanggung jawab
 
