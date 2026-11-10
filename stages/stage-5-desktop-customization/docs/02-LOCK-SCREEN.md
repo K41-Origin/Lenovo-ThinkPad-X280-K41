@@ -1,8 +1,8 @@
 # Workstream 02 — Lock Screen
 
-**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul K41-dots.
+**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
 
-**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status implementasi source K41: IMPLEMENTED. Status migrasi/runtime: PLANNED / NOT VERIFIED.** Source visual Floating Password Card telah diekstrak ke namespace `k41-dots/modules/lockscreen/`. Source lama dipertahankan sebagai pembanding dan rollback sampai migrasi terpisah selesai.
+**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status implementasi source K41: IMPLEMENTED. Status migrasi/runtime: PLANNED / NOT VERIFIED.** Source visual Floating Password Card sekarang berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`. Folder `k41-dots/` tidak digunakan dan telah dihapus dari struktur project.
 
 ## Tujuan dan batas scope
 
@@ -28,9 +28,9 @@ Pengguna menetapkan batas partisipasi: **pengguna tidak ingin melakukan pekerjaa
 ## Urutan pengerjaan wajib
 
 1. **Audit visual read-only — COMPLETED.** Audit source visual pada report 20261110T192941Z telah menyediakan source QML, dependency visual, aset, dan konfigurasi terpilih. Report mengandung satu file di luar scope; file itu tidak dipakai sebagai input implementasi. Screenshot/runtime capture belum tersedia.
-2. **Audit dependency dan batas ownership — PARTIAL.** Dependency statis yang tampak pada QML sudah dicatat di README K41-dots. Kelengkapan dependency runtime masih menunggu pemeriksaan setelah modul dipasang.
-3. **Ekstraksi source terpilih — IMPLEMENTED.** Empat file QML visual tersedia di `k41-dots/modules/lockscreen/`. Source lama tetap dipertahankan; belum ada file upstream yang dihapus.
-4. **Rancang modul K41-dots — IMPLEMENTED AT SOURCE LEVEL.** Struktur dan kontrak komponen didokumentasikan di `k41-dots/README.md`; integrasi runtime, backup, validasi deployment, dan rollback belum diimplementasikan.
+2. **Audit dependency dan batas ownership — PARTIAL.** Dependency statis yang tampak pada QML dicatat di `workstreams/02-lock-screen/modules/lockscreen/README.md`. Kelengkapan dependency runtime masih menunggu pemeriksaan setelah modul dipasang.
+3. **Ekstraksi source terpilih — IMPLEMENTED.** Empat file QML visual tersedia langsung di `workstreams/02-lock-screen/modules/lockscreen/`.
+4. **Struktur modul visual Stage 5 — IMPLEMENTED.** Struktur dan kontrak komponen didokumentasikan di `workstreams/02-lock-screen/modules/lockscreen/README.md`; integrasi runtime, backup, validasi deployment, dan rollback belum diimplementasikan.
 5. **Migrasi dan implementasi runtime — PLANNED.** Berikutnya buat script migrasi terpisah dengan preflight, validasi input/path, backup, staging, verifikasi pascaperubahan, dan rollback. Jangan gunakan installer lama.
 6. **Testing dan validasi.** Jalankan pemeriksaan statis dan test otomatis yang dapat dilakukan di repository/CI. Runtime, lock/unlock, password salah, wake/resume, dan perilaku perangkat hanya boleh dinyatakan VERIFIED bila benar-benar diuji dengan bukti.
 7. **Audit pascamigrasi.** Pastikan modul K41 tidak lagi bergantung pada source visual Caelestia yang akan dibersihkan, sementara dependency upstream yang masih diperlukan tetap tersedia dan tercatat.
@@ -51,12 +51,12 @@ Setiap tahap menghasilkan artefak dan bukti yang dapat ditinjau sebelum tahap be
             └── assets/
 ```
 
-Source repository K41-dots akan ditata agar mencerminkan modul `lockscreen/`. Struktur final source repository ditetapkan setelah audit, bukan diasumsikan sebelum dependency dipahami.
+Source visual berada langsung di workstream `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject atau namespace `K41-dots`.
 
 ## Kondisi repository saat ini
 
 Implementasi terdahulu masih berada di:
-- Source: `workstreams/02-lock-screen/k41-dots/modules/lock/`
+- Source sebelumnya: `workstreams/02-lock-screen/k41-dots/modules/lock/` (sudah dihapus setelah pemindahan source visual ke folder Stage 5).
 - Installer lama: `workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
 - Target lama: `~/.config/quickshell/caelestia/modules/lock/`
 
