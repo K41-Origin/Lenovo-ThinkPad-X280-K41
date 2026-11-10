@@ -81,7 +81,7 @@ review_files=(
   stages/stage-2-basic-arch-install/lib/base-system.sh
 )
 
-mapfile -t test_files < <(git -C "$repo_dir" ls-files 'tests/*.sh')
+mapfile -t test_files < <(git -C "$repo_dir" ls-files 'tests/*.sh' 'stages/stage-*/tests/*.sh')
 (( ${#test_files[@]} > 0 )) || die "No tracked test scripts found for source review."
 review_files+=("${test_files[@]}")
 

@@ -26,6 +26,7 @@ required=(
   'git -C "$repo_dir" rev-parse HEAD'
   'git -C "$repo_dir" status --porcelain'
   'review_files=('
+  "git -C \"\$repo_dir\" ls-files 'tests/*.sh' 'stages/stage-*/tests/*.sh'"
   'README.md'
   'AGENTS.md'
   'docs/00-START-HERE.md'
