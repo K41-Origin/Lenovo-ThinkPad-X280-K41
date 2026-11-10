@@ -18,7 +18,8 @@ workstreams/02-lock-screen/modules/lockscreen/
 - Folder ini adalah source visual Lock Screen yang dikelola langsung oleh Stage 5.
 - Caelestia tetap menjadi host/runtime dan menyediakan API serta komponen upstream yang diimpor modul.
 - Source mempertahankan kontrak `lock` dan API komponen Caelestia yang telah digunakan implementasi visual sebelumnya.
-- Source belum dipasang atau dihubungkan ke runtime. Script migrasi dibuat pada tahap berikutnya.
+- Script deployment tersedia di `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh`; script menyalin modul ke namespace K41 dengan backup, staging, checksum, idempotency, dan rollback.
+- Deployment file tidak sama dengan aktivasi: integrasi ke entrypoint Caelestia sengaja belum diubah karena titik integrasi host belum diverifikasi.
 - Jangan mengubah desain yang disetujui tanpa persetujuan.
 
 ## Komponen visual
