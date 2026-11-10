@@ -73,8 +73,8 @@ Source implementasi tersedia di repository. Status pengujian dan verifikasi terb
 
 ## Artefak global yang sengaja tidak dipindahkan
 
-- Test: `tests/test-boot-experience.sh`, `tests/test-plymouth-k41-theme.sh`, `tests/test-animated-boot-splash.sh`, `tests/test-autologin-desktop.sh`, `tests/test-lockscreen-design.sh`.
-- `tests/run.sh`, `.github/workflows/ci.yml`, dan `.github/workflows/bash-tests.yml`: runner dan CI lintas-stage. Kedua workflow memiliki cakupan yang tumpang tindih; lihat [Testing dan CI](../../docs/04-TESTING.md).
+- Test: `stages/stage-5-desktop-customization/tests/test-boot-experience.sh`, `stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh`, `stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh`, `stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh`, `stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`.
+- `tests/run.sh`, `.github/workflows/bash-tests.yml`: runner dan CI lintas-stage. Workflow CI tunggal menjalankan syntax, ShellCheck, shfmt terpilih, dan test suite; lihat [Testing dan CI](../../docs/04-TESTING.md).
 - `docs/08-STAGE-5/`: prosedur, scope, acceptance, Guest Mode.
 - `docs/07-DESKTOP-DESIGN-SYSTEM.md` dan `docs/07-DESIGN-SYSTEM/`: spesifikasi visual lintas-komponen.
 
@@ -93,7 +93,7 @@ Reorganisasi hanya memindahkan source dan memperbarui referensi. Tidak menjalank
 
 Validasi yang diperlukan:
 1. Bash syntax dan ShellCheck seluruh script yang dipindahkan.
-2. Test Stage 5: `bash tests/test-boot-experience.sh`, `bash tests/test-plymouth-k41-theme.sh`, `bash tests/test-animated-boot-splash.sh`, `bash tests/test-autologin-desktop.sh`, `bash tests/test-lockscreen-design.sh`.
+2. Test Stage 5: `bash stages/stage-5-desktop-customization/tests/test-boot-experience.sh`, `bash stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh`, `bash stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh`, `bash stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh`, `bash stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`.
 3. Global `bash tests/run.sh`.
 4. Pemeriksaan semua referensi path dan tautan dokumentasi.
 
