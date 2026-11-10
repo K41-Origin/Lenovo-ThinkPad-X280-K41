@@ -1,4 +1,4 @@
-# Workstream 5 — Launcher
+# Workstream 06 — Launcher
 
 ## Tujuan
 
@@ -13,26 +13,21 @@ Tidak termasuk redesign global typography/iconography atau penambahan launcher k
 ## Prosedur
 
 1. Audit executable dan package launcher yang terpasang, versi, konfigurasi aktif, keybind Hyprland, desktop entries, environment/session, dan launcher lain yang berjalan.
-2. Pastikan launcher yang dipilih kompatibel dengan sesi Wayland dan konfigurasi aktif. Jangan mengandalkan nama executable yang belum diverifikasi.
-3. Tentukan satu launcher utama dan satu fallback yang jelas bila dibutuhkan; dokumentasikan alasan pemilihan.
-4. Audit konfigurasi dan desktop entries sebelum perubahan. Backup semua file yang akan diubah.
-5. Terapkan keybind dan konfigurasi minimal tanpa menimpa konfigurasi pengguna secara membabi buta.
-6. Uji pembukaan launcher, pencarian aplikasi, hasil kosong, keyboard navigation, cancel/close, launch aplikasi, dan perilaku ketika executable tidak tersedia.
-7. Pastikan keybind tidak bertabrakan dengan Bottombar, Topbar, atau aplikasi lain.
+2. Pastikan launcher yang dipilih tidak menduplikasi fungsi Caelestia atau komponen K41 yang sudah aktif.
+3. Tentukan interface, ownership source, runtime path di bawah `~/.config/quickshell/`, deployment, backup, dan rollback.
+4. Implementasikan perubahan minimal menggunakan API upstream yang diverifikasi.
+5. Uji pencarian, keyboard navigation, command/action, keybind, fokus, fullscreen, dan shell restart.
+6. Periksa error runtime, keamanan command execution, serta konsumsi resource.
 
 ## Acceptance criteria
 
-- Satu launcher utama dapat dibuka dengan keybind yang ditetapkan.
-- Pencarian dan peluncuran aplikasi bekerja dengan desktop entries aktual.
-- Navigasi keyboard, hasil kosong, dan penutupan bekerja.
-- Tidak ada command berbahaya atau aksi destruktif yang dipicu hanya dengan pencarian/enter tanpa konfirmasi yang sesuai.
-- Tidak ada konflik keybind atau launcher duplikat yang membingungkan.
-- Fallback terdokumentasi dan dapat digunakan bila launcher utama gagal.
+- Hanya ada satu launcher utama yang jelas.
+- Pencarian dan navigasi keyboard bekerja konsisten.
+- Command/action dibatasi pada perilaku yang disetujui dan tidak mengeksekusi input secara tidak aman.
+- Tidak mengganggu fokus, fullscreen, atau komponen desktop lain.
+- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-shell.
+- Pengguna menerima hasil langsung pada X280.
 
-## Rollback dan bukti
+## Status
 
-Backup konfigurasi launcher dan Hyprland keybind. Catat executable/version, keybind, hasil skenario uji, konflik yang ditemukan, serta log yang relevan.
-
-## Gate keluar
-
-Status VERIFIED memerlukan uji peluncuran aplikasi nyata dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 6 — Sidebar](06-SIDEBAR.md).
+PLANNED. Mulai setelah Topbar diterima atau urutan diubah secara eksplisit oleh pengguna.
