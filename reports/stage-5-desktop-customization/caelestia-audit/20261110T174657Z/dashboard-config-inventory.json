@@ -1,0 +1,20 @@
+{
+  "scope": "global Caelestia shell.json and per-monitor monitors/*/shell.json",
+  "files": [
+    {
+      "path": "~/.config/caelestia/shell.json",
+      "sha256": "abe4467d09460acbc33ef849300d7e4be35076afb48062de4567528e06d2e262",
+      "status": "valid-json",
+      "dashboard_section": "present",
+      "dashboard": {
+        "enabled": true
+      }
+    },
+    {
+      "path": "~/.config/caelestia/monitors/eDP-1/shell.json",
+      "sha256": "d914176fd50bd7f565700006a31aa97b79d3ad17cee20c8e5ff2061d5cb74817",
+      "status": "valid-json",
+      "dashboard_section": "absent"
+    }
+  ]
+}
