@@ -1,6 +1,6 @@
 # Workstream 2 — Lock Screen
 
-**Status: IN PROGRESS.** Workstream 1 telah ditutup dan diterima pengguna. Workstream 2 adalah prioritas aktif Stage 5.
+**Status: COMPLETED / USER ACCEPTED — 2026-11-10.** Workstream 1 dan 2 telah ditutup berdasarkan penerimaan pengguna.
 
 ## Tujuan
 
@@ -36,7 +36,7 @@ Collector audit:
 Test statis:
 - `tests/test-lockscreen-design.sh`
 
-**Status implementasi:** IMPLEMENTED di repository. Implementasi terbaru belum dinyatakan TESTED/VERIFIED pada ThinkPad X280. Keberadaan file atau keberhasilan installer tidak membuktikan bahwa source lokal aktif, QML berhasil dimuat, atau tampilan diterima.
+**Status implementasi:** IMPLEMENTED di repository. Pengguna telah mengonfirmasi Workstream 2 selesai dan diterima. Status penerimaan ini tidak menambahkan klaim bahwa seluruh skenario runtime telah diuji ulang secara independen pada commit terkini. Jika muncul regresi atau ada permintaan perubahan, lakukan audit baru sebelum modifikasi.
 
 ## Prosedur penerapan dan pemeriksaan
 
@@ -75,4 +75,4 @@ Gunakan backup/rollback yang disediakan installer. Catat versi/revision Caelesti
 
 ## Guest Mode
 
-Guest Mode **NOT IMPLEMENTED / DEFERRED** dan bukan bagian dari acceptance lock screen. Spesifikasi konseptual terpisah ada di [03 — Guest Mode](03-GUEST-MODE.md). Jangan mengimplementasikan akun, session switch, storage, service, atau permission Guest sebelum lock screen diterima dan pengguna memberikan keputusan implementasi baru.
+Guest Mode **NOT IMPLEMENTED / DEFERRED** dan bukan bagian dari acceptance lock screen. Spesifikasi konseptual terpisah ada di [03 — Guest Mode](03-GUEST-MODE.md). Penerimaan Lock Screen tidak otomatis mengaktifkan Guest Mode. Jangan mengimplementasikan akun, session switch, storage, service, atau permission Guest tanpa keputusan implementasi baru yang eksplisit.
