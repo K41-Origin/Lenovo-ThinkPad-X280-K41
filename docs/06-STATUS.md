@@ -20,7 +20,7 @@ Keputusan terbaru pengguna pada 2026-11-11:
 1. **Dashboard dihapus dari implementasi.** Tidak perlu mendesain atau mengimplementasikan dashboard.
 2. **Taskbar/Panel berganti nama menjadi Bottombar.** Arah desain yang dipertahankan adalah dock horizontal minimal di bawah dengan indikator workspace saja. Implementasi sebelumnya pernah diterima sebagai Taskbar/Panel; perubahan dan verifikasi baru belum diterima.
 3. **Topbar akan dibuat.** Posisi atas dan orientasi horizontal telah diputuskan; daftar elemen, alignment, ukuran, dan perilaku visibility belum ditentukan.
-4. **Dashboard cleanup:** `k41-cleanup-caelestia.sh` menjalankan cleanup secara langsung tanpa opsi/mode. Script menghapus properti `dashboard` dari Caelestia `shell.json` dan direktori source `modules/dashboard`; script menolak root, argumen, symlink, dan source checkout Git yang memiliki perubahan lokal. Pengujian runtime pada X280 belum dilakukan.
+4. **Dashboard cleanup:** `k41-cleanup-caelestia.sh` menjalankan cleanup secara langsung tanpa opsi/mode. Script menghapus properti `dashboard` dari Caelestia `shell.json` dan direktori source `modules/dashboard`; script menolak root, argumen, symlink, dan direktori Dashboard di direktori Dashboard di source checkout Git yang memiliki perubahan lokal. Pengujian runtime pada X280 belum dilakukan.
 
 Dokumen pemilik:
 - [Bottombar](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
