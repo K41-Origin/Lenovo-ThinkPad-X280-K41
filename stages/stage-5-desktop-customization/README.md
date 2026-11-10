@@ -20,11 +20,11 @@ stages/stage-5-desktop-customization/
     │   │   ├── k41-lock-caelestia-after-start.sh
     │   │   ├── k41-plymouth-quit-after-lock.sh
     │   │   └── k41-start-hyprland.sh
-    │   └── themes/plymouth/k41/
+    │   └── stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/
     │       ├── k41.plymouth
     │       └── k41.script
     └── 02-lock-screen/
-        ├── config/quickshell/caelestia/modules/lock/
+        ├── stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/
         │   ├── Center.qml
         │   ├── Content.qml
         │   ├── LockSurface.qml
@@ -45,7 +45,7 @@ Dokumen pemilik: [01 — Boot Experience](../../docs/08-STAGE-5/01-BOOT-EXPERIEN
 
 | File | Tanggung jawab |
 |---|---|
-| `workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh` | Konfigurasi boot/Plymouth, UKI, dan TPM2 enrollment additive; privileged dan berisiko pada jalur boot |
+| `workstreams/01-boot-experience/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh` | Konfigurasi boot/Plymouth, UKI, dan TPM2 enrollment additive; privileged dan berisiko pada jalur boot |
 | `.../k41-install-plymouth-theme.sh` | Memasang tema Plymouth dan membangun ulang initramfs/UKI |
 | `.../k41-install-animated-boot-splash.sh` | Deploy Quickshell handoff splash dan mengubah konfigurasi Hyprland user |
 | `.../k41-enable-caelestia-autologin.sh` | Opt-in tty1 autologin dan startup/lock handoff; mutatif, punya rollback |
@@ -53,8 +53,8 @@ Dokumen pemilik: [01 — Boot Experience](../../docs/08-STAGE-5/01-BOOT-EXPERIEN
 | `.../k41-start-hyprland.sh` | Menjalankan upstream `start-hyprland` sambil menyimpan log privat |
 | `.../k41-lock-caelestia-after-start.sh` | Menunggu Caelestia lock IPC, meminta lock, memverifikasi, lalu menutup splash |
 | `.../k41-plymouth-quit-after-lock.sh` | Menunggu marker lock; fail-closed menghentikan tty1 autologin bila lock tidak siap |
-| `workstreams/01-boot-experience/themes/plymouth/k41/` | Source tema Plymouth K41 |
-| `workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml` | Source overlay handoff Quickshell |
+| `workstreams/01-boot-experience/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/` | Source tema Plymouth K41 |
+| `workstreams/01-boot-experience/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml` | Source overlay handoff Quickshell |
 
 Status Workstream 1: **COMPLETED / USER ACCEPTED**. Status ini adalah keputusan penerimaan pengguna, bukan klaim bahwa seluruh firmware/TPM/recovery state telah diukur ulang.
 
@@ -64,12 +64,12 @@ Dokumen pemilik: [02 — Lock Screen](../../docs/08-STAGE-5/02-LOCK-SCREEN.md).
 
 | File | Tanggung jawab |
 |---|---|
-| `workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh` | Deploy pinned Caelestia source tree dan override QML; privileged entry dengan privilege drop, backup, dan rollback |
+| `workstreams/02-lock-screen/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh` | Deploy pinned Caelestia source tree dan override QML; privileged entry dengan privilege drop, backup, dan rollback |
 | `.../k41-lockscreen-audit.sh` | Audit read-only kondisi lock screen dan membuat report lokal |
 | `.../k41-report-lockscreen-session.sh` | Mengumpulkan hasil restart Caelestia dari sesi Wayland |
 | `.../k41-report-lockscreen-failure.sh` | Collector diagnostik kegagalan deployment; read-only selain report |
 | `.../k41-report-lockscreen-permissions.sh` | Audit read-only metadata ownership/permission; membuat report |
-| `workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/` | Empat override QML untuk layout, surface, dan password card |
+| `workstreams/02-lock-screen/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/` | Empat override QML untuk layout, surface, dan password card |
 
 Status Workstream 2: **IN PROGRESS**. File tersedia di repository; implementasi terbaru belum dinyatakan TESTED/VERIFIED pada X280. Jangan menjalankan installer atau audit sebagai bagian dari reorganisasi file.
 
