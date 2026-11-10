@@ -15,7 +15,7 @@ grep -Fq 'browser profiles' <<<"$help_output" || fail 'help must state browser-p
 if bash "$SCRIPT" --invalid >/dev/null 2>&1; then fail 'unknown arguments must be rejected'; fi
 pass 'help and argument validation passed'
 
-for token in 'EUID != 0' 'branch --show-current' 'reports/guest-mode-audit' \
+for token in 'EUID != 0' 'branch --show-current' 'reports/stage-5-desktop-customization/03-guest-mode/guest-storage-audit' \
   'swapon --show' '/proc/meminfo' '/proc/cmdline' '/etc/fstab' \
   'systemd/journald.conf' 'systemd/coredump.conf' 'systemd/logind.conf' \
   '/var/lib/systemd/coredump' '/sys/block/zram*' '/sys/module/zswap' \

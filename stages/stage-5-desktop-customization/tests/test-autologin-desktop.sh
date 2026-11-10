@@ -31,7 +31,8 @@ fi
 grep -Fq 'caelestia shell -s' "$HELPER" || fail 'lock helper does not wait for Caelestia IPC'
 grep -Fq 'caelestia shell lock lock' "$HELPER" || fail 'lock helper does not invoke Caelestia lock IPC'
 grep -Fq 'caelestia shell lock isLocked' "$HELPER" || fail 'lock helper does not verify lock state'
-grep -Fq 'exec hyprlock' "$HELPER" || fail 'lock helper lacks a fail-safe Hyprlock fallback'
+grep -Fq 'hyprlock &' "$HELPER" || fail 'lock helper lacks a fail-safe Hyprlock fallback'
+grep -Fq 'wait "$lock_pid"' "$HELPER" || fail 'lock helper does not retain and wait for the fallback lock process'
 pass 'autologin installer and lock helper pass syntax and static safety contracts'
 
 fixture="$(mktemp -d)"
@@ -71,6 +72,7 @@ MOCK
 cat >"$fixture/bin/hyprlock" <<'MOCK'
 #!/usr/bin/env bash
 printf 'fallback\n' >"$K41_FALLBACK_LOG"
+sleep 2
 MOCK
 chmod 0755 "$fixture/bin/caelestia" "$fixture/bin/hyprlock"
 export K41_FALLBACK_LOG="$fixture/fallback.log"
