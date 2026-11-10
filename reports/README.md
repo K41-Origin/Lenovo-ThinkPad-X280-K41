@@ -14,7 +14,7 @@ Laporan runtime dikelompokkan berdasarkan Stage pemilik:
 - `reports/stage-6-hardware-optimization/<category>/<timestamp>/`
 - `reports/shared/<category>/<timestamp>/` untuk test runner dan collector lintas Stage, termasuk boot audit lintas Stage. Test runner kanonis menulis ke `reports/shared/test-runs/<timestamp>/`; boot audit menulis ke `reports/shared/boot-audit/<timestamp>/`.
 
-**Status migrasi:** Stage 1–5 telah memiliki beberapa producer yang menulis ke layout Stage-scoped. Producer historis yang belum dimigrasikan tetap menggunakan `reports/<category>/`; jangan menganggap semua output sudah berpindah. Migrasi harus memperbarui producer, consumer, test, dan dokumentasi secara bersamaan.
+**Status migrasi:** Stage 1–6 telah memiliki beberapa producer yang menulis ke layout Stage-scoped. Producer historis yang belum dimigrasikan tetap menggunakan `reports/<category>/`; jangan menganggap semua output sudah berpindah. Migrasi harus memperbarui producer, consumer, test, dan dokumentasi secara bersamaan.
 
 ## Policy
 
