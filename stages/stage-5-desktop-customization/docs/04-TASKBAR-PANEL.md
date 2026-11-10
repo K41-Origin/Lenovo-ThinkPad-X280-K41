@@ -56,4 +56,4 @@ Backup konfigurasi panel dan catat elemen aktif, posisi, ukuran, scaling, test i
 
 ## Gate keluar
 
-Status VERIFIED memerlukan uji runtime pada X280 untuk workspace switching, occupied/active indicator, auto-hide/reveal, click-through, fullscreen, fokus window, dan regression sesi. Setelah Taskbar diterima, kembali ke Workstream 3 — Dashboard yang sementara ditunda atas arahan pengguna; setelah Dashboard diterima, lanjutkan ke [Workstream 5 — Launcher](05-LAUNCHER.md).
+Workstream ini **COMPLETED / USER ACCEPTED pada 2026-11-11** berdasarkan persetujuan eksplisit pengguna. Penerimaan ini menutup workstream; jangan mengklaim pengujian runtime tambahan di luar bukti yang benar-benar tersedia. Jika muncul regresi, buka audit terarah sebagai pekerjaan baru. Workstream berikutnya adalah [Workstream 3 — Dashboard](03-DASHBOARD.md), lalu Workstream 5 — Launcher setelah Dashboard diterima.
