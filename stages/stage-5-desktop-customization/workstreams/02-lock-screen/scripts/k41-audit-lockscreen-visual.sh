@@ -369,8 +369,11 @@ if rc == 0:
             entries = json.loads(binds)
             selected = []
             for b in entries if isinstance(entries, list) else []:
-                serialized = json.dumps(b).lower()
-                if any(t in serialized for t in ("lock", "hyprlock", "caelestia")):
+                # Do not search the entire object: the boolean field "locked"
+                # exists on every bind and would incorrectly select every keybind.
+                searchable = " ".join(str(b.get(k, "")) for k in
+                                      ("dispatcher", "arg", "description", "key")).lower()
+                if any(t in searchable for t in ("lock", "hyprlock", "caelestia")):
                     selected.append({k: b.get(k) for k in
                                      ("key", "keycode", "modmask", "dispatcher", "arg",
                                       "description", "locked", "release") if k in b})
@@ -381,11 +384,121 @@ if rc == 0:
     else:
         add("hyprctl bind query unavailable.")
 
+section("ACTIVE SESSION, PROCESS, AND USER-SERVICE EVIDENCE")
+session_id = os.environ.get("XDG_SESSION_ID", "")
+add("XDG_SESSION_ID: " + (session_id if session_id else "unset"))
+if session_id:
+    rc, value = command(["loginctl", "show-session", session_id,
+                         "-p", "Name", "-p", "Type", "-p", "Class",
+                         "-p", "State", "-p", "Desktop", "-p", "Service",
+                         "-p", "Display", "-p", "Remote"])
+    add("loginctl selected session properties:")
+    add(value if rc == 0 else "unavailable")
+else:
+    add("loginctl session lookup skipped: XDG_SESSION_ID is unset.")
+for unit_cmd in (["systemctl", "--user", "list-units", "--all", "--no-legend", "--no-pager"],
+                 ["systemctl", "--user", "list-unit-files", "--no-legend", "--no-pager"]):
+    rc, value = command(unit_cmd)
+    add("User systemd units matching lock/quick/shell:")
+    if rc == 0:
+        matches = [line for line in value.splitlines()
+                   if re.search(r"lock|quick|caelestia|hypr", line, re.I)]
+        add("\\n".join(matches) if matches else "no matching unit names")
+    else:
+        add("unavailable")
+# Record executable identity only; never collect process command-line arguments or env.
+for proc_name in ("qs", "quickshell", "caelestia", "Hyprland", "hyprlock", "swaylock"):
+    rc, pids = command(["pgrep", "-x", proc_name])
+    if rc != 0:
+        add(f"process detail {proc_name}: not detected or pgrep unavailable")
+        continue
+    for pid in pids.splitlines():
+        proc = pathlib.Path("/proc") / pid
+        try:
+            exe = os.readlink(proc / "exe")
+        except OSError:
+            exe = "unavailable"
+        try:
+            comm = (proc / "comm").read_text().strip()
+        except OSError:
+            comm = proc_name
+        add(f"process detail {proc_name}: pid={pid} comm={comm} executable={redact(exe)}")
+
+section("CAELESTIA PACKAGE AND SOURCE PROVENANCE")
+for package in ("caelestia-shell", "caelestia-cli", "quickshell", "quickshell-git"):
+    rc, value = command(["pacman", "-Qi", package])
+    add(f"\\n[{package}]")
+    if rc == 0:
+        # Retain package provenance, dependency and install metadata; omit backup file hashes.
+        keep = ("Name", "Version", "Description", "Architecture", "URL",
+                "Licenses", "Groups", "Provides", "Depends On", "Optional Deps",
+                "Required By", "Optional For", "Packager", "Build Date",
+                "Install Date", "Install Reason", "Validated By")
+        selected_lines = []
+        for line in value.splitlines():
+            if any(line.startswith(k + " :") for k in keep):
+                selected_lines.append(line)
+        add("\\n".join(selected_lines) if selected_lines else value[:12000])
+    else:
+        add("not installed or package database query unavailable")
+for label, root in unique:
+    if label == "LEGACY_K41_OVERLAY" or not (root / ".git").exists():
+        continue
+    rc, value = command(["git", "-C", str(root), "remote", "-v"])
+    add(f"\\n[{label}] git remotes:")
+    add(value if rc == 0 else "not a Git checkout or remote unavailable")
+    rc, value = command(["git", "-C", str(root), "rev-parse", "HEAD"])
+    add(f"[{label}] git HEAD: " + (value if rc == 0 else "unavailable"))
+    rc, value = command(["git", "-C", str(root), "status", "--short"])
+    add(f"[{label}] git status: " + (value if value else ("clean" if rc == 0 else "unavailable")))
+
+section("TRANSITIVE LOCAL QML DEPENDENCY CLOSURE")
+# Resolve relative QML imports and local file URLs referenced by the selected
+# lock-screen QML. This is additive evidence, not a complete Qt import resolver.
+queue = [p for _, p in upstream_files if p.suffix.lower() == ".qml"]
+visited = set()
+while queue:
+    current = queue.pop(0)
+    try:
+        canonical = current.resolve(strict=True)
+    except OSError:
+        continue
+    if canonical in visited or not canonical.is_file():
+        continue
+    visited.add(canonical)
+    text_source = safe_read(canonical)
+    for match in re.finditer(r'^\\s*import\\s+"([^"]+)"', text_source, re.M):
+        import_dir = (canonical.parent / match.group(1)).resolve()
+        if import_dir.is_dir():
+            add(f"RELATIVE IMPORT {rel(canonical)} -> {rel(import_dir)}")
+            for candidate in sorted(import_dir.rglob("*.qml")):
+                if candidate.is_file() and not candidate.is_symlink():
+                    queue.append(candidate)
+        else:
+            add(f"UNRESOLVED RELATIVE IMPORT {rel(canonical)} -> {match.group(1)}")
+    for match in re.finditer(r'(?:source|sourceComponent)\\s*:\\s*["\\']([^"\\']+)["\\']', text_source):
+        value = match.group(1)
+        if "://" in value or value.startswith("qrc:"):
+            continue
+        candidate = (canonical.parent / value).resolve()
+        if candidate.is_file() and not candidate.is_symlink():
+            add(f"LOCAL RESOURCE {rel(canonical)} -> {rel(candidate)} sha256={file_hash(candidate)}")
+        elif not re.search(r"[$<{]", value):
+            add(f"UNRESOLVED LOCAL RESOURCE {rel(canonical)} -> {value}")
+add("Resolved local QML files:")
+for p in sorted(visited, key=lambda x: str(x)):
+    add(f"  {rel(p)} sha256={file_hash(p)}")
+add(f"Total resolved QML files (including initial lock files): {len(visited)}")
+add("Note: qmldir modules, Qt/C++ plugins, singleton registrations and runtime-generated URLs require manual/static upstream review; this resolver is not a full Qt/QML linker.")
+
 section("REPORT FILES AND AUDIT LIMITATIONS")
 add("This report contains local source text and host/package metadata; review before publishing.")
 add("No passwords, tokens, process command-line arguments, environment values, or full PAM lines are collected.")
 add("The collector does not install packages, edit configuration, modify PAM, change permissions, restart services, or alter Git state.")
 add("The collector does not infer the visually active implementation solely from filenames. Runtime review remains necessary.")
+add("Session evidence uses XDG_SESSION_ID when available; process evidence records executable identity only, never command-line arguments or environment.")
+add("Hyprland bind filtering inspects dispatcher/argument/description/key fields only; it deliberately excludes the generic boolean 'locked' property to avoid collecting every bind.")
+add("The local QML dependency closure resolves relative imports and literal local source URLs only; it is not a complete Qt/QML module or plugin dependency resolver.")
 add("Wallpaper identity, actual lock invocation, visual layout, failed-password feedback, fingerprint/Howdy, wake/resume, and unlock behavior require runtime validation.")
 add("Source discovery is limited to the listed common Caelestia locations and the legacy K41 overlay; additional custom paths may need to be added after reviewing this report.")
 add("Binary assets are inventoried by path, size, and SHA-256; binary payloads are not embedded.")
