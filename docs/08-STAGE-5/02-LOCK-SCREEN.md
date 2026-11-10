@@ -29,6 +29,9 @@ Installer deployment:
 
 Collector audit:
 - `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-session.sh`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-failure.sh`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-permissions.sh`
 
 Test statis:
 - `tests/test-lockscreen-design.sh`
