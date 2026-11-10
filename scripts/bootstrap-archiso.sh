@@ -62,6 +62,7 @@ review_files=(
   stages/stage-1-live-readiness/scripts/k41-live-validation.sh
   stages/stage-3-desktop-install/scripts/k41-install-desktop.sh
   stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh
+  stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh
   stages/stage-1-live-readiness/scripts/x280-install-readiness.sh
   stages/stage-1-live-readiness/scripts/live-validation.sh
   scripts/x280-first-boot-check.sh
