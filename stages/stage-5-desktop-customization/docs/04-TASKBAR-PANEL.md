@@ -10,6 +10,26 @@ Termasuk posisi/ukuran panel, workspace indicator, active window bila diperlukan
 
 Tidak termasuk redesign global compositor, global icon/cursor, notifications/OSD, utilities panel terpisah, atau aplikasi GTK/Qt.
 
+## Target desain yang disepakati
+
+- Dock horizontal di tepi bawah layar.
+- Floating/minimal: hanya indikator workspace; tidak menampilkan active window, tray, clock, status icons, atau power entry.
+- Auto-hide; dock muncul ketika pointer menyentuh area trigger di tepi bawah.
+- Tampilan ringkas dengan latar gelap/transparan secukupnya, sudut membulat, dan animasi halus.
+- Tidak mengambil ruang kerja secara permanen dan tidak mengganggu fullscreen, fokus window, atau perpindahan workspace.
+
+Ini adalah target desain, bukan klaim bahwa konfigurasi Caelestia saat ini sudah mendukung posisi/orientasi tersebut. Implementasi harus mengikuti API upstream yang terverifikasi. Jika layout vertikal bawaan tidak menyediakan opsi posisi/orientasi, perubahan QML harus dikelola sebagai source/patch yang terlacak dan dapat dipelihara saat upstream diperbarui.
+
+## Siklus audit dan implementasi
+
+Ikuti [alur kolaborasi Stage 5](00-COLLABORATION-WORKFLOW.md). Audit perangkat dilakukan melalui:
+
+```bash
+bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh
+```
+
+Audit menghasilkan laporan di `reports/stage-5-desktop-customization/caelestia-audit/<timestamp>/`, termasuk konfigurasi Caelestia terpilih, monitor/runtime Hyprland, inventory source Caelestia, proses Quickshell, dan validasi JSON. Periksa sanitasi laporan sebelum push. Audit tidak mengubah konfigurasi atau me-reload shell.
+
 ## Prosedur
 
 1. Audit panel aktif, konfigurasi Caelestia/Quickshell, versi/API upstream, output monitor, scaling/resolusi, tray host, widget, keybind, dan proses.
