@@ -22,7 +22,7 @@ bash scripts/k41-desktop-validation.sh
 
 Jika hasil memuat WARN/FAIL, tinjau bukti dan gunakan `bash scripts/k41-desktop-repair.sh` hanya untuk remediation yang didukung. Repair tidak menyediakan mode `--apply` dan tidak mengubah PAM, kernel parameters, SMT, atau firmware.
 
-Penerimaan Stage 4 tercatat sebagai **54 PASS, 3 WARN, 0 FAIL, 0 SKIP** (PASS_WITH_WARNINGS, exit 0). Pengguna juga mengonfirmasi pairing Bluetooth berhasil. Ini adalah snapshot historis, bukan klaim bahwa kondisi perangkat hari ini identik.
+Penerimaan Stage 4 tercatat sebagai **54 PASS, 3 WARN, 0 FAIL, 0 SKIP** (PASS_WITH_WARNINGS, exit 0). Pengguna juga mengonfirmasi pairing Bluetooth berhasil. Ini adalah snapshot historis, bukan klaim bahwa kondisi perangkat hari ini identik. Peta implementasi, batas repair, laporan, dan cakupan acceptance: [Stage 4 — Desktop Functional Validation](../stages/stage-4-desktop-validation/README.md).
 
 Bukti tersimpan dalam snapshot historis:
 - [Desktop validation summary](https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41/blob/02f6194ed04c8f13ea64eda35b7afb94f7006504/reports/archive/2026-11/desktop-validation/20261109T081724Z/summary.md)
