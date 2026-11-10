@@ -256,6 +256,6 @@ if [[ $restart_status == "COMMAND_RETURNED" ]] && grep -Fq 'Configuration Loaded
     restart_status="CONFIRMED"
 fi
 
-info 'Visual components configured: lock screen, bar/taskbar, dashboard, launcher, sidebar, notifications, OSD and utility quick toggles.'
+info 'Visual components configured: lock screen, bar, launcher, sidebar, notifications, OSD and utility quick toggles; dashboard disabled.'
 info 'Open Caelestia panels with the existing Hyprland shortcuts; use SUPER+L to test lock screen if that binding is present.'
 info "Rollback command: bash scripts/k41-apply-full-desktop-profile.sh --rollback '$backup_dir'"
