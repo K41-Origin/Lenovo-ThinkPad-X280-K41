@@ -41,9 +41,10 @@ Modul memakai komponen dan API visual/runtime Caelestia yang sudah ada, termasuk
 
 ## Status berikutnya
 
-1. Buat script migrasi dengan preflight, backup, staging, validasi, atomic switch, dan rollback.
-2. Uji pemeriksaan statis melalui CI.
-3. Verifikasi runtime pada target sebelum cleanup dependency visual upstream.
-4. Cleanup hanya source visual upstream yang terbukti tidak lagi dipakai.
+1. **Deployment source — IMPLEMENTED.** Jalankan script `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --install` sebagai user biasa (tanpa sudo) untuk menyalin empat file visual ke `~/.config/quickshell/k41/modules/lockscreen/`.
+2. **Static/isolated test — IMPLEMENTED.** Test `stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh` mencakup syntax, install di HOME sementara, checksum, idempotency, status, rollback, dan proteksi target unmanaged.
+3. **Host integration — BLOCKED / NOT VERIFIED.** Script deployment tidak mengedit `caelestia/shell.qml`. Titik import/integrasi yang didukung harus diverifikasi terhadap host Caelestia yang benar-benar terpasang sebelum modul diaktifkan.
+4. Verifikasi runtime pada target sebelum cleanup dependency visual upstream.
+5. Cleanup hanya source visual upstream yang terbukti tidak lagi dipakai.
 
 Tidak ada klaim runtime rendering atau penerimaan perangkat pada tahap ini.
