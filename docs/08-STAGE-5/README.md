@@ -4,19 +4,23 @@ Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini han
 
 ## Urutan workstream
 
-| Urutan | Workstream | Status |
-|---|---|---|
-| 1 | [Boot Experience](01-BOOT-EXPERIENCE.md) | **COMPLETED / USER ACCEPTED** |
-| 2 | [Lock Screen](02-LOCK-SCREEN.md) | **IN PROGRESS** |
-| 3 | [Dashboard](03-DASHBOARD.md) | PLANNED |
-| 4 | [Taskbar/Panel](04-TASKBAR-PANEL.md) | PLANNED |
-| 5 | [Launcher](05-LAUNCHER.md) | PLANNED |
-| 6 | [Sidebar](06-SIDEBAR.md) | PLANNED |
-| 7 | [Utilities](07-UTILITIES.md) | PLANNED |
+| Urutan | Workstream |
+|---|---|
+| 1 | [Boot Experience](01-BOOT-EXPERIENCE.md) |
+| 2 | [Lock Screen](02-LOCK-SCREEN.md) |
+| 3 | [Dashboard](03-DASHBOARD.md) |
+| 4 | [Taskbar/Panel](04-TASKBAR-PANEL.md) |
+| 5 | [Launcher](05-LAUNCHER.md) |
+| 6 | [Sidebar](06-SIDEBAR.md) |
+| 7 | [Utilities](07-UTILITIES.md) |
 
-Kerjakan satu workstream pada satu waktu. Jangan membuka kembali Workstream 1 berdasarkan catatan historis; statusnya sudah ditutup pengguna pada 2026-11-10.
+Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [status proyek](../06-STATUS.md); jangan membuka kembali workstream yang telah diterima pengguna hanya berdasarkan catatan historis.
 
-## Peta implementasi repository\n\nSource runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../../stages/stage-5-desktop-customization/README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.\n\n## Dokumen acuan
+## Peta implementasi repository
+
+Source runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../../stages/stage-5-desktop-customization/README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.
+
+## Dokumen acuan
 
 - [Project architecture](../01-PROJECT.md)
 - [Desktop handoff](../03-DESKTOP.md)
@@ -37,15 +41,9 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 8. Catat perintah, hasil aktual, keterbatasan, dan keputusan pengguna dalam teks. Jangan mengarang hasil atau menyamakan file tersedia dengan runtime VERIFIED.
 9. Lanjutkan ke workstream berikutnya setelah acceptance terpenuhi atau pengguna secara eksplisit menerima pengecualian.
 
-## Siklus status
+## Status
 
-- **PLANNED** — belum dibuat/diterapkan.
-- **IMPLEMENTED** — perubahan tersedia di repository/perangkat.
-- **TESTED** — pemeriksaan yang disebutkan benar-benar dijalankan.
-- **VERIFIED** — perilaku dibuktikan dengan metode yang sesuai.
-- **COMPLETED / USER ACCEPTED** — pengguna secara eksplisit menerima dan menutup workstream.
-- **BLOCKED** — prasyarat menghalangi.
-- **NOT APPLICABLE** — tidak relevan dengan alasan yang dicatat.
+Gunakan definisi status kanonis di [AGENTS.md](../../AGENTS.md). Status aktual dan prioritas tidak disalin di sini.
 
 ## Guest Mode
 
