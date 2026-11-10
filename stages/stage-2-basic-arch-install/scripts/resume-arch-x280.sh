@@ -38,7 +38,7 @@ init_logging() {
     overlay|tmpfs) ;;
     *) printf 'FATAL: repository checkout must be on Arch ISO overlay/tmpfs; found: %s.\n' "$fs_type" >&2; return 1 ;;
   esac
-  base="$ROOT/reports/installer"
+  base="$ROOT/reports/stage-2-basic-arch-install/installer"
   install -d -o root -g root -m 0700 "$base" || return 1
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   local log_dir="$base/resume-$timestamp"

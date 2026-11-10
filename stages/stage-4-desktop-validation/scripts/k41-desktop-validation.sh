@@ -21,7 +21,7 @@ done
 source "$ROOT/stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh"
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/desktop-validation"
+report_root="$ROOT/reports/stage-4-desktop-validation/desktop-validation"
 mkdir -p -- "$report_root"
 run_dir="$report_root/$timestamp"
 suffix=0

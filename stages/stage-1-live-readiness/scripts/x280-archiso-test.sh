@@ -20,7 +20,7 @@ stages/stage-1-live-readiness/scripts/k41-live-validation.sh.
 
 It does NOT partition, format, encrypt, mount, install packages, change
 services/firmware, or write to the selected installation target. The report
-is stored under reports/x280-archiso-test/<UTC timestamp>/ inside this checkout.
+is stored under reports/stage-1-live-readiness/x280-archiso-test/<UTC timestamp>/ inside this checkout.
 On the Arch ISO, the checkout must resolve to overlay or tmpfs; otherwise the
 collector stops before writing.
 USAGE
@@ -59,7 +59,7 @@ overlay | tmpfs) ;;
 esac
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/x280-archiso-test"
+report_root="$ROOT/reports/stage-1-live-readiness/x280-archiso-test"
 mkdir -p -- "$report_root"
 report_dir="$report_root/$timestamp"
 suffix=0

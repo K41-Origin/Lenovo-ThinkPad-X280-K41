@@ -183,3 +183,7 @@ Validasi Stage 4 dijalankan sebagai user biasa di sesi Hyprland. Exit 0 dari Sta
 ## Batas dokumentasi
 
 Dokumen ini memetakan implementasi yang ada. Ia tidak mengubah paket, dependency, kebijakan AUR, konfigurasi desktop, atau prosedur runtime. Perubahan implementasi di masa depan harus memperbarui dokumen ini dan test terkait.
+
+## Tests and reports
+
+The Stage 3 contract test is `stages/stage-3-desktop-install/tests/test-desktop-setup.sh`. It is invoked through the canonical root `bash tests/run.sh` manifest. Desktop installation reports are written under `reports/stage-3-desktop-install/desktop/`.

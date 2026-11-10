@@ -173,3 +173,7 @@ Dokumen ini memetakan implementasi dan batas Stage 1; isinya bukan bukti readine
 ## Catatan
 
 Pengembangan Custom Arch ISO dicatat sebagai ide di [dokumen proyek](../../docs/01-PROJECT.md). Ide tersebut belum menjadi bagian dari scope atau acceptance Stage 1.
+
+## Reports and tests
+
+Runtime evidence is written under `reports/stage-1-live-readiness/`. The stage-owned contract test is `stages/stage-1-live-readiness/tests/test-x280-install-readiness.sh`; it is included in the canonical `bash tests/run.sh` manifest.

@@ -86,8 +86,8 @@ make_report_dir() {
   printf '%s\n' "$candidate"
 }
 
-readiness_dir="$(make_report_dir "$ROOT/reports/live-readiness")"
-live_root="$ROOT/reports/live-validation"
+readiness_dir="$(make_report_dir "$ROOT/reports/stage-1-live-readiness/live-readiness")"
+live_root="$ROOT/reports/stage-1-live-readiness/live-validation"
 mkdir -p -- "$live_root"
 live_stamp="$timestamp"
 live_report="$live_root/$live_stamp.md"

@@ -244,3 +244,7 @@ Tidak ada reboot otomatis. Periksa hasil sebelum melakukan unmount `/mnt/efi`, u
 ## Catatan
 
 Pengembangan Custom Arch ISO dicatat sebagai ide di [dokumen proyek](../../docs/01-PROJECT.md). Ide tersebut belum menjadi bagian dari scope atau acceptance Stage 2.
+
+## Tests and reports
+
+Stage-owned tests live in `stages/stage-2-basic-arch-install/tests/` and are invoked by the root `tests/run.sh` manifest. Installer and resume evidence is written under `reports/stage-2-basic-arch-install/installer/`.

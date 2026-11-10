@@ -194,3 +194,7 @@ Review visual/interaksi langsung oleh pengguna tetap dilakukan pada perangkat; s
 - Setelah Stage 4 diterima, lanjutkan customization secara berurutan melalui [Stage 5 workstreams](../../stages/stage-5-desktop-customization/docs/README.md).
 - Jangan menganggap hasil Stage 4 sebagai izin untuk menerapkan tuning hardware; Stage 6 membutuhkan baseline dan prosedur tersendiri.
 - Bila kode validator, classifier, collector, atau repair berubah, perbarui test dan dokumen ini bersama perubahan implementasi.
+
+## Tests and reports
+
+Stage 4 contract tests live in `stages/stage-4-desktop-validation/tests/`. Validation and repair reports are written under `reports/stage-4-desktop-validation/` and are invoked through the canonical root test manifest.

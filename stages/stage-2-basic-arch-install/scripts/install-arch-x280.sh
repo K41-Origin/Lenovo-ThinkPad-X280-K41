@@ -43,7 +43,7 @@ installer::init_logging() {
     overlay|tmpfs) ;;
     *) printf 'FATAL: checkout harus berada pada overlay/tmpfs Arch ISO, ditemukan: %s.\n' "$fs_type" >&2; return 1 ;;
   esac
-  root="$ROOT/reports/installer"
+  root="$ROOT/reports/stage-2-basic-arch-install/installer"
   install -d -o root -g root -m 0700 "$root" || { printf 'FATAL: direktori log root-only di dalam repositori tidak dapat dibuat.\n' >&2; return 1; }
   printf -v timestamp '%(%Y%m%dT%H%M%SZ)T' -1
   installer_log_dir="$root/$timestamp"

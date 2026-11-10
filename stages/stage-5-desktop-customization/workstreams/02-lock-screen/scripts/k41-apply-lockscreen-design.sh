@@ -98,7 +98,7 @@ fi
 [[ ${K41_SUDO_REEXEC:-} == 1 && $EUID -ne 0 ]] ||
     die 'This installer must be started with sudo from the regular desktop account.'
 
-log_dir="$repo_root/reports/lockscreen-apply"
+log_dir="$repo_root/reports/stage-5-desktop-customization/02-lock-screen/lockscreen-apply"
 for path in "$repo_root/reports" "$log_dir"; do
     current=
     IFS=/ read -r -a parts <<<"$path"

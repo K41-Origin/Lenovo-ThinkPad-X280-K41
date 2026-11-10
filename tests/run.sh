@@ -14,6 +14,7 @@ tests=(
   stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh
   stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh
+  stages/stage-5-desktop-customization/tests/test-boot-visual-diagnostics.sh
   stages/stage-4-desktop-validation/tests/test-desktop-validation.sh
   stages/stage-4-desktop-validation/tests/test-desktop-repair.sh
   tests/test-hardware-audit.sh
@@ -42,7 +43,7 @@ tests=(
 )
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/test-runs"
+report_root="$ROOT/reports/shared/test-runs"
 mkdir -p -- "$report_root"
 run_dir="$report_root/$timestamp"
 suffix=0

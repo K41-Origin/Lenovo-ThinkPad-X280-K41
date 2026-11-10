@@ -22,7 +22,7 @@ done
 [[ -f "$ROOT/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh" ]] || { printf 'ERROR: validator missing.\n' >&2; exit 2; }
 
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/desktop-repair"
+report_root="$ROOT/reports/stage-4-desktop-validation/desktop-repair"
 mkdir -p -- "$report_root"
 report_dir="$report_root/$stamp"
 n=0

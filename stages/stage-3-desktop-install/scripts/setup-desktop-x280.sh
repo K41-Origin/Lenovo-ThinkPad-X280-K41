@@ -16,7 +16,7 @@ prompt_yes_no() {
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(cd -- "$script_dir/../../.." && pwd -P)"
 source "$repo_root/stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh"
-report_root="$repo_root/reports/desktop"
+report_root="$repo_root/reports/stage-3-desktop-install/desktop"
 started_utc="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 mkdir -p -- "$report_root"

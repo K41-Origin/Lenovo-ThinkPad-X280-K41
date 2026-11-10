@@ -13,7 +13,7 @@ grep -Fq 'cryptsetup open "$root_part" cryptroot' "$script"
 grep -Fq 'lsblk -nrpo MOUNTPOINTS "$disk"' "$script"
 grep -Fq '[[ -z ${mounted_paths//[[:space:]]/} ]]' "$script"
 grep -Fq '! mountpoint -q "$ESP_MOUNT"' "$script"
-grep -Fq 'base="$ROOT/reports/installer"' "$script"
+grep -Fq 'base="$ROOT/reports/stage-2-basic-arch-install/installer"' "$script"
 grep -Fq 'findmnt -nro FSTYPE -T "$ROOT"' "$script"
 if grep -Eq '/var/log/x280-installer|/run/x280-installer' "$script"; then
   printf 'FAIL: continuation logs must remain inside the repository checkout\\n' >&2

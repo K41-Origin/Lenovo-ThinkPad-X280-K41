@@ -93,3 +93,7 @@ Validasi yang diperlukan:
 4. Pemeriksaan semua referensi path dan tautan dokumentasi.
 
 Test statis tidak membuktikan runtime visual, boot/recovery, TPM2 unlock, atau lock/unlock pada perangkat. Review visual dilakukan langsung pengguna pada X280; screenshot bukan acceptance gate.
+
+## Tests and reports
+
+Stage 5 contract tests live in `stages/stage-5-desktop-customization/tests/` and are invoked through `bash tests/run.sh`. Lock-screen deployment reports use `reports/stage-5-desktop-customization/02-lock-screen/lockscreen-apply/`.
