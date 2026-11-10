@@ -467,7 +467,7 @@ while queue:
         continue
     visited.add(canonical)
     text_source = safe_read(canonical)
-    for match in re.finditer(r'^\\s*import\\s+"([^"]+)"', text_source, re.M):
+    for match in re.finditer(r'^\s*import\s+"([^"]+)"', text_source, re.M):
         import_dir = (canonical.parent / match.group(1)).resolve()
         if import_dir.is_dir():
             add(f"RELATIVE IMPORT {rel(canonical)} -> {rel(import_dir)}")
@@ -476,7 +476,7 @@ while queue:
                     queue.append(candidate)
         else:
             add(f"UNRESOLVED RELATIVE IMPORT {rel(canonical)} -> {match.group(1)}")
-    for match in re.finditer(r'(?:source|sourceComponent)\\s*:\\s*["\\']([^"\\']+)["\\']', text_source):
+    for match in re.finditer(r"""(?:source|sourceComponent)\s*:\s*["']([^"']+)["']""", text_source):
         value = match.group(1)
         if "://" in value or value.startswith("qrc:"):
             continue
