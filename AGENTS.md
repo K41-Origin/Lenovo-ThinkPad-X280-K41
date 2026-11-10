@@ -37,7 +37,6 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Design System | `docs/07-DESKTOP-DESIGN-SYSTEM.md` sebagai indeks |
 | Eksekusi dan prosedur Stage 5 | `stages/stage-5-desktop-customization/docs/README.md` |
 | Peta fisik implementasi Stage 5 | `stages/stage-5-desktop-customization/README.md` |
-| Dashboard (keputusan dihentikan) | `stages/stage-5-desktop-customization/docs/03-DASHBOARD.md` |
 | Bottombar | `stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md` |
 | Topbar | `stages/stage-5-desktop-customization/docs/05-TOPBAR.md` |
 
@@ -47,10 +46,10 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 
 - Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED pada 2026-11-10**.
 - Workstream 2 — Lock Screen **COMPLETED / USER ACCEPTED pada 2026-11-10**.
-- **Dashboard dihentikan / dihapus dari scope pada 2026-11-11.** Jangan melanjutkan desain atau implementasi dashboard.
+- **Dashboard dihapus dari daftar workstream Stage 5 pada 2026-11-11.** Fitur runtime dinonaktifkan melalui `k41-cleanup-caelestia.sh`; jangan menghapus source QML upstream atau menambahkan dashboard kembali.
 - **Taskbar/Panel diarahkan menjadi Bottombar.** Konsep dock workspace-only horizontal di tepi bawah dipertahankan. Penerimaan lama hanya berlaku untuk versi Taskbar/Panel sebelumnya; perubahan baru memerlukan review pengguna.
 - **Topbar akan dibuat di tepi atas.** Detail elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
-- Cleanup Caelestia direncanakan melalui `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`. Script ini belum dibuat. Audit aktual harus mendahului implementasi; wajib ada mode pemeriksaan, backup, rollback, dan scope terbatas. Jangan menghapus source checkout upstream atau file yang kepemilikannya tidak jelas.
+- Cleanup dashboard diimplementasikan melalui `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`. Default dry-run; `--apply` mem-backup dan mengatur `dashboard.enabled=false` pada konfigurasi global serta override monitor yang relevan; `--rollback` memulihkan backup. Audit terbaru harus ditinjau sebelum apply. Script tidak menghapus source checkout upstream, keybind, package, atau service.
 - Launcher, Sidebar, dan Utilities mengikuti urutan Stage 5 setelah Bottombar/Topbar sesuai status di `docs/06-STATUS.md`.
 - Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan membuat akun, service, mount, storage policy, atau workflow Guest tanpa keputusan eksplisit baru.
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
