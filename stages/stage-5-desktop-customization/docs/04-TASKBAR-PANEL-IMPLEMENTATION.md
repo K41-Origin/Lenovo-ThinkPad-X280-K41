@@ -26,7 +26,7 @@ bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh 
 The script refuses root execution. It requires the active source checkout at
 `~/.config/quickshell/caelestia` and runtime config at
 `~/.config/caelestia/shell.json`. Override the source path with
-`K41_CAELSTIA_SOURCE=/path/to/caelestia` if needed.
+`K41_CAELESTIA_SOURCE=/path/to/caelestia` if needed.
 
 Before the first write, it backs up:
 - source `shell.qml`;
