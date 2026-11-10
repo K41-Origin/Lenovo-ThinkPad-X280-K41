@@ -52,6 +52,8 @@ Detail identitas visual lintas-komponen berada di [Design System](../07-DESKTOP-
 - `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-enable-caelestia-autologin.sh` (opt-in; bukan default instalasi)
 - `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh`
 - `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-hyprland-launcher.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-plymouth-quit-after-lock.sh`
 - `tests/test-boot-experience.sh`
 - `tests/test-plymouth-k41-theme.sh`
 - `tests/test-animated-boot-splash.sh`
