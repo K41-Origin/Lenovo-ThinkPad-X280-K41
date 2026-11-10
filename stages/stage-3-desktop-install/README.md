@@ -91,6 +91,8 @@ Jika Caelestia tidak dipilih, installer menambahkan paket resmi `quickshell`.
 
 Jika Caelestia dipilih, installer menambahkan build/runtime tools dan utilitas yang dinyatakan dalam array paket, kemudian meminta resolver memproses root package `quickshell-git`, `python-materialyoucolor3`, `caelestia-cli`, dan `caelestia-shell`.
 
+**Keterbatasan integrasi Stage 3 → Stage 4:** validator Stage 4 saat ini mewajibkan package `quickshell-git`, `caelestia-shell`, dan `caelestia-cli`. Karena itu, pilihan memasang Quickshell resmi tanpa Caelestia tidak memenuhi kontrak package Stage 4 dan akan menghasilkan FAIL pada pemeriksaan package tersebut. Untuk alur proyek yang sekarang, pilih pemasangan Caelestia. Dukungan validator untuk jalur Quickshell-only belum diimplementasikan; lihat [Status proyek](../../docs/06-STATUS.md).
+
 Daftar di atas mencerminkan source installer saat ini, bukan jaminan bahwa package repository/AUR akan selalu menyediakan versi atau dependency yang sama. Verifikasi transaksi aktual sebelum menyetujui perubahan.
 
 ### Batas keamanan AUR
@@ -156,7 +158,11 @@ Test Stage 3 yang relevan:
 - `tests/test-bootstrap-archiso.sh` — pemeriksaan integrasi source-review dan kontrak wrapper desktop sebagai bagian dari bootstrap lintas tahap.
 - `tests/run.sh` — manifest global; jalankan dari root dengan `bash tests/run.sh`.
 
-CI juga melakukan Bash syntax validation seluruh script dan ShellCheck pada daftar script yang dipilih.
+Dua workflow CI aktif:
+- `.github/workflows/ci.yml`: Bash syntax, ShellCheck `--severity=error` pada daftar script terpilih, dan suite test; trigger pull request serta push ke `main`, `feature/**`, dan `fix/**`.
+- `.github/workflows/bash-tests.yml`: Bash syntax dan ShellCheck seluruh file shell, shfmt pada infrastruktur test/readiness terpilih, dan suite test; trigger pull request/push ke `main` serta manual.
+
+Keduanya tumpang tindih pada perubahan `main` dan pull request ke `main`. Perbedaan trigger/cakupan dan alasan mempertahankan dua workflow dicatat di [Testing dan CI](../../docs/04-TESTING.md); jangan menghapus salah satunya sebelum required checks ditinjau.
 
 Batas bukti:
 - Fixture resolver bukan build AUR aktual.
