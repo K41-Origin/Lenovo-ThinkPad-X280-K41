@@ -6,10 +6,9 @@ umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
-(( EUID == 0 )) || die "Run with sudo: sudo bash scripts/k41-install-plymouth-theme.sh"
+(( EUID == 0 )) || die "Run with sudo: sudo bash stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd -- "$SCRIPT_DIR/../../../.." && pwd -P)"
 SOURCE_DIR="$SCRIPT_DIR/../themes/plymouth/k41"
 THEME_DIR="/usr/share/plymouth/themes/k41"
 [[ -s "$SOURCE_DIR/k41.plymouth" && -s "$SOURCE_DIR/k41.script" ]] || die "K41 theme source files are missing."
