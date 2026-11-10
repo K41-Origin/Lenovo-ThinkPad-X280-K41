@@ -4,17 +4,20 @@ Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini han
 
 ## Urutan workstream
 
-| Urutan | Workstream |
-|---|---|
-| 1 | [Boot Experience](01-BOOT-EXPERIENCE.md) |
-| 2 | [Lock Screen](02-LOCK-SCREEN.md) |
-| 3 | [Dashboard](03-DASHBOARD.md) |
-| 4 | [Taskbar/Panel](04-TASKBAR-PANEL.md) |
-| 5 | [Launcher](05-LAUNCHER.md) |
-| 6 | [Sidebar](06-SIDEBAR.md) |
-| 7 | [Utilities](07-UTILITIES.md) |
+| Urutan | Workstream | Status/arah |
+|---|---|---|
+| 1 | [Boot Experience](01-BOOT-EXPERIENCE.md) | Diterima pengguna |
+| 2 | [Lock Screen](02-LOCK-SCREEN.md) | Diterima pengguna |
+| 3 | [Dashboard](03-DASHBOARD.md) | Dihentikan; tidak diperlukan |
+| 4 | [Bottombar](04-TASKBAR-PANEL.md) | Penyesuaian nama dan verifikasi lanjutan |
+| 5 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
+| 6 | [Launcher](05-LAUNCHER.md) | Planned |
+| 7 | [Sidebar](06-SIDEBAR.md) | Planned |
+| 8 | [Utilities](07-UTILITIES.md) | Planned |
 
-Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [status proyek](../../../docs/06-STATUS.md); jangan membuka kembali workstream yang telah diterima pengguna hanya berdasarkan catatan historis.
+Nomor workstream adalah urutan proses; beberapa nama file lama dipertahankan agar tautan yang sudah ada tidak rusak.
+
+Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [status proyek](../../../docs/06-STATUS.md); jangan membuka kembali workstream yang telah diterima pengguna kecuali ada permintaan perubahan atau laporan regresi.
 
 ## Peta implementasi repository
 
@@ -22,7 +25,7 @@ Source runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 —
 
 ## Alur kolaborasi dan verifikasi
 
-Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) untuk seluruh iterasi Stage 5. Dokumen tersebut menetapkan pembagian tanggung jawab, pembaruan script audit melalui GitHub, pull dan eksekusi pada X280, pemeriksaan privasi laporan, push bukti, serta verifikasi hasil. Jangan menggunakan prosedur audit manual terpisah jika pemeriksaan dapat ditambahkan ke script audit yang relevan.
+Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) untuk seluruh iterasi Stage 5. Dokumen tersebut menetapkan pembagian tanggung jawab, pembaruan script audit melalui GitHub, pull dan eksekusi pada X280, pemeriksaan privasi laporan, push bukti, serta verifikasi hasil.
 
 ## Dokumen acuan
 
@@ -31,7 +34,7 @@ Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) unt
 - [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md)
 - [Current status](../../../docs/06-STATUS.md)
 
-Design System menentukan bahasa visual lintas-komponen. Implementasi global yang tidak diperlukan oleh komponen aktif ditunda sampai workstream komponen selesai. Setiap workstream tetap harus mengikuti token/prinsip desain yang relevan.
+Design System menentukan bahasa visual lintas-komponen. Implementasi global yang tidak diperlukan oleh komponen aktif ditunda sampai workstream komponen selesai.
 
 ## Aturan eksekusi
 
@@ -48,6 +51,10 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 ## Status
 
 Gunakan definisi status kanonis di [AGENTS.md](../../../AGENTS.md). Status aktual dan prioritas tidak disalin di sini.
+
+## Cleanup Caelestia
+
+Pembersihan konfigurasi dashboard dan penataan konfigurasi Caelestia akan ditangani oleh `scripts/k41-cleanup-caelestia.sh`. Script ini **PLANNED**, belum dibuat, dan harus dirancang berdasarkan audit terbaru. Mode pemeriksaan harus tersedia; setiap perubahan harus memiliki backup dan rollback. Jangan menghapus source upstream atau konfigurasi yang tidak terkait.
 
 ## Guest Mode
 
