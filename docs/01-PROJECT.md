@@ -16,14 +16,9 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji
 
 Tahap tidak berpindah otomatis. Entry point dan prosedur berada di [Instalasi](02-INSTALLATION.md), [Desktop](03-DESKTOP.md), [Testing](04-TESTING.md), dan [Operations](05-OPERATIONS.md).
 
-## Status Stage 5
+## Status proyek
 
-- **Workstream 1 — Boot Experience: COMPLETED / USER ACCEPTED (2026-11-10).** Keputusan penutupan diberikan secara eksplisit oleh pengguna. Catatan lama tentang visual boot adalah histori sebelum penutupan dan tidak menjadi pekerjaan aktif.
-- **Workstream 2 — Lock Screen: IN PROGRESS.** Implementasi QML dan installer deployment tersedia; runtime terbaru, lock/unlock, wake, dan penerimaan visual pada X280 belum dinyatakan lulus. Detail ada di [Workstream 2](08-STAGE-5/02-LOCK-SCREEN.md).
-- **Workstream 3–7: PLANNED**, mengikuti urutan Stage 5.
-- **Guest Mode: NOT IMPLEMENTED / DEFERRED.** Fitur opsional terpisah; spesifikasi ada di [03 — Guest Mode](08-STAGE-5/03-GUEST-MODE.md).
-
-Penerimaan Workstream 1 tidak boleh ditafsirkan sebagai klaim bahwa setiap detail teknis (misalnya TPM2 token atau Secure Boot) telah diukur ulang. Itu adalah status penyelesaian workstream berdasarkan penerimaan pengguna. Jangan membuka kembali workstream hanya berdasarkan catatan historis; evaluasi isu baru bila pengguna melaporkannya.
+Status implementasi, prioritas aktif, acceptance, dan gate berikutnya hanya dicatat di [06 — Status](06-STATUS.md). Dokumen ini mempertahankan tujuan dan arsitektur, bukan salinan status workstream.
 
 ## Entry point kanonis
 
@@ -43,9 +38,13 @@ Wrapper harus tetap tipis dan tidak menggandakan implementasi.
 - AUR recipe harus direview dan package dibangun sebagai user non-root.
 - Jangan menganggap exit code 0 atau file konfigurasi hadir sebagai bukti acceptance fungsional.
 
+## Ide pengembangan di luar roadmap aktif
+
+**Custom Arch ISO — IDE / NOT SCHEDULED.** Tahap 1 dan 2 dapat menjadi dasar evaluasi untuk ISO Arch kustom yang menyertakan tooling proyek. Ini belum menjadi bagian dari tujuh tahap aktif, belum memiliki desain teknis, acceptance criteria, atau jadwal. Jangan mulai implementasi sebelum kebutuhan, metode build ISO, pemeliharaan paket, keamanan supply chain, dan strategi update ditetapkan secara terpisah.
+
 ## Struktur repository
 
-- `scripts/`: entry point dan workflow.
+- `scripts/`: workflow dan utilitas lintas tahap.
 - `lib/`: modul bersama.
 - `config/`: konfigurasi target.
 - `tests/`: automated checks.
