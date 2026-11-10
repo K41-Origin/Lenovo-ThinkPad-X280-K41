@@ -241,8 +241,28 @@ for candidate in \
     [[ -d $candidate ]] || continue
     {
         printf 'SOURCE_ROOT %s\n' "${candidate#"$HOME"/}"
-        for relative in shell.qml modules/bar/Bar.qml modules/bar/BarWrapper.qml \
-            modules/bar/components/workspaces/Workspaces.qml; do
+        for relative in \
+            shell.qml \
+            modules/bar/Bar.qml \
+            modules/bar/BarWrapper.qml \
+            modules/bar/components/workspaces/Workspaces.qml \
+            modules/dashboard/Content.qml \
+            modules/dashboard/Dash.qml \
+            modules/dashboard/Media.qml \
+            modules/dashboard/Performance.qml \
+            modules/dashboard/Tabs.qml \
+            modules/dashboard/WeatherTab.qml \
+            modules/dashboard/Wrapper.qml \
+            modules/dashboard/dash/Calendar.qml \
+            modules/dashboard/dash/DateTime.qml \
+            modules/dashboard/dash/Resources.qml \
+            modules/dashboard/dash/SmallWeather.qml \
+            modules/dashboard/dash/User.qml \
+            modules/dashboard/performance/BatteryTank.qml \
+            modules/dashboard/performance/HeroCard.qml \
+            modules/dashboard/performance/MemoryCard.qml \
+            modules/dashboard/performance/NetworkCard.qml \
+            modules/dashboard/performance/StorageCard.qml; do
             if [[ -f $candidate/$relative ]]; then
                 printf '  PRESENT %s\n' "$relative"
             else
@@ -257,6 +277,39 @@ for candidate in \
 done
 if [[ ! -s $source_file ]]; then
     printf 'No common Caelestia source directory found.\n' | tee -a "$source_file"
+fi
+
+printf '\n## Dashboard keybind inventory\n'
+dashboard_binds_file="$report_dir/dashboard-keybinds.json"
+if command -v hyprctl >/dev/null 2>&1 && timeout 8s hyprctl -j binds >"$report_dir/binds.raw.json" 2>/dev/null; then
+    python3 - "$report_dir/binds.raw.json" "$dashboard_binds_file" "$HOME" <<'PY'
+import json, pathlib, sys
+src, dst = map(pathlib.Path, sys.argv[1:3])
+home = sys.argv[3]
+try:
+    binds = json.loads(src.read_text(encoding="utf-8"))
+    selected = []
+    for bind in binds if isinstance(binds, list) else []:
+        if "dashboard" not in json.dumps(bind, ensure_ascii=False).lower():
+            continue
+        selected.append({
+            key: (value.replace(home, "~") if isinstance(value, str) else value)
+            for key, value in bind.items()
+            if key in ("key", "keycode", "modmask", "submap", "dispatcher",
+                       "arg", "description", "mouse", "locked", "release")
+        })
+    dst.write_text(json.dumps({"status": "ok", "matching_bind_count": len(selected),
+                               "binds": selected}, indent=2) + "\n", encoding="utf-8")
+    print(f"Dashboard-related Hyprland binds: {len(selected)}")
+except Exception as exc:
+    dst.write_text(json.dumps({"status": "invalid-response",
+                               "error": type(exc).__name__}) + "\n", encoding="utf-8")
+    print(f"WARN dashboard bind inventory: {type(exc).__name__}")
+PY
+    rm -f -- "$report_dir/binds.raw.json"
+else
+    printf '{"status":"unavailable","binds":[]}\n' >"$dashboard_binds_file"
+    printf 'WARN Hyprland bind query unavailable.\n'
 fi
 
 printf '\n## Workspace runtime inventory\n'
