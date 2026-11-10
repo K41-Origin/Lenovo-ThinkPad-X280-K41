@@ -39,6 +39,8 @@ mode, rollback_arg, home_arg = sys.argv[1:]
 home = pathlib.Path(home_arg).resolve(strict=True)
 config_root = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
 state_root = pathlib.Path(os.environ.get("XDG_STATE_HOME", home / ".local/state"))
+if not config_root.is_absolute() or not state_root.is_absolute():
+    fail("XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.")
 caelestia_root = config_root / "caelestia"
 global_config = caelestia_root / "shell.json"
 backup_root = state_root / "k41" / "caelestia-cleanup" / "backups"
@@ -157,7 +159,7 @@ if not caelestia_root.is_dir():
 global_data = load_config(global_config)
 targets = [(global_config, global_data, True)]
 monitor_root = caelestia_root / "monitors"
-if monitor_root.exists():
+if monitor_root.is_symlink() or monitor_root.exists():
     reject_symlink_components(monitor_root)
     if not monitor_root.is_dir():
         fail(f"Monitor configuration path is not a directory: {monitor_root}")
