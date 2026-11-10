@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Dokumen ini menetapkan alur kerja antara maintainer repository dan pengguna ThinkPad X280 untuk implementasi, pengujian, dan verifikasi Stage 5. Setiap komponen dibangun bertahap; hasil Stage 5 menjadi fondasi teknis dan pengalaman untuk proyek lanjutan **k41-shell**.
+Dokumen ini menetapkan alur kerja antara maintainer repository dan pengguna ThinkPad X280 untuk implementasi, pengujian, dan verifikasi Stage 5. Setiap komponen dibangun bertahap; hasil Stage 5 menjadi fondasi teknis dan pengalaman untuk proyek lanjutan **k41-dots**.
 
 ## Pembagian tanggung jawab
 
@@ -29,7 +29,7 @@ Assistant tidak mengklaim perubahan bekerja pada perangkat hanya karena commit b
    - Identifikasi risiko perubahan dan pertahankan pekerjaan lokal yang tidak terkait.
 2. **Design**
    - Tetapkan tujuan, interface, ownership, lokasi source/runtime, acceptance criteria, dan rollback.
-   - Rancang komponen K41 agar dapat dipisahkan dari upstream dan berpotensi diekstrak ke k41-shell.
+   - Rancang komponen K41 agar dapat dipisahkan dari upstream dan berpotensi diekstrak ke k41-dots.
 3. **Implement through GitHub**
    - Periksa isi dan SHA file sebelum mengubahnya.
    - Simpan source kanonis, installer, test, dan dokumentasi di repository.
