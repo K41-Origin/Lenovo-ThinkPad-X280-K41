@@ -39,6 +39,7 @@ on_exit() {
         [[ -f $snapshot_file ]] && printf ', config-snapshot.json'
         [[ -f $monitor_file ]] && printf ', monitor-runtime.json'
         [[ -f $source_file ]] && printf ', source-inventory.txt'
+        [[ -f $report_dir/dashboard-keybinds.json ]] && printf ', dashboard-keybinds.json'
         printf '\n'
         printf 'Mode: read-only; no configuration or system state changed.\n'
     } >"$summary_file"
