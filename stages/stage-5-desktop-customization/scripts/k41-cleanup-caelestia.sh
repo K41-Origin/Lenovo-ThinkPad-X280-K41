@@ -16,19 +16,26 @@ source_root="$config_root/quickshell/caelestia"
 dashboard_dir="$source_root/modules/dashboard"
 
 command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
+command -v realpath >/dev/null 2>&1 || die 'realpath is required.'
 [[ -d $caelestia_config ]] || die "Caelestia config directory not found: $caelestia_config"
 
-# Never delete from a symlinked source path or a dirty Git checkout.
+# Validate the exact source target before touching any configuration.
 if [[ -L $source_root || -L $dashboard_dir ]]; then
     die 'Refusing to remove a symlinked Caelestia source path.'
 fi
-if [[ -d $source_root ]] && git -C "$source_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    if [[ -n $(git -C "$source_root" status --porcelain --untracked-files=all) ]]; then
-        die "Caelestia source checkout has local changes; refusing to delete files: $source_root"
+if [[ -d $dashboard_dir ]]; then
+    resolved_source="$(realpath -e -- "$source_root")"
+    resolved_dashboard="$(realpath -e -- "$dashboard_dir")"
+    [[ $resolved_dashboard == "$resolved_source/modules/dashboard" ]] \
+        || die "Unexpected Dashboard path; refusing deletion: $resolved_dashboard"
+    if git -C "$source_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        if [[ -n $(git -C "$source_root" status --porcelain --untracked-files=all) ]]; then
+            die "Caelestia source checkout has local changes; refusing to delete files: $source_root"
+        fi
     fi
 fi
 
-# Remove only the Dashboard property from global and per-monitor shell.json.
+# Collect and validate every relevant JSON file before changing any of them.
 mapfile -d '' config_files < <(
     find "$caelestia_config" -type f -name shell.json -print0
 )
@@ -42,6 +49,7 @@ import stat
 import sys
 import tempfile
 
+records = []
 for raw in sys.argv[1:]:
     path = pathlib.Path(raw)
     if path.is_symlink() or not path.is_file():
@@ -53,6 +61,9 @@ for raw in sys.argv[1:]:
         raise SystemExit(f"Invalid JSON in {path}: {type(exc).__name__}: {exc}")
     if not isinstance(data, dict):
         raise SystemExit(f"Expected a JSON object in {path}")
+    records.append((path, data, original_mode))
+
+for path, data, original_mode in records:
     if "dashboard" not in data:
         print(f"UNCHANGED {path}: Dashboard setting absent")
         continue
@@ -75,10 +86,6 @@ PY
 
 # Remove only the Dashboard module directory; preserve all sibling modules.
 if [[ -d $dashboard_dir ]]; then
-    resolved_source="$(realpath -e -- "$source_root")"
-    resolved_dashboard="$(realpath -e -- "$dashboard_dir")"
-    [[ $resolved_dashboard == "$resolved_source/modules/dashboard" ]] \
-        || die "Unexpected Dashboard path; refusing deletion: $resolved_dashboard"
     rm -rf -- "$resolved_dashboard"
     info "Removed Dashboard source module: $resolved_dashboard"
 else
