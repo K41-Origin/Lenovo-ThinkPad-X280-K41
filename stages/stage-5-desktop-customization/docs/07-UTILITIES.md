@@ -1,4 +1,4 @@
-# Workstream 7 — Utilities
+# Workstream 8 — Utilities
 
 ## Tujuan
 
@@ -36,4 +36,4 @@ Backup konfigurasi utilities. Catat backend/API, privilege, test tiap kontrol, h
 
 ## Gate keluar
 
-Workstream 7 ditutup hanya setelah setiap kontrol diterima atau dikeluarkan dengan alasan. Setelah itu, buat rencana terpisah untuk fase **global appearance** dan konsistensi lintas-komponen; jangan mulai fase tersebut secara otomatis tanpa audit dan persetujuan.
+Workstream 8 ditutup hanya setelah setiap kontrol diterima atau dikeluarkan dengan alasan. Setelah itu, buat rencana terpisah untuk fase **global appearance** dan konsistensi lintas-komponen; jangan mulai fase tersebut secara otomatis tanpa audit dan persetujuan.
