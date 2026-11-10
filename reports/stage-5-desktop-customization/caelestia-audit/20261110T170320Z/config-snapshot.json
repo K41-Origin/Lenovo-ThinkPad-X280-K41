@@ -1,0 +1,559 @@
+{
+  "privacy": "Personal paths and weather location are redacted; unrelated shell.json sections omitted.",
+  "shell_json": {
+    "status": "valid-json",
+    "top_level_keys": [
+      "appearance",
+      "background",
+      "bar",
+      "dashboard",
+      "launcher",
+      "lock",
+      "nexus",
+      "notifs",
+      "osd",
+      "paths",
+      "services",
+      "sidebar",
+      "utilities"
+    ],
+    "selected_settings": {
+      "appearance": {
+        "anim": {
+          "durations": {
+            "scale": 0.8
+          }
+        },
+        "deformScale": 0.88,
+        "font": {
+          "body": {
+            "family": "Rubik",
+            "large": {
+              "italic": false,
+              "size": 16,
+              "vaxes": {},
+              "weight": 400
+            },
+            "medium": {
+              "italic": false,
+              "size": 14,
+              "vaxes": {},
+              "weight": 400
+            },
+            "small": {
+              "italic": false,
+              "size": 12,
+              "vaxes": {},
+              "weight": 400
+            }
+          },
+          "clock": "Rubik",
+          "headline": {
+            "family": "Rubik",
+            "large": {
+              "italic": false,
+              "size": 32,
+              "vaxes": {},
+              "weight": 600
+            },
+            "medium": {
+              "italic": false,
+              "size": 26,
+              "vaxes": {},
+              "weight": 600
+            },
+            "small": {
+              "italic": false,
+              "size": 22,
+              "vaxes": {},
+              "weight": 500
+            }
+          },
+          "icon": {
+            "extraLarge": {
+              "italic": false,
+              "size": 36,
+              "vaxes": {},
+              "weight": 400
+            },
+            "family": "Material Symbols Rounded",
+            "large": {
+              "italic": false,
+              "size": 24,
+              "vaxes": {},
+              "weight": 400
+            },
+            "medium": {
+              "italic": false,
+              "size": 18,
+              "vaxes": {},
+              "weight": 400
+            },
+            "small": {
+              "italic": false,
+              "size": 15,
+              "vaxes": {},
+              "weight": 400
+            }
+          },
+          "label": {
+            "family": "Rubik",
+            "large": {
+              "italic": false,
+              "size": 14,
+              "vaxes": {},
+              "weight": 500
+            },
+            "medium": {
+              "italic": false,
+              "size": 12,
+              "vaxes": {},
+              "weight": 500
+            },
+            "small": {
+              "italic": false,
+              "size": 11,
+              "vaxes": {},
+              "weight": 500
+            }
+          },
+          "mono": {
+            "family": "CaskaydiaCove NF",
+            "large": {
+              "italic": false,
+              "size": 16,
+              "vaxes": {},
+              "weight": 400
+            },
+            "medium": {
+              "italic": false,
+              "size": 14,
+              "vaxes": {},
+              "weight": 400
+            },
+            "small": {
+              "italic": false,
+              "size": 12,
+              "vaxes": {},
+              "weight": 400
+            }
+          },
+          "scale": 1,
+          "title": {
+            "family": "Rubik",
+            "large": {
+              "italic": false,
+              "size": 22,
+              "vaxes": {},
+              "weight": 600
+            },
+            "medium": {
+              "italic": false,
+              "size": 16,
+              "vaxes": {},
+              "weight": 500
+            },
+            "small": {
+              "italic": false,
+              "size": 14,
+              "vaxes": {},
+              "weight": 500
+            }
+          },
+          "workspaces": "Rubik"
+        },
+        "padding": {
+          "scale": 0.92
+        },
+        "rounding": {
+          "scale": 1.12
+        },
+        "spacing": {
+          "scale": 0.92
+        },
+        "transparency": {
+          "base": 0.85,
+          "enabled": true,
+          "layers": 0.4
+        }
+      },
+      "background": {
+        "enabled": true,
+        "wallpaperEnabled": true
+      },
+      "bar": {
+        "activeWindow": {
+          "compact": true,
+          "inverted": false,
+          "showOnHover": false
+        },
+        "clock": {
+          "background": false,
+          "showDate": true,
+          "showIcon": false
+        },
+        "dragThreshold": 20,
+        "entries": [
+          {
+            "enabled": false,
+            "id": "workspaces"
+          },
+          {
+            "enabled": false,
+            "id": "spacer"
+          },
+          {
+            "enabled": false,
+            "id": "activeWindow"
+          },
+          {
+            "enabled": false,
+            "id": "spacer"
+          },
+          {
+            "enabled": false,
+            "id": "tray"
+          },
+          {
+            "enabled": false,
+            "id": "clock"
+          },
+          {
+            "enabled": false,
+            "id": "statusIcons"
+          },
+          {
+            "enabled": false,
+            "id": "power"
+          }
+        ],
+        "excludedScreens": [],
+        "persistent": false,
+        "popouts": {
+          "activeWindow": true,
+          "statusIcons": true,
+          "tray": true
+        },
+        "scrollActions": {
+          "brightness": true,
+          "volume": true,
+          "workspaces": true
+        },
+        "showOnHover": false,
+        "statusIcons": [
+          {
+            "enabled": true,
+            "id": "lockStatus"
+          },
+          {
+            "enabled": true,
+            "id": "audio"
+          },
+          {
+            "enabled": false,
+            "id": "microphone"
+          },
+          {
+            "enabled": false,
+            "id": "kbLayout"
+          },
+          {
+            "enabled": true,
+            "id": "network"
+          },
+          {
+            "enabled": true,
+            "id": "bluetooth"
+          },
+          {
+            "enabled": true,
+            "id": "battery"
+          }
+        ],
+        "tray": {
+          "background": false,
+          "compact": true,
+          "recolour": true
+        },
+        "workspaces": {
+          "activeIndicator": true,
+          "activeTrail": true,
+          "displayType": "Shapes",
+          "maxWindowIcons": 3,
+          "occupiedBg": false,
+          "perMonitor": true,
+          "showUnoccupied": true,
+          "showWindows": false,
+          "showWindowsOnSpecialWorkspaces": false,
+          "shown": 5,
+          "specialDisplayType": "Icons"
+        }
+      },
+      "dashboard": {
+        "dragThreshold": 50,
+        "enabled": true,
+        "mediaUpdateInterval": 2000,
+        "performance": {
+          "showBattery": true,
+          "showCpu": true,
+          "showGpu": true,
+          "showMemory": true,
+          "showNetwork": true,
+          "showStorage": true
+        },
+        "resourceUpdateInterval": 2500,
+        "showClockSeconds": true,
+        "showDashboard": true,
+        "showMedia": true,
+        "showOnHover": true,
+        "showPerformance": true,
+        "showWeather": false
+      },
+      "launcher": {
+        "actionPrefix": ">",
+        "dragThreshold": 50,
+        "enableDangerousActions": false,
+        "enabled": true,
+        "maxShown": 9,
+        "maxWallpapers": 9,
+        "showOnHover": false,
+        "specialPrefix": "@",
+        "useFuzzy": {
+          "actions": true,
+          "apps": true,
+          "schemes": false,
+          "variants": false,
+          "wallpapers": false
+        },
+        "vimKeybinds": false
+      },
+      "lock": {
+        "enableFprint": true,
+        "enableHowdy": true,
+        "enabled": true,
+        "hideNotifs": true,
+        "maxFprintTries": 3,
+        "maxHowdyTries": 3,
+        "recolourLogo": false,
+        "triggerHowdyOnWake": true,
+        "useWallpaper": true
+      },
+      "notifs": {
+        "actionOnClick": false,
+        "clearThreshold": 0.3,
+        "defaultExpireTimeout": 5000,
+        "expandThreshold": 20,
+        "expire": true,
+        "fullscreen": "On",
+        "fullscreenExpireTimeout": 2000,
+        "groupPreviewNum": 2,
+        "openExpanded": false
+      },
+      "osd": {
+        "enableBrightness": true,
+        "enableMicrophone": false,
+        "enabled": true,
+        "hideDelay": 1800
+      },
+      "services": {
+        "audioIncrement": 0.05,
+        "brightnessIncrement": 0.05,
+        "clockFormat": "Auto",
+        "dataUnits": "Binary",
+        "gpuType": "Auto",
+        "maxVolume": 1,
+        "sensorUnits": "Celsius",
+        "smartScheme": false
+      },
+      "sidebar": {
+        "dragThreshold": 80,
+        "enabled": true,
+        "minHoverThreshold": 200,
+        "showOnHover": false
+      },
+      "utilities": {
+        "enabled": true,
+        "maxToasts": 3,
+        "quickToggles": [
+          {
+            "enabled": true,
+            "id": "wifi"
+          },
+          {
+            "enabled": true,
+            "id": "bluetooth"
+          },
+          {
+            "enabled": true,
+            "id": "mic"
+          },
+          {
+            "enabled": true,
+            "id": "settings"
+          },
+          {
+            "enabled": true,
+            "id": "gameMode"
+          },
+          {
+            "enabled": true,
+            "id": "dnd"
+          },
+          {
+            "enabled": false,
+            "id": "vpn"
+          }
+        ],
+        "toasts": {
+          "audioInputChanged": true,
+          "audioOutputChanged": true,
+          "capsLockChanged": true,
+          "chargingChanged": true,
+          "configLoaded": true,
+          "dndChanged": true,
+          "fullscreen": "off",
+          "gameModeChanged": true,
+          "kbLayoutChanged": true,
+          "kbLimit": true,
+          "nowPlaying": false,
+          "numLockChanged": true,
+          "vpnChanged": true
+        }
+      }
+    }
+  },
+  "shell_tokens_json": {
+    "status": "absent"
+  },
+  "scheme_state": {
+    "status": "valid-json",
+    "selected_fields": {
+      "name": "caelestia",
+      "mode": "dark",
+      "variant": "monochrome",
+      "flavour": "default",
+      "colors": {
+        "background": "0a0f0f",
+        "onBackground": "dce8e6",
+        "surface": "0a0f0f",
+        "surfaceDim": "0a0f0f",
+        "surfaceBright": "242e2d",
+        "surfaceContainerLowest": "000000",
+        "surfaceContainerLow": "0e1514",
+        "surfaceContainer": "131b1a",
+        "surfaceContainerHigh": "192120",
+        "surfaceContainerHighest": "1d2827",
+        "onSurface": "dce8e6",
+        "surfaceVariant": "1d2827",
+        "onSurfaceVariant": "a2adac",
+        "outline": "6d7876",
+        "outlineVariant": "3f4a49",
+        "inverseSurface": "f6faf9",
+        "inverseOnSurface": "515655",
+        "shadow": "000000",
+        "scrim": "000000",
+        "surfaceTint": "9bd0cc",
+        "primary": "9bd0cc",
+        "primaryDim": "8ec2bf",
+        "onPrimary": "0d4845",
+        "primaryContainer": "255b58",
+        "onPrimaryContainer": "b8ede9",
+        "inversePrimary": "336764",
+        "primaryFixed": "b7ede9",
+        "primaryFixedDim": "a9deda",
+        "onPrimaryFixed": "0c4744",
+        "onPrimaryFixedVariant": "306461",
+        "secondary": "b0ccc9",
+        "secondaryDim": "a3bebc",
+        "onSecondary": "2c4543",
+        "secondaryContainer": "27403e",
+        "onSecondaryContainer": "a9c5c2",
+        "secondaryFixed": "cce8e5",
+        "secondaryFixedDim": "bedad7",
+        "onSecondaryFixed": "2b4442",
+        "onSecondaryFixedVariant": "47605e",
+        "tertiary": "d5efff",
+        "tertiaryDim": "b6e3fe",
+        "onTertiary": "2e5c72",
+        "tertiaryContainer": "b6e3fe",
+        "onTertiaryContainer": "255369",
+        "tertiaryFixed": "b6e3fe",
+        "tertiaryFixedDim": "a8d5ef",
+        "onTertiaryFixed": "0b4156",
+        "onTertiaryFixedVariant": "2f5d73",
+        "error": "fa746f",
+        "errorDim": "c54d4a",
+        "onError": "490006",
+        "errorContainer": "871f21",
+        "onErrorContainer": "ff9993",
+        "primaryPaletteKeyColor": "4c807d",
+        "secondaryPaletteKeyColor": "627c7a",
+        "tertiaryPaletteKeyColor": "517d94",
+        "neutralPaletteKeyColor": "737877",
+        "neutralVariantPaletteKeyColor": "6e7978",
+        "errorPaletteKeyColor": "c84f4c",
+        "primary_paletteKeyColor": "4c807d",
+        "secondary_paletteKeyColor": "627c7a",
+        "tertiary_paletteKeyColor": "517d94",
+        "neutral_paletteKeyColor": "737877",
+        "neutral_variant_paletteKeyColor": "6e7978",
+        "term0": "343434",
+        "term1": "769e00",
+        "term2": "56e2c0",
+        "term3": "81fcce",
+        "term4": "76b6b3",
+        "term5": "7aaee9",
+        "term6": "83d8c9",
+        "term7": "cddcd3",
+        "term8": "9aa59e",
+        "term9": "85b900",
+        "term10": "41f7d0",
+        "term11": "cdffe9",
+        "term12": "a3c8c3",
+        "term13": "a2c0f7",
+        "term14": "8bedd9",
+        "term15": "ffffff",
+        "rosewater": "f1f3e5",
+        "flamingo": "e3e4c5",
+        "pink": "bae2ff",
+        "mauve": "60cfe8",
+        "red": "8ab5ff",
+        "maroon": "abbef0",
+        "peach": "a9daac",
+        "yellow": "d3fae8",
+        "green": "8df1df",
+        "teal": "9feee7",
+        "sky": "93eae9",
+        "sapphire": "70d7db",
+        "blue": "57cdda",
+        "lavender": "86d9e7",
+        "klink": "00969e",
+        "klinkSelection": "00969e",
+        "kvisited": "008ca9",
+        "kvisitedSelection": "008ca9",
+        "knegative": "838f00",
+        "knegativeSelection": "838f00",
+        "kneutral": "34c359",
+        "kneutralSelection": "34c359",
+        "kpositive": "00beab",
+        "kpositiveSelection": "00beab",
+        "text": "dce8e6",
+        "subtext1": "a2adac",
+        "subtext0": "6d7876",
+        "overlay2": "5f6967",
+        "overlay1": "505958",
+        "overlay0": "434b4a",
+        "surface2": "353d3c",
+        "surface1": "282e2e",
+        "surface0": "191f1e",
+        "base": "0a0f0f",
+        "mantle": "0a0f0f",
+        "crust": "090e0e",
+        "success": "B5CCBA",
+        "onSuccess": "213528",
+        "successContainer": "374B3E",
+        "onSuccessContainer": "D1E9D6"
+      }
+    }
+  }
+}

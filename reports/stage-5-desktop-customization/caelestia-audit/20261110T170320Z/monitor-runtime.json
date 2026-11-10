@@ -1,0 +1,19 @@
+{
+  "status": "ok",
+  "monitors": [
+    {
+      "name": "eDP-1",
+      "width": 1920,
+      "height": 1080,
+      "refreshRate": 60.001,
+      "scale": 1.5,
+      "transform": 0,
+      "focused": true,
+      "disabled": false,
+      "dpmsStatus": true,
+      "availableModes": [
+        "1920x1080@60.00Hz"
+      ]
+    }
+  ]
+}
