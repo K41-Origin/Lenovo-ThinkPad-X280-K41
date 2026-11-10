@@ -3,7 +3,6 @@
 set -Eeuo pipefail
 umask 077
 
-SCRIPT_NAME=${0##*/}
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
 
@@ -39,14 +38,16 @@ done
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)" ||
     die 'Cannot locate the project Git repository.'
-source_root="${K41_CAELSTIA_SOURCE:-$HOME/.config/quickshell/caelestia}"
+source_root="${K41_CAELESTIA_SOURCE:-$HOME/.config/quickshell/caelestia}"
 config_file="${XDG_CONFIG_HOME:-$HOME/.config}/caelestia/shell.json"
 dock_source="$repo_root/stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml"
 dock_target="$source_root/modules/k41dock/K41Dock.qml"
 shell_file="$source_root/shell.qml"
 
-[[ -f $shell_file ]] || die "Caelestia source entry point not found: $shell_file"
-[[ -f $config_file ]] || die "Runtime Caelestia config not found: $config_file"
+if [[ $mode != --rollback ]]; then
+    [[ -f $shell_file ]] || die "Caelestia source entry point not found: $shell_file"
+    [[ -f $config_file ]] || die "Runtime Caelestia config not found: $config_file"
+fi
 
 if [[ $mode == --check ]]; then
     [[ -f $dock_source ]] || die "Dock QML source missing from repository: $dock_source"
@@ -63,7 +64,6 @@ if "import \"modules/k41dock\" as K41Dock" in text:
 data = json.loads(config.read_text(encoding="utf-8"))
 if not isinstance(data.get("bar"), dict) or not isinstance(data["bar"].get("entries"), list):
     raise SystemExit("FAIL: shell.json does not have the expected bar.entries structure")
-json.loads(dock.read_text(encoding="utf-8")) if dock.suffix == ".json" else None
 print("PASS: source layout, runtime JSON, and deployment preconditions")
 PY
     exit 0
