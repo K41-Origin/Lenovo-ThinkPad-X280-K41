@@ -2,7 +2,7 @@
 
 **Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
 
-**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status implementasi source K41: IMPLEMENTED. Status migrasi/runtime: PLANNED / NOT VERIFIED.** Source visual Floating Password Card sekarang berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`. Struktur source kini langsung berada di workstream Stage 5; tidak ada subproject terpisah.
+**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan deployment visual K41: IMPLEMENTED. Status integrasi host/runtime: NOT VERIFIED.** Source visual Floating Password Card sekarang berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`. Struktur source kini langsung berada di workstream Stage 5; tidak ada subproject terpisah.
 
 ## Tujuan dan batas scope
 
@@ -30,8 +30,28 @@ Pengguna menetapkan batas partisipasi: **pengguna tidak ingin melakukan pekerjaa
 1. **Audit visual read-only — COMPLETED.** Audit source visual pada report 20261110T192941Z telah menyediakan source QML, dependency visual, aset, dan konfigurasi terpilih. Report mengandung satu file di luar scope; file itu tidak dipakai sebagai input implementasi. Screenshot/runtime capture belum tersedia.
 2. **Audit dependency dan batas ownership — PARTIAL.** Dependency statis yang tampak pada QML dicatat di `workstreams/02-lock-screen/modules/lockscreen/README.md`. Kelengkapan dependency runtime masih menunggu pemeriksaan setelah modul dipasang.
 3. **Ekstraksi source terpilih — IMPLEMENTED.** Empat file QML visual tersedia langsung di `workstreams/02-lock-screen/modules/lockscreen/`.
-4. **Struktur modul visual Stage 5 — IMPLEMENTED.** Struktur dan kontrak komponen didokumentasikan di `workstreams/02-lock-screen/modules/lockscreen/README.md`; integrasi runtime, backup, validasi deployment, dan rollback belum diimplementasikan.
+4. **Struktur modul visual Stage 5 — IMPLEMENTED.** Struktur dan kontrak komponen didokumentasikan di `workstreams/02-lock-screen/modules/lockscreen/README.md`; host integration dan runtime masih belum diverifikasi.
 5. **Deployment source visual — IMPLEMENTED (deployment only).** Script `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh` melakukan preflight, menyalin empat file visual ke `~/.config/quickshell/k41/modules/lockscreen/`, membuat backup, staging, checksum, idempotency, dan rollback. Jalankan sebagai user desktop biasa tanpa sudo. Ini belum mengaktifkan modul.
+
+Perintah pada laptop setelah checkout diperbarui:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --install
+```
+
+Pemeriksaan status:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --status
+```
+
+Rollback menggunakan path backup yang dicetak saat instalasi:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --rollback /home/USER/.local/state/k41/lockscreen/backups/TIMESTAMP
+```
+
+Script hanya menyalin empat file QML visual ke namespace K41. Script tidak mengubah entrypoint Caelestia karena titik integrasi host belum dibuktikan dari source/runtime aktual. Karena itu deployment file tidak boleh dianggap sebagai Lock Screen yang sudah aktif.
 6. **Static/isolated testing — IMPLEMENTED, runtime — NOT VERIFIED.** Test `stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh` memeriksa syntax dan alur deployment dalam HOME sementara. Integrasi host Caelestia belum dilakukan karena titik import yang benar belum diverifikasi. Runtime, lock/unlock, password salah, wake/resume, dan perilaku perangkat hanya boleh dinyatakan VERIFIED bila benar-benar diuji dengan bukti.
 7. **Audit pascamigrasi.** Pastikan modul K41 tidak lagi bergantung pada source visual Caelestia yang akan dibersihkan, sementara dependency upstream yang masih diperlukan tetap tersedia dan tercatat.
 8. **Cleanup source visual upstream.** Hanya setelah migrasi terbukti berfungsi dan pengguna menerima hasilnya, identifikasi serta hapus source visual upstream yang sudah tidak digunakan. Cleanup harus sempit, berdasarkan dependency graph, dan memiliki rencana rollback. Jangan menghapus komponen autentikasi atau dependency bersama.
