@@ -187,7 +187,6 @@ except BaseException:
 check = json.loads(target_path.read_text(encoding="utf-8"))
 required = {
     "bar": ["entries", "clock", "workspaces"],
-    "dashboard": ["enabled"],
     "launcher": ["maxShown", "useFuzzy"],
     "lock": ["useWallpaper", "hideNotifs"],
     "sidebar": ["enabled"],
@@ -199,11 +198,9 @@ for section, keys in required.items():
     for key in keys:
         if key not in check[section]:
             raise SystemExit(f"Missing profile setting: {section}.{key}")
-if check["dashboard"].get("enabled") is not False:
-    raise SystemExit("Dashboard must remain disabled in the K41 profile.")
 if check["lock"].get("useWallpaper") is not True:
     raise SystemExit("Lock screen wallpaper setting did not persist.")
-print("PASS: merged Caelestia profile, dashboard-disabled policy, and required component settings verified.")
+print("PASS: merged Caelestia profile and required component settings verified.")
 PY
 
 if ! timeout 15s caelestia scheme set -n caelestia -m dark -v monochrome; then
@@ -256,6 +253,6 @@ if [[ $restart_status == "COMMAND_RETURNED" ]] && grep -Fq 'Configuration Loaded
     restart_status="CONFIRMED"
 fi
 
-info 'Visual components configured: lock screen, bar, launcher, sidebar, notifications, OSD and utility quick toggles; dashboard disabled.'
+info 'Visual components configured: lock screen, bar, launcher, sidebar, notifications, OSD and utility quick toggles; Dashboard is excluded from the K41 profile; runtime removal is handled separately.'
 info 'Open Caelestia panels with the existing Hyprland shortcuts; use SUPER+L to test lock screen if that binding is present.'
 info "Rollback command: bash scripts/k41-apply-full-desktop-profile.sh --rollback '$backup_dir'"
