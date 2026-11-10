@@ -187,3 +187,7 @@ Dokumen ini memetakan implementasi yang ada. Ia tidak mengubah paket, dependency
 ## Tests and reports
 
 The Stage 3 contract test is `stages/stage-3-desktop-install/tests/test-desktop-setup.sh`. It is invoked through the canonical root `bash tests/run.sh` manifest. Desktop installation reports are written under `reports/stage-3-desktop-install/desktop/`.
+
+## Stage-owned support scripts
+
+Caelestia cache diagnostics and the narrowly scoped cache-permission repair are owned by Stage 3 and stored in `stages/stage-3-desktop-install/scripts/`. Root-level `scripts/fix-caelestia-cache-permissions-x280.sh` and `scripts/test-caelestia-permissions-x280.sh` remain compatibility symlinks.

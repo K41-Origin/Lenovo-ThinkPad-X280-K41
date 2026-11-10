@@ -7,6 +7,7 @@ Peta fisik dan ownership implementasi Stage 5. Status proyek tetap dimiliki [doc
 ```text
 stages/stage-5-desktop-customization/
 ├── README.md
+├── scripts/  # Stage 5 support and appearance tools
 └── workstreams/
     ├── 01-boot-experience/
     │   ├── config/quickshell/k41-boot-splash/shell.qml
@@ -35,6 +36,8 @@ stages/stage-5-desktop-customization/
             ├── k41-report-lockscreen-permissions.sh
             └── k41-report-lockscreen-session.sh
 ```
+
+Stage 5 support scripts (appearance profile, Caelestia audit, baseline/inventory, desktop integration, boot visual diagnostics, and Guest Mode storage audit) are canonical under `scripts/` within this stage. Root `scripts/` names remain compatibility symlinks for existing command paths. Their reports are written under `reports/stage-5-desktop-customization/`.
 
 ## Workstream 1 — Boot Experience
 
