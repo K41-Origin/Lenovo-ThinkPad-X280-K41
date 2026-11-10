@@ -19,16 +19,16 @@ Detail visual lintas-komponen mengacu pada [Design System](../07-DESKTOP-DESIGN-
 ## Implementasi repository
 
 Override QML yang dikelola proyek:
-- `config/quickshell/caelestia/modules/lock/LockSurface.qml`
-- `config/quickshell/caelestia/modules/lock/Content.qml`
-- `config/quickshell/caelestia/modules/lock/Center.qml`
-- `config/quickshell/caelestia/modules/lock/center/PasswordInput.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/LockSurface.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Content.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Center.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/center/PasswordInput.qml`
 
 Installer deployment:
-- `scripts/k41-apply-lockscreen-design.sh`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
 
 Collector audit:
-- `scripts/k41-lockscreen-audit.sh`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`
 
 Test statis:
 - `tests/test-lockscreen-design.sh`
@@ -41,9 +41,9 @@ Dari checkout terbaru pada perangkat:
 
 ```bash
 git pull --ff-only origin main
-bash -n scripts/k41-apply-lockscreen-design.sh
+bash -n stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh
 bash tests/test-lockscreen-design.sh
-sudo bash scripts/k41-apply-lockscreen-design.sh
+sudo bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh
 ```
 
 Ikuti validasi dan instruksi yang benar-benar dicetak installer. Setelah deployment:
