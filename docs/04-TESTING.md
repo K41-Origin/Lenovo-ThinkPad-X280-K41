@@ -10,6 +10,17 @@ bash tests/run.sh
 
 Manifest test dan urutannya hanya didefinisikan di `tests/run.sh`; cakupan suite ada di [tests/README.md](../tests/README.md). Suite menggunakan static checks, fixtures, mocks, dan disposable loop-backed image. Hasilnya tidak membuktikan instalasi penuh, firmware boot, atau kompatibilitas hardware.
 
+## CI workflows
+
+Repository saat ini memiliki dua workflow yang sebagian tumpang tindih; keduanya dipertahankan dan belum dikonsolidasikan:
+
+| Workflow | Trigger | Validasi |
+|---|---|---|
+| `.github/workflows/ci.yml` | Pull request; push ke `main`, `feature/**`, dan `fix/**` | Bash syntax untuk file `.sh` dan `installer`; ShellCheck `--severity=error` pada daftar script terpilih; `bash tests/run.sh`. |
+| `.github/workflows/bash-tests.yml` | Pull request/push ke `main`; manual `workflow_dispatch` | Bash syntax seluruh file shell dan `installer`; ShellCheck seluruh file shell; shfmt pada file infrastruktur test/readiness terpilih; `bash tests/run.sh`. |
+
+Kedua workflow berjalan pada perubahan ke `main` dan pull request yang menargetkan `main`, sehingga sebagian test suite dijalankan dua kali. Perbedaan cakupan dan trigger perlu ditinjau sebelum konsolidasi; jangan menghapus workflow atau mengubah required checks tanpa audit branch protection dan kebutuhan maintenance.
+
 ## Gate tujuh tahap
 
 1. **Live readiness:** `bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh` berakhir PASS; laporan dan identitas target direview.
