@@ -124,7 +124,13 @@ cleanup() {
     [[ -z ${stage:-} || ! -d $stage ]] || rm -rf -- "$stage"
     if (( rc != 0 && changed == 1 )); then
         info "Deployment failed; restoring the four original visual files from $backup."
-        restore_originals || printf 'CRITICAL: automatic restore failed; backup remains at %s\n' "$backup" >&2
+        if restore_originals; then
+            if command -v caelestia >/dev/null 2>&1; then
+                caelestia shell -r -d >/dev/null 2>&1 || printf 'WARNING: restored files, but Caelestia reload after rollback failed.\n' >&2
+            fi
+        else
+            printf 'CRITICAL: automatic restore failed; backup remains at %s\n' "$backup" >&2
+        fi
     fi
     exit "$rc"
 }
