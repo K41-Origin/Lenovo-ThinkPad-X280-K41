@@ -10,7 +10,7 @@
 | 2. Basic Arch Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh`; operasi destruktif. |
 | 3. Desktop Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. |
 | 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot historis: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. |
-| 5. Desktop Customization | **IN PROGRESS — TOPBAR / BOTTOMBAR REWORK** | Dashboard dihentikan. Bottombar dan Topbar menjadi arah UI aktif. Cleanup script belum diimplementasikan. |
+| 5. Desktop Customization | **IN PROGRESS — TOPBAR / BOTTOMBAR REWORK** | Dashboard dihentikan. Bottombar dan Topbar menjadi arah UI aktif. Cleanup script sudah tersedia; audit terbaru dan eksekusi pada X280 masih menunggu. |
 | 6. Desktop & Hardware Optimization | PLANNED | Menunggu Stage 5 dan baseline X280 terbaru. |
 | 7. Release | PLANNED | Menunggu seluruh gate dan regression lulus. |
 
@@ -20,10 +20,9 @@ Keputusan terbaru pengguna pada 2026-11-11:
 1. **Dashboard dihapus dari scope.** Tidak perlu mendesain atau mengimplementasikan dashboard.
 2. **Taskbar/Panel berganti nama menjadi Bottombar.** Arah desain yang dipertahankan adalah dock horizontal minimal di bawah dengan indikator workspace saja. Implementasi sebelumnya pernah diterima sebagai Taskbar/Panel; perubahan dan verifikasi baru belum diterima.
 3. **Topbar akan dibuat.** Posisi atas dan orientasi horizontal telah diputuskan; daftar elemen, alignment, ukuran, dan perilaku visibility belum ditentukan.
-4. **Cleanup script direncanakan:** `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`. Status **PLANNED — NOT IMPLEMENTED**. Script harus dirancang setelah audit aktual, memiliki mode pemeriksaan, backup, rollback, dan tidak menyentuh source/config yang tidak terkait.
+4. **Cleanup dashboard:** `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh` berstatus **IMPLEMENTED — NOT TESTED ON X280**. Default dry-run; `--apply` menonaktifkan `dashboard.enabled` pada konfigurasi global/monitor setelah backup; `--rollback` memulihkan backup. Source QML upstream tidak dihapus.
 
 Dokumen pemilik:
-- [Dashboard — retired decision](../stages/stage-5-desktop-customization/docs/03-DASHBOARD.md)
 - [Bottombar](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
 - [Topbar](../stages/stage-5-desktop-customization/docs/05-TOPBAR.md)
 
@@ -33,18 +32,17 @@ Dokumen pemilik:
 |---|---|
 | 1. Boot Experience | **COMPLETED / USER ACCEPTED — 2026-11-10** |
 | 2. Lock Screen | **COMPLETED / USER ACCEPTED — 2026-11-10** |
-| 3. Dashboard | **CANCELLED / REMOVED FROM SCOPE — 2026-11-11** |
-| 4. Bottombar | **REWORK PLANNED** (sebelumnya Taskbar/Panel diterima) |
-| 5. Topbar | **PLANNED — REQUIREMENTS TO FINALIZE** |
-| 6. Launcher | PLANNED |
-| 7. Sidebar | PLANNED |
-| 8. Utilities | PLANNED |
+| 3. Bottombar | **REWORK PLANNED** (sebelumnya Taskbar/Panel diterima) |
+| 4. Topbar | **PLANNED — REQUIREMENTS TO FINALIZE** |
+| 5. Launcher | PLANNED |
+| 6. Sidebar | PLANNED |
+| 7. Utilities | PLANNED |
 
 Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual ada di [03 — Guest Mode](../stages/stage-5-desktop-customization/docs/03-GUEST-MODE.md). Fitur ini bukan pekerjaan aktif dan tidak boleh diimplementasikan tanpa keputusan baru yang eksplisit.
 
 ## Keputusan proyek yang masih berlaku
 
-1. Stage 5 dikerjakan berurutan; dashboard yang dihentikan tidak dihitung sebagai pekerjaan tertunda.
+1. Dashboard dihapus dari daftar workstream Stage 5; fungsi runtime sedang ditangani melalui cleanup script terpisah.
 2. Hasil Stage 5 menjadi input evaluasi/perbaikan tahap instalasi sebelumnya.
 3. Refactoring integrasi instalasi dilakukan setelah Stage 5 cukup matang dan sebelum Stage 7 — Release.
 4. Screenshot tidak digunakan, tidak diminta, dan bukan acceptance gate.
