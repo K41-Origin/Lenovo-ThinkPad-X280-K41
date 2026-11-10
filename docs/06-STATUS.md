@@ -16,12 +16,13 @@
 
 ## Prioritas aktif Stage 5
 
-1. **Workstream 04 — Bottombar / K41Dock: COMPLETED / USER CONFIRMED SUCCESS.** Implementasi `K41Dock.qml` menjadi baseline komponen K41. Source kanonis berada di `workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/`; runtime laptop berada di `~/.config/quickshell/caelestia/modules/k41dock/`.
-2. **Workstream 05 — Topbar: PLANNED.** Posisi atas dan orientasi horizontal telah diputuskan; elemen, alignment, ukuran, dan visibility harus ditentukan sebelum implementasi.
-3. **Workstream 06 — Launcher: PLANNED.**
-4. **Workstream 07 — Sidebar: PLANNED.**
-5. **Workstream 08 — Utilities: PLANNED.**
-6. Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan pekerjaan aktif.
+1. **Workstream 02 — Lock Screen: COMPLETED / USER ACCEPTED.** Empat override QML kini memiliki source kanonis di `workstreams/02-lock-screen/k41-dots/modules/lock/`; installer mendeploy overlay ke source runtime Caelestia. Audit Caelestia membandingkan source kanonis dengan runtime.
+2. **Workstream 04 — Bottombar / K41Dock: COMPLETED / USER CONFIRMED SUCCESS.** Implementasi `K41Dock.qml` menjadi baseline komponen K41. Source kanonis berada di `workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/`; runtime laptop berada di `~/.config/quickshell/caelestia/modules/k41dock/`.
+3. **Workstream 05 — Topbar: PLANNED.** Posisi atas dan orientasi horizontal telah diputuskan; elemen, alignment, ukuran, dan visibility harus ditentukan sebelum implementasi.
+4. **Workstream 06 — Launcher: PLANNED.**
+5. **Workstream 07 — Sidebar: PLANNED.**
+6. **Workstream 08 — Utilities: PLANNED.**
+7. Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan pekerjaan aktif.
 
 ## Prinsip pengembangan Stage 5
 
