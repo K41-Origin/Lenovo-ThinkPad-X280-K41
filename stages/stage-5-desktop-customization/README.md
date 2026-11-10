@@ -8,36 +8,47 @@ Peta fisik dan ownership implementasi Stage 5. Status proyek tetap dimiliki [doc
 stages/stage-5-desktop-customization/
 ├── README.md
 ├── docs/
+│   ├── 00-COLLABORATION-WORKFLOW.md
+│   ├── 01-BOOT-EXPERIENCE.md
+│   ├── 02-LOCK-SCREEN.md
+│   ├── 04-TASKBAR-PANEL.md
+│   ├── 04-TASKBAR-PANEL-IMPLEMENTATION.md
+│   ├── 05-TOPBAR.md
+│   └── ...
 ├── scripts/
 │   ├── k41-audit-caelestia.sh
-│   └── k41-cleanup-caelestia.sh # Disable Dashboard via supported config
+│   ├── k41-cleanup-caelestia.sh
+│   └── k41-install-caelestia-dock.sh
 ├── tests/
 └── workstreams/
+    ├── 01-boot-experience/
+    ├── 02-lock-screen/
+    └── 04-taskbar-panel/
+        └── config/quickshell/caelestia/modules/k41dock/K41Dock.qml
 ```
 
-## Stage 5 UI direction
+## Prinsip Stage 5
 
-- Dashboard dinonaktifkan dari runtime Caelestia.
-- Taskbar/Panel diarahkan menjadi **Bottombar**: dock horizontal minimal di tepi bawah, berisi indikator workspace saja.
-- **Topbar** akan dibuat di tepi atas. Daftar elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
-- Audit Caelestia tetap tersedia melalui `scripts/k41-audit-caelestia.sh`. Cleanup berjalan langsung tanpa mode atau argumen:
-  `bash stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`
+- Setiap workstream dikerjakan bertahap dan terisolasi.
+- Source kanonis, installer, test, dan dokumentasi disimpan di repository.
+- Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`. Integrasi Caelestia saat ini menggunakan `~/.config/quickshell/caelestia/`.
+- Komponen K41 ditempatkan pada namespace milik K41, misalnya `modules/k41dock/K41Dock.qml`, dan bukan dengan mengubah source package-owned upstream yang tidak diperlukan.
+- Hasil Stage 5 akan menjadi basis komponen, pola integrasi, deployment, dan pengujian untuk proyek lanjutan **k41-shell**. Stage 5 belum berarti proyek k41-shell mandiri sudah dibuat.
 
-## Dashboard cleanup scope
+## Arah UI
 
-Laporan audit `20261110T174657Z` menunjukkan:
-- Global `~/.config/caelestia/shell.json` valid dan memiliki `dashboard.enabled: true`.
-- Per-monitor `monitors/eDP-1/shell.json` valid tetapi tidak memiliki bagian `dashboard`; ia mewarisi konfigurasi global.
-- File sumber di `modules/dashboard/` yang diinventarisasi tidak ditemukan.
-- Referensi Dashboard masih ada pada Nexus (`PageRegistry.qml`, `PageCompRegistry.qml`, `PanelsPage.qml`, dan `DashboardPanel.qml`) serta drawer interaction files.
-- Audit tidak menemukan candidate Hyprland keybind terkait Dashboard.
+- Dashboard dinonaktifkan dari runtime Caelestia; halaman Nexus belum dihapus dari source upstream.
+- Bottombar menggunakan K41Dock dan hanya menampilkan indikator workspace.
+- Topbar akan dibuat di tepi atas setelah elemen, alignment, ukuran, dan visibility disepakati.
+- Launcher, Sidebar, dan Utilities mengikuti urutan pada [indeks workstream](docs/README.md).
 
-Karena itu cleanup tidak lagi menghapus properti konfigurasi (yang dapat mengembalikan default upstream `enabled: true`) dan tidak menghapus source QML. Script menetapkan `dashboard.enabled=false` pada global config dan pada file monitor yang memang memiliki override Dashboard. Semua file kandidat divalidasi sebelum perubahan; backup bertimestamp dibuat sebelum penggantian atomik. Pengaturan lain dipertahankan.
+## Audit dan cleanup
 
-**Batasan yang diketahui:** script ini menonaktifkan Dashboard runtime melalui konfigurasi. Entry Dashboard di halaman Nexus dan referensi upstream QML tetap ada, sehingga penghapusan total dari antarmuka Nexus memerlukan refactoring source-level terpisah. Script tidak mengklaim telah menghapus entry tersebut atau mengubah file package-owned.
+Audit Caelestia tetap tersedia melalui `scripts/k41-audit-caelestia.sh`. Cleanup Dashboard berjalan tanpa argumen:
+`bash stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`
 
-## Safety dan validasi
+Cleanup menetapkan `dashboard.enabled=false` pada konfigurasi global dan override monitor yang relevan, membuat backup, dan tidak menghapus source QML atau file package-owned. Runtime X280 harus dinilai dari hasil aktual, bukan dari keberadaan script.
 
-Jalankan sebagai pengguna biasa, tanpa `sudo` dan tanpa argumen. Script menolak root, path konfigurasi symlink/non-regular, JSON invalid, dan struktur Dashboard yang tidak sesuai. Ia tidak menghapus source checkout atau file package-owned.
+## Validasi
 
-Fixture test: `tests/test-caelestia-dashboard-cleanup.sh`. Test statis/fixture tidak membuktikan runtime visual; runtime X280 tetap perlu diverifikasi setelah cleanup.
+Installer Bottombar mendukung `--check`, `--install`, dan `--rollback`. Lihat [dokumen implementasi K41Dock](docs/04-TASKBAR-PANEL-IMPLEMENTATION.md). Test statis/fixture tidak menggantikan pemeriksaan runtime dan penerimaan pengguna pada X280.
