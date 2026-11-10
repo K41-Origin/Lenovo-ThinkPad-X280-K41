@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/scripts/setup-desktop-x280.sh"
-RESOLVER="$ROOT/lib/aur-dependency-resolver.sh"
+SCRIPT="$ROOT/stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh"
+RESOLVER="$ROOT/stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$*"; }
 
@@ -50,11 +50,11 @@ bash -n "$SCRIPT" || fail 'desktop setup script syntax invalid'
 bash -n "$RESOLVER" || fail 'AUR dependency resolver syntax invalid'
 pass 'desktop setup script and resolver pass bash -n'
 
-DESKTOP_ENTRY="$ROOT/scripts/k41-install-desktop.sh"
+DESKTOP_ENTRY="$ROOT/stages/stage-3-desktop-install/scripts/k41-install-desktop.sh"
 [[ -f $DESKTOP_ENTRY ]] || fail 'canonical desktop entry point missing'
 bash -n "$DESKTOP_ENTRY" || fail 'canonical desktop entry point syntax invalid'
 # shellcheck disable=SC2016 # Literal contract string checked by grep.
-grep -Fq 'exec bash "$ROOT/scripts/setup-desktop-x280.sh" "$@"' "$DESKTOP_ENTRY" ||
+grep -Fq 'exec bash "$ROOT/stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh" "$@"' "$DESKTOP_ENTRY" ||
   fail 'canonical desktop entry point does not delegate to the existing setup implementation'
 pass 'canonical desktop entry point passes syntax and delegation checks'
 
@@ -135,7 +135,7 @@ depends_aarch64 = ignored-arm-only-dependency
 pkgname = fixture-demo
 provides = legacy-demo
 SRCINFO
-# shellcheck source=../lib/aur-dependency-resolver.sh
+# shellcheck source=../stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh
 source "$RESOLVER"
 [[ $(aur_dependency_name 'libcava>=1.0') == libcava ]] || fail 'versioned dependency normalization failed'
 aur_metadata_matches "$fixture_dir/.SRCINFO" fixture-demo || fail 'pkgname metadata matching failed'
