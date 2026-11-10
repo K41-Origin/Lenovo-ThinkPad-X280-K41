@@ -73,27 +73,25 @@ Source implementasi tersedia di repository. Status pengujian dan verifikasi terb
 
 ## Artefak global yang sengaja tidak dipindahkan
 
-- Test: `stages/stage-5-desktop-customization/tests/test-boot-experience.sh`, `stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh`, `stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh`, `stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh`, `stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`.
+- Stage-owned tests: `stages/stage-5-desktop-customization/tests/` (boot experience, Plymouth, animated splash, autologin, lock-screen, Guest Mode audit, and boot visual diagnostics).
 - `tests/run.sh`, `.github/workflows/bash-tests.yml`: runner dan CI lintas-stage. Workflow CI tunggal menjalankan syntax, ShellCheck, shfmt terpilih, dan test suite; lihat [Testing dan CI](../../docs/04-TESTING.md).
-- `docs/08-STAGE-5/`: prosedur, scope, acceptance, Guest Mode.
+- `stages/stage-5-desktop-customization/docs/`: prosedur, scope, acceptance, Guest Mode.
 - `docs/07-DESKTOP-DESIGN-SYSTEM.md` dan `docs/07-DESIGN-SYSTEM/`: spesifikasi visual lintas-komponen.
 
-Test Stage 5 yang terpisah kini dicantumkan di global runner. Jangan memindahkan test ke direktori stage atau membuat runner duplikat.
+Manifest global `tests/run.sh` memanggil test Stage 5 dari direktori stage. Jangan membuat runner duplikat.
 
 ## Tidak dipindahkan
 
-- `scripts/k41-apply-caelestia-profile.sh`, `scripts/k41-audit-caelestia.sh`, dan `scripts/k41-desktop-costumization-check.sh`: ownership workstream belum ditetapkan secara eksplisit.
-- `scripts/k41-diagnose-boot-visuals.sh` beserta test: tooling diagnostik; tidak dimasukkan ke runtime Workstream 1 tanpa bukti ownership yang lebih kuat.
 - Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual tetap di [03 — Guest Mode](docs/03-GUEST-MODE.md).
 - Workstream 3–7 masih PLANNED; tidak dibuat direktori runtime kosong.
 
 ## Safety dan validasi
 
-Reorganisasi hanya memindahkan source dan memperbarui referensi. Tidak menjalankan installer, TPM2 enrollment, rebuild UKI, Plymouth deployment, autologin, Caelestia deployment, lock/unlock, atau repair. Jangan mengubah PAM, password, LUKS keyslot, atau kebijakan autentikasi sebagai bagian dari kosmetik.
+Reorganisasi memindahkan source, tests, dan laporan runtime ke ownership Stage; root script paths dipertahankan sebagai symlink kompatibilitas. Tidak menjalankan installer, TPM2 enrollment, rebuild UKI, Plymouth deployment, autologin, Caelestia deployment, lock/unlock, atau repair. Jangan mengubah PAM, password, LUKS keyslot, atau kebijakan autentikasi sebagai bagian dari kosmetik.
 
 Validasi yang diperlukan:
 1. Bash syntax dan ShellCheck seluruh script yang dipindahkan.
-2. Test Stage 5: `bash stages/stage-5-desktop-customization/tests/test-boot-experience.sh`, `bash stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh`, `bash stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh`, `bash stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh`, `bash stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`.
+2. Test Stage 5: `bash stages/stage-5-desktop-customization/tests/test-boot-experience.sh`, `bash stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh`, `bash stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh`, `bash stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh`, `bash stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`, `bash stages/stage-5-desktop-customization/tests/test-guest-storage-audit.sh`, dan `bash stages/stage-5-desktop-customization/tests/test-boot-visual-diagnostics.sh`.
 3. Global `bash tests/run.sh`.
 4. Pemeriksaan semua referensi path dan tautan dokumentasi.
 

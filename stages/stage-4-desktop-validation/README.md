@@ -52,7 +52,7 @@ Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--ap
 | `stages/stage-4-desktop-validation/tests/test-desktop-repair.sh` | Syntax, batas mutasi, dan kontrak repair | Test milik Stage 4; canonical di `stages/stage-4-desktop-validation/tests/` |
 | `stages/stage-3-desktop-install/tests/test-desktop-setup.sh` | Memeriksa keberadaan dan syntax validator sebagai kontrak integrasi Stage 3 | Test milik Stage 3; canonical di `stages/stage-3-desktop-install/tests/` |
 | `tests/run.sh` | Manifest test repository | Shared; jangan dipindah |
-| `.github/workflows/ci.yml` | Bash syntax, ShellCheck pada daftar script terpilih, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
+| (workflow lama, sudah dikonsolidasikan) | Bash syntax, ShellCheck pada daftar script terpilih, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
 | `.github/workflows/bash-tests.yml` | Bash syntax dan ShellCheck seluruh file shell, shfmt terpilih, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
 
 **Struktur kanonis:** implementasi Stage 4 telah ditempatkan di `stages/stage-4-desktop-validation/scripts/` dan library khususnya di `stages/stage-4-desktop-validation/lib/`. Test khusus Stage 4 berada di `stages/stage-4-desktop-validation/tests/`; CI dan test runner tetap di lokasi bersama. Reorganisasi ini hanya mengubah lokasi dan referensi path, bukan perilaku runtime.
@@ -159,9 +159,9 @@ Test utama Stage 4:
 
 Integrasi tambahan:
 - `stages/stage-3-desktop-install/tests/test-desktop-setup.sh` memeriksa validator Stage 4 sebagai bagian dari kontrak desktop setup Stage 3.
-- `.github/workflows/ci.yml` menjalankan syntax, ShellCheck pada daftar terpilih, dan suite.
+- (workflow lama, sudah dikonsolidasikan) menjalankan syntax, ShellCheck pada daftar terpilih, dan suite.
 - `.github/workflows/bash-tests.yml` menjalankan syntax/ShellCheck seluruh file shell, shfmt terpilih, dan suite.
-- Kedua workflow tumpang tindih pada push dan pull request ke `main`; detail trigger/cakupan ada di [Testing dan CI](../../docs/04-TESTING.md).
+- Workflow tunggal `.github/workflows/bash-tests.yml` menjalankan syntax, ShellCheck, shfmt terpilih, dan suite pada push/PR; lihat [Testing dan CI](../../docs/04-TESTING.md).
 
 Static/fixture tests tidak menjalankan validator terhadap X280 aktual, tidak menjalankan repair pada host, dan tidak membuktikan UI/physical acceptance.
 

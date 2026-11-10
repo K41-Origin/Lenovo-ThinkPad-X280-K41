@@ -109,7 +109,7 @@ IFS= read -r acknowledgement </dev/tty
 
 info "Source review acknowledged for commit $commit_sha. Running the read-only readiness gate."
 if ! (cd "$repo_dir" && bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh --readiness); then
-  die "Read-only readiness failed. Review reports/live-readiness and reports/live-validation; the destructive installer was not launched."
+  die "Read-only readiness failed. Review reports/stage-1-live-readiness/live-readiness and reports/stage-1-live-readiness/live-validation; the destructive installer was not launched."
 fi
 
 printf '\nRead-only readiness PASSED for commit %s.\n' "$commit_sha" >&2
