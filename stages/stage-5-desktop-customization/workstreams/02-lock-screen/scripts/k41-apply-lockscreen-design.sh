@@ -345,5 +345,5 @@ info 'Complete pinned Caelestia source tree installed under the user config dire
 info 'The package-managed /etc/xdg tree, PAM, authentication, Hyprland configuration, and system services were not modified.'
 info 'Restart from the active Hyprland terminal as the regular user: caelestia shell -r -d'
 info 'Then confirm the restart log names ~/.config/quickshell/caelestia/shell.qml, not /etc/xdg/quickshell/caelestia/shell.qml.'
-info "Rollback: sudo bash scripts/k41-apply-lockscreen-design.sh --rollback '$backup_dir'"
+info "Rollback: sudo bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh --rollback '$backup_dir'"
 info 'No visual/runtime acceptance is claimed until lock/unlock and visual checks pass on the X280.'
