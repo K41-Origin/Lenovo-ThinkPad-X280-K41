@@ -2,7 +2,7 @@
 
 **Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
 
-**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan deployment visual K41: IMPLEMENTED. Status integrasi host/runtime: NOT VERIFIED.** Source visual Floating Password Card sekarang berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`. Struktur source kini langsung berada di workstream Stage 5; tidak ada subproject terpisah.
+**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan automatic deployment/reload: IMPLEMENTED. Status runtime rendering: NOT VERIFIED pada ThinkPad X280.** Source visual Floating Password Card berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject terpisah.
 
 ## Tujuan dan batas scope
 
@@ -31,28 +31,14 @@ Pengguna menetapkan batas partisipasi: **pengguna tidak ingin melakukan pekerjaa
 2. **Audit dependency dan batas ownership — PARTIAL.** Dependency statis yang tampak pada QML dicatat di `workstreams/02-lock-screen/modules/lockscreen/README.md`. Kelengkapan dependency runtime masih menunggu pemeriksaan setelah modul dipasang.
 3. **Ekstraksi source terpilih — IMPLEMENTED.** Empat file QML visual tersedia langsung di `workstreams/02-lock-screen/modules/lockscreen/`.
 4. **Struktur modul visual Stage 5 — IMPLEMENTED.** Struktur dan kontrak komponen didokumentasikan di `workstreams/02-lock-screen/modules/lockscreen/README.md`; host integration dan runtime masih belum diverifikasi.
-5. **Deployment source visual — IMPLEMENTED (deployment only).** Script `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh` melakukan preflight, menyalin empat file visual ke `~/.config/quickshell/k41/modules/lockscreen/`, membuat backup, staging, checksum, idempotency, dan rollback. Jalankan sebagai user desktop biasa tanpa sudo. Ini belum mengaktifkan modul.
-
-Perintah pada laptop setelah checkout diperbarui:
+5. **Automatic deployment dan aktivasi — IMPLEMENTED.** Script tunggal `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh` tanpa opsi CLI melakukan preflight, backup empat file, staging, verifikasi, penggantian source visual di `~/.config/quickshell/caelestia/modules/lock/`, lalu memanggil `caelestia shell -r -d`. Script menolak source tree/revision yang tidak sesuai, symlink, ownership yang tidak aman, atau perubahan lokal pada target; kegagalan deployment/reload memulihkan file dari backup. Jalankan dari root checkout sebagai user desktop biasa dalam sesi Hyprland aktif:
 
 ```bash
-bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --install
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh
 ```
 
-Pemeriksaan status:
-
-```bash
-bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --status
-```
-
-Rollback menggunakan path backup yang dicetak saat instalasi:
-
-```bash
-bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --rollback /home/USER/.local/state/k41/lockscreen/backups/TIMESTAMP
-```
-
-Script hanya menyalin empat file QML visual ke namespace K41. Script tidak mengubah entrypoint Caelestia karena titik integrasi host belum dibuktikan dari source/runtime aktual. Karena itu deployment file tidak boleh dianggap sebagai Lock Screen yang sudah aktif.
-6. **Static/isolated testing — IMPLEMENTED, runtime — NOT VERIFIED.** Test `stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh` memeriksa syntax dan alur deployment dalam HOME sementara. Integrasi host Caelestia belum dilakukan karena titik import yang benar belum diverifikasi. Runtime, lock/unlock, password salah, wake/resume, dan perilaku perangkat hanya boleh dinyatakan VERIFIED bila benar-benar diuji dengan bukti.
+Script tidak membuat partial config overlay, tidak mengubah `shell.qml`, `Lock.qml`, `Pam.qml`, `InputField.qml`, PAM/authentication, session-lock protocol, keybind, Hyprland config, maupun system services. Tidak ada opsi `--install`, `--status`, atau `--rollback`.
+6. **Static/isolated testing — IMPLEMENTED; runtime — NOT VERIFIED.** Test fixture memeriksa provenance guard, backup, penggantian empat file visual, dan pemanggilan reload. QML rendering, lock/unlock, password salah, wake/resume, dan penerimaan visual hanya boleh dinyatakan VERIFIED setelah diuji pada X280.
 7. **Audit pascamigrasi.** Pastikan modul K41 tidak lagi bergantung pada source visual Caelestia yang akan dibersihkan, sementara dependency upstream yang masih diperlukan tetap tersedia dan tercatat.
 8. **Cleanup source visual upstream.** Hanya setelah migrasi terbukti berfungsi dan pengguna menerima hasilnya, identifikasi serta hapus source visual upstream yang sudah tidak digunakan. Cleanup harus sempit, berdasarkan dependency graph, dan memiliki rencana rollback. Jangan menghapus komponen autentikasi atau dependency bersama.
 9. **Penerimaan.** Hasil akhir harus mempertahankan desain yang disetujui dan memenuhi acceptance di bawah.
@@ -113,7 +99,7 @@ Keberadaan script tidak membuktikan audit terbaru sudah dilakukan. Audit baru ha
 ## Acceptance criteria
 
 - Tampilan hasil migrasi tetap sesuai desain Lock Screen yang telah disetujui; tidak ada perubahan visual tanpa persetujuan.
-- Source visual K41 berada pada namespace K41, terpisah dari direktori internal Caelestia.
+- Source visual K41 dikelola di Stage 5 dan dideploy ke empat file visual pada modul lock Caelestia; source/runtime dan dependency upstream lain tetap dipertahankan.
 - Seluruh file, aset, dependency, konfigurasi, dan titik integrasi yang diperlukan telah diidentifikasi.
 - Tidak ada dependency tersembunyi pada source visual upstream yang dihapus.
 - PAM, autentikasi, password handling, fingerprint/Howdy policy, dan session-lock protocol tidak diubah oleh migrasi visual.
