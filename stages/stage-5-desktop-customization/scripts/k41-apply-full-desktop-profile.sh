@@ -12,7 +12,7 @@ usage() {
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(git -C "$script_dir" rev-parse --show-toplevel)"
-profile_file="$repo_root/config/desktop-customization/caelestia-shell.json"
+profile_file="$repo_root/shared/config/desktop-customization/caelestia-shell.json"
 wallpaper_source="$repo_root/assets/wallpapers/k41-obsidian-1280x720.jpg.base64"
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
