@@ -142,7 +142,7 @@ on_exit() {
 trap on_exit EXIT
 
 info "K41 full desktop profile started (UTC $timestamp)"
-info 'This profile changes Caelestia appearance, bar, dashboard, launcher, lock screen, sidebar, notifications, utilities and wallpaper.'
+info 'This profile changes Caelestia appearance, bar, launcher, lock screen, sidebar, notifications, utilities and wallpaper.'
 info 'It preserves existing authentication settings and does not edit shell-tokens.json, Hyprland binds, packages or system services.'
 printf 'Apply the full K41 Obsidian profile? [y/N] '
 IFS= read -r answer
@@ -187,7 +187,7 @@ except BaseException:
 check = json.loads(target_path.read_text(encoding="utf-8"))
 required = {
     "bar": ["entries", "clock", "workspaces"],
-    "dashboard": ["showMedia", "showPerformance"],
+    "dashboard": ["enabled"],
     "launcher": ["maxShown", "useFuzzy"],
     "lock": ["useWallpaper", "hideNotifs"],
     "sidebar": ["enabled"],
@@ -199,9 +199,11 @@ for section, keys in required.items():
     for key in keys:
         if key not in check[section]:
             raise SystemExit(f"Missing profile setting: {section}.{key}")
+if check["dashboard"].get("enabled") is not False:
+    raise SystemExit("Dashboard must remain disabled in the K41 profile.")
 if check["lock"].get("useWallpaper") is not True:
     raise SystemExit("Lock screen wallpaper setting did not persist.")
-print("PASS: merged Caelestia profile and required component settings verified.")
+print("PASS: merged Caelestia profile, dashboard-disabled policy, and required component settings verified.")
 PY
 
 if ! timeout 15s caelestia scheme set -n caelestia -m dark -v monochrome; then
