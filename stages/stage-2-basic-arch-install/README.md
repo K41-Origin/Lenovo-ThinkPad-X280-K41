@@ -173,7 +173,7 @@ Boot setup saat ini:
 - UKI di `/efi/EFI/Linux/arch-linux.efi`;
 - Secure Boot dinyatakan disabled pada storage profile.
 
-Installer menyalin `x280-first-boot-check.sh` ke target sebagai collector. Collector tersebut bukan gate wajib untuk menjalankan Stage 3.
+Installer menyalin `x280-first-boot-check.sh` ke target sebagai collector. Collector tersebut bukan gate wajib untuk menjalankan Stage 3. Jika dijalankan dari checkout, output default berada di `reports/stage-2-basic-arch-install/first-boot/`.
 
 ## 4. Syarat operator sebelum menjalankan
 
