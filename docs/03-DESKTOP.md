@@ -17,10 +17,10 @@ Jangan jalankan dari Arch ISO, chroot, atau sesi grafis. Entry point ini adalah 
 Jalankan dari terminal sesi Hyprland sebagai user biasa:
 
 ```bash
-bash scripts/k41-desktop-validation.sh
+bash stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
 ```
 
-Jika hasil memuat WARN/FAIL, tinjau bukti dan gunakan `bash scripts/k41-desktop-repair.sh` hanya untuk remediation yang didukung. Repair tidak menyediakan mode `--apply` dan tidak mengubah PAM, kernel parameters, SMT, atau firmware.
+Jika hasil memuat WARN/FAIL, tinjau bukti dan gunakan `bash stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` hanya untuk remediation yang didukung. Repair tidak menyediakan mode `--apply` dan tidak mengubah PAM, kernel parameters, SMT, atau firmware.
 
 Penerimaan Stage 4 tercatat sebagai **54 PASS, 3 WARN, 0 FAIL, 0 SKIP** (PASS_WITH_WARNINGS, exit 0). Pengguna juga mengonfirmasi pairing Bluetooth berhasil. Ini adalah snapshot historis, bukan klaim bahwa kondisi perangkat hari ini identik. Peta implementasi, batas repair, laporan, dan cakupan acceptance: [Stage 4 — Desktop Functional Validation](../stages/stage-4-desktop-validation/README.md).
 
