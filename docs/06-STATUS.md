@@ -20,7 +20,7 @@ Keputusan terbaru pengguna pada 2026-11-11:
 1. **Dashboard dihapus dari scope.** Tidak perlu mendesain atau mengimplementasikan dashboard.
 2. **Taskbar/Panel berganti nama menjadi Bottombar.** Arah desain yang dipertahankan adalah dock horizontal minimal di bawah dengan indikator workspace saja. Implementasi sebelumnya pernah diterima sebagai Taskbar/Panel; perubahan dan verifikasi baru belum diterima.
 3. **Topbar akan dibuat.** Posisi atas dan orientasi horizontal telah diputuskan; daftar elemen, alignment, ukuran, dan perilaku visibility belum ditentukan.
-4. **Cleanup dashboard:** `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh` berstatus **IMPLEMENTED — NOT TESTED ON X280**. Default dry-run; `--apply` menonaktifkan `dashboard.enabled` pada konfigurasi global/monitor setelah backup; `--rollback` memulihkan backup. Source QML upstream tidak dihapus.
+4. **Cleanup dashboard:** `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh` berstatus **IMPLEMENTED / CI TESTED — NOT TESTED ON X280**. Default dry-run; `--apply` menonaktifkan `dashboard.enabled` pada konfigurasi global/monitor setelah backup; `--rollback` memulihkan backup. Source QML upstream tidak dihapus.
 
 Dokumen pemilik:
 - [Bottombar](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
