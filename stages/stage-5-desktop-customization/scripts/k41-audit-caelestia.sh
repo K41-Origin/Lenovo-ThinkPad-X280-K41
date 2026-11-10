@@ -280,6 +280,92 @@ if [[ ! -s $source_file ]]; then
     printf 'No common Caelestia source directory found.\n' | tee -a "$source_file"
 fi
 
+printf '\n## Dashboard configuration inventory\n'
+dashboard_config_file="$report_dir/dashboard-config-inventory.json"
+python3 - "$config_root/caelestia" "$dashboard_config_file" "$HOME" <<'PY'
+import hashlib
+import json
+import pathlib
+import sys
+
+root, output, home = map(pathlib.Path, sys.argv[1:])
+candidates = [root / "shell.json"]
+candidates.extend(sorted((root / "monitors").glob("*/shell.json")))
+records = []
+for path in candidates:
+    try:
+        rel = "~/" + str(path.relative_to(home))
+    except ValueError:
+        rel = str(path)
+    record = {"path": rel}
+    if path.is_symlink():
+        record["status"] = "symlink-refused"
+    elif not path.exists():
+        record["status"] = "absent"
+    elif not path.is_file():
+        record["status"] = "not-regular-file"
+    else:
+        raw = path.read_bytes()
+        record["sha256"] = hashlib.sha256(raw).hexdigest()
+        try:
+            data = json.loads(raw)
+        except Exception as exc:
+            record.update(status="invalid-json", error=type(exc).__name__)
+        else:
+            if not isinstance(data, dict):
+                record["status"] = "non-object-json"
+            else:
+                section = data.get("dashboard")
+                if section is None:
+                    record.update(status="valid-json", dashboard_section="absent")
+                elif not isinstance(section, dict):
+                    record.update(status="valid-json", dashboard_section="invalid-type")
+                else:
+                    record.update(
+                        status="valid-json",
+                        dashboard_section="present",
+                        dashboard={k: section[k] for k in (
+                            "enabled", "showOnHover", "showDashboard", "showMedia",
+                            "showPerformance", "showWeather", "mediaUpdateInterval",
+                            "resourceUpdateInterval"
+                        ) if k in section},
+                    )
+    records.append(record)
+output.write_text(json.dumps({
+    "scope": "global Caelestia shell.json and per-monitor monitors/*/shell.json",
+    "files": records,
+}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+for item in records:
+    print(f'{item["status"]}: {item["path"]}')
+PY
+
+printf '\n## Dashboard source references\n'
+dashboard_refs_file="$report_dir/dashboard-source-references.txt"
+: >"$dashboard_refs_file"
+declare -A scanned_roots=()
+for candidate in \
+    "$config_root/quickshell/caelestia" \
+    "$config_root/Quickshell/caelestia" \
+    "$HOME/.config/quickshell/caelestia" \
+    /usr/share/caelestia \
+    /usr/lib/caelestia; do
+    [[ -d $candidate && ! -L $candidate ]] || continue
+    [[ -z \\${scanned_roots[$candidate]:-} ]] || continue
+    scanned_roots[$candidate]=1
+    printf 'SOURCE_ROOT %s\n' "\\${candidate#"$HOME"/}" >>"$dashboard_refs_file"
+    while IFS= read -r -d '' source_file_path; do
+        grep -nI -iE 'dashboard|showDashboard|toggleDash|openDash' "$source_file_path" 2>/dev/null |
+            awk -F: -v file="\\${source_file_path#"$candidate"/}" '{print "  " file ":" $1}' \
+            >>"$dashboard_refs_file" || true
+    done < <(find "$candidate" -type f \( -name '*.qml' -o -name '*.js' \) \
+        -not -path '*/.git/*' -not -path '*/build/*' -print0)
+done
+if [[ ! -s $dashboard_refs_file ]]; then
+    printf 'No readable QML/JS source roots found.\n' | tee "$dashboard_refs_file"
+else
+    cat "$dashboard_refs_file"
+fi
+
 printf '\n## Dashboard keybind inventory\n'
 dashboard_binds_file="$report_dir/dashboard-keybinds.json"
 if command -v hyprctl >/dev/null 2>&1 && timeout 8s hyprctl -j binds >"$report_dir/binds.raw.json" 2>/dev/null; then
@@ -291,7 +377,9 @@ try:
     binds = json.loads(src.read_text(encoding="utf-8"))
     selected = []
     for bind in binds if isinstance(binds, list) else []:
-        if "dashboard" not in json.dumps(bind, ensure_ascii=False).lower():
+        serialized = json.dumps(bind, ensure_ascii=False).lower()
+        # Capture candidate binds, not only those literally named "dashboard".
+        if not any(token in serialized for token in ("dashboard", "dash", "caelestia", "quickshell")):
             continue
         selected.append({
             key: (value.replace(home, "~") if isinstance(value, str) else value)
@@ -299,9 +387,9 @@ try:
             if key in ("key", "keycode", "modmask", "submap", "dispatcher",
                        "arg", "description", "mouse", "locked", "release")
         })
-    dst.write_text(json.dumps({"status": "ok", "matching_bind_count": len(selected),
+    dst.write_text(json.dumps({"status": "ok", "candidate_bind_count": len(selected),
                                "binds": selected}, indent=2) + "\n", encoding="utf-8")
-    print(f"Dashboard-related Hyprland binds: {len(selected)}")
+    print(f"Candidate dashboard/shell-related Hyprland binds: {len(selected)}")
 except Exception as exc:
     dst.write_text(json.dumps({"status": "invalid-response",
                                "error": type(exc).__name__}) + "\n", encoding="utf-8")
