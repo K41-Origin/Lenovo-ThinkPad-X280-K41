@@ -26,7 +26,7 @@ Tidak termasuk optimasi daya/thermal tahap 6, penggantian NetworkManager/audio s
 - Status tidak ditebak dan error ditangani dengan jelas.
 - Aksi tidak memerlukan privilege berlebih dan tidak merusak konfigurasi sistem.
 - Tidak menduplikasi fungsi yang sudah dimiliki Caelestia atau komponen K41 lain.
-- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-shell.
+- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-dots.
 - Pengguna menerima hasil langsung pada X280.
 
 ## Status
