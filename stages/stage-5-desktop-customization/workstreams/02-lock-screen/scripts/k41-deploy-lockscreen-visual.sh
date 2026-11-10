@@ -1,61 +1,47 @@
 #!/usr/bin/env bash
-# Deploy the K41-owned lock-screen visual module into the user's Quickshell tree.
-# This does NOT modify Caelestia's shell entrypoint or activate the module.
+# Deploy and activate the Stage 5 K41 Lock Screen visuals in the active Caelestia tree.
+# Run as the regular desktop user from anywhere inside the repository.
 set -Eeuo pipefail
 umask 077
 
-readonly SCRIPT_NAME=${0##*/}
-readonly RELATIVE_MODULE_PATH="modules/lockscreen"
-readonly MARKER=".k41-lockscreen-managed"
-readonly SOURCE_FILES=(LockSurface.qml Content.qml Center.qml center/PasswordInput.qml)
-
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
-usage() {
-    cat <<USAGE
-Usage:
-  bash $SCRIPT_NAME --install
-  bash $SCRIPT_NAME --status
-  bash $SCRIPT_NAME --rollback BACKUP_DIRECTORY
 
-Install copies only the Stage 5 visual module to:
-  ~/.config/quickshell/k41/$RELATIVE_MODULE_PATH
-
-No sudo is required. This script does not edit Caelestia's shell.qml,
-PAM/authentication, session-lock policy, Hyprland configuration, or services.
-USAGE
-}
-
-[[ $EUID -ne 0 ]] || die "Do not run this script with sudo or as root."
+[[ $# -eq 0 ]] || die "This script has no options; run it without arguments."
+[[ $EUID -ne 0 ]] || die "Run from the regular desktop account, never with sudo."
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die "HOME is missing or invalid."
-command -v realpath >/dev/null 2>&1 || die "realpath is required."
-command -v sha256sum >/dev/null 2>&1 || die "sha256sum is required."
-command -v install >/dev/null 2>&1 || die "install is required."
-command -v cmp >/dev/null 2>&1 || die "cmp is required."
-command -v mktemp >/dev/null 2>&1 || die "mktemp is required."
-command -v date >/dev/null 2>&1 || die "date is required."
-command -v cp >/dev/null 2>&1 || die "cp is required."
-command -v mv >/dev/null 2>&1 || die "mv is required."
-command -v rm >/dev/null 2>&1 || die "rm is required."
-command -v stat >/dev/null 2>&1 || die "stat is required."
+[[ -n ${WAYLAND_DISPLAY:-} ]] || die "No Wayland session detected; run this from the active Hyprland desktop."
+[[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} ]] || die "Hyprland session signature is missing; refusing to reload a non-active desktop."
+
+for command_name in realpath stat git cmp install mktemp date cp mv rm caelestia; do
+    command -v "$command_name" >/dev/null 2>&1 || die "Required command not found: $command_name"
+done
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(realpath -- "$script_dir/../../../../..")"
 source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen"
-config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
-state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
-quickshell_root="$config_root/quickshell"
-k41_root="$quickshell_root/k41"
-target_root="$k41_root/$RELATIVE_MODULE_PATH"
-backup_root="$state_root/k41/lockscreen/backups"
+config_root="$HOME/.config"
+host_root="$config_root/quickshell/caelestia"
+lock_root="$host_root/modules/lock"
+state_root="$HOME/.local/state/k41/lockscreen/backups"
+readonly upstream_url="https://github.com/caelestia-dots/shell.git"
+readonly upstream_revision="d999d4878ee4cec134168e60d913714566a8cfa6"
+readonly source_files=(LockSurface.qml Content.qml Center.qml center/PasswordInput.qml)
 
-[[ $config_root == "$HOME/.config" && $state_root == "$HOME/.local/state" ]] ||
-    die "Non-default XDG paths are not supported by this migration yet."
-[[ -d $source_root && ! -L $source_root ]] || die "Stage 5 source directory not found: $source_root"
-[[ $(stat -c %u "$repo_root") == "$EUID" ]] || die "Repository checkout must be owned by the current user."
+[[ -d "$source_root" && ! -L "$source_root" ]] || die "Stage 5 visual source is missing: $source_root"
+[[ $(stat -c %u "$repo_root") == "$EUID" ]] || die "Repository checkout is not owned by the current user."
+[[ -d "$host_root" && ! -L "$host_root" && -s "$host_root/shell.qml" ]] ||
+    die "Active user Caelestia source tree not found at $host_root. Refusing to create a partial Quickshell config overlay."
+[[ -d "$lock_root" && ! -L "$lock_root" ]] || die "Caelestia lock module directory is missing: $lock_root"
+[[ $(git -C "$host_root" rev-parse --is-inside-work-tree 2>/dev/null || true) == true ]] ||
+    die "Caelestia user source tree is not a Git checkout; refusing to overwrite unknown files."
+[[ $(git -C "$host_root" remote get-url origin 2>/dev/null || true) == "$upstream_url" ]] ||
+    die "Caelestia source tree origin does not match the audited upstream repository."
+[[ $(git -C "$host_root" rev-parse HEAD 2>/dev/null || true) == "$upstream_revision" ]] ||
+    die "Caelestia source revision differs from the audited revision $upstream_revision; re-audit before deployment."
 
-# Reject symlinked path components to prevent writes outside the intended home.
-assert_no_symlink_components() {
+# Reject symlinked paths and unexpected ownership before writing any user files.
+assert_safe_path() {
     local path=$1 current="" part
     local -a parts=()
     IFS=/ read -r -a parts <<< "$path"
@@ -65,167 +51,115 @@ assert_no_symlink_components() {
         [[ ! -L $current ]] || die "Refusing symlink path component: $current"
     done
 }
-assert_no_symlink_components "$config_root"
-assert_no_symlink_components "$quickshell_root"
-assert_no_symlink_components "$k41_root"
-assert_no_symlink_components "$target_root"
-assert_no_symlink_components "$state_root"
-assert_no_symlink_components "$backup_root"
-
-for relative in "${SOURCE_FILES[@]}"; do
-    [[ -s $source_root/$relative && ! -L $source_root/$relative ]] ||
-        die "Missing, empty, or symlinked source file: $relative"
-done
-[[ ! -e $source_root/Pam.qml && ! -e $source_root/pam ]] ||
-    die "Authentication implementation must not be deployed as part of this visual module."
-
-for path in "$quickshell_root" "$k41_root" "$target_root" "$backup_root"; do
-    if [[ -e $path && ! -d $path ]]; then
-        die "Expected directory but found another file type: $path"
-    fi
-    if [[ -d $path && $(stat -c %u "$path") != "$EUID" ]]; then
-        die "Directory is not owned by current user: $path"
+for path in "$config_root" "$config_root/quickshell" "$host_root" "$host_root/modules" "$lock_root" "$state_root"; do
+    assert_safe_path "$path"
+    if [[ -e $path ]]; then
+        [[ -d $path && $(stat -c %u "$path") == "$EUID" ]] ||
+            die "Path is not a user-owned directory: $path"
     fi
 done
 
-command_name=${1:---status}
-case "$command_name" in
-    --status)
-        if [[ -d $target_root && -f $target_root/$MARKER ]]; then
-            printf 'DEPLOYED: %s\n' "$target_root"
-            (cd -- "$target_root" && sha256sum -c MANIFEST.sha256)
-            printf 'ACTIVATION: NOT VERIFIED; Caelestia host integration is not modified by this script.\n'
-        elif [[ -e $target_root ]]; then
-            die "Target exists but is not marked as K41-managed; refusing to inspect/replace unknown content: $target_root"
-        else
-            printf 'NOT DEPLOYED: %s\n' "$target_root"
-        fi
-        exit 0
-        ;;
-    --install)
-        [[ $# -eq 1 ]] || { usage >&2; exit 2; }
-        ;;
-    --rollback)
-        [[ $# -eq 2 ]] || { usage >&2; exit 2; }
-        rollback_dir=$2
-        [[ -d $rollback_dir && ! -L $rollback_dir ]] ||
-            die "Backup path is invalid or outside $backup_root."
-        rollback_dir="$(realpath -e -- "$rollback_dir")"
-        backup_root="$(realpath -e -- "$backup_root")"
-        [[ $rollback_dir == "$backup_root/"* ]] || die "Backup path resolves outside $backup_root."
-        [[ $(stat -c %u "$rollback_dir") == "$EUID" ]] || die "Backup is not owned by current user."
-        [[ -f $rollback_dir/manifest && -f $rollback_dir/backup-kind ]] ||
-            die "Backup metadata is incomplete."
-        [[ $(<"$rollback_dir/backup-kind") == "k41-lockscreen-visual-v1" ]] ||
-            die "Unrecognized backup format."
-        [[ -d $target_root && -f $target_root/$MARKER ]] ||
-            die "Current target is not an installed K41-managed module; refusing rollback."
-        (cd -- "$target_root" && sha256sum -c MANIFEST.sha256 >/dev/null) ||
-            die "Current target differs from the managed manifest; preserve and inspect it before rollback."
-        if [[ -d $rollback_dir/previous ]]; then
-            restore_stage="$k41_root/.lockscreen-rollback.$$.tmp"
-            [[ ! -e $restore_stage && ! -L $restore_stage ]] || die "Rollback staging path already exists."
-            cp -a -- "$rollback_dir/previous" "$restore_stage"
-            [[ -d $restore_stage && ! -L $restore_stage ]] || die "Could not stage previous module."
-            retired="$k41_root/.lockscreen-retired.$$.tmp"
-            mv -- "$target_root" "$retired"
-            if ! mv -- "$restore_stage" "$target_root"; then
-                mv -- "$retired" "$target_root"
-                die "Rollback switch failed; original deployment restored."
-            fi
-            rm -rf -- "$retired"
-            info "Previous module restored from: $rollback_dir"
-        else
-            retired="$k41_root/.lockscreen-retired.$$.tmp"
-            mv -- "$target_root" "$retired"
-            rm -rf -- "$retired"
-            info "K41 visual module removed; there was no prior target to restore."
-        fi
-        exit 0
-        ;;
-    *)
-        usage >&2
-        exit 2
-        ;;
-esac
-
-mkdir -p -- "$quickshell_root" "$k41_root/modules" "$backup_root"
-for path in "$quickshell_root" "$k41_root" "$k41_root/modules" "$backup_root"; do
-    [[ ! -L $path && -d $path && $(stat -c %u "$path") == "$EUID" ]] ||
-        die "Unsafe directory after creation: $path"
+for relative in "${source_files[@]}"; do
+    [[ -s "$source_root/$relative" && ! -L "$source_root/$relative" ]] ||
+        die "Missing, empty, or symlinked visual source: $relative"
 done
 
-if [[ -e $target_root ]]; then
-    [[ -d $target_root && ! -L $target_root && -f $target_root/$MARKER ]] ||
-        die "Target already exists and is not a recognized K41-managed module: $target_root"
-    (cd -- "$target_root" && sha256sum -c MANIFEST.sha256 >/dev/null) ||
-        die "Existing managed module has local modifications; refusing to overwrite it."
-    if (cd -- "$target_root" && sha256sum -c MANIFEST.sha256 >/dev/null 2>&1); then
-        source_manifest="$(mktemp)"
-        target_manifest="$(mktemp)"
-        trap 'rm -f -- "$source_manifest" "$target_manifest"' EXIT
-        (cd -- "$source_root" && sha256sum "${SOURCE_FILES[@]}") > "$source_manifest"
-        (cd -- "$target_root" && sha256sum "${SOURCE_FILES[@]}") > "$target_manifest"
-        if cmp -s "$source_manifest" "$target_manifest"; then
-            info "Already up to date: $target_root"
-            printf 'ACTIVATION: NOT VERIFIED; host integration remains a separate step.\n'
-            exit 0
-        fi
-    fi
-fi
+# Confirm required upstream lock host files remain present. They are not replaced.
+for relative in Lock.qml LockSurface.qml Content.qml Center.qml center/PasswordInput.qml center/InputField.qml; do
+    [[ -s "$lock_root/$relative" && ! -L "$lock_root/$relative" ]] ||
+        die "Required Caelestia lock runtime file is missing: modules/lock/$relative"
+done
 
+# Only replace clean upstream versions or a previous byte-identical K41 deployment.
+for relative in "${source_files[@]}"; do
+    destination="$lock_root/$relative"
+    [[ -f "$destination" && ! -L "$destination" ]] ||
+        die "Expected a regular upstream file at $destination"
+    if ! cmp -s "$source_root/$relative" "$destination"; then
+        upstream_file="$(mktemp)"
+        if ! git -C "$host_root" show "HEAD:modules/lock/$relative" > "$upstream_file"; then
+            rm -f -- "$upstream_file"
+            die "File is not tracked by the pinned Caelestia checkout: modules/lock/$relative"
+        fi
+        if ! cmp -s "$upstream_file" "$destination"; then
+            rm -f -- "$upstream_file"
+            die "Local modifications detected at modules/lock/$relative; refusing to overwrite them."
+        fi
+        rm -f -- "$upstream_file"
+    fi
+done
+
+mkdir -p -- "$state_root"
+[[ -d "$state_root" && ! -L "$state_root" && $(stat -c %u "$state_root") == "$EUID" ]] ||
+    die "Unsafe backup directory: $state_root"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-backup_dir="$backup_root/$stamp"
+backup="$state_root/$stamp"
 suffix=0
-while ! mkdir -- "$backup_dir" 2>/dev/null; do
+while ! mkdir -- "$backup" 2>/dev/null; do
     suffix=$((suffix + 1))
-    backup_dir="$backup_root/$stamp-$suffix"
+    backup="$state_root/$stamp-$suffix"
 done
-printf '%s\n' "k41-lockscreen-visual-v1" > "$backup_dir/backup-kind"
-if [[ -d $target_root ]]; then
-    cp -a -- "$target_root" "$backup_dir/previous"
-    printf '%s\n' "previous-target=$target_root" > "$backup_dir/manifest"
-else
-    printf '%s\n' "previous-target=absent" > "$backup_dir/manifest"
-fi
-
-stage="$k41_root/.lockscreen-stage.$$.tmp"
-[[ ! -e $stage && ! -L $stage ]] || die "Staging path already exists: $stage"
-mkdir -p -- "$stage/center"
-cleanup_stage() { [[ ! -d $stage ]] || rm -rf -- "$stage"; }
-trap cleanup_stage EXIT
-
-for relative in "${SOURCE_FILES[@]}"; do
-    install -m 0644 -- "$source_root/$relative" "$stage/$relative"
+mkdir -p -- "$backup/center"
+for relative in "${source_files[@]}"; do
+    install -m 0644 -- "$lock_root/$relative" "$backup/$relative"
 done
-printf '%s\n' "K41 Stage 5 visual module; deployment marker only, not host activation." > "$stage/$MARKER"
+printf 'Caelestia origin: %s\nCaelestia revision: %s\n' "$upstream_url" "$upstream_revision" > "$backup/manifest"
 (
-    cd -- "$stage"
-    sha256sum "${SOURCE_FILES[@]}" > MANIFEST.sha256
+    cd -- "$backup"
+    sha256sum "${source_files[@]}" > MANIFEST.sha256
     sha256sum -c MANIFEST.sha256
 )
-for relative in "${SOURCE_FILES[@]}"; do
+
+stage="$(mktemp -d "$lock_root/.k41-lockscreen-stage.XXXXXX")"
+changed=0
+restore_originals() {
+    local relative
+    for relative in "${source_files[@]}"; do
+        install -m 0644 -- "$backup/$relative" "$lock_root/$relative"
+    done
+}
+cleanup() {
+    local rc=$?
+    trap - EXIT
+    [[ -z ${stage:-} || ! -d $stage ]] || rm -rf -- "$stage"
+    if (( rc != 0 && changed == 1 )); then
+        info "Deployment failed; restoring the four original visual files from $backup."
+        restore_originals || printf 'CRITICAL: automatic restore failed; backup remains at %s\n' "$backup" >&2
+    fi
+    exit "$rc"
+}
+trap cleanup EXIT
+
+mkdir -p -- "$stage/center"
+for relative in "${source_files[@]}"; do
+    install -m 0644 -- "$source_root/$relative" "$stage/$relative"
     cmp -s "$source_root/$relative" "$stage/$relative" ||
-        die "Staged file verification failed: $relative"
+        die "Staging verification failed: $relative"
 done
+(
+    cd -- "$stage"
+    sha256sum "${source_files[@]}" > MANIFEST.sha256
+    sha256sum -c MANIFEST.sha256
+)
 
-retired=""
-if [[ -d $target_root ]]; then
-    retired="$k41_root/.lockscreen-retired.$$.tmp"
-    [[ ! -e $retired && ! -L $retired ]] || die "Retired path already exists: $retired"
-    mv -- "$target_root" "$retired"
-fi
-if ! mv -- "$stage" "$target_root"; then
-    [[ -z $retired || ! -d $retired ]] || mv -- "$retired" "$target_root"
-    die "Atomic deployment switch failed; previous target restored."
-fi
+changed=1
+for relative in "${source_files[@]}"; do
+    mv -f -- "$stage/$relative" "$lock_root/$relative"
+done
+for relative in "${source_files[@]}"; do
+    cmp -s "$source_root/$relative" "$lock_root/$relative" ||
+        die "Post-deployment verification failed: $relative"
+done
+rm -rf -- "$stage"
 stage=""
-if [[ -n $retired && -d $retired ]]; then
-    rm -rf -- "$retired"
-fi
 
-info "Visual module deployed successfully: $target_root"
-info "Backup: $backup_dir"
-info "No Caelestia entrypoint, authentication, PAM, session-lock, Hyprland, or system service files were changed."
-printf 'ACTIVATION: NOT VERIFIED. This script intentionally does not edit Caelestia shell.qml.\n'
-printf 'NEXT: verify the supported host import/integration point before enabling this module.\n'
+info "K41 Floating Password Card visuals deployed into the active Caelestia lock module."
+info "Original files backed up to: $backup"
+info "Restarting Caelestia shell to activate the new QML."
+if ! caelestia shell -r -d >/dev/null; then
+    die "Caelestia reload command failed; original QML files will be restored."
+fi
+changed=0
+info "Caelestia reload command completed. The new visual source is now selected by the existing modules/lock import."
+info "Authentication, PAM, Lock.qml, session-lock protocol, Hyprland configuration, and system services were not changed."
+info "Visual acceptance still requires observing a real lock/unlock cycle on the ThinkPad X280."
