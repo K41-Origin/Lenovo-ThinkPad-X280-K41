@@ -53,7 +53,7 @@ if [[ ${1:-} == -C ]]; then
         "remote get-url origin") printf 'https://github.com/caelestia-dots/shell.git\n'; exit 0 ;;
         "rev-parse HEAD") printf 'd999d4878ee4cec134168e60d913714566a8cfa6\n'; exit 0 ;;
         show\ HEAD:*)
-            file=${1#show HEAD:}
+            file=${2#HEAD:}
             cat "$repo/$file"
             exit 0
             ;;
