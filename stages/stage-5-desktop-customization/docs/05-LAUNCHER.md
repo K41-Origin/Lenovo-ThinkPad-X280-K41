@@ -1,4 +1,4 @@
-# Workstream 5 — Launcher
+# Workstream 6 — Launcher
 
 ## Tujuan
 
@@ -18,7 +18,7 @@ Tidak termasuk redesign global typography/iconography atau penambahan launcher k
 4. Audit konfigurasi dan desktop entries sebelum perubahan. Backup semua file yang akan diubah.
 5. Terapkan keybind dan konfigurasi minimal tanpa menimpa konfigurasi pengguna secara membabi buta.
 6. Uji pembukaan launcher, pencarian aplikasi, hasil kosong, keyboard navigation, cancel/close, launch aplikasi, dan perilaku ketika executable tidak tersedia.
-7. Periksa bahwa keybind tidak bertabrakan dengan keybind dashboard, panel, atau aplikasi.
+7. Pastikan keybind tidak bertabrakan dengan Bottombar, Topbar, atau aplikasi lain.
 
 ## Acceptance criteria
 
@@ -35,4 +35,4 @@ Backup konfigurasi launcher dan Hyprland keybind. Catat executable/version, keyb
 
 ## Gate keluar
 
-Status VERIFIED memerlukan uji peluncuran aplikasi nyata dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 6 — Sidebar](06-SIDEBAR.md).
+Status VERIFIED memerlukan uji peluncuran aplikasi nyata dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 7 — Sidebar](06-SIDEBAR.md).
