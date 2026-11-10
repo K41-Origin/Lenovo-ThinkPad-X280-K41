@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+umask 077
 # Comprehensive, read-only audit of the currently approved Caelestia lock-screen
 # visuals and their integration dependencies. Does not deploy or modify the system.
 set -Eeuo pipefail
