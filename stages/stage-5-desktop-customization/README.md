@@ -49,7 +49,7 @@ Dokumen prosedur: [01 — Boot Experience](../../docs/08-STAGE-5/01-BOOT-EXPERIE
 | Launcher | `.../scripts/k41-install-hyprland-launcher.sh` dan `.../scripts/k41-start-hyprland.sh` — memasang wrapper output-capturing untuk upstream `start-hyprland` |
 | Lock handoff | `.../scripts/k41-lock-caelestia-after-start.sh` dan `.../scripts/k41-plymouth-quit-after-lock.sh` — meminta/verifikasi lock dan fail-closed release Plymouth |
 
-Status: **COMPLETED / USER ACCEPTED**. Ini adalah keputusan penerimaan pengguna; bukan klaim bahwa semua firmware, TPM2, Secure Boot, atau recovery state telah diukur ulang.
+Riwayat acceptance dan batas klaim Workstream 1 dimiliki [dokumen Workstream 1](../../docs/08-STAGE-5/01-BOOT-EXPERIENCE.md). Status proyek terkini tetap dicatat di [docs/06-STATUS.md](../../docs/06-STATUS.md).
 
 ## Workstream 2 — Lock Screen
 
@@ -64,7 +64,7 @@ Dokumen prosedur: [02 — Lock Screen](../../docs/08-STAGE-5/02-LOCK-SCREEN.md).
 | Permission report | `.../scripts/k41-report-lockscreen-permissions.sh` — audit metadata ownership/permission |
 | QML overrides | `workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/` — `Content.qml`, `Center.qml`, `LockSurface.qml`, dan `center/PasswordInput.qml` |
 
-Status: **IN PROGRESS**. Source ada di repository; implementasi terbaru belum dinyatakan TESTED/VERIFIED pada X280.
+Source implementasi tersedia di repository. Status pengujian dan verifikasi terbaru pada X280 hanya dicatat di [docs/06-STATUS.md](../../docs/06-STATUS.md).
 
 ## Artefak global yang sengaja tidak dipindahkan
 
