@@ -1,11 +1,11 @@
 # Stage 5 — Lock Screen Visual Module
 
-**Status: IMPLEMENTED (source placement and user-local deployment script), HOST INTEGRATION / RUNTIME NOT VERIFIED.**
+**Status source: IMPLEMENTED. Deployment/reload script: IMPLEMENTED. Runtime rendering: NOT VERIFIED on the ThinkPad X280.**
 
-Desain yang dipertahankan adalah **Floating Password Card** yang telah disetujui. Source visual K41 ditempatkan langsung di workstream Stage 5 ini, bukan di project/folder terpisah.
+Desain yang dipertahankan adalah **Floating Password Card** yang telah disetujui. Empat file QML visual dikelola langsung oleh workstream Stage 5 ini.
 
 ```text
-workstreams/02-lock-screen/modules/lockscreen/
+modules/lockscreen/
 ├── LockSurface.qml
 ├── Content.qml
 ├── Center.qml
@@ -13,50 +13,48 @@ workstreams/02-lock-screen/modules/lockscreen/
     └── PasswordInput.qml
 ```
 
-## Batas ownership
+## Deployment dan aktivasi
 
-- Folder ini adalah source visual Lock Screen yang dikelola langsung oleh Stage 5.
-- Caelestia tetap menjadi host/runtime dan menyediakan API serta komponen upstream yang diimpor modul.
-- Source mempertahankan kontrak `lock` dan API komponen Caelestia yang telah digunakan implementasi visual sebelumnya.
-- Script deployment tersedia di `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh`; script menyalin modul ke namespace K41 dengan backup, staging, checksum, idempotency, dan rollback.
-- Deployment file tidak sama dengan aktivasi: integrasi ke entrypoint Caelestia sengaja belum diubah karena titik integrasi host belum diverifikasi.
-- Jangan mengubah desain yang disetujui tanpa persetujuan.
+Satu script melakukan seluruh langkah deployment dan reload Caelestia. Tidak ada opsi `--install`, `--status`, atau `--rollback`.
+
+Dari root checkout repository, jalankan sebagai user desktop biasa di sesi Hyprland aktif:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh
+```
+
+Script:
+1. Memastikan sesi Wayland/Hyprland aktif.
+2. Memastikan checkout Caelestia user-local tersedia di `~/.config/quickshell/caelestia`, berasal dari upstream yang diaudit, dan berada pada revision yang dipin.
+3. Memastikan empat file target masih versi upstream asli atau sudah sama dengan source K41. Modifikasi lokal lain ditolak.
+4. Membuat backup bertimestamp dari empat file visual.
+5. Mengganti empat file di `~/.config/quickshell/caelestia/modules/lock/` dengan source Stage 5.
+6. Memverifikasi hasil dengan checksum/perbandingan file.
+7. Menjalankan `caelestia shell -r -d` untuk memuat ulang shell.
+
+Tidak perlu sudo. Script tidak membuat partial config overlay, tidak mengubah `shell.qml`, `Lock.qml`, `Pam.qml`, `InputField.qml`, PAM/authentication, session-lock protocol, Hyprland, maupun system services. Jika preflight tidak cocok, script berhenti tanpa menimpa file. Jika penyalinan atau reload gagal, empat file awal dipulihkan otomatis dari backup.
+
+## Ownership dan dependency
+
+- Folder ini adalah source visual K41 yang dikelola Stage 5.
+- Caelestia tetap menjadi host/runtime dan menyediakan API serta komponen visual/runtime upstream.
+- File K41 mempertahankan kontrak `lock` dan API komponen Caelestia yang sudah digunakan source.
+- Hanya `LockSurface.qml`, `Content.qml`, `Center.qml`, dan `center/PasswordInput.qml` yang diganti.
+- Autentikasi, PAM, password handling, fingerprint/Howdy policy, dan session-lock policy/protocol berada di luar scope visual.
 
 ## Komponen visual
 
 | File | Tanggung jawab |
 |---|---|
-| `LockSurface.qml` | Wallpaper/screencopy background, blur, lock icon, dan transisi visual |
+| `LockSurface.qml` | Background wallpaper/screencopy, blur, surface, dan transisi visual |
 | `Content.qml` | Komposisi konten Lock Screen |
 | `Center.qml` | Clock, tanggal, Floating Password Card, dan pesan status |
 | `center/PasswordInput.qml` | Surface, radius, spacing, ikon, dan presentasi field |
 
-## Batas scope
+## Status validasi
 
-Pekerjaan ini hanya mengambil ownership source tampilan. Tidak ada perubahan terhadap autentikasi, PAM, password processing, fingerprint/Howdy policy, session-lock policy/protocol, keybind, atau cara Lock Screen dipanggil.
-
-## Dependency
-
-Modul memakai komponen dan API visual/runtime Caelestia yang sudah ada, termasuk Config/tokens, colors, animations, Clock, StateMessage, InputField, LoadingIndicator, MaterialIcon, wallpaper/image services, serta M3Shapes. Dependency runtime final harus diperiksa setelah migrasi.
-
-## Status berikutnya
-
-1. **Deployment source — IMPLEMENTED.** Jalankan script `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --install` sebagai user biasa (tanpa sudo) untuk menyalin empat file visual ke `~/.config/quickshell/k41/modules/lockscreen/`.
-2. **Static/isolated test — IMPLEMENTED.** Test `stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh` mencakup syntax, install di HOME sementara, checksum, idempotency, status, rollback, dan proteksi target unmanaged.
-3. **Host integration — BLOCKED / NOT VERIFIED.** Script deployment tidak mengedit `caelestia/shell.qml`. Titik import/integrasi yang didukung harus diverifikasi terhadap host Caelestia yang benar-benar terpasang sebelum modul diaktifkan.
-4. Verifikasi runtime pada target sebelum cleanup dependency visual upstream.
-5. Cleanup hanya source visual upstream yang terbukti tidak lagi dipakai.
-
-### Deploy pada laptop
-
-Dari root checkout repository, jalankan sebagai user desktop biasa:
-
-```bash
-bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --install
-```
-
-Periksa status dengan `--status`. Script mencetak lokasi backup untuk rollback. Jangan gunakan installer lama `k41-apply-lockscreen-design.sh`.
-
-Deployment hanya menyalin file visual. Quickshell belum diarahkan untuk memuat modul ini sampai host integration Caelestia diverifikasi.
-
-Tidak ada klaim runtime rendering atau penerimaan perangkat pada tahap ini.
+- Source QML dan kontrak visual: **IMPLEMENTED**.
+- Deployment otomatis dan pemanggilan reload: **IMPLEMENTED**.
+- Test fixture terisolasi: memeriksa provenance guard, backup, penggantian empat file, dan pemanggilan reload.
+- QML runtime rendering, lock/unlock, password salah, wake/resume, dan penerimaan visual di ThinkPad X280: **NOT VERIFIED** sampai ada bukti dari perangkat aktual.
+- Cleanup dependency visual upstream: **BELUM DILAKUKAN**; tunggu penerimaan runtime.
