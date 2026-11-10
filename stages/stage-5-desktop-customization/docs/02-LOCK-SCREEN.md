@@ -48,25 +48,19 @@ Setiap tahap menghasilkan artefak dan bukti yang dapat ditinjau sebelum tahap be
 ## Struktur runtime tujuan
 
 ```text
-~/.config/quickshell/
-├── caelestia/                    # host/runtime dan dependency upstream
-└── k41/
-    └── modules/
-        └── lockscreen/
-            ├── ...
-            └── assets/
+~/.config/quickshell/caelestia/
+└── modules/lock/                 # host/runtime; empat file visual diganti oleh deployment Stage 5
 ```
 
 Source visual berada langsung di workstream `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject atau namespace `K41-dots`.
 
 ## Kondisi repository saat ini
 
-Implementasi terdahulu masih berada di:
-- Source visual sebelumnya telah dipindahkan ke `workstreams/02-lock-screen/modules/lockscreen/`.
-- Installer lama: `workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
-- Target lama: `~/.config/quickshell/caelestia/modules/lock/`
-
-Path dan installer tersebut adalah kondisi lama/transisi. **Jangan menjalankan installer lama sebagai migrasi ke struktur baru.** Source lama harus diaudit dan dibandingkan dengan upstream aktif sebelum diputuskan untuk dipertahankan, diekstrak, atau diganti.
+Implementasi saat ini:
+- Source visual K41: `workstreams/02-lock-screen/modules/lockscreen/`.
+- Satu-satunya script deployment: `workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh`.
+- Target aktif: `~/.config/quickshell/caelestia/modules/lock/`.
+- Installer interaktif lama `k41-apply-lockscreen-design.sh` telah dihapus. Tidak ada jalur deployment alternatif atau opsi CLI.
 
 ## Script audit visual baru
 
