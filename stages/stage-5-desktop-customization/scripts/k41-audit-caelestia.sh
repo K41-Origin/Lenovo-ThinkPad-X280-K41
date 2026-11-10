@@ -35,6 +35,8 @@ on_exit() {
         printf 'Report: reports/stage-5-desktop-customization/caelestia-audit/%s/\n' "$(basename -- "$report_dir")"
         printf 'Files: run.log, summary.txt'
         [[ -f $snapshot_file ]] && printf ', config-snapshot.json'
+        [[ -f $monitor_file ]] && printf ', monitor-runtime.json'
+        [[ -f $source_file ]] && printf ', source-inventory.txt'
         printf '\n'
         printf 'Mode: read-only; no configuration or system state changed.\n'
     } >"$summary_file"
@@ -165,8 +167,12 @@ PY
 
 printf '\n## Running Caelestia/Quickshell processes\n'
 if command -v pgrep >/dev/null 2>&1; then
-    pgrep -a -u "$UID" -f '(^|/)(qs|quickshell)( |$).*caelestia|caelestia.*shell' 2>/dev/null \
-        | sed "s|$HOME|~|g" || printf 'No matching process found (or process details unavailable).\n'
+    process_ids="$(pgrep -x -u "$UID" -d ' ' qs 2>/dev/null || true)"
+    if [[ -n $process_ids ]]; then
+        ps -o pid=,comm= -p "$process_ids" 2>/dev/null || true
+    else
+        printf 'No qs process found.\n'
+    fi
 else
     printf 'pgrep unavailable; skipped.\n'
 fi
