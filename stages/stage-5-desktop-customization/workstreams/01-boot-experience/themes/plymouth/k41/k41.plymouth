@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=K41
+Description=Minimal monochrome K41 animated boot splash
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/k41
+ScriptFile=/usr/share/plymouth/themes/k41/k41.script
