@@ -22,7 +22,7 @@ Stage 4 bukan:
 Jalankan validator dari terminal di sesi Hyprland aktif, sebagai user biasa:
 
 ```bash
-bash stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
+bash stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
 ```
 
 Jangan gunakan `sudo`. Script mensyaratkan `HYPRLAND_INSTANCE_SIGNATURE` dan `WAYLAND_DISPLAY`, serta menolak berjalan sebagai root.
@@ -30,7 +30,7 @@ Jangan gunakan `sudo`. Script mensyaratkan `HYPRLAND_INSTANCE_SIGNATURE` dan `WA
 Repair, bila memang diperlukan dan setelah laporan ditinjau, juga dijalankan sebagai user biasa di sesi Hyprland:
 
 ```bash
-bash stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh
+bash stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh
 ```
 
 Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--apply`, `--no-validate`, atau mode simulasi; pemanggilan tanpa argumen adalah workflow repair yang benar-benar dapat mengubah sistem. Jangan menjalankannya hanya untuk menghasilkan laporan.
@@ -39,11 +39,11 @@ Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--ap
 
 | Path saat ini | Peran | Ownership / catatan |
 |---|---|---|
-| `stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Orkestrator validasi otomatis, klasifikasi hasil, dan ringkasan | Implementasi utama Stage 4 |
-| `stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Remediasi terbatas, pemeriksaan integritas PAM, validasi pasca-repair, dan ringkasan tindakan | Implementasi repair Stage 4; mutatif |
-| `stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh` | Collector read-only untuk paket, executable, Hyprland, perangkat, audio, jaringan, power, thermal, dan journal | Collector Stage 4 |
-| `stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh` | Collector proses, CLI/IPC, log, dan package Caelestia/Quickshell | Collector Stage 4; jika dipanggil sendiri, dapat mencoba memulai Caelestia bila belum berjalan |
-| `stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh` | Klasifikasi log Caelestia dan journal | Saat ini hanya di-source validator dan test Stage 4; kandidat ownership Stage 4 |
+| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Orkestrator validasi otomatis, klasifikasi hasil, dan ringkasan | Implementasi utama Stage 4 |
+| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Remediasi terbatas, pemeriksaan integritas PAM, validasi pasca-repair, dan ringkasan tindakan | Implementasi repair Stage 4; mutatif |
+| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh` | Collector read-only untuk paket, executable, Hyprland, perangkat, audio, jaringan, power, thermal, dan journal | Collector Stage 4 |
+| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh` | Collector proses, CLI/IPC, log, dan package Caelestia/Quickshell | Collector Stage 4; jika dipanggil sendiri, dapat mencoba memulai Caelestia bila belum berjalan |
+| `stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh` | Klasifikasi log Caelestia dan journal | Library khusus Stage 4; di-source validator dan test Stage 4 |
 | `tests/test-desktop-validation.sh` | Syntax, read-only contract, report permissions/order, serta fixture classifier | Test global; tetap di `tests/` |
 | `tests/test-desktop-repair.sh` | Syntax, batas mutasi, dan kontrak repair | Test global; tetap di `tests/` |
 | `tests/test-desktop-setup.sh` | Memeriksa keberadaan dan syntax validator sebagai kontrak integrasi Stage 3 | Test global; bukan test utama Stage 4 |
@@ -55,15 +55,15 @@ Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--ap
 ## Alur validator
 
 ```text
-stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
+stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
   ├── guard: non-root + sesi Hyprland/Wayland aktif
   ├── source stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh
   ├── buat reports/desktop-validation/<UTC timestamp>/
   ├── cek platform, package, Hyprland, Quickshell, Caelestia
   ├── cek service, portal, audio, network, radio, GPU/backlight
   ├── snapshot memory, filesystem, battery, thermal
-  ├── jalankan stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh
-  ├── jalankan stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh hanya jika proses Caelestia sudah terdeteksi
+  ├── jalankan stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh
+  ├── jalankan stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh hanya jika proses Caelestia sudah terdeteksi
   ├── kumpulkan journal user/system/kernel
   ├── kumpulkan diagnostics terarah: CPU, PCI/USB, firmware, Bluetooth, PAM, service
   ├── klasifikasikan Caelestia log dan journal
