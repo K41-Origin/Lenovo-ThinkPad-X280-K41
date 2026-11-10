@@ -60,8 +60,8 @@ review_files=(
   stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh
   stages/stage-2-basic-arch-install/scripts/configure-arch-x280.sh
   stages/stage-1-live-readiness/scripts/k41-live-validation.sh
-  scripts/k41-install-desktop.sh
-  scripts/setup-desktop-x280.sh
+  stages/stage-3-desktop-install/scripts/k41-install-desktop.sh
+  stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh
   stages/stage-1-live-readiness/scripts/x280-install-readiness.sh
   stages/stage-1-live-readiness/scripts/live-validation.sh
   scripts/x280-first-boot-check.sh
