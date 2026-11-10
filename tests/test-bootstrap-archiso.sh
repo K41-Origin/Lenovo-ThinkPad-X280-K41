@@ -9,13 +9,13 @@ pass() { printf 'PASS: %s\n' "$1"; }
 [[ -f $SCRIPT ]] || fail "Arch ISO bootstrap script is missing"
 bash -n "$SCRIPT" || fail "Arch ISO bootstrap has a Bash syntax error"
 
-for path in "$ROOT/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh" "$ROOT/scripts/k41-install-desktop.sh"; do
+for path in "$ROOT/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh" "$ROOT/stages/stage-3-desktop-install/scripts/k41-install-desktop.sh"; do
   [[ -f $path ]] || fail "canonical entry point is missing: $path"
   bash -n "$path" || fail "canonical entry point has a Bash syntax error: $path"
 done
 grep -Fq 'exec bash "$ROOT/stages/stage-2-basic-arch-install/scripts/install-arch-x280.sh" "$@"' "$ROOT/stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh" ||
   fail "basic Arch entry point does not delegate to the existing installer"
-grep -Fq 'exec bash "$ROOT/scripts/setup-desktop-x280.sh" "$@"' "$ROOT/scripts/k41-install-desktop.sh" ||
+grep -Fq 'exec bash "$ROOT/stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh" "$@"' "$ROOT/stages/stage-3-desktop-install/scripts/k41-install-desktop.sh" ||
   fail "desktop entry point does not delegate to the existing setup implementation"
 pass "canonical entry points exist, parse, and delegate"
 
@@ -41,8 +41,8 @@ required=(
   'config/hardware/thinkpad-x280.conf'
   'scripts/bootstrap-archiso.sh'
   'stages/stage-1-live-readiness/scripts/k41-live-validation.sh'
-  'scripts/k41-install-desktop.sh'
-  'scripts/setup-desktop-x280.sh'
+  'stages/stage-3-desktop-install/scripts/k41-install-desktop.sh'
+  'stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh'
   'stages/stage-1-live-readiness/scripts/x280-install-readiness.sh'
   'scripts/x280-first-boot-check.sh'
   'tests/helpers/storage-fixtures.sh'
