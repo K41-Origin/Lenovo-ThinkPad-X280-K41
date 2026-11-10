@@ -9,7 +9,7 @@ Proyek ini membangun instalasi Arch Linux yang modular, aman, reproducible, dan 
 | 1. Live readiness | Arch Linux Live ISO | `bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh` · [Peta Stage 1](stages/stage-1-live-readiness/README.md) |
 | 2. Basic Arch installation | Arch Linux Live ISO | `bash stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` · [Peta Stage 2](stages/stage-2-basic-arch-install/README.md) |
 | 3. Desktop installation | Arch Linux terpasang, TTY | `sudo bash stages/stage-3-desktop-install/scripts/k41-install-desktop.sh` · [Peta Stage 3](stages/stage-3-desktop-install/README.md) |
-| 4. Desktop functional validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` |
+| 4. Desktop functional validation | Sesi Hyprland | `bash scripts/k41-desktop-validation.sh` · [Peta Stage 4](stages/stage-4-desktop-validation/README.md) |
 | 5. Desktop customization | Desktop hasil tahap 4 | [Workstream](docs/08-STAGE-5/README.md) · [Design System](docs/07-DESKTOP-DESIGN-SYSTEM.md) |
 | 6. Desktop & hardware optimization | Setelah customization diterima | [Operations](docs/05-OPERATIONS.md) |
 | 7. Release | Setelah seluruh gate lulus | [Status](docs/06-STATUS.md) |
