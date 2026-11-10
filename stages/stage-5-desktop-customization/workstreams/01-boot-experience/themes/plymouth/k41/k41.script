@@ -1,0 +1,117 @@
+# Minimal K41 theme: black background, compact wordmark, and animated rectangle ring.
+Window.SetBackgroundTopColor (0.0, 0.0, 0.0);
+Window.SetBackgroundBottomColor (0.0, 0.0, 0.0);
+
+global.status = "normal";
+global.count = 12;
+global.phase = 0;
+global.radius = 9;
+global.center_x = Window.GetX() + Window.GetWidth() / 2;
+global.center_y = Window.GetY() + Window.GetHeight() / 2;
+
+global.logo_image = Image.Text("K41", 0.8, 0.8, 0.8);
+global.logo_sprite = Sprite(global.logo_image);
+global.logo_sprite.SetPosition(
+    global.center_x - global.logo_image.GetWidth() / 2,
+    global.center_y - 17 - global.logo_image.GetHeight(),
+    10
+);
+
+global.rectangle_image = Image.Text("▯", 0.9, 0.9, 0.9);
+global.rectangles = [];
+
+for (i = 0; i < global.count; i++)
+{
+    global.rectangles[i] = Sprite(global.rectangle_image);
+
+    angle = (i * 2 * 3.141592653589793) / global.count;
+
+    x = global.center_x
+        + Math.Cos(angle) * global.radius
+        - global.rectangle_image.GetWidth() / 2;
+
+    y = global.center_y + 10
+        + Math.Sin(angle) * global.radius
+        - global.rectangle_image.GetHeight() / 2;
+
+    global.rectangles[i].SetPosition(x, y, 10);
+    global.rectangles[i].SetOpacity(0.18);
+}
+
+global.password_image = NULL;
+global.password_sprite = NULL;
+global.bullet_sprites = [];
+global.bullet_count = 0;
+
+fun refresh_callback ()
+{
+    if (global.status == "normal")
+    {
+        for (i = 0; i < global.count; i++)
+        {
+            opacity = (i == global.phase) ? 1.0 : 0.18;
+            global.rectangles[i].SetOpacity(opacity);
+        }
+
+        global.phase = (global.phase + 1) % global.count;
+    }
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+fun display_password_callback (prompt, bullets)
+{
+    global.status = "password";
+    if (!global.password_image)
+    {
+        global.password_image = Image.Text("Enter disk password", 1.0, 1.0, 1.0);
+        global.password_sprite = Sprite(global.password_image);
+        global.password_sprite.SetPosition(global.center_x - global.password_image.GetWidth() / 2,
+                                           global.center_y + 78, 100);
+    }
+    global.password_sprite.SetOpacity(1);
+
+    for (i = 0; i < bullets; i++)
+    {
+        if (!global.bullet_sprites[i])
+        {
+            global.bullet_sprites[i] = Sprite(global.rectangle_image);
+            global.bullet_sprites[i].SetPosition(global.center_x +
+                (i - bullets / 2) * (global.rectangle_image.GetWidth() + 5),
+                global.center_y + 108, 101);
+        }
+        global.bullet_sprites[i].SetOpacity(1);
+    }
+
+    if (bullets > global.bullet_count)
+        global.bullet_count = bullets;
+
+    for (i = bullets; i < global.bullet_count; i++)
+        global.bullet_sprites[i].SetOpacity(0);
+}
+
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback ()
+{
+    global.status = "normal";
+    if (global.password_sprite)
+        global.password_sprite.SetOpacity(0);
+    for (i = 0; i < global.bullet_count; i++)
+        global.bullet_sprites[i].SetOpacity(0);
+}
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+fun message_callback (message)
+{
+    # Keep boot diagnostics unobtrusive; the user can press Esc to reveal full logs.
+    if (message && message != "")
+        global.last_message = message;
+}
+Plymouth.SetMessageFunction(message_callback);
+
+fun quit_callback ()
+{
+    global.logo_sprite.SetOpacity(1);
+}
+Plymouth.SetQuitFunction(quit_callback);
