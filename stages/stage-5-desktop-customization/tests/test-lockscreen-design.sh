@@ -7,15 +7,17 @@ center="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k4
 locksurface="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/LockSurface.qml"
 password="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/center/PasswordInput.qml"
 installer="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh"
+audit="$root/stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh"
 reporter="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-session.sh"
 permission_audit="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-permissions.sh"
 failure_reporter="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-failure.sh"
 
-for file in "$content" "$center" "$locksurface" "$password" "$installer" "$reporter" "$permission_audit" "$failure_reporter"; do
+for file in "$content" "$center" "$locksurface" "$password" "$installer" "$audit" "$reporter" "$permission_audit" "$failure_reporter"; do
     [[ -s $file ]] || { printf 'FAIL: missing/empty %s\n' "$file" >&2; exit 1; }
 done
 
 bash -n "$installer"
+bash -n "$audit"
 bash -n "$reporter"
 bash -n "$permission_audit"
 bash -n "$failure_reporter"
@@ -40,6 +42,9 @@ grep -Fq 'StateMessage {' "$center"
 
 # The deployment must provide the complete upstream shell root locally.
 grep -Fq 'k41-dots/modules/lock' "$installer"
+grep -Fq 'K41-Dots lock-screen source and runtime comparison' "$audit"
+grep -Fq 'for relative in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml' "$audit"
+grep -Fq 'cmp -s "$source_path" "$runtime_path"' "$audit"
 grep -Fq 'UPSTREAM_REPO="https://github.com/caelestia-dots/shell.git"' "$installer"
 grep -Fq 'UPSTREAM_REVISION="d999d4878ee4cec134168e60d913714566a8cfa6"' "$installer"
 grep -Fq 'git -C "$staging" fetch --quiet --depth 1 origin "$UPSTREAM_REVISION"' "$installer"
