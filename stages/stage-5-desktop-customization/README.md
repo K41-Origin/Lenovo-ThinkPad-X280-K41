@@ -1,60 +1,48 @@
 # Stage 5 — Desktop Customization
 
-Peta fisik dan ownership implementasi Stage 5. Status proyek tetap dimiliki [docs/06-STATUS.md](../../docs/06-STATUS.md); prosedur dan acceptance tiap workstream tetap dimiliki dokumen di [Stage 5 workstream docs](docs/README.md).
+Peta implementasi Stage 5. Status proyek dimiliki [docs/06-STATUS.md](../../docs/06-STATUS.md); prosedur dan acceptance tiap workstream dimiliki dokumen di [Stage 5 docs](docs/README.md).
 
-## Struktur kanonis
+## Tujuan
+
+Stage 5 mengembangkan dan menyesuaikan komponen desktop satu per satu. Hasil yang relevan menjadi fondasi **K41-Dots**, yaitu kumpulan modul Quickshell dengan namespace K41. Tidak ada target membangun shell mandiri penuh pada tahap ini.
+
+## Struktur K41-Dots yang dituju
+
+Source yang direview disimpan di repository. Script penyiapan mendeploy modul ke runtime user:
 
 ```text
-stages/stage-5-desktop-customization/
-├── README.md
-├── docs/
-│   ├── 00-COLLABORATION-WORKFLOW.md
-│   ├── 01-BOOT-EXPERIENCE.md
-│   ├── 02-LOCK-SCREEN.md
-│   ├── 04-TASKBAR-PANEL.md
-│   ├── 04-TASKBAR-PANEL-IMPLEMENTATION.md
-│   ├── 05-TOPBAR.md
-│   └── ...
-├── scripts/
-│   ├── k41-audit-caelestia.sh
-│   ├── k41-cleanup-caelestia.sh
-│   └── k41-install-caelestia-dock.sh
-├── tests/
-└── workstreams/
-    ├── 01-boot-experience/
-    ├── 02-lock-screen/
-    │   ├── k41-dots/modules/lock/
-    │   └── scripts/
-    └── 04-taskbar-panel/
-        └── config/quickshell/caelestia/modules/k41dock/K41Dock.qml
+~/.config/quickshell/k41/
+└── modules/
+    ├── lockscreen/
+    ├── bottombar/
+    ├── topbar/
+    ├── launcher/
+    └── ...
 ```
 
-## Prinsip Stage 5
+Contoh lokasi runtime Lock Screen: `~/.config/quickshell/k41/modules/lockscreen/`.
 
-Stage 5 menjadi fondasi bertahap **k41-dots**, bukan proyek shell mandiri yang harus dibangun sekaligus. Fondasi ini mencakup komponen desktop K41, pola integrasi, deployment, dan pengujian yang benar-benar dibutuhkan.
+## Alur minimum per fitur
 
-**Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Jalur boot/splash ditangani oleh Plymouth. Workstream 01 tetap menjadi bagian dari pengalaman boot proyek ini, tetapi bukan komponen atau backlog pengembangan k41-dots. Artefak Quickshell boot splash yang masih tersimpan tidak otomatis menjadi bagian dari fondasi tersebut.
+1. Audit source/config Caelestia yang berkaitan dengan fitur yang sedang dikerjakan.
+2. Catat file utama, dependency upstream, konfigurasi, dan titik integrasi yang benar-benar diperlukan.
+3. Siapkan hanya file/resource relevan ke namespace K41 melalui script penyiapan.
+4. Integrasikan modul ke lingkungan Quickshell yang ada dengan perubahan minimum.
+5. Verifikasi hasil dan dokumentasikan dependency yang tetap dimiliki upstream.
 
-- Setiap workstream dikerjakan bertahap dan terisolasi.
-- Source kanonis, installer, test, dan dokumentasi disimpan di repository.
-- Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`. Integrasi Caelestia saat ini menggunakan `~/.config/quickshell/caelestia/`.
-- Komponen K41 ditempatkan pada namespace milik K41, misalnya `modules/k41dock/K41Dock.qml`, dan bukan dengan mengubah source package-owned upstream yang tidak diperlukan.
-- Hasil Stage 5 akan menjadi basis komponen, pola integrasi, deployment, dan pengujian untuk proyek lanjutan **k41-dots**. Stage 5 belum berarti proyek k41-dots mandiri sudah dibuat.
+Audit harus read-only. Penyiapan/deployment adalah langkah terpisah yang melakukan perubahan secara eksplisit. Hindari framework installer, bootstrap, service, atau abstraksi tambahan sebelum dibutuhkan.
 
-## Arah UI
+**Workstream 01 — Boot Experience dikecualikan dari K41-Dots.** Jalur boot/splash menggunakan Plymouth. Workstream 01 tetap bagian dari proyek utama.
 
-- Dashboard dinonaktifkan dari runtime Caelestia; halaman Nexus belum dihapus dari source upstream.
-- Bottombar menggunakan K41Dock dan hanya menampilkan indikator workspace.
-- Topbar akan dibuat di tepi atas setelah elemen, alignment, ukuran, dan visibility disepakati.
-- Launcher, Sidebar, dan Utilities mengikuti urutan pada [indeks workstream](docs/README.md).
+## Prinsip
 
-## Audit dan cleanup
+- Caelestia tetap menjadi host/runtime yang digunakan selama belum ada keputusan baru.
+- Source K41 berada di namespace `quickshell/k41/modules/<feature>/`, terpisah dari `quickshell/caelestia/`.
+- Jangan menyalin seluruh source Caelestia; ambil hanya bagian fitur dan resource yang dibutuhkan.
+- Dependency upstream yang masih dipakai harus diidentifikasi, bukan diduplikasi tanpa alasan.
+- Repository adalah sumber kanonis source, script, test, dan dokumentasi.
+- Jangan mengubah konfigurasi autentikasi atau mekanisme session-lock untuk perubahan visual.
 
-Audit Caelestia tetap tersedia melalui `scripts/k41-audit-caelestia.sh`. Cleanup Dashboard berjalan tanpa argumen:
-`bash stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`
+## Status dan urutan
 
-Cleanup menetapkan `dashboard.enabled=false` pada konfigurasi global dan override monitor yang relevan, membuat backup, dan tidak menghapus source QML atau file package-owned. Runtime X280 harus dinilai dari hasil aktual, bukan dari keberadaan script.
-
-## Validasi
-
-Installer Bottombar mendukung `--check`, `--install`, dan `--rollback`. Lihat [dokumen implementasi K41Dock](docs/04-TASKBAR-PANEL-IMPLEMENTATION.md). Test statis/fixture tidak menggantikan pemeriksaan runtime dan penerimaan pengguna pada X280.
+Lihat [docs/06-STATUS.md](../../docs/06-STATUS.md) untuk status tunggal proyek dan [indeks workstream](docs/README.md) untuk rincian tiap fitur.
