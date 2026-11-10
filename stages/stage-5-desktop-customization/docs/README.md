@@ -20,6 +20,10 @@ Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [stat
 
 Source runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.
 
+## Alur kolaborasi dan verifikasi
+
+Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) untuk seluruh iterasi Stage 5. Dokumen tersebut menetapkan pembagian tanggung jawab, pembaruan script audit melalui GitHub, pull dan eksekusi pada X280, pemeriksaan privasi laporan, push bukti, serta verifikasi hasil. Jangan menggunakan prosedur audit manual terpisah jika pemeriksaan dapat ditambahkan ke script audit yang relevan.
+
 ## Dokumen acuan
 
 - [Project architecture](../../../docs/01-PROJECT.md)
