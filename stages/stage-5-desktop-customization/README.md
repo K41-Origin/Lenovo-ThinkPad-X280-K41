@@ -29,11 +29,15 @@ stages/stage-5-desktop-customization/
 
 ## Prinsip Stage 5
 
+Stage 5 menjadi fondasi bertahap **k41-dots**, bukan proyek shell mandiri yang harus dibangun sekaligus. Fondasi ini mencakup komponen desktop K41, pola integrasi, deployment, dan pengujian yang benar-benar dibutuhkan.
+
+**Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Jalur boot/splash ditangani oleh Plymouth. Workstream 01 tetap menjadi bagian dari pengalaman boot proyek ini, tetapi bukan komponen atau backlog pengembangan k41-dots. Artefak Quickshell boot splash yang masih tersimpan tidak otomatis menjadi bagian dari fondasi tersebut.
+
 - Setiap workstream dikerjakan bertahap dan terisolasi.
 - Source kanonis, installer, test, dan dokumentasi disimpan di repository.
 - Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`. Integrasi Caelestia saat ini menggunakan `~/.config/quickshell/caelestia/`.
 - Komponen K41 ditempatkan pada namespace milik K41, misalnya `modules/k41dock/K41Dock.qml`, dan bukan dengan mengubah source package-owned upstream yang tidak diperlukan.
-- Hasil Stage 5 akan menjadi basis komponen, pola integrasi, deployment, dan pengujian untuk proyek lanjutan **k41-shell**. Stage 5 belum berarti proyek k41-shell mandiri sudah dibuat.
+- Hasil Stage 5 akan menjadi basis komponen, pola integrasi, deployment, dan pengujian untuk proyek lanjutan **k41-dots**. Stage 5 belum berarti proyek k41-dots mandiri sudah dibuat.
 
 ## Arah UI
 
