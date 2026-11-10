@@ -149,8 +149,8 @@ case "$command_name" in
         ;;
 esac
 
-mkdir -p -- "$quickshell_root" "$k41_root" "$backup_root"
-for path in "$quickshell_root" "$k41_root" "$backup_root"; do
+mkdir -p -- "$quickshell_root" "$k41_root/modules" "$backup_root"
+for path in "$quickshell_root" "$k41_root" "$k41_root/modules" "$backup_root"; do
     [[ ! -L $path && -d $path && $(stat -c %u "$path") == "$EUID" ]] ||
         die "Unsafe directory after creation: $path"
 done
