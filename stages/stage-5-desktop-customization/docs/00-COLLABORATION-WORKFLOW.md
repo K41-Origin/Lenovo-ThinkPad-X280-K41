@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Dokumen ini menetapkan alur kerja Stage 5. Hasil yang relevan menjadi fondasi **K41-Dots**, kumpulan modul Quickshell milik K41. Ini bukan proyek shell mandiri pada tahap ini. Workstream 01 — Boot Experience dikecualikan karena boot/splash menggunakan Plymouth.
+Dokumen ini menetapkan alur kerja Stage 5. Hasil yang relevan menjadi fondasi **K41-dots**, kumpulan modul Quickshell milik K41. Ini bukan proyek shell mandiri pada tahap ini. Workstream 01 — Boot Experience dikecualikan karena boot/splash menggunakan Plymouth.
 
 ## Pembagian tanggung jawab
 
@@ -46,7 +46,7 @@ Tidak perlu membuat bootstrap, service, updater, framework installer, atau runti
 Audit Caelestia yang ada:
 `bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh`
 
-Script ini masih memiliki cakupan audit lama dan akan disederhanakan mengikuti alur audit per fitur. Jangan menganggap audit lama sebagai implementasi final K41-Dots.
+Script ini masih memiliki cakupan audit lama dan akan disederhanakan mengikuti alur audit per fitur. Jangan menganggap audit lama sebagai implementasi final K41-dots.
 
 ## Klasifikasi hasil
 
