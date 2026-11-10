@@ -36,7 +36,7 @@ report="$root/$report_rel"
 [[ -f $report/dashboard-config-inventory.json ]]
 [[ -f $report/dashboard-source-references.txt ]]
 [[ -f $report/dashboard-keybinds.json ]]
-grep -q 'Deletion performed: NO' "$report/summary.txt"
+grep -q 'Mode: read-only; no configuration or system state changed.' "$report/summary.txt"
 
 after=""
 if [[ -f $config ]]; then
