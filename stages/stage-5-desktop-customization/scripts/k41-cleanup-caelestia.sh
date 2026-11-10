@@ -144,9 +144,7 @@ if mode == "rollback":
     print(f"Rollback will restore {len(restored)} configuration file(s):")
     for _, target in restored:
         print(f"  {target}")
-    answer = input("Restore the exact pre-cleanup configuration? [y/N] ").strip().lower()
-    if answer not in ("y", "yes"):
-        fail("Rollback cancelled.")
+    print("Rollback explicitly requested with --rollback; restoring the selected backup.")
     for source, target in restored:
         atomic_restore(source, target)
     print("Rollback completed. Restart Caelestia manually to reload the restored configuration.")
@@ -198,9 +196,7 @@ if mode == "dry-run":
     print("Run with --apply after reviewing the latest audit report.")
     raise SystemExit(0)
 
-answer = input("Create a private backup and disable the dashboard now? [y/N] ").strip().lower()
-if answer not in ("y", "yes"):
-    fail("Apply cancelled.")
+print("Apply explicitly authorized by --apply; creating a private backup before writing.")
 
 reject_symlink_components(state_root)
 backup_parent = backup_root
