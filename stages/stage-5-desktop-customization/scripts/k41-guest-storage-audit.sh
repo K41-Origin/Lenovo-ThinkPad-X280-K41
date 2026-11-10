@@ -8,7 +8,7 @@ usage() {
   cat <<'USAGE'
 Usage: bash scripts/k41-guest-storage-audit.sh
 
-Creates a read-only Guest Mode audit report under reports/guest-mode-audit/.
+Creates a read-only Guest Mode audit report under reports/stage-5-desktop-customization/03-guest-mode/guest-storage-audit/.
 Run from the repository clone as the regular desktop user, without sudo.
 
 Collects storage/mount topology, swap/hibernate, volatile-memory limits,

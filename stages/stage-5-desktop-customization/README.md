@@ -7,7 +7,9 @@ Peta fisik dan ownership implementasi Stage 5. Status proyek tetap dimiliki [doc
 ```text
 stages/stage-5-desktop-customization/
 ├── README.md
-├── scripts/  # Stage 5 support and appearance tools
+├── docs/       # Prosedur dan acceptance workstream
+├── scripts/    # Stage 5 support and appearance tools
+├── tests/      # Test kontrak milik Stage 5
 └── workstreams/
     ├── 01-boot-experience/
     │   ├── config/quickshell/k41-boot-splash/shell.qml

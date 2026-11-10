@@ -33,8 +33,8 @@ for required in \
   'ThinkPad X280 DMI identity' \
   'bash tests/run.sh' \
   'bash stages/stage-1-live-readiness/scripts/validate-live-storage.sh' \
-  'reports/live-readiness' \
-  'reports/live-validation' \
+  'reports/stage-1-live-readiness/live-readiness' \
+  'reports/stage-1-live-readiness/live-validation' \
   'summary.md' \
   'diagnostics.log' \
   'ShellCheck (severity error)' \
@@ -56,7 +56,7 @@ pass "legacy entry points delegate without maintaining duplicate implementations
 
 grep -Fq 'stages/stage-1-live-readiness/scripts/k41-live-validation.sh' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not reference canonical validator"
 grep -Fq 'bash "$VALIDATOR" --readiness' "$SUPPLEMENTAL" || fail "supplemental Arch ISO collector does not delegate readiness to canonical validator"
-grep -Fq 'reports/x280-archiso-test' "$SUPPLEMENTAL" || fail "supplemental report is not stored inside the repository"
+grep -Fq 'reports/stage-1-live-readiness/x280-archiso-test' "$SUPPLEMENTAL" || fail "supplemental report is not stored inside the repository"
 if grep -Fq '/run/x280-archiso-storage-test-' "$SUPPLEMENTAL"; then
   fail "supplemental report must not be written outside the repository"
 fi
