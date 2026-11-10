@@ -12,7 +12,7 @@ if (( EUID != 0 )); then
 fi
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-report_root="$ROOT/reports/boot-audit"
+report_root="$ROOT/reports/shared/boot-audit"
 mkdir -p -- "$report_root"
 if [[ -n ${SUDO_UID:-} && ${SUDO_UID} =~ ^[0-9]+$ ]] && (( SUDO_UID >= 1000 )); then
   chown "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$report_root"
