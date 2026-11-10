@@ -35,14 +35,16 @@ Status terkini dan prioritas hanya dicatat di [06 — Status](06-STATUS.md).
 
 Peta fisik implementasi: [Stage 5 — Desktop Customization](../stages/stage-5-desktop-customization/README.md).
 
-Urutan resmi:
-1. [Boot Experience](08-STAGE-5/01-BOOT-EXPERIENCE.md)
-2. [Lock Screen](08-STAGE-5/02-LOCK-SCREEN.md)
-3. [Dashboard](08-STAGE-5/03-DASHBOARD.md)
-4. [Taskbar/Panel](08-STAGE-5/04-TASKBAR-PANEL.md)
-5. [Launcher](08-STAGE-5/05-LAUNCHER.md)
-6. [Sidebar](08-STAGE-5/06-SIDEBAR.md)
-7. [Utilities](08-STAGE-5/07-UTILITIES.md)
+Urutan workstream aktif:
+1. [Boot Experience](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md)
+2. [Lock Screen](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md)
+3. [Bottombar](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
+4. [Topbar](../stages/stage-5-desktop-customization/docs/05-TOPBAR.md)
+5. [Launcher](../stages/stage-5-desktop-customization/docs/05-LAUNCHER.md)
+6. [Sidebar](../stages/stage-5-desktop-customization/docs/06-SIDEBAR.md)
+7. [Utilities](../stages/stage-5-desktop-customization/docs/07-UTILITIES.md)
+
+Dashboard telah dihapus dari daftar workstream; fitur runtime dinonaktifkan oleh cleanup script Stage 5.
 
 Arah visual kanonis adalah **K41 Obsidian Minimalism / Graphite Monochrome**. Gunakan [Design System index](07-DESKTOP-DESIGN-SYSTEM.md) dan dokumen spesifiknya. Jangan menyalin ulang token atau keputusan desain ke dokumen workstream.
 
