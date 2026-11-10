@@ -1,4 +1,10 @@
-# Runtime-generated diagnostics and test output stay local by default.
+# Runtime-generated diagnostics stay local by default.
+# The Stage 5 Caelestia audit is an explicit exception so reviewed reports
+# can be committed and shared for the agreed implementation workflow.
 /reports/*
 !/reports/README.md
 !/reports/archive/
+!/reports/stage-5-desktop-customization/
+/reports/stage-5-desktop-customization/*
+!/reports/stage-5-desktop-customization/caelestia-audit/
+!/reports/stage-5-desktop-customization/caelestia-audit/**
