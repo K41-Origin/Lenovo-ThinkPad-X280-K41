@@ -1,7 +1,6 @@
 # Proyek dan Arsitektur
 
 ## Tujuan
-
 Membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji untuk ThinkPad X280. Desktop menggunakan Hyprland, Quickshell, dan Caelestia Shell sesuai dependensi upstream. BlackArch bersifat opsional dan selektif.
 
 ## Tujuh tahap resmi
@@ -10,18 +9,16 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji
 2. **Basic Arch installation:** instalasi dasar Arch pada SSD target setelah pemeriksaan identitas dan konfirmasi eksplisit. Destruktif. Detail: [Stage 2](../stages/stage-2-basic-arch-install/README.md).
 3. **Desktop installation:** setup desktop dari Arch terpasang melalui TTY. Detail: [Stage 3](../stages/stage-3-desktop-install/README.md).
 4. **Desktop functional validation:** pemeriksaan otomatis sesi, konfigurasi, proses, IPC, service, audio, jaringan, baterai, thermal, dan journal. Tidak menggantikan review interaksi pengguna. Detail: [Stage 4](../stages/stage-4-desktop-validation/README.md).
-5. **Desktop customization:** tujuh workstream berurutan. Detail dan acceptance dimiliki [Stage 5 docs](../stages/stage-5-desktop-customization/docs/README.md). Arah desain lintas-komponen ada di [Design System](07-DESKTOP-DESIGN-SYSTEM.md).
+5. **Desktop customization:** tujuh workstream berurutan. Detail: [Stage 5 docs](../stages/stage-5-desktop-customization/docs/README.md). Arah desain lintas-komponen ada di [Design System](07-DESKTOP-DESIGN-SYSTEM.md).
 6. **Desktop & hardware optimization:** CPU/GPU, thermal/fan, daya/baterai, suspend/hibernate/resume, stabilitas dan pengukuran baseline.
 7. **Release:** hanya setelah acceptance, regression, dokumentasi, dan bukti final ditinjau.
 
 Tahap tidak berpindah otomatis. Entry point dan prosedur umum berada di [Instalasi](02-INSTALLATION.md), [Desktop](03-DESKTOP.md), [Testing](04-TESTING.md), dan [Operations](05-OPERATIONS.md).
 
 ## Status proyek
-
 Status implementasi, prioritas aktif, acceptance, dan gate berikutnya hanya dicatat di [06 — Status](06-STATUS.md).
 
 ## Keputusan arsitektur
-
 - Tidak ada display manager atau autologin sebagai default instalasi.
 - TTY login manual dipertahankan; autologin TTY1 adalah opsi terpisah dan opt-in.
 - NetworkManager digunakan untuk jaringan.
@@ -30,11 +27,9 @@ Status implementasi, prioritas aktif, acceptance, dan gate berikutnya hanya dica
 - Jangan menganggap exit code 0 atau file konfigurasi hadir sebagai bukti acceptance fungsional.
 
 ## Ide pengembangan di luar roadmap aktif
-
 **Custom Arch ISO — IDE / NOT SCHEDULED.** Belum menjadi bagian dari tujuh tahap aktif, belum memiliki desain teknis, acceptance criteria, atau jadwal.
 
 ## Struktur repository
-
 - `stages/<stage>/`: implementasi, dokumentasi, konfigurasi, library, test, dan report yang dimiliki Stage terkait.
 - `shared/`: komponen yang digunakan lintas Stage; implementasi kanonis berada di `shared/lib/` dan `shared/config/`.
 - `scripts/`: utilitas lintas tahap yang belum memiliki ownership Stage tunggal; pemetaan ada di dokumen owner.
@@ -45,12 +40,42 @@ Status implementasi, prioritas aktif, acceptance, dan gate berikutnya hanya dica
 Root-level `lib/` dan `config/` dipertahankan sementara sebagai symlink kompatibilitas menuju `shared/`; kode baru harus memakai path kanonis `shared/`.
 
 ## Terminologi status
-
 PLANNED, IMPLEMENTED, TESTED, VERIFIED, COMPLETED / USER ACCEPTED, BLOCKED, dan RELEASED memiliki arti berbeda. Lihat [AGENTS.md](../AGENTS.md).
 
-## Handoff menuju k41-dots
+## Fondasi K41-Dots
 
-Stage 5 hanya membangun fondasi yang diperlukan secara bertahap: komponen desktop K41, pola integrasi, deployment, dan test. Tidak ada target untuk mengganti Caelestia secara menyeluruh atau membangun shell mandiri penuh pada tahap ini. **Workstream 01 — Boot Experience dikecualikan dari k41-dots** karena jalur boot/splash menggunakan Plymouth; Workstream 01 tetap berada dalam scope pengalaman boot proyek utama.
+K41-Dots dibangun **sederhana dan bertahap** sebagai kumpulan modul Quickshell milik K41. Ini bukan pekerjaan untuk membuat shell mandiri, runtime baru, bootstrap, atau sistem integrasi besar sekarang.
 
+### Struktur runtime yang dituju
 
-Stage 5 juga membangun fondasi teknis untuk proyek lanjutan **k41-dots**. Setiap komponen desktop K41 dikembangkan bertahap, memiliki source dan ownership terpisah dari Caelestia upstream, serta dideploy ke area Quickshell laptop di bawah `~/.config/quickshell/`. Repository Stage 5 tetap menjadi sumber kanonis source, installer, test, dan dokumentasi. Setelah komponen Stage 5 matang, pola integrasi dan komponen yang sudah diterima akan dievaluasi untuk diekstrak menjadi shell mandiri. **k41-dots belum menjadi implementasi aktif dan tidak boleh diasumsikan sudah memiliki bootstrap/runtime terpisah.**
+Semua modul K41 ditempatkan di namespace milik K41:
+
+```text
+~/.config/quickshell/k41/
+└── modules/
+    ├── lockscreen/
+    ├── bottombar/
+    ├── topbar/
+    ├── launcher/
+    └── ...
+```
+
+Contoh: komponen Lock Screen K41 berada di `~/.config/quickshell/k41/modules/lockscreen/`. Nama direktori fitur menggunakan nama yang jelas dan konsisten; jangan menaruh modul K41 di dalam namespace `quickshell/caelestia/`.
+
+### Alur kerja minimum
+
+1. **Audit fitur upstream:** script audit memeriksa source Caelestia/Quickshell dan konfigurasi yang relevan untuk satu fitur. Audit mengidentifikasi file utama, dependency, konfigurasi, serta titik integrasi yang diperlukan. Hasilnya dibatasi pada fitur yang sedang dikerjakan; tidak menyalin atau menginventarisasi seluruh shell tanpa alasan.
+2. **Siapkan modul K41:** berdasarkan hasil audit, script menyiapkan/menyalin hanya source dan resource yang diperlukan ke `~/.config/quickshell/k41/modules/<feature>/`. File upstream yang masih menjadi dependency tetap dicatat; jangan menyalin semuanya secara otomatis.
+3. **Integrasi seperlunya:** hubungkan modul K41 ke lingkungan Quickshell/Caelestia yang ada dengan perubahan minimum. Caelestia tetap menjadi host selama belum ada keputusan arsitektur baru.
+4. **Verifikasi:** periksa hasil salinan, dependency, konfigurasi, dan pemuatan modul. Audit bersifat read-only; script penyiapan harus memisahkan pemeriksaan dari operasi tulis.
+
+Repository tetap menyimpan source yang direview, script audit/penyiapan, test, dan dokumentasi. Path runtime di atas adalah tujuan deployment pada laptop, bukan pengganti source repository.
+
+### Batas scope
+- Workstream 01 — Boot Experience dikecualikan dari K41-Dots karena boot/splash menggunakan Plymouth.
+- Tidak perlu membuat installer shell, service manager, updater, rollback framework, atau bootstrap K41-Dots tersendiri pada tahap fondasi ini.
+- Jangan mengubah PAM, autentikasi, atau mekanisme lock/session upstream saat hanya memisahkan tampilan.
+- Jangan menghapus atau menimpa source upstream yang masih diperlukan.
+- Perluasan arsitektur hanya dilakukan jika kebutuhan nyata dari modul berikutnya membuktikannya.
+
+**Catatan transisi:** struktur Lock Screen yang saat ini berada di `workstreams/02-lock-screen/k41-dots/` dan deployment lama ke `quickshell/caelestia/modules/lock/` belum sesuai struktur runtime tujuan di atas. Perubahan source dan script untuk memindahkannya dilakukan setelah rancangan ini diselaraskan; dokumentasi ini sendiri tidak mengubah runtime laptop.
