@@ -2,10 +2,10 @@
 set -Eeuo pipefail
 
 root="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
-content="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/Content.qml"
-center="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/Center.qml"
-locksurface="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/LockSurface.qml"
-password="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/center/PasswordInput.qml"
+content="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/Content.qml"
+center="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/Center.qml"
+locksurface="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/LockSurface.qml"
+password="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/center/PasswordInput.qml"
 installer="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh"
 audit="$root/stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh"
 reporter="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-session.sh"
