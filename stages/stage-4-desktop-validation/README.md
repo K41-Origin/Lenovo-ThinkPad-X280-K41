@@ -63,7 +63,7 @@ Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--ap
 stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
   ├── guard: non-root + sesi Hyprland/Wayland aktif
   ├── source stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh
-  ├── buat reports/desktop-validation/<UTC timestamp>/
+  ├── buat reports/stage-4-desktop-validation/desktop-validation/<UTC timestamp>/
   ├── cek platform, package, Hyprland, Quickshell, Caelestia
   ├── cek service, portal, audio, network, radio, GPU/backlight
   ├── snapshot memory, filesystem, battery, thermal
@@ -128,7 +128,7 @@ Jika repair gagal di tengah jalan, jangan menganggap rollback terjadi. Periksa `
 
 Validator membuat:
 
-`reports/desktop-validation/<UTC timestamp>/`
+`reports/stage-4-desktop-validation/desktop-validation/<UTC timestamp>/`
 
 Artefak utama:
 - `summary.md` — hasil agregat dan interpretasi.
@@ -141,7 +141,7 @@ Artefak utama:
 
 Repair membuat:
 
-`reports/desktop-repair/<UTC timestamp>/`
+`reports/stage-4-desktop-validation/desktop-repair/<UTC timestamp>/`
 
 Artefak utama:
 - `repair.log`, `actions.tsv`, `summary.md`;

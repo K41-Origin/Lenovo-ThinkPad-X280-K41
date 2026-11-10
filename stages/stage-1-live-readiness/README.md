@@ -108,10 +108,10 @@ Validator bersifat read-only terhadap konfigurasi sistem dan SSD target, tetapi 
 
 | Lokasi | Isi |
 |---|---|
-| `reports/live-readiness/<timestamp>/` | Ringkasan readiness dan diagnostik dengan serial yang disamarkan |
-| `reports/live-validation/<timestamp>.md`, `latest.md` | Diagnostik host lebih luas; dapat memuat serial dan metadata jaringan |
-| `reports/x280-archiso-test/<timestamp>/` | Bukti tambahan collector Arch ISO |
-| `reports/test-runs/<timestamp>/` | Log dan ringkasan seluruh test suite |
+| `reports/stage-1-live-readiness/live-readiness/<timestamp>/` | Ringkasan readiness dan diagnostik dengan serial yang disamarkan |
+| `reports/stage-1-live-readiness/live-validation/<timestamp>.md`, `latest.md` | Diagnostik host lebih luas; dapat memuat serial dan metadata jaringan |
+| `reports/stage-1-live-readiness/x280-archiso-test/<timestamp>/` | Bukti tambahan collector Arch ISO |
+| `reports/shared/test-runs/<timestamp>/` | Log dan ringkasan seluruh test suite |
 
 File laporan dikelola dengan permission terbatas (umask/chmod 600). Review dan redaksi laporan sebelum dibagikan karena diagnostik rinci dapat memuat hardware identifier dan metadata jaringan.
 
@@ -161,8 +161,8 @@ bash stages/stage-1-live-readiness/scripts/x280-archiso-test.sh
 
 Setelah readiness:
 1. Periksa exit code dan hasil PASS/FAIL.
-2. Review `summary.md` terbaru di `reports/live-readiness/`.
-3. Review laporan `reports/live-validation/` untuk konteks host.
+2. Review `summary.md` terbaru di `reports/stage-1-live-readiness/live-readiness/`.
+3. Review laporan `reports/stage-1-live-readiness/live-validation/` untuk konteks host.
 4. Pastikan identitas SSD yang dilaporkan sesuai perangkat target.
 5. Lanjutkan ke Stage 2 hanya setelah target, backup, dan rencana instalasi diperiksa secara terpisah.
 

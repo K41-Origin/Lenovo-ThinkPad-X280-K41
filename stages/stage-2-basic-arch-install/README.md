@@ -92,7 +92,7 @@ Installer menolak kondisi berikut:
 - `/mnt/etc` sudah ada;
 - command wajib tidak tersedia.
 
-Log dibuat di `reports/installer/<UTC timestamp>/installer.log`, direktori permission `0700`, file `0600`. Log mencatat tahap terakhir dan exit status. Passphrase dibaca secara interaktif dan tidak sengaja dimasukkan ke log; shell xtrace tidak diaktifkan.
+Log dibuat di `reports/stage-2-basic-arch-install/installer/<UTC timestamp>/installer.log`, direktori permission `0700`, file `0600`. Log mencatat tahap terakhir dan exit status. Passphrase dibaca secara interaktif dan tidak sengaja dimasukkan ke log; shell xtrace tidak diaktifkan.
 
 ### 3.2 Identitas target SSD
 
@@ -195,7 +195,7 @@ Jangan menebak path disk dan jangan mengandalkan nomor indeks tanpa memeriksa id
 Installer tidak menyediakan rollback otomatis. Jika gagal atau terputus:
 1. Jangan langsung menjalankan ulang installer.
 2. Jangan menjalankan `stages/stage-2-basic-arch-install/scripts/resume-arch-x280.sh`; utility itu bukan recovery path yang disetujui.
-3. Simpan dan periksa log terakhir di `reports/installer/`.
+3. Simpan dan periksa log terakhir di `reports/stage-2-basic-arch-install/installer/`.
 4. Boot/pertahankan lingkungan recovery yang sesuai dan periksa kondisi aktual partition table, LUKS, mapper, filesystem, mount, fstab, dan UKI tanpa melakukan write tambahan.
 5. Jangan meng-unmount, menutup mapper, memformat, atau mengulang langkah secara otomatis jika kondisi belum dipahami.
 6. Tentukan prosedur recovery baru berdasarkan kondisi aktual dan persetujuan operator.

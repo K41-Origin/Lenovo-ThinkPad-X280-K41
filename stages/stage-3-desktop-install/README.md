@@ -68,7 +68,7 @@ Installer membuat direktori laporan privat sebelum sebagian besar preflight berj
 
 ## Alur instalasi
 
-1. Membuat direktori laporan unik di `reports/desktop/<UTC timestamp>/`, mode direktori 0700 dan file laporan 0600.
+1. Membuat direktori laporan unik di `reports/stage-3-desktop-install/desktop/<UTC timestamp>/`, mode direktori 0700 dan file laporan 0600.
 2. Menyimpan snapshot sistem dan daftar paket sebelum instalasi.
 3. Meminta persetujuan untuk instalasi paket desktop.
 4. Meminta pilihan terpisah untuk memasang Caelestia Shell.
@@ -131,7 +131,7 @@ Setelah selesai, keluar ke TTY, login sebagai user biasa, lalu jalankan `start-h
 
 ## Laporan dan kegagalan
 
-Lokasi laporan: `reports/desktop/<UTC timestamp>/`.
+Lokasi laporan: `reports/stage-3-desktop-install/desktop/<UTC timestamp>/`.
 
 Artefak yang dibuat:
 - `setup.log`

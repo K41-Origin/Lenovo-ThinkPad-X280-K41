@@ -41,4 +41,4 @@ Kedua workflow berjalan pada perubahan ke `main` dan pull request yang menargetk
 - Automated runtime/log validation bukan bukti interaksi fisik.
 - **COMPLETED / USER ACCEPTED** berarti pengguna menutup workstream secara eksplisit; jangan mengubahnya menjadi klaim pengukuran teknis yang tidak tersedia.
 
-Output test baru ditulis lokal ke `reports/test-runs/` dan tidak dikomit otomatis. Arsip historis tersedia melalui [indeks laporan](../reports/archive/2026-11/README.md). Review dan redaksi data sensitif sebelum membagikan laporan.
+Output test baru ditulis lokal ke `reports/shared/test-runs/` dan tidak dikomit otomatis. Arsip historis tersedia melalui [indeks laporan](../reports/archive/2026-11/README.md). Review dan redaksi data sensitif sebelum membagikan laporan.
