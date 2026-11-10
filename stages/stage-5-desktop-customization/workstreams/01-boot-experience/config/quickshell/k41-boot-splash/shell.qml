@@ -2,7 +2,7 @@ import Quickshell
 import Quickshell.Wayland
 import QtQuick
 
-// K41 handoff splash: visual counterpart of themes/plymouth/k41/k41.script.
+// K41 handoff splash: visual counterpart of the Stage 5 Workstream 1 Plymouth source.
 PanelWindow {
     id: root
 
