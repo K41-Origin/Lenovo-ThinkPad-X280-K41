@@ -50,13 +50,13 @@ if [[ ${1:-} == -C ]]; then
     case ${1:-} in
         rev-parse)
             case ${2:-} in
-                --is-inside-work-tree) printf 'true\\n'; exit 0 ;;
-                HEAD) printf 'd999d4878ee4cec134168e60d913714566a8cfa6\\n'; exit 0 ;;
+                --is-inside-work-tree) printf 'true\n'; exit 0 ;;
+                HEAD) printf 'd999d4878ee4cec134168e60d913714566a8cfa6\n'; exit 0 ;;
             esac
             ;;
         remote)
             [[ ${2:-} == get-url && ${3:-} == origin ]] || exit 1
-            printf 'https://github.com/caelestia-dots/shell.git\\n'
+            printf 'https://github.com/caelestia-dots/shell.git\n'
             exit 0
             ;;
         show)
