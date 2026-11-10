@@ -40,6 +40,8 @@ on_exit() {
         [[ -f $monitor_file ]] && printf ', monitor-runtime.json'
         [[ -f $source_file ]] && printf ', source-inventory.txt'
         [[ -f $report_dir/dashboard-keybinds.json ]] && printf ', dashboard-keybinds.json'
+        [[ -f $report_dir/dashboard-config-inventory.json ]] && printf ', dashboard-config-inventory.json'
+        [[ -f $report_dir/dashboard-source-references.txt ]] && printf ', dashboard-source-references.txt'
         printf '\n'
         printf 'Mode: read-only; no configuration or system state changed.\n'
     } >"$summary_file"
@@ -350,12 +352,12 @@ for candidate in \
     /usr/share/caelestia \
     /usr/lib/caelestia; do
     [[ -d $candidate && ! -L $candidate ]] || continue
-    [[ -z \\${scanned_roots[$candidate]:-} ]] || continue
+    [[ -z ${scanned_roots[$candidate]:-} ]] || continue
     scanned_roots[$candidate]=1
-    printf 'SOURCE_ROOT %s\n' "\\${candidate#"$HOME"/}" >>"$dashboard_refs_file"
+    printf 'SOURCE_ROOT %s\n' "${candidate#"$HOME"/}" >>"$dashboard_refs_file"
     while IFS= read -r -d '' source_file_path; do
         grep -nI -iE 'dashboard|showDashboard|toggleDash|openDash' "$source_file_path" 2>/dev/null |
-            awk -F: -v file="\\${source_file_path#"$candidate"/}" '{print "  " file ":" $1}' \
+            awk -F: -v file="${source_file_path#"$candidate"/}" '{print "  " file ":" $1}' \
             >>"$dashboard_refs_file" || true
     done < <(find "$candidate" -type f \( -name '*.qml' -o -name '*.js' \) \
         -not -path '*/.git/*' -not -path '*/build/*' -print0)
