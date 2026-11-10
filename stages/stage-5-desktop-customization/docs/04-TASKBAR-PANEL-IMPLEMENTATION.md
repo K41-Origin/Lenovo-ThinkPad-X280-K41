@@ -1,59 +1,77 @@
-# K41 Bottombar — Workspace Dock
+# K41Dock — Bottombar Workspace Dock
 
-## Scope
+## Tujuan
 
-Installs a separate Bottombar workspace dock at the bottom edge for the Caelestia/Quickshell
-source checkout. The upstream vertical bar entries are disabled in the user's
-runtime `shell.json`; the rest of the shell configuration is preserved.
+Workstream 04 menghasilkan komponen Bottombar bernama `K41Dock.qml`. Komponen ini menjadi pola awal pengembangan komponen K41 yang terpisah dari fitur upstream Caelestia dan dapat dikembangkan bertahap menuju proyek mandiri **k41-shell**.
 
-The dock:
-- displays workspaces belonging to the current monitor;
-- highlights the active workspace and marks occupied workspaces;
-- switches workspace on click;
-- reveals on bottom-edge hover and remains visible while hovered;
-- uses no exclusive zone, so it does not reserve workspace layout space;
-- hides while the active workspace has a fullscreen toplevel.
+## Source dan lokasi runtime
 
-## Install
+| Jenis | Path |
+|---|---|
+| Source kanonis di repository | `stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
+| Source aktif pada laptop | `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
+| Entry point Caelestia aktif | `~/.config/quickshell/caelestia/shell.qml` |
+| Runtime config Caelestia | `~/.config/caelestia/shell.json` |
+| Backup dan log installer | `~/.local/state/k41/backups/caelestia-dock/<timestamp>/` |
 
-From the project root:
+Repository menyimpan source yang dapat direview dan direproduksi. Laptop menjalankan salinan runtime di bawah `~/.config/quickshell/`. Jangan menjadikan salinan runtime sebagai satu-satunya tempat penyimpanan source; setelah perubahan diuji, sinkronkan kembali hasil yang disetujui ke repository.
+
+## Perilaku K41Dock
+
+- Menampilkan workspace pada monitor yang sesuai.
+- Workspace aktif memiliki indikator lebih menonjol; workspace yang memiliki window diberi penanda berbeda.
+- Klik indikator memanggil `Hypr.focusWorkspace()`.
+- Trigger hover selebar layar berada di tepi bawah.
+- Dock tetap terlihat ketika pointer berada di dock dan disembunyikan setelah pointer meninggalkannya.
+- `exclusiveZone: 0`; dock tidak memesan ruang layout workspace.
+- Dock disembunyikan ketika monitor memiliki fullscreen toplevel aktif.
+- Menggunakan `PanelWindow`, `WlrLayershell`, dan API Hyprland melalui Quickshell.
+
+## Integrasi saat ini
+
+Installer `scripts/k41-install-caelestia-dock.sh`:
+1. Memastikan dijalankan sebagai user biasa.
+2. Memeriksa source checkout Caelestia dan runtime config.
+3. Memvalidasi struktur `shell.qml`, `shell.json`, dan QML sebelum perubahan.
+4. Membuat backup `shell.qml`, target `K41Dock.qml` (atau mencatat bahwa target belum ada), dan `shell.json`.
+5. Menyalin modul ke `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml`.
+6. Menambahkan import dan instance K41Dock ke `shell.qml`.
+7. Menonaktifkan entry bar upstream pada `shell.json` sambil mempertahankan pengaturan lain.
+8. Memeriksa hasil perubahan.
+
+Installer tidak menggunakan sudo, tidak memasang paket, tidak me-restart service, dan tidak me-reload Quickshell secara otomatis.
+
+## Install, check, dan rollback
+
+Dari root repository:
 
 ```bash
 bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh --check
 bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh --install
 ```
 
-The script refuses root execution. It requires the active source checkout at
-`~/.config/quickshell/caelestia` and runtime config at
-`~/.config/caelestia/shell.json`. Override the source path with
-`K41_CAELESTIA_SOURCE=/path/to/caelestia` if needed.
-
-Before the first write, it backs up:
-- source `shell.qml`;
-- source `modules/k41dock/K41Dock.qml` (or records that it did not exist);
-- runtime `shell.json`.
-
-Backups and logs are stored under
-`$XDG_STATE_HOME/k41/backups/caelestia-dock/<timestamp>/` (or
-`~/.local/state/k41/backups/caelestia-dock/`). The script prints the exact
-backup directory. No sudo, package installation, service restart, Quickshell
-reload, or automatic upload is performed.
-
-## Rollback
-
-Use the exact backup directory printed by the installer:
+Untuk rollback, gunakan direktori backup persis yang dicetak installer:
 
 ```bash
 bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh --rollback "$HOME/.local/state/k41/backups/caelestia-dock/<timestamp>"
 ```
 
-Rollback restores only the three managed targets and removes the dock QML file
-if it did not exist before installation.
+Path source dapat dioverride melalui `K41_CAELESTIA_SOURCE=/path/to/caelestia`.
 
-## Important limitations
+## Pola pengembangan menuju k41-shell
 
-This is an initial implementation, not yet runtime-verified on the ThinkPad.
-The dock uses Quickshell's PanelWindow/Hyprland APIs and needs validation against
-the installed Quickshell version. The full-width transparent layer window has
-no exclusive zone; pointer/click-through behavior and fullscreen behavior must
-be checked on-device. Do not classify it as VERIFIED until those checks pass.
+K41Dock menjadi referensi proses, bukan alasan untuk menyalin seluruh source Caelestia. Untuk setiap komponen Stage 5 berikutnya:
+
+1. Audit API, source aktif, config, versi, dan dependensi upstream.
+2. Tentukan ownership dan interface komponen.
+3. Simpan source K41 di direktori workstream repository yang terpisah.
+4. Deploy salinan runtime ke `~/.config/quickshell/` menggunakan installer yang aman dan dapat di-rollback.
+5. Uji komponen secara terisolasi dan integrasinya dengan shell aktif.
+6. Catat hasil, batasan, dan keputusan penerimaan.
+7. Pertahankan pemisahan antara kode K41 dan kode upstream agar komponen dapat diekstrak ke proyek k41-shell.
+
+Jangan membuat struktur runtime mandiri `~/.config/quickshell/k41-shell/` atau mengganti entry point shell aktif sebelum desain bootstrap dan integrasi Quickshell diputuskan. Itu merupakan pekerjaan arsitektur proyek lanjutan, bukan asumsi untuk setiap workstream Stage 5.
+
+## Status
+
+K41Dock telah diserahkan dan pengguna mengonfirmasi hasil workstream berhasil. Status workstream: **COMPLETED / USER CONFIRMED SUCCESS**. Perubahan baru tetap memerlukan audit dan regression check.
