@@ -30,7 +30,7 @@ Tahap 6 **PLANNED** dan baru dimulai setelah Stage 5 diterima.
 
 - `scripts/audit-x280-hardware.sh` — inventaris hardware.
 - `scripts/audit-x280-power-management.sh` — baseline daya.
-- `scripts/set-x280-power-profile.sh` — selector power-profiles-daemon; perubahan memerlukan `--apply`.
+- `scripts/set-x280-power-profile.sh --show` — membaca profil aktif; `--apply PROFILE` mengubah profil dan memverifikasi hasilnya. Jalankan sebagai user biasa tanpa sudo.
 
 Collector audit tidak melakukan tuning. Simpan hasil baseline sebelum perubahan dan ukur ulang pada kondisi workload yang sebanding.
 
