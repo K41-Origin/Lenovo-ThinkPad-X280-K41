@@ -51,7 +51,7 @@ Gunakan urutan berikut untuk setiap iterasi:
    - Laporan runtime Stage 5 berada di bawah `reports/stage-5-desktop-customization/`.
    - Untuk audit Caelestia, script membuat direktori bertimestamp di:
      `reports/stage-5-desktop-customization/caelestia-audit/<timestamp>/`
-   - Periksa `summary.txt`, `run.log`, dan `config-snapshot.json` (jika dibuat).
+   - Periksa `summary.txt`, `run.log`, `config-snapshot.json`, `dashboard-config-inventory.json`, `dashboard-source-references.txt`, dan `dashboard-keybinds.json` (sesuai artefak yang dibuat).
    - Sebelum commit, periksa seluruh laporan untuk username, path pribadi, hostname, alamat jaringan, token, credential, informasi lokasi, atau data sensitif lain. Redaksi otomatis bukan jaminan bahwa semua informasi sensitif terhapus.
    - Jangan push laporan yang mengandung secret atau data pribadi. Jika ragu, jangan commit; laporkan masalahnya dan minta bantuan untuk memperbaiki sanitasi collector.
    - Stage hanya direktori laporan yang relevan, bukan seluruh `reports/` atau perubahan lain:
