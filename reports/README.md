@@ -1,20 +1,29 @@
 # Reports
 
-This directory is the output root for runtime diagnostics, validation, test runs, and repair evidence.
+Direktori ini menyimpan arsip bukti historis yang memang dipilih untuk dipertahankan serta menjadi root output runtime lokal.
+
+## Ownership dan layout runtime
+
+Laporan runtime baru sebaiknya dikelompokkan berdasarkan Stage pemilik:
+
+- `reports/stage-1-live-readiness/<category>/<timestamp>/`
+- `reports/stage-2-basic-arch-install/<category>/<timestamp>/`
+- `reports/stage-3-desktop-install/<category>/<timestamp>/`
+- `reports/stage-4-desktop-validation/<category>/<timestamp>/`
+- `reports/stage-5-desktop-customization/<workstream>/<category>/<timestamp>/`
+- `reports/shared/<category>/<timestamp>/` untuk test runner dan collector lintas Stage.
+
+**Status migrasi:** skrip yang ada masih menulis ke path `reports/<category>/` historis. Path tersebut dipertahankan untuk kompatibilitas sampai setiap producer dimigrasikan dan test-nya diperbarui. Jangan menganggap layout Stage-scoped sudah diterapkan ke semua producer.
 
 ## Policy
 
-- Runtime-generated reports are local artifacts by default and are ignored by Git.
-- Do not commit every diagnostic run. Keep only small, reviewed, redacted evidence that is necessary for a documented acceptance decision.
-- Historical reports already committed before this policy are preserved in [archive/2026-11](archive/2026-11/README.md).
-- Historical snapshots are not current system state. Use the owning document in `docs/` for current decisions and status.
-- Never store passwords, LUKS passphrases/recovery keys, tokens, cookies, or credentials in reports.
-- Review hardware identifiers, serial numbers, journal excerpts, usernames, paths, and network metadata before sharing or curating evidence.
+- Runtime-generated reports adalah artefak lokal secara default dan diabaikan Git.
+- Jangan commit setiap diagnostic run. Simpan hanya bukti kecil yang telah direview dan disamarkan bila diperlukan untuk keputusan acceptance.
+- Snapshot historis yang telah dikomit dipertahankan di [archive/2026-11](archive/2026-11/README.md).
+- Snapshot historis bukan kondisi sistem saat ini.
+- Jangan pernah menyimpan password, LUKS passphrase/recovery key, token, cookie, atau credential.
+- Review hardware identifiers, serial numbers, journal excerpts, usernames, paths, dan network metadata sebelum membagikan laporan.
 
-## Runtime compatibility
+## AI dan maintenance
 
-Existing scripts continue writing to their established `reports/<category>/<timestamp>/` paths. Those paths are intentionally unchanged; newly generated output remains local and is not committed automatically.
-
-## AI and maintenance guidance
-
-Do not enumerate or read `reports/archive/` during routine repository work. Access a specific archived artifact only when historical investigation is explicitly required or a current document links to it.
+Jangan enumerate atau membaca seluruh `reports/archive/` untuk pekerjaan rutin. Akses artefak arsip tertentu hanya bila investigasi historis secara eksplisit memerlukannya.
