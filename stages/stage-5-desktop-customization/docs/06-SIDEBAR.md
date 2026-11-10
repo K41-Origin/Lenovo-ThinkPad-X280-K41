@@ -24,7 +24,7 @@ Tidak termasuk mengulang fungsi Bottombar, Topbar, launcher, atau utilities. Sid
 - Sidebar hanya dibuat bila memiliki fungsi yang tidak dipenuhi komponen lain.
 - Konten dan interaksi sesuai keputusan pengguna.
 - Tidak mengganggu fokus, fullscreen, atau area kerja.
-- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-shell.
+- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-dots.
 - Pengguna menerima hasil langsung pada X280.
 
 ## Status
