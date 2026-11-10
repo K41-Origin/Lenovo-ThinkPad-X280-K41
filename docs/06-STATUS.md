@@ -10,7 +10,7 @@
 | 2. Basic Arch Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh`; operasi destruktif. Peta: [Stage 2](../stages/stage-2-basic-arch-install/README.md). |
 | 3. Desktop Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. Catatan: pilihan skip Caelestia belum kompatibel dengan kontrak package Stage 4 saat ini. Peta: [Stage 3](../stages/stage-3-desktop-install/README.md). |
 | 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot historis: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. Pengguna mengonfirmasi pairing Bluetooth berhasil. Peta: [Stage 4](../stages/stage-4-desktop-validation/README.md). |
-| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 selesai dan diterima pengguna; Workstream 2 aktif. Peta fisik: [Stage 5](../stages/stage-5-desktop-customization/README.md). |
+| 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 4** | Workstream 1 dan 2 telah diterima pengguna. Workstream 4 — Taskbar/Panel sedang difinalisasi atas prioritas eksplisit pengguna; Workstream 3 — Dashboard tetap PLANNED dan ditunda sementara. Peta fisik: [Stage 5](../stages/stage-5-desktop-customization/README.md). |
 | 6. Desktop & Hardware Optimization | PLANNED | Audit/selector tools dipetakan di [Stage 6](../stages/stage-6-hardware-optimization/README.md); optimasi aktual menunggu Stage 5 diterima dan baseline X280 terbaru. |
 | 7. Release | PLANNED | Menunggu seluruh gate dan regression lulus. |
 
@@ -20,16 +20,16 @@
 
 ## Prioritas aktif
 
-**Stage 5 — Workstream 2: Lock Screen.**
+**Stage 5 — Workstream 4: Taskbar/Panel.** Workstream 3 — Dashboard tetap PLANNED; urutan pengerjaan Taskbar didahulukan berdasarkan arahan eksplisit pengguna agar pekerjaan taskbar yang sudah dimulai dapat diselesaikan. Setelah Taskbar diterima, Dashboard menjadi pekerjaan Stage 5 berikutnya sebelum Launcher.
 
 - Desain: **C — Floating Password Card**.
 - Implementasi repository: override QML `Content.qml`, `Center.qml`, `PasswordInput.qml`, dan `LockSurface.qml`, serta installer deployment source tree Caelestia tersedia.
 - Installer: `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`.
 - Collector audit: `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`.
 - Static test: `stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`.
-- Status: **IMPLEMENTED; NOT TESTED / NOT VERIFIED pada X280 untuk implementasi terbaru**.
-- Belum ada bukti yang cukup bahwa source tree lokal terbaru aktif, runtime QML berhasil, lock/unlock dan wake lulus, atau tampilan diterima pengguna.
-- Gate berikutnya: terapkan perubahan dari checkout terbaru, periksa source aktif, jalankan test aman yang tersedia, uji lock/unlock dan wake pada X280, lalu minta keputusan visual pengguna secara langsung. Tidak menggunakan screenshot.
+- Status proyek: **COMPLETED / USER ACCEPTED pada 2026-11-10**, berdasarkan konfirmasi eksplisit pengguna bahwa pekerjaan Lock Screen telah selesai.
+- Status kode: IMPLEMENTED di repository. Penerimaan pengguna menutup workstream; status ini tidak dimaksudkan sebagai klaim baru bahwa setiap skenario runtime telah diuji ulang secara independen pada commit terkini.
+- Jangan membuka kembali Workstream 2 hanya karena catatan status lama atau bukti historis belum mencatat seluruh skenario. Audit ulang hanya jika pengguna melaporkan regresi atau meminta perubahan.
 
 Detail prosedur dan acceptance hanya berada di [Workstream 2 — Lock Screen](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md).
 
@@ -48,14 +48,14 @@ Dokumen pemilik: [Workstream 1 — Boot Experience](../stages/stage-5-desktop-cu
 | Workstream | Status |
 |---|---|
 | 1. Boot Experience | **COMPLETED / USER ACCEPTED** |
-| 2. Lock Screen | **IN PROGRESS** |
-| 3. Dashboard | PLANNED |
-| 4. Taskbar/Panel | PLANNED |
+| 2. Lock Screen | **COMPLETED / USER ACCEPTED** |
+| 3. Dashboard | PLANNED — ditunda sampai Taskbar selesai |
+| 4. Taskbar/Panel | **IN PROGRESS — IMPLEMENTED, DEVICE VALIDATION PENDING** |
 | 5. Launcher | PLANNED |
 | 6. Sidebar | PLANNED |
 | 7. Utilities | PLANNED |
 
-Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual ada di [03 — Guest Mode](../stages/stage-5-desktop-customization/docs/03-GUEST-MODE.md). Fitur ini bukan pekerjaan aktif dan tidak boleh diimplementasikan sebelum lock screen diterima serta ada keputusan implementasi baru.
+Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual ada di [03 — Guest Mode](../stages/stage-5-desktop-customization/docs/03-GUEST-MODE.md). Fitur ini bukan pekerjaan aktif dan tidak boleh diimplementasikan tanpa keputusan implementasi baru yang eksplisit; penerimaan Lock Screen tidak otomatis mengaktifkannya.
 
 ## Keputusan proyek yang masih berlaku
 
