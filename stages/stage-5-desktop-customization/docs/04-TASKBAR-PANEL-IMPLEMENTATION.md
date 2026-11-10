@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Workstream 04 menghasilkan komponen Bottombar bernama `K41Dock.qml`. Komponen ini menjadi pola awal pengembangan komponen K41 yang terpisah dari fitur upstream Caelestia dan dapat dikembangkan bertahap menuju proyek mandiri **k41-shell**.
+Workstream 04 menghasilkan komponen Bottombar bernama `K41Dock.qml`. Komponen ini menjadi pola awal pengembangan komponen K41 yang terpisah dari fitur upstream Caelestia dan dapat dikembangkan bertahap menuju proyek mandiri **k41-dots**.
 
 ## Source dan lokasi runtime
 
@@ -58,7 +58,9 @@ bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh 
 
 Path source dapat dioverride melalui `K41_CAELESTIA_SOURCE=/path/to/caelestia`.
 
-## Pola pengembangan menuju k41-shell
+## Pola pengembangan menuju k41-dots
+
+Scope k41-dots dibatasi pada fondasi komponen desktop yang dibutuhkan. Workstream 01 — Boot Experience berada di luar scope karena boot/splash menggunakan Plymouth.
 
 K41Dock menjadi referensi proses, bukan alasan untuk menyalin seluruh source Caelestia. Untuk setiap komponen Stage 5 berikutnya:
 
@@ -68,9 +70,9 @@ K41Dock menjadi referensi proses, bukan alasan untuk menyalin seluruh source Cae
 4. Deploy salinan runtime ke `~/.config/quickshell/` menggunakan installer yang aman dan dapat di-rollback.
 5. Uji komponen secara terisolasi dan integrasinya dengan shell aktif.
 6. Catat hasil, batasan, dan keputusan penerimaan.
-7. Pertahankan pemisahan antara kode K41 dan kode upstream agar komponen dapat diekstrak ke proyek k41-shell.
+7. Pertahankan pemisahan antara kode K41 dan kode upstream agar komponen dapat diekstrak ke proyek k41-dots.
 
-Jangan membuat struktur runtime mandiri `~/.config/quickshell/k41-shell/` atau mengganti entry point shell aktif sebelum desain bootstrap dan integrasi Quickshell diputuskan. Itu merupakan pekerjaan arsitektur proyek lanjutan, bukan asumsi untuk setiap workstream Stage 5.
+Jangan membuat struktur runtime mandiri `~/.config/quickshell/k41-dots/` atau mengganti entry point shell aktif sebelum desain bootstrap dan integrasi Quickshell diputuskan. Itu merupakan pekerjaan arsitektur proyek lanjutan, bukan asumsi untuk setiap workstream Stage 5.
 
 ## Status
 
