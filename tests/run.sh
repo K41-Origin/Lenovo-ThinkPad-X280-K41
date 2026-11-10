@@ -15,6 +15,7 @@ tests=(
   stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-visual-module.sh
+  stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh
   stages/stage-5-desktop-customization/tests/test-boot-visual-diagnostics.sh
   stages/stage-4-desktop-validation/tests/test-desktop-validation.sh
   stages/stage-4-desktop-validation/tests/test-desktop-repair.sh
