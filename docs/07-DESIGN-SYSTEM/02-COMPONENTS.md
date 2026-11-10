@@ -1,6 +1,6 @@
 # Components — Desktop Scope and Behavior
 
-Dokumen ini mendefinisikan tujuan desain komponen. Urutan pengerjaan dan status aktual berada di [Stage 5](../08-STAGE-5/README.md) dan [Status](../06-STATUS.md).
+Dokumen ini mendefinisikan tujuan desain komponen. Urutan pengerjaan dan status aktual berada di [Stage 5](../../stages/stage-5-desktop-customization/docs/README.md) dan [Status](../06-STATUS.md).
 
 | Komponen | Tujuan dan perilaku | Batas utama |
 |---|---|---|

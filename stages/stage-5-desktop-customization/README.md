@@ -1,6 +1,6 @@
 # Stage 5 — Desktop Customization
 
-Peta fisik dan ownership implementasi Stage 5. Status proyek tetap dimiliki [docs/06-STATUS.md](../../docs/06-STATUS.md); prosedur dan acceptance tiap workstream tetap dimiliki dokumen di [docs/08-STAGE-5/](../../docs/08-STAGE-5/README.md).
+Peta fisik dan ownership implementasi Stage 5. Status proyek tetap dimiliki [docs/06-STATUS.md](../../docs/06-STATUS.md); prosedur dan acceptance tiap workstream tetap dimiliki dokumen di [docs/08-STAGE-5/](docs/README.md).
 
 ## Struktur kanonis
 
@@ -38,7 +38,7 @@ stages/stage-5-desktop-customization/
 
 ## Workstream 1 — Boot Experience
 
-Dokumen prosedur: [01 — Boot Experience](../../docs/08-STAGE-5/01-BOOT-EXPERIENCE.md).
+Dokumen prosedur: [01 — Boot Experience](docs/01-BOOT-EXPERIENCE.md).
 
 | Ownership | File / fungsi |
 |---|---|
@@ -49,11 +49,11 @@ Dokumen prosedur: [01 — Boot Experience](../../docs/08-STAGE-5/01-BOOT-EXPERIE
 | Launcher | `.../scripts/k41-install-hyprland-launcher.sh` dan `.../scripts/k41-start-hyprland.sh` — memasang wrapper output-capturing untuk upstream `start-hyprland` |
 | Lock handoff | `.../scripts/k41-lock-caelestia-after-start.sh` dan `.../scripts/k41-plymouth-quit-after-lock.sh` — meminta/verifikasi lock dan fail-closed release Plymouth |
 
-Riwayat acceptance dan batas klaim Workstream 1 dimiliki [dokumen Workstream 1](../../docs/08-STAGE-5/01-BOOT-EXPERIENCE.md). Status proyek terkini tetap dicatat di [docs/06-STATUS.md](../../docs/06-STATUS.md).
+Riwayat acceptance dan batas klaim Workstream 1 dimiliki [dokumen Workstream 1](docs/01-BOOT-EXPERIENCE.md). Status proyek terkini tetap dicatat di [docs/06-STATUS.md](../../docs/06-STATUS.md).
 
 ## Workstream 2 — Lock Screen
 
-Dokumen prosedur: [02 — Lock Screen](../../docs/08-STAGE-5/02-LOCK-SCREEN.md).
+Dokumen prosedur: [02 — Lock Screen](docs/02-LOCK-SCREEN.md).
 
 | Ownership | File / fungsi |
 |---|---|
@@ -79,7 +79,7 @@ Test Stage 5 yang terpisah kini dicantumkan di global runner. Jangan memindahkan
 
 - `scripts/k41-apply-caelestia-profile.sh`, `scripts/k41-audit-caelestia.sh`, dan `scripts/k41-desktop-costumization-check.sh`: ownership workstream belum ditetapkan secara eksplisit.
 - `scripts/k41-diagnose-boot-visuals.sh` beserta test: tooling diagnostik; tidak dimasukkan ke runtime Workstream 1 tanpa bukti ownership yang lebih kuat.
-- Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual tetap di [03 — Guest Mode](../../docs/08-STAGE-5/03-GUEST-MODE.md).
+- Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual tetap di [03 — Guest Mode](docs/03-GUEST-MODE.md).
 - Workstream 3–7 masih PLANNED; tidak dibuat direktori runtime kosong.
 
 ## Safety dan validasi

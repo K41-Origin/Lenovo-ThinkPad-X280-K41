@@ -38,10 +38,10 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Security, recovery, optimasi tahap 6 | `docs/05-OPERATIONS.md` |
 | Status aktual dan prioritas | `docs/06-STATUS.md` |
 | Design System | `docs/07-DESKTOP-DESIGN-SYSTEM.md` sebagai indeks; rincian berada di `docs/07-DESIGN-SYSTEM/` |
-| Eksekusi dan prosedur Stage 5 | `docs/08-STAGE-5/README.md` dan dokumen workstream terkait |
+| Eksekusi dan prosedur Stage 5 | `stages/stage-5-desktop-customization/docs/README.md` dan dokumen workstream terkait |
 | Peta fisik implementasi Stage 5 | `stages/stage-5-desktop-customization/README.md` |
-| Workstream 1 | `docs/08-STAGE-5/01-BOOT-EXPERIENCE.md` |
-| Workstream 2 dan gate Guest Mode | `docs/08-STAGE-5/02-LOCK-SCREEN.md`; spesifikasi Guest Mode di `03-GUEST-MODE.md` |
+| Workstream 1 | `stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md` |
+| Workstream 2 dan gate Guest Mode | `stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md`; spesifikasi Guest Mode di `03-GUEST-MODE.md` |
 
 Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Update dokumen pemilik dan hanya ringkasan/cross-reference yang terdampak.
 

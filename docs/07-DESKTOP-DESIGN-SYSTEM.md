@@ -11,7 +11,7 @@ Dokumen ini adalah **indeks kanonis**, bukan tempat menumpuk seluruh spesifikasi
 ## Pemisahan sumber kebenaran
 
 - **Design intent:** dokumen di `docs/07-DESIGN-SYSTEM/`.
-- **Urutan dan acceptance Stage 5:** [Stage 5 index](08-STAGE-5/README.md) dan dokumen workstream masing-masing.
+- **Urutan dan acceptance Stage 5:** [Stage 5 index](../stages/stage-5-desktop-customization/docs/README.md) dan dokumen workstream masing-masing.
 - **Implementasi dan status aktual:** [Project status](06-STATUS.md).
 - **Prosedur apply/rollback:** script dan dokumen pemilik komponen.
 
