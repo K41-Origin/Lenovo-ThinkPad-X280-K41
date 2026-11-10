@@ -1,10 +1,10 @@
-# K41-Dots Lock Screen
+# K41-Dots — Lock Screen
 
 ## Ownership
 
-This directory is the canonical repository source for the K41-owned lock-screen overrides. It separates K41 implementation from the Caelestia upstream source tree.
+Direktori ini adalah source repository kanonis untuk empat override QML lock screen yang dimiliki K41. Source K41 dipisahkan dari source upstream Caelestia agar perubahan, review, dan deployment memiliki batas ownership yang jelas.
 
-## Source layout
+## Struktur source
 
 ```text
 k41-dots/
@@ -16,39 +16,39 @@ k41-dots/
         └── PasswordInput.qml
 ```
 
-## Runtime integration
+## Integrasi runtime
 
-The installer deploys these files into the pinned Caelestia user source tree:
+Installer menyalin file tersebut ke source tree Caelestia yang dipin:
 
 `~/.config/quickshell/caelestia/modules/lock/`
 
-The files intentionally use Caelestia/Quickshell APIs and upstream components (`qs.*`, `Caelestia.Config`, PAM service objects, session-lock protocol). This is a K41-owned component integrated with Caelestia, **not a standalone lock manager or an independent shell**.
+File QML tetap menggunakan API Caelestia/Quickshell dan komponen upstream (`qs.*`, `Caelestia.Config`, objek layanan PAM, serta session-lock protocol). Artinya ini adalah komponen milik K41 yang terintegrasi dengan Caelestia, **bukan lock manager mandiri atau shell independen**.
 
-The installer must preserve the pinned upstream shell, authentication flow, PAM policy, fingerprint/Howdy policy, and session-lock protocol. It must only replace the four explicitly managed QML overrides after preflight and backup.
+Installer harus mempertahankan source upstream yang dipin, alur autentikasi, kebijakan PAM, kebijakan fingerprint/Howdy, dan session-lock protocol. Installer hanya mengganti empat override QML yang dikelola secara eksplisit setelah preflight dan backup.
 
-## Design contract
+## Kontrak desain
 
-- Keep the upstream wallpaper/screencopy background and blur.
-- Keep the outer lock surface transparent.
-- Keep the password input as its own rounded surface.
-- Center clock, date, password input, and state message as one group.
-- Preserve upstream PAM and keyboard/focus handling.
-- Do not change authentication policy for visual reasons.
+- Pertahankan wallpaper/screencopy background dan blur upstream.
+- Buat outer lock surface transparan.
+- Pertahankan password input sebagai surface rounded tersendiri.
+- Posisikan clock, date, password input, dan state message sebagai satu kelompok yang terpusat.
+- Pertahankan PAM serta keyboard/focus handling upstream.
+- Jangan mengubah kebijakan autentikasi demi perubahan visual.
 
-## Validation
+## Validasi
 
-Run the Stage 5 static test:
+Jalankan test statis Stage 5:
 
 ```bash
 bash stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh
 ```
 
-Run the read-only Caelestia audit as the regular desktop user:
+Jalankan audit Caelestia secara read-only sebagai user desktop biasa:
 
 ```bash
 bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh
 ```
 
-The audit compares these canonical files with the active user-local Caelestia lock module and records MATCH/MISMATCH/MISSING states. It does not deploy, modify, restart, or unlock anything.
+Audit membandingkan empat source kanonis dengan modul lock screen runtime Caelestia dan mencatat status `MATCH`, `MISMATCH`, atau `MISSING`. Audit tidak melakukan deployment, mengubah konfigurasi, me-restart shell, atau membuka kunci layar.
 
-QML loading, lock/unlock, wrong-password handling, wake/resume, and visual acceptance still require validation on the X280.
+Pemuatan QML, lock/unlock, penanganan password salah, wake/resume, dan penerimaan visual tetap harus divalidasi pada X280.
