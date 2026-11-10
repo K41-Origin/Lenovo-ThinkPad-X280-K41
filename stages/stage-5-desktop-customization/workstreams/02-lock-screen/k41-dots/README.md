@@ -50,9 +50,9 @@ Jalankan dari root checkout pada X280 sebagai user biasa:
 bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh
 ```
 
-Laporan bertimestamp dibuat di `reports/lockscreen-visual-audit/`. Cakupannya meliputi penemuan source Caelestia, source QML terkait lock, legacy K41 overlay, aset, hash file, import/referensi, konfigurasi visual terpilih, dan metadata integrasi autentikasi/session-lock. Isi PAM/password dan nilai environment sensitif tidak dikumpulkan. Source text yang relevan dimasukkan ke report agar dependency dapat dianalisis sebelum implementasi.
+Laporan bertimestamp dibuat di `reports/lockscreen-visual-audit/`. Cakupannya meliputi penemuan source Caelestia, source QML terkait lock, legacy K41 overlay, aset dan hash, import/referensi, resolusi relatif QML/resource lokal, provenance package/source Git, konfigurasi visual terpilih, user systemd units, identitas executable proses tanpa command-line/environment, serta metadata integrasi autentikasi/session-lock. Isi PAM, password, command-line proses, dan nilai environment sensitif tidak dikumpulkan. Source text yang relevan dimasukkan ke report agar dependency dapat dianalisis sebelum implementasi.
 
-Script tidak mengubah sistem maupun Git state. Folder report di-ignore secara default; publikasi hasil memerlukan alur review/transfer yang disepakati. Report harus diperiksa karena dapat memuat source custom dan metadata mesin.
+Script tidak mengubah sistem maupun Git state. Aturan `.gitignore` repository saat ini tidak mengecualikan `reports/`, sehingga laporan baru dapat terlihat sebagai file untracked dan ikut dipush jika pengguna melakukan `git add`/commit. Review dan redaksi report sebelum publikasi wajib dilakukan: laporan dapat memuat source custom/proprietary dan metadata mesin.
 
 ## Batas keamanan
 
