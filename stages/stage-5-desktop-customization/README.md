@@ -23,6 +23,8 @@ stages/stage-5-desktop-customization/
 └── workstreams/
     ├── 01-boot-experience/
     ├── 02-lock-screen/
+    │   ├── k41-dots/modules/lock/
+    │   └── scripts/
     └── 04-taskbar-panel/
         └── config/quickshell/caelestia/modules/k41dock/K41Dock.qml
 ```
