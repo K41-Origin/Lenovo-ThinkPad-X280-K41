@@ -14,7 +14,7 @@ readonly UPSTREAM_REVISION="d999d4878ee4cec134168e60d913714566a8cfa6"
 readonly EXPECTED_PACKAGE_VERSION="2.5.0-1"
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-repo_root="$(cd -- "$script_dir/../../../.." && pwd -P)"
+repo_root="$(cd -- "$script_dir/../../../../.." && pwd -P)"
 source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock"
 
 # Require sudo at entry, then drop privileges before touching user files.
