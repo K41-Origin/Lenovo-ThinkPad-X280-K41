@@ -9,7 +9,7 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
 warn() { printf 'WARN: %s\n' "$*" >&2; }
 
-(( EUID == 0 )) || die "Run with sudo: sudo bash scripts/k41-configure-boot-experience.sh"
+(( EUID == 0 )) || die "Run with sudo: sudo bash stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh"
 [[ -d /sys/firmware/efi ]] || die "UEFI boot is required."
 [[ -r /etc/mkinitcpio.conf && -r /etc/kernel/cmdline ]] || die "Expected mkinitcpio and UKI command-line configuration is missing."
 mountpoint -q /efi || die "/efi is not mounted; refusing to rebuild a UKI onto an unmounted path."
