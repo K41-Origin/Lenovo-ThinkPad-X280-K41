@@ -72,7 +72,7 @@ cat > "$fakebin/caelestia" <<'MOCKCAELESTIA'
 #!/usr/bin/env bash
 set -Eeuo pipefail
 printf '%s\n' "$*" >> "$K41_TEST_RELOAD_LOG"
-[[ "$*" == "shell -r -d" ]]
+[[ "$*" == "shell -r -d" && ${K41_TEST_RELOAD_FAIL:-0} != 1 ]]
 MOCKCAELESTIA
 chmod 0755 "$fakebin/git" "$fakebin/caelestia"
 reload_log="$tmp/reload.log"
@@ -98,6 +98,21 @@ mapfile -t backups < <(find "$backup_root" -mindepth 1 -maxdepth 1 -type d -prin
     exit 1
 }
 (cd "${backups[0]}" && sha256sum -c MANIFEST.sha256 >/dev/null)
+# A failed reload must restore all four upstream visual files and try reloading them.
+git -C "$host" checkout -- modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml
+if PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" K41_TEST_RELOAD_FAIL=1 \
+    env -u XDG_CONFIG_HOME -u XDG_STATE_HOME HOME="$home" \
+    WAYLAND_DISPLAY=wayland-test HYPRLAND_INSTANCE_SIGNATURE=test-session \
+    bash "$script" >/dev/null 2>&1; then
+    printf 'FAIL: deployment should fail when Caelestia reload fails.\n' >&2
+    exit 1
+fi
+for file in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
+    /usr/bin/git -C "$host" show "HEAD:modules/lock/$file" | cmp - "$lock/$file" || {
+        printf 'FAIL: original file was not restored after reload failure: %s\n' "$file" >&2
+        exit 1
+    }
+done
 
 if PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" \
     env -u XDG_CONFIG_HOME -u XDG_STATE_HOME HOME="$home" \
