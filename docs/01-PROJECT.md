@@ -30,8 +30,7 @@ Penerimaan Workstream 1 tidak boleh ditafsirkan sebagai klaim bahwa setiap detai
 - `stages/stage-1-live-readiness/scripts/k41-live-validation.sh` — peta rinci: [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md).
 - `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` → delegasi internal `install-arch-x280.sh`; peta rinci: [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md)
 - `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh` → delegasi internal `stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh`; peta rinci: [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md)
-- `scripts/k41-desktop-validation.sh`
-- `scripts/k41-desktop-repair.sh`
+- `scripts/k41-desktop-validation.sh` and `scripts/k41-desktop-repair.sh` — peta rinci, side effects, bukti, dan test: [Stage 4 — Desktop Functional Validation](../stages/stage-4-desktop-validation/README.md)
 
 Wrapper harus tetap tipis dan tidak menggandakan implementasi.
 
