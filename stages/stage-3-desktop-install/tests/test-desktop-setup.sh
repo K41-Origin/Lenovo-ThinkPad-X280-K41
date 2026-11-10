@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+ROOT="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 SCRIPT="$ROOT/stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh"
 RESOLVER="$ROOT/stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }

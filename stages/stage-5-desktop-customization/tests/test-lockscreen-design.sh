@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+root="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 content="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Content.qml"
 center="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Center.qml"
 installer="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh"

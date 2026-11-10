@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+ROOT="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
 grep -Fq 'ModuleName=script' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth"
 grep -Fq 'ScriptFile=/usr/share/plymouth/themes/k41/k41.script' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth"

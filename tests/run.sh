@@ -8,23 +8,23 @@ cd "$ROOT"
 
 tests=(
   tests/test-x280-first-boot-check.sh
-  tests/test-desktop-setup.sh
-  tests/test-autologin-desktop.sh
-  tests/test-boot-experience.sh
-  tests/test-plymouth-k41-theme.sh
-  tests/test-animated-boot-splash.sh
-  tests/test-lockscreen-design.sh
-  tests/test-desktop-validation.sh
-  tests/test-desktop-repair.sh
+  stages/stage-3-desktop-install/tests/test-desktop-setup.sh
+  stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh
+  stages/stage-5-desktop-customization/tests/test-boot-experience.sh
+  stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh
+  stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh
+  stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh
+  stages/stage-4-desktop-validation/tests/test-desktop-validation.sh
+  stages/stage-4-desktop-validation/tests/test-desktop-repair.sh
   tests/test-hardware-audit.sh
   tests/test-guest-storage-audit.sh
   tests/test-power-management-audit.sh
   tests/test-power-profile-selector.sh
   tests/test-bootstrap-archiso.sh
   tests/test-common-preflight.sh
-  tests/test-installer-entry.sh
-  tests/test-arch-installer-script.sh
-  tests/test-arch-config-script.sh
+  stages/stage-2-basic-arch-install/tests/test-installer-entry.sh
+  stages/stage-2-basic-arch-install/tests/test-arch-installer-script.sh
+  stages/stage-2-basic-arch-install/tests/test-arch-config-script.sh
   stages/stage-1-live-readiness/tests/test-x280-install-readiness.sh
   tests/test-pinned-device-path.sh
   tests/test-inventory.sh
@@ -37,8 +37,8 @@ tests=(
   tests/test-storage-topology.sh
   tests/test-preflight-gate.sh
   tests/test-native-storage-handle.sh
-  tests/test-base-system-fstab.sh
-  tests/test-resume-arch-installer.sh
+  stages/stage-2-basic-arch-install/tests/test-base-system-fstab.sh
+  stages/stage-2-basic-arch-install/tests/test-resume-arch-installer.sh
 )
 
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"

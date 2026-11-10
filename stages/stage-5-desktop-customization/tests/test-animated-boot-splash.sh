@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+ROOT="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-animated-boot-splash.sh"
 bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh"
 python3 - "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-animated-boot-splash.sh" <<'PY'

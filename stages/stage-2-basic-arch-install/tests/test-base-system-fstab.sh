@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-# shellcheck source=../stages/stage-2-basic-arch-install/lib/base-system.sh
+ROOT="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
+# shellcheck source=../lib/base-system.sh
 source "$ROOT/stages/stage-2-basic-arch-install/lib/base-system.sh"
 
 if (( EUID != 0 )); then
