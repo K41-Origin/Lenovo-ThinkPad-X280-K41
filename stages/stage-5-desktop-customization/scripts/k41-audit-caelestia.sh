@@ -320,6 +320,15 @@ installer_file="$repo_root/stages/stage-5-desktop-customization/workstreams/02-l
     else
         printf 'Runtime upstream git metadata: NOT_FOUND\n'
     fi
+    printf '\nRequired upstream lock dependencies:\n'
+    for relative in Lock.qml Pam.qml center/Clock.qml center/InputField.qml center/StateMessage.qml; do
+        dependency_path="$runtime_lock_root/$relative"
+        if [[ -L $dependency_path || ! -f $dependency_path ]]; then
+            printf 'UPSTREAM_DEPENDENCY_MISSING_OR_SYMLINK %s\n' "$relative"
+        else
+            printf 'UPSTREAM_DEPENDENCY_PRESENT %s\n' "$relative"
+        fi
+    done
     printf '\nOverride file comparison (source vs active runtime):\n'
     for relative in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
         source_path="$dots_lock_root/$relative"
