@@ -6,8 +6,8 @@ umask 077
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 for cmd in git python3 date mkdir stat; do command -v "$cmd" >/dev/null 2>&1 || die "Missing command: $cmd"; done
 (( EUID != 0 )) || die 'Run as the regular desktop user, without sudo.'
-[[ -n \${HOME:-} && -d $HOME ]] || die 'HOME is invalid.'
-script_dir="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")" && pwd -P)"
+[[ -n ${HOME:-} && -d $HOME ]] || die 'HOME is invalid.'
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)" || die 'Run from a Git checkout.'
 repo_root="$(cd -- "$repo_root" && pwd -P)"
 [[ "$(git -C "$repo_root" branch --show-current)" == main ]] || die 'Audit only runs on main.'
@@ -28,7 +28,7 @@ done
 report="$run_dir/lockscreen-visual-audit.log"
 ( set -o noclobber; : > "$report" ) 2>/dev/null || die 'Cannot create report.'
 export K41_AUDIT_HOME="$HOME" K41_AUDIT_REPO="$repo_root" K41_AUDIT_REPORT="$report"
-export K41_AUDIT_CONFIG="\${XDG_CONFIG_HOME:-$HOME/.config}"
+export K41_AUDIT_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 python3 <<'PY'
 import hashlib, os, pathlib, re, shutil, subprocess
@@ -138,14 +138,14 @@ section("LOCAL VISUAL DEPENDENCY GRAPH")
 # that cannot be resolved from source filenames are documented as limitations.
 queue = [p for _,p in initial if p.suffix.lower()==".qml"]
 visited, resources, edges = set(), set(), set()
-type_re = re.compile(r"(?m)^\\s*([A-Z][A-Za-z0-9_]*)\\s*\\{")
+type_re = re.compile(r"(?m)^\s*([A-Z][A-Za-z0-9_]*)\s*\{")
 while queue:
     p = queue.pop(0)
     try: p = p.resolve(strict=True)
     except OSError: continue
     if p in visited or not p.is_file(): continue
     visited.add(p); src = read(p)
-    for m in re.finditer(r'(?m)^\\s*import\\s+"([^"]+)"',src):
+    for m in re.finditer(r'(?m)^\s*import\s+"([^"]+)"',src):
         target=(p.parent/m.group(1)).resolve()
         if target.is_dir():
             for q in walk(target,{".qml"}): edges.add((str(p),str(q),"relative-import")); queue.append(q)
@@ -224,7 +224,7 @@ for package in ("caelestia-shell","quickshell","quickshell-git"):
     rc,v=run(["pacman","-Qi",package])
     if rc==0:
         keep=("Name","Version","Description","Architecture","URL","Packager","Build Date","Install Date")
-        add(f"[{package}]"); add("\\n".join(line for line in v.splitlines() if any(line.startswith(k+" :") for k in keep)))
+        add(f"[{package}]"); add("\n".join(line for line in v.splitlines() if any(line.startswith(k+" :") for k in keep)))
     else: add(f"{package}: not installed or pacman unavailable")
 
 section("LIMITATIONS AND IMPLEMENTATION HANDOFF")
@@ -237,7 +237,7 @@ add("Binary assets are represented by path, size and SHA-256, not embedded.")
 add("Report contains local source text, paths, package versions and host label; review/redact before publishing.")
 add("No system configuration, package, service, authentication, permission or Git state was modified.")
 add("Report path: "+clean(report))
-report.write_text("\\n".join(out)+"\\n",encoding="utf-8")
+report.write_text("\n".join(out)+"\n",encoding="utf-8")
 print(f"Appearance-only audit report created: {report}")
 print(f"Report size: {report.stat().st_size} bytes")
 PY
