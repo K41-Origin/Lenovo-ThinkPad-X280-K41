@@ -271,23 +271,7 @@
     "excludedScreens": []
   },
   "dashboard": {
-    "enabled": true,
-    "showOnHover": false,
-    "showDashboard": true,
-    "showMedia": true,
-    "showPerformance": true,
-    "showWeather": false,
-    "mediaUpdateInterval": 2000,
-    "resourceUpdateInterval": 2500,
-    "dragThreshold": 50,
-    "performance": {
-      "showBattery": true,
-      "showGpu": true,
-      "showCpu": true,
-      "showMemory": true,
-      "showStorage": true,
-      "showNetwork": true
-    }
+    "enabled": false
   },
   "launcher": {
     "enabled": true,
