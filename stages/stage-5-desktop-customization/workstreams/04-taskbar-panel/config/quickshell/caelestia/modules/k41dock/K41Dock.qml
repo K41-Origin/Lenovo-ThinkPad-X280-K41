@@ -16,7 +16,6 @@ Variants {
         PanelWindow {
             id: root
 
-            required property ShellScreen screen
             screen: scope.modelData
 
             anchors {
@@ -31,6 +30,14 @@ Variants {
 
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+            // Only the trigger strip and dock accept pointer input.
+            mask: Region {
+                item: dock
+                Region {
+                    item: trigger
+                }
+            }
 
             readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
             readonly property int activeWorkspaceId: monitor?.activeWorkspace?.id ?? 1
@@ -136,7 +143,7 @@ Variants {
                             required property int index
 
                             readonly property bool active: modelData.id === root.activeWorkspaceId
-                            readonly property bool occupied: (modelData.lastIpcObject?.windows ?? 0) > 0
+                            readonly property bool occupied: modelData.toplevels.values.length > 0
 
                             width: active ? 24 : 14
                             height: 18
@@ -159,7 +166,6 @@ Variants {
                                 onClicked: Hypr.focusWorkspace(workspaceItem.modelData.id)
                             }
 
-                            ToolTip.visible: false
                         }
                     }
                 }
