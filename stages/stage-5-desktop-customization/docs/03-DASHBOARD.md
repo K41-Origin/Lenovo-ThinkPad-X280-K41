@@ -35,4 +35,4 @@ Backup file konfigurasi sebelum edit. Catat versi shell, widget yang dipakai, su
 
 ## Gate keluar
 
-Status VERIFIED memerlukan pengujian runtime dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 4 — Taskbar/Panel](04-TASKBAR-PANEL.md).
+Status VERIFIED memerlukan pengujian runtime dan konfirmasi pengguna. Setelah diterima, lanjutkan ke [Workstream 5 — Launcher](05-LAUNCHER.md).
