@@ -2,71 +2,54 @@
 
 ## Tujuan
 
-Dokumen ini menetapkan alur kerja antara maintainer repository dan pengguna ThinkPad X280 untuk implementasi, pengujian, dan verifikasi Stage 5. Stage 5 menjadi fondasi bertahap **k41-dots**, bukan proyek shell mandiri berskala besar. Workstream 01 — Boot Experience dikecualikan dari scope k41-dots karena boot/splash ditangani Plymouth; workstream tersebut tetap menjadi bagian dari proyek utama.
+Dokumen ini menetapkan alur kerja Stage 5. Hasil yang relevan menjadi fondasi **K41-Dots**, kumpulan modul Quickshell milik K41. Ini bukan proyek shell mandiri pada tahap ini. Workstream 01 — Boot Experience dikecualikan karena boot/splash menggunakan Plymouth.
 
 ## Pembagian tanggung jawab
 
 | Pihak | Tanggung jawab |
 |---|---|
-| Assistant | Memeriksa repository dan upstream; mengimplementasikan perubahan kode/config/docs; memeriksa hasil commit; menganalisis kegagalan dan memperbaiki implementasi. |
-| Pengguna | Melakukan pull; menjalankan script/test pada X280; memeriksa dampak runtime; menyampaikan hasil dan keputusan. |
+| Assistant | Memeriksa repository dan upstream; mengimplementasikan source, script, test, dan dokumentasi; memverifikasi perubahan GitHub. |
+| Pengguna | Menjalankan audit/test/deployment pada X280 bila diperlukan; memeriksa dampak runtime dan menerima hasil. |
 
-Assistant tidak mengklaim perubahan bekerja pada perangkat hanya karena commit berhasil. Pengujian perangkat dan review pengguna adalah bukti terpisah.
+Commit sukses tidak membuktikan perilaku runtime pada laptop.
 
-## Source of truth dan lokasi kerja
+## Source dan runtime
 
-- Repository GitHub adalah sumber kanonis untuk source, installer, dokumentasi, dan test yang direview.
-- Direktori `~/.config/quickshell/` pada laptop adalah lokasi source/runtime Quickshell yang digunakan untuk menjalankan hasil Stage 5.
-- Untuk integrasi saat ini, Caelestia aktif berada di `~/.config/quickshell/caelestia/`. Kode K41 disimpan terpisah di namespace milik K41, contohnya `modules/k41dock/K41Dock.qml`; jangan menimpa file upstream yang tidak perlu.
-- Template source setiap workstream disimpan di repository pada `workstreams/<id>/config/quickshell/...` dan dideploy ke lokasi runtime melalui script workstream.
-- Jangan menjadikan perubahan manual pada laptop sebagai satu-satunya salinan. Setelah perubahan diterima, sinkronkan kembali source dan dokumentasinya ke repository.
-- Backup konfigurasi/source dan log instalasi disimpan di bawah `~/.local/state/k41/backups/` atau lokasi yang dinyatakan oleh installer. Jangan commit backup runtime atau data sensitif.
+- Repository adalah sumber kanonis source yang direview, script, test, dan dokumentasi.
+- Runtime modul K41 berada di `~/.config/quickshell/k41/modules/<feature>/`.
+- Contoh Lock Screen: `~/.config/quickshell/k41/modules/lockscreen/`.
+- Caelestia tetap menjadi host/runtime selama belum ada keputusan baru.
+- Namespace K41 dipisahkan dari `~/.config/quickshell/caelestia/`; jangan menaruh source K41 di dalam direktori internal Caelestia.
+- Backup runtime tidak di-commit.
 
-## Siklus kerja
+## Alur minimum per fitur
 
-1. **Inspect**
-   - Periksa branch, file terkait, konfigurasi, dokumentasi, dan implementasi upstream.
-   - Identifikasi risiko perubahan dan pertahankan pekerjaan lokal yang tidak terkait.
-2. **Design**
-   - Tetapkan tujuan, interface, ownership, lokasi source/runtime, acceptance criteria, dan rollback.
-   - Rancang komponen K41 agar dapat dipisahkan dari upstream dan berpotensi diekstrak ke k41-dots.
-3. **Implement through GitHub**
-   - Periksa isi dan SHA file sebelum mengubahnya.
-   - Simpan source kanonis, installer, test, dan dokumentasi di repository.
-   - Lakukan perubahan kecil dan fokus pada branch `main`; verifikasi setiap write melalui GitHub.
-4. **Deploy and test on X280**
-   - Pastikan perubahan lokal pengguna aman.
-   - Sinkronkan: `git pull --ff-only origin main`.
-   - Jalankan hanya script/test yang ditentukan, tanpa sudo kecuali ada alasan teknis yang dijelaskan.
-   - Jalankan `--check` sebelum `--install` bila installer mendukung mode tersebut.
-   - Catat exit status dan output aktual.
-5. **Verify and iterate**
-   - Hubungkan hasil pengujian dengan commit/script yang diuji.
-   - Laporkan bukti, ketidakpastian, risiko, dan langkah berikutnya.
-   - Review visual/interaksi dilakukan pengguna bila acceptance memerlukannya; screenshot bukan acceptance gate.
+1. **Audit upstream** — script read-only memeriksa source/config Caelestia yang berkaitan dengan fitur tersebut. Kumpulkan file utama, resource, dependency, konfigurasi, dan titik integrasi yang diperlukan saja.
+2. **Review hasil audit** — pastikan mana source yang akan menjadi milik K41 dan mana dependency yang tetap disediakan upstream.
+3. **Siapkan modul** — script terpisah menyalin source/resource yang dipilih ke `~/.config/quickshell/k41/modules/<feature>/`. Jangan gabungkan audit read-only dengan operasi tulis.
+4. **Integrasikan seperlunya** — lakukan perubahan minimum agar modul K41 digunakan oleh lingkungan Quickshell yang ada.
+5. **Verifikasi** — periksa file hasil, dependency, konfigurasi, pemuatan QML, dan perilaku fitur yang relevan.
 
-## Script Caelestia
+Tidak perlu membuat bootstrap, service, updater, framework installer, atau runtime K41 mandiri sebelum kebutuhan nyata muncul.
 
-Audit dan cleanup adalah dua script terpisah:
+## Siklus perubahan
 
-- Audit read-only: `bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh`
-- Cleanup Dashboard: `bash stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`
+1. Periksa branch, file terkait, konfigurasi, dan implementasi upstream.
+2. Tetapkan scope dan acceptance sebelum mengubah source.
+3. Periksa isi dan SHA file sebelum menulis ke GitHub.
+4. Buat perubahan kecil dan verifikasi hasil write.
+5. Jalankan test statis/fixture yang relevan.
+6. Pengujian runtime dilakukan pada X280 bila diperlukan; laporkan hasil aktual, bukan asumsi.
 
-Cleanup menetapkan `dashboard.enabled=false` pada konfigurasi Caelestia yang relevan. Script berjalan tanpa argumen, menolak root, memvalidasi JSON, membuat backup bertimestamp, dan tidak menghapus source QML upstream, halaman Nexus, package, atau service.
+## Script Stage 5
+
+Audit Caelestia yang ada:
+`bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh`
+
+Script ini masih memiliki cakupan audit lama dan akan disederhanakan mengikuti alur audit per fitur. Jangan menganggap audit lama sebagai implementasi final K41-Dots.
 
 ## Klasifikasi hasil
 
-Gunakan status proyek kanonis dari [AGENTS.md](../../../AGENTS.md):
+Gunakan status kanonis dari [AGENTS.md](../../../AGENTS.md): PLANNED, IMPLEMENTED, TESTED, VERIFIED, COMPLETED / USER ACCEPTED, BLOCKED, dan RELEASED. Jelaskan bukti dan batas klaim untuk setiap status.
 
-- **PLANNED** — belum diimplementasikan.
-- **IMPLEMENTED** — perubahan telah dibuat di repository.
-- **TESTED** — test yang disebutkan telah benar-benar dijalankan; cantumkan hasilnya.
-- **VERIFIED** — perilaku telah dikonfirmasi dengan bukti yang sesuai, termasuk pengujian perangkat bila diperlukan.
-- **COMPLETED / USER ACCEPTED** — pengguna telah menerima dan menutup workstream; jangan memperluas klaim teknis di luar scope yang diterima.
-- **RELEASED** — masuk ke rilis yang ditetapkan.
-
-Commit sukses hanya membuktikan perubahan tersimpan di GitHub, bukan acceptance runtime.
-
-## Penutupan iterasi
-
-Setiap laporan kemajuan menyebutkan file/commit yang berubah, pemeriksaan yang benar-benar dijalankan, hasil aktual, risiko yang tersisa, dan acceptance yang belum terpenuhi. Status keseluruhan Stage 5 hanya dicatat di [status proyek](../../../docs/06-STATUS.md).
+Status keseluruhan Stage 5 hanya dicatat di [docs/06-STATUS.md](../../../docs/06-STATUS.md).
