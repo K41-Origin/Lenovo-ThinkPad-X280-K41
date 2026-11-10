@@ -115,7 +115,7 @@ File laporan dikelola dengan permission terbatas (umask/chmod 600). Review dan r
 
 Pada Arch ISO, validator readiness dan collector tambahan mensyaratkan checkout berada pada filesystem `overlay` atau `tmpfs` sebelum menulis laporan.
 
-**Catatan test suite:** manifest global berisi 29 test script. Suite memakai static checks, fixtures, mocks, dan disposable loop-backed image. `test-pinned-device-path.sh` dapat menjalankan wipefs, sgdisk, mkfs, cryptsetup, mount, dan unmount terhadap image sementara pada loop device. Itu bukan SSD target, tetapi suite secara keseluruhan tidak bebas dari operasi block-device.
+**Catatan test suite:** manifest global didefinisikan di `tests/run.sh`. Suite memakai static checks, fixtures, mocks, dan disposable loop-backed image. `test-pinned-device-path.sh` dapat menjalankan wipefs, sgdisk, mkfs, cryptsetup, mount, dan unmount terhadap image sementara pada loop device. Itu bukan SSD target, tetapi suite secara keseluruhan tidak bebas dari operasi block-device.
 
 ## 7. Test dan validasi
 
@@ -166,7 +166,7 @@ Setelah readiness:
 
 ## 9. Status bukti
 
-Pemetaan ini berdasarkan inspeksi statis source, manifest, workflow CI, dan referensi aktif pada branch `main`. Tidak ada script, test, atau readiness gate yang dijalankan dalam perubahan pemindahan ini. Bash syntax, ShellCheck, shfmt, test suite, dan validasi fisik tetap perlu dijalankan pada tahap verifikasi berikutnya.
+Dokumen ini memetakan implementasi dan batas Stage 1; isinya bukan bukti readiness atau hasil pengujian runtime. Klaim PASS harus didukung oleh laporan dari eksekusi aktual pada checkout dan host yang relevan. Validasi fisik ThinkPad X280 tetap terpisah dari test statis dan fixture.
 
 ## Catatan
 
