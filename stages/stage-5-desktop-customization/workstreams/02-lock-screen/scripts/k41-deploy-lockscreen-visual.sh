@@ -5,7 +5,6 @@ set -Eeuo pipefail
 umask 077
 
 readonly SCRIPT_NAME=${0##*/}
-readonly MODULE_NAME="lockscreen"
 readonly RELATIVE_MODULE_PATH="modules/lockscreen"
 readonly MARKER=".k41-lockscreen-managed"
 readonly SOURCE_FILES=(LockSurface.qml Content.qml Center.qml center/PasswordInput.qml)
@@ -32,11 +31,16 @@ USAGE
 command -v realpath >/dev/null 2>&1 || die "realpath is required."
 command -v sha256sum >/dev/null 2>&1 || die "sha256sum is required."
 command -v install >/dev/null 2>&1 || die "install is required."
-command -v find >/dev/null 2>&1 || die "find is required."
+command -v cmp >/dev/null 2>&1 || die "cmp is required."
+command -v mktemp >/dev/null 2>&1 || die "mktemp is required."
+command -v date >/dev/null 2>&1 || die "date is required."
+command -v cp >/dev/null 2>&1 || die "cp is required."
+command -v mv >/dev/null 2>&1 || die "mv is required."
+command -v rm >/dev/null 2>&1 || die "rm is required."
 command -v stat >/dev/null 2>&1 || die "stat is required."
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-repo_root="$(realpath -- "$script_dir/../../../../../../..")"
+repo_root="$(realpath -- "$script_dir/../../../../..")"
 source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen"
 config_root="${XDG_CONFIG_HOME:-$HOME/.config}"
 state_root="${XDG_STATE_HOME:-$HOME/.local/state}"
@@ -104,8 +108,11 @@ case "$command_name" in
     --rollback)
         [[ $# -eq 2 ]] || { usage >&2; exit 2; }
         rollback_dir=$2
-        [[ $rollback_dir == "$backup_root/"* && -d $rollback_dir && ! -L $rollback_dir ]] ||
+        [[ -d $rollback_dir && ! -L $rollback_dir ]] ||
             die "Backup path is invalid or outside $backup_root."
+        rollback_dir="$(realpath -e -- "$rollback_dir")"
+        backup_root="$(realpath -e -- "$backup_root")"
+        [[ $rollback_dir == "$backup_root/"* ]] || die "Backup path resolves outside $backup_root."
         [[ $(stat -c %u "$rollback_dir") == "$EUID" ]] || die "Backup is not owned by current user."
         [[ -f $rollback_dir/manifest && -f $rollback_dir/backup-kind ]] ||
             die "Backup metadata is incomplete."
