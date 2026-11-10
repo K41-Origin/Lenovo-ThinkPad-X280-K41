@@ -26,6 +26,18 @@ File QML tetap menggunakan API Caelestia/Quickshell dan komponen upstream (`qs.*
 
 Installer harus mempertahankan source upstream yang dipin, alur autentikasi, kebijakan PAM, kebijakan fingerprint/Howdy, dan session-lock protocol. Installer hanya mengganti empat override QML yang dikelola secara eksplisit setelah preflight dan backup.
 
+### Pemetaan ownership dan dependensi
+
+| Source K41-Dots | Target override upstream |
+|---|---|
+| `modules/lock/LockSurface.qml` | `modules/lock/LockSurface.qml` |
+| `modules/lock/Content.qml` | `modules/lock/Content.qml` |
+| `modules/lock/Center.qml` | `modules/lock/Center.qml` |
+| `modules/lock/center/PasswordInput.qml` | `modules/lock/center/PasswordInput.qml` |
+
+Komponen upstream yang tetap menjadi dependency dan tidak disalin ke source K41-Dots: `modules/lock/Lock.qml`, `modules/lock/Pam.qml`, `modules/lock/center/Clock.qml`, `modules/lock/center/InputField.qml`, dan `modules/lock/center/StateMessage.qml`. Installer mengambil source upstream pada revision yang dipin di script, lalu memasang empat override K41-Dots di atasnya. Versi paket yang diharapkan saat ini adalah `caelestia-shell 2.5.0-1`.
+
+
 ## Kontrak desain
 
 - Pertahankan wallpaper/screencopy background dan blur upstream.
