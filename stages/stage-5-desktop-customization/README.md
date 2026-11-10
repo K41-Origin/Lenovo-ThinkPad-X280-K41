@@ -83,7 +83,9 @@ Manifest global `tests/run.sh` memanggil test Stage 5 dari direktori stage. Jang
 ## Tidak dipindahkan
 
 - Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual tetap di [03 — Guest Mode](docs/03-GUEST-MODE.md).
-- Workstream 3–7 masih PLANNED; tidak dibuat direktori runtime kosong.
+- Workstream 3 — Dashboard: PLANNED dan ditunda sementara sampai Taskbar selesai.
+- Workstream 4 — Taskbar/Panel: implementasi awal tersedia; deployment dan validasi perangkat masih berlangsung.
+- Workstream 5–7 — Launcher, Sidebar, Utilities: PLANNED; tidak dibuat direktori runtime kosong.
 
 ## Safety dan validasi
 
