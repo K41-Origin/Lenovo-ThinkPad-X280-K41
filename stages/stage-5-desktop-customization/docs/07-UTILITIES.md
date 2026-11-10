@@ -1,4 +1,4 @@
-# Workstream 7 — Utilities
+# Workstream 08 — Utilities
 
 ## Tujuan
 
@@ -12,28 +12,23 @@ Tidak termasuk optimasi daya/thermal tahap 6, penggantian NetworkManager/audio s
 
 ## Prosedur
 
-1. Audit perangkat dan service aktual: NetworkManager, BlueZ, PipeWire/WirePlumber, brightness interface, media controls, DND/notification service, serta API Caelestia/Quickshell.
-2. Untuk setiap kontrol, dokumentasikan sumber status, command/API aksi, kebutuhan privilege, efek samping, dan cara mendeteksi kegagalan.
-3. Pilih subset kontrol yang berguna. Jangan menampilkan toggle yang hanya dekoratif atau tidak didukung.
-4. Bedakan status aktif/nonaktif/tidak diketahui; jangan menampilkan status optimistis jika backend gagal.
-5. Backup konfigurasi dan implementasikan satu kontrol pada satu waktu.
-6. Uji toggle dan verifikasi state dari backend, bukan hanya perubahan ikon/warna.
-7. Uji error permission, service tidak aktif, perangkat tidak tersedia, jaringan putus, dan aksi yang gagal.
-8. Pastikan kontrol berisiko tidak menjalankan tindakan destruktif tanpa konfirmasi. Jangan mengubah policy/service global sebagai jalan pintas UI.
+1. Audit perangkat dan service aktual: NetworkManager, BlueZ, PipeWire/WirePlumber, brightness interface, dan provider lain yang relevan.
+2. Tentukan kontrol yang benar-benar diperlukan; jangan menduplikasi panel Caelestia yang tetap dipakai.
+3. Tentukan interface, ownership source, runtime path di bawah `~/.config/quickshell/`, deployment, backup, dan rollback.
+4. Verifikasi API dan izin operasi sebelum menghubungkan UI dengan tindakan sistem.
+5. Implementasikan kontrol satu per satu; setiap aksi harus memiliki feedback sukses/gagal yang jelas.
+6. Uji status aktual, perubahan state, kegagalan backend, permission, fullscreen/focus, dan shell restart.
+7. Periksa error runtime serta konsumsi resource.
 
 ## Acceptance criteria
 
-- Setiap kontrol yang ditampilkan didukung dan terhubung ke backend aktual.
-- State UI sesuai state backend setelah aksi dan setelah refresh.
-- Kegagalan ditampilkan dengan jelas; UI tidak mengklaim aksi berhasil bila backend menolak.
-- Kontrol jaringan, Bluetooth, audio, microphone, dan brightness diuji pada hardware yang relevan.
-- Tidak ada service/daemon duplikat atau perubahan tahap 6 yang terselip.
-- Pengguna menerima interaksi langsung pada X280.
+- Hanya kontrol yang disetujui dan didukung backend aktual yang ditampilkan.
+- Status tidak ditebak dan error ditangani dengan jelas.
+- Aksi tidak memerlukan privilege berlebih dan tidak merusak konfigurasi sistem.
+- Tidak menduplikasi fungsi yang sudah dimiliki Caelestia atau komponen K41 lain.
+- Source K41 terpisah dan dapat dipelihara sebagai kandidat komponen k41-shell.
+- Pengguna menerima hasil langsung pada X280.
 
-## Rollback dan bukti
+## Status
 
-Backup konfigurasi utilities. Catat backend/API, privilege, test tiap kontrol, hasil backend, error handling, resource impact, dan konfirmasi pengguna. Redaksi SSID, alamat, device identifiers, serta informasi personal dari laporan.
-
-## Gate keluar
-
-Workstream 8 ditutup hanya setelah setiap kontrol diterima atau dikeluarkan dengan alasan. Setelah itu, buat rencana terpisah untuk fase **global appearance** dan konsistensi lintas-komponen; jangan mulai fase tersebut secara otomatis tanpa audit dan persetujuan.
+PLANNED.
