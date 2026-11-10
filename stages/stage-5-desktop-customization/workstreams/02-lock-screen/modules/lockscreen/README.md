@@ -1,6 +1,6 @@
 # Stage 5 — Lock Screen Visual Module
 
-**Status: IMPLEMENTED (source placement), NOT YET MIGRATED OR RUNTIME-VERIFIED.**
+**Status: IMPLEMENTED (source placement and user-local deployment script), HOST INTEGRATION / RUNTIME NOT VERIFIED.**
 
 Desain yang dipertahankan adalah **Floating Password Card** yang telah disetujui. Source visual K41 ditempatkan langsung di workstream Stage 5 ini, bukan di project/folder terpisah.
 
@@ -46,5 +46,17 @@ Modul memakai komponen dan API visual/runtime Caelestia yang sudah ada, termasuk
 3. **Host integration — BLOCKED / NOT VERIFIED.** Script deployment tidak mengedit `caelestia/shell.qml`. Titik import/integrasi yang didukung harus diverifikasi terhadap host Caelestia yang benar-benar terpasang sebelum modul diaktifkan.
 4. Verifikasi runtime pada target sebelum cleanup dependency visual upstream.
 5. Cleanup hanya source visual upstream yang terbukti tidak lagi dipakai.
+
+### Deploy pada laptop
+
+Dari root checkout repository, jalankan sebagai user desktop biasa:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh --install
+```
+
+Periksa status dengan `--status`. Script mencetak lokasi backup untuk rollback. Jangan gunakan installer lama `k41-apply-lockscreen-design.sh`.
+
+Deployment hanya menyalin file visual. Quickshell belum diarahkan untuk memuat modul ini sampai host integration Caelestia diverifikasi.
 
 Tidak ada klaim runtime rendering atau penerimaan perangkat pada tahap ini.
