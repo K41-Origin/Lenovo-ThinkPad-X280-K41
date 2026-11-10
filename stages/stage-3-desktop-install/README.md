@@ -46,8 +46,8 @@ Wrapper adalah entry point, sedangkan `setup-desktop-x280.sh` memegang alur inst
 | `stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh` | Resolver dependency AUR rekursif yang di-source oleh installer | Dependensi Stage 3 |
 | `tests/test-desktop-setup.sh` | Static contract, syntax, dan fixture resolver untuk installer | Test global; tetap di `tests/` |
 | `scripts/bootstrap-archiso.sh` | Source review lintas tahap; bukan launcher Stage 3 | Orchestrator Stage 1–2 |
-| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Pemeriksaan desktop setelah sesi berjalan | Stage 4; bukan bagian installer |
-| `stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Remediasi terbatas berdasarkan temuan validasi | Operasi desktop pasca-instalasi |
+| `stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Pemeriksaan desktop setelah sesi berjalan | Stage 4; bukan bagian installer |
+| `stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Remediasi terbatas berdasarkan temuan validasi | Operasi desktop pasca-instalasi |
 | `lib/desktop.sh` | Placeholder modul desktop generik | **PLANNED / UNUSED**; tidak dipanggil installer |
 
 Script autologin, launcher TTY, Plymouth, lock-screen, dan customization berada pada workstream terpisah. Stage 3 secara eksplisit tidak mengaktifkan autologin atau display manager.
@@ -169,7 +169,7 @@ Batas bukti:
 Setelah installer selesai dan sesi Hyprland dimulai secara manual, lanjutkan ke Stage 4 melalui:
 
 ```bash
-bash stages/stage-4-desktop-validation/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
+bash stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
 ```
 
 Validasi Stage 4 dijalankan sebagai user biasa di sesi Hyprland. Exit 0 dari Stage 3 tidak menggantikan gate Stage 4.
