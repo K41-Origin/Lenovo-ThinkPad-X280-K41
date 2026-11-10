@@ -54,7 +54,8 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 - Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan membuat akun, service, mount, storage policy, atau workflow Guest tanpa keputusan eksplisit baru.
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
-- Hasil Stage 5 akan menjadi fondasi komponen dan pola integrasi bagi proyek lanjutan **k41-shell**. Proyek mandiri tersebut belum dimulai.
+- Stage 5 menjadi fondasi bertahap **k41-dots**; hindari asumsi perlu membangun shell mandiri penuh atau mengganti Caelestia.
+- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots** karena boot/splash ditangani Plymouth. Jangan memasukkan komponen Quickshell boot splash lama sebagai backlog k41-dots tanpa keputusan baru.
 - Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`; repository menyimpan source kanonis dan installer untuk deployment.
 
 ## Required change process
