@@ -18,11 +18,15 @@ Detail visual lintas-komponen mengacu pada [Design System](../../../docs/07-DESK
 
 ## Implementasi repository
 
+Source empat override QML sekarang dimiliki secara eksplisit oleh **K41-Dots** di `workstreams/02-lock-screen/k41-dots/modules/lock/`. Source tersebut tidak lagi disimpan di jalur yang menyerupai konfigurasi runtime Caelestia. Installer menyalinnya ke `~/.config/quickshell/caelestia/modules/lock/` sebagai integration overlay. Komponen ini tetap bergantung pada API dan komponen upstream Caelestia; ini bukan lock manager mandiri.
+
+- Penjelasan ownership dan design contract: [K41-Dots Lock Screen README](../workstreams/02-lock-screen/k41-dots/README.md).
+
 Override QML yang dikelola proyek:
-- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/LockSurface.qml`
-- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Content.qml`
-- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Center.qml`
-- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/center/PasswordInput.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/LockSurface.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/Content.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/Center.qml`
+- `stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock/center/PasswordInput.qml`
 
 Installer deployment:
 - `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
