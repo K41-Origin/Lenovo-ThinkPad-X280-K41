@@ -7,7 +7,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$ROOT"
 
 tests=(
-  tests/test-x280-first-boot-check.sh
+  stages/stage-2-basic-arch-install/tests/test-x280-first-boot-check.sh
   stages/stage-3-desktop-install/tests/test-desktop-setup.sh
   stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh
   stages/stage-5-desktop-customization/tests/test-boot-experience.sh
@@ -18,7 +18,7 @@ tests=(
   stages/stage-4-desktop-validation/tests/test-desktop-validation.sh
   stages/stage-4-desktop-validation/tests/test-desktop-repair.sh
   tests/test-hardware-audit.sh
-  tests/test-guest-storage-audit.sh
+  stages/stage-5-desktop-customization/tests/test-guest-storage-audit.sh
   tests/test-power-management-audit.sh
   tests/test-power-profile-selector.sh
   tests/test-bootstrap-archiso.sh
