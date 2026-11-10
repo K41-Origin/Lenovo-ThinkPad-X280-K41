@@ -31,7 +31,10 @@ Override QML yang dikelola proyek:
 Installer deployment:
 - `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
 
-Collector audit:
+Audit integrasi Caelestia dan K41-Dots:
+- `stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh` (membandingkan checksum source kanonis dengan empat file runtime dan mencatat versi/revision)
+
+Collector audit khusus lock screen:
 - `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`
 - `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-session.sh`
 - `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-failure.sh`
