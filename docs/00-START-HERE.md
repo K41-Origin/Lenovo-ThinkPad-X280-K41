@@ -42,7 +42,8 @@ Laporan runtime baru disimpan lokal di `reports/<category>/<timestamp>/` dan tid
 | Tujuan, tahapan, arsitektur | [01 — Proyek](01-PROJECT.md) |
 | Tahap 1–3: prosedur instalasi | [02 — Instalasi](02-INSTALLATION.md) |
 | Stage 1: peta entry point, call graph, modul, laporan, dan test | [Stage 1 — Live Readiness](../stages/stage-1-live-readiness/README.md) |
-| Stage 2: peta installer, storage plan, layout, recovery, dan test | [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md) |\n| Stage 3: peta desktop installer, AUR resolver, side effects, dan test | [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md) |
+| Stage 2: peta installer, storage plan, layout, recovery, dan test | [Stage 2 — Basic Arch Installation](../stages/stage-2-basic-arch-install/README.md) |
+| Stage 3: peta desktop installer, AUR resolver, side effects, dan test | [Stage 3 — Desktop Installation](../stages/stage-3-desktop-install/README.md) |
 | Stage 4: peta validator, repair, diagnostics, report, dan acceptance | [Stage 4 — Desktop Functional Validation](../stages/stage-4-desktop-validation/README.md) |
 | Desktop tahap 3–5 | [03 — Desktop](03-DESKTOP.md) |
 | Automated tests dan acceptance | [04 — Testing](04-TESTING.md) |
