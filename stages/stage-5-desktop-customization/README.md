@@ -16,7 +16,7 @@ stages/stage-5-desktop-customization/
 │   └── ...
 ├── scripts/
 │   ├── k41-audit-caelestia.sh
-│   └── k41-cleanup-caelestia.sh # disable dashboard config
+│   └── k41-cleanup-caelestia.sh # Dashboard removal pre-audit
 ├── tests/
 └── workstreams/
     ├── 01-boot-experience/
@@ -25,10 +25,10 @@ stages/stage-5-desktop-customization/
 
 ## Stage 5 UI direction
 
-- Dashboard dihapus dari workstream; cleanup menonaktifkan `dashboard.enabled` tanpa menghapus source upstream.
+- Dashboard dihapus dari scope. Penghapusan runtime disiapkan melalui pre-audit read-only; target source/config/keybind ditentukan dari laporan terbaru sebelum implementasi mutatif.
 - Taskbar/Panel diarahkan menjadi **Bottombar**: dock horizontal minimal di tepi bawah, berisi indikator workspace saja.
 - **Topbar** akan dibuat di tepi atas. Daftar elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
-- Cleanup dashboard menggunakan `scripts/k41-cleanup-caelestia.sh`: dry-run sebagai default, `--apply` dengan backup, dan `--rollback`.
+- `scripts/k41-cleanup-caelestia.sh --audit` menjalankan inventaris Caelestia read-only. Opsi `--apply` dan `--rollback` sengaja belum tersedia sampai laporan ditinjau dan target penghapusan aman ditetapkan.
 
 ## Existing implementation ownership
 
