@@ -1,30 +1,37 @@
 # Stage 5 — Desktop Customization
 
-Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini hanya dimiliki oleh [docs/06-STATUS.md](../../../docs/06-STATUS.md).** Dokumen ini menetapkan urutan dan cara kerja, bukan menyalin riwayat implementasi.
+Stage 5 mengerjakan customization desktop secara bertahap dan satu workstream pada satu waktu. **Status terkini hanya dimiliki oleh [docs/06-STATUS.md](../../../docs/06-STATUS.md).** Dokumen ini menetapkan urutan dan cara kerja, bukan menyalin riwayat implementasi.
 
 ## Urutan workstream
 
-| Urutan | Workstream | Status/arah |
-|---|---|---|
-| 1 | [Boot Experience](01-BOOT-EXPERIENCE.md) | Diterima pengguna |
-| 2 | [Lock Screen](02-LOCK-SCREEN.md) | Diterima pengguna |
-| 3 | [Bottombar](04-TASKBAR-PANEL.md) | Penyesuaian nama dan verifikasi lanjutan |
-| 4 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
-| 5 | [Launcher](05-LAUNCHER.md) | Planned |
-| 6 | [Sidebar](06-SIDEBAR.md) | Planned |
-| 7 | [Utilities](07-UTILITIES.md) | Planned |
+| Urutan | ID | Workstream | Status/arah |
+|---:|---:|---|---|
+| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | Diterima pengguna |
+| 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | Diterima pengguna |
+| 3 | 04 | [Bottombar / K41Dock](04-TASKBAR-PANEL.md) | Berhasil; menjadi pola komponen K41 |
+| 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
+| 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
+| 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
+| 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
 
-Nomor workstream adalah urutan proses; beberapa nama file lama dipertahankan agar tautan yang sudah ada tidak rusak.
+ID workstream adalah identitas komponen; urutan adalah urutan pengerjaan. Nomor pada beberapa nama file dokumentasi dipertahankan untuk menjaga tautan lama. Guest Mode (ID 03) deferred dan bukan bagian dari urutan implementasi aktif.
 
-Kerjakan satu workstream pada satu waktu. Status tiap workstream mengikuti [status proyek](../../../docs/06-STATUS.md); jangan membuka kembali workstream yang telah diterima pengguna kecuali ada permintaan perubahan atau laporan regresi.
+## Prinsip penyimpanan dan ownership
+
+- Repository adalah sumber kanonis untuk source, installer, dokumentasi, dan test.
+- Source runtime komponen Quickshell pada laptop berada di bawah `~/.config/quickshell/`.
+- Untuk integrasi Caelestia saat ini, source aktif berada pada `~/.config/quickshell/caelestia/`. Komponen K41 ditempatkan dalam namespace/folder milik K41, misalnya `modules/k41dock/K41Dock.qml`.
+- Setiap workstream menyimpan template source dalam `workstreams/<id>/config/quickshell/...`; installer menyalinnya ke lokasi runtime yang sesuai.
+- Jangan mengedit source upstream atau file package-owned jika komponen K41 terpisah dapat digunakan.
+- Perubahan runtime harus memiliki preflight, backup, verifikasi pascaperubahan, dan rollback yang sesuai.
 
 ## Peta implementasi repository
 
-Source runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.
+Source runtime Workstream 1–2 dan artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream tetap menjadi acuan prosedur dan acceptance.
 
 ## Alur kolaborasi dan verifikasi
 
-Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) untuk seluruh iterasi Stage 5. Dokumen tersebut menetapkan pembagian tanggung jawab, pembaruan script audit melalui GitHub, pull dan eksekusi pada X280, pemeriksaan privasi laporan, push bukti, serta verifikasi hasil.
+Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) untuk pembagian tanggung jawab, pembaruan melalui GitHub, sinkronisasi dan eksekusi pada X280, pemeriksaan privasi laporan, serta verifikasi hasil.
 
 ## Dokumen acuan
 
@@ -43,17 +50,13 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 4. Utamakan schema/API upstream dan hindari komponen, daemon, service, widget, atau fungsi duplikat.
 5. Terapkan perubahan kecil dan terisolasi; jangan mencampur Stage 6.
 6. Validasi syntax/configuration, runtime, fungsi, regression, dan resource sesuai perubahan.
-7. Review visual/interaksi dilakukan langsung oleh pengguna pada ThinkPad X280. **Screenshot tidak digunakan, tidak diminta, dan bukan acceptance gate.**
+7. Review visual/interaksi dilakukan langsung oleh pengguna pada ThinkPad X280. Screenshot bukan acceptance gate.
 8. Catat perintah, hasil aktual, keterbatasan, dan keputusan pengguna dalam teks. Jangan mengarang hasil atau menyamakan file tersedia dengan runtime VERIFIED.
 9. Lanjutkan ke workstream berikutnya setelah acceptance terpenuhi atau pengguna secara eksplisit menerima pengecualian.
 
-## Status
-
-Gunakan definisi status kanonis di [AGENTS.md](../../../AGENTS.md). Status aktual dan prioritas tidak disalin di sini.
-
 ## Cleanup Caelestia
 
-Dashboard tidak lagi menjadi workstream Stage 5. `scripts/k41-cleanup-caelestia.sh` menonaktifkan fitur melalui `dashboard.enabled=false` pada konfigurasi global dan override monitor yang relevan. Mode default adalah dry-run; `--apply` membuat backup dan memverifikasi JSON; `--rollback` memulihkan backup. Script tidak menghapus QML upstream, keybind, package, atau service. Jalankan audit terbaru sebelum apply.
+Dashboard dinonaktifkan melalui `dashboard.enabled=false` pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script `scripts/k41-cleanup-caelestia.sh` berjalan tanpa argumen, menolak root, memvalidasi JSON, membuat backup, dan tidak menghapus source QML upstream. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
 
 ## Guest Mode
 
