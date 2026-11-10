@@ -14,7 +14,7 @@ Menyelesaikan tampilan dan interaksi Caelestia lock screen dengan desain **C —
 - Kelompok clock/date/password diposisikan secara geometris di tengah area konten.
 - Jangan mengubah PAM, password, fingerprint/Howdy policy, atau mekanisme autentikasi hanya untuk kosmetik.
 
-Detail visual lintas-komponen mengacu pada [Design System](../07-DESKTOP-DESIGN-SYSTEM.md).
+Detail visual lintas-komponen mengacu pada [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md).
 
 ## Implementasi repository
 

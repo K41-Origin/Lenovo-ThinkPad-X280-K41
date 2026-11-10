@@ -42,7 +42,7 @@ Sumber desain:
 - Plymouth: `stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script`.
 - Quickshell: `stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml`.
 
-Detail identitas visual lintas-komponen berada di [Design System](../07-DESKTOP-DESIGN-SYSTEM.md).
+Detail identitas visual lintas-komponen berada di [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md).
 
 ## Implementasi terkait
 
