@@ -8,12 +8,11 @@ Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini han
 |---|---|---|
 | 1 | [Boot Experience](01-BOOT-EXPERIENCE.md) | Diterima pengguna |
 | 2 | [Lock Screen](02-LOCK-SCREEN.md) | Diterima pengguna |
-| 3 | [Dashboard](03-DASHBOARD.md) | Dihentikan; tidak diperlukan |
-| 4 | [Bottombar](04-TASKBAR-PANEL.md) | Penyesuaian nama dan verifikasi lanjutan |
-| 5 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
-| 6 | [Launcher](05-LAUNCHER.md) | Planned |
-| 7 | [Sidebar](06-SIDEBAR.md) | Planned |
-| 8 | [Utilities](07-UTILITIES.md) | Planned |
+| 3 | [Bottombar](04-TASKBAR-PANEL.md) | Penyesuaian nama dan verifikasi lanjutan |
+| 4 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
+| 5 | [Launcher](05-LAUNCHER.md) | Planned |
+| 6 | [Sidebar](06-SIDEBAR.md) | Planned |
+| 7 | [Utilities](07-UTILITIES.md) | Planned |
 
 Nomor workstream adalah urutan proses; beberapa nama file lama dipertahankan agar tautan yang sudah ada tidak rusak.
 
@@ -54,7 +53,7 @@ Gunakan definisi status kanonis di [AGENTS.md](../../../AGENTS.md). Status aktua
 
 ## Cleanup Caelestia
 
-Pembersihan konfigurasi dashboard dan penataan konfigurasi Caelestia akan ditangani oleh `scripts/k41-cleanup-caelestia.sh`. Script ini **PLANNED**, belum dibuat, dan harus dirancang berdasarkan audit terbaru. Mode pemeriksaan harus tersedia; setiap perubahan harus memiliki backup dan rollback. Jangan menghapus source upstream atau konfigurasi yang tidak terkait.
+Dashboard tidak lagi menjadi workstream Stage 5. `scripts/k41-cleanup-caelestia.sh` menonaktifkan fitur melalui `dashboard.enabled=false` pada konfigurasi global dan override monitor yang relevan. Mode default adalah dry-run; `--apply` membuat backup dan memverifikasi JSON; `--rollback` memulihkan backup. Script tidak menghapus QML upstream, keybind, package, atau service. Jalankan audit terbaru sebelum apply.
 
 ## Guest Mode
 
