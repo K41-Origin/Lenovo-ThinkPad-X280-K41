@@ -33,7 +33,7 @@ Bukti tersimpan dalam snapshot historis:
 
 Status terkini dan prioritas hanya dicatat di [06 — Status](06-STATUS.md).
 
-Urutan resmi:
+Peta fisik implementasi: [Stage 5 — Desktop Customization](../stages/stage-5-desktop-customization/README.md).\n\nUrutan resmi:
 1. [Boot Experience — COMPLETED / USER ACCEPTED](08-STAGE-5/01-BOOT-EXPERIENCE.md)
 2. [Lock Screen — IN PROGRESS](08-STAGE-5/02-LOCK-SCREEN.md)
 3. [Dashboard](08-STAGE-5/03-DASHBOARD.md)
