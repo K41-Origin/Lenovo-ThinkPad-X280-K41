@@ -29,29 +29,31 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Navigasi dan sumber kebenaran | `docs/00-START-HERE.md` |
 | Tujuan, tahapan, arsitektur | `docs/01-PROJECT.md` |
 | Tahap 1–3: ringkasan prosedur instalasi | `docs/02-INSTALLATION.md` |
-| Stage 1: peta readiness dan ownership | `stages/stage-1-live-readiness/README.md` |
-| Stage 2: peta installer dasar, storage safety, recovery, dan test | `stages/stage-2-basic-arch-install/README.md` |
-| Stage 3: peta desktop installer, AUR resolver, side effects, dan test | `stages/stage-3-desktop-install/README.md` |
-| Stage 4: peta validator, repair, diagnostics, report, dan acceptance | `stages/stage-4-desktop-validation/README.md` |
+| Stage 1–4: peta implementasi | README masing-masing stage |
 | Desktop tahap 3–5 dan handoff | `docs/03-DESKTOP.md` |
 | Test suite dan acceptance gate | `docs/04-TESTING.md`, `tests/README.md` |
 | Security, recovery, optimasi tahap 6 | `docs/05-OPERATIONS.md` |
 | Status aktual dan prioritas | `docs/06-STATUS.md` |
-| Design System | `docs/07-DESKTOP-DESIGN-SYSTEM.md` sebagai indeks; rincian berada di `docs/07-DESIGN-SYSTEM/` |
-| Eksekusi dan prosedur Stage 5 | `stages/stage-5-desktop-customization/docs/README.md` dan dokumen workstream terkait |
+| Design System | `docs/07-DESKTOP-DESIGN-SYSTEM.md` sebagai indeks |
+| Eksekusi dan prosedur Stage 5 | `stages/stage-5-desktop-customization/docs/README.md` |
 | Peta fisik implementasi Stage 5 | `stages/stage-5-desktop-customization/README.md` |
-| Workstream 1 | `stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md` |
-| Workstream 2 dan gate Guest Mode | `stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md`; spesifikasi Guest Mode di `03-GUEST-MODE.md` |
+| Dashboard (keputusan dihentikan) | `stages/stage-5-desktop-customization/docs/03-DASHBOARD.md` |
+| Bottombar | `stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md` |
+| Topbar | `stages/stage-5-desktop-customization/docs/05-TOPBAR.md` |
 
 Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Update dokumen pemilik dan hanya ringkasan/cross-reference yang terdampak.
 
 ## Current project decisions
 
-- Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED pada 2026-11-10**. Jangan membuka kembali berdasarkan catatan historis yang lebih lama; evaluasi ulang hanya bila ada laporan masalah baru dari pengguna.
-- Workstream 2 — Lock Screen **COMPLETED / USER ACCEPTED pada 2026-11-10** berdasarkan konfirmasi eksplisit pengguna. Jangan membukanya kembali berdasarkan status lama; audit ulang hanya bila ada laporan regresi atau permintaan perubahan baru.
-- Workstream 4 — Taskbar/Panel **COMPLETED / USER ACCEPTED pada 2026-11-11** berdasarkan persetujuan eksplisit pengguna. Jangan membuka kembali tanpa laporan regresi atau permintaan perubahan baru. Workstream 3 — Dashboard kini menjadi prioritas aktif; lakukan audit aktual dan tetapkan kebutuhan sebelum implementasi. Dashboard dikerjakan sebelum Launcher.
+- Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED pada 2026-11-10**.
+- Workstream 2 — Lock Screen **COMPLETED / USER ACCEPTED pada 2026-11-10**.
+- **Dashboard dihentikan / dihapus dari scope pada 2026-11-11.** Jangan melanjutkan desain atau implementasi dashboard.
+- **Taskbar/Panel diarahkan menjadi Bottombar.** Konsep dock workspace-only horizontal di tepi bawah dipertahankan. Penerimaan lama hanya berlaku untuk versi Taskbar/Panel sebelumnya; perubahan baru memerlukan review pengguna.
+- **Topbar akan dibuat di tepi atas.** Detail elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
+- Cleanup Caelestia direncanakan melalui `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`. Script ini belum dibuat. Audit aktual harus mendahului implementasi; wajib ada mode pemeriksaan, backup, rollback, dan scope terbatas. Jangan menghapus source checkout upstream atau file yang kepemilikannya tidak jelas.
+- Launcher, Sidebar, dan Utilities mengikuti urutan Stage 5 setelah Bottombar/Topbar sesuai status di `docs/06-STATUS.md`.
 - Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan membuat akun, service, mount, storage policy, atau workflow Guest tanpa keputusan eksplisit baru.
-- Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek. Review visual dilakukan langsung oleh pengguna pada display X280 dan hasilnya dicatat dalam teks.
+- Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
 - Hasil Stage 5 akan menjadi input evaluasi tahap instalasi sebelum Stage 7. Refactoring instalasi menyeluruh belum menjadi pekerjaan aktif.
 
@@ -80,7 +82,7 @@ Setelah perubahan:
 
 - Output runtime dikelompokkan di `reports/<stage>/<category>/`; artefak lintas-stage berada di `reports/shared/<category>/`. Semua output runtime lokal secara default dan diabaikan Git.
 - Snapshot laporan historis November 2026 disimpan dalam Git history pada commit `02f6194ed04c8f13ea64eda35b7afb94f7006504`; indeks aktif: `reports/archive/2026-11/README.md`.
-- Jangan enumerate atau membaca seluruh arsip laporan untuk tugas rutin. Buka hanya laporan tertentu bila diperlukan oleh dokumen pemilik.
+- Jangan enumerate atau membaca seluruh arsip laporan untuk tugas rutin. Buka hanya laporan tertentu bila diperlukan oleh dokumen aktif.
 - Laporan dapat memuat serial, username, path, journal, dan metadata jaringan. Redaksi sebelum dibagikan. Jangan pernah menyimpan password, passphrase LUKS, recovery key, token, cookie, atau credential.
 
 ## Status vocabulary
