@@ -48,6 +48,9 @@ Root-level `lib/` dan `config/` dipertahankan sementara sebagai symlink kompatib
 
 PLANNED, IMPLEMENTED, TESTED, VERIFIED, COMPLETED / USER ACCEPTED, BLOCKED, dan RELEASED memiliki arti berbeda. Lihat [AGENTS.md](../AGENTS.md).
 
-## Handoff menuju k41-shell
+## Handoff menuju k41-dots
 
-Stage 5 juga membangun fondasi teknis untuk proyek lanjutan **k41-shell**. Setiap komponen desktop K41 dikembangkan bertahap, memiliki source dan ownership terpisah dari Caelestia upstream, serta dideploy ke area Quickshell laptop di bawah `~/.config/quickshell/`. Repository Stage 5 tetap menjadi sumber kanonis source, installer, test, dan dokumentasi. Setelah komponen Stage 5 matang, pola integrasi dan komponen yang sudah diterima akan dievaluasi untuk diekstrak menjadi shell mandiri. **k41-shell belum menjadi implementasi aktif dan tidak boleh diasumsikan sudah memiliki bootstrap/runtime terpisah.**
+Stage 5 hanya membangun fondasi yang diperlukan secara bertahap: komponen desktop K41, pola integrasi, deployment, dan test. Tidak ada target untuk mengganti Caelestia secara menyeluruh atau membangun shell mandiri penuh pada tahap ini. **Workstream 01 — Boot Experience dikecualikan dari k41-dots** karena jalur boot/splash menggunakan Plymouth; Workstream 01 tetap berada dalam scope pengalaman boot proyek utama.
+
+
+Stage 5 juga membangun fondasi teknis untuk proyek lanjutan **k41-dots**. Setiap komponen desktop K41 dikembangkan bertahap, memiliki source dan ownership terpisah dari Caelestia upstream, serta dideploy ke area Quickshell laptop di bawah `~/.config/quickshell/`. Repository Stage 5 tetap menjadi sumber kanonis source, installer, test, dan dokumentasi. Setelah komponen Stage 5 matang, pola integrasi dan komponen yang sudah diterima akan dievaluasi untuk diekstrak menjadi shell mandiri. **k41-dots belum menjadi implementasi aktif dan tidak boleh diasumsikan sudah memiliki bootstrap/runtime terpisah.**
