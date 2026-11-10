@@ -53,7 +53,7 @@ Daftar ini adalah dependency statis yang tampak pada source; kelengkapan depende
 
 ## Urutan berikutnya
 
-1. Buat test statis yang memastikan struktur, import, komponen, dan guard scope visual.
+1. Test statis tersedia di `stages/stage-5-desktop-customization/tests/test-lockscreen-visual-module.sh` dan sudah terdaftar pada `tests/run.sh`.
 2. Buat script migrasi terpisah dengan preflight, backup, staging, validasi, atomic switch, dan rollback.
 3. Jalankan CI untuk pemeriksaan statis.
 4. Setelah migrasi/runtime terbukti dan diterima, lakukan audit dependency pascamigrasi.
