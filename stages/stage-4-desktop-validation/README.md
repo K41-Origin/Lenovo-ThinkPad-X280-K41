@@ -48,8 +48,8 @@ Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--ap
 | `stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh` | Collector read-only untuk paket, executable, Hyprland, perangkat, audio, jaringan, power, thermal, dan journal | Collector Stage 4 |
 | `stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh` | Collector proses, CLI/IPC, log, dan package Caelestia/Quickshell | Collector Stage 4; jika dipanggil sendiri, dapat mencoba memulai Caelestia bila belum berjalan |
 | `stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh` | Klasifikasi log Caelestia dan journal | Library khusus Stage 4; di-source validator dan test Stage 4 |
-| `tests/test-desktop-validation.sh` | Syntax, read-only contract, report permissions/order, serta fixture classifier | Test global; tetap di `tests/` |
-| `tests/test-desktop-repair.sh` | Syntax, batas mutasi, dan kontrak repair | Test global; tetap di `tests/` |
+| `stages/stage-4-desktop-validation/tests/test-desktop-validation.sh` | Syntax, read-only contract, report permissions/order, serta fixture classifier | Test global; tetap di `tests/` |
+| `stages/stage-4-desktop-validation/tests/test-desktop-repair.sh` | Syntax, batas mutasi, dan kontrak repair | Test global; tetap di `tests/` |
 | `tests/test-desktop-setup.sh` | Memeriksa keberadaan dan syntax validator sebagai kontrak integrasi Stage 3 | Test global; bukan test utama Stage 4 |
 | `tests/run.sh` | Manifest test repository | Shared; jangan dipindah |
 | `.github/workflows/ci.yml` | Bash syntax, ShellCheck pada daftar script terpilih, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
@@ -153,8 +153,8 @@ Laporan dapat berisi username, hostname, device identity, package versions, file
 ## Test dan CI
 
 Test utama Stage 4:
-- `bash tests/test-desktop-validation.sh` — syntax, read-only contract, report initialization/permissions, coverage token, classifier fixtures Caelestia dan journal (termasuk empty/access-limited journal, firmware warning, critical kernel signature, CPU mitigation correlation).
-- `bash tests/test-desktop-repair.sh` — syntax, larangan opsi/operasi berbahaya, batas package/service/PAM, laporan privat, dan penilaian hasil validator post-repair.
+- `bash stages/stage-4-desktop-validation/tests/test-desktop-validation.sh` — syntax, read-only contract, report initialization/permissions, coverage token, classifier fixtures Caelestia dan journal (termasuk empty/access-limited journal, firmware warning, critical kernel signature, CPU mitigation correlation).
+- `bash stages/stage-4-desktop-validation/tests/test-desktop-repair.sh` — syntax, larangan opsi/operasi berbahaya, batas package/service/PAM, laporan privat, dan penilaian hasil validator post-repair.
 - `bash tests/run.sh` — suite repository penuh; manifest dimiliki `tests/run.sh`.
 
 Integrasi tambahan:

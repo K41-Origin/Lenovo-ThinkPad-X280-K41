@@ -208,13 +208,13 @@ Test relevan yang terdaftar di manifest global `tests/run.sh`:
 
 | Test | Cakupan |
 |---|---|
-| `tests/test-arch-installer-script.sh` | Kontrak statis installer, urutan guard, target, confirmation, descriptor pinning, operasi, dan postcondition |
-| `tests/test-base-system-fstab.sh` | Fstab: preserve entry lain, permission mask ESP, idempotency, konflik, package arguments |
+| `stages/stage-2-basic-arch-install/tests/test-arch-installer-script.sh` | Kontrak statis installer, urutan guard, target, confirmation, descriptor pinning, operasi, dan postcondition |
+| `stages/stage-2-basic-arch-install/tests/test-base-system-fstab.sh` | Fstab: preserve entry lain, permission mask ESP, idempotency, konflik, package arguments |
 | `tests/test-storage-plan.sh` | Perhitungan layout, alignment, overflow, profile binding, digest, validasi plan |
 | `tests/test-storage-prerequisites.sh` | Mock discovery, UEFI/tool/topology prerequisite, stable identity |
 | `tests/test-storage-confirmation.sh` | Exact confirmation, digest binding, final revalidation, one-shot gate |
 | `tests/test-pinned-device-path.sh` | Integrasi tool storage pada disposable loop-backed image; membutuhkan root dan tool terkait |
-| `tests/test-resume-arch-installer.sh` | Kontrak statis utility resume legacy; bukan validasi recovery fisik |
+| `stages/stage-2-basic-arch-install/tests/test-resume-arch-installer.sh` | Kontrak statis utility resume legacy; bukan validasi recovery fisik |
 | `tests/test-bootstrap-archiso.sh` | Integrasi statis orkestrator Stage 1–2 |
 
 `tests/test-storage-execution-dry-run.sh` dan `tests/test-storage-execution-boundary.sh` menguji simulator/mock boundary. Mereka tidak mengeksekusi disk target dan tidak membuktikan installer produksi memakai boundary tersebut.

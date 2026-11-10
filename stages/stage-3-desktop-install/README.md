@@ -44,7 +44,7 @@ Wrapper adalah entry point, sedangkan `setup-desktop-x280.sh` memegang alur inst
 | `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh` | Entry point tipis yang meneruskan argumen ke implementasi | Khusus Stage 3 |
 | `stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh` | Preflight, package transaction, konfigurasi awal, laporan, dan orchestration desktop | Khusus Stage 3 |
 | `stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh` | Resolver dependency AUR rekursif yang di-source oleh installer | Dependensi Stage 3 |
-| `stages/stage-3-desktop-install/tests/test-desktop-setup.sh` | Static contract, syntax, dan fixture resolver untuk installer | Test milik Stage 3 |
+| `stages/stage-3-desktop-install/stages/stage-3-desktop-install/tests/test-desktop-setup.sh` | Static contract, syntax, dan fixture resolver untuk installer | Test milik Stage 3 |
 | `scripts/bootstrap-archiso.sh` | Source review lintas tahap; bukan launcher Stage 3 | Orchestrator Stage 1–2 |
 | `stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh` | Pemeriksaan desktop setelah sesi berjalan | Stage 4; bukan bagian installer |
 | `stages/stage-4-desktop-validation/scripts/k41-desktop-repair.sh` | Remediasi terbatas berdasarkan temuan validasi | Operasi desktop pasca-instalasi |
@@ -154,7 +154,7 @@ Installer tidak menyediakan rollback transaksional atas package upgrade/installa
 ## Test coverage
 
 Test Stage 3 yang relevan:
-- `tests/test-desktop-setup.sh` — syntax, keberadaan entry point/installer/resolver, delegasi wrapper, kontrak package dan safety, guard terhadap display manager/autologin, serta fixture parsing metadata AUR.
+- `stages/stage-3-desktop-install/tests/test-desktop-setup.sh` — syntax, keberadaan entry point/installer/resolver, delegasi wrapper, kontrak package dan safety, guard terhadap display manager/autologin, serta fixture parsing metadata AUR.
 - `tests/test-bootstrap-archiso.sh` — pemeriksaan integrasi source-review dan kontrak wrapper desktop sebagai bagian dari bootstrap lintas tahap.
 - `tests/run.sh` — manifest global; jalankan dari root dengan `bash tests/run.sh`.
 
@@ -186,7 +186,7 @@ Dokumen ini memetakan implementasi yang ada. Ia tidak mengubah paket, dependency
 
 ## Tests and reports
 
-The Stage 3 contract test is `stages/stage-3-desktop-install/tests/test-desktop-setup.sh`. It is invoked through the canonical root `bash tests/run.sh` manifest. Desktop installation reports are written under `reports/stage-3-desktop-install/desktop/`.
+The Stage 3 contract test is `stages/stage-3-desktop-install/stages/stage-3-desktop-install/tests/test-desktop-setup.sh`. It is invoked through the canonical root `bash tests/run.sh` manifest. Desktop installation reports are written under `reports/stage-3-desktop-install/desktop/`.
 
 ## Stage-owned support scripts
 
