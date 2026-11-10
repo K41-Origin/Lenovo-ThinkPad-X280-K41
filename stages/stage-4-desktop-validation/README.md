@@ -27,6 +27,10 @@ bash stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh
 
 Jangan gunakan `sudo`. Script mensyaratkan `HYPRLAND_INSTANCE_SIGNATURE` dan `WAYLAND_DISPLAY`, serta menolak berjalan sebagai root.
 
+### Kontrak package dan pilihan Stage 3
+
+Validator saat ini memiliki daftar package wajib yang mencakup `hyprland`, `quickshell-git`, `caelestia-shell`, `caelestia-cli`, PipeWire/WirePlumber, dan portal Hyprland. Stage 3 menawarkan opsi Quickshell resmi tanpa Caelestia; opsi tersebut tidak memenuhi daftar wajib validator dan akan menghasilkan FAIL pada pemeriksaan package. Untuk workflow yang sesuai dengan kontrak Stage 4 sekarang, Caelestia harus dipilih saat instalasi Stage 3. Jalur Quickshell-only belum didukung end-to-end oleh validator; lihat [Status proyek](../../docs/06-STATUS.md).
+
 Repair, bila memang diperlukan dan setelah laporan ditinjau, juga dijalankan sebagai user biasa di sesi Hyprland:
 
 ```bash
@@ -48,7 +52,8 @@ Repair meminta autentikasi sudo saat membutuhkan privilege. Tidak ada opsi `--ap
 | `tests/test-desktop-repair.sh` | Syntax, batas mutasi, dan kontrak repair | Test global; tetap di `tests/` |
 | `tests/test-desktop-setup.sh` | Memeriksa keberadaan dan syntax validator sebagai kontrak integrasi Stage 3 | Test global; bukan test utama Stage 4 |
 | `tests/run.sh` | Manifest test repository | Shared; jangan dipindah |
-| `.github/workflows/ci.yml` | Bash syntax, ShellCheck, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
+| `.github/workflows/ci.yml` | Bash syntax, ShellCheck pada daftar script terpilih, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
+| `.github/workflows/bash-tests.yml` | Bash syntax dan ShellCheck seluruh file shell, shfmt terpilih, dan suite test | CI repository; bukan milik eksklusif Stage 4 |
 
 **Struktur kanonis:** implementasi Stage 4 telah ditempatkan di `stages/stage-4-desktop-validation/scripts/` dan library khususnya di `stages/stage-4-desktop-validation/lib/`. Test global tetap di `tests/`; CI dan test runner tetap di lokasi bersama. Reorganisasi ini hanya mengubah lokasi dan referensi path, bukan perilaku runtime.
 
@@ -154,7 +159,9 @@ Test utama Stage 4:
 
 Integrasi tambahan:
 - `tests/test-desktop-setup.sh` memeriksa validator Stage 4 sebagai bagian dari kontrak desktop setup Stage 3.
-- CI menjalankan Bash syntax validation, ShellCheck pada script terpilih, dan `bash tests/run.sh`.
+- `.github/workflows/ci.yml` menjalankan syntax, ShellCheck pada daftar terpilih, dan suite.
+- `.github/workflows/bash-tests.yml` menjalankan syntax/ShellCheck seluruh file shell, shfmt terpilih, dan suite.
+- Kedua workflow tumpang tindih pada push dan pull request ke `main`; detail trigger/cakupan ada di [Testing dan CI](../../docs/04-TESTING.md).
 
 Static/fixture tests tidak menjalankan validator terhadap X280 aktual, tidak menjalankan repair pada host, dan tidak membuktikan UI/physical acceptance.
 
