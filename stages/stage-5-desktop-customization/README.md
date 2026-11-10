@@ -37,6 +37,6 @@ Workstream 1–2 dan artefak implementasinya tetap berada pada direktori yang su
 
 ## Safety dan validasi
 
-Cleanup hanya menghapus properti `dashboard` dari Caelestia `shell.json` dan direktori `modules/dashboard`. Script menolak root, argumen, symlink, serta direktori Dashboard di direktori Dashboard di source checkout Git yang memiliki perubahan lokal. Jalankan sebagai pengguna biasa. Modul lain tidak menjadi target.
+Cleanup hanya menghapus properti `dashboard` dari Caelestia `shell.json` dan direktori `modules/dashboard`. Script menolak root, argumen, symlink, serta direktori Dashboard di source checkout Git yang memiliki perubahan lokal. Jalankan sebagai pengguna biasa. Modul lain tidak menjadi target.
 
 Test statis dan fixture tidak membuktikan runtime visual. Setelah menjalankan cleanup, validasi konfigurasi dan sesi Caelestia pada X280.
