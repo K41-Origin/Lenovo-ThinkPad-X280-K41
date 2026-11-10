@@ -94,7 +94,7 @@ done
 backup_root="$home/.local/state/k41/lockscreen/backups"
 mapfile -t backups < <(find "$backup_root" -mindepth 1 -maxdepth 1 -type d -print)
 [[ ${#backups[@]} -eq 1 ]] || {
-    printf 'FAIL: expected one backup directory, found ${#backups[@]}.\n' >&2
+    printf 'FAIL: expected one backup directory, found %s.\n' "${#backups[@]}" >&2
     exit 1
 }
 (cd "${backups[0]}" && sha256sum -c MANIFEST.sha256 >/dev/null)
