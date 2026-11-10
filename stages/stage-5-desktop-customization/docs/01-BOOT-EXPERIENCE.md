@@ -74,3 +74,7 @@ Daftar ini menunjukkan pemetaan implementasi repository, bukan instruksi untuk m
 **COMPLETED / USER ACCEPTED** adalah keputusan proyek dari pengguna. Status ini tidak boleh diperluas menjadi klaim bahwa setiap parameter firmware, TPM2 token, Secure Boot, atau kondisi recovery telah diukur ulang pada tanggal penutupan. Catatan teknis yang lebih lama dipertahankan dalam Git history dan arsip; bukan backlog aktif.
 
 Tidak ada screenshot yang digunakan atau diperlukan untuk acceptance.
+
+## Batas terhadap k41-dots
+
+Workstream 01 **dikecualikan dari fondasi k41-dots**. Jalur boot/splash proyek ini menggunakan Plymouth; komponen boot bukan bagian dari kumpulan komponen desktop Quickshell k41-dots. Keputusan ini tidak menghapus atau mengubah artefak historis Workstream 01 di repository.
