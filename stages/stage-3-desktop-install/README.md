@@ -19,15 +19,15 @@ Stage 3 bukan instalasi Arch ke disk, bukan validasi fungsional desktop (Stage 4
 Jalankan hanya wrapper kanonis:
 
 ```bash
-sudo bash scripts/k41-install-desktop.sh
+sudo bash stages/stage-3-desktop-install/scripts/k41-install-desktop.sh
 ```
 
 Alur implementasi:
 
 ```text
-scripts/k41-install-desktop.sh
-  └── scripts/setup-desktop-x280.sh
-        └── lib/aur-dependency-resolver.sh  [source; hanya jika memilih Caelestia]
+stages/stage-3-desktop-install/scripts/k41-install-desktop.sh
+  └── stages/stage-3-desktop-install/stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh
+        └── stages/stage-3-desktop-install/stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh  [source; hanya jika memilih Caelestia]
               ├── pacman -T / pacman -Si
               ├── git clone AUR package base
               ├── baca dan review PKGBUILD + .SRCINFO
@@ -41,9 +41,9 @@ Wrapper adalah entry point, sedangkan `setup-desktop-x280.sh` memegang alur inst
 
 | Path | Peran | Kepemilikan |
 |---|---|---|
-| `scripts/k41-install-desktop.sh` | Entry point tipis yang meneruskan argumen ke implementasi | Khusus Stage 3 |
-| `scripts/setup-desktop-x280.sh` | Preflight, package transaction, konfigurasi awal, laporan, dan orchestration desktop | Khusus Stage 3 |
-| `lib/aur-dependency-resolver.sh` | Resolver dependency AUR rekursif yang di-source oleh installer | Dependensi Stage 3 |
+| `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh` | Entry point tipis yang meneruskan argumen ke implementasi | Khusus Stage 3 |
+| `stages/stage-3-desktop-install/stages/stage-3-desktop-install/scripts/setup-desktop-x280.sh` | Preflight, package transaction, konfigurasi awal, laporan, dan orchestration desktop | Khusus Stage 3 |
+| `stages/stage-3-desktop-install/stages/stage-3-desktop-install/lib/aur-dependency-resolver.sh` | Resolver dependency AUR rekursif yang di-source oleh installer | Dependensi Stage 3 |
 | `tests/test-desktop-setup.sh` | Static contract, syntax, dan fixture resolver untuk installer | Test global; tetap di `tests/` |
 | `scripts/bootstrap-archiso.sh` | Source review lintas tahap; bukan launcher Stage 3 | Orchestrator Stage 1–2 |
 | `scripts/k41-desktop-validation.sh` | Pemeriksaan desktop setelah sesi berjalan | Stage 4; bukan bagian installer |
