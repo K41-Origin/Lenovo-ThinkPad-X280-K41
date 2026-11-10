@@ -2,12 +2,12 @@
 set -Eeuo pipefail
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-content="$root/config/quickshell/caelestia/modules/lock/Content.qml"
-center="$root/config/quickshell/caelestia/modules/lock/Center.qml"
-installer="$root/scripts/k41-apply-lockscreen-design.sh"
-reporter="$root/scripts/k41-report-lockscreen-session.sh"
-permission_audit="$root/scripts/k41-report-lockscreen-permissions.sh"
-failure_reporter="$root/scripts/k41-report-lockscreen-failure.sh"
+content="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Content.qml"
+center="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/quickshell/caelestia/modules/lock/Center.qml"
+installer="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh"
+reporter="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-session.sh"
+permission_audit="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-permissions.sh"
+failure_reporter="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-report-lockscreen-failure.sh"
 
 for file in "$content" "$center" "$installer" "$reporter" "$permission_audit" "$failure_reporter"; do
     [[ -s $file ]] || { printf 'FAIL: missing/empty %s\n' "$file" >&2; exit 1; }
@@ -49,7 +49,7 @@ grep -Fq -- "-printf '%P\\n'" "$installer"
 grep -Fq 'chown "$target_uid:$target_gid" -- "$target_parent" "$target_config" "$target_config/modules"' "$installer"
 ! grep -Fq 'chown -R' "$installer"
 grep -Fq 'refusing destructive rollback' "$installer"
-grep -Fq 'sudo bash scripts/k41-apply-lockscreen-design.sh --rollback' "$installer"
+grep -Fq 'sudo bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh --rollback' "$installer"
 ! grep -Fq 'cp -- "$source_root/Content.qml" "/etc/xdg' "$installer"
 
 # Preserve sudo privilege drop and avoid restarting from a sanitized process.
