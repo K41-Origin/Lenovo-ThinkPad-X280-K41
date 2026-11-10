@@ -17,10 +17,10 @@ tests=(
   stages/stage-5-desktop-customization/tests/test-boot-visual-diagnostics.sh
   stages/stage-4-desktop-validation/tests/test-desktop-validation.sh
   stages/stage-4-desktop-validation/tests/test-desktop-repair.sh
-  tests/test-hardware-audit.sh
+  stages/stage-6-hardware-optimization/tests/test-hardware-audit.sh
   stages/stage-5-desktop-customization/tests/test-guest-storage-audit.sh
-  tests/test-power-management-audit.sh
-  tests/test-power-profile-selector.sh
+  stages/stage-6-hardware-optimization/tests/test-power-management-audit.sh
+  stages/stage-6-hardware-optimization/tests/test-power-profile-selector.sh
   tests/test-bootstrap-archiso.sh
   tests/test-common-preflight.sh
   stages/stage-2-basic-arch-install/tests/test-installer-entry.sh

@@ -11,7 +11,7 @@
 | 3. Desktop Installation | IMPLEMENTED | Entry point kanonis: `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh`. Catatan: pilihan skip Caelestia belum kompatibel dengan kontrak package Stage 4 saat ini. Peta: [Stage 3](../stages/stage-3-desktop-install/README.md). |
 | 4. Desktop Functional Validation | **COMPLETED / USER ACCEPTED** | Snapshot historis: 54 PASS, 3 WARN, 0 FAIL, 0 SKIP; exit 0. Pengguna mengonfirmasi pairing Bluetooth berhasil. Peta: [Stage 4](../stages/stage-4-desktop-validation/README.md). |
 | 5. Desktop Customization | **IN PROGRESS — WORKSTREAM 2** | Workstream 1 selesai dan diterima pengguna; Workstream 2 aktif. Peta fisik: [Stage 5](../stages/stage-5-desktop-customization/README.md). |
-| 6. Desktop & Hardware Optimization | PLANNED | Menunggu Stage 5 diterima dan baseline aktual. |
+| 6. Desktop & Hardware Optimization | PLANNED | Audit/selector tools dipetakan di [Stage 6](../stages/stage-6-hardware-optimization/README.md); optimasi aktual menunggu Stage 5 diterima dan baseline X280 terbaru. |
 | 7. Release | PLANNED | Menunggu seluruh gate dan regression lulus. |
 
 ## Keterbatasan integrasi yang diketahui
@@ -26,12 +26,12 @@
 - Implementasi repository: override QML `Content.qml`, `Center.qml`, `PasswordInput.qml`, dan `LockSurface.qml`, serta installer deployment source tree Caelestia tersedia.
 - Installer: `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`.
 - Collector audit: `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`.
-- Static test: `tests/test-lockscreen-design.sh`.
+- Static test: `stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh`.
 - Status: **IMPLEMENTED; NOT TESTED / NOT VERIFIED pada X280 untuk implementasi terbaru**.
 - Belum ada bukti yang cukup bahwa source tree lokal terbaru aktif, runtime QML berhasil, lock/unlock dan wake lulus, atau tampilan diterima pengguna.
 - Gate berikutnya: terapkan perubahan dari checkout terbaru, periksa source aktif, jalankan test aman yang tersedia, uji lock/unlock dan wake pada X280, lalu minta keputusan visual pengguna secara langsung. Tidak menggunakan screenshot.
 
-Detail prosedur dan acceptance hanya berada di [Workstream 2 — Lock Screen](08-STAGE-5/02-LOCK-SCREEN.md).
+Detail prosedur dan acceptance hanya berada di [Workstream 2 — Lock Screen](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md).
 
 ## Status Workstream 1 — Boot Experience
 
@@ -41,7 +41,7 @@ Pengguna secara eksplisit menyatakan Workstream 1 selesai. Keputusan ini menutup
 
 Penutupan ini tidak boleh diperluas menjadi klaim teknis yang tidak pernah dicatat, misalnya pengukuran ulang status TPM2 token, Secure Boot, atau semua konfigurasi firmware. Jika pengguna melaporkan masalah baru, lakukan audit baru sebagai pekerjaan baru; jangan membatalkan penutupan hanya dengan mengutip catatan lama.
 
-Dokumen pemilik: [Workstream 1 — Boot Experience](08-STAGE-5/01-BOOT-EXPERIENCE.md).
+Dokumen pemilik: [Workstream 1 — Boot Experience](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md).
 
 ## Workstream berikutnya
 
@@ -55,7 +55,7 @@ Dokumen pemilik: [Workstream 1 — Boot Experience](08-STAGE-5/01-BOOT-EXPERIENC
 | 6. Sidebar | PLANNED |
 | 7. Utilities | PLANNED |
 
-Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual ada di [03 — Guest Mode](08-STAGE-5/03-GUEST-MODE.md). Fitur ini bukan pekerjaan aktif dan tidak boleh diimplementasikan sebelum lock screen diterima serta ada keputusan implementasi baru.
+Guest Mode **NOT IMPLEMENTED / DEFERRED**. Spesifikasi konseptual ada di [03 — Guest Mode](../stages/stage-5-desktop-customization/docs/03-GUEST-MODE.md). Fitur ini bukan pekerjaan aktif dan tidak boleh diimplementasikan sebelum lock screen diterima serta ada keputusan implementasi baru.
 
 ## Keputusan proyek yang masih berlaku
 

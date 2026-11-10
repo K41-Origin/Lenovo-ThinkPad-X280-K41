@@ -11,6 +11,7 @@ Laporan runtime dikelompokkan berdasarkan Stage pemilik:
 - `reports/stage-3-desktop-install/<category>/<timestamp>/`
 - `reports/stage-4-desktop-validation/<category>/<timestamp>/`
 - `reports/stage-5-desktop-customization/<workstream-or-category>/<category>/<timestamp>/`
+- `reports/stage-6-hardware-optimization/<category>/<timestamp>/`
 - `reports/shared/<category>/<timestamp>/` untuk test runner dan collector lintas Stage. Test runner kanonis menulis ke `reports/shared/test-runs/<timestamp>/`.
 
 **Status migrasi:** Stage 1–5 telah memiliki beberapa producer yang menulis ke layout Stage-scoped. Producer historis yang belum dimigrasikan tetap menggunakan `reports/<category>/`; jangan menganggap semua output sudah berpindah. Migrasi harus memperbarui producer, consumer, test, dan dokumentasi secara bersamaan.
