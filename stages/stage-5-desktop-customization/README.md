@@ -4,9 +4,9 @@ Peta implementasi Stage 5. Status proyek dimiliki [docs/06-STATUS.md](../../docs
 
 ## Tujuan
 
-Stage 5 mengembangkan dan menyesuaikan komponen desktop satu per satu. Hasil yang relevan menjadi fondasi **K41-Dots**, yaitu kumpulan modul Quickshell dengan namespace K41. Tidak ada target membangun shell mandiri penuh pada tahap ini.
+Stage 5 mengembangkan dan menyesuaikan komponen desktop satu per satu. Hasil yang relevan menjadi fondasi **K41-dots**, yaitu kumpulan modul Quickshell dengan namespace K41. Tidak ada target membangun shell mandiri penuh pada tahap ini.
 
-## Struktur K41-Dots yang dituju
+## Struktur K41-dots yang dituju
 
 Source yang direview disimpan di repository. Script penyiapan mendeploy modul ke runtime user:
 
@@ -32,7 +32,7 @@ Contoh lokasi runtime Lock Screen: `~/.config/quickshell/k41/modules/lockscreen/
 
 Audit harus read-only. Penyiapan/deployment adalah langkah terpisah yang melakukan perubahan secara eksplisit. Hindari framework installer, bootstrap, service, atau abstraksi tambahan sebelum dibutuhkan.
 
-**Workstream 01 — Boot Experience dikecualikan dari K41-Dots.** Jalur boot/splash menggunakan Plymouth. Workstream 01 tetap bagian dari proyek utama.
+**Workstream 01 — Boot Experience dikecualikan dari K41-dots.** Jalur boot/splash menggunakan Plymouth. Workstream 01 tetap bagian dari proyek utama.
 
 ## Prinsip
 
