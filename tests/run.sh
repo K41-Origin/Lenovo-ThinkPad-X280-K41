@@ -11,6 +11,9 @@ tests=(
   tests/test-desktop-setup.sh
   tests/test-autologin-desktop.sh
   tests/test-boot-experience.sh
+  tests/test-plymouth-k41-theme.sh
+  tests/test-animated-boot-splash.sh
+  tests/test-lockscreen-design.sh
   tests/test-desktop-validation.sh
   tests/test-desktop-repair.sh
   tests/test-hardware-audit.sh
