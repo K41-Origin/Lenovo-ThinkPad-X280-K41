@@ -69,7 +69,7 @@ Source implementasi tersedia di repository. Status pengujian dan verifikasi terb
 ## Artefak global yang sengaja tidak dipindahkan
 
 - Test: `tests/test-boot-experience.sh`, `tests/test-plymouth-k41-theme.sh`, `tests/test-animated-boot-splash.sh`, `tests/test-autologin-desktop.sh`, `tests/test-lockscreen-design.sh`.
-- `tests/run.sh` dan `.github/workflows/ci.yml`: runner dan CI lintas-stage.
+- `tests/run.sh`, `.github/workflows/ci.yml`, dan `.github/workflows/bash-tests.yml`: runner dan CI lintas-stage. Kedua workflow memiliki cakupan yang tumpang tindih; lihat [Testing dan CI](../../docs/04-TESTING.md).
 - `docs/08-STAGE-5/`: prosedur, scope, acceptance, Guest Mode.
 - `docs/07-DESKTOP-DESIGN-SYSTEM.md` dan `docs/07-DESIGN-SYSTEM/`: spesifikasi visual lintas-komponen.
 
