@@ -1,4 +1,4 @@
-# Workstream 6 — Sidebar
+# Workstream 7 — Sidebar
 
 ## Tujuan
 
@@ -8,7 +8,7 @@ Menyediakan panel samping untuk navigasi atau quick access yang benar-benar dibu
 
 Termasuk keberadaan/ketiadaan sidebar, konten, layout, ukuran, posisi, trigger, focus, keyboard/mouse interaction, dan integrasi upstream.
 
-Tidak termasuk mengulang seluruh fungsi dashboard, taskbar, launcher, atau utilities. Sidebar tidak wajib dibuat bila kebutuhan sudah dipenuhi komponen lain.
+Tidak termasuk mengulang fungsi Bottombar, Topbar, launcher, atau utilities. Sidebar tidak wajib dibuat bila kebutuhan sudah dipenuhi komponen lain.
 
 ## Prosedur
 
@@ -34,4 +34,4 @@ Backup konfigurasi terkait. Catat kebutuhan yang dipenuhi, fungsi yang dihindari
 
 ## Gate keluar
 
-Status VERIFIED atau NOT APPLICABLE yang disetujui harus dicatat sebelum lanjut ke [Workstream 7 — Utilities](07-UTILITIES.md).
+Status VERIFIED atau NOT APPLICABLE yang disetujui harus dicatat sebelum lanjut ke [Workstream 8 — Utilities](07-UTILITIES.md).
