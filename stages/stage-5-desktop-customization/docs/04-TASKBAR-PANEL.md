@@ -1,50 +1,44 @@
-# Workstream 3 — Bottombar
+# Workstream 04 — Bottombar (K41Dock)
 
-## Tujuan
+**Status: COMPLETED / USER CONFIRMED SUCCESS.**
 
-Mempertahankan panel workspace horizontal yang ringkas di tepi bawah layar. Komponen ini menjadi **Bottombar**, terpisah dari Topbar.
+Implementasi yang menjadi hasil workstream ini adalah `K41Dock.qml`, yaitu dock horizontal minimal di tepi bawah untuk indikator workspace Hyprland. Nama lama Taskbar/Panel dipertahankan pada sebagian path repository demi kompatibilitas; nama komponen Stage 5 adalah **Bottombar**.
 
-## Target desain
+## Hasil implementasi
 
-- Posisi horizontal di tepi bawah layar.
-- Menampilkan indikator workspace saja; tidak menampilkan active window, tray, clock, status icons, atau power entry.
-- Floating/minimal dan auto-hide; muncul ketika pointer menyentuh area trigger bawah.
-- Menandai workspace aktif dan workspace yang berisi window; klik indikator berpindah ke workspace terkait.
-- Tidak mengambil exclusive workspace area secara permanen.
-- Latar gelap/transparan secukupnya, sudut membulat, dan transisi halus mengikuti Design System.
-- Tidak mengganggu fullscreen, fokus window, input, atau perpindahan workspace.
+Source kanonis:
+`workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml`
 
-Target ini meneruskan konsep dock yang sebelumnya diterima sebagai Taskbar/Panel. Perubahan nama menjadi Bottombar adalah keputusan terminologi; setiap perubahan implementasi lanjutan tetap harus diuji pada X280.
+Runtime pada laptop:
+`~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml`
 
-## Batas
+Installer:
+`scripts/k41-install-caelestia-dock.sh`
 
-Termasuk posisi, ukuran, workspace indicator, trigger edge, visibility, click-through, fullscreen behavior, dan integrasi Caelestia/Quickshell.
+K41Dock:
+- Menampilkan workspace pada monitor terkait.
+- Menandai workspace aktif dan workspace yang memiliki window.
+- Mengganti workspace ketika indikator diklik.
+- Muncul melalui trigger hover di tepi bawah dan tetap tampil ketika dock di-hover.
+- Tidak memakai exclusive zone.
+- Disembunyikan ketika workspace aktif memiliki fullscreen toplevel.
+- Dibangun sebagai modul QML milik K41 dengan namespace `modules/k41dock`, bukan dengan mengubah file package-owned.
 
-Tidak termasuk clock, tray, system status, launcher, utilities, atau informasi yang menjadi tanggung jawab Topbar.
+## Batas dan ownership
 
-## Prosedur
+Bottombar hanya menangani navigasi workspace. Clock, system tray, status sistem, launcher, dashboard, dan utilities bukan bagian dari komponen ini.
 
-1. Audit konfigurasi dan source aktif, versi Quickshell/Caelestia, monitor/scaling, panel yang berjalan, dan keybind terkait.
-2. Verifikasi apakah implementasi dock yang ada masih sesuai target; jangan mengasumsikan konfigurasi lokal belum berubah.
-3. Backup semua file yang akan disentuh dan siapkan rollback.
-4. Terapkan perubahan minimal. Gunakan API upstream yang terverifikasi; custom QML harus terlacak dan mudah dipelihara.
-5. Uji active/occupied workspace, klik, hover trigger, click-through, fullscreen, fokus, multi-window, dan shell restart.
-6. Periksa error QML/runtime dan konsumsi resource.
+Repository adalah sumber kanonis untuk source, installer, dokumentasi, dan test. Salinan yang berjalan pada laptop berada di bawah `~/.config/quickshell/caelestia/`, yaitu source checkout Caelestia aktif. Integrasi saat ini menambahkan import dan instance K41Dock ke `shell.qml`, serta menonaktifkan entry bar upstream melalui `~/.config/caelestia/shell.json`.
 
-## Acceptance criteria
+Setiap komponen K41 berikutnya harus memiliki direktori source terpisah di `workstreams/<id>/config/quickshell/...` dan dideploy ke area runtime `~/.config/quickshell/` melalui installer yang memiliki preflight, backup, verifikasi pascaperubahan, dan rollback. Jangan menaruh kode K41 ke direktori internal upstream yang tidak dimiliki proyek tanpa alasan dan audit yang jelas.
 
-- Bottombar berada di tepi bawah dan hanya menampilkan indikator workspace.
-- Workspace aktif/terisi ditampilkan benar dan klik berpindah ke workspace yang dipilih.
-- Bottombar tersembunyi saat idle dan muncul melalui trigger bawah.
-- Tidak ada exclusive zone permanen atau penghalangan input di luar area dock.
-- Fullscreen, fokus window, keybind, dan workspace switching tetap berfungsi.
-- Tidak ada error runtime kritis atau konsumsi resource yang tidak wajar.
-- Pengguna menerima perilaku langsung pada X280.
+## Acceptance dan batas klaim
 
-## Rollback dan bukti
+Pengguna telah mengonfirmasi workstream K41Dock berhasil. Konfirmasi tersebut menutup workstream Bottombar pada scope implementasi yang diserahkan. Itu tidak otomatis membuktikan semua versi Quickshell, multi-monitor, seluruh edge-case fullscreen, atau konsumsi resource telah diuji secara terukur. Catat bukti tambahan hanya jika test tersebut benar-benar dijalankan.
 
-Backup konfigurasi dan source custom sebelum perubahan. Catat file, versi, test interaksi, log, dan hasil review pengguna. Jangan memasukkan data sensitif ke laporan.
+## Pemeliharaan
 
-## Status
-
-Implementasi dock sebelumnya telah **COMPLETED / USER ACCEPTED pada 2026-11-11** sebagai Taskbar/Panel. Workstream ini dibuka kembali secara terbatas untuk perubahan nama/penyesuaian yang diperlukan menjadi Bottombar; jangan mengklaim penerimaan baru sampai pengguna memeriksa hasil perubahan tersebut.
+- Perubahan Bottombar berikutnya harus mempertahankan interface dan perilaku yang sudah diterima, kecuali ada permintaan perubahan atau laporan regresi.
+- Jangan menduplikasi workspace dock pada Topbar atau komponen lain.
+- Simpan perubahan source di repository terlebih dahulu, lalu deploy ke laptop menggunakan installer.
+- Backup dan rollback mengikuti [dokumen implementasi](04-TASKBAR-PANEL-IMPLEMENTATION.md).
