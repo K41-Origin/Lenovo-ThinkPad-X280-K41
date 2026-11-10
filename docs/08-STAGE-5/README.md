@@ -16,7 +16,7 @@ Stage 5 mengerjakan customization desktop secara berurutan. **Status terkini han
 
 Kerjakan satu workstream pada satu waktu. Jangan membuka kembali Workstream 1 berdasarkan catatan historis; statusnya sudah ditutup pengguna pada 2026-11-10.
 
-## Dokumen acuan
+## Peta implementasi repository\n\nSource runtime Workstream 1–2 dan ownership fisiknya dipetakan di [Stage 5 — Desktop Customization](../../stages/stage-5-desktop-customization/README.md). Dokumen workstream di direktori ini tetap menjadi acuan prosedur dan acceptance.\n\n## Dokumen acuan
 
 - [Project architecture](../01-PROJECT.md)
 - [Desktop handoff](../03-DESKTOP.md)
