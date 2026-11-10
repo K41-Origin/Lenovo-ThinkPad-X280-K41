@@ -24,8 +24,9 @@ Gunakan urutan berikut untuk setiap iterasi:
 
 2. **Update audit script bila diperlukan**
    - Semua pemeriksaan perangkat yang berulang atau diperlukan untuk keputusan implementasi harus ditambahkan ke script audit Stage 5 yang relevan.
-   - Untuk audit Caelestia/Quickshell, entry point kanonis adalah:
-     `bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh`
+   - Untuk persiapan penghapusan Dashboard Caelestia, entry point kanonis adalah:
+     `bash stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh --audit`
+   - Script cleanup menjalankan audit Caelestia read-only dan belum menyediakan operasi `--apply`; implementasi penghapusan baru dibuat setelah laporan X280 ditinjau.
    - Jangan meminta pengguna menjalankan kumpulan perintah audit manual jika pemeriksaan tersebut dapat dikemas secara aman ke script.
    - Audit harus read-only: tidak mengubah konfigurasi, package, service, wallpaper, session, atau state shell; tidak menjalankan reload/restart; tidak menggunakan sudo.
    - Jika pemeriksaan membutuhkan tindakan mutatif atau interaksi visual, pisahkan sebagai langkah implementasi/pengujian dan minta persetujuan eksplisit bila berisiko.
@@ -49,8 +50,9 @@ Gunakan urutan berikut untuk setiap iterasi:
 
 5. **Review and push reports**
    - Laporan runtime Stage 5 berada di bawah `reports/stage-5-desktop-customization/`.
-   - Untuk audit Caelestia, script membuat direktori bertimestamp di:
+   - Untuk pre-audit penghapusan Dashboard, script cleanup menghasilkan direktori bertimestamp di:
      `reports/stage-5-desktop-customization/caelestia-audit/<timestamp>/`
+   - Pastikan laporan memuat `summary.txt`, `run.log`, `config-snapshot.json`, `source-inventory.txt`, `dashboard-config-inventory.json`, `dashboard-source-references.txt`, dan `dashboard-keybinds.json`.
    - Periksa `summary.txt`, `run.log`, `config-snapshot.json`, `dashboard-config-inventory.json`, `dashboard-source-references.txt`, dan `dashboard-keybinds.json` (sesuai artefak yang dibuat).
    - Sebelum commit, periksa seluruh laporan untuk username, path pribadi, hostname, alamat jaringan, token, credential, informasi lokasi, atau data sensitif lain. Redaksi otomatis bukan jaminan bahwa semua informasi sensitif terhapus.
    - Jangan push laporan yang mengandung secret atau data pribadi. Jika ragu, jangan commit; laporkan masalahnya dan minta bantuan untuk memperbaiki sanitasi collector.
