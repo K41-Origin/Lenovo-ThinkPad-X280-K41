@@ -96,7 +96,7 @@ def load_config(path):
     if not isinstance(value, dict):
         fail(f"Expected a JSON object in {path}")
     section = value.get("dashboard")
-    if section is not None and not isinstance(section, dict):
+    if "dashboard" in value and not isinstance(section, dict):
         fail(f"dashboard section is not a JSON object in {path}")
     return value
 
@@ -248,6 +248,7 @@ try:
             with os.fdopen(fd, "w", encoding="utf-8") as stream:
                 json.dump(data, stream, indent=2, ensure_ascii=False)
                 stream.write("\n")
+            shutil.copystat(path, temporary)
             os.chmod(temporary, stat.S_IMODE(info.st_mode))
             os.replace(temporary, path)
         except BaseException:
