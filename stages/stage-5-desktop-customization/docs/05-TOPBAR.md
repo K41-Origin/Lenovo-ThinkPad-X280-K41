@@ -34,7 +34,7 @@ Gunakan pola yang dipelajari dari Workstream 04 — K41Dock:
 - Runtime source dideploy ke bawah `~/.config/quickshell/` melalui installer.
 - Integrasi dengan Caelestia harus minimal dan tidak mengubah file upstream yang tidak diperlukan.
 - Installer harus memiliki preflight, backup, verifikasi pascaperubahan, dan rollback.
-- Komponen harus memiliki ownership dan interface yang jelas agar dapat diekstrak ke k41-shell.
+- Komponen harus memiliki ownership dan interface yang jelas agar dapat diekstrak ke k41-dots.
 
 ## Prosedur
 
