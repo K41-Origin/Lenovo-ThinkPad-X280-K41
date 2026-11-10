@@ -20,6 +20,8 @@ done
 log_file="$report_dir/run.log"
 summary_file="$report_dir/summary.txt"
 snapshot_file="$report_dir/config-snapshot.json"
+monitor_file="$report_dir/monitor-runtime.json"
+source_file="$report_dir/source-inventory.txt"
 exec > >(tee -a "$log_file") 2>&1
 
 status="COMPLETED"
@@ -185,6 +187,89 @@ for raw in sys.argv[1:]:
     except Exception as exc:
         print(f"FAIL {path.name}: {type(exc).__name__}: {exc}")
 PY
+
+
+printf '\\n## Monitor and Hyprland runtime\\n'
+if command -v hyprctl >/dev/null 2>&1; then
+    if timeout 8s hyprctl -j monitors >"$report_dir/monitors.raw.json" 2>/dev/null; then
+        python3 - "$report_dir/monitors.raw.json" "$monitor_file" <<'PY'
+import json, pathlib, sys
+src, dst = map(pathlib.Path, sys.argv[1:])
+try:
+    raw = json.loads(src.read_text(encoding="utf-8"))
+    fields = ("name", "width", "height", "refreshRate", "scale", "transform",
+              "focused", "disabled", "dpmsStatus", "availableModes")
+    monitors = [{k: m[k] for k in fields if k in m} for m in raw if isinstance(m, dict)]
+    dst.write_text(json.dumps({"status": "ok", "monitors": monitors}, indent=2) + "\\n")
+    print(f"PASS monitor inventory: {len(monitors)} monitor(s)")
+except Exception as exc:
+    dst.write_text(json.dumps({"status": "invalid-response", "error": type(exc).__name__}) + "\\n")
+    print(f"FAIL monitor inventory: {type(exc).__name__}")
+PY
+        rm -f -- "$report_dir/monitors.raw.json"
+    else
+        printf '{"status":"unavailable"}\\n' >"$monitor_file"
+        printf 'WARN hyprctl monitor query unavailable (timeout or inactive session).\\n'
+    fi
+    printf '[Hyprland config errors]\n'
+    config_errors="$(timeout 8s hyprctl configerrors 2>&1 || true)"
+    config_errors="$(printf '%s' "$config_errors" | sed "s|$HOME|~|g")"
+    if [[ -z $config_errors ]]; then
+        printf 'No output returned.\\n'
+    else
+        printf '%s\\n' "$config_errors" | head -n 30
+    fi
+else
+    printf 'hyprctl unavailable; skipped.\\n'
+fi
+
+printf '\\n## Caelestia Quickshell source inventory\\n'
+: >"$source_file"
+for candidate in \
+    "$config_root/quickshell/caelestia" \
+    "$config_root/Quickshell/caelestia" \
+    "$HOME/.config/quickshell/caelestia" \
+    /usr/share/caelestia \
+    /usr/lib/caelestia; do
+    [[ -d $candidate ]] || continue
+    {
+        printf 'SOURCE_ROOT %s\\n' "${candidate#"$HOME"/}"
+        for relative in shell.qml modules/bar/Bar.qml modules/bar/BarWrapper.qml \
+            modules/bar/components/workspaces/Workspaces.qml; do
+            if [[ -f $candidate/$relative ]]; then
+                printf '  PRESENT %s\\n' "$relative"
+            else
+                printf '  ABSENT  %s\\n' "$relative"
+            fi
+        done
+        if command -v git >/dev/null 2>&1 && git -C "$candidate" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            printf '  GIT_COMMIT %s\\n' "$(git -C "$candidate" rev-parse --short HEAD 2>/dev/null || printf unknown)"
+            printf '  GIT_DIRTY %s\\n' "$(if [[ -n $(git -C "$candidate" status --porcelain 2>/dev/null) ]]; then printf yes; else printf no; fi)"
+        fi
+    } | tee -a "$source_file"
+done
+if [[ ! -s $source_file ]]; then
+    printf 'No common Caelestia source directory found.\\n' | tee -a "$source_file"
+fi
+
+printf '\\n## Workspace runtime inventory\\n'
+if command -v hyprctl >/dev/null 2>&1; then
+    for query in activeworkspace workspaces; do
+        printf '[%s]\n' "$query"
+        timeout 8s hyprctl -j "$query" 2>/dev/null | python3 -c '
+import json,sys
+try:
+    data=json.load(sys.stdin)
+    if isinstance(data,dict):
+        keys=("id","name","monitor","windows","hasfullscreen")
+        print(json.dumps({k:data[k] for k in keys if k in data}, ensure_ascii=False))
+    elif isinstance(data,list):
+        print(json.dumps([{k:x[k] for k in ("id","name","monitor","windows","hasfullscreen") if k in x} for x in data if isinstance(x,dict)], ensure_ascii=False))
+    else: print("Unexpected JSON type")
+except Exception: print("Unavailable or invalid response")
+' || printf 'Unavailable.\\n'
+    done
+fi
 
 info 'Audit complete. No configuration, package, service, wallpaper, or shell state was changed.'
 info 'Review config-snapshot.json before pushing; personal paths and location fields are redacted.'
