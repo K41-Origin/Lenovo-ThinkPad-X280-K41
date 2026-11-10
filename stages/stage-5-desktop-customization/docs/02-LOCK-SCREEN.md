@@ -74,7 +74,7 @@ Jalankan dari checkout repository pada ThinkPad X280 sebagai user desktop biasa 
 bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh
 ```
 
-Script menghasilkan direktori laporan bertimestamp di `reports/lockscreen-visual-audit/`. Laporan mencakup metadata host/session dan versi package, penemuan source roots Caelestia, inventory serta SHA-256 file terkait, source QML/JS lock yang ditemukan, seluruh teks source visual legacy dan upstream yang terpilih, aset visual, referensi QML/import/resource, field konfigurasi lock/wallpaper yang dipilih, serta metadata integrasi Hyprland/PAM tanpa mengambil isi lengkap file PAM.
+Script menghasilkan direktori laporan bertimestamp di `reports/lockscreen-visual-audit/`. Laporan mencakup metadata host/session, versi dan provenance package/source Caelestia, inventory serta SHA-256 file terkait, source QML/JS lock yang ditemukan, teks source visual legacy/upstream terpilih, aset visual, referensi/import/resource, resolusi dependency QML lokal secara rekursif, field konfigurasi lock/wallpaper terpilih, user systemd units, identitas executable proses tanpa command-line/environment, serta metadata integrasi Hyprland/PAM tanpa mengambil isi lengkap file PAM. Filter keybind Hyprland menghindari properti generik `locked` agar tidak salah mengumpulkan seluruh keybind.
 
 Audit tidak melakukan deployment, cleanup, perubahan konfigurasi, instalasi package, restart service, atau perubahan autentikasi. Binary asset dicatat melalui path/ukuran/hash, bukan disalin ke log. Report dapat memuat source custom dan metadata host; periksa/redaksi sebelum dipublikasikan. Folder report mengikuti aturan ignore repository dan tidak otomatis di-commit atau di-push.
 
