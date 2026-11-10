@@ -39,7 +39,7 @@ Audit dan cleanup adalah dua script terpisah:
 - Audit read-only: `bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh`
 - Cleanup Dashboard: `bash stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`
 
-Script cleanup tidak memiliki opsi/mode. Script tersebut menghapus properti konfigurasi Dashboard dari file `shell.json` dan direktori source `modules/dashboard`; script menolak berjalan sebagai root, menolak argumen, symlink, dan source checkout Git yang memiliki perubahan lokal. Jangan menghapus atau menimpa perubahan pengguna yang tidak terkait.
+Script cleanup tidak memiliki opsi/mode. Script tersebut menghapus properti konfigurasi Dashboard dari file `shell.json` dan direktori source `modules/dashboard`; script menolak berjalan sebagai root, menolak argumen, symlink, dan direktori Dashboard di direktori Dashboard di source checkout Git yang memiliki perubahan lokal. Jangan menghapus atau menimpa perubahan pengguna yang tidak terkait.
 
 ## Klasifikasi hasil
 
