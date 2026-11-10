@@ -42,12 +42,13 @@ Audit menghasilkan laporan di `reports/stage-5-desktop-customization/caelestia-a
 
 ## Acceptance criteria
 
-- Panel stabil, tidak menutupi area kerja secara tidak wajar, dan tetap terbaca.
-- Workspace dan indikator status mencerminkan keadaan aktual.
-- Tray/menu dan interaksi yang ditampilkan bekerja.
-- Tidak ada fungsi duplikat dengan dashboard atau utilities yang membingungkan.
-- Panel tidak mengganggu fullscreen, window focus, atau keybind.
-- Pengguna menyetujui visual dan interaksi pada perangkat.
+- Dock horizontal hanya menampilkan indikator workspace sesuai target desain minimal; tidak ada tray, clock, active-window label, atau status widget.
+- Workspace aktif dan workspace berisi window ditampilkan secara benar; klik indikator memindahkan workspace sesuai ID yang dipilih.
+- Dock tersembunyi saat idle dan muncul ketika pointer menyentuh trigger bawah; transisi tidak mengganggu input.
+- Panel tidak mengambil exclusive workspace area secara permanen dan area transparan di luar dock/trigger meneruskan klik ke aplikasi.
+- Dock tidak mengganggu fullscreen, window focus, keybind, atau perpindahan workspace.
+- Tidak ada error QML/runtime kritis atau konsumsi resource yang tidak wajar.
+- Pengguna menyetujui visual dan interaksi langsung pada X280.
 
 ## Rollback dan bukti
 
@@ -55,4 +56,4 @@ Backup konfigurasi panel dan catat elemen aktif, posisi, ukuran, scaling, test i
 
 ## Gate keluar
 
-Status VERIFIED memerlukan uji fungsi panel dan regression workspace/window. Setelah diterima, lanjutkan ke [Workstream 5 — Launcher](05-LAUNCHER.md).
+Status VERIFIED memerlukan uji runtime pada X280 untuk workspace switching, occupied/active indicator, auto-hide/reveal, click-through, fullscreen, fokus window, dan regression sesi. Setelah Taskbar diterima, kembali ke Workstream 3 — Dashboard yang sementara ditunda atas arahan pengguna; setelah Dashboard diterima, lanjutkan ke [Workstream 5 — Launcher](05-LAUNCHER.md).
