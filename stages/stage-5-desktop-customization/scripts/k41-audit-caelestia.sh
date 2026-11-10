@@ -294,10 +294,10 @@ installer_file="$repo_root/stages/stage-5-desktop-customization/workstreams/02-l
 : >"$lockscreen_inventory_file"
 {
     printf 'Canonical K41-Dots source: %s\n' "${dots_lock_root#"$repo_root"/}"
-    printf 'Expected runtime overlay: %s\n' "${runtime_lock_root#"$HOME"/}"
+    printf 'Expected runtime overlay: user XDG config/quickshell/caelestia/modules/lock/\n'
     printf 'Active user shell entrypoint: '
     if [[ -f $config_root/quickshell/caelestia/shell.qml && ! -L $config_root/quickshell/caelestia/shell.qml ]]; then
-        printf 'PRESENT (%s)\n' "${config_root#"$HOME"/}/quickshell/caelestia/shell.qml"
+        printf 'PRESENT (user XDG config/quickshell/caelestia/shell.qml)\n'
     else
         printf 'MISSING (user-local shell entrypoint not confirmed)\n'
     fi
@@ -311,7 +311,12 @@ installer_file="$repo_root/stages/stage-5-desktop-customization/workstreams/02-l
     fi
     if [[ -d $config_root/quickshell/caelestia/.git && ! -L $config_root/quickshell/caelestia/.git ]]; then
         printf 'Runtime upstream revision: %s\n' "$(git -C "$config_root/quickshell/caelestia" rev-parse HEAD 2>/dev/null || printf UNKNOWN)"
-        printf 'Runtime upstream origin: %s\n' "$(git -C "$config_root/quickshell/caelestia" remote get-url origin 2>/dev/null || printf UNKNOWN)"
+        runtime_origin="$(git -C "$config_root/quickshell/caelestia" remote get-url origin 2>/dev/null || true)"
+        if [[ $runtime_origin == https://github.com/caelestia-dots/shell.git || $runtime_origin == git@github.com:caelestia-dots/shell.git ]]; then
+            printf 'Runtime upstream origin: MATCH\n'
+        else
+            printf 'Runtime upstream origin: MISMATCH_OR_UNKNOWN (value redacted)\n'
+        fi
     else
         printf 'Runtime upstream git metadata: NOT_FOUND\n'
     fi
