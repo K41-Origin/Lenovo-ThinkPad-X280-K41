@@ -20,8 +20,8 @@
 
 - Desain: **C — Floating Password Card**.
 - Implementasi repository: override QML `Content.qml`, `Center.qml`, `PasswordInput.qml`, dan `LockSurface.qml`, serta installer deployment source tree Caelestia tersedia.
-- Installer: `scripts/k41-apply-lockscreen-design.sh`.
-- Collector audit: `scripts/k41-lockscreen-audit.sh`.
+- Installer: `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`.
+- Collector audit: `stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`.
 - Static test: `tests/test-lockscreen-design.sh`.
 - Status: **IMPLEMENTED; NOT TESTED / NOT VERIFIED pada X280 untuk implementasi terbaru**.
 - Belum ada bukti yang cukup bahwa source tree lokal terbaru aktif, runtime QML berhasil, lock/unlock dan wake lulus, atau tampilan diterima pengguna.
