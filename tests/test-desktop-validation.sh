@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/scripts/k41-desktop-validation.sh"
+SCRIPT="$ROOT/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$*"; }
 
@@ -23,7 +23,7 @@ chmod_line="$(grep -nF 'chmod 0600 "$run_dir"/*.txt "$log" "$checks" "$diagnosti
 pass 'desktop validator syntax, read-only contract, and diagnostic initialization order'
 
 # Regression fixtures for the Caelestia runtime classifier.
-source "$ROOT/scripts/lib/k41-log-classifiers.sh"
+source "$ROOT/stages/stage-4-desktop-validation/lib/k41-log-classifiers.sh"
 fixture_dir="$(mktemp -d)"
 trap 'rm -rf -- "$fixture_dir"' EXIT
 log_file="$fixture_dir/runtime.log"
