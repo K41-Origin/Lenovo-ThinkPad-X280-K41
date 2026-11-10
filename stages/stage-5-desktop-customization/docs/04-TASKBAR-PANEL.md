@@ -2,43 +2,33 @@
 
 **Status: COMPLETED / USER CONFIRMED SUCCESS.**
 
-Implementasi yang menjadi hasil workstream ini adalah `K41Dock.qml`, yaitu dock horizontal minimal di tepi bawah untuk indikator workspace Hyprland. Nama lama Taskbar/Panel dipertahankan pada sebagian path repository demi kompatibilitas; nama komponen Stage 5 adalah **Bottombar**.
+Implementasi yang diterima adalah `K41Dock.qml`, dock horizontal minimal di tepi bawah untuk indikator workspace Hyprland.
 
-## Hasil implementasi
+## Hasil implementasi saat ini
 
-Source kanonis:
-`workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml`
+- Source repository lama: `workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml`
+- Runtime lama: `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml`
+- Installer lama: `stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh`
 
-Runtime pada laptop:
-`~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml`
+K41Dock menampilkan workspace pada monitor terkait, menandai workspace aktif/berisi window, mengganti workspace saat diklik, memakai trigger hover di tepi bawah, dan menghilang ketika fullscreen toplevel aktif. Komponen tidak memakai exclusive zone.
 
-Installer:
-`scripts/k41-install-caelestia-dock.sh`
+## Arah K41-Dots
 
-K41Dock:
-- Menampilkan workspace pada monitor terkait.
-- Menandai workspace aktif dan workspace yang memiliki window.
-- Mengganti workspace ketika indikator diklik.
-- Muncul melalui trigger hover di tepi bawah dan tetap tampil ketika dock di-hover.
-- Tidak memakai exclusive zone.
-- Disembunyikan ketika workspace aktif memiliki fullscreen toplevel.
-- Dibangun sebagai modul QML milik K41 dengan namespace `modules/k41dock`, bukan dengan mengubah file package-owned.
+K41-Dots menggunakan namespace runtime K41 yang terpisah:
 
-## Batas dan ownership
+`~/.config/quickshell/k41/modules/bottombar/`
 
-Bottombar hanya menangani navigasi workspace. Clock, system tray, status sistem, launcher, dashboard, dan utilities bukan bagian dari komponen ini.
+Source dan deployment K41Dock akan dipindahkan/disesuaikan ke struktur tersebut pada pekerjaan migrasi terpisah. Desain dan perilaku yang telah diterima tidak berubah hanya karena perpindahan lokasi.
 
-Repository adalah sumber kanonis untuk source, installer, dokumentasi, dan test. Salinan yang berjalan pada laptop berada di bawah `~/.config/quickshell/caelestia/`, yaitu source checkout Caelestia aktif. Integrasi saat ini menambahkan import dan instance K41Dock ke `shell.qml`, serta menonaktifkan entry bar upstream melalui `~/.config/caelestia/shell.json`.
+Caelestia tetap menjadi host. Integrasi dilakukan seperlunya; jangan menyalin seluruh source Caelestia atau membuat runtime/bootstrapping K41 mandiri.
 
-Setiap komponen K41 berikutnya harus memiliki direktori source terpisah di `workstreams/<id>/config/quickshell/...` dan dideploy ke area runtime `~/.config/quickshell/` melalui installer yang memiliki preflight, backup, verifikasi pascaperubahan, dan rollback. Jangan menaruh kode K41 ke direktori internal upstream yang tidak dimiliki proyek tanpa alasan dan audit yang jelas.
+## Batas klaim
 
-## Acceptance dan batas klaim
-
-Pengguna telah mengonfirmasi workstream K41Dock berhasil. Konfirmasi tersebut menutup workstream Bottombar pada scope implementasi yang diserahkan. Itu tidak otomatis membuktikan semua versi Quickshell, multi-monitor, seluruh edge-case fullscreen, atau konsumsi resource telah diuji secara terukur. Catat bukti tambahan hanya jika test tersebut benar-benar dijalankan.
+Penerimaan pengguna menutup scope Bottombar yang diserahkan. Hal tersebut tidak membuktikan seluruh versi Quickshell, multi-monitor, semua edge-case fullscreen, atau konsumsi resource telah diuji terukur. Status runtime setelah migrasi namespace perlu diverifikasi kembali.
 
 ## Pemeliharaan
 
-- Perubahan Bottombar berikutnya harus mempertahankan interface dan perilaku yang sudah diterima, kecuali ada permintaan perubahan atau laporan regresi.
+- Pertahankan perilaku K41Dock yang sudah diterima kecuali ada permintaan perubahan/regresi.
 - Jangan menduplikasi workspace dock pada Topbar atau komponen lain.
-- Simpan perubahan source di repository terlebih dahulu, lalu deploy ke laptop menggunakan installer.
-- Backup dan rollback mengikuti [dokumen implementasi](04-TASKBAR-PANEL-IMPLEMENTATION.md).
+- Audit dependency dan titik integrasi sebelum migrasi.
+- Simpan source kanonis di repository; deploy modul ke namespace runtime K41 melalui script penyiapan terpisah.
