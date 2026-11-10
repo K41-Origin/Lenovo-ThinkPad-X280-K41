@@ -14,7 +14,9 @@
 2. `stages/stage-2-basic-arch-install/scripts/k41-install-basic-arch.sh` — instalasi dasar Arch; destruktif.
 3. `stages/stage-3-desktop-install/scripts/k41-install-desktop.sh` — setup desktop dari Arch terpasang melalui TTY.
 4. `scripts/k41-desktop-validation.sh` — validasi desktop read-only; jalankan sebagai user biasa dalam sesi Hyprland.
-5. `scripts/k41-desktop-repair.sh` — remediasi terbatas berbasis bukti.
+5. `scripts/k41-desktop-repair.sh` — remediasi terbatas yang dapat mengubah paket/service/Bluetooth; jalankan hanya setelah review bukti.
+
+Peta implementasi Stage 4: `stages/stage-4-desktop-validation/README.md`.
 
 Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplikasi logika atau menjalankan wrapper dan implementasinya secara berurutan untuk pekerjaan yang sama.
 
