@@ -270,9 +270,6 @@
     ],
     "excludedScreens": []
   },
-  "dashboard": {
-    "enabled": false
-  },
   "launcher": {
     "enabled": true,
     "showOnHover": false,
