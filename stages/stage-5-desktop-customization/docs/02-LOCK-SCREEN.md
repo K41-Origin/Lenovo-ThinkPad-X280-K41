@@ -62,7 +62,25 @@ Implementasi terdahulu masih berada di:
 
 Path dan installer tersebut adalah kondisi lama/transisi. **Jangan menjalankan installer lama sebagai migrasi ke struktur baru.** Source lama harus diaudit dan dibandingkan dengan upstream aktif sebelum diputuskan untuk dipertahankan, diekstrak, atau diganti.
 
-## Artefak audit yang sudah ada
+## Script audit visual baru
+
+Script khusus audit visual telah ditambahkan:
+
+`workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh`
+
+Jalankan dari checkout repository pada ThinkPad X280 sebagai user desktop biasa (tanpa sudo):
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh
+```
+
+Script menghasilkan direktori laporan bertimestamp di `reports/lockscreen-visual-audit/`. Laporan mencakup metadata host/session dan versi package, penemuan source roots Caelestia, inventory serta SHA-256 file terkait, source QML/JS lock yang ditemukan, seluruh teks source visual legacy dan upstream yang terpilih, aset visual, referensi QML/import/resource, field konfigurasi lock/wallpaper yang dipilih, serta metadata integrasi Hyprland/PAM tanpa mengambil isi lengkap file PAM.
+
+Audit tidak melakukan deployment, cleanup, perubahan konfigurasi, instalasi package, restart service, atau perubahan autentikasi. Binary asset dicatat melalui path/ukuran/hash, bukan disalin ke log. Report dapat memuat source custom dan metadata host; periksa/redaksi sebelum dipublikasikan. Folder report mengikuti aturan ignore repository dan tidak otomatis di-commit atau di-push.
+
+Script mengandalkan path umum Caelestia. Jika instalasi menggunakan source root nonstandar, hasil audit akan menunjukkan root yang tidak ditemukan; jangan menganggap inventory lengkap sampai path aktual diketahui.
+
+## Artefak audit terdahulu
 
 Script berikut sudah ada di repository dan perlu diperiksa sebelum digunakan atau diganti:
 - `workstreams/02-lock-screen/scripts/k41-lockscreen-audit.sh`
