@@ -25,11 +25,14 @@
 
 ## Prinsip pengembangan Stage 5
 
+- Stage 5 menjadi fondasi bertahap **k41-dots**, bukan proyek shell mandiri yang ambisius.
+- Workstream 01 — Boot Experience dikecualikan dari fondasi k41-dots; jalur boot/splash menggunakan Plymouth. Workstream tersebut tetap menjadi bagian dari proyek utama, tetapi bukan scope k41-dots.
+
 - Setiap workstream dikerjakan satu per satu dengan audit, desain, implementasi, test, deployment, dan acceptance yang jelas.
 - Repository adalah sumber kanonis source, installer, test, dan dokumentasi.
 - Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`; integrasi Caelestia saat ini berada di `~/.config/quickshell/caelestia/`.
 - Kode K41 harus dipisahkan dalam namespace milik K41 dan dideploy melalui installer dengan preflight, backup, verifikasi, dan rollback.
-- Hasil Stage 5 akan menjadi fondasi komponen, pola integrasi, dan deployment bagi proyek lanjutan **k41-shell**. Proyek k41-shell mandiri belum dimulai.
+- Hasil Stage 5 akan menjadi fondasi komponen, pola integrasi, dan deployment bagi proyek lanjutan **k41-dots**. Proyek k41-dots mandiri belum dimulai.
 
 ## Keputusan proyek yang masih berlaku
 
