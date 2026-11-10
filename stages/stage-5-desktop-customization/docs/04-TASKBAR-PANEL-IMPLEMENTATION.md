@@ -1,8 +1,8 @@
-# K41 Horizontal Workspace Dock
+# K41 Bottombar — Workspace Dock
 
 ## Scope
 
-Installs a separate, bottom-edge workspace dock for the Caelestia/Quickshell
+Installs a separate Bottombar workspace dock at the bottom edge for the Caelestia/Quickshell
 source checkout. The upstream vertical bar entries are disabled in the user's
 runtime `shell.json`; the rest of the shell configuration is preserved.
 
