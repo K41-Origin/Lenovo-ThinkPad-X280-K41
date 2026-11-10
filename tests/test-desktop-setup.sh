@@ -8,28 +8,28 @@ pass() { printf 'PASS: %s\n' "$*"; }
 
 [[ -f $SCRIPT ]] || fail 'desktop setup script missing'
 [[ -f $RESOLVER ]] || fail 'AUR dependency resolver missing'
-[[ -f $ROOT/scripts/k41-desktop-validation.sh ]] || fail 'canonical desktop validation entry point missing'
-bash -n "$ROOT/scripts/k41-desktop-validation.sh" || fail 'canonical desktop validation entry point syntax invalid'
-for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'K41_REPORT_DIR=' 'diagnostics.tsv' 'diagnostics.log' 'validation.log' 'umask 077' '[[ -f "$ROOT/scripts/test-desktop-x280.sh" ]]' '[[ -f "$ROOT/scripts/test-caelestia-x280.sh" ]]'; do
-  grep -Fq -- "$token" "$ROOT/scripts/k41-desktop-validation.sh" || fail "canonical desktop validator missing contract: $token"
+[[ -f $ROOT/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh ]] || fail 'canonical desktop validation entry point missing'
+bash -n "$ROOT/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh" || fail 'canonical desktop validation entry point syntax invalid'
+for token in 'HYPRLAND_INSTANCE_SIGNATURE' 'K41_REPORT_DIR=' 'diagnostics.tsv' 'diagnostics.log' 'validation.log' 'umask 077' '[[ -f "$ROOT/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh" ]]' '[[ -f "$ROOT/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh" ]]'; do
+  grep -Fq -- "$token" "$ROOT/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh" || fail "canonical desktop validator missing contract: $token"
 done
-if grep -Eq '(^|[[:space:]])sudo[[:space:]]|systemctl (enable|disable|start|stop)' "$ROOT/scripts/k41-desktop-validation.sh"; then
+if grep -Eq '(^|[[:space:]])sudo[[:space:]]|systemctl (enable|disable|start|stop)' "$ROOT/stages/stage-4-desktop-validation/scripts/k41-desktop-validation.sh"; then
   fail 'desktop functional validator must not use sudo or mutate system services'
 fi
 pass 'canonical desktop validation entry point passes syntax and safety-contract checks'
-[[ -f $ROOT/scripts/test-desktop-x280.sh ]] || fail 'desktop diagnostic collector missing'
-bash -n "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop diagnostic collector syntax invalid'
-grep -Fq 'K41_REPORT_DIR' "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop collector does not support consolidated report output'
-grep -Fq 'coverage-limitations.md' "$ROOT/scripts/test-desktop-x280.sh" || fail 'desktop collector must document automated coverage limits'
-if grep -Fq 'manual-checklist.md' "$ROOT/scripts/test-desktop-x280.sh"; then
+[[ -f $ROOT/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh ]] || fail 'desktop diagnostic collector missing'
+bash -n "$ROOT/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh" || fail 'desktop diagnostic collector syntax invalid'
+grep -Fq 'K41_REPORT_DIR' "$ROOT/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh" || fail 'desktop collector does not support consolidated report output'
+grep -Fq 'coverage-limitations.md' "$ROOT/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh" || fail 'desktop collector must document automated coverage limits'
+if grep -Fq 'manual-checklist.md' "$ROOT/stages/stage-4-desktop-validation/scripts/test-desktop-x280.sh"; then
   fail 'Stage 4 must not request manual hardware/visual acceptance'
 fi
 pass 'desktop diagnostic collector passes syntax, report, and automated Stage 4 scope checks'
-[[ -f $ROOT/scripts/test-caelestia-x280.sh ]] || fail 'Caelestia diagnostic collector missing'
-bash -n "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia diagnostic collector syntax invalid'
-grep -Fq 'K41_REPORT_DIR' "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector does not support consolidated report output'
-grep -Fq 'coverage-limitations.md' "$ROOT/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector must document automated coverage limits'
-if grep -Fq 'manual-checklist.md' "$ROOT/scripts/test-caelestia-x280.sh"; then
+[[ -f $ROOT/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh ]] || fail 'Caelestia diagnostic collector missing'
+bash -n "$ROOT/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh" || fail 'Caelestia diagnostic collector syntax invalid'
+grep -Fq 'K41_REPORT_DIR' "$ROOT/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector does not support consolidated report output'
+grep -Fq 'coverage-limitations.md' "$ROOT/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh" || fail 'Caelestia collector must document automated coverage limits'
+if grep -Fq 'manual-checklist.md' "$ROOT/stages/stage-4-desktop-validation/scripts/test-caelestia-x280.sh"; then
   fail 'Caelestia collector must not request manual visual acceptance'
 fi
 pass 'Caelestia diagnostic collector passes syntax and automated coverage contract'
