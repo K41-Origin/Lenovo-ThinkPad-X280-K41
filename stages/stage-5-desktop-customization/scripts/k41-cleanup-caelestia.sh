@@ -29,8 +29,8 @@ if [[ -d $dashboard_dir ]]; then
     [[ $resolved_dashboard == "$resolved_source/modules/dashboard" ]] \
         || die "Unexpected Dashboard path; refusing deletion: $resolved_dashboard"
     if git -C "$source_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        if [[ -n $(git -C "$source_root" status --porcelain --untracked-files=all) ]]; then
-            die "Caelestia source checkout has local changes; refusing to delete files: $source_root"
+        if [[ -n $(git -C "$source_root" status --porcelain --untracked-files=all -- modules/dashboard) ]]; then
+            die "Dashboard source directory contains local changes; refusing to delete them: $dashboard_dir"
         fi
     fi
 fi
