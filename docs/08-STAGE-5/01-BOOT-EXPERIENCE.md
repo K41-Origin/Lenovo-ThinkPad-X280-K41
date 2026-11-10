@@ -39,19 +39,19 @@ Plymouth dan Quickshell adalah renderer berbeda. Keduanya mengikuti bahasa visua
 - Tidak mengubah bentuk, jumlah glyph, proporsi, atau pola sequential glow tanpa persetujuan pengguna.
 
 Sumber desain:
-- Plymouth: `themes/plymouth/k41/k41.script`.
-- Quickshell: `config/quickshell/k41-boot-splash/shell.qml`.
+- Plymouth: `stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script`.
+- Quickshell: `stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml`.
 
 Detail identitas visual lintas-komponen berada di [Design System](../07-DESKTOP-DESIGN-SYSTEM.md).
 
 ## Implementasi terkait
 
-- `scripts/k41-configure-boot-experience.sh`
-- `scripts/k41-install-plymouth-theme.sh`
-- `scripts/k41-install-animated-boot-splash.sh`
-- `scripts/k41-enable-caelestia-autologin.sh` (opt-in; bukan default instalasi)
-- `scripts/k41-lock-caelestia-after-start.sh`
-- `scripts/k41-start-hyprland.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-animated-boot-splash.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-enable-caelestia-autologin.sh` (opt-in; bukan default instalasi)
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh`
+- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh`
 - `tests/test-boot-experience.sh`
 - `tests/test-plymouth-k41-theme.sh`
 - `tests/test-animated-boot-splash.sh`
