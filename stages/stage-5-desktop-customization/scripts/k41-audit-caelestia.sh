@@ -24,6 +24,7 @@ summary_file="$report_dir/summary.txt"
 snapshot_file="$report_dir/config-snapshot.json"
 monitor_file="$report_dir/monitor-runtime.json"
 source_file="$report_dir/source-inventory.txt"
+lockscreen_inventory_file="$report_dir/lockscreen-source-inventory.txt"
 exec > >(tee -a "$log_file") 2>&1
 
 status="COMPLETED"
@@ -39,6 +40,7 @@ on_exit() {
         [[ -f $snapshot_file ]] && printf ', config-snapshot.json'
         [[ -f $monitor_file ]] && printf ', monitor-runtime.json'
         [[ -f $source_file ]] && printf ', source-inventory.txt'
+        [[ -f $lockscreen_inventory_file ]] && printf ', lockscreen-source-inventory.txt'
         [[ -f $report_dir/dashboard-keybinds.json ]] && printf ', dashboard-keybinds.json'
         [[ -f $report_dir/dashboard-config-inventory.json ]] && printf ', dashboard-config-inventory.json'
         [[ -f $report_dir/dashboard-source-references.txt ]] && printf ', dashboard-source-references.txt'
@@ -285,6 +287,50 @@ if [[ ! -s $source_file ]]; then
     printf 'No common Caelestia source directory found.\n' | tee -a "$source_file"
 fi
 
+printf '\n## K41-Dots lock-screen source and runtime comparison\n'
+dots_lock_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/k41-dots/modules/lock"
+runtime_lock_root="$config_root/quickshell/caelestia/modules/lock"
+installer_file="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh"
+: >"$lockscreen_inventory_file"
+{
+    printf 'Canonical K41-Dots source: %s\n' "${dots_lock_root#"$repo_root"/}"
+    printf 'Expected runtime overlay: %s\n' "${runtime_lock_root#"$HOME"/}"
+    printf 'Active user shell entrypoint: '
+    if [[ -f $config_root/quickshell/caelestia/shell.qml && ! -L $config_root/quickshell/caelestia/shell.qml ]]; then
+        printf 'PRESENT (%s)\n' "${config_root#"$HOME"/}/quickshell/caelestia/shell.qml"
+    else
+        printf 'MISSING (user-local shell entrypoint not confirmed)\n'
+    fi
+    expected_version="$(sed -n 's/^readonly EXPECTED_PACKAGE_VERSION="\([^"]*\)"/\1/p' "$installer_file" 2>/dev/null | head -n 1)"
+    expected_revision="$(sed -n 's/^readonly UPSTREAM_REVISION="\([^"]*\)"/\1/p' "$installer_file" 2>/dev/null | head -n 1)"
+    printf 'Installer pinned package version: %s\n' "${expected_version:-UNKNOWN}"
+    printf 'Installer pinned upstream revision: %s\n' "${expected_revision:-UNKNOWN}"
+    if command -v pacman >/dev/null 2>&1; then
+        printf 'Installed package: '
+        pacman -Q caelestia-shell 2>/dev/null || printf 'NOT_INSTALLED\n'
+    fi
+    if [[ -d $config_root/quickshell/caelestia/.git && ! -L $config_root/quickshell/caelestia/.git ]]; then
+        printf 'Runtime upstream revision: %s\n' "$(git -C "$config_root/quickshell/caelestia" rev-parse HEAD 2>/dev/null || printf UNKNOWN)"
+        printf 'Runtime upstream origin: %s\n' "$(git -C "$config_root/quickshell/caelestia" remote get-url origin 2>/dev/null || printf UNKNOWN)"
+    else
+        printf 'Runtime upstream git metadata: NOT_FOUND\n'
+    fi
+    printf '\nOverride file comparison (source vs active runtime):\n'
+    for relative in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
+        source_path="$dots_lock_root/$relative"
+        runtime_path="$runtime_lock_root/$relative"
+        if [[ -L $source_path || ! -f $source_path ]]; then
+            printf 'SOURCE_MISSING_OR_SYMLINK %s\n' "$relative"
+        elif [[ -L $runtime_path || ! -f $runtime_path ]]; then
+            printf 'RUNTIME_MISSING_OR_SYMLINK %s\n' "$relative"
+        elif cmp -s "$source_path" "$runtime_path"; then
+            printf 'MATCH %s\n' "$relative"
+        else
+            printf 'MISMATCH %s\n' "$relative"
+        fi
+    done
+    printf '\n'
+} | tee "$lockscreen_inventory_file"
 printf '\n## Dashboard configuration inventory\n'
 dashboard_config_file="$report_dir/dashboard-config-inventory.json"
 python3 - "$config_root/caelestia" "$dashboard_config_file" "$HOME" <<'PY'
