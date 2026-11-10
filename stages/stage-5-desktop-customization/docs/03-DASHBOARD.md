@@ -17,7 +17,6 @@ Tidak termasuk redesign global shell, perubahan taskbar, sidebar, utilities pane
    bash stages/stage-5-desktop-customization/scripts/k41-audit-caelestia.sh
    ```
    Audit membuat laporan di `reports/stage-5-desktop-customization/caelestia-audit/<timestamp>/`. Periksa setidaknya `summary.txt`, `config-snapshot.json`, `source-inventory.txt`, dan `dashboard-keybinds.json` bila tersedia. Collector mencatat konfigurasi dashboard terpilih, keberadaan modul QML upstream, serta bind Hyprland yang secara eksplisit menyebut dashboard. Audit tidak mengubah konfigurasi atau me-reload shell. Tinjau dan sanitasi laporan sebelum push sesuai [alur kolaborasi](00-COLLABORATION-WORKFLOW.md).
-2. Audit versi Caelestia/Quickshell, konfigurasi dashboard yang aktif, widget upstream yang tersedia, keybind/trigger, proses, dependensi data, dan log runtime.
 2. Inventarisasi fitur yang sudah disediakan upstream; jangan membuat widget duplikat.
 3. Catat kebutuhan informasi berdasarkan kegunaan. Hindari widget dekoratif atau data yang tidak membantu keputusan pengguna.
 4. Tetapkan layout, urutan, ukuran, dan trigger minimal untuk iterasi pertama.
