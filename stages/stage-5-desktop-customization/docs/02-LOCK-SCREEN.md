@@ -2,7 +2,7 @@
 
 **Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
 
-**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status implementasi source K41: IMPLEMENTED. Status migrasi/runtime: PLANNED / NOT VERIFIED.** Source visual Floating Password Card sekarang berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`. Folder `k41-dots/` tidak digunakan dan telah dihapus dari struktur project.
+**Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status implementasi source K41: IMPLEMENTED. Status migrasi/runtime: PLANNED / NOT VERIFIED.** Source visual Floating Password Card sekarang berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`. Struktur source kini langsung berada di workstream Stage 5; tidak ada subproject terpisah.
 
 ## Tujuan dan batas scope
 
@@ -56,7 +56,7 @@ Source visual berada langsung di workstream `workstreams/02-lock-screen/modules/
 ## Kondisi repository saat ini
 
 Implementasi terdahulu masih berada di:
-- Source sebelumnya: `workstreams/02-lock-screen/k41-dots/modules/lock/` (sudah dihapus setelah pemindahan source visual ke folder Stage 5).
+- Source visual sebelumnya telah dipindahkan ke `workstreams/02-lock-screen/modules/lockscreen/`.
 - Installer lama: `workstreams/02-lock-screen/scripts/k41-apply-lockscreen-design.sh`
 - Target lama: `~/.config/quickshell/caelestia/modules/lock/`
 
