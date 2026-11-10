@@ -15,36 +15,48 @@ trap 'rm -rf -- "$tmp"' EXIT
 home="$tmp/home"
 config="$tmp/config"
 mkdir -p "$home" "$config/caelestia/monitors/eDP-1" \
-  "$config/quickshell/caelestia/modules/dashboard" \
-  "$config/quickshell/caelestia/modules/bar"
-
+  "$config/quickshell/caelestia/modules/nexus/pages/panels"
 cat >"$config/caelestia/shell.json" <<'JSON'
-{"dashboard":{"enabled":true},"bar":{"persistent":true}}
+{"dashboard":{"enabled":true},"bar":{"persistent":true},"launcher":{"enabled":true}}
 JSON
 cat >"$config/caelestia/monitors/eDP-1/shell.json" <<'JSON'
-{"dashboard":{"enabled":true},"bar":{"persistent":true}}
+{"bar":{"persistent":false},"appearance":{"scale":1}}
 JSON
-printf 'dashboard fixture\n' >"$config/quickshell/caelestia/modules/dashboard/Dash.qml"
-printf 'bar fixture\n' >"$config/quickshell/caelestia/modules/bar/Bar.qml"
-
-for option in --audit --apply --rollback; do
-  if HOME="$home" XDG_CONFIG_HOME="$config" bash "$script" "$option" >/dev/null 2>&1; then
-    printf 'FAIL: obsolete option accepted: %s\n' "$option" >&2
-    exit 1
-  fi
-done
+printf 'upstream nexus fixture\n' >"$config/quickshell/caelestia/modules/nexus/pages/panels/DashboardPanel.qml"
 
 output="$(HOME="$home" XDG_CONFIG_HOME="$config" bash "$script")"
-grep -q 'Dashboard cleanup completed' <<<"$output"
-[[ ! -e $config/quickshell/caelestia/modules/dashboard ]]
-[[ -f $config/quickshell/caelestia/modules/bar/Bar.qml ]]
+grep -q 'Dashboard disabled' <<<"$output"
+grep -q 'Nexus may still display' <<<"$output"
 
 python3 - "$config/caelestia/shell.json" "$config/caelestia/monitors/eDP-1/shell.json" <<'PY'
 import json, pathlib, sys
-for raw in sys.argv[1:]:
-    data = json.loads(pathlib.Path(raw).read_text(encoding="utf-8"))
-    assert "dashboard" not in data, raw
-    assert data["bar"]["persistent"] is True, raw
+global_data = json.loads(pathlib.Path(sys.argv[1]).read_text())
+monitor_data = json.loads(pathlib.Path(sys.argv[2]).read_text())
+assert global_data["dashboard"]["enabled"] is False
+assert global_data["bar"]["persistent"] is True
+assert global_data["launcher"]["enabled"] is True
+assert monitor_data["bar"]["persistent"] is False
+assert monitor_data["appearance"]["scale"] == 1
 PY
 
-printf 'PASS: direct cleanup removes Dashboard config/source and preserves sibling modules.\n'
+# A second run is idempotent and preserves the existing disabled value.
+HOME="$home" XDG_CONFIG_HOME="$config" bash "$script" >/dev/null
+python3 - "$config/caelestia/shell.json" <<'PY'
+import json, pathlib, sys
+assert json.loads(pathlib.Path(sys.argv[1]).read_text())["dashboard"]["enabled"] is False
+PY
+
+# A broken monitor JSON file must abort before the global file changes.
+before="$(sha256sum "$config/caelestia/shell.json" | cut -d' ' -f1)"
+printf '{invalid json\n' >"$config/caelestia/monitors/eDP-1/shell.json"
+if HOME="$home" XDG_CONFIG_HOME="$config" bash "$script" >/dev/null 2>&1; then
+  printf 'FAIL: invalid monitor JSON was accepted.\n' >&2
+  exit 1
+fi
+after="$(sha256sum "$config/caelestia/shell.json" | cut -d' ' -f1)"
+[[ $before == "$after" ]]
+
+# Source files are deliberately untouched.
+[[ -f $config/quickshell/caelestia/modules/nexus/pages/panels/DashboardPanel.qml ]]
+
+printf 'PASS: Dashboard config is disabled, unrelated settings/source are preserved, and failures preflight safely.\n'
