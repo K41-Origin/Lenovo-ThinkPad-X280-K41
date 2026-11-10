@@ -39,8 +39,6 @@ mode, rollback_arg, home_arg = sys.argv[1:]
 home = pathlib.Path(home_arg).resolve(strict=True)
 config_root = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
 state_root = pathlib.Path(os.environ.get("XDG_STATE_HOME", home / ".local/state"))
-if not config_root.is_absolute() or not state_root.is_absolute():
-    fail("XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.")
 caelestia_root = config_root / "caelestia"
 global_config = caelestia_root / "shell.json"
 backup_root = state_root / "k41" / "caelestia-cleanup" / "backups"
@@ -48,6 +46,9 @@ uid = os.getuid()
 
 def fail(message):
     raise SystemExit(f"ERROR: {message}")
+
+if not config_root.is_absolute() or not state_root.is_absolute():
+    fail("XDG_CONFIG_HOME and XDG_STATE_HOME must be absolute paths.")
 
 def reject_symlink_components(path):
     path = pathlib.Path(os.path.abspath(path))
