@@ -6,7 +6,7 @@ Dokumen ini adalah sumber utama untuk struktur, penggunaan, dependensi, pengujia
 
 Stage 1 memastikan lingkungan Arch Linux Live dan perangkat ThinkPad X280 memenuhi prasyarat sebelum instalasi dasar pada Stage 2.
 
-Jalankan dari root checkout pada Arch Linux Live ISO:
+Jalankan dari root checkout pada Arch Linux Live ISO sebagai **root**:
 
 ```bash
 bash stages/stage-1-live-readiness/scripts/k41-live-validation.sh
