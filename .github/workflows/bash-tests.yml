@@ -47,6 +47,23 @@ jobs:
             printf 'PASS: bash -n %s\n' "$file"
           done
 
+      - name: Validate embedded Python syntax
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          script = Path("stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh")
+          text = script.read_text(encoding="utf-8")
+          marker = "python3 <<'PY'\\n"
+          if text.count(marker) != 1:
+              raise SystemExit(f"Expected exactly one embedded Python block in {script}")
+          source = text.split(marker, 1)[1].split("\\nPY\\n", 1)[0]
+          compile(source, str(script) + " (embedded Python)", "exec")
+          print(f"PASS: embedded Python syntax in {script}")
+          PY
+
       - name: Run ShellCheck
         shell: bash
         run: |
