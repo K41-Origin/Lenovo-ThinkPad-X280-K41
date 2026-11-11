@@ -1,0 +1,133 @@
+K41 Workstream 01 — Boot Experience Audit
+Generated UTC: 20261111T062548Z
+Mode: READ-ONLY; no system changes
+Repository: /home/kai/Lenovo-ThinkPad-X280-K41
+Host: unknown
+Kernel: Linux 7.2.14-arch1-1
+Architecture: x86_64
+User context: non-root
+Collection output: /home/kai/Lenovo-ThinkPad-X280-K41/reports/stage-5-desktop-customization/01-boot-experience/audits/20261111T062548Z
+
+
+===== SAFETY / COLLECTION SCOPE =====
+This collector does not invoke pacman, mkinitcpio, bootctl install/update, efibootmgr writes, systemctl enable/disable/start/stop, cryptsetup mutation, systemd-cryptenroll enrollment, mount, or reboot.
+LUKS passphrases, key material, recovery keys, and full token metadata are not intentionally collected.
+Review the report before sharing; firmware identifiers, disk labels, UUIDs, journal text, and local paths may still be sensitive.
+
+
+===== SYSTEM / FIRMWARE MODEL (SERIALS EXCLUDED) =====
+sys_vendor=LENOVO
+product_name=20KESC2Y00
+product_version=ThinkPad X280
+bios_vendor=LENOVO
+bios_version=N20ET74W (1.59 )
+bios_date=08/26/2025
+
+
+===== FIRMWARE MODE =====
+UEFI
+64
+SecureBoot-variable-present
+
+
+===== BOOTCTL STATUS =====
+Failed to read "/efi/EFI/systemd": Permission denied
+Failed to open '/efi/loader/loader.conf': Permission denied
+System:
+      Firmware: UEFI 2.50 (Lenovo 0.5520)
+ Firmware Arch: x64
+   Secure Boot: disabled
+  TPM2 Support: yes
+  Measured UKI: yes
+   Measured OS: yes
+  Boot into FW: supported
+ Platform Lang: en_US.UTF-8
+
+Current Boot Loader:
+        Product: systemd-boot 262.1-1-arch
+       Features: ✓ Boot counting
+                 ✓ Menu timeout control
+                 ✓ One-shot menu timeout control
+                 ✓ Default entry control
+                 ✓ One-shot entry control
+                 ✓ Support for XBOOTLDR partition
+                 ✓ Support for passing random seed to OS
+                 ✓ Load drop-in drivers
+                 ✓ Support Type #1 sort-key field
+                 ✓ Support @saved pseudo-entry
+                 ✓ Support Type #1 devicetree field
+                 ✓ Enroll SecureBoot keys
+                 ✓ Retain SHIM protocols
+                 ✓ Menu can be disabled
+                 ✓ Multi-Profile UKIs are supported
+                 ✓ Loader reports network boot URL
+                 ✓ Support Type #1 uki field
+                 ✓ Support Type #1 uki-url field
+                 ✓ Loader reports active TPM2 PCR banks
+                 ✓ Loader reports firmware keyboard layout
+                 ✓ Loader measures SMBIOS information
+      Partition: /dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700
+         Loader: └─/efi//EFI/BOOT/BOOTX64.EFI
+Keyboard Layout: n/a (not reported by firmware)
+  Current Entry: arch-linux.efi
+
+Current Stub:
+        Product: systemd-stub 262.1-1-arch
+       Features: ✓ Stub reports loader partition information
+                 ✓ Stub reports stub partition information
+                 ✓ Stub reports network boot URL
+                 ✓ Picks up credentials from boot partition
+                 ✓ Picks up system extension images from boot partition
+                 ✓ Picks up configuration extension images from boot partition
+                 ✓ Measures kernel+command line+sysexts
+                 ✓ Support for passing random seed to OS
+                 ✓ Pick up .cmdline from addons
+                 ✓ Pick up .cmdline from SMBIOS Type 11
+                 ✓ Pick up .dtb from addons
+                 ✓ Stub understands profile selector
+                 ✓ Stub measures SMBIOS information
+      Partition: /dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700
+           Stub: └─/EFI/Linux/arch-linux.efi
+
+Random Seed:
+ System Token: set
+       Exists: Can't access /efi/loader/random-seed (Permission denied)
+
+Available Boot Loaders on ESP:
+          ESP: /efi (/dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700)
+         File: (can't access /efi: Permission denied)
+
+No boot loaders listed in EFI Variables.
+
+[command exit: 1]
+
+
+===== BOOTCTL ENTRIES =====
+Failed to open '/efi/loader/loader.conf': Permission denied
+[command exit: 1]
+
+
+===== EFI BOOT ENTRIES (READ ONLY) =====
+[unavailable: efibootmgr]
+
+
+===== BLOCK DEVICES / FILESYSTEMS =====
+NAME          PATH                  TYPE    SIZE FSTYPE      FSVER LABEL    UUID                                 PARTUUID                             MOUNTPOINTS
+sda           /dev/sda              disk      0B                                                                                                      
+nvme0n1       /dev/nvme0n1          disk  238.5G                                                                                                      
+├─nvme0n1p1   /dev/nvme0n1p1        part      1G vfat        FAT32 K41_EFI  58E4-F8E1                            a2d45e68-dba3-469e-945f-319d68cba700 /efi
+└─nvme0n1p2   /dev/nvme0n1p2        part  237.5G crypto_LUKS 2              43d5fcd3-03b1-4545-bbc6-10df6eb9e706 1f376e22-1cad-4b61-94bf-b77e718af6af 
+  └─cryptroot /dev/mapper/cryptroot crypt 237.5G ext4        1.0   K41_ROOT 66adf4f3-4810-4f38-acfc-2583d39b19c7                                      /
+
+
+===== MOUNT TABLE (BOOT-RELATED) =====
+[command exit: 1]
+
+
+===== ROOT SOURCE =====
+/dev/mapper/cryptroot ext4 rw,relatime
+
+
+===== CRYPT DEVICE STATUS (NO KEYS) =====
+Cannot initialize device-mapper, running as non-root user.
+[command exit: 1]

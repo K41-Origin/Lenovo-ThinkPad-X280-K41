@@ -1,0 +1,1242 @@
+K41 Workstream 01 — Boot Experience Audit
+Generated UTC: 20261111T063301Z
+Mode: READ-ONLY; no system changes
+Repository: /home/kai/Lenovo-ThinkPad-X280-K41
+Host: unknown
+Kernel: Linux 7.2.14-arch1-1
+Architecture: x86_64
+User context: non-root
+Collection output: /home/kai/Lenovo-ThinkPad-X280-K41/reports/stage-5-desktop-customization/01-boot-experience/audits/20261111T063301Z
+
+
+===== SAFETY / COLLECTION SCOPE =====
+This collector does not invoke pacman, mkinitcpio, bootctl install/update, efibootmgr writes, systemctl enable/disable/start/stop, cryptsetup mutation, systemd-cryptenroll enrollment, mount, or reboot.
+LUKS passphrases, key material, recovery keys, and full token metadata are not intentionally collected.
+Review the report before sharing; firmware identifiers, disk labels, UUIDs, journal text, and local paths may still be sensitive.
+
+
+===== SYSTEM / FIRMWARE MODEL (SERIALS EXCLUDED) =====
+sys_vendor=LENOVO
+product_name=20KESC2Y00
+product_version=ThinkPad X280
+bios_vendor=LENOVO
+bios_version=N20ET74W (1.59 )
+bios_date=08/26/2025
+
+
+===== FIRMWARE MODE =====
+UEFI
+Firmware platform bits: 64
+SecureBoot-variable-present
+
+
+===== BOOTCTL STATUS =====
+Failed to read "/efi/EFI/systemd": Permission denied
+Failed to open '/efi/loader/loader.conf': Permission denied
+System:
+      Firmware: UEFI 2.50 (Lenovo 0.5520)
+ Firmware Arch: x64
+   Secure Boot: disabled
+  TPM2 Support: yes
+  Measured UKI: yes
+   Measured OS: yes
+  Boot into FW: supported
+ Platform Lang: en_US.UTF-8
+
+Current Boot Loader:
+        Product: systemd-boot 262.1-1-arch
+       Features: ✓ Boot counting
+                 ✓ Menu timeout control
+                 ✓ One-shot menu timeout control
+                 ✓ Default entry control
+                 ✓ One-shot entry control
+                 ✓ Support for XBOOTLDR partition
+                 ✓ Support for passing random seed to OS
+                 ✓ Load drop-in drivers
+                 ✓ Support Type #1 sort-key field
+                 ✓ Support @saved pseudo-entry
+                 ✓ Support Type #1 devicetree field
+                 ✓ Enroll SecureBoot keys
+                 ✓ Retain SHIM protocols
+                 ✓ Menu can be disabled
+                 ✓ Multi-Profile UKIs are supported
+                 ✓ Loader reports network boot URL
+                 ✓ Support Type #1 uki field
+                 ✓ Support Type #1 uki-url field
+                 ✓ Loader reports active TPM2 PCR banks
+                 ✓ Loader reports firmware keyboard layout
+                 ✓ Loader measures SMBIOS information
+      Partition: /dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700
+         Loader: └─/efi//EFI/BOOT/BOOTX64.EFI
+Keyboard Layout: n/a (not reported by firmware)
+  Current Entry: arch-linux.efi
+
+Current Stub:
+        Product: systemd-stub 262.1-1-arch
+       Features: ✓ Stub reports loader partition information
+                 ✓ Stub reports stub partition information
+                 ✓ Stub reports network boot URL
+                 ✓ Picks up credentials from boot partition
+                 ✓ Picks up system extension images from boot partition
+                 ✓ Picks up configuration extension images from boot partition
+                 ✓ Measures kernel+command line+sysexts
+                 ✓ Support for passing random seed to OS
+                 ✓ Pick up .cmdline from addons
+                 ✓ Pick up .cmdline from SMBIOS Type 11
+                 ✓ Pick up .dtb from addons
+                 ✓ Stub understands profile selector
+                 ✓ Stub measures SMBIOS information
+      Partition: /dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700
+           Stub: └─/EFI/Linux/arch-linux.efi
+
+Random Seed:
+ System Token: set
+       Exists: Can't access /efi/loader/random-seed (Permission denied)
+
+Available Boot Loaders on ESP:
+          ESP: /efi (/dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700)
+         File: (can't access /efi: Permission denied)
+
+No boot loaders listed in EFI Variables.
+
+[command exit: 1]
+
+
+===== BOOTCTL ENTRIES =====
+Failed to open '/efi/loader/loader.conf': Permission denied
+[command exit: 1]
+
+
+===== EFI BOOT ENTRIES (READ ONLY) =====
+[unavailable: efibootmgr]
+
+
+===== BLOCK DEVICES / FILESYSTEMS =====
+NAME          PATH                  TYPE    SIZE FSTYPE      FSVER LABEL    UUID                                 PARTUUID                             MOUNTPOINTS
+sda           /dev/sda              disk      0B                                                                                                      
+nvme0n1       /dev/nvme0n1          disk  238.5G                                                                                                      
+├─nvme0n1p1   /dev/nvme0n1p1        part      1G vfat        FAT32 K41_EFI  58E4-F8E1                            a2d45e68-dba3-469e-945f-319d68cba700 /efi
+└─nvme0n1p2   /dev/nvme0n1p2        part  237.5G crypto_LUKS 2              43d5fcd3-03b1-4545-bbc6-10df6eb9e706 1f376e22-1cad-4b61-94bf-b77e718af6af 
+  └─cryptroot /dev/mapper/cryptroot crypt 237.5G ext4        1.0   K41_ROOT 66adf4f3-4810-4f38-acfc-2583d39b19c7                                      /
+
+
+===== MOUNT TABLE (BOOT-RELATED) =====
+/ /dev/mapper/cryptroot ext4 rw,relatime
+/efi /dev/nvme0n1p1 vfat rw,relatime,fmask=0177,dmask=0077,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro
+
+
+===== ROOT SOURCE =====
+/dev/mapper/cryptroot ext4 rw,relatime
+
+
+===== CRYPT DEVICE STATUS (NO KEYS) =====
+Cannot initialize device-mapper, running as non-root user.
+
+
+===== LUKS METADATA SUMMARY (NO KEY MATERIAL) =====
+
+
+===== KERNEL COMMAND LINE (SENSITIVE FIELDS REDACTED) =====
+rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw quiet splash
+
+
+===== FILESYSTEM TABLE =====
+# Static information about the filesystems.
+# See fstab(5) for details.
+
+# <file system> <dir> <type> <options> <dump> <pass>
+UUID=<UUID-REDACTED>	/         	ext4      	rw,relatime	0 1
+UUID=<UUID-REDACTED> /efi vfat rw,relatime,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro,fmask=0177,dmask=0077 0 2
+/swapfile none swap defaults 0 0
+
+
+===== CRYPTTAB (KEYFILE PATHS REDACTED) =====
+[/etc/crypttab not readable or absent]
+
+
+===== MKINITCPIO HOOKS CONFIGURATION =====
+# vim:set ft=sh:
+# MODULES
+# The following modules are loaded before any boot hooks are
+# run.  Advanced users may wish to specify all system modules
+# in this array.  For instance:
+#     MODULES=(usbhid xhci_hcd)
+MODULES=()
+
+# BINARIES
+# This setting includes any additional binaries a given user may
+# wish into the CPIO image.  This is run last, so it may be used to
+# override the actual binaries included by a given hook
+# BINARIES are dependency parsed, so you may safely ignore libraries
+BINARIES=()
+
+# FILES
+# This setting is similar to BINARIES above, however, files are added
+# as-is and are not parsed in any way.  This is useful for config files.
+FILES=()
+
+# HOOKS
+# This is the most important setting in this file.  The HOOKS control the
+# modules and scripts added to the image, and what happens at boot time.
+# Order is important, and it is recommended that you do not change the
+# order in which HOOKS are added.  Run 'mkinitcpio -H <hook name>' for
+# help on a given hook.
+# 'base' is _required_ unless you know precisely what you are doing.
+# 'udev' is _required_ in order to automatically load modules
+# 'filesystems' is _required_ unless you specify your fs modules in MODULES
+# Examples:
+##   This setup specifies all modules in the MODULES setting above.
+##   No RAID, lvm2, or encrypted root is needed.
+#    HOOKS=(base)
+#
+##   This setup will autodetect all modules for your system and should
+##   work as a sane default
+#    HOOKS=(base udev autodetect microcode modconf block filesystems fsck)
+#
+##   This setup will generate a 'full' image which supports most systems.
+##   No autodetection is done.
+#    HOOKS=(base udev microcode modconf block filesystems fsck)
+#
+##   This setup assembles a mdadm array with an encrypted root file system.
+##   Note: See 'mkinitcpio -H mdadm_udev' for more information on RAID devices.
+#    HOOKS=(base udev microcode modconf keyboard keymap consolefont block mdadm_udev encrypt filesystems fsck)
+#
+##   This setup loads an lvm2 volume group.
+#    HOOKS=(base udev microcode modconf block lvm2 filesystems fsck)
+#
+##   This will create a systemd based initramfs which loads an encrypted root filesystem.
+#    HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+#
+##   NOTE: If you have /usr on a separate partition, you MUST include the
+#    usr and fsck hooks.
+HOOKS=(base systemd plymouth autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt filesystems fsck)
+
+# COMPRESSION
+# Use this to compress the initramfs image. By default, zstd compression
+# is used for Linux ≥ 5.9 and gzip compression is used for Linux < 5.9.
+# Use 'cat' to create an uncompressed image.
+#COMPRESSION="zstd"
+#COMPRESSION="gzip"
+#COMPRESSION="bzip2"
+#COMPRESSION="lzma"
+#COMPRESSION="xz"
+#COMPRESSION="lzop"
+#COMPRESSION="lz4"
+
+# COMPRESSION_OPTIONS
+# Additional options for the compressor
+#COMPRESSION_OPTIONS=()
+
+# MODULES_DECOMPRESS
+# Decompress loadable kernel modules and their firmware during initramfs
+# creation. Switch (yes/no).
+# Enable to allow further decreasing image size when using high compression
+# (e.g. xz -9e or zstd --long --ultra -22) at the expense of increased RAM usage
+# at early boot.
+# Note that any compressed files will be placed in the uncompressed early CPIO
+# to avoid double compression.
+#MODULES_DECOMPRESS="no"
+
+
+===== MKINITCPIO PRESETS =====
+
+--- /etc/mkinitcpio.d/linux.preset ---
+4:ALL_kver="/boot/vmlinuz-linux"
+7:PRESETS=('default')
+18:default_uki="/efi/EFI/Linux/arch-linux.efi"
+19:default_cmdline="/etc/kernel/cmdline"
+
+
+===== BOOTLOADER ENTRY CONTENTS (SENSITIVE FIELDS REDACTED) =====
+
+
+===== INITRAMFS TOOL VERSION =====
+mkinitcpio "42.2"
+
+
+===== INITRAMFS CONTENTS — PLYMOUTH / CRYPT / TPM MATCHES =====
+
+--- /boot/initramfs-linux.img ---
+
+
+===== KERNEL / PACKAGE VERSIONS =====
+Linux x280 7.2.14-arch1-1 #1 SMP PREEMPT_DYNAMIC Fri, 30 Oct 2026 14:32:40 +0000 x86_64 GNU/Linux
+linux 7.2.14.arch1-1
+mkinitcpio 42.2-1
+systemd 262.1-1
+plymouth 26.134.222-3
+cryptsetup 2.8.8-1
+
+
+===== PLYMOUTH THEME / PACKAGE =====
+Splash control client
+USAGE: plymouth [OPTION...] [COMMAND [OPTION...]...]
+
+Options:
+  --help                         This help message
+  --debug                        Enable verbose debug logging
+  --get-splash-plugin-path       Get directory where splash plugins are installed
+  --newroot=<string>             Tell boot daemon that new root filesystem is mounted
+  --quit                         Tell boot daemon to quit
+  --ping                         Check if boot daemon is running
+  --has-active-vt                Check if boot daemon has an active vt
+  --sysinit                      Tell boot daemon root filesystem is mounted read-write
+  --show-splash                  Show splash screen
+  --hide-splash                  Hide splash screen
+  --ask-for-password             Ask user for password
+  --ignore-keystroke=<string>    Remove sensitivity to a keystroke
+  --update=<string>              Tell boot daemon an update about boot progress
+  --details                      Tell boot daemon there were errors during boot
+  --wait                         Wait for boot daemon to quit
+
+Available commands:
+  change-mode        Change the operation mode
+  system-update      Tell the daemon about updates progress
+  update             Tell daemon about boot status changes
+  update-root-fs     Tell daemon about root filesystem changes
+  show-splash        Tell daemon to show splash screen
+  hide-splash        Tell daemon to hide splash screen
+  ask-for-password   Ask user for password
+  ask-question       Ask user a question
+  display-message    Display a message
+  hide-message       Hide a message
+  watch-keystroke    Become sensitive to a keystroke
+  ignore-keystroke   Remove sensitivity to a keystroke
+  pause-progress     Pause boot progress bar
+  unpause-progress   Unpause boot progress bar
+  report-error       Tell boot daemon there were errors during boot
+  deactivate         Tell boot daemon to deactivate
+  reactivate         Tell boot daemon to reactivate
+  quit               Tell boot daemon to quit
+  reload             Tell the daemon to reload the theme
+
+Options for change-mode command:
+  --boot-up             Starting the system up
+  --shutdown            Shutting the system down
+  --reboot              Rebooting the system
+  --updates             Applying updates
+  --system-upgrade      Upgrading the OS to a new version
+  --firmware-upgrade    Upgrading firmware to a new version
+  --system-reset        Resetting the OS and erasing all user data
+
+Options for system-update command:
+  --progress=<integer>    The percentage progress of the updates
+
+Options for update command:
+  --status=<string>    Tell daemon the current boot status
+
+Options for update-root-fs command:
+  --new-root-dir=<string>    Root filesystem is about to change
+  --read-write               Root filesystem is no longer read-only
+
+Options for ask-for-password command:
+  --command=<string>             Command to send password to via standard input
+  --prompt=<string>              Message to display when asking for password
+  --number-of-tries=<integer>    Number of times to ask before giving up (requires --command)
+  --dont-pause-progress          Don't pause boot progress bar while asking
+
+Options for ask-question command:
+  --command=<string>       Command to send the answer to via standard input
+  --prompt=<string>        Message to display when asking the question
+  --dont-pause-progress    Don't pause boot progress bar while asking
+
+Options for display-message command:
+  --text=<string>    The message text
+
+Options for hide-message command:
+  --text=<string>    The message text
+
+Options for watch-keystroke command:
+  --command=<string>    Command to send keystroke to via standard input
+  --keys=<string>       Keys to become sensitive to
+
+Options for ignore-keystroke command:
+  --keys=<string>    Keys to remove sensitivity to
+
+Options for quit command:
+  --retain-splash    Don't explicitly hide boot splash on exit
+
+k41
+plymouth 26.134.222-3
+/usr/share/plymouth/themes/bgrt/bgrt.plymouth
+/usr/share/plymouth/themes/details/details.plymouth
+/usr/share/plymouth/themes/fade-in/fade-in.plymouth
+/usr/share/plymouth/themes/glow/glow.plymouth
+/usr/share/plymouth/themes/k41/k41.plymouth
+/usr/share/plymouth/themes/k41/k41.script
+/usr/share/plymouth/themes/script/script.plymouth
+/usr/share/plymouth/themes/script/script.script
+/usr/share/plymouth/themes/solar/solar.plymouth
+/usr/share/plymouth/themes/spinfinity/spinfinity.plymouth
+/usr/share/plymouth/themes/spinner/spinner.plymouth
+/usr/share/plymouth/themes/text/text.plymouth
+/usr/share/plymouth/themes/tribar/tribar.plymouth
+
+
+===== PLYMOUTH / CRYPT / TPM SYSTEMD UNITS =====
+UNIT FILE                              STATE   PRESET
+k41-plymouth-release.service           enabled disabled
+plymouth-halt.service                  static  -
+plymouth-kexec.service                 static  -
+plymouth-poweroff.service              static  -
+plymouth-quit-wait.service             static  -
+plymouth-quit.service                  static  -
+plymouth-read-write.service            static  -
+plymouth-reboot.service                static  -
+plymouth-start.service                 static  -
+plymouth-switch-root-initramfs.service static  -
+plymouth-switch-root.service           static  -
+
+11 unit files listed.
+
+
+===== ACTIVE CRYPTSETUP UNITS =====
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+To show all installed unit files use 'systemctl list-unit-files'.
+
+
+===== BOOTLOADER / KERNEL INSTALL FILES =====
+
+--- /etc/kernel ---
+/etc/kernel/cmdline
+
+
+===== RELEVANT UNIT STATE =====
+
+--- plymouth-start.service ---
+● plymouth-start.service - Show Plymouth Boot Screen
+     Loaded: loaded (/usr/lib/systemd/system/plymouth-start.service; static)
+     Active: active (exited) since Wed 2026-11-11 13:02:01 WIB; 31min ago
+ Invocation: 5731bd042191437b9b3cc670306898b7
+   Main PID: 188 (code=exited, status=0/SUCCESS)
+   Mem peak: 15.7M
+        CPU: 574ms
+
+Nov 11 13:02:01 archlinux systemd[1]: Starting Show Plymouth Boot Screen...
+Nov 11 13:02:01 archlinux systemd[1]: Started Show Plymouth Boot Screen.
+
+--- plymouth-quit.service ---
+● plymouth-quit.service - Terminate Plymouth Boot Screen
+     Loaded: loaded (/usr/lib/systemd/system/plymouth-quit.service; static)
+    Drop-In: /etc/systemd/system/plymouth-quit.service.d
+             └─k41-lock-handoff.conf
+     Active: active (exited) since Wed 2026-11-11 13:03:31 WIB; 29min ago
+ Invocation: f7ab13e6745a4f48a5f0f6211842deab
+    Process: 508 ExecStart=/usr/local/libexec/k41-plymouth-quit-after-lock /home/kai/.cache/k41/boot-lock-ready (code=exited, status=0/SUCCESS)
+   Main PID: 508 (code=exited, status=0/SUCCESS)
+   Mem peak: 2.9M
+        CPU: 260ms
+
+Nov 11 13:02:15 x280 systemd[1]: Starting Terminate Plymouth Boot Screen...
+Nov 11 13:03:31 x280 systemd[1]: Finished Terminate Plymouth Boot Screen.
+
+--- plymouth-quit-wait.service ---
+● plymouth-quit-wait.service - Hold until boot process finishes up
+     Loaded: loaded (/usr/lib/systemd/system/plymouth-quit-wait.service; static)
+     Active: active (exited) since Wed 2026-11-11 13:02:15 WIB; 30min ago
+ Invocation: a6e20a3542fa4235b897eabbc8ca869c
+    Process: 503 ExecStart=/usr/bin/plymouth --wait (code=exited, status=0/SUCCESS)
+   Main PID: 503 (code=exited, status=0/SUCCESS)
+   Mem peak: 2M
+        CPU: 11ms
+
+Nov 11 13:02:15 x280 systemd[1]: Starting Hold until boot process finishes up...
+Nov 11 13:02:15 x280 systemd[1]: Finished Hold until boot process finishes up.
+
+--- systemd-cryptsetup@cryptroot.service ---
+Unit systemd-cryptsetup@cryptroot.service could not be found.
+
+--- systemd-boot-update.service ---
+○ systemd-boot-update.service - Automatic Boot Loader Update
+     Loaded: loaded (/usr/lib/systemd/system/systemd-boot-update.service; disabled; preset: enabled)
+     Active: inactive (dead)
+       Docs: man:bootctl(1)
+
+--- getty@tty1.service ---
+○ getty@tty1.service - Getty on tty1
+     Loaded: loaded (/usr/lib/systemd/system/getty@.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/getty@tty1.service.d
+             └─k41-autologin.conf
+     Active: inactive (dead) since Wed 2026-11-11 13:03:31 WIB; 29min ago
+   Duration: 1min 15.325s
+ Invocation: 7a6eabc8d8204a55bd780dc9b69bdad7
+       Docs: man:agetty(8)
+             man:systemd-getty-generator(8)
+             https://0pointer.de/blog/projects/serial-console.html
+    Process: 507 ExecStart=/usr/bin/agetty --noreset --noclear --noissue --nohostname --autologin kai - "\${TERM}" (code=exited, status=0/SUCCESS)
+   Main PID: 507 (code=exited, status=0/SUCCESS)
+   Mem peak: 5.7M
+        CPU: 29ms
+
+Nov 11 13:02:15 x280 systemd[1]: Started Getty on tty1.
+Nov 11 13:02:15 x280 login[507]: pam_unix(login:session): session opened for user kai(uid=1000) by kai(uid=0)
+Nov 11 13:03:31 x280 systemd[1]: Stopping Getty on tty1...
+Nov 11 13:03:31 x280 systemd[1]: getty@tty1.service: Deactivated successfully.
+Nov 11 13:03:31 x280 systemd[1]: Stopped Getty on tty1.
+
+--- k41-plymouth-release.service ---
+● k41-plymouth-release.service - Retain splash frame and release Plymouth display ownership before K41 Hyprland startup
+     Loaded: loaded (/etc/systemd/system/k41-plymouth-release.service; enabled; preset: disabled)
+     Active: active (exited) since Wed 2026-11-11 13:02:14 WIB; 30min ago
+ Invocation: b3b3990b5aa74e09ad0dc08983d53ec6
+    Process: 457 ExecStartPre=/usr/bin/rm -f -- /home/kai/.cache/k41/boot-lock-ready (code=exited, status=0/SUCCESS)
+    Process: 461 ExecStart=/usr/bin/plymouth quit --retain-splash (code=exited, status=0/SUCCESS)
+   Main PID: 461 (code=exited, status=0/SUCCESS)
+   Mem peak: 2.6M
+        CPU: 24ms
+
+Nov 11 13:02:14 x280 systemd[1]: Starting Retain splash frame and release Plymouth display ownership before K41 Hyprland startup...
+Nov 11 13:02:14 x280 systemd[1]: Finished Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+
+
+===== TPM DEVICE PRESENCE =====
+crw-rw---- 1 tss  root  10,   224 Nov 11 13:02 /dev/tpm0
+crw-rw---- 1 root tss  252, 65536 Nov 11 13:02 /dev/tpmrm0
+PATH        DEVICE     DRIVER
+/dev/tpmrm0 STM7304:00 tpm_tis
+
+
+===== SECURE BOOT STATE =====
+Failed to read "/efi/EFI/systemd": Permission denied
+Failed to open '/efi/loader/loader.conf': Permission denied
+System:
+      Firmware: UEFI 2.50 (Lenovo 0.5520)
+ Firmware Arch: x64
+   Secure Boot: disabled
+  TPM2 Support: yes
+  Measured UKI: yes
+   Measured OS: yes
+  Boot into FW: supported
+ Platform Lang: en_US.UTF-8
+
+Current Boot Loader:
+        Product: systemd-boot 262.1-1-arch
+       Features: ✓ Boot counting
+                 ✓ Menu timeout control
+                 ✓ One-shot menu timeout control
+                 ✓ Default entry control
+                 ✓ One-shot entry control
+                 ✓ Support for XBOOTLDR partition
+                 ✓ Support for passing random seed to OS
+                 ✓ Load drop-in drivers
+                 ✓ Support Type #1 sort-key field
+                 ✓ Support @saved pseudo-entry
+                 ✓ Support Type #1 devicetree field
+                 ✓ Enroll SecureBoot keys
+                 ✓ Retain SHIM protocols
+                 ✓ Menu can be disabled
+                 ✓ Multi-Profile UKIs are supported
+                 ✓ Loader reports network boot URL
+                 ✓ Support Type #1 uki field
+                 ✓ Support Type #1 uki-url field
+                 ✓ Loader reports active TPM2 PCR banks
+                 ✓ Loader reports firmware keyboard layout
+                 ✓ Loader measures SMBIOS information
+      Partition: /dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700
+         Loader: └─/efi//EFI/BOOT/BOOTX64.EFI
+Keyboard Layout: n/a (not reported by firmware)
+  Current Entry: arch-linux.efi
+
+Current Stub:
+        Product: systemd-stub 262.1-1-arch
+       Features: ✓ Stub reports loader partition information
+                 ✓ Stub reports stub partition information
+                 ✓ Stub reports network boot URL
+                 ✓ Picks up credentials from boot partition
+                 ✓ Picks up system extension images from boot partition
+                 ✓ Picks up configuration extension images from boot partition
+                 ✓ Measures kernel+command line+sysexts
+                 ✓ Support for passing random seed to OS
+                 ✓ Pick up .cmdline from addons
+                 ✓ Pick up .cmdline from SMBIOS Type 11
+                 ✓ Pick up .dtb from addons
+                 ✓ Stub understands profile selector
+                 ✓ Stub measures SMBIOS information
+      Partition: /dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700
+           Stub: └─/EFI/Linux/arch-linux.efi
+
+Random Seed:
+ System Token: set
+       Exists: Can't access /efi/loader/random-seed (Permission denied)
+
+Available Boot Loaders on ESP:
+          ESP: /efi (/dev/disk/by-partuuid/a2d45e68-dba3-469e-945f-319d68cba700)
+         File: (can't access /efi: Permission denied)
+
+No boot loaders listed in EFI Variables.
+
+[command exit: 1]
+
+
+===== BOOT-RELATED PROCESSES =====
+[command exit: 1]
+
+
+===== TTY1 GETTY OVERRIDES =====
+find: ‘/etc/systemd/system/getty@tty1.service.d’: Permission denied
+[command exit: 1]
+
+
+===== K41 BOOT-RELATED FILE INVENTORY =====
+/etc/plymouth/plymouthd.conf
+/etc/plymouth/plymouthd.confe
+/etc/mkinitcpio.conf
+/etc/kernel/cmdline
+/etc/mkinitcpio.d/linux.preset
+/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
+/etc/systemd/system/k41-plymouth-release.service
+/usr/local/libexec/k41-plymouth-quit-after-lock
+/home/kai/.config/hypr/hyprland.conf
+/home/kai/.config/hypr/hyprland.lua
+/home/kai/.config/hypr/scheme/current.lua
+/home/kai/.config/quickshell/k41-boot-splash/shell.qml
+/home/kai/.config/quickshell/k41/modules/lockscreen/Content.qml
+/home/kai/.config/quickshell/k41/modules/lockscreen/Center.qml
+/home/kai/.config/quickshell/k41/modules/lockscreen/LockSurface.qml
+/home/kai/.config/quickshell/k41/modules/lockscreen/MANIFEST.sha256
+/home/kai/.config/quickshell/k41/modules/lockscreen/.k41-lockscreen-managed
+/home/kai/.config/quickshell/caelestia/utils/scripts/fuzzysort.js
+/home/kai/.config/quickshell/caelestia/utils/scripts/fzf.js
+/home/kai/.config/quickshell/caelestia/utils/Images.qml
+/home/kai/.config/quickshell/caelestia/utils/NetworkConnection.qml
+/home/kai/.config/quickshell/caelestia/utils/Icons.qml
+/home/kai/.config/quickshell/caelestia/utils/Strings.qml
+/home/kai/.config/quickshell/caelestia/utils/SysInfo.qml
+/home/kai/.config/quickshell/caelestia/utils/Searcher.qml
+/home/kai/.config/quickshell/caelestia/utils/Paths.qml
+/home/kai/.config/quickshell/caelestia/scripts/trs.fish
+/home/kai/.config/quickshell/caelestia/scripts/qml-lint-conventions.py
+/home/kai/.config/quickshell/caelestia/scripts/trs-check.py
+/home/kai/.config/quickshell/caelestia/.vscode/settings.json
+/home/kai/.config/quickshell/caelestia/plugin/cmake/qml-module.cmake
+/home/kai/.config/quickshell/caelestia/plugin/cmake/pch.cmake
+/home/kai/.config/quickshell/caelestia/plugin/cmake/sensorslib.cmake
+/home/kai/.config/quickshell/caelestia/plugin/CMakeLists.txt
+/home/kai/.config/quickshell/caelestia/.envrc
+/home/kai/.config/quickshell/caelestia/assets/wrap_term_launch.sh
+/home/kai/.config/quickshell/caelestia/assets/wallpaper.webp
+/home/kai/.config/quickshell/caelestia/assets/logo.svg
+/home/kai/.config/quickshell/caelestia/assets/kurukuru.gif
+/home/kai/.config/quickshell/caelestia/assets/google-sans-flex/GoogleSansFlex-VariableFont_GRAD,ROND,opsz,slnt,wdth,wght.ttf
+/home/kai/.config/quickshell/caelestia/assets/google-sans-flex/LICENSE
+/home/kai/.config/quickshell/caelestia/assets/dino.png
+/home/kai/.config/quickshell/caelestia/assets/bongocat.gif
+/home/kai/.config/quickshell/caelestia/assets/pam.d/passwd
+/home/kai/.config/quickshell/caelestia/assets/pam.d/fprint
+/home/kai/.config/quickshell/caelestia/assets/pam.d/howdy
+/home/kai/.config/quickshell/caelestia/.clang-tidy
+/home/kai/.config/quickshell/caelestia/services/Time.qml
+/home/kai/.config/quickshell/caelestia/services/Recorder.qml
+/home/kai/.config/quickshell/caelestia/services/Screens.qml
+/home/kai/.config/quickshell/caelestia/services/Wallpapers.qml
+/home/kai/.config/quickshell/caelestia/services/Audio.qml
+/home/kai/.config/quickshell/caelestia/services/IdleInhibitor.qml
+/home/kai/.config/quickshell/caelestia/services/ShellState.qml
+/home/kai/.config/quickshell/caelestia/services/Colours.qml
+/home/kai/.config/quickshell/caelestia/services/Players.qml
+/home/kai/.config/quickshell/caelestia/services/Brightness.qml
+/home/kai/.config/quickshell/caelestia/services/Notifs.qml
+/home/kai/.config/quickshell/caelestia/services/Nmcli.qml
+/home/kai/.config/quickshell/caelestia/services/Hypr.qml
+/home/kai/.config/quickshell/caelestia/services/GameMode.qml
+/home/kai/.config/quickshell/caelestia/services/Weather.qml
+/home/kai/.config/quickshell/caelestia/services/NotifData.qml
+/home/kai/.config/quickshell/caelestia/services/VPN.qml
+/home/kai/.config/quickshell/caelestia/.git/config
+/home/kai/.config/quickshell/caelestia/.git/hooks/pre-applypatch.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/pre-rebase.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/fsmonitor-watchman.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/prepare-commit-msg.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/pre-commit.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/push-to-checkout.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/post-update.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/pre-merge-commit.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/pre-push.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/update.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/pre-receive.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/applypatch-msg.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/commit-msg.sample
+/home/kai/.config/quickshell/caelestia/.git/hooks/sendemail-validate.sample
+/home/kai/.config/quickshell/caelestia/.git/description
+/home/kai/.config/quickshell/caelestia/.git/shallow
+/home/kai/.config/quickshell/caelestia/.git/info/exclude
+/home/kai/.config/quickshell/caelestia/.git/HEAD
+/home/kai/.config/quickshell/caelestia/.git/FETCH_HEAD
+/home/kai/.config/quickshell/caelestia/.git/logs/HEAD
+/home/kai/.config/quickshell/caelestia/.git/index
+/home/kai/.config/quickshell/caelestia/shell.qml
+/home/kai/.config/quickshell/caelestia/.clang-format
+/home/kai/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml
+/home/kai/.config/quickshell/caelestia/modules/bar/Bar.qml
+/home/kai/.config/quickshell/caelestia/modules/bar/BarWrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/utilities/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/utilities/Background.qml
+/home/kai/.config/quickshell/caelestia/modules/utilities/Wrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/utilities/RecordingDeleteModal.qml
+/home/kai/.config/quickshell/caelestia/modules/launcher/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/launcher/AppList.qml
+/home/kai/.config/quickshell/caelestia/modules/launcher/WallpaperList.qml
+/home/kai/.config/quickshell/caelestia/modules/launcher/ContentList.qml
+/home/kai/.config/quickshell/caelestia/modules/launcher/Wrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/BatteryMonitor.qml
+/home/kai/.config/quickshell/caelestia/modules/notifications/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/notifications/Notification.qml
+/home/kai/.config/quickshell/caelestia/modules/notifications/Wrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/Shortcuts.qml
+/home/kai/.config/quickshell/caelestia/modules/osd/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/osd/Wrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/ServiceLoader.qml
+/home/kai/.config/quickshell/caelestia/modules/background/Wallpaper.qml
+/home/kai/.config/quickshell/caelestia/modules/background/Background.qml
+/home/kai/.config/quickshell/caelestia/modules/background/DesktopClock.qml
+/home/kai/.config/quickshell/caelestia/modules/background/Visualiser.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/NotifGroupList.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/NotifActionList.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/NotifDockList.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/Notif.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/NotifGroup.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/Props.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/NotifDock.qml
+/home/kai/.config/quickshell/caelestia/modules/sidebar/Wrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/drawers/Drawers.qml
+/home/kai/.config/quickshell/caelestia/modules/drawers/Panels.qml
+/home/kai/.config/quickshell/caelestia/modules/drawers/Regions.qml
+/home/kai/.config/quickshell/caelestia/modules/drawers/Exclusions.qml
+/home/kai/.config/quickshell/caelestia/modules/drawers/Interactions.qml
+/home/kai/.config/quickshell/caelestia/modules/drawers/ContentWindow.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Center.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/LockSurface.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Fetch.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/NotifGroup.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/NotifDock.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Media.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Resources.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Lock.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/Pam.qml
+/home/kai/.config/quickshell/caelestia/modules/lock/WeatherInfo.qml
+/home/kai/.config/quickshell/caelestia/modules/IdleMonitors.qml
+/home/kai/.config/quickshell/caelestia/modules/GSFLoader.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/NexusState.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/Nexus.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/NavPane.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/PageRegistry.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/Pages.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/PageCompRegistry.qml
+/home/kai/.config/quickshell/caelestia/modules/nexus/WindowFactory.qml
+/home/kai/.config/quickshell/caelestia/modules/session/Content.qml
+/home/kai/.config/quickshell/caelestia/modules/session/Wrapper.qml
+/home/kai/.config/quickshell/caelestia/modules/windowinfo/WindowInfo.qml
+/home/kai/.config/quickshell/caelestia/modules/windowinfo/Details.qml
+/home/kai/.config/quickshell/caelestia/modules/windowinfo/Preview.qml
+/home/kai/.config/quickshell/caelestia/modules/windowinfo/Buttons.qml
+/home/kai/.config/quickshell/caelestia/modules/areapicker/Picker.qml
+/home/kai/.config/quickshell/caelestia/modules/areapicker/AreaPicker.qml
+/home/kai/.config/quickshell/caelestia/README.md
+/home/kai/.config/quickshell/caelestia/extras/version.cpp
+/home/kai/.config/quickshell/caelestia/extras/CMakeLists.txt
+/home/kai/.config/quickshell/caelestia/components/containers/VerticalFadeFlickable.qml
+/home/kai/.config/quickshell/caelestia/components/containers/StyledFlickable.qml
+/home/kai/.config/quickshell/caelestia/components/containers/StyledWindow.qml
+/home/kai/.config/quickshell/caelestia/components/containers/VerticalFadeListView.qml
+/home/kai/.config/quickshell/caelestia/components/containers/StyledListView.qml
+/home/kai/.config/quickshell/caelestia/components/AnimLoader.qml
+/home/kai/.config/quickshell/caelestia/components/StateLayer.qml
+/home/kai/.config/quickshell/caelestia/components/StyledText.qml
+/home/kai/.config/quickshell/caelestia/components/controls/IconButton.qml
+/home/kai/.config/quickshell/caelestia/components/controls/IconTextButton.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledRadioButton.qml
+/home/kai/.config/quickshell/caelestia/components/controls/ButtonBase.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledSpinBox.qml
+/home/kai/.config/quickshell/caelestia/components/controls/CircularProgress.qml
+/home/kai/.config/quickshell/caelestia/components/controls/CircularIndicator.qml
+/home/kai/.config/quickshell/caelestia/components/controls/TextButton.qml
+/home/kai/.config/quickshell/caelestia/components/controls/CustomMouseArea.qml
+/home/kai/.config/quickshell/caelestia/components/controls/TextFieldBase.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledSwitch.qml
+/home/kai/.config/quickshell/caelestia/components/controls/SearchBar.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledSlider.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledScrollBar.qml
+/home/kai/.config/quickshell/caelestia/components/controls/FilledSlider.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledProgressBar.qml
+/home/kai/.config/quickshell/caelestia/components/controls/SplitButton.qml
+/home/kai/.config/quickshell/caelestia/components/controls/Menu.qml
+/home/kai/.config/quickshell/caelestia/components/controls/StyledTextField.qml
+/home/kai/.config/quickshell/caelestia/components/controls/MenuItem.qml
+/home/kai/.config/quickshell/caelestia/components/controls/LoadingIndicator.qml
+/home/kai/.config/quickshell/caelestia/components/CAnim.qml
+/home/kai/.config/quickshell/caelestia/components/StyledRect.qml
+/home/kai/.config/quickshell/caelestia/components/ScreenState.qml
+/home/kai/.config/quickshell/caelestia/components/widgets/CoverArt.qml
+/home/kai/.config/quickshell/caelestia/components/widgets/ExtraIndicator.qml
+/home/kai/.config/quickshell/caelestia/components/widgets/WavyTopRect.qml
+/home/kai/.config/quickshell/caelestia/components/Anim.qml
+/home/kai/.config/quickshell/caelestia/components/AnchorAnim.qml
+/home/kai/.config/quickshell/caelestia/components/images/FadeImage.qml
+/home/kai/.config/quickshell/caelestia/components/images/CachingImage.qml
+/home/kai/.config/quickshell/caelestia/components/images/CachingIconImage.qml
+/home/kai/.config/quickshell/caelestia/components/StyledClippingRect.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/Sizes.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/Sidebar.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/CurrentItem.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/HeaderBar.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/DialogButtons.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/FolderContents.qml
+/home/kai/.config/quickshell/caelestia/components/filedialog/FileDialog.qml
+/home/kai/.config/quickshell/caelestia/components/misc/Ref.qml
+/home/kai/.config/quickshell/caelestia/components/misc/CustomShortcut.qml
+/home/kai/.config/quickshell/caelestia/components/Logo.qml
+/home/kai/.config/quickshell/caelestia/components/effects/Mask.qml
+/home/kai/.config/quickshell/caelestia/components/effects/ColouredIcon.qml
+/home/kai/.config/quickshell/caelestia/components/effects/Elevation.qml
+/home/kai/.config/quickshell/caelestia/components/effects/Colouriser.qml
+/home/kai/.config/quickshell/caelestia/components/MaterialIcon.qml
+/home/kai/.config/quickshell/caelestia/.gitignore
+/home/kai/.config/quickshell/caelestia/LICENSE
+/home/kai/.config/quickshell/caelestia/.github/ISSUE_TEMPLATE/issue.yml
+/home/kai/.config/quickshell/caelestia/.github/ISSUE_TEMPLATE/config.yml
+/home/kai/.config/quickshell/caelestia/.github/ISSUE_TEMPLATE/feature.yml
+/home/kai/.config/quickshell/caelestia/.github/ISSUE_TEMPLATE/crash.yml
+/home/kai/.config/quickshell/caelestia/.github/CONTRIBUTING.md
+/home/kai/.config/quickshell/caelestia/.github/workflows/update-image.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/check-pr-title.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/check-format.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/update-flake-inputs.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/build.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/lint.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/check-pr-approvals.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/check-issue-title.yml
+/home/kai/.config/quickshell/caelestia/.github/workflows/release.yml
+/home/kai/.config/quickshell/caelestia/flake.nix
+/home/kai/.config/quickshell/caelestia/CMakeLists.txt
+/home/kai/.config/quickshell/caelestia/flake.lock
+/home/kai/.config/quickshell/caelestia/nix/default.nix
+/home/kai/.config/quickshell/caelestia/nix/hm-module.nix
+
+
+===== REPOSITORY WORKSTREAM 01 INVENTORY =====
+scripts/k41-audit-boot-experience.sh
+scripts/k41-configure-boot-experience.sh
+scripts/k41-enable-caelestia-autologin.sh
+scripts/k41-install-hyprland-launcher.sh
+scripts/k41-install-plymouth-theme.sh
+scripts/k41-lock-caelestia-after-start.sh
+scripts/k41-plymouth-quit-after-lock.sh
+scripts/k41-start-hyprland.sh
+themes/plymouth/k41/k41.plymouth
+themes/plymouth/k41/k41.script
+
+
+===== CURRENT AND PREVIOUS BOOT JOURNAL (FILTERED) =====
+[    1.324417] archlinux kernel: Command line: rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw quiet splash
+[    1.324642] archlinux kernel: efi: EFI v2.5 by Lenovo
+[    1.324650] archlinux kernel: efi: TPMFinalLog=0x7ff92000 SMBIOS=0x7f0d9000 SMBIOS 3.0=0x7f0d6000 ACPI=0x7fffe000 ACPI 2.0=0x7fffe014 ESRT=0x7ef63000 MEMATTR=0x79cf0298 RNG=0x7ffa8f18 INITRD=0x7564df18 TPMEventLog=0x7ffa0018 
+[    1.324665] archlinux kernel: efi: Remove mem47: MMIO range=[0xf8000000-0xfbffffff] (64MB) from e820 map
+[    1.324684] archlinux kernel: efi: Not removing mem48: MMIO range=[0xfe010000-0xfe010fff] (4KB) from e820 map
+[    1.324812] archlinux kernel: Secure boot disabled
+[    1.324916] archlinux kernel: ACPI: SSDT 0x000000007FFF2000 0003DB (v02 LENOVO Tpm2Tabl 00001000 INTL 20160527)
+[    1.324928] archlinux kernel: ACPI: TPM2 0x000000007FFF1000 000034 (v03 LENOVO TP-N20   00001590 PTEC 00000002)
+[    1.324939] archlinux kernel: ACPI: UEFI 0x000000007FF53000 000042 (v01 LENOVO TP-N20   00001590 PTEC 00000002)
+[    1.325219] archlinux kernel: ACPI: UEFI 0x000000007FF3B000 00013E (v01 LENOVO TP-N20   00001590 PTEC 00000002)
+[    1.325273] archlinux kernel: ACPI: Reserving TPM2 table memory at [mem 0x7fff1000-0x7fff1033]
+[    1.325282] archlinux kernel: ACPI: Reserving UEFI table memory at [mem 0x7ff53000-0x7ff53041]
+[    1.325503] archlinux kernel: ACPI: Reserving UEFI table memory at [mem 0x7ff3b000-0x7ff3b13d]
+[    1.325857] archlinux kernel: clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1910969940391419 ns
+[    1.326205] archlinux kernel: Kernel command line: rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw quiet splash
+[    1.326212] archlinux kernel: Unknown kernel command line parameters "splash", will be passed to user space.
+[    1.327124] archlinux kernel: efi: Freeing EFI boot services memory: 61628K
+[    1.343926] archlinux kernel: efivars: Registered efivars operations
+[    1.364738] archlinux kernel: Trying to unpack rootfs image as initramfs...
+[    1.366175] archlinux kernel: tpm_tis STM7304:00: 2.0 TPM (vendor-id 0x104A, device-id 0x0, rev-id 78)
+[    1.374925] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.374939] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.374946] archlinux kernel: integrity: Loaded X.509 cert 'Lenovo UEFI CA 2014: 4b91a68732eaefdd2c8ffffc6b027ec3449e9c8f'
+[    1.374953] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.374960] archlinux kernel: integrity: Loaded X.509 cert 'Microsoft Corporation UEFI CA 2011: 13adbf4309bd82709c8cd54f316ed522988a1bd4'
+[    1.374967] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.375497] archlinux systemd[1]: systemd 262.1-1-arch running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA +IPE +SMACK +SECCOMP +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF +XKBCOMMON +UTMP +LIBARCHIVE)
+[    1.375538] archlinux systemd[1]: Created slice Slice /system/systemd-cryptsetup.
+[    1.375600] archlinux systemd[1]: Listening on TPM PCR Measurements.
+[    1.375653] archlinux systemd[1]: Starting TPM PCR OS Separator...
+[    1.375660] archlinux systemd[1]: Starting TPM PCR Barrier (initrd)...
+[    1.375795] archlinux systemd[1]: Finished TPM PCR Barrier (initrd).
+[    1.380365] archlinux systemd[1]: Finished TPM PCR OS Separator.
+[    1.382886] archlinux systemd[1]: Starting Early TPM SRK Setup...
+[    1.432760] archlinux systemd-tpm2-setup[148]: SRK already stored in the TPM.
+[    1.434528] archlinux systemd-tpm2-setup[148]: SRK fingerprint is 7abee71de226ac6c8c0599e0db97e521ed4fdc8a8d1d1edc92a2e077ce96e474.
+[    1.434634] archlinux systemd-tpm2-setup[148]: SRK public key saved to '/run/systemd/tpm2-srk-public-key.pem' in PEM format.
+[    1.434685] archlinux systemd-tpm2-setup[148]: SRK public key saved to '/run/systemd/tpm2-srk-public-key.tpm2b_public' in TPM2B_PUBLIC format.
+[    1.451465] archlinux systemd-tpm2-setup[148]: NvPCR initialization is not authorized in this boot (no PCR public key, no signed PCR policy for NvPCR initialization, or not running in the initrd), unable to allocate NvPCR 'verity' and any others: Required key not available
+[    1.451471] archlinux systemd-tpm2-setup[148]: Skipped 4 NvPCR(s) because NvPCR initialization is not authorized in this boot, proceeding anyway.
+[    1.452754] archlinux systemd[1]: Finished Early TPM SRK Setup.
+[    1.454020] archlinux systemd[1]: Starting TPM PCR NvPCR Initialization Separator...
+[    1.499789] archlinux systemd[1]: Finished TPM PCR NvPCR Initialization Separator.
+[    1.544202] archlinux systemd[1]: Starting Show Plymouth Boot Screen...
+[    1.557999] archlinux systemd[1]: Received SIGRTMIN+20 from PID 188 (plymouthd).
+[    1.599199] archlinux systemd[1]: Received SIGRTMIN+20 from PID 188 (plymouthd).
+[    1.599698] archlinux systemd[1]: Started Show Plymouth Boot Screen.
+[    1.599958] archlinux systemd[1]: Dispatch Password=<REDACTED> Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[    1.600083] archlinux systemd[1]: Started Forward Password=<REDACTED> Requests to Plymouth Directory Watch.
+[    1.633761] archlinux systemd[1]: Found device WDC PC SN730 SDBQNTY-256G-1001 K41-ROOT.
+[    1.717064] archlinux kernel: tsc: Refined TSC clocksource calibration: 1799.997 MHz
+[    6.232535] archlinux systemd-fsck[234]: K41_ROOT: clean, 154880/15564800 files, 6786968/62248273 blocks
+[    6.291340] archlinux systemd[1]: Closed TPM PCR Measurements.
+[    6.292398] archlinux systemd[1]: Starting Plymouth switch root service...
+[    6.292874] archlinux systemd[1]: Stopped TPM PCR NvPCR Initialization Separator.
+[    6.293353] archlinux systemd[1]: systemd-tpm2-setup-early.service: Deactivated successfully.
+[    6.293434] archlinux systemd[1]: Stopped Early TPM SRK Setup.
+[    6.293612] archlinux systemd[1]: Stopped TPM PCR OS Separator.
+[    6.294432] archlinux systemd[1]: Stopping TPM PCR Barrier (initrd)...
+[    6.335636] archlinux systemd[1]: Stopped TPM PCR Barrier (initrd).
+[    6.355372] archlinux systemd[1]: Finished Plymouth switch root service.
+[   13.937252] x280 systemd[1]: systemd 262.1-1-arch running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA +IPE +SMACK +SECCOMP +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF +XKBCOMMON +UTMP +LIBARCHIVE)
+[   13.937512] x280 systemd[1]: Dispatch Password=<REDACTED> Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   13.937786] x280 systemd[1]: Listening on TPM PCR Measurements.
+[   13.937801] x280 systemd[1]: Listening on Make TPM PCR Policy.
+[   13.938009] x280 systemd[1]: plymouth-switch-root.service: Deactivated successfully.
+[   13.938087] x280 systemd[1]: Stopped Plymouth switch root service.
+[   13.938185] x280 systemd[1]: systemd-cryptsetup@cryptroot.service: Deactivated successfully.
+[   13.938245] x280 systemd[1]: Stopped systemd-cryptsetup@cryptroot.service.
+[   13.938291] x280 systemd[1]: Clear Stale Hibernate Storage Info skipped, unmet condition check ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67
+[   13.938487] x280 systemd[1]: Starting TPM PCR Machine ID Measurement...
+[   13.938554] x280 systemd[1]: TPM PCR OS Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   13.938666] x280 systemd[1]: Early TPM SRK Setup skipped, unmet condition check ConditionPathExists=!/run/systemd/tpm2-srk-public-key.pem
+[   13.938759] x280 systemd[1]: TPM PCR NvPCR Initialization Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   13.938841] x280 systemd[1]: Starting TPM NvPCR Product ID Measurement...
+[   13.939272] x280 systemd[1]: Starting TPM SRK Setup...
+[   14.107207] x280 systemd[1]: Finished TPM PCR Machine ID Measurement.
+[   14.108626] x280 systemd[1]: Finished TPM NvPCR Product ID Measurement.
+[   14.134813] x280 systemd-tpm2-setup[311]: SRK already stored in the TPM.
+[   14.135132] x280 systemd-tpm2-setup[311]: SRK fingerprint is 7abee71de226ac6c8c0599e0db97e521ed4fdc8a8d1d1edc92a2e077ce96e474.
+[   14.135140] x280 systemd-tpm2-setup[311]: SRK saved in '/var/lib/systemd/tpm2-srk-public-key.pem' matches SRK in TPM2.
+[   14.166701] x280 systemd[1]: Finished TPM SRK Setup.
+[   14.190069] x280 systemd[1]: Condition check resulted in /dev/tpmrm0 being skipped.
+[   14.190197] x280 systemd[1]: Expecting device /dev/tpm0...
+[   14.238425] x280 systemd[1]: Condition check resulted in WDC PC SN730 SDBQNTY-256G-1001 K41_EFI being skipped.
+[   14.344731] x280 systemd[1]: Condition check resulted in /dev/tpm0 being skipped.
+[   14.556055] x280 kernel: Bluetooth: hci0: Secure boot is enabled
+[   14.561406] x280 systemd[1]: Dispatch Password=<REDACTED> Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   14.561546] x280 systemd[1]: Clear Stale Hibernate Storage Info skipped, unmet condition check ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67
+[   14.561712] x280 systemd[1]: TPM PCR OS Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   14.561837] x280 systemd[1]: Early TPM SRK Setup skipped, unmet condition check ConditionPathExists=!/run/systemd/tpm2-srk-public-key.pem
+[   14.561870] x280 systemd[1]: TPM PCR NvPCR Initialization Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   14.864458] x280 systemd[1]: Mounting /efi...
+[   14.912291] x280 systemd[1]: Mounted /efi.
+[   14.919971] x280 systemd[1]: Starting Tell Plymouth To Write Out Runtime Data...
+[   14.954377] x280 systemd[1]: Received SIGRTMIN+20 from PID 188 (plymouthd).
+[   14.954864] x280 systemd[1]: Finished Tell Plymouth To Write Out Runtime Data.
+[   14.972176] x280 bootctl[423]: Random seed file /efi/loader/random-seed successfully refreshed (32 bytes).
+[   15.100079] x280 systemd[1]: Starting TPM PCR Barrier (Initialization)...
+[   15.153878] x280 systemd[1]: Finished TPM PCR Barrier (Initialization).
+[   15.161333] x280 systemd[1]: Starting Retain splash frame and release Plymouth display ownership before K41 Hyprland startup...
+[   15.172769] x280 systemd[1]: Starting TPM PCR Barrier (User)...
+[   15.217408] x280 systemd[1]: Received SIGRTMIN+21 from PID 188 (plymouthd).
+[   15.221500] x280 systemd[1]: Finished TPM PCR Barrier (User).
+[   15.289093] x280 systemd[1]: Finished Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+[   16.266722] x280 systemd[1]: Starting Terminate Plymouth Boot Screen...
+[   16.402806] x280 systemd[1]: Starting TPM NvPCR Measurement of User Record for UID 1000...
+[   16.433498] x280 systemd[1]: Finished TPM NvPCR Measurement of User Record for UID 1000.
+[   19.536562] x280 systemd[525]: Reached target Hyprland session.
+[   19.867082] x280 systemd[525]: Starting Portal service (Hyprland implementation)...
+[   19.885953] x280 systemd[525]: Started Portal service (Hyprland implementation).
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG] Initializing xdph...
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG] XDG_CURRENT_DESKTOP set to Hyprland
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG] Gathering exported interfaces
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wl_seat (ver 9)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wl_data_device_manager (ver 3)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wl_compositor (ver 6)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wl_subcompositor (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wl_shm (ver 2)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_viewporter (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_tearing_control_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_fractional_scale_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zxdg_output_manager_v1 (ver 3)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_cursor_shape_manager_v1 (ver 2)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_idle_inhibit_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_relative_pointer_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zxdg_decoration_manager_v1 (ver 2)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_alpha_modifier_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_gamma_control_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_foreign_toplevel_list_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_pointer_gestures_v1 (ver 3)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_foreign_toplevel_manager_v1 (ver 3)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG] [toplevel] (activate) locks: 1
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_keyboard_shortcuts_inhibit_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_text_input_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_text_input_manager_v3 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_pointer_constraints_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_output_power_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xdg_activation_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_idle_notifier_v1 (ver 2)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_lock_notifier_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_session_lock_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_input_method_manager_v2 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_virtual_keyboard_manager_v1 (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_virtual_pointer_manager_v1 (ver 2)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_output_manager_v1 (ver 4)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: org_kde_kwin_server_decoration_manager (ver 1)
+[   19.890062] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_focus_grab_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_tablet_manager_v2 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_layer_shell_v1 (ver 5)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_presentation (ver 2)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xdg_wm_base (ver 7)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_data_control_manager_v1 (ver 2)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwp_primary_selection_device_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xwayland_shell_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_toplevel_mapping_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG] [toplevel mapping] registered manager
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_global_shortcuts_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG] [globalshortcuts] registered
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xdg_wm_dialog_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_single_pixel_buffer_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_security_context_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_ctm_control_manager_v1 (ver 2)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_input_capture_manager_v1 (ver 2)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG] [input-capture] initializing input capture portal
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG] [input-capture] init successful
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_surface_manager_v1 (ver 2)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_content_type_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xdg_toplevel_tag_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xdg_system_bell_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: vicinae_hotkey_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: xx_hotkey_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_workspace_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_data_control_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_pointer_warp_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_fifo_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zxdg_exporter_v2 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zxdg_importer_v2 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_background_effect_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: wp_commit_timing_manager_v1 (ver 1)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: zwlr_screencopy_manager_v1 (ver 3)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG] [pipewire] connected
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG] [screencopy] init successful
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: hyprland_toplevel_export_manager_v1 (ver 2)
+[   19.892526] x280 xdg-desktop-portal-hyprland[703]: [LOG]  | Got interface: ext_output_image_capture_source_manager_v1 (ver 1)
+[   91.579081] x280 k41-boot[995]: Lock screen did not become ready within 75s; stopping tty1 autologin and releasing Plymouth.
+[   91.601187] x280 xdg-desktop-portal-hyprland[703]: [LOG]
+[   91.669607] x280 systemd[1]: Finished Terminate Plymouth Boot Screen.
+[  101.870865] x280 systemd[525]: Stopped target Hyprland session.
+[    1.309526] archlinux kernel: Command line: rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw quiet splash
+[    1.309749] archlinux kernel: efi: EFI v2.5 by Lenovo
+[    1.309758] archlinux kernel: efi: TPMFinalLog=0x7ff92000 SMBIOS=0x7f0d9000 SMBIOS 3.0=0x7f0d6000 ACPI=0x7fffe000 ACPI 2.0=0x7fffe014 ESRT=0x7ef63000 MEMATTR=0x79cf0298 RNG=0x7ffa8f18 INITRD=0x7564df18 TPMEventLog=0x7ffa0018 
+[    1.309774] archlinux kernel: efi: Remove mem47: MMIO range=[0xf8000000-0xfbffffff] (64MB) from e820 map
+[    1.309795] archlinux kernel: efi: Not removing mem48: MMIO range=[0xfe010000-0xfe010fff] (4KB) from e820 map
+[    1.310057] archlinux kernel: Secure boot disabled
+[    1.310158] archlinux kernel: ACPI: SSDT 0x000000007FFF2000 0003DB (v02 LENOVO Tpm2Tabl 00001000 INTL 20160527)
+[    1.310168] archlinux kernel: ACPI: TPM2 0x000000007FFF1000 000034 (v03 LENOVO TP-N20   00001590 PTEC 00000002)
+[    1.310181] archlinux kernel: ACPI: UEFI 0x000000007FF53000 000042 (v01 LENOVO TP-N20   00001590 PTEC 00000002)
+[    1.310409] archlinux kernel: ACPI: UEFI 0x000000007FF3B000 00013E (v01 LENOVO TP-N20   00001590 PTEC 00000002)
+[    1.310470] archlinux kernel: ACPI: Reserving TPM2 table memory at [mem 0x7fff1000-0x7fff1033]
+[    1.310481] archlinux kernel: ACPI: Reserving UEFI table memory at [mem 0x7ff53000-0x7ff53041]
+[    1.310698] archlinux kernel: ACPI: Reserving UEFI table memory at [mem 0x7ff3b000-0x7ff3b13d]
+[    1.311068] archlinux kernel: clocksource: refined-jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 1910969940391419 ns
+[    1.311617] archlinux kernel: Kernel command line: rd.luks.name=43d5fcd3-03b1-4545-bbc6-10df6eb9e706=cryptroot root=/dev/mapper/cryptroot rw quiet splash
+[    1.311624] archlinux kernel: Unknown kernel command line parameters "splash", will be passed to user space.
+[    1.312692] archlinux kernel: efi: Freeing EFI boot services memory: 61628K
+[    1.337685] archlinux kernel: efivars: Registered efivars operations
+[    1.372443] archlinux kernel: Trying to unpack rootfs image as initramfs...
+[    1.373872] archlinux kernel: tpm_tis STM7304:00: 2.0 TPM (vendor-id 0x104A, device-id 0x0, rev-id 78)
+[    1.381635] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.381649] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.381656] archlinux kernel: integrity: Loaded X.509 cert 'Lenovo UEFI CA 2014: 4b91a68732eaefdd2c8ffffc6b027ec3449e9c8f'
+[    1.381663] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.381670] archlinux kernel: integrity: Loaded X.509 cert 'Microsoft Corporation UEFI CA 2011: 13adbf4309bd82709c8cd54f316ed522988a1bd4'
+[    1.381679] archlinux kernel: integrity: Loading X.509 certificate: UEFI:db
+[    1.382095] archlinux systemd[1]: systemd 262.1-1-arch running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA +IPE +SMACK +SECCOMP +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF +XKBCOMMON +UTMP +LIBARCHIVE)
+[    1.382139] archlinux systemd[1]: Created slice Slice /system/systemd-cryptsetup.
+[    1.382202] archlinux systemd[1]: Listening on TPM PCR Measurements.
+[    1.382256] archlinux systemd[1]: Starting TPM PCR OS Separator...
+[    1.382264] archlinux systemd[1]: Starting TPM PCR Barrier (initrd)...
+[    1.382408] archlinux systemd[1]: Finished TPM PCR Barrier (initrd).
+[    1.384182] archlinux systemd[1]: Finished TPM PCR OS Separator.
+[    1.384191] archlinux systemd[1]: Starting Early TPM SRK Setup...
+[    1.425788] archlinux systemd-tpm2-setup[138]: SRK already stored in the TPM.
+[    1.427511] archlinux systemd-tpm2-setup[138]: SRK fingerprint is 7abee71de226ac6c8c0599e0db97e521ed4fdc8a8d1d1edc92a2e077ce96e474.
+[    1.427616] archlinux systemd-tpm2-setup[138]: SRK public key saved to '/run/systemd/tpm2-srk-public-key.pem' in PEM format.
+[    1.427655] archlinux systemd-tpm2-setup[138]: SRK public key saved to '/run/systemd/tpm2-srk-public-key.tpm2b_public' in TPM2B_PUBLIC format.
+[    1.444471] archlinux systemd-tpm2-setup[138]: NvPCR initialization is not authorized in this boot (no PCR public key, no signed PCR policy for NvPCR initialization, or not running in the initrd), unable to allocate NvPCR 'verity' and any others: Required key not available
+[    1.444477] archlinux systemd-tpm2-setup[138]: Skipped 4 NvPCR(s) because NvPCR initialization is not authorized in this boot, proceeding anyway.
+[    1.445944] archlinux systemd[1]: Finished Early TPM SRK Setup.
+[    1.447225] archlinux systemd[1]: Starting TPM PCR NvPCR Initialization Separator...
+[    1.496658] archlinux systemd[1]: Finished TPM PCR NvPCR Initialization Separator.
+[    1.539878] archlinux systemd[1]: Starting Show Plymouth Boot Screen...
+[    1.551681] archlinux systemd[1]: Received SIGRTMIN+20 from PID 189 (plymouthd).
+[    1.595277] archlinux systemd[1]: Received SIGRTMIN+20 from PID 189 (plymouthd).
+[    1.595785] archlinux systemd[1]: Started Show Plymouth Boot Screen.
+[    1.596057] archlinux systemd[1]: Dispatch Password=<REDACTED> Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[    1.596194] archlinux systemd[1]: Started Forward Password=<REDACTED> Requests to Plymouth Directory Watch.
+[    1.641904] archlinux systemd[1]: Found device WDC PC SN730 SDBQNTY-256G-1001 K41-ROOT.
+[    1.670603] archlinux kernel: tsc: Refined TSC clocksource calibration: 1799.997 MHz
+[    6.231130] archlinux systemd-fsck[236]: K41_ROOT: clean, 154879/15564800 files, 6786960/62248273 blocks
+[    6.290841] archlinux systemd[1]: Closed TPM PCR Measurements.
+[    6.292072] archlinux systemd[1]: Starting Plymouth switch root service...
+[    6.292571] archlinux systemd[1]: Stopped TPM PCR NvPCR Initialization Separator.
+[    6.293143] archlinux systemd[1]: systemd-tpm2-setup-early.service: Deactivated successfully.
+[    6.293238] archlinux systemd[1]: Stopped Early TPM SRK Setup.
+[    6.293448] archlinux systemd[1]: Stopped TPM PCR OS Separator.
+[    6.294380] archlinux systemd[1]: Stopping TPM PCR Barrier (initrd)...
+[    6.339668] archlinux systemd[1]: Stopped TPM PCR Barrier (initrd).
+[    6.348332] archlinux systemd[1]: Finished Plymouth switch root service.
+[   13.936257] x280 systemd[1]: systemd 262.1-1-arch running in system mode (+PAM +AUDIT -SELINUX +APPARMOR -IMA +IPE +SMACK +SECCOMP +GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF +XKBCOMMON +UTMP +LIBARCHIVE)
+[   13.936671] x280 systemd[1]: Dispatch Password=<REDACTED> Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   13.937234] x280 systemd[1]: Listening on TPM PCR Measurements.
+[   13.937257] x280 systemd[1]: Listening on Make TPM PCR Policy.
+[   13.937746] x280 systemd[1]: plymouth-switch-root.service: Deactivated successfully.
+[   13.937767] x280 systemd[1]: Stopped Plymouth switch root service.
+[   13.937789] x280 systemd[1]: systemd-cryptsetup@cryptroot.service: Deactivated successfully.
+[   13.937819] x280 systemd[1]: Stopped systemd-cryptsetup@cryptroot.service.
+[   13.937842] x280 systemd[1]: Clear Stale Hibernate Storage Info skipped, unmet condition check ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67
+[   13.937924] x280 systemd[1]: Starting TPM PCR Machine ID Measurement...
+[   13.937947] x280 systemd[1]: TPM PCR OS Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   13.937990] x280 systemd[1]: Early TPM SRK Setup skipped, unmet condition check ConditionPathExists=!/run/systemd/tpm2-srk-public-key.pem
+[   13.938021] x280 systemd[1]: TPM PCR NvPCR Initialization Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   13.938075] x280 systemd[1]: Starting TPM NvPCR Product ID Measurement...
+[   13.938565] x280 systemd[1]: Starting TPM SRK Setup...
+[   13.971237] x280 systemd[1]: Finished TPM NvPCR Product ID Measurement.
+[   13.972225] x280 systemd[1]: Finished TPM PCR Machine ID Measurement.
+[   14.009269] x280 systemd-tpm2-setup[314]: SRK already stored in the TPM.
+[   14.009776] x280 systemd-tpm2-setup[314]: SRK fingerprint is 7abee71de226ac6c8c0599e0db97e521ed4fdc8a8d1d1edc92a2e077ce96e474.
+[   14.009783] x280 systemd-tpm2-setup[314]: SRK saved in '/var/lib/systemd/tpm2-srk-public-key.pem' matches SRK in TPM2.
+[   14.173129] x280 systemd[1]: Finished TPM SRK Setup.
+[   14.189743] x280 systemd[1]: Condition check resulted in /dev/tpmrm0 being skipped.
+[   14.189803] x280 systemd[1]: Expecting device /dev/tpm0...
+[   14.231879] x280 systemd[1]: Condition check resulted in WDC PC SN730 SDBQNTY-256G-1001 K41_EFI being skipped.
+[   14.379716] x280 systemd[1]: Condition check resulted in /dev/tpm0 being skipped.
+[   14.559207] x280 kernel: Bluetooth: hci0: Secure boot is enabled
+[   14.564930] x280 systemd[1]: Dispatch Password=<REDACTED> Requests to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   14.565095] x280 systemd[1]: Clear Stale Hibernate Storage Info skipped, unmet condition check ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67
+[   14.565254] x280 systemd[1]: TPM PCR OS Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   14.565382] x280 systemd[1]: Early TPM SRK Setup skipped, unmet condition check ConditionPathExists=!/run/systemd/tpm2-srk-public-key.pem
+[   14.565416] x280 systemd[1]: TPM PCR NvPCR Initialization Separator skipped, unmet condition check ConditionPathExists=/etc/initrd-release
+[   14.868292] x280 systemd[1]: Mounting /efi...
+[   14.927093] x280 systemd[1]: Mounted /efi.
+[   14.933802] x280 systemd[1]: Starting Tell Plymouth To Write Out Runtime Data...
+[   14.964997] x280 systemd[1]: Received SIGRTMIN+20 from PID 189 (plymouthd).
+[   14.966427] x280 systemd[1]: Finished Tell Plymouth To Write Out Runtime Data.
+[   14.982859] x280 bootctl[431]: Random seed file /efi/loader/random-seed successfully refreshed (32 bytes).
+[   15.100111] x280 systemd[1]: Starting TPM PCR Barrier (Initialization)...
+[   15.152500] x280 systemd[1]: Finished TPM PCR Barrier (Initialization).
+[   15.159632] x280 systemd[1]: Starting Retain splash frame and release Plymouth display ownership before K41 Hyprland startup...
+[   15.170126] x280 systemd[1]: Starting TPM PCR Barrier (User)...
+[   15.209752] x280 systemd[1]: Received SIGRTMIN+21 from PID 189 (plymouthd).
+[   15.215832] x280 systemd[1]: Finished TPM PCR Barrier (User).
+[   15.288060] x280 systemd[1]: Finished Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+[   16.279643] x280 systemd[1]: Starting Terminate Plymouth Boot Screen...
+[   16.425394] x280 systemd[1]: Starting TPM NvPCR Measurement of User Record for UID 1000...
+[   16.467608] x280 systemd[1]: Finished TPM NvPCR Measurement of User Record for UID 1000.
+[   19.512352] x280 systemd[525]: Reached target Hyprland session.
+[   19.856184] x280 systemd[525]: Starting Portal service (Hyprland implementation)...
+[   19.874780] x280 systemd[525]: Started Portal service (Hyprland implementation).
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG] Initializing xdph...
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG] XDG_CURRENT_DESKTOP set to Hyprland
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG] Gathering exported interfaces
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_seat (ver 9)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_data_device_manager (ver 3)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_compositor (ver 6)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_subcompositor (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_shm (ver 2)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_viewporter (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_tearing_control_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_fractional_scale_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_output_manager_v1 (ver 3)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_cursor_shape_manager_v1 (ver 2)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_idle_inhibit_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_relative_pointer_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_decoration_manager_v1 (ver 2)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_alpha_modifier_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_gamma_control_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_foreign_toplevel_list_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_pointer_gestures_v1 (ver 3)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_foreign_toplevel_manager_v1 (ver 3)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG] [toplevel] (activate) locks: 1
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_keyboard_shortcuts_inhibit_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_text_input_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_text_input_manager_v3 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_pointer_constraints_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_output_power_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_activation_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_idle_notifier_v1 (ver 2)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_lock_notifier_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_session_lock_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_input_method_manager_v2 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_virtual_keyboard_manager_v1 (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_virtual_pointer_manager_v1 (ver 2)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_output_manager_v1 (ver 4)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: org_kde_kwin_server_decoration_manager (ver 1)
+[   19.915058] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_focus_grab_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_tablet_manager_v2 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_layer_shell_v1 (ver 5)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_presentation (ver 2)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_wm_base (ver 7)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_data_control_manager_v1 (ver 2)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_primary_selection_device_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xwayland_shell_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_toplevel_mapping_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG] [toplevel mapping] registered manager
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_global_shortcuts_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG] [globalshortcuts] registered
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_wm_dialog_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_single_pixel_buffer_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_security_context_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_ctm_control_manager_v1 (ver 2)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_input_capture_manager_v1 (ver 2)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG] [input-capture] initializing input capture portal
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG] [input-capture] init successful
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_surface_manager_v1 (ver 2)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_content_type_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_toplevel_tag_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_system_bell_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: vicinae_hotkey_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xx_hotkey_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_workspace_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_data_control_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_pointer_warp_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_fifo_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_exporter_v2 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_importer_v2 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_background_effect_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_commit_timing_manager_v1 (ver 1)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_screencopy_manager_v1 (ver 3)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG] [pipewire] connected
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG] [screencopy] init successful
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_toplevel_export_manager_v1 (ver 2)
+[   19.915904] x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_output_image_capture_source_manager_v1 (ver 1)
+[   91.594266] x280 k41-boot[994]: Lock screen did not become ready within 75s; stopping tty1 autologin and releasing Plymouth.
+[   91.613542] x280 xdg-desktop-portal-hyprland[713]: [LOG]
+[   91.674886] x280 systemd[1]: Finished Terminate Plymouth Boot Screen.
+[  264.646910] x280 systemd[1]: Starting Show Plymouth Power Off Screen...
+[  264.705123] x280 systemd[1]: k41-plymouth-release.service: Deactivated successfully.
+[  264.705584] x280 systemd[1]: Stopped Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+[  264.705967] x280 systemd[1]: plymouth-quit.service: Deactivated successfully.
+[  264.706205] x280 systemd[1]: Stopped Terminate Plymouth Boot Screen.
+[  264.751087] x280 mkinitcpio[1443]: ==> Starting build: 'none'
+[  264.755541] x280 mkinitcpio[1443]:   -> Running build hook: [sd-shutdown]
+[  264.784711] x280 systemd[1]: Received SIGRTMIN+20 from PID 1461 (plymouthd).
+[  264.787621] x280 systemd[1]: plymouth-quit-wait.service: Deactivated successfully.
+[  264.793929] x280 systemd[525]: Stopped target Hyprland session.
+[  264.818106] x280 mkinitcpio[1443]:   -> Running build hook: [plymouth-shutdown]
+[  264.922251] x280 mkinitcpio[1443]: ==> Build complete.
+[  264.951645] x280 systemd[1]: mkinitcpio-generate-shutdown-ramfs.service: Deactivated successfully.
+[  264.952233] x280 systemd[1]: Received SIGRTMIN+20 from PID 1461 (plymouthd).
+[  264.968896] x280 systemd[1]: Started Show Plymouth Power Off Screen.
+[  264.970695] x280 systemd[1]: Starting Tell Plymouth To Jump To initramfs...
+[  264.978172] x280 systemd[1]: Stopped TPM NvPCR Measurement of User Record for UID 1000.
+[  264.979773] x280 systemd[1]: Stopping TPM PCR Barrier (User)...
+[  264.989344] x280 systemd[1]: Finished Tell Plymouth To Jump To initramfs.
+[  265.014616] x280 systemd[1]: Stopped TPM PCR Barrier (User).
+[  265.257080] x280 systemd[1]: systemd-ask-password=<REDACTED>-plymouth.path: Deactivated successfully.
+[  265.257988] x280 systemd[1]: Stopped Forward Password=<REDACTED> Requests to Plymouth Directory Watch.
+[  265.273833] x280 systemd[1]: Stopping TPM PCR Barrier (Initialization)...
+[  265.321604] x280 systemd[1]: Stopped TPM PCR Barrier (Initialization).
+[  265.324078] x280 systemd[1]: systemd-boot-random-seed.service: Deactivated successfully.
+[  265.324271] x280 systemd[1]: Stopped TPM PCR Machine ID Measurement.
+[  265.324391] x280 systemd[1]: Stopped TPM NvPCR Product ID Measurement.
+[  265.325843] x280 systemd[1]: systemd-tpm2-setup.service: Deactivated successfully.
+[  265.325886] x280 systemd[1]: Stopped TPM SRK Setup.
+[  265.343920] x280 systemd[1]: Unmounting /efi...
+[  265.353236] x280 systemd[1]: efi.mount: Deactivated successfully.
+[  265.353462] x280 systemd[1]: Unmounted /efi.
