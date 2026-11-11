@@ -34,7 +34,7 @@ mkdir -p -- "$log_root"
     die 'Cannot establish a user-owned lock startup log directory.'
 
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-log_file="$log_root/startup-$stamp-$.log"
+log_file="$log_root/startup-$stamp-${BASHPID}.log"
 [[ ! -e $log_file && ! -L $log_file ]] || die "Refusing to overwrite existing log: $log_file"
 ( set -o noclobber; : >"$log_file" ) 2>/dev/null || die "Cannot create startup log: $log_file"
 chmod 0600 "$log_file"
