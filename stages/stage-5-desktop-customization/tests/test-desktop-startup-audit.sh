@@ -46,6 +46,8 @@ for token in \
     'UNLOCK_EVENT' \
     'HYPRLAND_SESSION_START' \
     'HYPRLAND_SESSION_STOP' \
+    'LOCK_SURFACE_VISIBLE' \
+    'DESKTOP_RESTORED_AFTER_UNLOCK' \
     'subprocess.run(' \
     'Desktop restoration cannot be proven retrospectively'; do
     grep -Fq -- "$token" "$script" || {
