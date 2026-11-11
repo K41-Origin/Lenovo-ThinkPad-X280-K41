@@ -10,7 +10,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 
 | Urutan | ID | Workstream | Status/arah |
 |---:|---:|---|---|
-| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | Diterima pengguna |
+| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | REOPENED — AUDIT REQUIRED; Plymouth-only |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | Diterima; source dipisahkan ke K41-Dots |
 | 3 | 04 | [Bottombar / K41Dock](04-TASKBAR-PANEL.md) | Berhasil; menjadi pola komponen K41 |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
