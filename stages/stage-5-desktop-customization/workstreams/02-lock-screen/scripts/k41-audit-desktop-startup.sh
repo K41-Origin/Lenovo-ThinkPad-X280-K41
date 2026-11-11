@@ -407,7 +407,9 @@ fi
 section 'LOCK LIFECYCLE: NORMALIZED EVIDENCE TIMELINE'
 timeline_file="$run_dir/lifecycle-timeline.tsv"
 python3 - "$helper_log_root" "$timeline_file" "$report" <<'PY'
+import os
 import pathlib
+import pwd
 import re
 import subprocess
 import sys
@@ -471,7 +473,16 @@ with timeline_path.open("w", encoding="utf-8") as out:
         matches = observed.get(name, journal_events.get(name, []))
         if matches:
             for stamp, source, evidence in matches:
-                safe = evidence.replace("\t", " ").replace("\n", " ")
+                safe = evidence.replace("\\t", " ").replace("\\n", " ")
+                home = os.environ.get("HOME", "")
+                if home and home != "/":
+                    safe = safe.replace(home, "<HOME>")
+                try:
+                    username = pwd.getpwuid(os.getuid()).pw_name
+                    safe = re.sub(r"(?<![A-Za-z0-9_.-])" + re.escape(username) + r"(?![A-Za-z0-9_.-])", "<USER>", safe)
+                except KeyError:
+                    pass
+                safe = re.sub(r"(?i)\\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\\b([=: ]+)[^\\s,;]+", r"\\1\\2<REDACTED>", safe)
                 out.write(f"{name}\tOBSERVED\t{stamp}\t{source}\t{safe}\n")
         else:
             out.write(f"{name}\tNOT_OBSERVED\tUNKNOWN\tUNKNOWN\tNo matching evidence in collected sources\n")
