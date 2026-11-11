@@ -92,7 +92,7 @@ run "BOOTCTL STATUS" bootctl status --no-pager
 run "BOOTCTL ENTRIES" bootctl list --no-pager
 run "EFI BOOT ENTRIES (READ ONLY)" efibootmgr -v
 run "BLOCK DEVICES / FILESYSTEMS" lsblk -e7 -o NAME,PATH,TYPE,SIZE,FSTYPE,FSVER,LABEL,UUID,PARTUUID,MOUNTPOINTS
-run "MOUNT TABLE (BOOT-RELATED)" bash -c 'findmnt -rn -o TARGET,SOURCE,FSTYPE,OPTIONS | awk \"\\$1 == \\\"/\\\" || \\$1 == \\\"/boot\\\" || \\$1 == \\\"/efi\\\" || \\$1 == \\\"/boot/efi\\\" { print }\"'
+run "MOUNT TABLE (BOOT-RELATED)" findmnt -rn -o TARGET,SOURCE,FSTYPE,OPTIONS
 run "ROOT SOURCE" findmnt -no SOURCE,FSTYPE,OPTIONS /
 run "CRYPT DEVICE STATUS (NO KEYS)" bash -c 'if command -v cryptsetup >/dev/null 2>&1; then cryptsetup status cryptroot 2>&1; else echo cryptsetup-unavailable; fi'
 run "LUKS METADATA SUMMARY (NO KEY MATERIAL)" bash -c '
@@ -100,28 +100,20 @@ run "LUKS METADATA SUMMARY (NO KEY MATERIAL)" bash -c '
     echo cryptsetup-unavailable
     exit 0
   fi
-
-  while IFS= read -r dev; do
-    [[ -b $dev ]] || continue
-    if ! cryptsetup isLuks "$dev" 2>/dev/null; then
-      continue
+  while read -r dev type; do
+    [[ $type == part && -b $dev ]] || continue
+    if cryptsetup isLuks "$dev" 2>/dev/null; then
+      printf "DEVICE=%s\\n" "$dev"
+      cryptsetup luksDump "$dev" 2>/dev/null |
+        grep -E "^(Version:|Cipher name:|Cipher mode:|PBKDF:|[[:space:]]+[0-9]+: (luks2|systemd-tpm2|systemd-fido2|systemd-pkcs11))" || true
     fi
-
-    printf "DEVICE=%s\\n" "$dev"
-    cryptsetup luksDump "$dev" 2>/dev/null |
-      awk "/^Version:|^Cipher name:|^Cipher mode:|^PBKDF:/ { print }" || true
-    cryptsetup luksDump "$dev" 2>/dev/null |
-      awk "/^  [0-9]+: luks2/ { count++ } END { printf \"LUKS2_KEYSLOT_LINES=%d\\n\", count }" || true
-  done < <(lsblk -rpno PATH,TYPE | awk "\$2 == \\\"part\\\" { print \$1 }")
+  done < <(lsblk -rpno PATH,TYPE)
 '
 read_file "KERNEL COMMAND LINE (SENSITIVE FIELDS REDACTED)" /etc/kernel/cmdline
 read_file "FILESYSTEM TABLE" /etc/fstab
 section "CRYPTTAB (KEYFILE PATHS REDACTED)"
 if [[ -r /etc/crypttab ]]; then
-  sed -E \
-    -e 's/^([[:space:]]*[^#[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+)[^[:space:]]+/\\1<KEYFILE-REDACTED>/' \
-    -e 's/(rd\\.luks\\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\\1=<REDACTED>/Ig' \
-    /etc/crypttab >>"$REPORT"
+  sed -E -e 's/^([[:space:]]*[^#[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+)[^[:space:]]+/\1<KEYFILE-REDACTED>/' -e 's/(rd\.luks\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\1=<REDACTED>/Ig' /etc/crypttab >>"$REPORT"
 else
   note "[/etc/crypttab not readable or absent]"
 fi
@@ -129,7 +121,7 @@ read_file "MKINITCPIO HOOKS CONFIGURATION" /etc/mkinitcpio.conf
 section "MKINITCPIO PRESETS"
 if compgen -G '/etc/mkinitcpio.d/*.preset' >/dev/null; then
   for file in /etc/mkinitcpio.d/*.preset; do
-    printf '\n--- %s ---\n' "$file" >>"$REPORT"
+  printf '\n--- %s ---\n' "$file" >>"$REPORT"
     grep -nE '^(ALL_|PRESETS=|default_|fallback_|uki_|initrd_|image=|options=)' "$file" >>"$REPORT" || true
   done
 else
@@ -138,10 +130,10 @@ fi
 section "BOOTLOADER ENTRY CONTENTS (SENSITIVE FIELDS REDACTED)"
 for file in /boot/loader/entries/*.conf /efi/loader/entries/*.conf /boot/grub/grub.cfg /efi/EFI/BOOT/grub.cfg; do
   [[ -f $file && -r $file ]] || continue
-  printf '\\n--- %s ---\\n' "$file" >>"$REPORT"
+  printf '\n--- %s ---\n' "$file" >>"$REPORT"
   grep -nE '^[[:space:]]*(title|linux|linuxefi|initrd|initrdefi|options|search|cryptdevice|cryptkey)' "$file" |
-    sed -E \\
-      -e 's/(rd\\.luks\\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\\1=<REDACTED>/Ig' \\
+    sed -E -e 's/(rd\.luks\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\1=<REDACTED>/Ig' -e 's/(UUID=)[[:xdigit:]-]+/\1<UUID-REDACTED>/Ig' || true
+done
       -e 's/(UUID=)[[:xdigit:]-]+/\\\\1<UUID-REDACTED>/Ig' >>"$REPORT" || true
 done
 run "INITRAMFS TOOL VERSION" mkinitcpio --version
@@ -149,7 +141,7 @@ run "INITRAMFS CONTENTS — PLYMOUTH / CRYPT / TPM MATCHES" bash -c '
   command -v lsinitcpio >/dev/null 2>&1 || { echo lsinitcpio-unavailable; exit 0; }
   for image in /boot/initramfs-*.img /efi/EFI/Linux/*.efi /boot/EFI/Linux/*.efi; do
     [[ -s $image ]] || continue
-    printf "\n--- %s ---\n" "$image"
+  printf '\n--- %s ---\n' "$file" >>"$REPORT"
     lsinitcpio -a "$image" 2>&1 | grep -Ei "plymouth|crypt|encrypt|tpm|systemd" | head -n 160 || true
   done
 '
@@ -170,13 +162,13 @@ run "ACTIVE CRYPTSETUP UNITS" systemctl list-units --all --no-pager "systemd-cry
 run "BOOTLOADER / KERNEL INSTALL FILES" bash -c '
   for root in /boot/loader /efi/loader /boot/EFI /efi/EFI /etc/kernel /etc/cmdline.d; do
     [[ -d $root ]] || continue
-    printf "\\n--- %s ---\\n" "$root"
+  printf '\n--- %s ---\n' "$file" >>"$REPORT"
     find "$root" -maxdepth 4 -type f -print 2>/dev/null | sort
   done
 '
 section "RELEVANT UNIT STATE"
 for unit in plymouth-start.service plymouth-quit.service plymouth-quit-wait.service systemd-cryptsetup@cryptroot.service systemd-boot-update.service getty@tty1.service k41-plymouth-release.service; do
-  printf '\n--- %s ---\n' "$unit" >>"$REPORT"
+  printf '\n--- %s ---\n' "$file" >>"$REPORT"
   systemctl status "$unit" --no-pager 2>&1 | head -n 80 >>"$REPORT" || true
 done
 run "TPM DEVICE PRESENCE" bash -c 'ls -l /dev/tpm* 2>&1 || true; command -v systemd-cryptenroll >/dev/null 2>&1 && systemd-cryptenroll --tpm2-device=list 2>&1 || true'
