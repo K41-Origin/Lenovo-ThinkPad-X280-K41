@@ -4,14 +4,14 @@ Stage 5 mengerjakan customization desktop secara bertahap dan satu workstream pa
 
 ## Batas fondasi k41-dots
 
-Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Statusnya REOPENED — AUDIT REQUIRED; boot splash wajib menggunakan Plymouth sebagai satu-satunya renderer, 100% tanpa QML/Quickshell. Workstream 01 tetap bagian dari proyek utama, tetapi bukan komponen, dependency, atau backlog k41-dots. Artefak Quickshell boot splash legacy telah dihapus dari branch aktif.
+Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Implementasi Plymouth-only berstatus COMPLETE; runtime acceptance tema/UKI masih NOT VERIFIED. TTY2 fallback akibat lock-readiness timeout ditangani sebagai dependency Workstream 02, bukan dibuka kembali sebagai kegagalan renderer Plymouth. Workstream 01 tetap bagian dari proyek utama, tetapi bukan komponen, dependency, atau backlog k41-dots. Artefak Quickshell boot splash legacy telah dihapus dari branch aktif.
 
 ## Urutan workstream
 
 | Urutan | ID | Workstream | Status/arah |
 |---:|---:|---|---|
-| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | REOPENED — AUDIT REQUIRED; Plymouth-only |
-| 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | Diterima; source dipisahkan ke K41-Dots |
+| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | COMPLETE — Plymouth implementation; runtime acceptance pending |
+| 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | Design accepted; desktop lock startup under investigation |
 | 3 | 04 | [Bottombar / K41Dock](04-TASKBAR-PANEL.md) | Berhasil; menjadi pola komponen K41 |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
@@ -24,14 +24,14 @@ ID workstream adalah identitas komponen; urutan adalah urutan pengerjaan. Nomor 
 
 - Repository adalah sumber kanonis untuk source, installer, dokumentasi, dan test.
 - Source runtime komponen Quickshell pada laptop berada di bawah `~/.config/quickshell/`.
-- Untuk integrasi Caelestia saat ini, source upstream aktif berada pada `~/.config/quickshell/caelestia/`; source milik K41 disimpan terpisah di direktori `k41-dots/` pada workstream pemilik lalu dideploy sebagai overlay.
-- Source milik K41 disimpan dalam direktori ownership khusus pada workstream (misalnya `workstreams/02-lock-screen/k41-dots/`); installer menyalinnya ke lokasi runtime yang sesuai.
+- Untuk integrasi Lock Screen saat ini, source upstream aktif berada pada `~/.config/quickshell/caelestia/`; empat file visual K41 disimpan di `workstreams/02-lock-screen/modules/lockscreen/` dan dideploy sebagai overlay ke `modules/lock/` setelah runtime stabil.
+- Source milik K41 disimpan di direktori ownership khusus pada workstream; lokasi runtime mengikuti integrasi yang sudah diaudit. Jangan mengasumsikan seluruh fitur menggunakan namespace runtime `k41-dots` sebelum migrasi terbukti.
 - Jangan mengedit source upstream atau file package-owned jika komponen K41 terpisah dapat digunakan.
 - Perubahan runtime harus memiliki preflight, backup, verifikasi pascaperubahan, dan rollback yang sesuai.
 
 ## Peta implementasi repository
 
-Source komponen Workstream 02 (K41-Dots) dan artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream tetap menjadi acuan prosedur dan acceptance.
+Source visual Workstream 02 berada di `workstreams/02-lock-screen/modules/lockscreen/`; deployment overlay ke Caelestia ditahan selama startup regression. Artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream tetap menjadi acuan prosedur dan acceptance.
 
 ## Alur kolaborasi dan verifikasi
 
