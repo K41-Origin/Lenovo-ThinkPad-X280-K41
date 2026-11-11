@@ -39,7 +39,9 @@ log_stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 log_file="$log_root/history/deploy-$log_stamp-$.log"
 : > "$log_file"
 chmod 0600 "$log_file"
+exec 3>&1 4>&2
 exec > >(tee -a "$log_file") 2>&1
+log_tee_pid=$!
 on_error() {
     local rc=$?
     printf 'ERROR: command failed (exit=%s, line=%s): %s\n' "$rc" "$LINENO" "$BASH_COMMAND" >&2
@@ -160,6 +162,9 @@ cleanup() {
         fi
     fi
     printf 'INFO: Deployment finished with exit status %s.\n' "$rc"
+    exec 1>&3 2>&4
+    exec 3>&- 4>&-
+    wait "$log_tee_pid" || true
     if [[ -s $log_file ]]; then
         local latest_tmp="$log_root/.latest.log.$"
         if cp -- "$log_file" "$latest_tmp" && chmod 0600 "$latest_tmp" && mv -f -- "$latest_tmp" "$log_root/latest.log"; then
