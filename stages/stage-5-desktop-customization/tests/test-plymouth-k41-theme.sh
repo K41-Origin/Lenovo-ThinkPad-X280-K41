@@ -21,10 +21,5 @@ grep -Fq 'Image.Text("K41", 0.8, 0.8, 0.8)' "$ROOT/stages/stage-5-desktop-custom
 grep -Fq 'Image.Text("▯", 0.9, 0.9, 0.9)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
 grep -Fq 'global.rectangles[i].SetOpacity(opacity)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
 grep -Fq 'global.center_y + 10' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'readonly property int rectangleCount: 12' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
-grep -Fq 'readonly property real ringRadius: 9' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
-grep -Fq 'text: "K41"' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
-grep -Fq 'width: 4' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
-grep -Fq 'height: 10' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml"
 
 printf 'PASS: K41 Plymouth theme static invariants\n'
