@@ -76,7 +76,7 @@ printf '%s\n' "$*" >> "$K41_TEST_RELOAD_LOG"
 MOCKCAELESTIA
 chmod 0755 "$fakebin/git" "$fakebin/caelestia"
 reload_log="$tmp/reload.log"
-PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" \
+PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" K41_LOCKSCREEN_LOG_DIR="$tmp/deploy-logs" \
     env -u XDG_CONFIG_HOME -u XDG_STATE_HOME HOME="$home" \
     WAYLAND_DISPLAY=wayland-test HYPRLAND_INSTANCE_SIGNATURE=test-session \
     bash "$script"
@@ -87,6 +87,23 @@ for file in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
         exit 1
     }
 done
+[[ -s "$tmp/deploy-logs/latest.log" ]] || {
+    printf 'FAIL: persistent latest deployment log was not written.\n' >&2
+    exit 1
+}
+mapfile -t deployment_logs < <(find "$tmp/deploy-logs/history" -maxdepth 1 -type f -name 'deploy-*.log' -print)
+[[ ${#deployment_logs[@]} -eq 1 ]] || {
+    printf 'FAIL: expected one timestamped deployment log.\n' >&2
+    exit 1
+}
+grep -q 'automatic deployment' "$tmp/deploy-logs/latest.log" && {
+    printf 'FAIL: unexpected placeholder text in deployment log.\n' >&2
+    exit 1
+}
+grep -q 'Caelestia reload command completed' "$tmp/deploy-logs/latest.log" || {
+    printf 'FAIL: log does not record successful reload invocation.\n' >&2
+    exit 1
+}
 [[ $(<"$reload_log") == "shell -r -d" ]] || {
     printf 'FAIL: Caelestia reload command was not called.\n' >&2
     exit 1
@@ -122,5 +139,5 @@ if PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" \
     exit 1
 fi
 
-printf 'PASS: automatic deployment, upstream provenance guard, four-file backup/checksum, QML replacement, and Caelestia reload invocation.\n'
+printf 'PASS: automatic deployment, upstream provenance guard, four-file backup/checksum, QML replacement, Caelestia reload invocation, and persistent deployment logs.\n'
 printf 'NOTE: the CI fixture does not execute a real Quickshell session or verify lock/unlock rendering.\n'
