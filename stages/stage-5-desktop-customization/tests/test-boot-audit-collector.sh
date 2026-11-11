@@ -24,3 +24,20 @@ grep -Fq 'chmod 0600 "$REPORT"' "$SCRIPT"
 ! grep -Eq '^[[:space:]]*(systemctl[[:space:]]+(enable|disable|start|stop|restart)|mkinitcpio[[:space:]]+-P|bootctl[[:space:]]+(install|update)|efibootmgr[[:space:]]+-[acCo]|systemd-cryptenroll[[:space:]].*--tpm2-device=auto|cryptsetup[[:space:]]+(luksAddKey|luksRemoveKey|luksErase|luksFormat))' "$SCRIPT"
 
 printf 'PASS: Workstream 01 audit collector static safety contract\n'
+
+# Execute the collector on the disposable GitHub Actions host. This validates
+# report creation and permissions; it is not a substitute for an X280 audit.
+output="$(bash "$SCRIPT")"
+report="$(printf '%s\n' "$output" | sed -n 's/^Audit report: //p')"
+[[ -n $report && -s $report ]]
+report_dir="$(dirname -- "$report")"
+[[ -s "$report_dir/README.txt" ]]
+[[ "$(stat -c '%a' "$report")" == 600 ]]
+[[ "$(stat -c '%a' "$report_dir")" == 700 ]]
+grep -Fq 'Mode: READ-ONLY' "$report"
+grep -Fq '===== FIRMWARE MODE =====' "$report"
+grep -Fq '===== LUKS METADATA SUMMARY (NO KEY MATERIAL) =====' "$report"
+grep -Fq '===== PLYMOUTH THEME / PACKAGE =====' "$report"
+grep -Fq '===== CURRENT AND PREVIOUS BOOT JOURNAL (FILTERED) =====' "$report"
+
+printf 'PASS: Workstream 01 audit collector runtime smoke test; report created with restrictive permissions\n'
