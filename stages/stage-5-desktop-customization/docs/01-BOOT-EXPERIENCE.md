@@ -59,7 +59,7 @@ Audit statis awal pada branch main menemukan:
 - Test lama yang mensyaratkan QML diganti dengan test-plymouth-only-boot.sh; test tema Plymouth tidak lagi memerlukan QML.
 - Installer konfigurasi boot juga mengubah mkinitcpio hooks, kernel cmdline, theme, UKI, systemd units, getty autologin, dan menawarkan TPM2 enrollment. Ini terlalu banyak side effect dalam satu alur dan berisiko untuk dijalankan sebelum audit kondisi perangkat.
 - Installer tema Plymouth mensyaratkan path /efi, preset linux.preset, dan UKI /efi/EFI/Linux/arch-linux.efi; asumsi ini harus dicocokkan dengan hasil audit aktual.
-- Test yang ada dominan static string assertions; test tersebut tidak membuktikan firmware boot, prompt LUKS, timing Plymouth, TPM unlock, atau transisi desktop.
+- Test repository mencakup static assertions dan runtime smoke test collector pada runner Ubuntu GitHub Actions; hasil tersebut tidak membuktikan firmware boot, prompt LUKS, timing Plymouth, TPM unlock, atau transisi desktop pada ThinkPad X280.
 - Status implementasi aktual di laptop **BELUM DIVERIFIKASI**.
 
 Temuan ini adalah audit source repository, bukan hasil pemeriksaan laptop.
@@ -85,7 +85,7 @@ Collector read-only terhadap konfigurasi sistem. Output tetap perlu ditinjau dan
 - Test Plymouth-only baru ditambahkan ke manifest global, bersama test static safety untuk audit collector.
 - Perubahan ini adalah IMPLEMENTED di repository; belum membuktikan kondisi boot pada laptop.
 
-## Urutan kerja yang disepakati
+## Validasi audit collector (11 November 2026)\n\nGitHub Actions `Bash validation`, run #1656, commit `7975ea7d821695c6d432ca76f8bb2931c0b7ff46`: **SUCCESS**.\n\n- Bash syntax validation: PASS.\n- ShellCheck (`--severity=error`): PASS.\n- Formatting check: PASS.\n- Runtime smoke test pada runner Ubuntu: PASS; report dan README berhasil dibuat, report permission `0600`, direktori audit `0700`, dan section utama tersedia.\n- Repository test suite: **37 passed, 0 failed, 0 skipped**.\n\nValidasi ini membuktikan script dapat dieksekusi di lingkungan CI Linux, bukan bahwa seluruh command tersedia atau hasilnya mewakili konfigurasi X280. Audit perangkat tetap harus dijalankan pada laptop sebelum implementasi boot.\n\n## Urutan kerja yang disepakati
 
 1. **Audit repository (read-only):** seluruh script, theme, tests, docs, CI, dan referensi silang Workstream 01.
 2. **Audit perangkat (read-only):** kumpulkan laporan menggunakan audit script; tidak mengubah konfigurasi.
