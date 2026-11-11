@@ -1,6 +1,6 @@
 # Workstream 01 — Boot Experience
 
-**Status: REOPENED — DESKTOP STARTUP FAILURE UNDER INVESTIGATION.**  
+**Status: COMPLETE — PLYMOUTH BOOT EXPERIENCE IMPLEMENTATION.** Runtime acceptance untuk tampilan tema/UKI masih NOT VERIFIED; desktop lock-readiness integration dimiliki Workstream 02.  
 Audit report reviewed: `reports/stage-5-desktop-customization/01-boot-experience/audits/20261111T063301Z/report.txt`.
 
 ## Keputusan tetap
@@ -71,17 +71,24 @@ Installer tidak:
 - Theme script: `workstreams/01-boot-experience/themes/plymouth/k41/k41.script`
 - Tests: `test-boot-experience.sh`, `test-plymouth-k41-theme.sh`, `test-plymouth-only-boot.sh`
 
-## Reopened: laporan kegagalan startup setelah instalasi tema
+## Handoff boundary ke Workstream 02
 
-Pengguna melaporkan telah menjalankan ulang `k41-install-plymouth-theme.sh`. Pada boot berikutnya sistem masuk ke TTY 2, bukan desktop; menjalankan `start-hyprland` secara manual dari TTY juga mengalami stuck loading. Belum ada report runtime terbaru yang membuktikan komponen penyebabnya.
+Implementasi Workstream 01 dinyatakan **COMPLETE** untuk scope renderer Plymouth, tema K41, installer tema, dan kontrak handoff boot. Workstream 01 menunggu satu readiness marker; ia tidak mengimplementasikan Caelestia IPC atau visual Lock Screen.
 
-Petunjuk yang perlu diuji bersama Workstream 02:
-- `k41-plymouth-quit-after-lock.sh` memiliki timeout 75 detik dan pada timeout menghentikan `getty@tty1.service`, melepaskan Plymouth, lalu menjalankan `chvt 2`.
-- `k41-lock-caelestia-after-start.sh` menunggu Caelestia lock IPC hingga 45 percobaan, kemudian mencoba Hyprlock fallback.
-- `k41-start-hyprland.sh` menjalankan upstream `start-hyprland` dan mengalihkan stdout/stderr ke `~/.local/state/k41/hyprland-startup.log`.
-- Bash profile hanya memanggil wrapper dari tty1. Percobaan manual dari tty2 tidak identik dengan jalur autologin tersebut.
+Audit startup X280 tanggal 11 November 2026 membuktikan urutan berikut:
+- Hyprland session mencapai target sekitar 19 detik setelah boot.
+- `getty@tty1.service` dihentikan setelah helper handoff mencatat lock screen tidak siap selama 75 detik.
+- `getty@tty2.service` kemudian dimulai.
+- Hyprland session berhenti setelah tty1 dihentikan.
 
-Ini adalah hipotesis jalur eksekusi berdasarkan source yang ada, bukan root cause yang telah dibuktikan. Jangan mengubah Plymouth, getty, autologin, systemd units, Hyprland, PAM, TPM/LUKS, atau konfigurasi boot sebelum report startup terbaru dianalisis. Script audit Workstream 02 mengumpulkan journal boot saat ini/sebelumnya, state tty1/tty2, unit systemd, startup log, dan metadata sesi tanpa mengubah sistem.
+Karena marker readiness tidak pernah tersedia, handoff Plymouth menjalankan fallback yang memang dirancang untuk kondisi tersebut. Ini bukan bukti kerusakan renderer Plymouth atau installer tema. Kegagalan penerbitan marker berada pada jalur Caelestia lock startup yang kini ditangani Workstream 02.
+
+Batas ownership:
+- Workstream 01: Plymouth renderer, theme assets, installer, UKI/initramfs validation, dan fail-safe handoff setelah marker/timer.
+- Workstream 02: Caelestia/Quickshell lock visual, IPC lock invocation, helper yang menerbitkan readiness marker, dan verifikasi lock state.
+- Jangan memindahkan diagnosis kegagalan Caelestia lock ke Workstream 01 hanya karena timer handoff berada di jalur boot.
+
+Tidak ada perubahan pada Plymouth, getty, autologin, systemd, bootloader, initramfs, TPM/LUKS, atau autentikasi sebagai bagian dari penyelesaian status ini.
 
 ## Validasi dan acceptance
 
