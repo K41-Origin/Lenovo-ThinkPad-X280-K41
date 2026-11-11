@@ -113,5 +113,5 @@ Pengguna hanya melakukan sinkronisasi git pull dan git push sesuai alur kolabora
 - Audit collector: workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh
 - Plymouth theme: workstreams/01-boot-experience/themes/plymouth/k41/
 - Installer lama yang wajib direview sebelum refactor: workstreams/01-boot-experience/scripts/
-- Test pemilik: stages/stage-5-desktop-customization/tests/test-boot-experience.sh dan test-plymouth-k41-theme.sh
+- Test pemilik: stages/stage-5-desktop-customization/tests/test-boot-experience.sh, test-plymouth-k41-theme.sh, test-plymouth-only-boot.sh, dan test-boot-audit-collector.sh
 - Status tunggal: [docs/06-STATUS.md](../../../docs/06-STATUS.md)
