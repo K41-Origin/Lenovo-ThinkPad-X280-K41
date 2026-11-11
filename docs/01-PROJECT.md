@@ -72,7 +72,7 @@ Contoh: komponen Lock Screen K41 berada di `~/.config/quickshell/k41/modules/loc
 Repository tetap menyimpan source yang direview, script audit/penyiapan, test, dan dokumentasi. Path runtime di atas adalah tujuan deployment pada laptop, bukan pengganti source repository.
 
 ### Batas scope
-- Workstream 01 — Boot Experience dikecualikan dari K41-Dots karena boot/splash menggunakan Plymouth.
+- Workstream 01 — Boot Experience dikecualikan dari K41-Dots. Boot splash/animasi wajib menggunakan Plymouth sebagai satu-satunya renderer, 100% tanpa QML/Quickshell; lihat [dokumen Workstream 01](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md).
 - Tidak perlu membuat installer shell, service manager, updater, rollback framework, atau bootstrap K41-Dots tersendiri pada tahap fondasi ini.
 - Jangan mengubah PAM, autentikasi, atau mekanisme lock/session upstream saat hanya memisahkan tampilan.
 - Jangan menghapus atau menimpa source upstream yang masih diperlukan.
