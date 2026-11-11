@@ -55,7 +55,7 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
 - Stage 5 menjadi fondasi bertahap **k41-dots**; hindari asumsi perlu membangun shell mandiri penuh atau mengganti Caelestia.
-- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots**. Boot splash wajib Plymouth-only, 100% tanpa QML/Quickshell. Artefak QML/installer Quickshell lama adalah legacy/conflicting implementation, bukan jalur boot yang disetujui.
+- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots**. Boot splash wajib Plymouth-only, 100% tanpa QML/Quickshell. Artefak QML/installer Quickshell lama telah dihapus dari branch aktif; jangan menghidupkan kembali dependency boot tersebut.
 - Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`; repository menyimpan source kanonis dan installer untuk deployment.
 
 ## Required change process
