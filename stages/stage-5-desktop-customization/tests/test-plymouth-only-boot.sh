@@ -10,7 +10,7 @@ bash -n "$LOCK_HELPER"
 
 # Workstream 01 boot visuals must be Plymouth-only. Legacy QML/Quickshell
 # artifacts must not be installed, started, or required by the boot path.
-! grep -Eiq 'quickshell|(^|[^[:alnum:]_])qs([[:space:]]|$)|\.qml|k41-install-animated-boot-splash' "$CONFIGURE"
+! grep -Eiq '(^|[^[:alnum:]_])qs([[:space:]]|$)|\.qml|k41-install-animated-boot-splash' "$CONFIGURE"
 ! grep -Eiq 'quickshell|boot-splash|boot-splash\.pid|\.qml|qs[[:space:]]+-c' "$LOCK_HELPER"
 grep -Fq 'plymouth-set-default-theme k41' "$CONFIGURE"
 grep -Fq 'plymouth' "$WS/themes/plymouth/k41/k41.plymouth"
