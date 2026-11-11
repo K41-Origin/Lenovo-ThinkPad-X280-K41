@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Wait for Caelestia's lock IPC, request a lock, verify it, then dismiss K41 overlay.
+# Wait for Caelestia's lock IPC, request a lock, and verify it; Plymouth lifecycle is handled by systemd.
 set -Eeuo pipefail
 
 die() { printf 'K41 Caelestia lock: %s\n' "$*" >&2; exit 1; }
@@ -8,16 +8,6 @@ mark_ready() {
     install -d -m 0700 "$(dirname -- "$marker")"
     : >"$marker"
     chmod 0600 "$marker"
-}
-dismiss_splash() {
-    local pid_file="$HOME/.cache/k41/boot-splash.pid" pid
-    if [[ -f $pid_file && ! -L $pid_file ]]; then
-        IFS= read -r pid <"$pid_file" || true
-        if [[ $pid =~ ^[1-9][0-9]*$ ]] && kill -0 "$pid" 2>/dev/null; then
-            kill "$pid" 2>/dev/null || true
-        fi
-        rm -f -- "$pid_file"
-    fi
 }
 command -v caelestia >/dev/null 2>&1 || die 'caelestia CLI is unavailable.'
 command -v sleep >/dev/null 2>&1 || die 'sleep is unavailable.'
@@ -46,7 +36,6 @@ for ((i = 1; i <= attempts; i++)); do
         for ((v = 1; v <= verify_attempts; v++)); do
             if is_locked; then
                 printf 'K41 Caelestia lock: lock state verified.\n'
-                dismiss_splash
                 mark_ready
                 exit 0
             fi
@@ -62,7 +51,6 @@ if command -v hyprlock >/dev/null 2>&1; then
     lock_pid=$!
     sleep 1
     if kill -0 "$lock_pid" 2>/dev/null; then
-        dismiss_splash
         mark_ready
         wait "$lock_pid"
         exit $?
