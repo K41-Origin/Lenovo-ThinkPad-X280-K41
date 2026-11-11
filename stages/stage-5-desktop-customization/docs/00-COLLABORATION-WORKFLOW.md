@@ -63,7 +63,8 @@ Jangan membuat bootstrap, service, updater, framework installer, atau runtime K4
 - Audit mencakup source visual, QML, styling, animasi, aset, konfigurasi visual, resource, dependency, dan titik integrasi.
 - PAM, autentikasi, password handling, fingerprint/Howdy policy, dan session-lock protocol tidak boleh diubah oleh pekerjaan visual.
 - Source visual K41 dipisahkan ke `workstreams/02-lock-screen/modules/lockscreen/`; deployment empat file ke `~/.config/quickshell/caelestia/modules/lock/` telah diimplementasikan tetapi runtime acceptance belum VERIFIED.
-- TTY2 fallback telah terbukti dipicu karena readiness marker lock tidak muncul selama 75 detik. Penyebab internal Caelestia IPC/helper/QML/fallback masih UNKNOWN; kumpulkan isi/hash helper terpasang dan runtime logs sebelum mengubah lock path.
+- TTY2 fallback telah terbukti dipicu karena readiness marker lock tidak muncul selama 75 detik. Source helper lama memiliki nested retry bug yang dapat melebihi timeout; helper baru dengan bounded deadline dan updater ber-backup sudah diimplementasikan. Penyebab branch yang benar-benar berjalan pada boot gagal masih perlu dikonfirmasi dari backup helper lokal dan log runtime.
+- Setelah `git pull`, updater helper dapat dijalankan sebagai user biasa dari TTY2: `bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-update-lockscreen-startup-helper.sh`. Script membackup helper lama dan hanya mengganti executable user-local. Setelah reboot, jalankan startup audit bila masalah masih terjadi.
 - Jangan mengubah PAM, password handling, fingerprint/Howdy policy, atau session-lock protocol selama diagnosis.
 - Pengguna hanya melakukan pull/push. Assistant membuat script audit, ekstraksi, migrasi, implementasi, test, dan dokumentasi.
 
