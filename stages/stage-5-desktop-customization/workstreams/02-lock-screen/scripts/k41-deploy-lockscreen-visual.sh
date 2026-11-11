@@ -237,6 +237,10 @@ cleanup() {
             rm -f -- "$latest_tmp"
             printf 'WARNING: Could not update latest.log; timestamped log remains at %s\n' "$log_file" >&2
         fi
+        if ! publish_logs; then
+            printf 'WARNING: sanitized deployment log could not be published.\\n' >&2
+            rc=1
+        fi
     fi
     exit "$rc"
 }
