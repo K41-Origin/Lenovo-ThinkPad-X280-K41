@@ -44,8 +44,8 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 
 ## Current project decisions
 
-- Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **REOPENED — AUDIT REQUIRED pada 2026-11-11**. Keputusan baru: boot splash/animasi 100% menggunakan Plymouth sebagai satu-satunya renderer; tidak boleh ada QML/Quickshell dalam boot path. Status COMPLETED / USER ACCEPTED pada 2026-11-10 adalah histori.
-- Workstream 2 — Lock Screen **COMPLETED / USER ACCEPTED pada 2026-11-10**.
+- Stage 5 adalah tahap aktif. Workstream 01 — Boot Experience **COMPLETE untuk implementasi Plymouth-only**; runtime acceptance tema/UKI masih NOT VERIFIED. TTY2 fallback telah terbukti dipicu oleh lock-readiness timeout Workstream 02, bukan kegagalan renderer Plymouth.
+- Workstream 02 — Lock Screen: **DESIGN ACCEPTED; STARTUP FAILURE CONFIRMED; ROOT CAUSE UNDER INVESTIGATION**. Jangan lanjutkan visual deployment/cleanup sampai lock readiness dan desktop startup stabil.
 - **Dashboard dihapus dari daftar workstream Stage 5 pada 2026-11-11.** Fitur runtime dinonaktifkan melalui `k41-cleanup-caelestia.sh`; jangan menghapus source QML upstream atau menambahkan dashboard kembali.
 - **Workstream 04 — Bottombar / K41Dock COMPLETED / USER CONFIRMED SUCCESS.** Source kanonis berada di repository pada `workstreams/04-taskbar-panel/`; source runtime berada di bawah `~/.config/quickshell/caelestia/`. Lihat dokumen Bottombar.
 - **Workstream 05 — Topbar** adalah pekerjaan Stage 5 berikutnya. Elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
@@ -55,7 +55,7 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
 - Stage 5 menjadi fondasi bertahap **k41-dots**; hindari asumsi perlu membangun shell mandiri penuh atau mengganti Caelestia.
-- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots**. Boot splash wajib Plymouth-only, 100% tanpa QML/Quickshell. Artefak QML/installer Quickshell lama telah dihapus dari branch aktif; jangan menghidupkan kembali dependency boot tersebut.
+- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots**. Boot splash wajib Plymouth-only, 100% tanpa QML/Quickshell. Jangan menghidupkan kembali dependency boot tersebut. Jika menemukan sisa directive `qs -c k41-boot-splash` di konfigurasi runtime, perlakukan sebagai legacy drift yang harus diaudit dan dibersihkan secara terkontrol; jangan menganggapnya root cause sebelum bukti.
 - Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`; repository menyimpan source kanonis dan installer untuk deployment.
 
 ## Required change process
