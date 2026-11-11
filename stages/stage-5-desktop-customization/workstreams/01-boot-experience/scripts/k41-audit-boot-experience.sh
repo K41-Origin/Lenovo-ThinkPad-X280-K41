@@ -92,26 +92,27 @@ run "BOOTCTL STATUS" bootctl status --no-pager
 run "BOOTCTL ENTRIES" bootctl list --no-pager
 run "EFI BOOT ENTRIES (READ ONLY)" efibootmgr -v
 run "BLOCK DEVICES / FILESYSTEMS" lsblk -e7 -o NAME,PATH,TYPE,SIZE,FSTYPE,FSVER,LABEL,UUID,PARTUUID,MOUNTPOINTS
-run "MOUNT TABLE (BOOT-RELATED)" findmnt -rn -o TARGET,SOURCE,FSTYPE,OPTIONS / /boot /efi /boot/efi
+run "MOUNT TABLE (BOOT-RELATED)" bash -c 'findmnt -rn -o TARGET,SOURCE,FSTYPE,OPTIONS | awk \"\\$1 == \\\"/\\\" || \\$1 == \\\"/boot\\\" || \\$1 == \\\"/efi\\\" || \\$1 == \\\"/boot/efi\\\" { print }\"'
 run "ROOT SOURCE" findmnt -no SOURCE,FSTYPE,OPTIONS /
 run "CRYPT DEVICE STATUS (NO KEYS)" bash -c 'if command -v cryptsetup >/dev/null 2>&1; then cryptsetup status cryptroot 2>&1; else echo cryptsetup-unavailable; fi'
 run "LUKS METADATA SUMMARY (NO KEY MATERIAL)" bash -c '
-  command -v cryptsetup >/dev/null 2>&1 || { echo cryptsetup-unavailable; exit 0; }
+  if ! command -v cryptsetup >/dev/null 2>&1; then
+    echo cryptsetup-unavailable
+    exit 0
+  fi
+
   while IFS= read -r dev; do
     [[ -b $dev ]] || continue
-    if cryptsetup isLuks "$dev" 2>/dev/null; then
-      printf "DEVICE=%s\n" "$dev"
-      cryptsetup luksDump "$dev" 2>/dev/null | awk "/^Version:|^Cipher name:|^Cipher mode:|^PBKDF:/ {print}" || true
-      cryptsetup luksDump --dump-json-metadata "$dev" 2>/dev/null | python3 -c "
-import json,sys
-try:
- d=json.load(sys.stdin)
- print('TOKEN_TYPES=' + ','.join(sorted({v.get('type','unknown') for v in d.get('tokens',{}).values()})))
- print('KEYSLOT_COUNT=' + str(len(d.get('keyslots',{}))))
-except Exception: print('METADATA_PARSE=unavailable')
-" || true
+    if ! cryptsetup isLuks "$dev" 2>/dev/null; then
+      continue
     fi
-  done < <(lsblk -rpno PATH,TYPE | awk '$2=="part" {print $1}')
+
+    printf "DEVICE=%s\\n" "$dev"
+    cryptsetup luksDump "$dev" 2>/dev/null |
+      awk "/^Version:|^Cipher name:|^Cipher mode:|^PBKDF:/ { print }" || true
+    cryptsetup luksDump "$dev" 2>/dev/null |
+      awk "/^  [0-9]+: luks2/ { count++ } END { printf \"LUKS2_KEYSLOT_LINES=%d\\n\", count }" || true
+  done < <(lsblk -rpno PATH,TYPE | awk "\$2 == \\\"part\\\" { print \$1 }")
 '
 read_file "KERNEL COMMAND LINE (SENSITIVE FIELDS REDACTED)" /etc/kernel/cmdline
 read_file "FILESYSTEM TABLE" /etc/fstab
@@ -140,7 +141,7 @@ for file in /boot/loader/entries/*.conf /efi/loader/entries/*.conf /boot/grub/gr
   printf '\\n--- %s ---\\n' "$file" >>"$REPORT"
   grep -nE '^[[:space:]]*(title|linux|linuxefi|initrd|initrdefi|options|search|cryptdevice|cryptkey)' "$file" |
     sed -E \\
-      -e 's/(rd\\\\.luks\\\\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\\\\1=<REDACTED>/Ig' \\
+      -e 's/(rd\\.luks\\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\\1=<REDACTED>/Ig' \\
       -e 's/(UUID=)[[:xdigit:]-]+/\\\\1<UUID-REDACTED>/Ig' >>"$REPORT" || true
 done
 run "INITRAMFS TOOL VERSION" mkinitcpio --version
