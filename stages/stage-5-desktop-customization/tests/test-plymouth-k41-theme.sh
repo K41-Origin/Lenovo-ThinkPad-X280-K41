@@ -1,25 +1,33 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+
 ROOT="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
-bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-grep -Fq 'ModuleName=script' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth"
-grep -Fq 'ScriptFile=/usr/share/plymouth/themes/k41/k41.script' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth"
-grep -Fq 'Window.SetBackgroundTopColor (0.0, 0.0, 0.0)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'Plymouth.SetRefreshFunction(refresh_callback)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'Plymouth.SetDisplayPasswordFunction(display_password_callback)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'Plymouth.SetDisplayNormalFunction(display_normal_callback)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'mkinitcpio -P' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-grep -Fq 'plymouth-reboot.service' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-grep -Fq 'plymouth-poweroff.service' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-grep -Fq 'reboot.target.wants' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-grep -Fq 'poweroff.target.wants' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-! grep -Eq 'systemd-cryptenroll|luksAddKey|luksRemoveKey|luksErase|wipe-slot' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
+WS="$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience"
+INSTALLER="$WS/scripts/k41-install-plymouth-theme.sh"
+THEME="$WS/themes/plymouth/k41"
 
-grep -Fq 'global.count = 12;' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'global.radius = 9;' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'Image.Text("K41", 0.8, 0.8, 0.8)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'Image.Text("▯", 0.9, 0.9, 0.9)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'global.rectangles[i].SetOpacity(opacity)' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
-grep -Fq 'global.center_y + 10' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script"
+bash -n "$INSTALLER"
+grep -Fq 'ModuleName=script' "$THEME/k41.plymouth"
+grep -Fq 'ScriptFile=/usr/share/plymouth/themes/k41/k41.script' "$THEME/k41.plymouth"
+grep -Fq 'Window.SetBackgroundTopColor (0.0, 0.0, 0.0)' "$THEME/k41.script"
+grep -Fq 'Plymouth.SetRefreshFunction(refresh_callback)' "$THEME/k41.script"
+grep -Fq 'Plymouth.SetDisplayPasswordFunction(display_password_callback)' "$THEME/k41.script"
+grep -Fq 'Plymouth.SetDisplayNormalFunction(display_normal_callback)' "$THEME/k41.script"
+grep -Fq 'plymouth-set-default-theme -R k41' "$INSTALLER"
+grep -Fq 'systemd -> plymouth -> sd-encrypt' "$INSTALLER"
+grep -Fq 'default_uki' "$INSTALLER"
+grep -Fq 'UKI destination verified' "$INSTALLER"
 
-printf 'PASS: K41 Plymouth theme static invariants\n'
+# Preserve the approved K41 visual identity.
+grep -Fq 'global.count = 12;' "$THEME/k41.script"
+grep -Fq 'global.radius = 9;' "$THEME/k41.script"
+grep -Fq 'Image.Text("K41", 0.8, 0.8, 0.8)' "$THEME/k41.script"
+grep -Fq 'Image.Text("▯", 0.9, 0.9, 0.9)' "$THEME/k41.script"
+grep -Fq 'global.rectangles[i].SetOpacity(opacity)' "$THEME/k41.script"
+grep -Fq 'global.center_y + 10' "$THEME/k41.script"
+
+# This installer does not enroll TPM or edit LUKS/bootloader/systemd lifecycle.
+! grep -Eiq 'systemd-cryptenroll|cryptsetup|luks(Add|Remove|Erase)|wipe-slot|efibootmgr|bootctl|systemctl' "$INSTALLER"
+! grep -Eiq 'k41-plymouth-release.service|plymouth-quit.service.d|getty@tty1|autologin|quickshell|\.qml' "$INSTALLER"
+
+printf 'PASS: K41 Plymouth theme and installer invariants\n'
