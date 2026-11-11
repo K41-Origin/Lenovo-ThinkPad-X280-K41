@@ -27,7 +27,17 @@ for token in \
     'k41-boot-splash' \
     'coredumpctl info start-hyprland' \
     '.local/state/caelestia' \
-    'chmod 0644'; do
+    'chmod 0644' \\
+    'LOCK LIFECYCLE: LOGIN SESSION STATE' \\
+    'LOCK LIFECYCLE: HELPER INVOCATIONS AND PHASE TRANSITIONS' \\
+    'LOCK LIFECYCLE: CURRENT CAELESTIA IPC STATE (READ-ONLY)' \\
+    'CAELESTIA LOCK isLocked QUERY' \\
+    'LOCK LIFECYCLE: LOCKER AND COMPOSITOR PROCESS STATE' \\
+    'HYPRLAND LOCK-RELATED BINDINGS' \\
+    'LOCK LIFECYCLE: AUTHENTICATION AND UNLOCK JOURNAL EVENTS' \\
+    'LOCK LIFECYCLE: DEPLOYMENT AND VISUAL SOURCE PROVENANCE' \\
+    'startup-*.log' \\
+    'deployment-logs'; do
     grep -Fq -- "$token" "$script" || {
         printf 'FAIL: audit collector missing diagnostic coverage: %s\n' "$token" >&2
         exit 1
