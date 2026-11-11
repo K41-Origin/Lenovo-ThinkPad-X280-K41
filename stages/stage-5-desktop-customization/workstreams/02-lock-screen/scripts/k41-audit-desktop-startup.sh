@@ -187,7 +187,7 @@ else note '[~/.config/hypr/hyprland.lua unavailable]'; fi
 
 section 'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON'
 installed_helper="$HOME/.local/bin/k41-lock-caelestia-after-start"
-source_helper="$repo_root/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh"
+source_helper="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lock-caelestia-after-start.sh"
 if [[ -f $installed_helper && ! -L $installed_helper ]]; then
     printf 'Installed helper: ' | redact >>"$report"
     stat -c 'mode=%A uid=%u gid=%g size=%s' "$installed_helper" 2>&1 | redact >>"$report" || true
