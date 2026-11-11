@@ -450,6 +450,8 @@ journal_patterns = {
     "UNLOCK_EVENT": re.compile(r"\b(unlocked|unlock successful|session unlocked)\b", re.I),
     "HYPRLAND_SESSION_START": re.compile(r"Reached target.*(?:Hyprland|graphical)|Hyprland.*started", re.I),
     "HYPRLAND_SESSION_STOP": re.compile(r"Stopped target.*(?:Hyprland|graphical)|Hyprland.*(stopped|exited)", re.I),
+    "LOCK_SURFACE_VISIBLE": re.compile(r"(?!)"),
+    "DESKTOP_RESTORED_AFTER_UNLOCK": re.compile(r"(?!)"),
 }
 journal_events = {name: [] for name in journal_patterns}
 try:
