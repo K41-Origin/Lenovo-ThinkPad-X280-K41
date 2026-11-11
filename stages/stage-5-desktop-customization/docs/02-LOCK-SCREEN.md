@@ -1,6 +1,6 @@
 # Workstream 02 — Lock Screen
 
-**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
+**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. **Status operasional: BLOCKED — desktop startup regression sedang diaudit; deployment visual baru ditahan sampai Hyprland dapat start secara stabil.** Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
 
 **Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan automatic deployment/reload: IMPLEMENTED. Status runtime rendering: NOT VERIFIED pada ThinkPad X280.** Source visual Floating Password Card berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject terpisah.
 
@@ -108,3 +108,54 @@ Screenshot bukan acceptance gate.
 ## Status Guest Mode
 
 Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan bagian dari scope atau acceptance Lock Screen.
+
+
+## Desktop startup regression — audit sebelum melanjutkan migrasi visual
+
+Pengguna melaporkan bahwa setelah menjalankan ulang installer tema Plymouth dan reboot, sistem berhenti pada TTY 2, bukan masuk ke desktop. Percobaan menjalankan `start-hyprland` secara manual dari TTY mengalami stuck saat loading.
+
+Gejala tersebut belum membuktikan bahwa modul Lock Screen menyebabkan kegagalan. Jalur yang harus dibedakan adalah:
+1. tty1 autologin dan Bash login profile;
+2. wrapper `k41-start-hyprland` serta upstream `start-hyprland`;
+3. startup Hyprland, konfigurasi Lua, GPU/DRM dan Wayland;
+4. pemanggilan Caelestia/Quickshell dari event `hyprland.start`;
+5. Caelestia lock IPC, helper lock, dan Plymouth handoff;
+6. timeout helper yang dapat menghentikan `getty@tty1` dan berpindah ke tty2.
+
+Laporan Workstream 01 sebelumnya memang mencatat `k41-plymouth-release.service`, `plymouth-quit.service` drop-in, tty1 autologin, dan lock handoff timeout 75 detik. Itu merupakan petunjuk audit, bukan bukti akar masalah. Jangan menganggap TTY 2 sebagai kerusakan Plymouth sebelum journal membuktikan urutan kejadian.
+
+### Script audit baru
+
+Script read-only:
+`workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh`
+
+Script dapat dijalankan dari TTY 2 sebagai user desktop biasa (tanpa sudo); tidak memerlukan sesi Wayland/Hyprland aktif. Ia mengumpulkan:
+- TTY aktif, login sessions, getty tty1/tty2, target systemd, failed units, dan state unit boot/lock;
+- user systemd session dan layanan terkait;
+- nama proses tanpa argumen/environment;
+- versi executable dan paket Hyprland, start-hyprland, Quickshell, dan Caelestia;
+- metadata file startup, Bash profile K41, integrasi startup Hyprland, serta inventory konfigurasi;
+- `~/.local/state/k41/hyprland-startup.log` dan log terkait yang tersedia;
+- Hyprland IPC bila compositor ternyata aktif;
+- inventory DRM/GPU;
+- journal boot sekarang, boot sebelumnya, dan user journal dengan filter startup/session.
+
+Report disimpan di:
+`reports/stage-5-desktop-customization/02-lock-screen/startup-audits/<timestamp>/`
+
+Izin report dibatasi ke user (direktori 0700, file 0600). Collector tidak menjalankan `start-hyprland`, tidak reload Caelestia, tidak mengubah konfigurasi, permission, package, service, bootloader, initramfs, TPM/LUKS, PAM, atau autentikasi. Redaksi otomatis tidak menjamin semua data privat terhapus; report wajib ditinjau sebelum dipush.
+
+Jalankan dari checkout repository pada TTY 2:
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
+```
+
+Setelah report tersedia di repository dan dipush, audit log untuk menentukan titik kegagalan sebelum melakukan perubahan implementasi. Jangan jalankan deployer visual Lock Screen atau mengubah PAM/session-lock selama desktop startup belum stabil.
+
+### Batas status
+
+- Audit script dan test: **IMPLEMENTED** setelah perubahan repository.
+- Hasil audit aktual X280: **PENDING**.
+- Root cause: **UNKNOWN / NOT VERIFIED**.
+- Perbaikan startup: **NOT IMPLEMENTED**.
+- Migrasi visual Lock Screen dan runtime acceptance: **PAUSED** sampai jalur Hyprland startup pulih.
