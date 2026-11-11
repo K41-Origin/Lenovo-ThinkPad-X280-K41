@@ -269,7 +269,7 @@ Run this script as the regular desktop user from tty2 or a normal shell:
 Report: report.txt
 
 The collector is read-only. It does not attempt to launch or repair Hyprland.
-Review report.txt and remove private data before committing/pushing this directory.
+The script publishes a sanitized copy of this run directory to GitHub main using existing Git credentials. The local report remains private (0600); if publication fails, the report stays local and the script exits non-zero. Review the published report for any residual private information.
 EOF
 chmod 0600 "$run_dir/README.txt"
 
