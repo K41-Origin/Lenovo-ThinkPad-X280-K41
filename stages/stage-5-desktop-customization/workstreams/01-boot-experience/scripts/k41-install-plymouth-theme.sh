@@ -60,6 +60,13 @@ encrypt_index="$(hook_index sd-encrypt)" || die "The sd-encrypt hook is missing.
 (( systemd_index < plymouth_index && plymouth_index < encrypt_index )) ||
     die "Invalid hook order; expected systemd -> plymouth -> sd-encrypt."
 
+root_source="$(findmnt -nro SOURCE /)"
+[[ $root_source == "/dev/mapper/cryptroot" ]] ||
+    die "The active root source is not /dev/mapper/cryptroot: $root_source"
+grep -Eq '(^|[[:space:]])rd\\.luks\\.name=[^[:space:]]+=cryptroot([[:space:]]|$)' "$KERNEL_CMDLINE" ||
+    die "The existing UKI command line does not map the encrypted root to cryptroot."
+grep -Eq '(^|[[:space:]])root=/dev/mapper/cryptroot([[:space:]]|$)' "$KERNEL_CMDLINE" ||
+    die "The existing UKI command line does not use /dev/mapper/cryptroot."
 grep -Eq '(^|[[:space:]])splash([[:space:]]|$)' "$KERNEL_CMDLINE" ||
     die "The existing UKI command line is missing the splash argument."
 
@@ -76,7 +83,7 @@ UKI_PATH=${uki_paths[0]}
 command -v plymouth >/dev/null 2>&1 || die "Plymouth client is unavailable."
 
 previous_theme="$(plymouth-set-default-theme 2>/dev/null || true)"
-timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+timestamp="$(date -u +'%Y%m%dT%H%M%SZ')-$"
 BACKUP_DIR="/var/lib/k41/boot-experience/theme-backups/$timestamp"
 install -d -m 0700 "$BACKUP_DIR"
 
