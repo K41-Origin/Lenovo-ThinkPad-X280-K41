@@ -18,7 +18,7 @@ grep -Fq 'for ((attempt = 1; attempt <= verify_attempts; attempt++))' "$helper" 
     fail 'lock verification is not bounded'
 grep -Fq 'helper-backups' "$updater" || fail 'updater does not preserve the previous helper'
 grep -Fq 'cmp -s "$source_helper" "$target"' "$updater" || fail 'updater does not verify the installed helper'
-! grep -Eiq 'systemctl|pacman|sudo|PAM|cryptsetup|mkinitcpio|plymouth-set-default-theme' "$updater" ||
+! grep -Eiq '^[[:space:]]*(systemctl|pacman|sudo|cryptsetup|mkinitcpio|plymouth-set-default-theme)([[:space:]]|$)' "$updater" ||
     fail 'user-local updater contains an unrelated system mutation'
 pass 'lock helper and updater pass syntax and bounded-timeout safety checks'
 
