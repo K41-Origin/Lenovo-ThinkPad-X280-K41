@@ -53,7 +53,7 @@ Source visual kanonis:
 ## Hasil audit repository (11 November 2026)
 
 Audit statis awal pada branch main menemukan:
-- Installer k41-configure-boot-experience.sh memanggil k41-install-animated-boot-splash.sh, mensyaratkan qs, dan menyiapkan QML overlay. Ini bertentangan dengan keputusan Plymouth-only.
+- Audit awal menemukan installer k41-configure-boot-experience.sh memanggil installer Quickshell splash dan mensyaratkan qs. Referensi tersebut telah dihapus dari jalur konfigurasi.
 - Source QML dan installer Quickshell boot splash legacy telah dihapus dari branch aktif.
 - Helper lock tidak lagi mengelola PID splash Quickshell.
 - Test lama yang mensyaratkan QML diganti dengan test-plymouth-only-boot.sh; test tema Plymouth tidak lagi memerlukan QML.
