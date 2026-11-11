@@ -314,6 +314,96 @@ if have journalctl; then
         tail -n 500 | redact >>"$report" || true
 else note '[journalctl unavailable]'; fi
 
+
+# Explicit lock lifecycle evidence. All commands below are observational and bounded.
+section 'LOCK LIFECYCLE: LOGIN SESSION STATE'
+if have loginctl; then
+    while read -r session_id _; do
+        [[ -n ${session_id:-} ]] || continue
+        section "LOGIN SESSION DETAILS: $session_id"
+        loginctl show-session "$session_id" --no-pager \
+            -p Id -p Name -p User -p State -p Active -p Remote -p Type \
+            -p Class -p Seat -p TTY -p Display -p Leader -p Scope -p Service \
+            2>&1 | redact >>"$report" || true
+    done < <(loginctl list-sessions --no-legend 2>/dev/null)
+else
+    note '[loginctl unavailable; per-session lifecycle state not collected]'
+fi
+
+section 'LOCK LIFECYCLE: HELPER INVOCATIONS AND PHASE TRANSITIONS'
+helper_log_root="$HOME/.local/state/k41/lockscreen"
+if [[ -d $helper_log_root && ! -L $helper_log_root ]]; then
+    mapfile -t helper_logs < <(
+        find "$helper_log_root" -maxdepth 1 -type f -name 'startup-*.log' \
+            -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n 8 | cut -d' ' -f2-
+    )
+    if (("${#helper_logs[@]}" > 0)); then
+        for helper_log in "${helper_logs[@]}"; do
+            [[ -f $helper_log && ! -L $helper_log ]] || continue
+            printf '\n-- %s --\n' "${helper_log#"$HOME"/}" | redact >>"$report"
+            stat -c 'size=%s modified=%y mode=%A' "$helper_log" 2>&1 | redact >>"$report" || true
+            if have sha256sum; then sha256sum "$helper_log" 2>&1 | redact >>"$report" || true; fi
+            # Helper logs are bounded by the helper's own timeout; retain the full
+            # latest log so IPC errors and the exact terminal phase are not truncated.
+            tail -n 400 -- "$helper_log" | redact >>"$report" || true
+        done
+    else
+        note '[No startup-*.log helper invocation records found]'
+    fi
+else
+    note '[K41 lock helper log directory missing or unsafe]'
+fi
+
+section 'LOCK LIFECYCLE: CURRENT CAELESTIA IPC STATE (READ-ONLY)'
+if have caelestia; then
+    run 'CAELESTIA EXPORTED SHELL IPC TARGETS' caelestia shell -s
+    run 'CAELESTIA LOCK isLocked QUERY' caelestia shell lock isLocked
+else
+    note '[caelestia CLI unavailable; IPC state cannot be queried]'
+fi
+if have qs; then
+    run 'QUICKSHELL VERSION' qs --version
+else
+    note '[qs executable unavailable]'
+fi
+
+section 'LOCK LIFECYCLE: LOCKER AND COMPOSITOR PROCESS STATE'
+if have ps; then
+    ps -eo etimes,stat,comm --sort=comm 2>/dev/null |
+        awk 'NR==1 || tolower($0) ~ /hyprland|quickshell|(^|[[:space:]])qs([[:space:]]|$)|caelestia|hyprlock|swaylock/' |
+        redact >>"$report" || true
+fi
+run 'HYPRLAND IPC INSTANCE INVENTORY' hyprctl instances
+run 'HYPRLAND IPC MONITOR STATE' hyprctl -j monitors
+if have hyprctl; then
+    section 'HYPRLAND LOCK-RELATED BINDINGS'
+    hyprctl -j binds 2>&1 |
+        grep -iE -C 2 'lock|hyprlock|swaylock|SUPER[[:space:]]*\+[[:space:]]*M' |
+        redact >>"$report" || note '[No matching lock/recovery binding or IPC unavailable]'
+fi
+
+section 'LOCK LIFECYCLE: AUTHENTICATION AND UNLOCK JOURNAL EVENTS'
+if have journalctl; then
+    journalctl -b --no-pager -o short-iso-precise 2>&1 |
+        grep -Ei 'hyprlock|caelestia.*lock|lock.*caelestia|pam_.*(auth|account|session)|authentication|authenticated|authenticat|unlock|unlocked|session (opened|closed)|session scope|stopped target.*(hyprland|graphical)|reached target.*(hyprland|graphical)' |
+        tail -n 500 | redact >>"$report" || true
+else
+    note '[journalctl unavailable; authentication/unlock lifecycle cannot be reconstructed]'
+fi
+
+section 'LOCK LIFECYCLE: DEPLOYMENT AND VISUAL SOURCE PROVENANCE'
+deployment_log_root="$HOME/.local/state/k41/lockscreen/deployment-logs"
+if [[ -d $deployment_log_root && ! -L $deployment_log_root ]]; then
+    while IFS= read -r -d '' deployment_log; do
+        [[ -f $deployment_log && ! -L $deployment_log ]] || continue
+        printf '\n-- %s --\n' "${deployment_log#"$HOME"/}" | redact >>"$report"
+        tail -n 250 -- "$deployment_log" | redact >>"$report" || true
+    done < <(find "$deployment_log_root" -maxdepth 3 -type f \( -name 'latest.log' -o -name 'deploy-*.log' \) -printf '%T@ %p\0' 2>/dev/null |
+        sort -z -nr | head -z -n 5 | cut -z -d' ' -f2-)
+else
+    note '[No local lockscreen visual deployment log directory found]'
+fi
+
 section 'DIAGNOSTIC LIMITATIONS'
 note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command.'
 note '- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.'
