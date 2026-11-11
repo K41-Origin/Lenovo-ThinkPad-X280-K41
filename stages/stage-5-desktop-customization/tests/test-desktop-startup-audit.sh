@@ -37,7 +37,17 @@ for token in \
     'LOCK LIFECYCLE: AUTHENTICATION AND UNLOCK JOURNAL EVENTS' \\
     'LOCK LIFECYCLE: DEPLOYMENT AND VISUAL SOURCE PROVENANCE' \\
     'startup-*.log' \\
-    'deployment-logs'; do
+    'deployment-logs' \
+    'LOCK LIFECYCLE: NORMALIZED EVIDENCE TIMELINE' \
+    'lifecycle-timeline.tsv' \
+    'NOT_OBSERVED' \
+    'AUTH_SUCCESS' \
+    'AUTH_FAILURE' \
+    'UNLOCK_EVENT' \
+    'HYPRLAND_SESSION_START' \
+    'HYPRLAND_SESSION_STOP' \
+    'subprocess.run(' \
+    'Desktop restoration cannot be proven retrospectively'; do
     grep -Fq -- "$token" "$script" || {
         printf 'FAIL: audit collector missing diagnostic coverage: %s\n' "$token" >&2
         exit 1
