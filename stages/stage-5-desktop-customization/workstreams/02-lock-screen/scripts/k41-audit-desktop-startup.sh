@@ -207,14 +207,15 @@ fi
 section 'PREVIOUS INSTALLED LOCK HELPER BACKUPS'
 helper_backup_root="$HOME/.local/state/k41/lockscreen/helper-backups"
 if [[ -d $helper_backup_root && ! -L $helper_backup_root ]]; then
-    while IFS= read -r -d '' backup_file; do
+    while IFS= read -r backup_name; do
+        [[ -n $backup_name ]] || continue
+        backup_file="$helper_backup_root/$backup_name"
         [[ -f $backup_file && ! -L $backup_file ]] || continue
-        printf '\\n-- BACKUP %s --\\n' "${backup_file#"$HOME"/}" | redact >>"$report"
+        printf '\n-- BACKUP %s --\n' "${backup_file#"$HOME"/}" | redact >>"$report"
         stat -c 'mode=%A uid=%u gid=%g size=%s' "$backup_file" 2>&1 | redact >>"$report" || true
         if have sha256sum; then sha256sum "$backup_file" 2>&1 | redact >>"$report" || true; fi
         sed -n '1,320p' "$backup_file" | redact >>"$report" || true
-    done < <(find "$helper_backup_root" -maxdepth 1 -type f -name 'k41-lock-caelestia-after-start-*.sh' -printf '%T@ %p\\0' 2>/dev/null |
-        sort -zr | cut -z -d' ' -f2- | head -z -n 3)
+    done < <(find "$helper_backup_root" -maxdepth 1 -type f -name 'k41-lock-caelestia-after-start-*.sh' -printf '%T@ %f\n' 2>/dev/null | sort -nr | head -n 3 | cut -d' ' -f2-)
 else
     note 'No previous installed lock helper backups found.'
 fi
