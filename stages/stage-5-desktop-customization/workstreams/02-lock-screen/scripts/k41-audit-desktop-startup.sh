@@ -9,7 +9,7 @@ have() { command -v "$1" >/dev/null 2>&1; }
 
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in git stat date mkdir chmod uname id who tty ps awk grep sed tail find python3 cp rm mktemp rmdir tr; do
+for cmd in git stat date mkdir chmod uname id who tty ps awk grep sed tail find python3 cp rm mktemp rmdir tr timeout; do
     have "$cmd" || die "Command wajib tidak tersedia: $cmd"
 done
 
