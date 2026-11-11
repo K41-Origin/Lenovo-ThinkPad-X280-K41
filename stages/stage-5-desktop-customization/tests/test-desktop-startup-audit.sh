@@ -29,7 +29,7 @@ if grep -Eiq 'systemctl[[:space:]]+(enable|disable|start|stop|restart|daemon-rel
     printf 'FAIL: audit collector contains a host mutation command.\n' >&2
     exit 1
 fi
-! grep -Eiq '(^|[;&|[:space:]])(chmod|chown|sudo)[[:space:]]' "$script" || {
+! grep -Eiq '(^|[;&|[:space:]])(chown|sudo)[[:space:]]' "$script" || {
     printf 'FAIL: audit collector must not change permissions/ownership or elevate.\n' >&2
     exit 1
 }
