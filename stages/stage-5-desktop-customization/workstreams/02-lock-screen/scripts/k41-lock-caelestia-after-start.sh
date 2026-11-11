@@ -41,9 +41,9 @@ chmod 0600 "$log_file"
 exec >>"$log_file" 2>&1
 
 log "Lock startup helper started."
-log "Readiness budget: ${K41_LOCK_READY_TIMEOUT :-30}s; verification attempts: ${K41_LOCK_VERIFY_RETRIES:-10}."
+log "Readiness budget: ${K41_LOCK_READY_TIMEOUT:-30}s; verification attempts: ${K41_LOCK_VERIFY_RETRIES:-10}."
 
-ready_timeout=${K41_LOCK_READY_TIMEOUT :-30}
+ready_timeout=${K41_LOCK_READY_TIMEOUT:-30}
 interval=${K41_LOCK_INTERVAL:-1}
 verify_attempts=${K41_LOCK_VERIFY_RETRIES:-10}
 command_timeout=${K41_LOCK_COMMAND_TIMEOUT:-1}
