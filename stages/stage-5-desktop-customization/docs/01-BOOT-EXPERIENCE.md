@@ -54,9 +54,9 @@ Source visual kanonis:
 
 Audit statis awal pada branch main menemukan:
 - Installer k41-configure-boot-experience.sh memanggil k41-install-animated-boot-splash.sh, mensyaratkan qs, dan menyiapkan QML overlay. Ini bertentangan dengan keputusan Plymouth-only.
-- Terdapat QML config/quickshell/k41-boot-splash/shell.qml dan installer Quickshell boot splash.
-- Helper lock masih mengelola PID splash Quickshell.
-- Test test-animated-boot-splash.sh dan test-plymouth-k41-theme.sh secara eksplisit mewajibkan QML/Quickshell.
+- Source QML dan installer Quickshell boot splash legacy telah dihapus dari branch aktif.
+- Helper lock tidak lagi mengelola PID splash Quickshell.
+- Test lama yang mensyaratkan QML diganti dengan test-plymouth-only-boot.sh; test tema Plymouth tidak lagi memerlukan QML.
 - Installer konfigurasi boot juga mengubah mkinitcpio hooks, kernel cmdline, theme, UKI, systemd units, getty autologin, dan menawarkan TPM2 enrollment. Ini terlalu banyak side effect dalam satu alur dan berisiko untuk dijalankan sebelum audit kondisi perangkat.
 - Installer tema Plymouth mensyaratkan path /efi, preset linux.preset, dan UKI /efi/EFI/Linux/arch-linux.efi; asumsi ini harus dicocokkan dengan hasil audit aktual.
 - Test yang ada dominan static string assertions; test tersebut tidak membuktikan firmware boot, prompt LUKS, timing Plymouth, TPM unlock, atau transisi desktop.
@@ -77,7 +77,15 @@ Collector menginventarisasi firmware/UEFI, Secure Boot status yang dapat dibaca,
 
 Collector read-only terhadap konfigurasi sistem. Output tetap perlu ditinjau dan disamarkan sebelum dibagikan karena dapat memuat identifier perangkat, UUID, label disk, firmware detail, path, dan log. Jangan pernah membagikan passphrase, recovery key, LUKS key material, token, atau credential.
 
-## Perubahan repository yang sudah dilakukan\n\n- Installer konfigurasi boot tidak lagi mensyaratkan Quickshell atau memanggil installer QML splash.\n- Helper lock tidak lagi mengelola PID Quickshell overlay; marker lock menjadi handoff untuk lifecycle Plymouth/systemd.\n- Source QML dan installer boot splash Quickshell legacy dihapus dari branch aktif.\n- Test Plymouth-only baru ditambahkan ke manifest global, bersama test static safety untuk audit collector.\n- Perubahan ini adalah IMPLEMENTED di repository; belum membuktikan kondisi boot pada laptop.\n\n## Urutan kerja yang disepakati
+## Perubahan repository yang sudah dilakukan
+
+- Installer konfigurasi boot tidak lagi mensyaratkan Quickshell atau memanggil installer QML splash.
+- Helper lock tidak lagi mengelola PID Quickshell overlay; marker lock menjadi handoff untuk lifecycle Plymouth/systemd.
+- Source QML dan installer boot splash Quickshell legacy dihapus dari branch aktif.
+- Test Plymouth-only baru ditambahkan ke manifest global, bersama test static safety untuk audit collector.
+- Perubahan ini adalah IMPLEMENTED di repository; belum membuktikan kondisi boot pada laptop.
+
+## Urutan kerja yang disepakati
 
 1. **Audit repository (read-only):** seluruh script, theme, tests, docs, CI, dan referensi silang Workstream 01.
 2. **Audit perangkat (read-only):** kumpulkan laporan menggunakan audit script; tidak mengubah konfigurasi.
