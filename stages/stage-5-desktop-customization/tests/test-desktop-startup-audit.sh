@@ -20,7 +20,7 @@ for token in \
     'read-only' \
     'publish_report()' \
     'git -C "$publish_dir" push origin HEAD:main' \
-    'git worktree add --detach' \
+    'git -C "$publish_dir" worktree add --detach' \
     'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON' \
     'Installed helper byte comparison' \
     'INSTALLED K41 LOCK VISUAL SOURCE COMPARISON' \
