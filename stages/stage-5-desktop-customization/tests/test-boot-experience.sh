@@ -9,7 +9,6 @@ INSTALLER="$WS/scripts/k41-install-plymouth-theme.sh"
 [[ -f $CONFIGURE && -f $INSTALLER ]]
 bash -n "$CONFIGURE"
 bash -n "$INSTALLER"
-bash -n "$WS/scripts/k41-lock-caelestia-after-start.sh"
 bash -n "$WS/scripts/k41-start-hyprland.sh"
 bash -n "$WS/scripts/k41-plymouth-quit-after-lock.sh"
 
