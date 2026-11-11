@@ -150,7 +150,7 @@ Jalankan dari checkout repository pada TTY 2:
 bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
 ```
 
-Setelah report tersedia di repository dan dipush, audit log untuk menentukan titik kegagalan sebelum melakukan perubahan implementasi. Jangan jalankan deployer visual Lock Screen atau mengubah PAM/session-lock selama desktop startup belum stabil.
+Setelah report otomatis tersedia di repository, audit log untuk menentukan titik kegagalan sebelum melakukan perubahan implementasi. Jangan jalankan deployer visual Lock Screen atau mengubah PAM/session-lock selama desktop startup belum stabil.
 
 ### Batas status
 
