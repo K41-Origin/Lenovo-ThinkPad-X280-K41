@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Safely update the user-local Caelestia lock startup helper from Workstream 02.
-# The existing helper is backed up before the single user-local executable is replaced.
+# Install the bounded lock helper and managed Hyprlock fallback, then remove
+# duplicate Caelestia startup and obsolete non-Plymouth splash commands from
+# the exact K41 block in the user's Hyprland Lua config.
 set -Eeuo pipefail
 umask 077
 
@@ -11,7 +12,7 @@ info() { printf 'INFO: %s\n' "$*"; }
 [[ $# -eq 0 ]] || die 'This updater takes no arguments.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME is missing or invalid.'
 
-for command_name in git stat date mkdir cp chmod install bash mktemp mv cmp sha256sum awk rm; do
+for command_name in git stat date mkdir cp chmod install bash mktemp mv cmp sha256sum awk rm python3 grep; do
     command -v "$command_name" >/dev/null 2>&1 || die "Required command is unavailable: $command_name"
 done
 
@@ -25,71 +26,175 @@ repo_root="$(cd -- "$repo_root" && pwd -P)"
     die 'Repository checkout is not owned by the current user.'
 
 source_helper="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lock-caelestia-after-start.sh"
+source_config="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/hyprlock-fallback.conf"
 bin_root="$HOME/.local/bin"
-target="$bin_root/k41-lock-caelestia-after-start"
+target_helper="$bin_root/k41-lock-caelestia-after-start"
+config_root="$HOME/.config"
+k41_config="$config_root/k41"
+target_config="$k41_config/hyprlock-fallback.conf"
+hypr_root="$config_root/hypr"
+hypr_conf="$hypr_root/hyprland.conf"
+hypr_lua="$hypr_root/hyprland.lua"
 state_root="$HOME/.local/state"
-k41_state="$state_root/k41"
-lock_state="$k41_state/lockscreen"
-backup_root="$lock_state/helper-backups"
+lock_state="$state_root/k41/lockscreen"
+backup_root="$lock_state/config-backups"
 
 [[ -f $source_helper && ! -L $source_helper && -s $source_helper ]] ||
     die "Workstream 02 lock helper source is missing or unsafe: $source_helper"
+[[ -f $source_config && ! -L $source_config && -s $source_config ]] ||
+    die "Managed Hyprlock fallback config source is missing or unsafe: $source_config"
 bash -n "$source_helper" || die 'Workstream 02 lock helper has invalid Bash syntax.'
+grep -Fq -- '--config' "$source_helper" || die 'Lock helper does not pass an explicit Hyprlock config.'
+grep -Fq 'input-field {' "$source_config" || die 'Fallback config has no password input field.'
 
-for path in "$HOME/.local" "$bin_root" "$state_root" "$k41_state" "$lock_state" "$backup_root"; do
+command -v hyprlock >/dev/null 2>&1 || die 'hyprlock is not installed; install it before using this updater.'
+hyprlock --help 2>&1 | grep -Fq -- '--config' ||
+    die 'Installed hyprlock does not advertise --config support.'
+
+for path in "$HOME/.local" "$bin_root" "$state_root" "$config_root" "$k41_config" "$hypr_root" "$state_root/k41" "$lock_state" "$backup_root"; do
     [[ ! -L $path ]] || die "Refusing symlinked user path: $path"
     [[ ! -e $path || -d $path ]] || die "User path is not a directory: $path"
     if [[ -e $path ]]; then
         [[ $(stat -c %u -- "$path") == "$EUID" ]] || die "User path is not owned by the current account: $path"
     fi
 done
+[[ -f $hypr_conf && ! -L $hypr_conf && -f $hypr_lua && ! -L $hypr_lua ]] ||
+    die 'Expected regular ~/.config/hypr/hyprland.conf and hyprland.lua files.'
 
-mkdir -p -- "$bin_root" "$backup_root"
-[[ -d $bin_root && ! -L $bin_root && $(stat -c %u -- "$bin_root") == "$EUID" ]] ||
-    die 'Cannot establish a user-owned ~/.local/bin directory.'
-[[ -d $backup_root && ! -L $backup_root && $(stat -c %u -- "$backup_root") == "$EUID" ]] ||
-    die 'Cannot establish a user-owned helper backup directory.'
+# Keep the single shell startup in hyprland.conf. The Lua hook only starts the
+# readiness helper; launching Caelestia from both files caused duplicate shells.
+conf_start_count="$(grep -Ec '^[[:space:]]*exec-once[[:space:]]*=[[:space:]]*caelestia shell -d[[:space:]]*$' "$hypr_conf" || true)"
+[[ $conf_start_count == 1 ]] ||
+    die "Expected exactly one 'exec-once = caelestia shell -d' in hyprland.conf; found $conf_start_count. No changes made."
 
-if [[ -e $target || -L $target ]]; then
-    [[ -f $target && ! -L $target ]] || die "Installed helper is not a regular file: $target"
-    [[ $(stat -c %u -- "$target") == "$EUID" ]] || die 'Installed helper is not owned by the current user.'
-    if cmp -s "$source_helper" "$target"; then
-        info 'Installed lock helper already matches Workstream 02 source; no changes made.'
-        exit 0
-    fi
-fi
+mkdir -p -- "$bin_root" "$k41_config" "$backup_root"
+for path in "$bin_root" "$k41_config" "$backup_root"; do
+    [[ -d $path && ! -L $path && $(stat -c %u -- "$path") == "$EUID" ]] ||
+        die "Cannot establish a user-owned directory: $path"
+done
 
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-backup=""
-if [[ -f $target ]]; then
-    backup="$backup_root/k41-lock-caelestia-after-start-$stamp-${BASHPID}.sh"
-    [[ ! -e $backup && ! -L $backup ]] || die "Backup already exists: $backup"
-    cp -p -- "$target" "$backup"
-    chmod 0600 "$backup"
-    info "Existing helper backed up to: $backup"
-else
-    info 'No installed helper existed; installing the Workstream 02 helper.'
-fi
+backup_one() {
+    local source=$1 label=$2 destination
+    [[ -f $source && ! -L $source ]] || die "Cannot back up unsafe file: $source"
+    destination="$backup_root/$label-$stamp-${BASHPID}.bak"
+    [[ ! -e $destination && ! -L $destination ]] || die "Backup already exists: $destination"
+    cp -p -- "$source" "$destination"
+    chmod 0600 "$destination"
+    info "Backup created: $destination"
+}
 
-temporary="$(mktemp "$bin_root/.k41-lock-caelestia-after-start.XXXXXX")" ||
-    die 'Cannot create temporary helper in ~/.local/bin.'
+# Stage the Lua change before writing anything. Refuse ambiguous/unknown blocks.
+lua_stage="$(mktemp "$hypr_root/.hyprland.lua.k41-stage.XXXXXX")"
 cleanup() {
-    [[ -z ${temporary:-} || ! -e $temporary ]] || rm -f -- "$temporary"
+    [[ -z ${lua_stage:-} || ! -e $lua_stage ]] || rm -f -- "$lua_stage"
+    [[ -z ${helper_stage:-} || ! -e $helper_stage ]] || rm -f -- "$helper_stage"
+    [[ -z ${config_stage:-} || ! -e $config_stage ]] || rm -f -- "$config_stage"
 }
 trap cleanup EXIT
 
-install -m 0755 -- "$source_helper" "$temporary"
-bash -n "$temporary" || die 'Staged helper failed Bash syntax validation.'
-cmp -s "$source_helper" "$temporary" || die 'Staged helper differs from repository source.'
-mv -f -- "$temporary" "$target"
-temporary=""
+python3 - "$hypr_lua" "$lua_stage" <<'PY'
+from pathlib import Path
+import re
+import sys
 
-cmp -s "$source_helper" "$target" || die 'Installed helper failed byte-for-byte verification.'
-[[ -x $target && ! -L $target && $(stat -c %u -- "$target") == "$EUID" ]] ||
-    die 'Installed helper has unexpected type, ownership, or executable state.'
+source, destination = map(Path, sys.argv[1:])
+text = source.read_text()
+start = "-- K41 CAELESTIA AUTOLOCK START"
+end = "-- K41 CAELESTIA AUTOLOCK END"
+if text.count(start) != 1 or text.count(end) != 1:
+    raise SystemExit("Expected exactly one K41 Caelestia autolock block; refusing an ambiguous edit.")
+before, rest = text.split(start, 1)
+block, after = rest.split(end, 1)
+lines = block.splitlines(keepends=True)
 
-info 'Workstream 02 lock startup helper updated and verified.'
-info "Installed helper: $target"
-info "SHA-256: $(sha256sum "$target" | awk '{print $1}')"
-[[ -z $backup ]] || info "Rollback copy: $backup"
-info 'No system service, package, Plymouth, getty, PAM, authentication, bootloader, or initramfs state was changed.'
+helper_lines = [line for line in lines if "k41-lock-caelestia-after-start" in line]
+if len(helper_lines) != 1:
+    raise SystemExit(f"Expected exactly one K41 lock-helper invocation in Lua block; found {len(helper_lines)}.")
+
+splash_lines = [line for line in lines if "qs -c k41-boot-splash" in line]
+if len(splash_lines) > 1:
+    raise SystemExit("Multiple legacy K41 boot-splash invocations found; refusing automatic cleanup.")
+caelestia_lines = [line for line in lines if "caelestia shell -d" in line]
+if len(caelestia_lines) > 1:
+    raise SystemExit("Multiple duplicate Caelestia startup commands found in Lua block; refusing automatic cleanup.")
+
+cleaned = []
+for line in lines:
+    if "qs -c k41-boot-splash" in line:
+        continue
+    if "caelestia shell -d" in line:
+        continue
+    if line.strip() == "-- K41 ANIMATED BOOT SPLASH START":
+        continue
+    cleaned.append(line)
+
+new_block = "".join(cleaned)
+if "qs -c k41-boot-splash" in new_block or "caelestia shell -d" in new_block:
+    raise SystemExit("Legacy startup command remains after transformation.")
+if sum("k41-lock-caelestia-after-start" in line for line in cleaned) != 1:
+    raise SystemExit("K41 lock-helper invocation was not preserved exactly once.")
+destination.write_text(before + start + new_block + end + after)
+PY
+
+[[ -s $lua_stage ]] || die 'Staged Hyprland Lua config is empty.'
+if ! cmp -s "$hypr_lua" "$lua_stage"; then
+    info 'Hyprland Lua config contains the expected duplicate Caelestia/splash startup entries; a focused patch is staged.'
+else
+    info 'Hyprland Lua startup block is already normalized.'
+fi
+
+helper_stage="$(mktemp "$bin_root/.k41-lock-helper.XXXXXX")"
+config_stage="$(mktemp "$k41_config/.hyprlock-fallback.XXXXXX")"
+install -m 0755 -- "$source_helper" "$helper_stage"
+install -m 0600 -- "$source_config" "$config_stage"
+bash -n "$helper_stage" || die 'Staged lock helper failed Bash syntax validation.'
+cmp -s "$source_helper" "$helper_stage" || die 'Staged lock helper differs from repository source.'
+cmp -s "$source_config" "$config_stage" || die 'Staged fallback config differs from repository source.'
+
+# Preserve every pre-existing target before replacing it.
+if [[ -e $target_helper || -L $target_helper ]]; then
+    [[ -f $target_helper && ! -L $target_helper && $(stat -c %u -- "$target_helper") == "$EUID" ]] ||
+        die 'Installed helper target is not a regular user-owned file.'
+    cmp -s "$source_helper" "$target_helper" || backup_one "$target_helper" 'lock-helper'
+fi
+if [[ -e $target_config || -L $target_config ]]; then
+    [[ -f $target_config && ! -L $target_config && $(stat -c %u -- "$target_config") == "$EUID" ]] ||
+        die 'Hyprlock config target is not a regular user-owned file.'
+    cmp -s "$source_config" "$target_config" || backup_one "$target_config" 'hyprlock-config'
+fi
+if ! cmp -s "$hypr_lua" "$lua_stage"; then
+    backup_one "$hypr_lua" 'hyprland-lua'
+fi
+
+mv -f -- "$helper_stage" "$target_helper"
+helper_stage=""
+mv -f -- "$config_stage" "$target_config"
+config_stage=""
+if ! cmp -s "$hypr_lua" "$lua_stage"; then
+    lua_mode="$(stat -c %a -- "$hypr_lua")"
+    chmod "$lua_mode" "$lua_stage"
+    mv -f -- "$lua_stage" "$hypr_lua"
+    lua_stage=""
+fi
+
+cmp -s "$source_helper" "$target_helper" || die 'Installed lock helper failed byte-for-byte verification.'
+cmp -s "$source_config" "$target_config" || die 'Installed fallback config failed byte-for-byte verification.'
+[[ -x $target_helper && -f $target_config && ! -L $target_config ]] ||
+    die 'Installed helper/config failed final type or executable checks.'
+grep -Fq -- '--config' "$target_helper" || die 'Installed helper does not use explicit fallback config.'
+if grep -Fq 'qs -c k41-boot-splash' "$hypr_lua" ||
+   grep -Fq 'caelestia shell -d' "$hypr_lua"; then
+    die 'Legacy duplicate startup directive remains in Hyprland Lua config.'
+fi
+grep -Fq 'k41-lock-caelestia-after-start' "$hypr_lua" ||
+    die 'K41 lock readiness helper invocation is missing from Hyprland Lua config.'
+
+info 'Workstream 02 runtime preparation completed.'
+info "Installed helper: $target_helper"
+info "Installed fallback config: $target_config"
+info "Hyprland Lua config normalized: $hypr_lua"
+info "Helper SHA-256: $(sha256sum "$target_helper" | awk '{print $1}')"
+info "Fallback config SHA-256: $(sha256sum "$target_config" | awk '{print $1}')"
+info 'Only user-local helper/config and the exact K41 Lua startup block were changed.'
+info 'No system service, package, Plymouth, getty, PAM, authentication, bootloader, initramfs, or system configuration was changed.'

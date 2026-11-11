@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Start and verify the Caelestia session lock before publishing the Plymouth handoff marker.
-# This is lock-screen orchestration and is owned by Workstream 02.
+# Hyprlock fallback uses a repository-managed config passed explicitly with --config.
 set -Eeuo pipefail
 umask 077
 
@@ -81,24 +81,29 @@ mark_ready() {
     log 'Readiness marker published.'
 }
 
+last_ipc_output=''
 lock_ipc_ready() {
     local listing
-    listing="$(timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell -s 2>/dev/null)" ||
+    if ! listing="$(timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell -s 2>&1)"; then
+        last_ipc_output=$listing
         return 1
-    grep -Eq 'target[[:space:]]+lock([[:space:]]|$)' <<<"$listing" &&
-        grep -Eq 'function[[:space:]]+isLocked\(\):[[:space:]]*bool' <<<"$listing"
+    fi
+    if grep -Eq 'target[[:space:]]+lock([[:space:]]|$)' <<<"$listing" &&
+       grep -Eq 'function[[:space:]]+isLocked\(\):[[:space:]]*bool' <<<"$listing"; then
+        return 0
+    fi
+    last_ipc_output=$listing
+    return 1
 }
 
 is_locked() {
     local state
-    state="$(timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell lock isLocked 2>/dev/null)" ||
+    state="$(timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell lock isLocked 2>&1)" ||
         return 1
     [[ $state =~ ^[[:space:]]*true[[:space:]]*$ ]]
 }
 
-# Bound the IPC discovery phase independently from lock-state verification.
-# The previous nested retry loops could consume up to 45 x (10 + 1) seconds,
-# exceeding the 75-second Plymouth handoff timeout and preventing fallback.
+# Discovery and verification are separate bounded phases. No nested retry multiplication.
 deadline=$((SECONDS + ready_timeout))
 ipc_ready=0
 while (( SECONDS < deadline )); do
@@ -122,25 +127,34 @@ if (( ipc_ready == 1 )); then
             log "Caelestia lock state not yet verified ($attempt/$verify_attempts)."
             sleep "$interval"
         done
-        log "Caelestia lock did not reach verified state within the bounded verification window."
+        log 'Caelestia lock did not reach verified state within the bounded verification window.'
     else
         log 'Caelestia lock IPC rejected or timed out on the lock request.'
     fi
 else
     log "Caelestia lock IPC did not become ready within ${ready_timeout}s."
+    if [[ -n $last_ipc_output ]]; then
+        log "Last Caelestia IPC response: ${last_ipc_output:0:1200}"
+    else
+        log 'Caelestia IPC returned no diagnostic output.'
+    fi
 fi
 
-# Fallback is reached after one bounded readiness phase and one bounded
-# verification phase; it is never multiplied by the outer IPC retry count.
+# The fallback must use a known, managed config; never depend on an implicit search path.
 if ! command -v hyprlock >/dev/null 2>&1; then
     die 'Caelestia lock was not verified and Hyprlock fallback is unavailable.'
 fi
+hyprlock_config="$HOME/.config/k41/hyprlock-fallback.conf"
+[[ -f $hyprlock_config && ! -L $hyprlock_config && -s $hyprlock_config ]] ||
+    die "Managed Hyprlock fallback config is missing or unsafe: $hyprlock_config"
+[[ $(stat -c %u -- "$hyprlock_config") == "$EUID" ]] ||
+    die 'Managed Hyprlock fallback config is not owned by the desktop user.'
 
-log 'Starting Hyprlock fallback.'
-hyprlock &
+log "Starting Hyprlock fallback with explicit config: $hyprlock_config"
+hyprlock --config "$hyprlock_config" &
 lock_pid=$!
 sleep 1
-if ! kill -0 "$lock_pid" 2>/dev/null; then
+if ! jobs -pr | grep -Fxq "$lock_pid"; then
     set +e
     wait "$lock_pid"
     fallback_status=$?
