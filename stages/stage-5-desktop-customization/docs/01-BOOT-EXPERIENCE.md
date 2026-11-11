@@ -48,7 +48,7 @@ Source visual kanonis:
 - workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth
 - workstreams/01-boot-experience/themes/plymouth/k41/k41.script
 
-**Tidak ada source QML untuk boot splash dalam arsitektur target.** File QML dan installer Quickshell lama yang ditemukan dalam audit diperlakukan sebagai legacy/conflicting implementation; keduanya tidak boleh menjadi dependency, dipanggil oleh installer, atau dimasukkan ke alur boot target. Penghapusan file legacy dilakukan setelah referensi, rollback, dan test dimigrasikan secara aman.
+**Tidak ada source QML untuk boot splash dalam arsitektur target.** File QML dan installer Quickshell lama yang ditemukan dalam audit diperlakukan sebagai legacy/conflicting implementation; keduanya tidak boleh menjadi dependency, dipanggil oleh installer, atau dimasukkan ke alur boot target. Artefak QML/installer boot splash legacy telah dihapus dari branch aktif setelah referensi installer dan test dimigrasikan; Git history tetap menyimpan histori.
 
 ## Hasil audit repository (11 November 2026)
 
@@ -77,7 +77,7 @@ Collector menginventarisasi firmware/UEFI, Secure Boot status yang dapat dibaca,
 
 Collector read-only terhadap konfigurasi sistem. Output tetap perlu ditinjau dan disamarkan sebelum dibagikan karena dapat memuat identifier perangkat, UUID, label disk, firmware detail, path, dan log. Jangan pernah membagikan passphrase, recovery key, LUKS key material, token, atau credential.
 
-## Urutan kerja yang disepakati
+## Perubahan repository yang sudah dilakukan\n\n- Installer konfigurasi boot tidak lagi mensyaratkan Quickshell atau memanggil installer QML splash.\n- Helper lock tidak lagi mengelola PID Quickshell overlay; marker lock menjadi handoff untuk lifecycle Plymouth/systemd.\n- Source QML dan installer boot splash Quickshell legacy dihapus dari branch aktif.\n- Test Plymouth-only baru ditambahkan ke manifest global, bersama test static safety untuk audit collector.\n- Perubahan ini adalah IMPLEMENTED di repository; belum membuktikan kondisi boot pada laptop.\n\n## Urutan kerja yang disepakati
 
 1. **Audit repository (read-only):** seluruh script, theme, tests, docs, CI, dan referensi silang Workstream 01.
 2. **Audit perangkat (read-only):** kumpulkan laporan menggunakan audit script; tidak mengubah konfigurasi.
