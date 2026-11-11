@@ -4,7 +4,7 @@ Stage 5 mengerjakan customization desktop secara bertahap dan satu workstream pa
 
 ## Batas fondasi k41-dots
 
-Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots** karena jalur boot/splash menggunakan Plymouth. Workstream 01 tetap menjadi bagian dari proyek utama, tetapi bukan komponen, dependency, atau backlog k41-dots. Artefak Quickshell boot splash lama tidak mengubah keputusan scope ini.
+Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Statusnya REOPENED — AUDIT REQUIRED; boot splash wajib menggunakan Plymouth sebagai satu-satunya renderer, 100% tanpa QML/Quickshell. Workstream 01 tetap bagian dari proyek utama, tetapi bukan komponen, dependency, atau backlog k41-dots. Artefak Quickshell boot splash legacy telah dihapus dari branch aktif.
 
 ## Urutan workstream
 
