@@ -184,6 +184,18 @@ for base in "$HOME/.config/hypr" "$HOME/.config/quickshell/caelestia" "$HOME/.co
         sort | head -n 200 | redact >>"$report" || true
 done
 
+section 'BOOT HANDOFF UNIT CONFIGURATION (selected directives only)'
+for unit_file in \
+    /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf \
+    /etc/systemd/system/k41-plymouth-release.service \
+    /etc/systemd/system/k41-plymouth-release.service.d/*.conf \
+    /etc/systemd/system/getty@tty1.service.d/k41-autologin.conf; do
+    [[ -f $unit_file && ! -L $unit_file ]] || continue
+    printf '\\n-- %s --\\n' "$unit_file" | redact >>"$report"
+    grep -nE '^[[:space:]]*(Description|Type|User|Group|ExecStart|ExecStartPre|ExecStartPost|ExecStop|After|Before|Wants|Requires|WantedBy|PartOf|TimeoutStartSec|Restart|RestartSec)[[:space:]]*=' "$unit_file" |
+        redact >>"$report" || true
+done
+
 section 'HYPRLAND STARTUP LOG'
 startup_log="$HOME/.local/state/k41/hyprland-startup.log"
 if [[ -f $startup_log && ! -L $startup_log ]]; then
@@ -210,7 +222,6 @@ section 'HYPRLAND IPC (only succeeds if compositor is running)'
 run 'HYPRLAND INSTANCES' hyprctl instances
 run 'HYPRLAND VERSION VIA IPC' hyprctl version
 run 'HYPRLAND MONITORS' hyprctl monitors
-run 'HYPRLAND CLIENTS' hyprctl clients
 
 section 'GRAPHICS DEVICE INVENTORY'
 run 'DRM DEVICE NODES' ls -l /dev/dri
