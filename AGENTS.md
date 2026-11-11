@@ -44,7 +44,7 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 
 ## Current project decisions
 
-- Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **COMPLETED / USER ACCEPTED pada 2026-11-10**.
+- Stage 5 adalah tahap aktif. Workstream 1 — Boot Experience **REOPENED — AUDIT REQUIRED pada 2026-11-11**. Keputusan baru: boot splash/animasi 100% menggunakan Plymouth sebagai satu-satunya renderer; tidak boleh ada QML/Quickshell dalam boot path. Status COMPLETED / USER ACCEPTED pada 2026-11-10 adalah histori.
 - Workstream 2 — Lock Screen **COMPLETED / USER ACCEPTED pada 2026-11-10**.
 - **Dashboard dihapus dari daftar workstream Stage 5 pada 2026-11-11.** Fitur runtime dinonaktifkan melalui `k41-cleanup-caelestia.sh`; jangan menghapus source QML upstream atau menambahkan dashboard kembali.
 - **Workstream 04 — Bottombar / K41Dock COMPLETED / USER CONFIRMED SUCCESS.** Source kanonis berada di repository pada `workstreams/04-taskbar-panel/`; source runtime berada di bawah `~/.config/quickshell/caelestia/`. Lihat dokumen Bottombar.
@@ -55,7 +55,7 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
 - Stage 5 menjadi fondasi bertahap **k41-dots**; hindari asumsi perlu membangun shell mandiri penuh atau mengganti Caelestia.
-- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots** karena boot/splash ditangani Plymouth. Jangan memasukkan komponen Quickshell boot splash lama sebagai backlog k41-dots tanpa keputusan baru.
+- **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots**. Boot splash wajib Plymouth-only, 100% tanpa QML/Quickshell. Artefak QML/installer Quickshell lama adalah legacy/conflicting implementation, bukan jalur boot yang disetujui.
 - Source/runtime Quickshell pada laptop berada di bawah `~/.config/quickshell/`; repository menyimpan source kanonis dan installer untuk deployment.
 
 ## Required change process
