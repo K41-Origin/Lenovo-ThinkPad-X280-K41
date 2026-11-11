@@ -14,6 +14,8 @@ done
 
 grep -Fq 'K41_LOCK_READY_TIMEOUT' "$helper" || fail 'lock helper readiness timeout missing'
 grep -Fq 'deadline=$((SECONDS + ready_timeout))' "$helper" || fail 'lock helper does not use a bounded readiness deadline'
+grep -Fq '(( ready_timeout <= 30 ))' "$helper" || fail 'lock helper readiness budget is not capped below the handoff timeout'
+grep -Fq '(( verify_attempts <= 10 ))' "$helper" || fail 'lock helper verification count is not capped'
 grep -Fq 'for ((attempt = 1; attempt <= verify_attempts; attempt++))' "$helper" ||
     fail 'lock verification is not bounded'
 grep -Fq 'helper-backups' "$updater" || fail 'updater does not preserve the previous helper'
