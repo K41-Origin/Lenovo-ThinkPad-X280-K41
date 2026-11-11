@@ -1,6 +1,6 @@
 # Workstream 02 — Lock Screen
 
-**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen saat ini, dengan konsep Floating Password Card, sudah disetujui pengguna. **Status operasional: BLOCKED — desktop startup regression sedang diaudit; deployment visual baru ditahan sampai Hyprland dapat start secara stabil.** Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
+**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen dengan konsep Floating Password Card sudah disetujui pengguna. **Status operasional: BLOCKED — startup failure terbukti berasal dari lock-readiness handoff yang tidak selesai; penyebab internal Caelestia/helper/QML masih diselidiki.** Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
 
 **Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan automatic deployment/reload: IMPLEMENTED. Status runtime rendering: NOT VERIFIED pada ThinkPad X280.** Source visual Floating Password Card berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject terpisah.
 
@@ -110,52 +110,60 @@ Screenshot bukan acceptance gate.
 Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan bagian dari scope atau acceptance Lock Screen.
 
 
-## Desktop startup regression — audit sebelum melanjutkan migrasi visual
+## Desktop startup regression — temuan audit X280 11 November 2026
 
-Pengguna melaporkan bahwa setelah menjalankan ulang installer tema Plymouth dan reboot, sistem berhenti pada TTY 2, bukan masuk ke desktop. Percobaan menjalankan `start-hyprland` secara manual dari TTY mengalami stuck saat loading.
+Report aktual: `reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261111T070139Z/report.txt`.
 
-Gejala tersebut belum membuktikan bahwa modul Lock Screen menyebabkan kegagalan. Jalur yang harus dibedakan adalah:
-1. tty1 autologin dan Bash login profile;
-2. wrapper `k41-start-hyprland` serta upstream `start-hyprland`;
-3. startup Hyprland, konfigurasi Lua, GPU/DRM dan Wayland;
-4. pemanggilan Caelestia/Quickshell dari event `hyprland.start`;
-5. Caelestia lock IPC, helper lock, dan Plymouth handoff;
-6. timeout helper yang dapat menghentikan `getty@tty1` dan berpindah ke tty2.
+### Fakta yang sudah VERIFIED
 
-Laporan Workstream 01 sebelumnya memang mencatat `k41-plymouth-release.service`, `plymouth-quit.service` drop-in, tty1 autologin, dan lock handoff timeout 75 detik. Itu merupakan petunjuk audit, bukan bukti akar masalah. Jangan menganggap TTY 2 sebagai kerusakan Plymouth sebelum journal membuktikan urutan kejadian.
+1. Hyprland session mencapai target sekitar 19 detik setelah boot; `xdg-desktop-portal-hyprland` berhasil terhubung ke Wayland. Jadi boot pertama tidak berhenti sebelum compositor/session mulai.
+2. Pada sekitar 91.58 detik, journal mencatat: `Lock screen did not become ready within 75s; stopping tty1 autologin and releasing Plymouth.`
+3. `getty@tty1.service` kemudian dihentikan, `getty@tty2.service` dimulai, dan Hyprland session berhenti sekitar 101.87 detik.
+4. Dengan demikian, perpindahan ke TTY2 merupakan akibat langsung dari fail-safe timeout Workstream 01. Pemicu timeout adalah tidak adanya readiness marker dari jalur Caelestia lock.
+5. Ketika pengguna mencoba `start-hyprland` secara manual dari TTY2, proses kemudian core-dump dengan `std::system_error: Resource deadlock avoided`. Kejadian ini muncul setelah fallback dan bukan bukti penyebab awal boot gagal.
 
-### Script audit baru
+### Temuan source dan runtime yang perlu ditelusuri
 
-Script read-only:
-`workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh`
+- Hyprland Lua config yang dikumpulkan menunjukkan hook `hyprland.start` menjalankan `caelestia shell -d`, lalu helper `k41-lock-caelestia-after-start`.
+- `caelestia`, `hyprlock`, `quickshell`, dan Hyprland tersedia pada sistem. Versi Hyprland saat report: `0.57.1`.
+- File helper terpasang `~/.local/bin/k41-lock-caelestia-after-start` berukuran 2527 byte, sedangkan source repository yang diperiksa berukuran 2152 byte. Collector lama hanya mengambil metadata, bukan isi/hash helper; perbedaan ukuran belum membuktikan helper stale atau rusak, tetapi harus diperiksa sebelum mengubah logic.
+- File QML runtime menunjukkan file K41 visual pernah dideploy, tetapi ukuran file saja tidak membuktikan byte-identical dengan source. Audit berikutnya membandingkan checksum/isi empat file.
+- Audit lama tidak merekam log startup Quickshell/Caelestia secara memadai. Karena itu belum diketahui apakah `caelestia shell -d` gagal, QML lock surface gagal dimuat saat lock diminta, IPC tidak tersedia, atau fallback Hyprlock langsung keluar.
+- `hyprland.lua` memuat sisa directive `qs -c k41-boot-splash`. Directive ini tidak sesuai keputusan proyek bahwa Plymouth adalah satu-satunya boot splash; keberadaannya perlu dipastikan dan dibersihkan secara terkontrol setelah isi file aktual dan asalnya diverifikasi. Jangan mengasumsikan directive ini adalah root cause.
 
-Script dapat dijalankan dari TTY 2 sebagai user desktop biasa (tanpa sudo); tidak memerlukan sesi Wayland/Hyprland aktif. Ia mengumpulkan:
-- TTY aktif, login sessions, getty tty1/tty2, target systemd, failed units, dan state unit boot/lock;
-- user systemd session dan layanan terkait;
-- nama proses tanpa argumen/environment;
-- versi executable dan paket Hyprland, start-hyprland, Quickshell, dan Caelestia;
-- metadata file startup, Bash profile K41, integrasi startup Hyprland, serta inventory konfigurasi;
-- `~/.local/state/k41/hyprland-startup.log` dan log terkait yang tersedia;
-- Hyprland IPC bila compositor ternyata aktif;
-- inventory DRM/GPU;
-- journal boot sekarang, boot sebelumnya, dan user journal dengan filter startup/session.
+### Analisis `start-hyprland`
 
-Report disimpan di:
-`reports/stage-5-desktop-customization/02-lock-screen/startup-audits/<timestamp>/`
+Report mencatat `start-hyprland` versi 0.57.1 dan abort `Resource deadlock avoided` pada percobaan manual dari TTY2. Upstream merilis 0.57.2 pada 9 November 2026 dengan beberapa perbaikan, termasuk penanganan child process yang dihentikan oleh signal. Ini kandidat perbaikan untuk crash sekunder, tetapi belum membuktikan atau memperbaiki kegagalan Caelestia lock readiness. Jangan menyamakan dua gejala tersebut.
 
-Izin report dibatasi ke user (direktori 0700, file 0600). Collector tidak menjalankan `start-hyprland`, tidak reload Caelestia, tidak mengubah konfigurasi, permission, package, service, bootloader, initramfs, TPM/LUKS, PAM, atau autentikasi. Redaksi otomatis tidak menjamin semua data privat terhapus; report wajib ditinjau sebelum dipush.
+Referensi upstream: https://github.com/hyprwm/Hyprland/releases/tag/v0.57.2
 
-Jalankan dari checkout repository pada TTY 2:
-```bash
-bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
-```
+### Perubahan diagnostik yang sudah dibuat
 
-Setelah report otomatis tersedia di repository, audit log untuk menentukan titik kegagalan sebelum melakukan perubahan implementasi. Jangan jalankan deployer visual Lock Screen atau mengubah PAM/session-lock selama desktop startup belum stabil.
+`workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh` diperluas agar audit berikutnya mengumpulkan:
+- Isi helper lock yang benar-benar terpasang (dengan redaksi), SHA-256, hasil `bash -n`, dan perbandingan byte terhadap source repository.
+- Perbandingan empat file QML visual runtime terhadap source Stage 5.
+- Startup directives dari `hyprland.conf` dan `hyprland.lua`, termasuk sisa `k41-boot-splash`.
+- Log dari direktori state/cache Caelestia dan Quickshell yang lazim.
+- Metadata coredump `start-hyprland` bila `coredumpctl` tersedia.
+
+Collector tetap read-only terhadap host: tidak menjalankan launcher, tidak memanggil lock IPC, tidak mengubah file konfigurasi, service, package, permission, PAM, bootloader, initramfs, TPM/LUKS, atau autentikasi. Report dipublikasikan melalui isolated worktree; tinjau data tersanitasi untuk kemungkinan informasi privat yang lolos redaksi.
+
+### Urutan perbaikan — jangan dilewati
+
+1. Ambil bukti isi/hash helper yang benar-benar terpasang dan bandingkan dengan source repository.
+2. Periksa apakah directive Quickshell boot splash lama masih aktif dan hilangkan hanya dengan migrasi terkontrol; jangan menyentuh Plymouth.
+3. Cocokkan checksum empat QML runtime dengan source K41; bila berbeda, identifikasi file dan backup sebelum deployment apa pun.
+4. Gunakan log Caelestia/Quickshell untuk menentukan apakah shell gagal start atau lock surface gagal dimuat saat IPC lock dipanggil.
+5. Periksa output dan exit status Hyprlock fallback, bukan hanya keberadaan proses sesaat.
+6. Setelah akar masalah terbukti, buat perbaikan minimal pada lock startup path dan test regresi untuk IPC-ready, lock verified, fallback, timeout, dan marker lifecycle.
+7. Verifikasi boot/lock runtime di X280 sebelum melanjutkan visual migration atau menyatakan desktop startup stabil.
 
 ### Batas status
 
-- Audit script dan test: **IMPLEMENTED** setelah perubahan repository.
-- Hasil audit aktual X280: **PENDING**.
-- Root cause: **UNKNOWN / NOT VERIFIED**.
-- Perbaikan startup: **NOT IMPLEMENTED**.
-- Migrasi visual Lock Screen dan runtime acceptance: **PAUSED** sampai jalur Hyprland startup pulih.
+- Desain Floating Password Card: **COMPLETED / USER ACCEPTED**.
+- Empat file source visual: **IMPLEMENTED**; runtime rendering **NOT VERIFIED**.
+- Deployment script dan isolated fixture: **IMPLEMENTED / STATIC TESTED** sesuai cakupan CI.
+- TTY2 fallback karena readiness timeout: **VERIFIED**.
+- Penyebab Caelestia IPC/lock readiness tidak tercapai: **UNKNOWN / UNDER INVESTIGATION**.
+- Perbaikan startup/lock path: **NOT IMPLEMENTED**.
+- Visual deployment lanjutan dan cleanup source upstream: **PAUSED** sampai lock path pulih.
