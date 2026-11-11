@@ -1,37 +1,34 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+
 ROOT="$(git -C "$(dirname -- "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
-SCRIPT="$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh"
+WS="$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience"
+CONFIGURE="$WS/scripts/k41-configure-boot-experience.sh"
+INSTALLER="$WS/scripts/k41-install-plymouth-theme.sh"
 
-[[ -f $SCRIPT ]]
-bash -n "$SCRIPT"
-bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh"
-bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh"
-bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-hyprland-launcher.sh"
-bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-enable-caelestia-autologin.sh"
-bash -n "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-plymouth-quit-after-lock.sh"
-grep -Fq 'systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7' "$SCRIPT"
-! grep -Fq 'cryptsetup luksHeaderBackup' "$SCRIPT"
-! grep -Fq 'Header backup path:' "$SCRIPT"
-! grep -Fq '$header_backup' "$SCRIPT"
-grep -Fq 'plymouth-set-default-theme k41' "$SCRIPT"
-grep -Fq 'HYPRLAND_CONFIG' "$SCRIPT"
-grep -Fq 'k41-start-hyprland' "$SCRIPT"
-grep -Fq 'hyprland-startup.log' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh"
-grep -Fq 'k41-start-hyprland' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-enable-caelestia-autologin.sh"
-grep -Fq 'start-hyprland' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-hyprland-launcher.sh"
-grep -Fq 'hyprland-startup.log' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh"
-grep -Fq 'themes/plymouth/k41' "$SCRIPT"
-grep -Fq 'plymouth-set-default-theme k41' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh"
-grep -Fq 'quiet' "$SCRIPT"
-grep -Fq 'splash' "$SCRIPT"
-grep -Fq 'k41-plymouth-release.service' "$SCRIPT"
-grep -Fq 'plymouth quit --retain-splash' "$SCRIPT"
-grep -Fq 'k41-lock-handoff.conf' "$SCRIPT"
-grep -Fq 'boot-lock-ready' "$SCRIPT"
-grep -Fq 'ExecStartPre=/usr/bin/rm -f' "$SCRIPT"
-grep -Fq 'mark_ready' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh"
-grep -Fq 'systemctl stop getty@tty1.service' "$ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-plymouth-quit-after-lock.sh"
-! grep -Eq 'cryptsetup[[:space:]]+luksErase|--wipe-slot=all|wipefs[[:space:]]' "$SCRIPT"
+[[ -f $CONFIGURE && -f $INSTALLER ]]
+bash -n "$CONFIGURE"
+bash -n "$INSTALLER"
+bash -n "$WS/scripts/k41-lock-caelestia-after-start.sh"
+bash -n "$WS/scripts/k41-start-hyprland.sh"
+bash -n "$WS/scripts/k41-plymouth-quit-after-lock.sh"
 
-printf 'PASS: boot-experience script syntax and safety invariants\n'
+grep -Fq 'exec bash "$INSTALLER" "$@"' "$CONFIGURE"
+grep -Fq 'plymouth-set-default-theme -R k41' "$INSTALLER"
+grep -Fq 'systemd -> plymouth -> sd-encrypt' "$INSTALLER"
+grep -Fq 'default_uki' "$INSTALLER"
+grep -Fq 'Backup retained at' "$INSTALLER"
+grep -Fq 'mountpoint -q "$EFI_MOUNT"' "$INSTALLER"
+grep -Fq 'findmnt -nro FSTYPE' "$INSTALLER"
+
+# The visual installer must not mutate unrelated boot/authentication/security state.
+! grep -Eiq '(^|[;&|[:space:]])(pacman|systemctl|systemd-cryptenroll|cryptsetup|efibootmgr|bootctl)([[:space:]]|$)' "$INSTALLER"
+! grep -Eiq 'getty@tty1|autologin|k41-plymouth-release.service|k41-lock-handoff.conf|boot-lock-ready|HYPRLAND_CONFIG|caelestia' "$INSTALLER"
+! grep -Eiq '(^|[;&|[:space:]])(pacman|systemctl|systemd-cryptenroll|cryptsetup|efibootmgr|bootctl)([[:space:]]|$)' "$CONFIGURE"
+! grep -Eiq 'quickshell|\.qml|qs[[:space:]]+-c|animated-boot-splash' "$CONFIGURE" "$INSTALLER"
+
+# Existing host configuration is validated, never rewritten by the installer.
+! grep -Eq 'HOOKS=.*(write_text|sed -i|tee)' "$INSTALLER"
+! grep -Eq 'kernel/cmdline.*(write_text|sed -i|tee)' "$INSTALLER"
+
+printf 'PASS: Plymouth installer syntax and non-invasive safety contract\n'
