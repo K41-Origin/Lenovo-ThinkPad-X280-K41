@@ -4,7 +4,7 @@ set -Eeuo pipefail
 umask 077
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null || cd "$SCRIPT_DIR/../../../../.." && pwd -P)"
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then\n  :\nelse\n  REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd -P)"\nfi
 STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
 OUT_ROOT="$REPO_ROOT/reports/stage-5-desktop-customization/01-boot-experience/audits"
 OUT="$OUT_ROOT/$STAMP"
@@ -120,12 +120,12 @@ run "KERNEL / PACKAGE VERSIONS" bash -c '
   done
 '
 run "PLYMOUTH THEME / PACKAGE" bash -c '
-  command -v plymouth --version 2>&1 || true
+  plymouth --version 2>&1 || true
   command -v plymouth-set-default-theme >/dev/null 2>&1 && plymouth-set-default-theme 2>&1 || true
   pacman -Q plymouth 2>/dev/null || true
   find /usr/share/plymouth/themes -maxdepth 3 -type f \( -name "*.plymouth" -o -name "*.script" \) -print 2>/dev/null | sort
 '
-run "PLYMOUTH / CRYPT / TPM SYSTEMD UNITS" systemctl list-unit-files --no-pager
+run "PLYMOUTH / CRYPT / TPM SYSTEMD UNITS" systemctl list-unit-files "plymouth*" "systemd-cryptsetup*" "getty@tty1.service" "k41-*" --no-pager
 section "RELEVANT UNIT STATE"
 for unit in plymouth-start.service plymouth-quit.service plymouth-quit-wait.service systemd-cryptsetup@cryptroot.service systemd-boot-update.service getty@tty1.service k41-plymouth-release.service; do
   printf '\n--- %s ---\n' "$unit" >>"$REPORT"
