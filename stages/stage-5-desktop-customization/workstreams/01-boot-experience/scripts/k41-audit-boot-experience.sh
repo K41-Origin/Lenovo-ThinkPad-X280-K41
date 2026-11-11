@@ -79,7 +79,15 @@ run "SYSTEM / FIRMWARE MODEL (SERIALS EXCLUDED)" bash -c '
     tr -d "\\000" <"$file"
   done
 '
-run "FIRMWARE MODE" bash -c '[[ -d /sys/firmware/efi ]] && echo UEFI || echo Legacy/unknown; [[ -r /sys/firmware/efi/fw_platform_size ]] && cat /sys/firmware/efi/fw_platform_size; [[ -r /sys/firmware/efi/efivars/SecureBoot-* ]] && echo SecureBoot-variable-present || true'
+run "FIRMWARE MODE" bash -c '
+  [[ -d /sys/firmware/efi ]] && echo UEFI || echo Legacy/unknown
+  [[ -r /sys/firmware/efi/fw_platform_size ]] && cat /sys/firmware/efi/fw_platform_size
+  if [[ -d /sys/firmware/efi/efivars ]] && find /sys/firmware/efi/efivars -maxdepth 1 -name "SecureBoot-*" -print -quit | grep -q .; then
+    echo SecureBoot-variable-present
+  else
+    echo SecureBoot-variable-unavailable
+  fi
+'
 run "BOOTCTL STATUS" bootctl status --no-pager
 run "BOOTCTL ENTRIES" bootctl list --no-pager
 run "EFI BOOT ENTRIES (READ ONLY)" efibootmgr -v
