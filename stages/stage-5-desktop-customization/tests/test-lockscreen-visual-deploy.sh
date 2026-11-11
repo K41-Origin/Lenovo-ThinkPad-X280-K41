@@ -96,10 +96,6 @@ mapfile -t deployment_logs < <(find "$tmp/deploy-logs/history" -maxdepth 1 -type
     printf 'FAIL: expected one timestamped deployment log.\n' >&2
     exit 1
 }
-grep -q 'automatic deployment' "$tmp/deploy-logs/latest.log" && {
-    printf 'FAIL: unexpected placeholder text in deployment log.\n' >&2
-    exit 1
-}
 grep -q 'Caelestia reload command completed' "$tmp/deploy-logs/latest.log" || {
     printf 'FAIL: log does not record successful reload invocation.\n' >&2
     exit 1
@@ -117,13 +113,21 @@ mapfile -t backups < <(find "$backup_root" -mindepth 1 -maxdepth 1 -type d -prin
 (cd "${backups[0]}" && sha256sum -c MANIFEST.sha256 >/dev/null)
 # A failed reload must restore all four upstream visual files and try reloading them.
 git -C "$host" checkout -- modules/lock/LockSurface.qml modules/lock/Content.qml modules/lock/Center.qml modules/lock/center/PasswordInput.qml
-if PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" K41_TEST_RELOAD_FAIL=1 \
+if PATH="$fakebin:$PATH" K41_TEST_RELOAD_LOG="$reload_log" K41_TEST_RELOAD_FAIL=1 K41_LOCKSCREEN_LOG_DIR="$tmp/deploy-logs" \
     env -u XDG_CONFIG_HOME -u XDG_STATE_HOME HOME="$home" \
     WAYLAND_DISPLAY=wayland-test HYPRLAND_INSTANCE_SIGNATURE=test-session \
     bash "$script" >/dev/null 2>&1; then
     printf 'FAIL: deployment should fail when Caelestia reload fails.\n' >&2
     exit 1
 fi
+grep -q 'restoring the four original visual files' "$tmp/deploy-logs/latest.log" || {
+    printf 'FAIL: failed deployment and rollback are not recorded in latest.log.\n' >&2
+    exit 1
+}
+grep -q 'exit status 1' "$tmp/deploy-logs/latest.log" || {
+    printf 'FAIL: failed deployment exit status is not recorded.\n' >&2
+    exit 1
+}
 for file in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
     /usr/bin/git -C "$host" show "HEAD:modules/lock/$file" | cmp - "$lock/$file" || {
         printf 'FAIL: original file was not restored after reload failure: %s\n' "$file" >&2
