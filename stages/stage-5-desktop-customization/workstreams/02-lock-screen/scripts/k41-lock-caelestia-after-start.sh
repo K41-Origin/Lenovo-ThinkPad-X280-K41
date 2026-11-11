@@ -15,7 +15,7 @@ log() {
 (( EUID != 0 )) || die 'Run as the regular desktop user, never with sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME is missing or invalid.'
 
-for command_name in caelestia date chmod mkdir mktemp mv sha256sum sleep stat timeout grep kill; do
+for command_name in caelestia date chmod mkdir mktemp mv sleep stat timeout grep kill; do
     command -v "$command_name" >/dev/null 2>&1 || die "Required command is unavailable: $command_name"
 done
 
@@ -34,7 +34,7 @@ mkdir -p -- "$log_root"
     die 'Cannot establish a user-owned lock startup log directory.'
 
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
-log_file="$log_root/startup-$stamp.log"
+log_file="$log_root/startup-$stamp-$.log"
 [[ ! -e $log_file && ! -L $log_file ]] || die "Refusing to overwrite existing log: $log_file"
 ( set -o noclobber; : >"$log_file" ) 2>/dev/null || die "Cannot create startup log: $log_file"
 chmod 0600 "$log_file"
