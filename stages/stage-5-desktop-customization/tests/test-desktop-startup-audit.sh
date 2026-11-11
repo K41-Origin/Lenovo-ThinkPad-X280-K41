@@ -21,6 +21,12 @@ for token in \
     'publish_report()' \
     'git push origin HEAD:main' \
     'git worktree add --detach' \
+    'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON' \
+    'Installed helper byte comparison' \
+    'INSTALLED K41 LOCK VISUAL SOURCE COMPARISON' \
+    'k41-boot-splash' \
+    'coredumpctl info start-hyprland' \
+    '.local/state/caelestia' \
     'chmod 0644'; do
     grep -Fq -- "$token" "$script" || {
         printf 'FAIL: audit collector missing diagnostic coverage: %s\n' "$token" >&2
