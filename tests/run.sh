@@ -12,7 +12,7 @@ tests=(
   stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh
   stages/stage-5-desktop-customization/tests/test-boot-experience.sh
   stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh
-  stages/stage-5-desktop-customization/tests/test-animated-boot-splash.sh
+  stages/stage-5-desktop-customization/tests/test-plymouth-only-boot.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-visual-module.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh
