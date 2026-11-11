@@ -1,80 +1,109 @@
-# Workstream 1 — Boot Experience
+# Workstream 01 — Boot Experience
 
-**Status: COMPLETED / USER ACCEPTED — 2026-11-10**
+**Status: REOPENED — AUDIT REQUIRED (2026-11-11).**
 
-Pengguna secara eksplisit menyatakan Workstream 1 selesai. Keputusan ini adalah acceptance dan penutupan workstream. Status ini menjadi acuan aktif; catatan lama yang menyebut visual boot belum selesai merupakan histori sebelum keputusan penutupan.
+Status sebelumnya **COMPLETED / USER ACCEPTED (2026-11-10)** dicatat sebagai histori penerimaan desain/pekerjaan terdahulu. Status tersebut tidak lagi berarti implementasi boot saat ini memenuhi kebutuhan baru. Workstream dibuka kembali karena fokus sekarang adalah memperbaiki jalur boot dan menetapkan **Plymouth sebagai satu-satunya renderer splash/animasi boot — 100% tanpa QML/Quickshell**.
 
-Jangan membuka kembali pekerjaan ini hanya dengan mengutip laporan atau catatan historis. Jika pengguna melaporkan masalah baru, lakukan audit baru sebagai pekerjaan terpisah dan perbarui status setelah ada bukti.
+Status runtime ThinkPad X280 belum diverifikasi oleh audit terbaru. Jangan menganggap konfigurasi pada laporan lama masih aktif.
 
-## Cakupan
+## Keputusan arsitektur
 
-Pengalaman boot dan transisi sistem pada ThinkPad X280:
-- Power-on/cold boot.
-- Handoff dari firmware/kernel/initramfs ke sesi grafis.
-- Reboot dan poweroff.
-- Plymouth K41 dan Quickshell handoff.
-- Transisi menuju Caelestia lock screen.
+### Keputusan wajib
 
-## Arsitektur yang digunakan
+1. **Plymouth adalah satu-satunya renderer visual selama boot.**
+2. Tidak ada QML, Quickshell, qs, Caelestia, Hyprland, atau compositor yang digunakan untuk menggambar boot splash.
+3. Tidak ada Quickshell boot splash, overlay transisi, atau fallback visual.
+4. Tema K41 diimplementasikan sebagai tema Plymouth (script plugin) dan menjadi sumber visual boot tunggal.
+5. Plymouth menangani tampilan prompt passphrase LUKS bila integrasi initramfs/systemd dan paket yang terpasang mendukungnya.
+6. Setelah boot mencapai sesi grafis, Plymouth dihentikan melalui mekanisme systemd/Plymouth yang diverifikasi; desktop lock screen adalah komponen terpisah, bukan bagian dari boot splash.
+7. Reboot/shutdown memakai lifecycle Plymouth/systemd upstream. Jangan membuat unit tandingan tanpa bukti kebutuhan dan verifikasi ordering.
 
-| Komponen | Tanggung jawab |
-|---|---|
-| UEFI, systemd-boot, UKI | Memulai sistem dan memuat kernel/initramfs |
-| LUKS2 + passphrase | Enkripsi root dan jalur recovery |
-| TPM2/systemd-cryptenroll | Metode unlock tambahan bila dikonfigurasi dan sesuai PCR |
-| Plymouth K41 | Splash early boot dan transisi shutdown/reboot yang didukung |
-| systemd | Lifecycle startup/shutdown dan unit transisi |
-| TTY1/Hyprland | Memulai sesi grafis |
-| K41 launcher | Menjaga TTY/stdin dan mengalihkan output startup ke log privat |
-| Quickshell/Caelestia | Handoff shell dan lock screen |
+### Model alur yang dituju
 
-Plymouth dan Quickshell adalah renderer berbeda. Keduanya mengikuti bahasa visual yang sama, bukan jaminan piksel identik.
+UEFI → bootloader/UKI (jika terpasang) → kernel + initramfs → Plymouth K41 → systemd/userspace → TTY/login → Hyprland/Caelestia
 
-## Design baseline yang disetujui
+Alur ini adalah model target, bukan pernyataan bahwa laptop saat ini menggunakan setiap komponen tersebut. Bootloader, UKI, filesystem EFI, initramfs generator, LUKS mapping, dan TPM2 harus dibuktikan oleh laporan audit sebelum prosedur implementasi dipilih.
 
+### Pemisahan tanggung jawab
+
+| Komponen | Tanggung jawab | Bukan tanggung jawab |
+|---|---|---|
+| Firmware + bootloader | Menemukan dan memuat entry boot | Menggambar UI QML |
+| Kernel + initramfs | Menginisialisasi sistem awal dan membuka root terenkripsi | Menjalankan desktop shell |
+| Plymouth K41 | Satu-satunya boot splash, animasi, pesan/prompt yang didukung | Menjalankan Quickshell |
+| systemd | Mengatur lifecycle service/target dan transisi Plymouth | Menggambar overlay K41 tambahan |
+| TTY/login + Hyprland | Memulai sesi grafis setelah boot userspace | Menjadi bagian dari boot splash |
+| Caelestia lock screen | Mengunci sesi desktop sesuai konfigurasi terpisah | Mengendalikan renderer boot |
+
+## Identitas visual Plymouth K41
+
+Baseline visual yang dipertahankan:
 - Background hitam.
-- Wordmark putih `K41`.
-- Ring rapat berisi 12 glyph persegi panjang kecil.
-- Satu glyph terang bergantian; glyph lain redup.
-- Tidak mengubah bentuk, jumlah glyph, proporsi, atau pola sequential glow tanpa persetujuan pengguna.
+- Wordmark putih K41.
+- Ring ringkas berisi 12 glyph persegi panjang kecil.
+- Satu glyph menyala bergantian, glyph lain redup.
+- Tidak mengubah bentuk, jumlah, proporsi, atau pola animasi tanpa keputusan desain baru.
 
-Sumber desain:
-- Plymouth: `stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41/k41.script`.
-- Quickshell: `stages/stage-5-desktop-customization/workstreams/01-boot-experience/config/quickshell/k41-boot-splash/shell.qml`.
+Source visual kanonis:
+- workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth
+- workstreams/01-boot-experience/themes/plymouth/k41/k41.script
 
-Detail identitas visual lintas-komponen berada di [Design System](../../../docs/07-DESKTOP-DESIGN-SYSTEM.md).
+**Tidak ada source QML untuk boot splash dalam arsitektur target.** File QML dan installer Quickshell lama yang ditemukan dalam audit diperlakukan sebagai legacy/conflicting implementation; keduanya tidak boleh menjadi dependency, dipanggil oleh installer, atau dimasukkan ke alur boot target. Penghapusan file legacy dilakukan setelah referensi, rollback, dan test dimigrasikan secara aman.
 
-## Implementasi terkait
+## Hasil audit repository (11 November 2026)
 
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh`
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh`
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-animated-boot-splash.sh`
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-enable-caelestia-autologin.sh` (opt-in; bukan default instalasi)
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh`
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh`
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-install-hyprland-launcher.sh`
-- `stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-plymouth-quit-after-lock.sh`
-- `tests/test-boot-experience.sh`
-- `tests/test-plymouth-k41-theme.sh`
-- `tests/test-animated-boot-splash.sh`
+Audit statis awal pada branch main menemukan:
+- Installer k41-configure-boot-experience.sh memanggil k41-install-animated-boot-splash.sh, mensyaratkan qs, dan menyiapkan QML overlay. Ini bertentangan dengan keputusan Plymouth-only.
+- Terdapat QML config/quickshell/k41-boot-splash/shell.qml dan installer Quickshell boot splash.
+- Helper lock masih mengelola PID splash Quickshell.
+- Test test-animated-boot-splash.sh dan test-plymouth-k41-theme.sh secara eksplisit mewajibkan QML/Quickshell.
+- Installer konfigurasi boot juga mengubah mkinitcpio hooks, kernel cmdline, theme, UKI, systemd units, getty autologin, dan menawarkan TPM2 enrollment. Ini terlalu banyak side effect dalam satu alur dan berisiko untuk dijalankan sebelum audit kondisi perangkat.
+- Installer tema Plymouth mensyaratkan path /efi, preset linux.preset, dan UKI /efi/EFI/Linux/arch-linux.efi; asumsi ini harus dicocokkan dengan hasil audit aktual.
+- Test yang ada dominan static string assertions; test tersebut tidak membuktikan firmware boot, prompt LUKS, timing Plymouth, TPM unlock, atau transisi desktop.
+- Status implementasi aktual di laptop **BELUM DIVERIFIKASI**.
 
-Daftar ini menunjukkan pemetaan implementasi repository, bukan instruksi untuk menjalankan ulang installer. Periksa script dan kondisi perangkat sebelum tindakan operasional.
+Temuan ini adalah audit source repository, bukan hasil pemeriksaan laptop.
 
-## Batas keamanan dan recovery
+## Audit perangkat
 
-- Jangan menghapus passphrase/keyslot LUKS.
-- TPM2 enrollment bersifat additive; jangan mengklaim auto-unlock aktif tanpa verifikasi pada perangkat.
-- PCR 7 bukan bukti Secure Boot verification jika Secure Boot tidak aktif.
-- Pastikan passphrase dan recovery path tetap tersedia sebelum perubahan boot.
-- Jika rebuild UKI gagal, jangan reboot sampai konfigurasi dan artefak boot dipulihkan/diperiksa.
-- Jangan menambah arbitrary delay atau unit yang bersaing dengan lifecycle upstream.
+Jalankan collector read-only dari checkout repository pada ThinkPad X280:
 
-## Catatan status
+    bash stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh
 
-**COMPLETED / USER ACCEPTED** adalah keputusan proyek dari pengguna. Status ini tidak boleh diperluas menjadi klaim bahwa setiap parameter firmware, TPM2 token, Secure Boot, atau kondisi recovery telah diukur ulang pada tanggal penutupan. Catatan teknis yang lebih lama dipertahankan dalam Git history dan arsip; bukan backlog aktif.
+Output lokal:
+reports/stage-5-desktop-customization/01-boot-experience/audits/<UTC timestamp>/
 
-Tidak ada screenshot yang digunakan atau diperlukan untuk acceptance.
+Collector menginventarisasi firmware/UEFI, Secure Boot status yang dapat dibaca, bootloader/entry, mount EFI, disk/filesystem, root mapping, ringkasan metadata LUKS tanpa key material, kernel cmdline (field sensitif disamarkan), mkinitcpio/preset, isi initramfs yang relevan, versi paket, tema Plymouth, unit systemd, TPM device discovery, file konfigurasi boot, serta journal boot terfilter.
 
-## Batas terhadap k41-dots
+Collector read-only terhadap konfigurasi sistem. Output tetap perlu ditinjau dan disamarkan sebelum dibagikan karena dapat memuat identifier perangkat, UUID, label disk, firmware detail, path, dan log. Jangan pernah membagikan passphrase, recovery key, LUKS key material, token, atau credential.
 
-Workstream 01 **dikecualikan dari fondasi k41-dots**. Jalur boot/splash proyek ini menggunakan Plymouth; komponen boot bukan bagian dari kumpulan komponen desktop Quickshell k41-dots. Keputusan ini tidak menghapus atau mengubah artefak historis Workstream 01 di repository.
+## Urutan kerja yang disepakati
+
+1. **Audit repository (read-only):** seluruh script, theme, tests, docs, CI, dan referensi silang Workstream 01.
+2. **Audit perangkat (read-only):** kumpulkan laporan menggunakan audit script; tidak mengubah konfigurasi.
+3. **Review hasil audit:** cocokkan arsitektur aktual dengan keputusan Plymouth-only dan tentukan perubahan spesifik.
+4. **Rencana implementasi:** pecah perubahan menjadi theme/initramfs integration, boot config, systemd lifecycle, login/desktop handoff, recovery, dan test. Pisahkan TPM/LUKS dari pekerjaan visual.
+5. **Implementasi bertahap:** perubahan kecil, backup, preflight, rollback, dan privileged action minimal. Jangan menjalankan installer gabungan yang belum direfaktor.
+6. **Verifikasi:** Bash syntax, ShellCheck, unit/config verification, initramfs/UKI inspection, static tests, lalu pengujian boot fisik dan recovery pada X280.
+7. **Acceptance:** hanya setelah hasil aktual direview dan diterima pengguna. Runtime VERIFIED memerlukan bukti perangkat; pull/push Git saja tidak menjalankan script atau membuktikan perilaku boot.
+
+Pengguna hanya melakukan sinkronisasi git pull dan git push sesuai alur kolaborasi. Jangan meminta edit manual atau menjalankan perintah ad hoc di luar proses yang disepakati. Jika pengumpulan laporan tidak dapat dieksekusi melalui jalur yang disetujui, status harus dinyatakan BLOCKED/NOT VERIFIED, bukan diasumsikan berhasil.
+
+## Batas keamanan
+
+- Jangan mengubah partisi, filesystem, firmware, boot entry, LUKS header/keyslot, TPM enrollment, Secure Boot, atau PCR policy tanpa audit dan persetujuan eksplisit untuk tindakan tersebut.
+- Jangan menghapus atau mengganti passphrase LUKS yang sudah ada.
+- Jangan menganggap TPM2 token ada/berfungsi hanya dari source script.
+- Jangan menjalankan mkinitcpio -P sebelum memastikan konfigurasi aktif, target EFI ter-mount, preset/UKI yang benar, dan recovery path.
+- Jangan membuat perubahan systemd/getty autologin sebagai bagian dari audit.
+- Jangan melakukan reboot sebagai test otomatis.
+- Jangan mengklaim boot/recovery verified dari syntax check atau fixture.
+- Plymouth-only adalah keputusan renderer boot; tidak mengubah pilihan desktop lock screen atau autentikasi setelah boot.
+
+## Artefak pemilik
+
+- Audit collector: workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh
+- Plymouth theme: workstreams/01-boot-experience/themes/plymouth/k41/
+- Installer lama yang wajib direview sebelum refactor: workstreams/01-boot-experience/scripts/
+- Test pemilik: stages/stage-5-desktop-customization/tests/test-boot-experience.sh dan test-plymouth-k41-theme.sh
+- Status tunggal: [docs/06-STATUS.md](../../../docs/06-STATUS.md)
