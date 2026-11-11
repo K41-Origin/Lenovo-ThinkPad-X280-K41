@@ -91,7 +91,7 @@ unit_state() {
     printf 'Captured UTC: %s\n' "$stamp"
     printf 'Scope: tty fallback, start-hyprland/Hyprland startup, user session and Caelestia handoff.\n'
     printf 'Mode: read-only; no service, package, boot, authentication, permission or configuration changes.\n'
-    printf 'Host: %s\n' "$(uname -n)"
+    printf 'Host: <REDACTED>\n'
     printf 'Kernel: %s\n' "$(uname -sr)"
     printf 'User UID/GID: %s/%s\n' "$EUID" "$(id -g)"
     printf 'Current TTY: %s\n' "$(tty 2>/dev/null || printf unknown)"
@@ -160,9 +160,9 @@ for path in \
     "$HOME/.config/quickshell/caelestia/modules/lock/LockSurface.qml" \
     "$HOME/.config/quickshell/caelestia/modules/lock/Content.qml" \
     "$HOME/.config/quickshell/caelestia/modules/lock/Center.qml"; do
-    if [[ -L $path ]]; then stat -c 'SYMLINK %A uid=%u gid=%g %n -> %N' "$path" >>"$report" 2>&1 || true
-    elif [[ -e $path ]]; then stat -c 'FILE %A uid=%u gid=%g size=%s %n' "$path" >>"$report" 2>&1 || true
-    else printf 'MISSING %s\n' "$path" >>"$report"; fi
+    if [[ -L $path ]]; then stat -c 'SYMLINK %A uid=%u gid=%g %n -> %N' "$path" 2>&1 | redact >>"$report" || true
+    elif [[ -e $path ]]; then stat -c 'FILE %A uid=%u gid=%g size=%s %n' "$path" 2>&1 | redact >>"$report" || true
+    else printf 'MISSING %s\n' "$path" | redact >>"$report"; fi
 done
 
 section 'BASH PROFILE K41 AUTOLOGIN BLOCK'
@@ -273,6 +273,58 @@ Review report.txt and remove private data before committing/pushing this directo
 EOF
 chmod 0600 "$run_dir/README.txt"
 
+publish_report() {
+    local remote_url publish_dir relative_dir publish_target
+    remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
+        { printf 'ERROR: tidak dapat membaca Git origin; report tetap lokal.\n' >&2; return 1; }
+    case "$remote_url" in
+        https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
+        *) printf 'ERROR: Git origin bukan repository K41 yang diizinkan; report tetap lokal.\n' >&2; return 1 ;;
+    esac
+    git -C "$repo_root" fetch --no-tags origin main ||
+        { printf 'ERROR: fetch origin/main gagal; report tetap lokal.\n' >&2; return 1; }
+    publish_dir="$(mktemp -d "${TMPDIR:-/tmp}/k41-startup-audit-publish.XXXXXX")" || return 1
+    rmdir -- "$publish_dir" || { rm -rf -- "$publish_dir"; return 1; }
+    if ! git -C "$repo_root" worktree add --detach "$publish_dir" FETCH_HEAD; then
+        rm -rf -- "$publish_dir"
+        printf 'ERROR: isolated worktree gagal dibuat; report tetap lokal.\n' >&2
+        return 1
+    fi
+    relative_dir="${run_dir#"$repo_root"/}"
+    publish_target="$publish_dir/$relative_dir"
+    mkdir -p -- "$publish_target"
+    cp -- "$report" "$publish_target/report.txt"
+    cp -- "$run_dir/README.txt" "$publish_target/README.txt"
+    chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt"
+    chmod 0755 "$publish_target"
+    git -C "$publish_dir" config user.name "K41 Startup Audit"
+    git -C "$publish_dir" config user.email "k41-startup-audit@users.noreply.github.com"
+    if ! git -C "$publish_dir" add -- "$relative_dir" ||
+       ! git -C "$publish_dir" commit -m "Add X280 desktop startup diagnostic"; then
+        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+        printf 'ERROR: commit report gagal; report tetap lokal.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" push origin HEAD:main; then
+        printf 'INFO: push tertahan update main; mencoba rebase satu kali.\n'
+        if ! git -C "$publish_dir" fetch --no-tags origin main ||
+           ! git -C "$publish_dir" rebase FETCH_HEAD ||
+           ! git -C "$publish_dir" push origin HEAD:main; then
+            git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+            printf 'ERROR: publikasi report gagal; report tetap lokal: %s\n' "$report" >&2
+            return 1
+        fi
+    fi
+    git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+    printf 'INFO: report tersanitasi dipublikasikan ke GitHub main: %s\n' "$relative_dir"
+}
+
 printf 'Audit report created: %s\n' "$report"
 printf 'README created: %s\n' "$run_dir/README.txt"
-printf 'Review/redact the report before pushing it. No system state was changed.\n'
+if publish_report; then
+    printf 'Report tersanitasi berhasil dipublikasikan menggunakan Git credentials yang sudah tersedia.\n'
+else
+    printf 'WARNING: report tetap tersedia lokal; publikasi otomatis gagal.\n' >&2
+    exit 1
+fi
+printf 'No system state was changed.\n'
