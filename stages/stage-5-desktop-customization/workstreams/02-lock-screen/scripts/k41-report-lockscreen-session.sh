@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Capture a Caelestia restart from the active Wayland session.
 set -Eeuo pipefail
+umask 077
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -9,11 +10,15 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 [[ -n ${XDG_RUNTIME_DIR:-} && -d $XDG_RUNTIME_DIR ]] || die 'XDG_RUNTIME_DIR is unset or invalid.'
 command -v caelestia >/dev/null 2>&1 || die 'caelestia command was not found.'
 command -v tee >/dev/null 2>&1 || die 'tee command was not found.'
-command -v grep >/dev/null 2>&1 || die 'grep command was not found.'
+for command_name in git stat date mkdir; do
+    command -v "$command_name" >/dev/null 2>&1 || die "$command_name command was not found."
+done
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-repo_root="$(cd -- "$script_dir/.." && pwd -P)"
-[[ -d $repo_root/.git ]] || die "Run from a Git checkout; repository root not found: $repo_root"
+repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)" ||
+    die "Run from a Git checkout; repository root not found."
+repo_root="$(cd -- "$repo_root" && pwd -P)"
+[[ $(git -C "$repo_root" branch --show-current) == main ]] || die 'Repository checkout must be on main.'
 [[ $(stat -c %u "$repo_root") == "$EUID" ]] || die 'Repository checkout is not owned by the current user.'
 
 report_dir="$repo_root/reports/lockscreen-apply"
@@ -24,7 +29,8 @@ mkdir -p -- "$report_dir"
 timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 report="$report_dir/${timestamp}-session-restart.log"
 [[ ! -e $report && ! -L $report ]] || die "Report already exists; refusing to overwrite: $report"
-: > "$report" || die "Cannot create report: $report"
+( set -o noclobber; : > "$report" ) 2>/dev/null || die "Cannot create report: $report"
+chmod 0600 "$report"
 
 # Log only whether sensitive/session variables are present, never their values.
 {
