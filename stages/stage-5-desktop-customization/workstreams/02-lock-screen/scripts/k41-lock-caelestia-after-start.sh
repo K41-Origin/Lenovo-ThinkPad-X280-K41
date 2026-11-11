@@ -46,13 +46,13 @@ log "Readiness budget: ${K41_LOCK_READY_TIMEOUT:-30}s; verification attempts: ${
 ready_timeout=${K41_LOCK_READY_TIMEOUT:-30}
 interval=${K41_LOCK_INTERVAL:-1}
 verify_attempts=${K41_LOCK_VERIFY_RETRIES:-10}
-command_timeout=${K41_LOCK_COMMAND_TIMEOUT:-1}
+command_timeout=1
 
 [[ $ready_timeout =~ ^[1-9][0-9]*$ ]] || die 'K41_LOCK_READY_TIMEOUT must be a positive integer.'
-[[ $interval =~ ^[0-9]+([.][0-9]+)?$ ]] || die 'K41_LOCK_INTERVAL must be numeric.'
+(( ready_timeout <= 30 )) || die 'K41_LOCK_READY_TIMEOUT must not exceed 30 seconds.'
+[[ $interval =~ ^[01]$ ]] || die 'K41_LOCK_INTERVAL must be 0 or 1 second.'
 [[ $verify_attempts =~ ^[1-9][0-9]*$ ]] || die 'K41_LOCK_VERIFY_RETRIES must be a positive integer.'
-[[ $command_timeout =~ ^[0-9]+([.][0-9]+)?$ && $command_timeout != 0 ]] ||
-    die 'K41_LOCK_COMMAND_TIMEOUT must be a positive number.'
+(( verify_attempts <= 10 )) || die 'K41_LOCK_VERIFY_RETRIES must not exceed 10 attempts.'
 
 marker_dir="$HOME/.cache/k41"
 for path in "$HOME/.cache" "$marker_dir"; do
