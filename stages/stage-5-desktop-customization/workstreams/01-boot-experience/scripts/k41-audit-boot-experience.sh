@@ -98,6 +98,16 @@ except Exception: print('METADATA_PARSE=unavailable')
   done < <(lsblk -rpno PATH,TYPE | awk '$2=="part" {print $1}')
 '
 read_file "KERNEL COMMAND LINE (SENSITIVE FIELDS REDACTED)" /etc/kernel/cmdline
+read_file "FILESYSTEM TABLE" /etc/fstab
+section "CRYPTTAB (KEYFILE PATHS REDACTED)"
+if [[ -r /etc/crypttab ]]; then
+  sed -E \
+    -e 's/^([[:space:]]*[^#[:space:]]+[[:space:]]+[^[:space:]]+[[:space:]]+)[^[:space:]]+/\\1<KEYFILE-REDACTED>/' \
+    -e 's/(rd\\.luks\\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\\1=<REDACTED>/Ig' \
+    /etc/crypttab >>"$REPORT"
+else
+  note "[/etc/crypttab not readable or absent]"
+fi
 read_file "MKINITCPIO HOOKS CONFIGURATION" /etc/mkinitcpio.conf
 section "MKINITCPIO PRESETS"
 if compgen -G '/etc/mkinitcpio.d/*.preset' >/dev/null; then
@@ -130,6 +140,14 @@ run "PLYMOUTH THEME / PACKAGE" bash -c '
   find /usr/share/plymouth/themes -maxdepth 3 -type f \( -name "*.plymouth" -o -name "*.script" \) -print 2>/dev/null | sort
 '
 run "PLYMOUTH / CRYPT / TPM SYSTEMD UNITS" systemctl list-unit-files "plymouth*" "systemd-cryptsetup*" "getty@tty1.service" "k41-*" --no-pager
+run "ACTIVE CRYPTSETUP UNITS" systemctl list-units --all --no-pager "systemd-cryptsetup*"
+run "BOOTLOADER / KERNEL INSTALL FILES" bash -c '
+  for root in /boot/loader /efi/loader /boot/EFI /efi/EFI /etc/kernel /etc/cmdline.d; do
+    [[ -d $root ]] || continue
+    printf "\\n--- %s ---\\n" "$root"
+    find "$root" -maxdepth 4 -type f -print 2>/dev/null | sort
+  done
+'
 section "RELEVANT UNIT STATE"
 for unit in plymouth-start.service plymouth-quit.service plymouth-quit-wait.service systemd-cryptsetup@cryptroot.service systemd-boot-update.service getty@tty1.service k41-plymouth-release.service; do
   printf '\n--- %s ---\n' "$unit" >>"$REPORT"
