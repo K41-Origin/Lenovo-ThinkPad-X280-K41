@@ -17,7 +17,7 @@ usage() {
 }
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-HELPER_SOURCE="$SCRIPT_DIR/k41-lock-caelestia-after-start.sh"
+HELPER_SOURCE="$SCRIPT_DIR/../../02-lock-screen/scripts/k41-lock-caelestia-after-start.sh"
 LAUNCHER_SOURCE="$SCRIPT_DIR/k41-start-hyprland.sh"
 MODE=apply
 ROLLBACK_DIR=""
