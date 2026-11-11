@@ -16,15 +16,15 @@
 
 ## Prioritas aktif Stage 5
 
-1. **Workstream 01 — Boot Experience: REOPENED — AUDIT REQUIRED.** Fokus adalah memperbaiki jalur boot dengan Plymouth sebagai satu-satunya renderer splash/animasi, 100% tanpa QML/Quickshell. Status COMPLETED / USER ACCEPTED pada 2026-11-10 adalah histori, bukan status implementasi saat ini. Audit source repository menemukan konflik Quickshell/QML splash; pemanggilan installer dan artefak QML legacy kini telah dihapus, test dialihkan ke kontrak Plymouth-only. Kondisi laptop belum diverifikasi. Audit read-only perangkat disiapkan melalui `workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh`. Jangan jalankan installer konfigurasi boot lama sebelum refactor dan review hasil audit perangkat. TPM/LUKS/bootloader/initramfs/UKI tetap tidak boleh diubah tanpa audit dan persetujuan eksplisit.
+1. **Workstream 01 — Boot Experience: IMPLEMENTATION REFACTORED — DEVICE INSTALLATION NOT YET RUN.** Laporan X280 `20261111T063301Z` mengonfirmasi UEFI/systemd-boot, ESP `/efi`, root LUKS2 → cryptroot → ext4, mkinitcpio systemd + Plymouth + sd-encrypt, `splash` pada kernel command line, dan UKI di `/efi/EFI/Linux/arch-linux.efi`. Installer telah dipisahkan menjadi entry point tipis dan installer tema Plymouth-only. Ia memvalidasi konfigurasi aktual dan membangun ulang UKI melalui `plymouth-set-default-theme -R k41`; tidak mengubah HOOKS, kernel command line, bootloader, TPM/LUKS, systemd lifecycle, getty/autologin, atau desktop. Audit dijalankan non-root sehingga status default theme, isi UKI/initramfs, dan token LUKS belum terverifikasi. Laporan juga mencatat custom lock handoff timeout 75 detik; isu tersebut terpisah dan belum diubah. Lihat `stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md`.
 2. **Workstream 02 — Lock Screen: DESIGN COMPLETED / USER ACCEPTED; MIGRATION PLANNED.** Tampilan saat ini harus dipertahankan tanpa redesign. Pekerjaan dimulai ulang dari audit read-only menyeluruh atas source visual, aset, konfigurasi, dependency, dan titik integrasi; kemudian ekstraksi source terpilih, perancangan modul `~/.config/quickshell/k41/modules/lockscreen/`, migrasi, testing, dan cleanup source visual upstream hanya setelah hasil terbukti berfungsi serta diterima. Pengguna hanya melakukan `git pull` dan `git push`; assistant bertanggung jawab atas script, implementasi, test, dan dokumentasi. Pull/push tidak menjalankan script atau memverifikasi runtime, sehingga batasan eksekusi harus ditangani melalui desain otomatisasi dan klaim runtime tidak boleh dibuat tanpa bukti.
-2. **Workstream 04 — Bottombar / K41Dock: COMPLETED / USER CONFIRMED SUCCESS.** Komponen telah berhasil digunakan. Source dan deployment saat ini masih berada pada struktur Caelestia lama; penyesuaian ke namespace K41 dilakukan sebagai bagian dari penyelarasan fondasi, tanpa mengubah desain yang sudah diterima.
-3. **Fondasi K41-dots: PLANNED.** Menyusun audit fitur upstream yang read-only dan script penyiapan modul ke `~/.config/quickshell/k41/modules/<feature>/`.
-4. **Workstream 05 — Topbar: PLANNED.** Posisi atas dan orientasi horizontal telah diputuskan; elemen, alignment, ukuran, dan visibility harus ditentukan sebelum implementasi.
-5. **Workstream 06 — Launcher: PLANNED.**
-6. **Workstream 07 — Sidebar: PLANNED.**
-7. **Workstream 08 — Utilities: PLANNED.**
-8. Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan pekerjaan aktif.
+3. **Workstream 04 — Bottombar / K41Dock: COMPLETED / USER CONFIRMED SUCCESS.** Komponen telah berhasil digunakan. Source dan deployment saat ini masih berada pada struktur Caelestia lama; penyesuaian ke namespace K41 dilakukan sebagai bagian dari penyelarasan fondasi, tanpa mengubah desain yang sudah diterima.
+4. **Fondasi K41-dots: PLANNED.** Menyusun audit fitur upstream yang read-only dan script penyiapan modul ke `~/.config/quickshell/k41/modules/<feature>/`.
+5. **Workstream 05 — Topbar: PLANNED.** Posisi atas dan orientasi horizontal telah diputuskan; elemen, alignment, ukuran, dan visibility harus ditentukan sebelum implementasi.
+6. **Workstream 06 — Launcher: PLANNED.**
+7. **Workstream 07 — Sidebar: PLANNED.**
+8. **Workstream 08 — Utilities: PLANNED.**
+9. Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan pekerjaan aktif.
 
 ## Prinsip Stage 5 dan K41-dots
 
@@ -33,7 +33,7 @@
 - Script audit mengumpulkan informasi source, dependency, konfigurasi, dan titik integrasi yang relevan untuk satu fitur; audit tidak mengubah sistem.
 - Script penyiapan mengambil hanya source/resource yang diperlukan dan menempatkannya pada namespace K41. Audit dan penyiapan adalah dua operasi terpisah.
 - Caelestia tetap menjadi host/runtime; integrasi dilakukan seperlunya.
-- Workstream 01 — Boot Experience dikecualikan dari K41-dots. Boot splash wajib hanya menggunakan Plymouth; QML/Quickshell tidak boleh menjadi bagian dari boot path. Lihat dokumen Workstream 01.
+- Workstream 01 — Boot Experience dikecualikan dari K41-dots. Boot splash wajib hanya menggunakan Plymouth; QML/Quickshell tidak boleh menjadi bagian dari boot path.
 - Jangan membangun bootstrap, runtime, service, atau framework deployment mandiri tanpa kebutuhan yang terbukti.
 - Status implementasi modul, runtime laptop, dan penerimaan pengguna harus dibedakan. Dokumentasi rencana tidak berarti migrasi sudah dilakukan.
 
