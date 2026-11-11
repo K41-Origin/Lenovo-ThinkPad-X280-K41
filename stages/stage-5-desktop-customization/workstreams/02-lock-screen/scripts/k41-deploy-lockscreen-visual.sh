@@ -7,6 +7,7 @@ umask 077
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf 'INFO: %s\n' "$*"; }
 
+
 [[ $# -eq 0 ]] || die "This script has no options; run it without arguments."
 [[ $EUID -ne 0 ]] || die "Run from the regular desktop account, never with sudo."
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die "HOME is missing or invalid."
@@ -19,6 +20,32 @@ done
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(realpath -- "$script_dir/../../../../..")"
+log_root="${K41_LOCKSCREEN_LOG_DIR:-$repo_root/reports/lockscreen-deployment}"
+[[ $log_root == /* ]] || die "Log directory must be an absolute path: $log_root"
+assert_log_path() {
+    local path=$1
+    [[ ! -L $path ]] || die "Refusing symlinked log path: $path"
+    if [[ -e $path ]]; then
+        [[ -d $path && $(stat -c %u "$path") == "$EUID" ]] ||
+            die "Log path is not a user-owned directory: $path"
+    fi
+}
+assert_log_path "$repo_root/reports"
+assert_log_path "$log_root"
+mkdir -p -- "$log_root/history"
+assert_log_path "$log_root" 
+assert_log_path "$log_root/history"
+log_stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+log_file="$log_root/history/deploy-$log_stamp-$.log"
+: > "$log_file"
+chmod 0600 "$log_file"
+exec > >(tee -a "$log_file") 2>&1
+on_error() {
+    local rc=$?
+    printf 'ERROR: command failed (exit=%s, line=%s): %s\n' "$rc" "$LINENO" "$BASH_COMMAND" >&2
+    return "$rc"
+}
+trap on_error ERR
 source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen"
 config_root="$HOME/.config"
 host_root="$config_root/quickshell/caelestia"
@@ -120,7 +147,7 @@ restore_originals() {
 }
 cleanup() {
     local rc=$?
-    trap - EXIT
+    trap - EXIT ERR
     [[ -z ${stage:-} || ! -d $stage ]] || rm -rf -- "$stage"
     if (( rc != 0 && changed == 1 )); then
         info "Deployment failed; restoring the four original visual files from $backup."
@@ -130,6 +157,17 @@ cleanup() {
             fi
         else
             printf 'CRITICAL: automatic restore failed; backup remains at %s\n' "$backup" >&2
+        fi
+    fi
+    printf 'INFO: Deployment finished with exit status %s.\n' "$rc"
+    if [[ -s $log_file ]]; then
+        local latest_tmp="$log_root/.latest.log.$"
+        if cp -- "$log_file" "$latest_tmp" && chmod 0600 "$latest_tmp" && mv -f -- "$latest_tmp" "$log_root/latest.log"; then
+            printf 'INFO: Persistent deployment log: %s\n' "$log_file"
+            printf 'INFO: Latest deployment log: %s/latest.log\n' "$log_root"
+        else
+            rm -f -- "$latest_tmp"
+            printf 'WARNING: Could not update latest.log; timestamped log remains at %s\n' "$log_file" >&2
         fi
     fi
     exit "$rc"
@@ -162,7 +200,7 @@ stage=""
 info "K41 Floating Password Card visuals deployed into the active Caelestia lock module."
 info "Original files backed up to: $backup"
 info "Restarting Caelestia shell to activate the new QML."
-if ! caelestia shell -r -d >/dev/null; then
+if ! caelestia shell -r -d; then
     die "Caelestia reload command failed; original QML files will be restored."
 fi
 changed=0
