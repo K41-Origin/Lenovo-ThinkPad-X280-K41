@@ -4,7 +4,11 @@ set -Eeuo pipefail
 umask 077
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
-if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then\n  :\nelse\n  REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd -P)"\nfi
+if REPO_ROOT="$(git -C "$SCRIPT_DIR" rev-parse --show-toplevel 2>/dev/null)"; then
+  :
+else
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../../../../.." && pwd -P)"
+fi
 STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
 OUT_ROOT="$REPO_ROOT/reports/stage-5-desktop-customization/01-boot-experience/audits"
 OUT="$OUT_ROOT/$STAMP"
