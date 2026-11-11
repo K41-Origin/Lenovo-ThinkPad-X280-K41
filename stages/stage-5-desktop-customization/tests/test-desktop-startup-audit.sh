@@ -19,7 +19,7 @@ for token in \
     'HYPRLAND_INSTANCE_SIGNATURE' \
     'read-only' \
     'publish_report()' \
-    'git push origin HEAD:main' \
+    'git -C "$publish_dir" push origin HEAD:main' \
     'git worktree add --detach' \
     'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON' \
     'Installed helper byte comparison' \
