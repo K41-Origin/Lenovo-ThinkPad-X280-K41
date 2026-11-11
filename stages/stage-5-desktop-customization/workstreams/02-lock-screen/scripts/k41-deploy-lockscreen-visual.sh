@@ -20,7 +20,7 @@ done
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repo_root="$(realpath -- "$script_dir/../../../../..")"
-log_root="${K41_LOCKSCREEN_LOG_DIR:-$repo_root/reports/lockscreen-deployment}"
+log_root="${K41_LOCKSCREEN_LOG_DIR:-$HOME/.local/state/k41/lockscreen/deployment-logs}"
 [[ $log_root == /* ]] || die "Log directory must be an absolute path: $log_root"
 assert_log_path() {
     local path=$1
@@ -30,11 +30,13 @@ assert_log_path() {
             die "Log path is not a user-owned directory: $path"
     fi
 }
-assert_log_path "$repo_root/reports"
-assert_log_path "$log_root"
+for path in "$HOME/.local" "$HOME/.local/state" "$HOME/.local/state/k41" "$HOME/.local/state/k41/lockscreen" "$log_root"; do
+    assert_log_path "$path"
+done
 mkdir -p -- "$log_root/history"
-assert_log_path "$log_root" 
-assert_log_path "$log_root/history"
+for path in "$HOME/.local" "$HOME/.local/state" "$HOME/.local/state/k41" "$HOME/.local/state/k41/lockscreen" "$log_root" "$log_root/history"; do
+    assert_log_path "$path"
+done
 log_stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 log_file="$log_root/history/deploy-$log_stamp-$.log"
 : > "$log_file"
@@ -147,6 +149,67 @@ restore_originals() {
         install -m 0644 -- "$backup/$relative" "$lock_root/$relative"
     done
 }
+publish_logs() {
+    local remote_url publish_dir publish_root uploaded_log
+    if [[ ${K41_LOCKSCREEN_TEST_MODE:-0} == 1 ]]; then
+        info "Test mode: remote log publication intentionally skipped."
+        return 0
+    fi
+    remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
+        { printf 'ERROR: cannot read repository origin; deployment log remains local.\n' >&2; return 1; }
+    case "$remote_url" in
+        https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
+        *) printf 'ERROR: repository origin is not the approved K41 GitHub repository; deployment log remains local.\n' >&2; return 1 ;;
+    esac
+    info "Publishing sanitized deployment log to GitHub main using existing Git credentials."
+    if ! git -C "$repo_root" fetch --no-tags origin main; then
+        printf 'ERROR: git fetch failed; deployment log remains local.\n' >&2
+        return 1
+    fi
+    publish_dir="$(mktemp -d "${TMPDIR:-/tmp}/k41-lockscreen-log-publish.XXXXXX")" || return 1
+    rmdir -- "$publish_dir" || { rm -rf -- "$publish_dir"; return 1; }
+    if ! git -C "$repo_root" worktree add --detach "$publish_dir" FETCH_HEAD; then
+        rm -rf -- "$publish_dir"
+        printf 'ERROR: isolated Git worktree creation failed; deployment log remains local.\n' >&2
+        return 1
+    fi
+    publish_root="$publish_dir/reports/lockscreen-deployment"
+    mkdir -p -- "$publish_root/history"
+    uploaded_log="$publish_root/history/$(basename -- "$log_file")"
+    if ! sed "s|$HOME|~|g" "$log_file" > "$uploaded_log"; then
+        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+        printf 'ERROR: log sanitization failed; deployment log remains local.\n' >&2
+        return 1
+    fi
+    chmod 0644 "$uploaded_log"
+    cp -- "$uploaded_log" "$publish_root/latest.log"
+    git -C "$publish_dir" config user.name "K41 Lock Screen Deployment Logger"
+    git -C "$publish_dir" config user.email "k41-lockscreen-logger@users.noreply.github.com"
+    if ! git -C "$publish_dir" add -- reports/lockscreen-deployment; then
+        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+        printf 'ERROR: could not stage deployment logs; log remains local.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" commit -m "Record lockscreen deployment log"; then
+        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+        printf 'ERROR: could not commit deployment logs; log remains local.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" push origin HEAD:main; then
+        info "Push raced with another main update; rebasing the isolated log commit once."
+        if ! git -C "$publish_dir" fetch --no-tags origin main ||
+           ! git -C "$publish_dir" rebase FETCH_HEAD ||
+           ! git -C "$publish_dir" push origin HEAD:main; then
+            git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+            printf 'ERROR: GitHub log publication failed; local log retained at %s.\n' "$log_file" >&2
+            return 1
+        fi
+    fi
+    git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+    info "Deployment log published to reports/lockscreen-deployment/ on GitHub main."
+    return 0
+}
+
 cleanup() {
     local rc=$?
     trap - EXIT ERR
