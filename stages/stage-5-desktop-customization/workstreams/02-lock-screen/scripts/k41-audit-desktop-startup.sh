@@ -9,7 +9,7 @@ have() { command -v "$1" >/dev/null 2>&1; }
 
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in git stat date mkdir chmod uname id who tty ps awk grep sed tail find python3; do
+for cmd in git stat date mkdir chmod uname id who tty ps awk grep sed tail find python3 cp rm mktemp rmdir tr; do
     have "$cmd" || die "Command wajib tidak tersedia: $cmd"
 done
 
@@ -45,10 +45,11 @@ chmod 0600 "$report"
 # Redact common identifiers and credential-like values before writing logs.
 redact() {
     python3 -c '
-import os, re, sys
+import os, pwd, re, sys
 s = sys.stdin.read()
 home = os.environ.get("HOME", "")
-user = os.environ.get("USER", "")
+try: user = pwd.getpwuid(os.getuid()).pw_name
+except KeyError: user = os.environ.get("USER", "")
 if home and home != "/": s = s.replace(home, "<HOME>")
 if user: s = re.sub(r"(?<![A-Za-z0-9_.-])" + re.escape(user) + r"(?![A-Za-z0-9_.-])", "<USER>", s)
 s = re.sub(r"(?i)\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\b([=: ]+)[^\s,;]+", r"\1\2<REDACTED>", s)
