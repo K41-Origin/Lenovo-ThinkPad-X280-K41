@@ -45,7 +45,7 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 ## Current project decisions
 
 - Stage 5 adalah tahap aktif. Workstream 01 — Boot Experience **COMPLETE untuk implementasi Plymouth-only**; runtime acceptance tema/UKI masih NOT VERIFIED. TTY2 fallback telah terbukti dipicu oleh lock-readiness timeout Workstream 02, bukan kegagalan renderer Plymouth.
-- Workstream 02 — Lock Screen: **DESIGN ACCEPTED; STARTUP FAILURE CONFIRMED; ROOT CAUSE UNDER INVESTIGATION**. Jangan lanjutkan visual deployment/cleanup sampai lock readiness dan desktop startup stabil.
+- Workstream 02 — Lock Screen: **DESIGN ACCEPTED; BOUNDED STARTUP FIX IMPLEMENTED; DEVICE VALIDATION PENDING**. Source helper lama memiliki nested retry yang dapat melebihi timeout handoff 75 detik; helper baru memakai deadline 30 detik, satu lock request, bounded verification, fallback, dan updater dengan backup. Jangan lanjutkan visual deployment/cleanup sampai lock readiness dan desktop startup terbukti stabil pada X280.
 - **Dashboard dihapus dari daftar workstream Stage 5 pada 2026-11-11.** Fitur runtime dinonaktifkan melalui `k41-cleanup-caelestia.sh`; jangan menghapus source QML upstream atau menambahkan dashboard kembali.
 - **Workstream 04 — Bottombar / K41Dock COMPLETED / USER CONFIRMED SUCCESS.** Source kanonis berada di repository pada `workstreams/04-taskbar-panel/`; source runtime berada di bawah `~/.config/quickshell/caelestia/`. Lihat dokumen Bottombar.
 - **Workstream 05 — Topbar** adalah pekerjaan Stage 5 berikutnya. Elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
