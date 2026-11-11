@@ -47,7 +47,7 @@ Jangan membuat bootstrap, service, updater, framework installer, atau runtime K4
 
 ## Protokol khusus Boot Experience (Workstream 01)
 
-- Status saat ini: REOPENED — AUDIT REQUIRED.
+- Status saat ini: COMPLETE untuk implementasi Plymouth-only; runtime acceptance tema/UKI masih NOT VERIFIED.
 - Audit repository dan perangkat harus read-only sebelum implementasi. Gunakan collector `workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh`.
 - Boot splash/animasi wajib 100% Plymouth; QML/Quickshell/qs tidak boleh menjadi dependency atau proses boot.
 - Review mencakup firmware/bootloader, EFI mount, kernel cmdline, initramfs/UKI, Plymouth, systemd units, LUKS/TPM metadata ringkas, TTY/login, serta journal. Jangan mengumpulkan secret.
@@ -58,11 +58,13 @@ Jangan membuat bootstrap, service, updater, framework installer, atau runtime K4
 
 ## Protokol khusus Lock Screen
 
-- Tampilan Lock Screen saat ini telah disetujui pengguna. Migrasi harus mempertahankan tampilan tersebut; bukan redesign.
+- Desain Floating Password Card telah disetujui pengguna; jangan redesign.
+- Status operasional: startup lock readiness gagal pada X280 dan sedang diinvestigasi. Jangan melanjutkan deployment visual atau cleanup upstream sampai startup stabil.
 - Audit mencakup source visual, QML, styling, animasi, aset, konfigurasi visual, resource, dependency, dan titik integrasi.
 - PAM, autentikasi, password handling, fingerprint/Howdy policy, dan session-lock protocol tidak boleh diubah oleh pekerjaan visual.
-- Source visual K41 dipisahkan ke modul `lockscreen`; dependency upstream yang masih dibutuhkan tetap dimiliki Caelestia.
-- Cleanup source visual upstream ditunda sampai migrasi terbukti berfungsi dan diterima pengguna.
+- Source visual K41 dipisahkan ke `workstreams/02-lock-screen/modules/lockscreen/`; deployment empat file ke `~/.config/quickshell/caelestia/modules/lock/` telah diimplementasikan tetapi runtime acceptance belum VERIFIED.
+- TTY2 fallback telah terbukti dipicu karena readiness marker lock tidak muncul selama 75 detik. Penyebab internal Caelestia IPC/helper/QML/fallback masih UNKNOWN; kumpulkan isi/hash helper terpasang dan runtime logs sebelum mengubah lock path.
+- Jangan mengubah PAM, password handling, fingerprint/Howdy policy, atau session-lock protocol selama diagnosis.
 - Pengguna hanya melakukan pull/push. Assistant membuat script audit, ekstraksi, migrasi, implementasi, test, dan dokumentasi.
 
 Dokumen rinci: [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md).
