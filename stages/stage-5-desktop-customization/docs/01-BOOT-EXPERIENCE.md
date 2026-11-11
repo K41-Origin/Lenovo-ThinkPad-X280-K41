@@ -73,7 +73,7 @@ Jalankan collector read-only dari checkout repository pada ThinkPad X280:
 Output lokal:
 reports/stage-5-desktop-customization/01-boot-experience/audits/<UTC timestamp>/
 
-Collector menginventarisasi firmware/UEFI, Secure Boot status yang dapat dibaca, bootloader/entry, mount EFI, disk/filesystem, root mapping, ringkasan metadata LUKS tanpa key material, kernel cmdline (field sensitif disamarkan), mkinitcpio/preset, isi initramfs yang relevan, versi paket, tema Plymouth, unit systemd, TPM device discovery, file konfigurasi boot, serta journal boot terfilter.
+Collector menginventarisasi firmware/UEFI, Secure Boot status yang dapat dibaca, bootloader/entry, mount EFI, disk/filesystem, root mapping, filesystem table, crypttab (keyfile path disamarkan), ringkasan metadata LUKS tanpa key material, kernel cmdline (field sensitif disamarkan), mkinitcpio/preset, file bootloader/kernel, isi initramfs yang relevan, versi paket, tema Plymouth, unit systemd, TPM device discovery, file konfigurasi boot, serta journal boot terfilter.
 
 Collector read-only terhadap konfigurasi sistem. Output tetap perlu ditinjau dan disamarkan sebelum dibagikan karena dapat memuat identifier perangkat, UUID, label disk, firmware detail, path, dan log. Jangan pernah membagikan passphrase, recovery key, LUKS key material, token, atau credential.
 
