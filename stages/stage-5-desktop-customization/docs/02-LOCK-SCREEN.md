@@ -1,6 +1,6 @@
 # Workstream 02 — Lock Screen
 
-**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen dengan konsep Floating Password Card sudah disetujui pengguna. **Status operasional: BLOCKED — startup failure terbukti berasal dari lock-readiness handoff yang tidak selesai; penyebab internal Caelestia/helper/QML masih diselidiki.** Pekerjaan berikutnya bukan redesign: tujuannya mengaudit, mengambil, dan memisahkan source tampilan yang sudah disetujui, lalu memigrasikannya menjadi modul visual langsung di workstream Stage 5.
+**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen dengan konsep Floating Password Card sudah disetujui pengguna. **Status operasional: BOUNDED STARTUP FIX IMPLEMENTED / CI TESTED; X280 RUNTIME VALIDATION PENDING.** Source helper lama memiliki nested retry bug yang dapat melampaui timeout handoff; helper baru, updater ber-backup, dan regression tests telah dibuat. Jangan lanjutkan visual deployment sebelum lock startup terbukti stabil pada perangkat.
 
 **Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan automatic deployment/reload: IMPLEMENTED. Status runtime rendering: NOT VERIFIED pada ThinkPad X280.** Source visual Floating Password Card berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject terpisah.
 
@@ -171,6 +171,6 @@ Jangan deploy ulang visual Lock Screen atau membersihkan source upstream sebelum
 - Deployment visual dan isolated fixture: **IMPLEMENTED / STATIC TESTED** sesuai cakupan CI.
 - TTY2 fallback karena readiness timeout: **VERIFIED**.
 - Nested retry/verification timeout bug pada source helper lama: **IDENTIFIED**.
-- Bounded lock helper, updater, dan regression tests: **IMPLEMENTED; CI/runtime validation pending**.
+- Bounded lock helper, updater, dan regression tests: **IMPLEMENTED / TESTED — CI PASS (39/39)**; X280 runtime validation pending.
 - Penyebab runtime final pada helper yang sebelumnya terpasang: **STRONG CANDIDATE; DEVICE CONFIRMATION PENDING**.
 - Visual deployment lanjutan dan cleanup source upstream: **PAUSED** sampai lock path pulih.
