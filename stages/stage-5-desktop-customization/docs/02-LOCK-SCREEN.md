@@ -116,54 +116,61 @@ Report aktual: `reports/stage-5-desktop-customization/02-lock-screen/startup-aud
 
 ### Fakta yang sudah VERIFIED
 
-1. Hyprland session mencapai target sekitar 19 detik setelah boot; `xdg-desktop-portal-hyprland` berhasil terhubung ke Wayland. Jadi boot pertama tidak berhenti sebelum compositor/session mulai.
+1. Hyprland session mencapai target sekitar 19 detik setelah boot; `xdg-desktop-portal-hyprland` berhasil terhubung ke Wayland.
 2. Pada sekitar 91.58 detik, journal mencatat: `Lock screen did not become ready within 75s; stopping tty1 autologin and releasing Plymouth.`
-3. `getty@tty1.service` kemudian dihentikan, `getty@tty2.service` dimulai, dan Hyprland session berhenti sekitar 101.87 detik.
-4. Dengan demikian, perpindahan ke TTY2 merupakan akibat langsung dari fail-safe timeout Workstream 01. Pemicu timeout adalah tidak adanya readiness marker dari jalur Caelestia lock.
-5. Ketika pengguna mencoba `start-hyprland` secara manual dari TTY2, proses kemudian core-dump dengan `std::system_error: Resource deadlock avoided`. Kejadian ini muncul setelah fallback dan bukan bukti penyebab awal boot gagal.
+3. `getty@tty1.service` dihentikan, `getty@tty2.service` dimulai, dan Hyprland session berhenti sekitar 101.87 detik.
+4. Perpindahan ke TTY2 merupakan akibat langsung dari fail-safe timeout Workstream 01. Pemicu timeout adalah tidak adanya readiness marker dari jalur Caelestia lock.
+5. Percobaan manual `start-hyprland` dari TTY2 kemudian core-dump dengan `std::system_error: Resource deadlock avoided`. Kejadian ini muncul setelah fallback dan bukan bukti penyebab awal boot gagal.
 
-### Temuan source dan runtime yang perlu ditelusuri
+### Defect source-level ditemukan
 
-- Hyprland Lua config yang dikumpulkan menunjukkan hook `hyprland.start` menjalankan `caelestia shell -d`, lalu helper `k41-lock-caelestia-after-start`.
-- `caelestia`, `hyprlock`, `quickshell`, dan Hyprland tersedia pada sistem. Versi Hyprland saat report: `0.57.1`.
-- File helper terpasang `~/.local/bin/k41-lock-caelestia-after-start` berukuran 2527 byte, sedangkan source repository yang diperiksa berukuran 2152 byte. Collector lama hanya mengambil metadata, bukan isi/hash helper; perbedaan ukuran belum membuktikan helper stale atau rusak, tetapi harus diperiksa sebelum mengubah logic.
-- File QML runtime menunjukkan file K41 visual pernah dideploy, tetapi ukuran file saja tidak membuktikan byte-identical dengan source. Audit berikutnya membandingkan checksum/isi empat file.
-- Audit lama tidak merekam log startup Quickshell/Caelestia secara memadai. Karena itu belum diketahui apakah `caelestia shell -d` gagal, QML lock surface gagal dimuat saat lock diminta, IPC tidak tersedia, atau fallback Hyprlock langsung keluar.
-- `hyprland.lua` memuat sisa directive `qs -c k41-boot-splash`. Directive ini tidak sesuai keputusan proyek bahwa Plymouth adalah satu-satunya boot splash; keberadaannya perlu dipastikan dan dibersihkan secara terkontrol setelah isi file aktual dan asalnya diverifikasi. Jangan mengasumsikan directive ini adalah root cause.
+Source helper lama memiliki nested retry yang tidak dibatasi oleh timeout total:
+- Outer loop: hingga 45 percobaan menunggu/menjalankan lock IPC.
+- Setiap kali IPC siap dan perintah lock diterima, inner loop melakukan hingga 10 percobaan verifikasi `isLocked`, dengan jeda 1 detik.
+- Jika perintah lock sukses tetapi status `isLocked` tidak pernah menjadi true, helper mengulang inner loop pada setiap iterasi outer loop. Durasi teoretisnya dapat mencapai sekitar 45 × 11 detik = 495 detik, jauh melewati timeout handoff Plymouth 75 detik.
 
-### Analisis `start-hyprland`
+Ini adalah bug logika yang nyata pada source helper lama dan kandidat kuat penyebab marker tidak pernah terbit sebelum timeout. Namun, report pertama tidak mengumpulkan isi/hash helper yang terpasang; ukuran file lokal 2527 byte berbeda dari source lama repository 2152 byte. Karena itu belum terbukti bahwa branch nested-loop tersebut persis yang dieksekusi di perangkat.
 
-Report mencatat `start-hyprland` versi 0.57.1 dan abort `Resource deadlock avoided` pada percobaan manual dari TTY2. Upstream merilis 0.57.2 pada 9 November 2026 dengan beberapa perbaikan, termasuk penanganan child process yang dihentikan oleh signal. Ini kandidat perbaikan untuk crash sekunder, tetapi belum membuktikan atau memperbaiki kegagalan Caelestia lock readiness. Jangan menyamakan dua gejala tersebut.
+### Perbaikan yang sudah diimplementasikan
+
+1. Ownership helper lock dipindahkan dari Workstream 01 ke Workstream 02: `workstreams/02-lock-screen/scripts/k41-lock-caelestia-after-start.sh`. Installer autologin Workstream 01 sekarang mengambil helper dari lokasi Workstream 02; Workstream 01 tetap hanya menyediakan handoff marker consumer dan Plymouth lifecycle.
+2. Retry logic diperbaiki: discovery Caelestia IPC memakai deadline total 30 detik; lock request dilakukan satu kali; verifikasi `isLocked` dibatasi hingga 10 percobaan. Bila tidak terverifikasi, helper segera mencoba Hyprlock fallback, bukan mengulang inner verification sampai ratusan detik.
+3. Setiap pemanggilan helper menulis log privat di `~/.local/state/k41/lockscreen/startup-<timestamp>-<pid>.log`. Audit startup mengambil log tersebut.
+4. Script `workstreams/02-lock-screen/scripts/k41-update-lockscreen-startup-helper.sh` dibuat untuk memperbarui helper yang sudah terpasang pada `~/.local/bin/`. Script membuat backup file lama di `~/.local/state/k41/lockscreen/helper-backups/`, memvalidasi source, melakukan penggantian atomik, dan membandingkan hasil. Ia tidak memakai sudo dan tidak mengubah systemd, Plymouth, getty, PAM, autentikasi, package, bootloader, atau initramfs.
+5. Test baru `tests/test-lockscreen-startup-helper.sh` menguji timeout bounded, verifikasi lock, fallback, fail-closed, backup updater, dan penolakan symlink.
+
+### Bukti lain yang masih perlu diperiksa
+
+- `hyprland.lua` pada report memuat sisa directive `qs -c k41-boot-splash`. Ini tidak sesuai keputusan proyek bahwa Plymouth satu-satunya boot splash. Source QML legacy tidak ada di branch aktif; directive runtime harus dibersihkan secara terkontrol setelah konfigurasi aktual ditinjau. Jangan menganggapnya root cause.
+- Empat file QML runtime belum dibuktikan byte-identical dengan source. Audit berikutnya membandingkan checksum.
+- Report lama tidak memiliki log Quickshell/Caelestia yang cukup. Audit baru mengumpulkan helper terpasang, backup helper lama, log startup, QML comparison, dan coredump metadata.
+- `start-hyprland` versi 0.57.1 menghasilkan abort `Resource deadlock avoided` pada percobaan manual. Upstream merilis 0.57.2 pada 9 November 2026 dengan beberapa perbaikan, termasuk penanganan child process yang dihentikan signal. Ini kandidat perbaikan crash sekunder, bukan bukti penyebab lock timeout.
 
 Referensi upstream: https://github.com/hyprwm/Hyprland/releases/tag/v0.57.2
 
-### Perubahan diagnostik yang sudah dibuat
+### Langkah perangkat berikutnya
 
-`workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh` diperluas agar audit berikutnya mengumpulkan:
-- Isi helper lock yang benar-benar terpasang (dengan redaksi), SHA-256, hasil `bash -n`, dan perbandingan byte terhadap source repository.
-- Perbandingan empat file QML visual runtime terhadap source Stage 5.
-- Startup directives dari `hyprland.conf` dan `hyprland.lua`, termasuk sisa `k41-boot-splash`.
-- Log dari direktori state/cache Caelestia dan Quickshell yang lazim.
-- Metadata coredump `start-hyprland` bila `coredumpctl` tersedia.
+Setelah perubahan repository ditarik ke X280, jalankan satu updater berikut dari TTY2 sebagai user biasa (tanpa sudo):
 
-Collector tetap read-only terhadap host: tidak menjalankan launcher, tidak memanggil lock IPC, tidak mengubah file konfigurasi, service, package, permission, PAM, bootloader, initramfs, TPM/LUKS, atau autentikasi. Report dipublikasikan melalui isolated worktree; tinjau data tersanitasi untuk kemungkinan informasi privat yang lolos redaksi.
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-update-lockscreen-startup-helper.sh
+```
 
-### Urutan perbaikan — jangan dilewati
+Updater akan menyimpan helper lama sebelum menggantinya. Setelah updater berhasil, reboot dan amati apakah desktop masuk ke lock screen Caelestia. Jika masih masuk TTY2, jalankan collector read-only berikut dari TTY2; report dipublikasikan otomatis ke GitHub:
 
-1. Ambil bukti isi/hash helper yang benar-benar terpasang dan bandingkan dengan source repository.
-2. Periksa apakah directive Quickshell boot splash lama masih aktif dan hilangkan hanya dengan migrasi terkontrol; jangan menyentuh Plymouth.
-3. Cocokkan checksum empat QML runtime dengan source K41; bila berbeda, identifikasi file dan backup sebelum deployment apa pun.
-4. Gunakan log Caelestia/Quickshell untuk menentukan apakah shell gagal start atau lock surface gagal dimuat saat IPC lock dipanggil.
-5. Periksa output dan exit status Hyprlock fallback, bukan hanya keberadaan proses sesaat.
-6. Setelah akar masalah terbukti, buat perbaikan minimal pada lock startup path dan test regresi untuk IPC-ready, lock verified, fallback, timeout, dan marker lifecycle.
-7. Verifikasi boot/lock runtime di X280 sebelum melanjutkan visual migration atau menyatakan desktop startup stabil.
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
+```
+
+Jangan deploy ulang visual Lock Screen atau membersihkan source upstream sebelum jalur lock readiness terbukti berfungsi. Jangan mengubah PAM, password handling, fingerprint/Howdy policy, session-lock protocol, atau Plymouth untuk mengatasi bug timeout ini.
 
 ### Batas status
 
 - Desain Floating Password Card: **COMPLETED / USER ACCEPTED**.
 - Empat file source visual: **IMPLEMENTED**; runtime rendering **NOT VERIFIED**.
-- Deployment script dan isolated fixture: **IMPLEMENTED / STATIC TESTED** sesuai cakupan CI.
+- Deployment visual dan isolated fixture: **IMPLEMENTED / STATIC TESTED** sesuai cakupan CI.
 - TTY2 fallback karena readiness timeout: **VERIFIED**.
-- Penyebab Caelestia IPC/lock readiness tidak tercapai: **UNKNOWN / UNDER INVESTIGATION**.
-- Perbaikan startup/lock path: **NOT IMPLEMENTED**.
+- Nested retry/verification timeout bug pada source helper lama: **IDENTIFIED**.
+- Bounded lock helper, updater, dan regression tests: **IMPLEMENTED; CI/runtime validation pending**.
+- Penyebab runtime final pada helper yang sebelumnya terpasang: **STRONG CANDIDATE; DEVICE CONFIRMATION PENDING**.
 - Visual deployment lanjutan dan cleanup source upstream: **PAUSED** sampai lock path pulih.
