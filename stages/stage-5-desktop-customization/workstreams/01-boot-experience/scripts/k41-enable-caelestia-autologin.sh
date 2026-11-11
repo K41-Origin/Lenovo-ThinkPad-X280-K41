@@ -18,6 +18,7 @@ usage() {
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 HELPER_SOURCE="$SCRIPT_DIR/k41-lock-caelestia-after-start.sh"
+LAUNCHER_SOURCE="$SCRIPT_DIR/k41-start-hyprland.sh"
 MODE=apply
 ROLLBACK_DIR=""
 
@@ -84,7 +85,6 @@ HYPRLAND_LUA="$CONFIG_DIR/hyprland.lua"
 BASH_PROFILE="$USER_HOME/.bash_profile"
 LOCAL_BIN="$USER_HOME/.local/bin"
 HELPER_TARGET="$LOCAL_BIN/k41-lock-caelestia-after-start"
-LAUNCHER_SOURCE="$SCRIPT_DIR/k41-start-hyprland.sh"
 LAUNCHER_TARGET="$LOCAL_BIN/k41-start-hyprland"
 GETTY_DROPIN_DIR="/etc/systemd/system/getty@tty1.service.d"
 GETTY_DROPIN="$GETTY_DROPIN_DIR/k41-autologin.conf"
