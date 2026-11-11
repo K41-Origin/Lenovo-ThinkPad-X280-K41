@@ -404,6 +404,94 @@ else
     note '[No local lockscreen visual deployment log directory found]'
 fi
 
+section 'LOCK LIFECYCLE: NORMALIZED EVIDENCE TIMELINE'
+timeline_file="$run_dir/lifecycle-timeline.tsv"
+python3 - "$helper_log_root" "$timeline_file" "$report" <<'PY'
+import pathlib
+import re
+import subprocess
+import sys
+
+log_root = pathlib.Path(sys.argv[1])
+timeline_path = pathlib.Path(sys.argv[2])
+report_path = pathlib.Path(sys.argv[3])
+events = {
+    "HELPER_STARTED": re.compile(r"Lock startup helper started"),
+    "CAELESTIA_IPC_READY": re.compile(r"Caelestia lock IPC is ready"),
+    "LOCK_REQUEST_ACCEPTED": re.compile(r"Caelestia lock request accepted"),
+    "LOCK_STATE_VERIFIED": re.compile(r"Caelestia lock state verified"),
+    "LOCK_READINESS_MARKER_PUBLISHED": re.compile(r"Readiness marker published"),
+    "CAELESTIA_IPC_TIMEOUT": re.compile(r"Caelestia lock IPC did not become ready"),
+    "LOCK_STATE_TIMEOUT": re.compile(r"did not reach verified state"),
+    "HYPRLOCK_FALLBACK_STARTED": re.compile(r"Starting Hyprlock fallback"),
+    "HYPRLOCK_FALLBACK_EXITED": re.compile(r"Hyprlock fallback exited"),
+}
+observed = {name: [] for name in events}
+sources = []
+if log_root.is_dir() and not log_root.is_symlink():
+    for path in sorted(log_root.glob("startup-*.log"), key=lambda p: p.stat().st_mtime, reverse=True)[:8]:
+        if path.is_file() and not path.is_symlink():
+            sources.append(path)
+            try:
+                lines = path.read_text(errors="replace").splitlines()
+            except OSError:
+                continue
+            for line in lines:
+                for name, pattern in events.items():
+                    if pattern.search(line):
+                        stamp = re.search(r"\[(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ)\]", line)
+                        observed[name].append((stamp.group(1) if stamp else "UNKNOWN", path.name, line[:300]))
+
+journal_patterns = {
+    "AUTH_SUCCESS": re.compile(r"pam_[^: ]+.*(?:authentication|auth).*success|authentication succeeded", re.I),
+    "AUTH_FAILURE": re.compile(r"pam_[^: ]+.*(?:authentication|auth).*failure|authentication failure|authenticator.*failed", re.I),
+    "UNLOCK_EVENT": re.compile(r"\b(unlocked|unlock successful|session unlocked)\b", re.I),
+    "HYPRLAND_SESSION_START": re.compile(r"Reached target.*(?:Hyprland|graphical)|Hyprland.*started", re.I),
+    "HYPRLAND_SESSION_STOP": re.compile(r"Stopped target.*(?:Hyprland|graphical)|Hyprland.*(stopped|exited)", re.I),
+}
+journal_events = {name: [] for name in journal_patterns}
+try:
+    result = subprocess.run(
+        ["journalctl", "-b", "--no-pager", "-o", "short-iso-precise"],
+        capture_output=True, text=True, timeout=15, check=False
+    )
+    if result.returncode == 0:
+        for line in result.stdout.splitlines():
+            for name, pattern in journal_patterns.items():
+                if pattern.search(line):
+                    journal_events[name].append(("JOURNAL_TIMESTAMP", "journalctl -b", line[:300]))
+except (OSError, subprocess.TimeoutExpired):
+    pass
+
+with timeline_path.open("w", encoding="utf-8") as out:
+    out.write("event\tstatus\ttimestamp_utc\tsource\tevidence\n")
+    all_events = list(events) + list(journal_patterns)
+    for name in all_events:
+        matches = observed.get(name, journal_events.get(name, []))
+        if matches:
+            for stamp, source, evidence in matches:
+                safe = evidence.replace("\t", " ").replace("\n", " ")
+                out.write(f"{name}\tOBSERVED\t{stamp}\t{source}\t{safe}\n")
+        else:
+            out.write(f"{name}\tNOT_OBSERVED\tUNKNOWN\tUNKNOWN\tNo matching evidence in collected sources\n")
+
+with report_path.open("a", encoding="utf-8") as report:
+    report.write("\n===== NORMALIZED LOCK LIFECYCLE TIMELINE =====\n")
+    report.write("Evidence status is literal: NOT_OBSERVED does not mean the event did not happen.\n")
+    report.write("Authentication and unlock events may be absent because PAM/locker logging is implementation-dependent.\n")
+    report.write("Desktop restoration cannot be proven retrospectively unless the compositor/session emits a correlated event.\n")
+    report.write("Timeline file: lifecycle-timeline.tsv\n")
+    report.write("Helper logs inspected: " + (", ".join(p.name for p in sources) if sources else "none") + "\n")
+    report.write("Journal query: " + ("available" if any(journal_events.values()) else "no matching/accessible evidence") + "\n")
+    for name in all_events:
+        matches = observed.get(name, journal_events.get(name, []))
+        report.write(f"{name}: {'OBSERVED (' + str(len(matches)) + ')' if matches else 'NOT_OBSERVED'}\n")
+PY
+chmod 0600 "$timeline_file"
+note "Normalized lifecycle timeline: $run_dir/lifecycle-timeline.tsv"
+note 'Timeline statuses describe collected evidence only; NOT_OBSERVED is not proof that an event did not occur.'
+note 'The collector cannot prove successful unlock or desktop restoration without correlated runtime telemetry.'
+
 section 'DIAGNOSTIC LIMITATIONS'
 note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command.'
 note '- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.'
