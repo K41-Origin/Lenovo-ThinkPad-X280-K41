@@ -459,7 +459,8 @@ try:
         for line in result.stdout.splitlines():
             for name, pattern in journal_patterns.items():
                 if pattern.search(line):
-                    journal_events[name].append(("JOURNAL_TIMESTAMP", "journalctl -b", line[:300]))
+                    stamp = line.split(maxsplit=1)[0] if line else "UNKNOWN"
+                    journal_events[name].append((stamp, "journalctl -b", line[:300]))
 except (OSError, subprocess.TimeoutExpired):
     pass
 
@@ -511,7 +512,7 @@ Run this script as the regular desktop user from tty2 or a normal shell:
 Report: report.txt
 
 The collector does not modify host system state and does not attempt to launch or repair Hyprland. It writes a private local report and publishes a sanitized copy.
-The script publishes a sanitized copy of this run directory to GitHub main using existing Git credentials. The local report remains private (0600); if publication fails, the report stays local and the script exits non-zero. Review the published report for any residual private information.
+The script publishes a sanitized copy of this run directory (report.txt, README.txt, lifecycle-timeline.tsv) to GitHub main using existing Git credentials. The local report remains private (0600); if publication fails, the report stays local and the script exits non-zero. Review the published report for any residual private information.
 EOF
 chmod 0600 "$run_dir/README.txt"
 
@@ -537,7 +538,8 @@ publish_report() {
     mkdir -p -- "$publish_target"
     cp -- "$report" "$publish_target/report.txt"
     cp -- "$run_dir/README.txt" "$publish_target/README.txt"
-    chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt"
+    cp -- "$timeline_file" "$publish_target/lifecycle-timeline.tsv"
+    chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" "$publish_target/lifecycle-timeline.tsv"
     chmod 0755 "$publish_target"
     git -C "$publish_dir" config user.name "K41 Startup Audit"
     git -C "$publish_dir" config user.email "k41-startup-audit@users.noreply.github.com"
