@@ -38,7 +38,8 @@ mapfile -t hook_assignments < <(grep -E '^[[:space:]]*HOOKS[[:space:]]*=' "$MKIN
 (( ${#hook_assignments[@]} == 1 )) || die "Expected exactly one active HOOKS assignment in $MKINITCPIO_CONF."
 
 hook_line=${hook_assignments[0]}
-[[ $hook_line =~ ^[[:space:]]*HOOKS[[:space:]]*=[[:space:]]*\(([^)]*)\)[[:space:]]*(#.*)?$ ]] ||
+hook_regex='^[[:space:]]*HOOKS[[:space:]]*=[[:space:]]*\(([^)]*)\)[[:space:]]*(#.*)?$'
+[[ $hook_line =~ $hook_regex ]] ||
     die "Unsupported HOOKS syntax; refusing to guess the active initramfs configuration."
 read -r -a hooks <<< "${BASH_REMATCH[1]}"
 
