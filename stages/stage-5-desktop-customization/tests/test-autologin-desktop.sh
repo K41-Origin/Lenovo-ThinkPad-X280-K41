@@ -45,7 +45,7 @@ grep -Fq 'caelestia shell lock lock' "$HELPER" || fail 'lock helper does not inv
 grep -Fq 'caelestia shell lock isLocked' "$HELPER" || fail 'lock helper does not verify lock state'
 grep -Fq 'K41_LOCK_READY_TIMEOUT' "$HELPER" || fail 'lock helper has no bounded IPC readiness deadline'
 grep -Fq 'deadline=$((SECONDS + ready_timeout))' "$HELPER" || fail 'lock helper readiness polling is not deadline-bounded'
-grep -Fq 'hyprlock &' "$HELPER" || fail 'lock helper lacks a fail-safe Hyprlock fallback'
+grep -Fq 'hyprlock --config "$hyprlock_config" &' "$HELPER" || fail 'lock helper lacks an explicit-config Hyprlock fallback'
 grep -Fq 'wait "$lock_pid"' "$HELPER" || fail 'lock helper does not retain and wait for the fallback lock process'
 pass 'autologin installer and lock helper pass syntax and static safety contracts'
 
@@ -107,6 +107,8 @@ sleep 2
 MOCK
 chmod 0755 "$fixture/bin/caelestia" "$fixture/bin/hyprlock"
 export K41_FALLBACK_LOG="$fixture/fallback.log"
+mkdir -p "$HOME/.config/k41"
+printf 'background {}\\ninput-field {}\\n' >"$HOME/.config/k41/hyprlock-fallback.conf"
 rm -f -- "$HOME/.cache/k41/boot-lock-ready"
 PATH="$fixture/bin:$PATH" K41_LOCK_READY_TIMEOUT=1 K41_LOCK_INTERVAL=0 K41_LOCK_VERIFY_RETRIES=2 \
     bash "$HELPER" || fail 'bounded lock verification did not fall back'
