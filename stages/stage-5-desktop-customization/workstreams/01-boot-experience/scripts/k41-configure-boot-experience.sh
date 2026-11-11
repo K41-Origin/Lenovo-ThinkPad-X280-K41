@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Configure a Plymouth boot splash and TPM2 auto-unlock for the encrypted root.
+# Configure Plymouth-only boot splash and optional TPM2 auto-unlock for encrypted root.
 # TPM enrollment is additive: the existing LUKS passphrase slot is retained.
 set -Eeuo pipefail
 umask 077
@@ -257,7 +257,7 @@ if ! cryptsetup luksDump --dump-json-metadata "$crypt_device" |
   die "TPM2 token was not found in LUKS metadata after enrollment. Keep the passphrase; do not reboot until investigated."
 fi
 
-info "The animated K41 Plymouth theme is configured and the UKI was rebuilt."
+info "The K41 Plymouth-only theme is configured and the UKI was rebuilt."
 info "TPM2 token is present in LUKS2 metadata; the original passphrase remains available."
 info "Config backup: $backup_dir"
 info "LUKS header backup: skipped by request; no external header backup was created."
