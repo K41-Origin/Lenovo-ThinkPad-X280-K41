@@ -1,6 +1,6 @@
 # Workstream 02 — Lock Screen
 
-**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen dengan konsep Floating Password Card sudah disetujui pengguna. **Status operasional: BOUNDED STARTUP FIX IMPLEMENTED / CI TESTED; X280 RUNTIME VALIDATION PENDING.** Source helper lama memiliki nested retry bug yang dapat melampaui timeout handoff; helper baru, updater ber-backup, dan regression tests telah dibuat. Jangan lanjutkan visual deployment sebelum lock startup terbukti stabil pada perangkat.
+**Status desain: COMPLETED / USER ACCEPTED.** Tampilan Lock Screen dengan konsep Floating Password Card sudah disetujui pengguna. **Status operasional: STARTUP REPAIR IMPLEMENTED / CI PASS; X280 RUNTIME VALIDATION PENDING.** Audit terbaru menemukan startup Caelestia ganda dan Hyprlock fallback tanpa konfigurasi. Updater kini memasang konfigurasi fallback eksplisit, menormalisasi blok startup K41 dengan backup, dan memperbaiki helper. Jangan lanjutkan visual deployment sebelum lock startup terbukti stabil pada perangkat.
 
 **Status audit visual: COMPLETED FOR SOURCE EXTRACTION. Status source dan automatic deployment/reload: IMPLEMENTED. Status runtime rendering: NOT VERIFIED pada ThinkPad X280.** Source visual Floating Password Card berada langsung di `workstreams/02-lock-screen/modules/lockscreen/`; tidak ada subproject terpisah.
 
@@ -174,3 +174,47 @@ Jangan deploy ulang visual Lock Screen atau membersihkan source upstream sebelum
 - Bounded lock helper, updater, dan regression tests: **IMPLEMENTED / TESTED — CI PASS (39/39)**; X280 runtime validation pending.
 - Penyebab runtime final pada helper yang sebelumnya terpasang: **STRONG CANDIDATE; DEVICE CONFIRMATION PENDING**.
 - Visual deployment lanjutan dan cleanup source upstream: **PAUSED** sampai lock path pulih.
+
+
+## Perbaikan startup X280 — 11 November 2026
+
+Report aktual terbaru: `reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261111T074137Z/report.txt`.
+
+### Temuan runtime yang terkonfirmasi
+
+1. `hyprland.conf` sudah menjalankan `exec-once = caelestia shell -d`, tetapi blok `K41 CAELESTIA AUTOLOCK` di `hyprland.lua` juga menjalankan `caelestia shell -d`. Dua entry point ini dapat membuat startup Quickshell/Caelestia ganda.
+2. Blok Lua yang sama menjalankan `qs -c k41-boot-splash`, bertentangan dengan keputusan Plymouth-only.
+3. Caelestia Lock IPC tidak tersedia selama jendela tunggu 30 detik.
+4. Hyprlock v0.9.7 gagal dengan `Config path error: Could not find config`; helper lama memanggil Hyprlock tanpa path konfigurasi eksplisit.
+
+### Perbaikan yang sekarang tersedia di repository
+
+- `workstreams/02-lock-screen/config/hyprlock-fallback.conf`: konfigurasi fallback hitam minimal dengan input password; menggunakan autentikasi PAM default Hyprlock dan tidak mengubah kebijakan autentikasi.
+- `k41-lock-caelestia-after-start.sh`: memanggil `hyprlock --config ~/.config/k41/hyprlock-fallback.conf`, memeriksa konfigurasi, mencatat diagnostik IPC terakhir, dan baru menerbitkan readiness marker setelah Caelestia terverifikasi atau Hyprlock tetap berjalan.
+- `k41-update-lockscreen-startup-helper.sh`: membuat backup privat, memasang helper dan konfigurasi fallback, lalu menghapus hanya dua perintah yang diketahui dari blok K41 Lua: startup Caelestia duplikat dan Quickshell boot splash. Script mempertahankan satu startup Caelestia yang sudah ada di `hyprland.conf` serta pemanggilan helper di Lua. Jika struktur konfigurasi ambigu atau entry point tunggal tidak ditemukan, script berhenti tanpa menebak.
+- Test terisolasi mencakup updater, backup, idempotensi, preservasi konfigurasi di luar blok K41, jalur Caelestia, fallback Hyprlock, dan fail-closed saat config fallback tidak tersedia.
+
+### Langkah uji aktual
+
+Setelah `git pull` pada branch `main`, jalankan satu perintah berikut dari root repository sebagai user desktop biasa (tanpa sudo):
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-update-lockscreen-startup-helper.sh
+```
+
+Updater akan menyiapkan:
+- `~/.local/bin/k41-lock-caelestia-after-start`
+- `~/.config/k41/hyprlock-fallback.conf`
+- `~/.config/hypr/hyprland.lua` (hanya blok K41 yang ditandai)
+
+Jika updater selesai dengan status sukses, reboot satu kali. Hasil yang diharapkan adalah lock screen Caelestia; jika Caelestia IPC masih gagal, Hyprlock harus tampil sebagai fallback. Kedua jalur tetap membutuhkan password unlock biasa.
+
+Jika kembali ke TTY2, jalankan collector read-only yang sama dari root checkout:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
+```
+
+Collector akan menerbitkan report diagnostik baru. Jangan jalankan visual deployment dahulu. Jangan mengubah PAM, autentikasi, Plymouth, getty, systemd unit, bootloader, atau initramfs secara manual.
+
+**Status:** CI run `42987653538` pada commit `d5280a8aa6c6e51d27ef57c769be63e6e896b39d` PASS: Bash syntax, embedded Python syntax, ShellCheck, formatting, dan 39 test scripts (39 PASS, 0 FAIL, 0 SKIP). Runtime X280 tetap NOT VERIFIED sampai reboot aktual dilakukan.
