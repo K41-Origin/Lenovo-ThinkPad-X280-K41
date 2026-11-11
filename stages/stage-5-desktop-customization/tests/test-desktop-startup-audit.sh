@@ -17,10 +17,10 @@ for token in \
     'journalctl --user -b' \
     'start-hyprland' \
     'HYPRLAND_INSTANCE_SIGNATURE' \
-    'read-only' \\
-    'publish_report()' \\
-    'git push origin HEAD:main' \\
-    'git worktree add --detach' \\
+    'read-only' \
+    'publish_report()' \
+    'git push origin HEAD:main' \
+    'git worktree add --detach' \
     'chmod 0644'; do
     grep -Fq -- "$token" "$script" || {
         printf 'FAIL: audit collector missing diagnostic coverage: %s\n' "$token" >&2
