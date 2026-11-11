@@ -10,6 +10,7 @@ tests=(
   stages/stage-2-basic-arch-install/tests/test-x280-first-boot-check.sh
   stages/stage-3-desktop-install/tests/test-desktop-setup.sh
   stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh
+  stages/stage-5-desktop-customization/tests/test-desktop-startup-audit.sh
   stages/stage-5-desktop-customization/tests/test-boot-experience.sh
   stages/stage-5-desktop-customization/tests/test-boot-audit-collector.sh
   stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh
