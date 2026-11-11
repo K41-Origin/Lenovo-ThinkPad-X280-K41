@@ -10,6 +10,14 @@ pass() { printf 'PASS: %s\n' "$*"; }
 bash -n "$INSTALLER" || fail 'autologin installer syntax invalid'
 bash -n "$HELPER" || fail 'Caelestia lock helper syntax invalid'
 
+launcher_source_line="$(grep -n '^LAUNCHER_SOURCE=' "$INSTALLER" | head -n 1 | cut -d: -f1)"
+launcher_check_line="$(grep -nF '[[ -r $LAUNCHER_SOURCE ]]' "$INSTALLER" | head -n 1 | cut -d: -f1)"
+[[ -n $launcher_source_line && -n $launcher_check_line ]] || fail 'launcher source assignment/check missing'
+(( launcher_source_line < launcher_check_line )) || fail 'launcher source is referenced before assignment under set -u'
+if grep -Fq 'k41-boot-splash' "$INSTALLER" || grep -Fq 'qs -c' "$INSTALLER"; then
+  fail 'autologin installer must not start a Quickshell boot splash; Plymouth is the only boot splash'
+fi
+
 tokens=(
   'getty@tty1.service.d/k41-autologin.conf'
   '--autologin $USER_NAME'
