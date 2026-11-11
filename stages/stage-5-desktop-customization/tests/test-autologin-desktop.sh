@@ -74,7 +74,7 @@ esac
 MOCK
 chmod 0755 "$fixture/bin/caelestia"
 PATH="$fixture/bin:$PATH" K41_LOCK_READY_TIMEOUT=1 K41_LOCK_INTERVAL=0 K41_LOCK_VERIFY_RETRIES=1 \
-    K41_LOCK_COMMAND_TIMEOUT=1 bash "$HELPER" || fail 'verified Caelestia lock flow failed'
+    bash "$HELPER" || fail 'verified Caelestia lock flow failed'
 grep -Fxq 'shell -s' "$K41_MOCK_LOG" || fail 'helper did not inspect Caelestia IPC'
 grep -Fxq 'shell lock lock' "$K41_MOCK_LOG" || fail 'helper did not invoke Caelestia lock IPC'
 grep -Fxq 'shell lock isLocked' "$K41_MOCK_LOG" || fail 'helper did not verify the lock state'
@@ -109,7 +109,7 @@ chmod 0755 "$fixture/bin/caelestia" "$fixture/bin/hyprlock"
 export K41_FALLBACK_LOG="$fixture/fallback.log"
 rm -f -- "$HOME/.cache/k41/boot-lock-ready"
 PATH="$fixture/bin:$PATH" K41_LOCK_READY_TIMEOUT=1 K41_LOCK_INTERVAL=0 K41_LOCK_VERIFY_RETRIES=2 \
-    K41_LOCK_COMMAND_TIMEOUT=1 bash "$HELPER" || fail 'bounded lock verification did not fall back'
+    bash "$HELPER" || fail 'bounded lock verification did not fall back'
 [[ $(grep -Fc 'shell lock lock' "$K41_MOCK_LOG") -eq 1 ]] || fail 'lock request was retried outside the bounded verification window'
 [[ $(grep -Fc 'shell lock isLocked' "$K41_MOCK_LOG") -eq 2 ]] || fail 'lock verification did not respect its configured retry bound'
 grep -Fq 'fallback' "$K41_FALLBACK_LOG" || fail 'helper did not invoke Hyprlock after verification timeout'
@@ -125,7 +125,7 @@ exit 0
 MOCK
 chmod 0755 "$fixture/bin/caelestia"
 PATH="$fixture/bin:/usr/bin:/bin" K41_LOCK_READY_TIMEOUT=1 K41_LOCK_INTERVAL=0 K41_LOCK_VERIFY_RETRIES=1 \
-    K41_LOCK_COMMAND_TIMEOUT=1 bash "$HELPER" >/dev/null 2>&1 && fail 'helper should fail when both lock paths are unavailable'
+    bash "$HELPER" >/dev/null 2>&1 && fail 'helper should fail when both lock paths are unavailable'
 [[ ! -e "$HOME/.cache/k41/boot-lock-ready" ]] || fail 'helper published readiness without a verified lock process'
 pass 'lock helper fails closed when Caelestia and Hyprlock are unavailable'
 
