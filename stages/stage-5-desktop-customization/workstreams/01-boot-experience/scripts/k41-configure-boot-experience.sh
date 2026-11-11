@@ -56,8 +56,6 @@ LAUNCHER_TARGET="$USER_HOME/.local/bin/k41-start-hyprland"
 [[ -x $LAUNCHER_TARGET ]] || die "The installed K41 Hyprland launcher was not found; rerun the autologin setup after updating the repository."
 HYPRLAND_CONFIG="$USER_HOME/.config/hypr/hyprland.lua"
 [[ -r $HYPRLAND_CONFIG ]] || die "Expected Hyprland config is missing: $HYPRLAND_CONFIG"
-command -v qs >/dev/null 2>&1 || die "Quickshell (qs) is required for the K41 graphical handoff."
-[[ -r "$SCRIPT_DIR/k41-install-animated-boot-splash.sh" ]] || die "The K41 Quickshell handoff installer is missing or unreadable."
 
 printf '\nK41 boot-experience setup\n'
 printf 'Root LUKS device: %s\n' "$crypt_device"
@@ -106,9 +104,8 @@ chmod 0600 "$backup_dir/luks-device"
 # /var/lib/k41/boot-experience/backups for restoring boot configuration only.
 warn "LUKS header backup is being skipped by request. Keep the existing passphrase safe; do not remove or overwrite its keyslot."
 
-# Install the graphical K41 handoff first. Its Hyprland config is backed up above.
-info "Installing the K41 Quickshell handoff and Hyprland visual suppression."
-bash "$SCRIPT_DIR/k41-install-animated-boot-splash.sh"
+# Plymouth is the sole boot renderer; no Quickshell/QML boot overlay is installed.
+info "Configuring the Plymouth-only boot path and separate desktop lock handoff; no QML overlay."
 
 # Install Plymouth from the signed official Arch repository; do not bypass pacman verification.
 pacman -S --needed plymouth
