@@ -256,7 +256,7 @@ note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, 
 note '- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.'
 note '- Journal mungkin tidak dapat dibaca lengkap oleh user biasa; permission-denied dicatat sebagai keterbatasan.'
 note '- Report menyimpan potongan log yang relevan dan metadata konfigurasi. Redaksi otomatis tidak menjamin seluruh data pribadi terhapus.'
-note '- Periksa report sebelum commit/push; jangan publikasikan token, hostname pribadi, alamat jaringan, atau informasi sensitif.'
+note '- Salinan report tersanitasi dipublikasikan otomatis; redaksi tidak menjamin seluruh data privat terhapus, jadi tinjau report di GitHub dan hapus data sensitif bila ditemukan.'
 note '- TTY2 fallback dapat merupakan konsekuensi eksplisit dari k41-plymouth-quit-after-lock.sh setelah timeout 75 detik; bukti journal menentukan apakah mekanisme itu yang berjalan.'
 note "Report: ${report#"$repo_root"/}"
 
@@ -269,7 +269,7 @@ Run this script as the regular desktop user from tty2 or a normal shell:
 
 Report: report.txt
 
-The collector is read-only. It does not attempt to launch or repair Hyprland.
+The collector does not modify host system state and does not attempt to launch or repair Hyprland. It writes a private local report and publishes a sanitized copy.
 The script publishes a sanitized copy of this run directory to GitHub main using existing Git credentials. The local report remains private (0600); if publication fails, the report stays local and the script exits non-zero. Review the published report for any residual private information.
 EOF
 chmod 0600 "$run_dir/README.txt"
