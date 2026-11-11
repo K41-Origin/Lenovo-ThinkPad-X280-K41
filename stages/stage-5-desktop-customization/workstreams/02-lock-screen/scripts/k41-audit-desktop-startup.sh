@@ -171,11 +171,56 @@ if [[ -r $HOME/.bash_profile ]]; then
     awk '/# K41 HYPRLAND AUTOLOGIN START/{show=1} show{print} /# K41 HYPRLAND AUTOLOGIN END/{show=0}' "$HOME/.bash_profile" | redact >>"$report" || true
 else note '[~/.bash_profile unavailable]'; fi
 
+section 'HYPRLAND CONFIG STARTUP INTEGRATION'
+for config_file in "$HOME/.config/hypr/hyprland.conf" "$HOME/.config/hypr/hyprland.lua"; do
+    [[ -r $config_file && ! -L $config_file ]] || continue
+    printf '\\n-- %s --\\n' "${config_file#"$HOME"/}" | redact >>"$report"
+    grep -nEi -C 4 'exec-once|exec[[:space:]]*=|caelestia|quickshell|(^|[[:space:]])qs([[:space:]]|$)|k41-boot-splash|hyprland\\.start|lock-caelestia' "$config_file" |
+        redact >>"$report" || note "[no matching startup directives in ${config_file#"$HOME"/}]"
+done
+
 section 'HYPRLAND LUA STARTUP / LOCK INTEGRATION LINES'
 if [[ -r $HOME/.config/hypr/hyprland.lua ]]; then
     grep -nEi -C 3 'K41|hyprland\.start|start-hyprland|caelestia|hyprlock|lock|exec_cmd|exec-once' "$HOME/.config/hypr/hyprland.lua" |
         redact >>"$report" || note '[no matching startup/lock lines]'
 else note '[~/.config/hypr/hyprland.lua unavailable]'; fi
+
+section 'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON'
+installed_helper="$HOME/.local/bin/k41-lock-caelestia-after-start"
+source_helper="$repo_root/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-lock-caelestia-after-start.sh"
+if [[ -f $installed_helper && ! -L $installed_helper ]]; then
+    printf 'Installed helper: ' | redact >>"$report"
+    stat -c 'mode=%A uid=%u gid=%g size=%s' "$installed_helper" 2>&1 | redact >>"$report" || true
+    if have sha256sum; then sha256sum "$installed_helper" "$source_helper" 2>&1 | redact >>"$report" || true; fi
+    if [[ -f $source_helper ]] && cmp -s "$installed_helper" "$source_helper"; then
+        note 'Installed helper byte comparison: MATCHES repository source.'
+    else
+        note 'Installed helper byte comparison: DIFFERS from repository source or source is missing.'
+    fi
+    if bash -n "$installed_helper" 2>&1; then note 'Installed helper Bash syntax: PASS'; else note 'Installed helper Bash syntax: FAIL'; fi
+    section 'INSTALLED LOCK HELPER SOURCE (redacted)'
+    sed -n '1,320p' "$installed_helper" | redact >>"$report" || true
+else
+    note 'Installed helper is missing, unreadable, or a symlink.'
+fi
+
+section 'INSTALLED K41 LOCK VISUAL SOURCE COMPARISON'
+source_module="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen"
+runtime_module="$HOME/.config/quickshell/caelestia/modules/lock"
+for relative in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
+    source_file="$source_module/$relative"
+    runtime_file="$runtime_module/$relative"
+    if [[ -f $source_file && ! -L $source_file && -f $runtime_file && ! -L $runtime_file ]]; then
+        if cmp -s "$source_file" "$runtime_file"; then
+            printf 'MATCH %s\n' "$relative" >>"$report"
+        else
+            printf 'DIFFERS %s\n' "$relative" >>"$report"
+        fi
+        if have sha256sum; then sha256sum "$source_file" "$runtime_file" 2>&1 | redact >>"$report" || true; fi
+    else
+        printf 'MISSING source/runtime file: %s\n' "$relative" | redact >>"$report"
+    fi
+done
 
 section 'HYPRLAND CONFIG FILE INVENTORY'
 for base in "$HOME/.config/hypr" "$HOME/.config/quickshell/caelestia" "$HOME/.config/caelestia"; do
@@ -204,7 +249,7 @@ if [[ -f $startup_log && ! -L $startup_log ]]; then
 else note '[K41 Hyprland startup log missing]'; fi
 
 section 'RECENT USER LOG FILES'
-for base in "$HOME/.local/state/k41" "$HOME/.local/share/hyprland" "$HOME/.cache/hyprland" "$HOME/.cache/qs" "$HOME/.cache/quickshell"; do
+for base in "$HOME/.local/state/k41" "$HOME/.local/state/caelestia" "$HOME/.local/state/quickshell" "$HOME/.local/share/hyprland" "$HOME/.local/share/caelestia" "$HOME/.cache/hyprland" "$HOME/.cache/caelestia" "$HOME/.cache/qs" "$HOME/.cache/quickshell"; do
     [[ -d $base && ! -L $base ]] || continue
     while IFS= read -r -d '' file; do
         [[ -f $file && ! -L $file ]] || continue
@@ -223,6 +268,8 @@ section 'HYPRLAND IPC (only succeeds if compositor is running)'
 run 'HYPRLAND INSTANCES' hyprctl instances
 run 'HYPRLAND VERSION VIA IPC' hyprctl version
 run 'HYPRLAND MONITORS' hyprctl monitors
+
+run 'START-HYPRLAND COREDUMP SUMMARY' coredumpctl info start-hyprland
 
 section 'GRAPHICS DEVICE INVENTORY'
 run 'DRM DEVICE NODES' ls -l /dev/dri
