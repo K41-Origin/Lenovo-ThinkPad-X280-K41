@@ -39,7 +39,7 @@ grep -Fq 'namei -l' "$permission_audit"
 grep -Fq 'getfacl -cp' "$permission_audit"
 grep -Fq 'stat -c' "$permission_audit"
 ! grep -Eq '^[[:space:]]*chown([[:space:]]|$)' "$permission_audit"
-! grep -Eq '^[[:space:]]*chmod([[:space:]]|$)' "$permission_audit" | grep -vF 'chmod 0600 "$report"'
+! grep -E '^[[:space:]]*chmod[[:space:]]' "$permission_audit" | grep -Fv 'chmod 0600 "$report"'
 grep -Fq 'umask 077' "$permission_audit"
 grep -Fq 'chmod 0600 "$report"' "$permission_audit"
 ! grep -Fq 'git add' "$permission_audit"
