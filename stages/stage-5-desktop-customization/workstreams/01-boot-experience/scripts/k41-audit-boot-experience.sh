@@ -71,6 +71,14 @@ note "This collector does not invoke pacman, mkinitcpio, bootctl install/update,
 note "LUKS passphrases, key material, recovery keys, and full token metadata are not intentionally collected."
 note "Review the report before sharing; firmware identifiers, disk labels, UUIDs, journal text, and local paths may still be sensitive."
 
+run "SYSTEM / FIRMWARE MODEL (SERIALS EXCLUDED)" bash -c '
+  for field in sys_vendor product_name product_version bios_vendor bios_version bios_date; do
+    file="/sys/class/dmi/id/$field"
+    [[ -r $file ]] || continue
+    printf "%s=" "$field"
+    tr -d "\\000" <"$file"
+  done
+'
 run "FIRMWARE MODE" bash -c '[[ -d /sys/firmware/efi ]] && echo UEFI || echo Legacy/unknown; [[ -r /sys/firmware/efi/fw_platform_size ]] && cat /sys/firmware/efi/fw_platform_size; [[ -r /sys/firmware/efi/efivars/SecureBoot-* ]] && echo SecureBoot-variable-present || true'
 run "BOOTCTL STATUS" bootctl status --no-pager
 run "BOOTCTL ENTRIES" bootctl list --no-pager
@@ -118,6 +126,15 @@ if compgen -G '/etc/mkinitcpio.d/*.preset' >/dev/null; then
 else
   note "[no mkinitcpio preset files found]"
 fi
+section "BOOTLOADER ENTRY CONTENTS (SENSITIVE FIELDS REDACTED)"
+for file in /boot/loader/entries/*.conf /efi/loader/entries/*.conf /boot/grub/grub.cfg /efi/EFI/BOOT/grub.cfg; do
+  [[ -f $file && -r $file ]] || continue
+  printf '\\n--- %s ---\\n' "$file" >>"$REPORT"
+  grep -nE '^[[:space:]]*(title|linux|linuxefi|initrd|initrdefi|options|search|cryptdevice|cryptkey)' "$file" |
+    sed -E \\
+      -e 's/(rd\\\\.luks\\\\.key|cryptkey|password|passphrase|token|credential)(=[^[:space:]]*)?/\\\\1=<REDACTED>/Ig' \\
+      -e 's/(UUID=)[[:xdigit:]-]+/\\\\1<UUID-REDACTED>/Ig' >>"$REPORT" || true
+done
 run "INITRAMFS TOOL VERSION" mkinitcpio --version
 run "INITRAMFS CONTENTS — PLYMOUTH / CRYPT / TPM MATCHES" bash -c '
   command -v lsinitcpio >/dev/null 2>&1 || { echo lsinitcpio-unavailable; exit 0; }
