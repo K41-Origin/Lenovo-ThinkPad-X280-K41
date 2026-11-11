@@ -17,7 +17,11 @@ for token in \
     'journalctl --user -b' \
     'start-hyprland' \
     'HYPRLAND_INSTANCE_SIGNATURE' \
-    'read-only'; do
+    'read-only' \\
+    'publish_report()' \\
+    'git push origin HEAD:main' \\
+    'git worktree add --detach' \\
+    'chmod 0644'; do
     grep -Fq -- "$token" "$script" || {
         printf 'FAIL: audit collector missing diagnostic coverage: %s\n' "$token" >&2
         exit 1
@@ -37,5 +41,6 @@ grep -Fq 'umask 077' "$script"
 grep -Fq 'chmod 0600 "$report"' "$script"
 grep -Fq 'chmod 0700 "$run_dir"' "$script"
 grep -Fq 'password|passwd|token|secret|authorization|cookie|api[_-]?key' "$script"
+! grep -Eq 'git[[:space:]].*push.*--force' "$script"
 
 printf 'PASS: desktop startup audit syntax, tty/session coverage, privacy guard, and read-only contract.\n'
