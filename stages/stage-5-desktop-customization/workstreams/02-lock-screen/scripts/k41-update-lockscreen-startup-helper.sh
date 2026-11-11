@@ -11,7 +11,7 @@ info() { printf 'INFO: %s\n' "$*"; }
 [[ $# -eq 0 ]] || die 'This updater takes no arguments.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME is missing or invalid.'
 
-for command_name in git stat date mkdir cp chmod install bash mktemp mv cmp sha256sum; do
+for command_name in git stat date mkdir cp chmod install bash mktemp mv cmp sha256sum awk rm; do
     command -v "$command_name" >/dev/null 2>&1 || die "Required command is unavailable: $command_name"
 done
 
