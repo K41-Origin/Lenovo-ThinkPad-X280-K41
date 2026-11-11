@@ -45,7 +45,18 @@ Jangan membuat bootstrap, service, updater, framework installer, atau runtime K4
 6. Pengujian runtime hanya boleh diklaim jika benar-benar dijalankan dan memiliki bukti.
 7. Catat perintah, hasil aktual, keterbatasan, dan keputusan pengguna.
 
-## Protokol khusus Boot Experience (Workstream 01)\n\n- Status saat ini: REOPENED — AUDIT REQUIRED.\n- Audit repository dan perangkat harus read-only sebelum implementasi. Gunakan collector `workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh`.\n- Boot splash/animasi wajib 100% Plymouth; QML/Quickshell/qs tidak boleh menjadi dependency atau proses boot.\n- Review mencakup firmware/bootloader, EFI mount, kernel cmdline, initramfs/UKI, Plymouth, systemd units, LUKS/TPM metadata ringkas, TTY/login, serta journal. Jangan mengumpulkan secret.\n- Pisahkan perubahan visual Plymouth dari perubahan TPM/LUKS, bootloader, autologin, dan enkripsi. Tidak ada operasi mutasi sebelum bukti perangkat dan rencana rollback direview.\n- Test statis tidak membuktikan boot fisik, unlock LUKS, recovery, atau Secure Boot. Jangan klaim VERIFIED tanpa bukti pada ThinkPad X280.\n- Artefak QML/installer Quickshell boot splash lama adalah legacy/conflicting implementation; hapus hanya setelah semua referensi dan test dimigrasikan.\n- Dokumen rinci: [Workstream 01 — Boot Experience](01-BOOT-EXPERIENCE.md).\n\n## Protokol khusus Lock Screen
+## Protokol khusus Boot Experience (Workstream 01)
+
+- Status saat ini: REOPENED — AUDIT REQUIRED.
+- Audit repository dan perangkat harus read-only sebelum implementasi. Gunakan collector `workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh`.
+- Boot splash/animasi wajib 100% Plymouth; QML/Quickshell/qs tidak boleh menjadi dependency atau proses boot.
+- Review mencakup firmware/bootloader, EFI mount, kernel cmdline, initramfs/UKI, Plymouth, systemd units, LUKS/TPM metadata ringkas, TTY/login, serta journal. Jangan mengumpulkan secret.
+- Pisahkan perubahan visual Plymouth dari perubahan TPM/LUKS, bootloader, autologin, dan enkripsi. Tidak ada operasi mutasi sebelum bukti perangkat dan rencana rollback direview.
+- Test statis tidak membuktikan boot fisik, unlock LUKS, recovery, atau Secure Boot. Jangan klaim VERIFIED tanpa bukti pada ThinkPad X280.
+- Artefak QML/installer Quickshell boot splash legacy telah dihapus setelah referensi deployment dan test dimigrasikan.
+- Dokumen rinci: [Workstream 01 — Boot Experience](01-BOOT-EXPERIENCE.md).
+
+## Protokol khusus Lock Screen
 
 - Tampilan Lock Screen saat ini telah disetujui pengguna. Migrasi harus mempertahankan tampilan tersebut; bukan redesign.
 - Audit mencakup source visual, QML, styling, animasi, aset, konfigurasi visual, resource, dependency, dan titik integrasi.
