@@ -29,7 +29,7 @@ Tidak termasuk workspace dock (Bottombar), launcher, dashboard (dinonaktifkan da
 
 ## Pola implementasi
 
-Gunakan pola yang dipelajari dari Workstream 04 — K41Dock:
+Gunakan pola yang dipelajari dari Workstream 04 — Bottombar:
 - Source K41 disimpan terpisah dalam repository pada direktori workstream.
 - Runtime source dideploy ke bawah `~/.config/quickshell/` melalui installer.
 - Integrasi dengan Caelestia harus minimal dan tidak mengubah file upstream yang tidak diperlukan.
