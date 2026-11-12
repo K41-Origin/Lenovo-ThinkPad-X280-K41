@@ -32,7 +32,7 @@ Urutan di bawah adalah urutan eksekusi workstream Stage 5. ID aktif berurutan 01
 ## Prinsip Stage 5 dan K41-dots
 
 - K41-dots adalah kumpulan modul Quickshell milik K41, bukan shell mandiri pada tahap ini.
-- Runtime tujuan modul adalah ~/.config/quickshell/k41/modules/<feature>/, misalnya lockscreen/.
+- Runtime utama modul yang diimpor Caelestia adalah ~/.config/quickshell/caelestia/k41/modules/<feature>/; namespace sibling ~/.config/quickshell/k41/modules/<feature>/ dipertahankan sebagai compatibility mirror. WS02 juga mempertahankan overlay aktif di caelestia/modules/lock/.
 - Script audit mengumpulkan informasi source, dependency, konfigurasi, dan titik integrasi yang relevan untuk satu fitur; audit tidak mengubah sistem.
 - Script penyiapan mengambil hanya source/resource yang diperlukan dan menempatkannya pada namespace K41. Audit dan penyiapan adalah dua operasi terpisah.
 - Caelestia tetap menjadi host/runtime; integrasi dilakukan seperlunya.
