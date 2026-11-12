@@ -36,13 +36,13 @@ Status terkini dan prioritas hanya dicatat di [06 — Status](06-STATUS.md).
 Peta fisik implementasi: [Stage 5 — Desktop Customization](../stages/stage-5-desktop-customization/README.md).
 
 Urutan workstream aktif:
-1. [Boot Experience](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md)
-2. [Lock Screen](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md)
-3. [Bottombar](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
-4. [Topbar](../stages/stage-5-desktop-customization/docs/05-TOPBAR.md)
-5. [Launcher](../stages/stage-5-desktop-customization/docs/05-LAUNCHER.md)
-6. [Sidebar](../stages/stage-5-desktop-customization/docs/06-SIDEBAR.md)
-7. [Utilities](../stages/stage-5-desktop-customization/docs/07-UTILITIES.md)
+1. [Boot Experience — ID 01: PAUSED](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md)
+2. [Lock Screen — ID 02: COMPLETED / USER ACCEPTED](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md)
+3. [Bottombar / K41Dock — ID 04: COMPLETED / USER CONFIRMED SUCCESS](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
+4. [Topbar — ID 05: NEXT / PLANNED](../stages/stage-5-desktop-customization/docs/05-TOPBAR.md)
+5. [Launcher — ID 06: PLANNED](../stages/stage-5-desktop-customization/docs/05-LAUNCHER.md)
+6. [Sidebar — ID 07: PLANNED](../stages/stage-5-desktop-customization/docs/06-SIDEBAR.md)
+7. [Utilities — ID 08: PLANNED](../stages/stage-5-desktop-customization/docs/07-UTILITIES.md)
 
 Dashboard telah dihapus dari daftar workstream; fitur runtime dinonaktifkan oleh cleanup script Stage 5.
 
@@ -55,5 +55,3 @@ Screenshot tidak digunakan, tidak diminta, dan bukan syarat acceptance. Pengguna
 ## Batas Stage 5
 
 Stage 5 berfokus pada shell, tampilan, interaksi, dan integrasi aplikasi. Optimasi CPU/GPU, thermal/fan, baterai, power policy, dan suspend/resume merupakan Stage 6.
-
-Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan menganggap collector audit Guest sebagai implementasi fitur.
