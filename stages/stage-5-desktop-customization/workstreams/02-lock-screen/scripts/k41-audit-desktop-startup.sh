@@ -845,10 +845,14 @@ publish_report() {
         printf 'ERROR: could not stage sanitized report in isolated clone; report remains local.\n' >&2
         return 1
     fi
-    chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" "$publish_target/lifecycle-timeline.tsv"
-    chmod 0755 "$publish_target"
-    git -C "$publish_dir" config user.name "K41 Startup Audit"
-    git -C "$publish_dir" config user.email "k41-startup-audit@users.noreply.github.com"
+    if ! chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" "$publish_target/lifecycle-timeline.tsv" ||
+       ! chmod 0755 "$publish_target" ||
+       ! git -C "$publish_dir" config user.name "K41 Startup Audit" ||
+       ! git -C "$publish_dir" config user.email "k41-startup-audit@users.noreply.github.com"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: isolated clone preparation failed; report remains local.\\n' >&2
+        return 1
+    fi
     if ! git -C "$publish_dir" add -- "$relative_dir" ||
        ! git -C "$publish_dir" commit -m "Add X280 desktop startup diagnostic"; then
         rm -rf -- "$publish_tmp"
