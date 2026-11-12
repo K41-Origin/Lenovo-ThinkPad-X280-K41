@@ -77,6 +77,15 @@ test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l
 
 # Inject a failure at host publication after handoff and K41 staging; verify full rollback.
 cp "$backup_root/Notifs.qml" "$notifs"
+# Model a fresh install: the host has no K41 import yet, while its target
+# directory contains an older, currently unused K41 copy.
+cat >"$host" <<'QML'
+import QtQuick
+import Quickshell
+ShellRoot {
+    id: root
+}
+QML
 notifs_before_rollback="$(sha256sum "$notifs" | cut -d' ' -f1)"
 host_before_rollback="$(sha256sum "$host" | cut -d' ' -f1)"
 mkdir -p "$tmp/bin"
@@ -137,6 +146,6 @@ if run_installer >/dev/null 2>&1; then
     exit 1
 fi
 test -L "$target"
-test "$(sha256sum "$host" | cut -d' ' -f1)" != "$host_before"
+test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
 printf 'PASS: service deployment, Caelestia handoff, idempotency, fail-closed, dependency and symlink guards.\n'
