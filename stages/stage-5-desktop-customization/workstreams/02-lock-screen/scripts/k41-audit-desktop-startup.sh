@@ -297,7 +297,8 @@ else
     note '[caelestia executable unavailable; helper IPC contract cannot be probed]'
 fi
 if have systemctl; then
-    run 'IMPLEMENTATION PROBE: USER SESSION ENVIRONMENT' systemctl --user show-environment
+    section 'IMPLEMENTATION PROBE: USER SESSION ENVIRONMENT VARIABLE NAMES'
+    systemctl --user show-environment 2>&1 | cut -d= -f1 | sort | redact >>"$report" || true
     for unit in caelestia.service quickshell.service hyprland-session.target graphical-session.target; do
         run "IMPLEMENTATION PROBE: USER UNIT CAT $unit" systemctl --user cat "$unit"
     done
@@ -571,7 +572,7 @@ with timeline_path.open("w", encoding="utf-8") as out:
     for name in all_events:
         matches = observed.get(name, journal_events.get(name, []))
         if name in ("LOCK_SURFACE_VISIBLE", "DESKTOP_RESTORED_AFTER_UNLOCK") and not matches:
-            out.write(f"{name}\\tNOT_INSTRUMENTED\\tUNKNOWN\\tUNKNOWN\\tNo reliable event source currently emits this event\\n")
+            out.write(f"{name}\tNOT_INSTRUMENTED\tUNKNOWN\tUNKNOWN\tNo reliable event source currently emits this event\n")
         elif matches:
             for stamp, source, evidence in matches:
                 safe = evidence.replace("\\t", " ").replace("\\n", " ")
@@ -583,7 +584,7 @@ with timeline_path.open("w", encoding="utf-8") as out:
                     safe = re.sub(r"(?<![A-Za-z0-9_.-])" + re.escape(username) + r"(?![A-Za-z0-9_.-])", "<USER>", safe)
                 except KeyError:
                     pass
-                safe = re.sub(r"(?i)\\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\\b([=: ]+)[^\\s,;]+", r"\\1\\2<REDACTED>", safe)
+                safe = re.sub(r"(?i)\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\b([=: ]+)[^\s,;]+", r"\1\2<REDACTED>", safe)
                 out.write(f"{name}\tOBSERVED\t{stamp}\t{source}\t{safe}\n")
         else:
             out.write(f"{name}\tNOT_OBSERVED\tUNKNOWN\tUNKNOWN\tNo matching evidence in collected sources\n")
@@ -599,7 +600,7 @@ with report_path.open("a", encoding="utf-8") as report:
     for name in all_events:
         matches = observed.get(name, journal_events.get(name, []))
         if name in ("LOCK_SURFACE_VISIBLE", "DESKTOP_RESTORED_AFTER_UNLOCK") and not matches:
-            report.write(f"{name}: NOT_INSTRUMENTED\\n")
+            report.write(f"{name}: NOT_INSTRUMENTED\n")
             continue
         report.write(f"{name}: {'OBSERVED (' + str(len(matches)) + ')' if matches else 'NOT_OBSERVED'}\n")
 PY
