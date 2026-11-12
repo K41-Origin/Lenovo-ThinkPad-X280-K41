@@ -13,7 +13,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
 | 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **COMPLETED / USER ACCEPTED** |
-| 4 | 04 | [Topbar](04-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
+| 4 | 04 | [Topbar](04-TOPBAR.md) | **PENDING — reboot dan runtime verification** |
 | 5 | 05 | [Launcher](05-LAUNCHER.md) | PLANNED |
 | 6 | 06 | [Sidebar](06-SIDEBAR.md) | PLANNED |
 | 7 | 07 | [Utilities](07-UTILITIES.md) | PLANNED |
