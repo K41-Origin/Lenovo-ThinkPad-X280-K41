@@ -31,7 +31,7 @@ export K41_AUDIT_HOME="$HOME" K41_AUDIT_REPO="$repo_root" K41_AUDIT_REPORT="$rep
 export K41_AUDIT_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
 
 python3 <<'PY'
-import hashlib, os, pathlib, re, shutil, subprocess
+import difflib, hashlib, os, pathlib, re, shutil, subprocess
 from datetime import datetime, timezone
 
 home = pathlib.Path(os.environ["K41_AUDIT_HOME"]).resolve()
@@ -109,6 +109,102 @@ for label, root in roots:
               (["git","-C",str(root),"status","--short"],"working tree")]:
                 rc, v = run(args); add(f"  Git {title}: {v if v else ('clean' if rc == 0 else 'unavailable')}")
     else: add(f"{label}: ABSENT {clean(root)}")
+
+section("DEPLOYMENT PREFLIGHT DIAGNOSTICS — FOUR K41 VISUAL TARGETS")
+# These values intentionally mirror the deployment script's audited pin.
+expected_origin = "https://github.com/caelestia-dots/shell.git"
+expected_revision = "d999d4878ee4cec134168e60d913714566a8cfa6"
+visual_source = repo / "stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen"
+target_files = [
+    "LockSurface.qml",
+    "Content.qml",
+    "Center.qml",
+    "center/PasswordInput.qml",
+]
+for label, root in available:
+    if label != "USER_CONFIG" or not (root / ".git").exists():
+        continue
+    add(f"Deployment candidate root: {clean(root)}")
+    rc, actual_origin = run(["git", "-C", str(root), "remote", "get-url", "origin"])
+    actual_origin = actual_origin if rc == 0 else "<unavailable>"
+    rc, actual_revision = run(["git", "-C", str(root), "rev-parse", "HEAD"])
+    actual_revision = actual_revision if rc == 0 else "<unavailable>"
+    rc, tree_status = run(["git", "-C", str(root), "status", "--short", "--untracked-files=all"])
+    add(f"Expected origin: {expected_origin}")
+    add(f"Actual origin:   {actual_origin}")
+    add(f"Origin matches:  {actual_origin == expected_origin}")
+    add(f"Expected HEAD:   {expected_revision}")
+    add(f"Actual HEAD:     {actual_revision}")
+    add(f"HEAD matches:    {actual_revision == expected_revision}")
+    add("Full checkout status: " + (tree_status or ("clean" if rc == 0 else "<unavailable>")))
+    for relative in target_files:
+        installed = root / "modules/lock" / relative
+        source = visual_source / relative
+        add()
+        add(f"TARGET: modules/lock/{relative}")
+        for title, candidate in (("Installed", installed), ("K41 source", source)):
+            if candidate.is_symlink():
+                add(f"  {title}: SYMLINK — rejected by deployment")
+            elif candidate.is_file():
+                st = candidate.stat()
+                add(f"  {title}: PRESENT | bytes={st.st_size} | mode={st.st_mode & 0o777:04o} | uid={st.st_uid} | sha256={sha(candidate)}")
+            else:
+                add(f"  {title}: MISSING")
+        rc, status = run(["git", "-C", str(root), "status", "--short", "--untracked-files=all", "--", f"modules/lock/{relative}"])
+        add("  Git path status: " + (status or ("clean" if rc == 0 else "<unavailable>")))
+        upstream = None
+        try:
+            p = subprocess.run(
+                ["git", "-C", str(root), "show", f"HEAD:modules/lock/{relative}"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10
+            )
+            if p.returncode == 0:
+                upstream = p.stdout
+                add(f"  Pinned HEAD blob: PRESENT | bytes={len(upstream)} | sha256={hashlib.sha256(upstream).hexdigest()}")
+            else:
+                add("  Pinned HEAD blob: MISSING/UNTRACKED")
+        except (OSError, subprocess.TimeoutExpired) as e:
+            add(f"  Pinned HEAD blob: UNAVAILABLE ({type(e).__name__})")
+        installed_bytes = None
+        try:
+            if installed.is_file() and not installed.is_symlink():
+                installed_bytes = installed.read_bytes()
+        except OSError:
+            pass
+        source_bytes = None
+        try:
+            if source.is_file() and not source.is_symlink():
+                source_bytes = source.read_bytes()
+        except OSError:
+            pass
+        add(f"  Installed equals pinned HEAD: {installed_bytes is not None and upstream is not None and installed_bytes == upstream}")
+        add(f"  Installed equals K41 source:  {installed_bytes is not None and source_bytes is not None and installed_bytes == source_bytes}")
+        for title, left, right in (
+            ("DIFF: pinned HEAD -> installed", upstream, installed_bytes),
+            ("DIFF: installed -> K41 source", installed_bytes, source_bytes),
+        ):
+            add(f"  {title}:")
+            if left is None or right is None:
+                add("    <comparison unavailable>")
+                continue
+            if left == right:
+                add("    <identical>")
+                continue
+            try:
+                diff_lines = difflib.unified_diff(
+                    left.decode("utf-8", "replace").splitlines(),
+                    right.decode("utf-8", "replace").splitlines(),
+                    fromfile=title.split(" -> ")[0],
+                    tofile=title.split(" -> ")[1],
+                    lineterm="",
+                )
+                rendered = list(diff_lines)
+                add("\\n".join("    " + line for line in rendered) if rendered else "    <no textual diff>")
+            except Exception as e:
+                add(f"    <diff failed: {type(e).__name__}>")
+    break
+else:
+    add("No user-local Git Caelestia checkout found; deployment provenance cannot be evaluated.")
 
 section("LOCK-SCREEN VISUAL ENTRY POINTS")
 initial, index = [], {}
