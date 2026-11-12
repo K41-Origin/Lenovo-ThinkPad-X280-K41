@@ -32,10 +32,16 @@ shell_file="$caelestia_root/shell.qml"
 [[ -f $shell_file && ! -L $shell_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$caelestia_root" && owned "$shell_file" || die 'Host Caelestia bukan milik user aktif.'
 
-runtime_root="$qs_root/k41"
-modules_root="$runtime_root/modules"
-module_root="$modules_root/bottombar"
+# Primary module location is inside the active Caelestia config root so qs.* imports resolve.
+caelestia_k41_root="$caelestia_root/k41"
+caelestia_modules_root="$caelestia_k41_root/modules"
+module_root="$caelestia_modules_root/bottombar"
 target_file="$module_root/Dock.qml"
+# Compatibility mirror retained at the historical sibling namespace.
+legacy_runtime_root="$qs_root/k41"
+legacy_modules_root="$legacy_runtime_root/modules"
+legacy_module_root="$legacy_modules_root/bottombar"
+legacy_target_file="$legacy_module_root/Dock.qml"
 legacy_case_file="$module_root/Dock.Qml"
 
 # K41 is a module namespace hosted by Caelestia, not a standalone Quickshell
@@ -58,20 +64,31 @@ if [[ -e $legacy_case_file || -L $legacy_case_file ]]; then
     legacy_case_sha="$(sha256sum -- "$legacy_case_file" | awk '{print $1}')"
 fi
 
-for path in "$runtime_root" "$modules_root" "$module_root"; do
+for path in "$legacy_runtime_root" "$legacy_modules_root" "$legacy_module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then
         [[ -d $path ]] || die "Path runtime bukan direktori: $path"
         owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
     fi
 done
+for path in "$caelestia_k41_root" "$caelestia_modules_root" "$module_root"; do
+    [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
+    if [[ -e $path ]]; then
+        [[ -d $path ]] || die "Path runtime bukan direktori: $path"
+        owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
+    fi
+done
+if [[ -e $legacy_target_file || -L $legacy_target_file ]]; then
+    [[ -f $legacy_target_file && ! -L $legacy_target_file ]] || die 'Legacy mirror target bukan regular file.'
+    owned "$legacy_target_file" || die 'Legacy mirror target bukan milik user aktif.'
+fi
 if [[ -e $target_file || -L $target_file ]]; then
     [[ -f $target_file && ! -L $target_file ]] || die 'Target Dock.qml bukan regular file.'
     owned "$target_file" || die 'Target Dock.qml bukan milik user aktif.'
 fi
 
 old_import='import "modules/k41dock" as K41Dock'
-new_import='import "../k41/modules/bottombar" as K41Bottombar'
+new_import='import qs.k41.modules.bottombar as K41Bottombar'
 old_import_n="$(grep -Ec '^[[:space:]]*import[[:space:]]+"modules/k41dock"[[:space:]]+as[[:space:]]+K41Dock[[:space:]]*$' "$shell_file" || true)"
 new_import_n="$(grep -Ec '^[[:space:]]*import[[:space:]]+"\.\./k41/modules/bottombar"[[:space:]]+as[[:space:]]+K41Bottombar[[:space:]]*$' "$shell_file" || true)"
 old_instance_n="$(grep -Ec '^[[:space:]]*K41Dock\.K41Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
@@ -87,7 +104,8 @@ fi
 
 source_sha="$(sha256sum -- "$source_file" | awk '{print $1}')"
 module_matches=0
-if [[ -f $target_file ]] && cmp -s -- "$source_file" "$target_file"; then module_matches=1; fi
+if [[ -f $target_file && -f $legacy_target_file ]] &&
+   cmp -s -- "$source_file" "$target_file" && cmp -s -- "$source_file" "$legacy_target_file"; then module_matches=1; fi
 if (( module_matches && ! host_change )); then
     info 'Modul canonical dan integrasi Caelestia sudah sesuai; tidak ada perubahan.'
     exit 0
@@ -103,7 +121,7 @@ for path in "$state_home" "$state_home/k41" "$state_home/k41/backups" "$backup_p
         owned "$path" || die "Path backup bukan milik user aktif: $path"
     fi
 done
-mkdir -p -- "$module_root" "$backup_parent"
+mkdir -p -- "$module_root" "$legacy_module_root" "$backup_parent"
 chmod 0700 "$backup_parent"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup_root="$backup_parent/$stamp"
@@ -200,6 +218,11 @@ mv -fT -- "$module_tmp" "$target_file"
 module_tmp=''
 [[ -f $target_file && ! -L $target_file ]] || die 'Target Dock.qml tidak valid setelah deployment.'
 cmp -s -- "$source_file" "$target_file" || die 'Content Dock.qml tidak cocok setelah deployment.'
+legacy_tmp="$(mktemp "$legacy_module_root/.Dock.qml.mirror.XXXXXX")"
+install -m 0644 -- "$source_file" "$legacy_tmp"
+cmp -s -- "$source_file" "$legacy_tmp" || { rm -f -- "$legacy_tmp"; die 'Staging compatibility mirror gagal diverifikasi.'; }
+mv -fT -- "$legacy_tmp" "$legacy_target_file"
+cmp -s -- "$source_file" "$legacy_target_file" || die 'Compatibility mirror Dock.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Dock.qml bukan 0644.'
 if (( legacy_case_present )); then
     [[ -f $legacy_case_file && ! -L $legacy_case_file ]] ||
@@ -220,7 +243,8 @@ fi
 module_replaced=0
 shell_replaced=0
 trap - EXIT
-info "Module K41 canonical: $target_file"
+info "Module K41 aktif: $target_file"
+info "Compatibility mirror: $legacy_target_file"
 if (( legacy_case_present )); then
     info "Legacy case-variant preserved unchanged: $legacy_case_file"
     info 'Hapus Dock.Qml secara manual hanya setelah Dock.qml diverifikasi aktif.'
@@ -229,6 +253,6 @@ info "Caelestia host: $shell_file"
 info "Backup privat: $backup_root"
 info 'Arsitektur: Caelestia adalah shell host; K41 hanya menyediakan modul Dock.qml.'
 info 'Tidak membuat shell.qml, qmldir, atau konfigurasi Quickshell mandiri di namespace K41.'
-info 'Integrasi memakai relative import ../k41/modules/bottombar dan K41Bottombar.Dock {}.'
+info 'Integrasi memakai relative import qs.k41.modules.bottombar dan K41Bottombar.Dock {}.'
 info 'File legacy k41dock tidak dihapus; cleanup dilakukan terpisah setelah runtime verification.'
 info 'Quickshell tidak di-reload atau di-restart.'
