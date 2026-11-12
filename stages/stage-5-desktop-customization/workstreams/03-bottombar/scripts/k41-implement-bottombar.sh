@@ -45,7 +45,7 @@ runtime_root="$legacy_runtime_root"
 modules_root="$legacy_modules_root"
 legacy_module_root="$legacy_modules_root/bottombar"
 legacy_target_file="$legacy_module_root/Dock.qml"
-legacy_case_file="$module_root/Dock.Qml"
+legacy_case_file="$legacy_module_root/Dock.Qml"
 
 # K41 is a module namespace hosted by Caelestia, not a standalone Quickshell
 # configuration. Do not create or silently adopt standalone entry points.
@@ -73,6 +73,9 @@ for path in "$legacy_runtime_root" "$legacy_modules_root" "$legacy_module_root";
         [[ -d $path ]] || die "Path runtime bukan direktori: $path"
         owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
     fi
+done
+for standalone_entry in "$caelestia_k41_root/shell.qml" "$caelestia_k41_root/qmldir" "$caelestia_modules_root/qmldir" "$module_root/qmldir"; do
+    [[ ! -e $standalone_entry && ! -L $standalone_entry ]] || die "Caelestia K41 namespace harus module-only; review manual diperlukan: $standalone_entry"
 done
 for path in "$caelestia_k41_root" "$caelestia_modules_root" "$module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
