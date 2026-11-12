@@ -29,7 +29,7 @@ for service in "${required_services[@]}"; do
     service_file="$service_source_dir/$service"
     [[ -f $service_file && ! -L $service_file ]] || die "Service K41 belum dimigrasikan: $service"
     owned "$service_file" || die "Source service bukan milik user aktif: $service"
-    if grep -En 'Caelestia|qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.' "$service_file"; then
+    if grep -En 'Caelestia|qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.' "$service_file"; then
         die "Dependency internal Caelestia terdeteksi pada $service; migrasi belum mandiri."
     fi
 done
@@ -134,7 +134,7 @@ rollback() {
             if (( had_services )); then
                 rm -rf -- "$service_target_dir"
                 cp -a "$backup_root/services" "$service_target_dir"
-                printf 'ROLLBACK: K41 services dipulihkan.\\n' >&2
+                printf 'ROLLBACK: K41 services dipulihkan.\n' >&2
             else
                 rm -rf -- "$service_target_dir"
             fi
