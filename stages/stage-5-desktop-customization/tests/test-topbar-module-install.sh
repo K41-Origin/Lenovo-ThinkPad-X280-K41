@@ -113,4 +113,4 @@ fi
 test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" != "$host_before"
 
-printf 'PASS: migration-first services, host integration, idempotency, dependency and symlink guards.\n'
+printf 'PASS: service deployment, Caelestia handoff, idempotency, fail-closed, dependency and symlink guards.\n'
