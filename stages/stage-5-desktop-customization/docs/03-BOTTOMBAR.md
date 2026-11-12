@@ -174,7 +174,7 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 
 - Report audit aktual X280 tersedia di `reports/stage-5-desktop-customization/03-bottombar/audits/20261112T170456Z/` dan telah ditinjau.
 - Source kanonis `modules/bottombar/Dock.Qml` dan script install/repair telah ditambahkan.
-- Fixture test install/repair/rollback tersedia di `tests/test-bottombar-module-install.sh`; eksekusinya belum diklaim.
+- Fixture test install/repair/rollback tersedia di `stages/stage-5-desktop-customization/tests/test-bottombar-module-install.sh` dan terdaftar pada manifest `tests/run.sh`; eksekusinya belum diklaim.
 - QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
 - Cleanup script tetap PLANNED dan tidak menjadi bagian dari installer.
 
