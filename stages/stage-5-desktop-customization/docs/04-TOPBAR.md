@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: RUNNING — NOTIFICATION BACKEND PENDING; CORE TOPBAR SERVICES IMPLEMENTED, NOT TESTED.** Lima komponen service/state non-notifikasi (`Cpu.qml`, `Memory.qml`, `Battery.qml`, `Clock.qml`, `TopbarState.qml`) sudah tersedia sebagai implementasi K41 dan terhubung ke `Topbar.qml`. Deployer `k41-implement-topbar.sh` memeriksa serta memasang keenam file service tersebut, termasuk `Notifications.qml` sebagai placeholder interface yang sengaja belum mengklaim D-Bus. CPU/RAM menggunakan pembacaan procfs via Quickshell Process; Battery memakai UPower; Clock memakai Quickshell SystemClock. NotificationServer, notification model/history/actions, dan tray aktual belum diimplementasikan karena ownership `org.freedesktop.Notifications` belum dialihkan dan diverifikasi. Deployer sekarang fail-closed: ia menolak placeholder dan mensyaratkan marker backend K41 serta marker eksplisit bahwa NotificationServer Caelestia telah dinonaktifkan. Marker tersebut belum tersedia; karena itu deployment sengaja berhenti sebelum mutasi. Deployer mempertahankan entry point `~/.config/quickshell/caelestia/shell.qml`. Bash/fixture/QML validation dan runtime X280 belum dilakukan untuk revisi ini.
+**Status: RUNNING — CORE SERVICES AND NOTIFICATION HANDOFF IMPLEMENTED IN SOURCE; AUTOMATED AND X280 RUNTIME VALIDATION PENDING.** Enam service/state K41 kini tersedia. Backend Notifications memiliki NotificationServer, model, action, expiry, dismiss, serta penyimpanan riwayat non-transient. Deployer menyiapkan backup dan handoff terkontrol dengan menonaktifkan satu blok NotificationServer pada Caelestia `services/Notifs.qml`, mempertahankan singleton, DND, IPC, dan model historis lama. K41 dock menjadi frontend untuk notifikasi baru. Deployer mempertahankan entry point `~/.config/quickshell/caelestia/shell.qml` dan tidak me-reload Quickshell. Implementasi sudah ditulis ke GitHub; Bash/fixture/QML validation dan runtime X280 masih menunggu pengujian.
 ## Tujuan dan batas ownership
 
 Membuat panel horizontal di tepi atas layar sebagai area informasi/status desktop yang ringkas. Topbar melengkapi Bottombar tanpa menduplikasi indikator workspace atau mengambil terlalu banyak ruang vertikal.
@@ -13,7 +13,7 @@ Prinsip ownership:
 - Lokasi source dan target runtime final ditetapkan setelah audit; jangan mengasumsikan path atau API sebelum diverifikasi.
 - Audit bersifat read-only. Deployment/implementasi merupakan operasi terpisah dan eksplisit.
 - Workstream 08 — Clean up Caelestia tetap menjadi pekerjaan terakhir; WS04 tidak boleh melakukan cleanup upstream yang tidak diperlukan untuk Topbar.
-- **Keputusan arsitektur aktif (13 November 2026):** entry point tetap `~/.config/quickshell/caelestia/shell.qml`; K41 Topbar di-mount sebagai modul di `~/.config/quickshell/caelestia/k41/modules/topbar/`. Caelestia menjadi host, sedangkan lima service/state non-notifikasi dimiliki K41. Source Caelestia dipakai sebagai referensi/adaptasi dengan atribusi dan kepatuhan GPL-3.0; source upstream terpasang tidak diubah. `Notifications.qml` saat ini hanya placeholder sampai ownership D-Bus diselesaikan.
+- **Keputusan arsitektur aktif (13 November 2026):** entry point tetap `~/.config/quickshell/caelestia/shell.qml`; K41 Topbar di-mount sebagai modul di `~/.config/quickshell/caelestia/k41/modules/topbar/`. Caelestia tetap menjadi host; seluruh enam service/state Topbar dimiliki K41. Source upstream dipakai sebagai referensi/adaptasi dengan atribusi dan kepatuhan GPL-3.0. Source Caelestia dalam repository upstream tidak diubah; deployer memodifikasi hanya salinan konfigurasi pengguna `services/Notifs.qml` saat handoff, dengan backup dan rollback.
 
 ## Keputusan desain
 
@@ -102,7 +102,7 @@ Source canonical dan deployer saat ini menggunakan arsitektur modul K41 di dalam
 | `Battery.qml` | **IMPLEMENTED** | Menggunakan `Quickshell.Services.UPower`; persentase UPower berupa fraction 0.0–1.0 dan dikonversi ke persen pada Topbar. |
 | `Clock.qml` | **IMPLEMENTED** | Menggunakan Quickshell `SystemClock` dan `Qt.formatDateTime`; tidak membuat timer polling tanggal sendiri. |
 | `TopbarState.qml` | **IMPLEMENTED** | State lokal untuk membuka/menutup panel notifikasi; bukan backend notifikasi. |
-| `Notifications.qml` | **RUNNING / PENDING IMPLEMENTATION** | Placeholder aman: count 0, backendAvailable false, dan status eksplisit. Belum memiliki NotificationServer, model/history, expiry, actions, persistence, atau daftar tray. |
+| `Notifications.qml` | **IMPLEMENTED — NOT RUNTIME VERIFIED** | Satu NotificationServer per Topbar, model notifikasi, actions, dismiss/expire, timer expiry, dan persistence riwayat non-transient. Dock K41 menampilkan aplikasi, summary, body, action buttons, dismiss, serta clear all. |
 
 ### Deployment script
 
@@ -114,19 +114,19 @@ Deployer mendefinisikan dan memvalidasi keenam file berikut sebelum deployment:
 required_services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 ```
 
-Semua file wajib tersedia sebagai regular file non-symlink, dimiliki user aktif, dan lolos guard dependency internal Caelestia. Script melakukan staging dan verifikasi copy service sebelum mempublikasikan modul Topbar. Dengan demikian, kelima komponen non-notifikasi di atas sudah tercakup dalam kontrak deployer; `Notifications.qml` ikut dipasang sebagai placeholder, bukan dianggap backend yang sudah selesai. Script tidak membuat NotificationServer kedua dan tidak mengubah ownership D-Bus.
+Semua file wajib tersedia sebagai regular file non-symlink, dimiliki user aktif, dan lolos guard dependency internal Caelestia. Script melakukan staging dan verifikasi copy service sebelum mempublikasikan modul Topbar. Deployer memvalidasi pola `Notifs.qml` yang dikenal, membuat backup, menghapus tepat satu balanced NotificationServer block Caelestia, lalu memverifikasi marker dan ketiadaan deklarasi server lama. Jika struktur tidak dikenal, deployer berhenti sebelum mutasi. Script tidak melakukan reload; setelah reload, proses K41 menjadi provider yang dikonfigurasi oleh shell. Deployer tidak dapat menjamin eksklusivitas D-Bus terhadap daemon pihak ketiga yang tidak dikelola oleh Caelestia.
 
 Target deployment adalah `~/.config/quickshell/caelestia/k41/modules/topbar/`; host `~/.config/quickshell/caelestia/shell.qml` menerima satu import dan satu instance `K41Topbar.Topbar`. Script tidak melakukan restart/reload Quickshell secara otomatis.
 
 ### Status bukti dan batas verifikasi
 
-- **IMPLEMENTED:** lima service/state non-notifikasi tersedia di source K41; Topbar menginstansiasikannya; deployer memvalidasi dan memasang seluruh enam file service termasuk placeholder Notifications.
+- **IMPLEMENTED:** enam service/state tersedia di source K41; Topbar membuat satu instance Notifications di luar `Variants` agar multi-monitor tidak membuat server ganda; deployer memasang module dan menjalankan handoff Caelestia dengan backup.
 - **SOURCE-LEVEL REVIEWED:** CPU, Memory, Battery, dan Clock telah ditinjau terhadap perilaku/upstream API yang menjadi referensi. Ini bukan bukti runtime.
-- **NOT TESTED:** Bash syntax, fixture regression, ShellCheck, QML lint/compile untuk revisi saat ini.
+- **NOT TESTED:** Bash syntax, fixture regression, ShellCheck, QML lint/compile untuk revisi saat ini. Test fixture telah diperluas tetapi belum dijalankan.
 - **NOT VERIFIED:** QML load/render, data provider aktual, interaksi panel, multi-monitor/hotplug, fullscreen, scaling, konsumsi resource, dan regression Bottombar pada X280.
 - **NOT DEPLOYED:** deployer belum dijalankan pada runtime X280 untuk revisi ini.
 
-Status **RUNNING** berarti WS04 sedang aktif dikerjakan dengan fokus berikutnya pada backend Notifications dan ownership handoff. Status tersebut tidak berarti notification backend sudah berfungsi atau Topbar sudah teruji di perangkat.
+Status **RUNNING** berarti source implementation dan handoff telah dibuat, tetapi hasilnya belum dinyatakan TESTED atau VERIFIED. Fokus berikutnya adalah menjalankan fixture regression, Bash/ShellCheck, QML lint/compile, lalu deployment dan runtime verification pada X280.
 
 ## Batas scope
 
