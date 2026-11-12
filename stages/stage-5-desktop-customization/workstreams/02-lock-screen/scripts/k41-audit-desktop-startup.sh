@@ -238,6 +238,44 @@ for relative in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml;
     fi
 done
 
+section 'LOCKSCREEN QML SOURCE: REPOSITORY AND INSTALLED RUNTIME'
+# Capture the exact implementation inputs needed for a follow-up installer change.
+# Only known lockscreen QML files are included; arbitrary config files are not dumped.
+source_module="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen"
+runtime_module="$HOME/.config/quickshell/caelestia/modules/lock"
+for relative in Lock.qml LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
+    for pair in "REPOSITORY:$source_module" "INSTALLED_RUNTIME:$runtime_module"; do
+        label="${pair%%:*}"
+        base="${pair#*:}"
+        file="$base/$relative"
+        section "LOCK QML $label: $relative"
+        if [[ -f $file && ! -L $file && -r $file ]]; then
+            printf 'path=%s\n' "${file#"$HOME"/}" | redact >>"$report"
+            stat -c 'size=%s mode=%A uid=%u gid=%g modified=%y' "$file" 2>&1 | redact >>"$report" || true
+            if have sha256sum; then sha256sum "$file" 2>&1 | redact >>"$report" || true; fi
+            # Bound each source file to 600 lines / 48 KiB to keep reports reviewable.
+            head -c 49152 "$file" | head -n 600 | redact >>"$report" || true
+        else
+            note '[missing, unreadable, symlinked, or not a regular file]'
+        fi
+    done
+done
+
+section 'LOCKSCREEN DEPLOYMENT STATE AND FILE HASHES'
+for file in \
+    "$HOME/.config/caelestia/shell.json" \
+    "$HOME/.config/quickshell/caelestia/shell.qml" \
+    "$HOME/.config/k41/hyprlock-fallback.conf" \
+    "$HOME/.cache/k41/boot-lock-ready"; do
+    if [[ -f $file && ! -L $file ]]; then
+        printf '%s\n' "${file#"$HOME"/}" | redact >>"$report"
+        stat -c 'size=%s mode=%A uid=%u gid=%g modified=%y' "$file" 2>&1 | redact >>"$report" || true
+        if have sha256sum; then sha256sum "$file" 2>&1 | redact >>"$report" || true; fi
+    else
+        printf 'MISSING_OR_UNSAFE %s\n' "${file#"$HOME"/}" | redact >>"$report"
+    fi
+done
+
 section 'HYPRLAND CONFIG FILE INVENTORY'
 for base in "$HOME/.config/hypr" "$HOME/.config/quickshell/caelestia" "$HOME/.config/caelestia"; do
     [[ -d $base && ! -L $base ]] || continue
@@ -426,7 +464,11 @@ events = {
     "CAELESTIA_IPC_TIMEOUT": re.compile(r"Caelestia lock IPC did not become ready"),
     "LOCK_STATE_TIMEOUT": re.compile(r"did not reach verified state"),
     "HYPRLOCK_FALLBACK_STARTED": re.compile(r"Starting Hyprlock fallback"),
+    "LOCK_STATE_RETRY": re.compile(r"Caelestia lock state not yet verified"),
+    "LOCK_REQUEST_REJECTED": re.compile(r"Caelestia lock IPC rejected or timed out on the lock request"),
+    "HELPER_TERMINAL_ERROR": re.compile(r"K41 lock startup: ERROR:"),
     "HYPRLOCK_FALLBACK_EXITED": re.compile(r"Hyprlock fallback exited"),
+    "HYPRLOCK_FALLBACK_RUNNING": re.compile(r"Hyprlock fallback is running"),
 }
 observed = {name: [] for name in events}
 sources = []
@@ -450,8 +492,7 @@ journal_patterns = {
     "UNLOCK_EVENT": re.compile(r"\b(unlocked|unlock successful|session unlocked)\b", re.I),
     "HYPRLAND_SESSION_START": re.compile(r"Reached target.*(?:Hyprland|graphical)|Hyprland.*started", re.I),
     "HYPRLAND_SESSION_STOP": re.compile(r"Stopped target.*(?:Hyprland|graphical)|Hyprland.*(stopped|exited)", re.I),
-    "LOCK_SURFACE_VISIBLE": re.compile(r"(?!)"),
-    "DESKTOP_RESTORED_AFTER_UNLOCK": re.compile(r"(?!)"),
+    # No current upstream/runtime telemetry proves these visual events.
 }
 journal_events = {name: [] for name in journal_patterns}
 try:
@@ -470,10 +511,12 @@ except (OSError, subprocess.TimeoutExpired):
 
 with timeline_path.open("w", encoding="utf-8") as out:
     out.write("event\tstatus\ttimestamp_utc\tsource\tevidence\n")
-    all_events = list(events) + list(journal_patterns)
+    all_events = list(events) + list(journal_patterns) + ["LOCK_SURFACE_VISIBLE", "DESKTOP_RESTORED_AFTER_UNLOCK"]
     for name in all_events:
         matches = observed.get(name, journal_events.get(name, []))
-        if matches:
+        if name in ("LOCK_SURFACE_VISIBLE", "DESKTOP_RESTORED_AFTER_UNLOCK") and not matches:
+            out.write(f"{name}\\tNOT_INSTRUMENTED\\tUNKNOWN\\tUNKNOWN\\tNo reliable event source currently emits this event\\n")
+        elif matches:
             for stamp, source, evidence in matches:
                 safe = evidence.replace("\\t", " ").replace("\\n", " ")
                 home = os.environ.get("HOME", "")
@@ -499,6 +542,9 @@ with report_path.open("a", encoding="utf-8") as report:
     report.write("Journal query: " + ("available" if any(journal_events.values()) else "no matching/accessible evidence") + "\n")
     for name in all_events:
         matches = observed.get(name, journal_events.get(name, []))
+        if name in ("LOCK_SURFACE_VISIBLE", "DESKTOP_RESTORED_AFTER_UNLOCK") and not matches:
+            report.write(f"{name}: NOT_INSTRUMENTED\\n")
+            continue
         report.write(f"{name}: {'OBSERVED (' + str(len(matches)) + ')' if matches else 'NOT_OBSERVED'}\n")
 PY
 chmod 0600 "$timeline_file"
@@ -510,7 +556,7 @@ section 'DIAGNOSTIC LIMITATIONS'
 note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command.'
 note '- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.'
 note '- Journal mungkin tidak dapat dibaca lengkap oleh user biasa; permission-denied dicatat sebagai keterbatasan.'
-note '- Report menyimpan potongan log yang relevan dan metadata konfigurasi. Redaksi otomatis tidak menjamin seluruh data pribadi terhapus.'
+note '- Report memuat QML lockscreen repository/runtime yang dipilih, potongan log, metadata, dan hash. Redaksi otomatis tidak menjamin seluruh data pribadi terhapus.'
 note '- Salinan report tersanitasi dipublikasikan otomatis; redaksi tidak menjamin seluruh data privat terhapus, jadi tinjau report di GitHub dan hapus data sensitif bila ditemukan.'
 note '- TTY2 fallback dapat merupakan konsekuensi eksplisit dari k41-plymouth-quit-after-lock.sh setelah timeout 75 detik; bukti journal menentukan apakah mekanisme itu yang berjalan.'
 note "Report: ${report#"$repo_root"/}"
