@@ -39,10 +39,11 @@ Urutan workstream aktif:
 1. [Boot Experience — ID 01: PAUSED](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md)
 2. [Lock Screen — ID 02: COMPLETED / USER ACCEPTED](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md)
 3. [Bottombar — ID 03: AUDIT IN PROGRESS](../stages/stage-5-desktop-customization/docs/03-BOTTOMBAR.md)
-4. [Topbar — ID 05: NEXT / PLANNED](../stages/stage-5-desktop-customization/docs/05-TOPBAR.md)
-5. [Launcher — ID 06: PLANNED](../stages/stage-5-desktop-customization/docs/05-LAUNCHER.md)
-6. [Sidebar — ID 07: PLANNED](../stages/stage-5-desktop-customization/docs/06-SIDEBAR.md)
-7. [Utilities — ID 08: PLANNED](../stages/stage-5-desktop-customization/docs/07-UTILITIES.md)
+4. [Topbar — ID 04: PLANNED](../stages/stage-5-desktop-customization/docs/04-TOPBAR.md)
+5. [Launcher — ID 05: PLANNED](../stages/stage-5-desktop-customization/docs/05-LAUNCHER.md)
+6. [Sidebar — ID 06: PLANNED](../stages/stage-5-desktop-customization/docs/06-SIDEBAR.md)
+7. [Utilities — ID 07: PLANNED](../stages/stage-5-desktop-customization/docs/07-UTILITIES.md)
+8. [Clean up Caelestia — ID 08: FINAL / PLANNED](../stages/stage-5-desktop-customization/docs/08-CLEAN-UP-CAELESTIA.md)
 
 Dashboard telah dihapus dari daftar workstream; fitur runtime dinonaktifkan oleh cleanup script Stage 5.
 
