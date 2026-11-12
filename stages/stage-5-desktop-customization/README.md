@@ -37,7 +37,7 @@ Audit harus read-only. Penyiapan/deployment adalah langkah terpisah yang melakuk
 ## Prinsip
 
 - Caelestia tetap menjadi host/runtime yang digunakan selama belum ada keputusan baru.
-- Source K41 berada di namespace `quickshell/k41/modules/<feature>/`, terpisah dari `quickshell/caelestia/`.
+- Modul utama K41 yang diimpor Caelestia berada di `quickshell/caelestia/k41/modules/<feature>/`; `quickshell/k41/modules/<feature>/` dipertahankan sebagai compatibility mirror.
 - Jangan menyalin seluruh source Caelestia; ambil hanya bagian fitur dan resource yang dibutuhkan.
 - Dependency upstream yang masih dipakai harus diidentifikasi, bukan diduplikasi tanpa alasan.
 - Repository adalah sumber kanonis source, script, test, dan dokumentasi.
