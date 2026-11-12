@@ -179,6 +179,15 @@ Audit tidak boleh mengubah source/runtime, package, konfigurasi, service, atau G
 
 **Acceptance audit:** report tersedia dan direview; source aktif serta titik integrasi teridentifikasi; dependency/API memiliki bukti; konflik/duplikasi dan unknown dicatat; tidak ada perubahan runtime atau checkout.
 
+Untuk diagnosis setelah deployment, audit juga merekam:
+
+- Perbandingan SHA-256 source canonical `Topbar.qml` dengan module runtime, serta keberadaan, tipe file, permission, ukuran, dan waktu modifikasi target.
+- Path efektif `XDG_CONFIG_HOME`, struktur/import/instance host Caelestia, posisi instance relatif terhadap `id: root`, dan checksum host.
+- Proses Quickshell aktif, executable basename, selector konfigurasi eksplisit, serta allowlist terbatas environment yang relevan.
+- Unit user systemd yang terkait Quickshell/Caelestia dan error/warning QML/Quickshell dari journal 30 menit terakhir.
+
+Audit tidak menampilkan PID, full command line, full environment, isi file konfigurasi, atau path home absolut. Selector konfigurasi eksplisit dan variabel allowlist yang diperlukan untuk memastikan instance aktif dilaporkan. Ringkasan yang dipublikasikan tetap perlu diperiksa sebelum dibagikan lebih lanjut.
+
 ### Tahap 2 — Review dan spesifikasi
 
 Keputusan pendekatan, lima elemen, urutan, properti visual, visibility, dan cakupan monitor sudah disetujui dan dicatat di bagian Keputusan desain. Setelah audit, siapkan spesifikasi teknis ringkas untuk:
