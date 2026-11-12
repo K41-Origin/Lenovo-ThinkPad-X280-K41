@@ -1,0 +1,212 @@
+
+============================================================================
+AUDIT SCOPE
+============================================================================
+Purpose: establish evidence for K41 Topbar technical design and implementation planning.
+Mode: observational/read-only; no package, service, runtime, configuration, source, or Git mutation.
+Captured UTC: 2026-11-12T19:33:02.444107+00:00
+Repository HEAD: 3c805d6
+Repository branch: main
+Checkout status: clean
+Note: local changes are observed but never staged, committed, stashed, or reset.
+
+============================================================================
+IMPORTANT ARCHITECTURE CONTEXT
+============================================================================
+Caelestia does not provide a Topbar in this environment/project baseline.
+Do not treat absence of a native Caelestia Topbar as an error or assume a native bar integration point.
+Audit discovers available Quickshell/Caelestia shell configuration and active runtime only.
+Topbar is a K41-owned component to be designed and integrated after this evidence is reviewed.
+No existing panel/bar source is copied or modified by this audit.
+
+============================================================================
+RUNTIME AND PACKAGE EVIDENCE
+============================================================================
+qs: path-present; version-exit=0; Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+quickshell: path-present; version-exit=0; Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+caelestia: path-present; version-exit=0; Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (pa
+hyprctl: path-present; version-exit=1; usage: hyprctl [flags] <command> [args...|--help]
+
+commands:
+    activewindow        → Gets the active window name and its properties
+    activeworkspace     → Gets the active workspace and its properties
+    animations          → Gets the 
+qmllint: NOT_FOUND
+qmlformat: NOT_FOUND
+package caelestia-shell: caelestia-shell 2.5.0-1
+package quickshell: quickshell-git 0.3.2.r11.g9b0f339-1
+package quickshell-git: quickshell-git 0.3.2.r11.g9b0f339-1
+package hyprland: hyprland 0.57.1-1
+package qt6-base: qt6-base 6.12.0-3
+package qt6-declarative: qt6-declarative 6.12.0-4
+package qt6-wayland: not installed or pacman unavailable
+
+============================================================================
+SHELL CONFIGURATION INVENTORY (NO SOURCE CONTENT)
+============================================================================
+XDG_QUICKSHELL: PRESENT
+  file-count-by-type: .cmake=3, .cpp=65, .fish=1, .frag=1, .gif=2, .hpp=84, .js=2, .json=1, .lock=1, .md=2, .nix=3, .png=1, .py=2, .qml=291, .sh=1, .sha256=1, .svg=1, .ttf=1, .txt=12, .vert=1, .webp=1, .yml=13, [no-extension]=10
+  files-counted=500; truncated=no
+SYSTEM_XDG_QUICKSHELL: PRESENT
+  file-count-by-type: .gif=2, .js=2, .png=1, .qml=282, .sh=1, .svg=1, .ttf=1, .webp=1, [no-extension]=5
+  files-counted=296; truncated=no
+SYSTEM_SHARE_QUICKSHELL: ABSENT_OR_NOT_DIRECTORY
+XDG_CAeleSTIA: PRESENT
+  file-count-by-type: .json=3
+  files-counted=3; truncated=no
+SYSTEM_CAelestia_ETC: ABSENT_OR_NOT_DIRECTORY
+SYSTEM_CAelestia_SHARE: ABSENT_OR_NOT_DIRECTORY
+
+============================================================================
+QML ENTRY-POINT AND INTEGRATION DISCOVERY (NO SOURCE CONTENT)
+============================================================================
+USER_QUICKSHELL: available
+SYSTEM_QUICKSHELL: available
+SYSTEM_SHARE_QUICKSHELL: unavailable
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/shell.qml; identifiers=ShellRoot,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/components/containers/StyledWindow.qml; identifiers=PanelWindow,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/IdleMonitors.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/areapicker/AreaPicker.qml; identifiers=Variants,Quickshell,IpcHandler
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/background/Background.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/dashboard/media/CoverVisualiser.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/dashboard/media/LyricsAndSelector.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/dashboard/performance/StorageCard.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/drawers/Drawers.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/launcher/services/Actions.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/launcher/services/Schemes.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/nexus/pages/LanguageAndRegion.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/nexus/pages/ServicesPage.qml; identifiers=Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/modules/nexus/pages/panels/LauncherPanel.qml; identifiers=Variants
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/services/Brightness.qml; identifiers=Variants,Quickshell,IpcHandler
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/services/IdleInhibitor.qml; identifiers=PanelWindow,Quickshell,IpcHandler
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/services/NotifData.qml; identifiers=PanelWindow,Quickshell,Notification
+candidate: root=USER_QUICKSHELL; relative-path=caelestia/services/ShellState.qml; identifiers=ShellRoot,Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=k41/modules/bottombar/Dock.qml; identifiers=PanelWindow,Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=k41/modules/topbar/Topbar.qml; identifiers=PanelWindow,Variants,Quickshell
+candidate: root=USER_QUICKSHELL; relative-path=k41-boot-splash/shell.qml; identifiers=PanelWindow,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/shell.qml; identifiers=ShellRoot,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/components/containers/StyledWindow.qml; identifiers=PanelWindow,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/IdleMonitors.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/areapicker/AreaPicker.qml; identifiers=Variants,Quickshell,IpcHandler
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/background/Background.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/dashboard/media/CoverVisualiser.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/dashboard/media/LyricsAndSelector.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/dashboard/performance/StorageCard.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/drawers/Drawers.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/launcher/services/Actions.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/launcher/services/Schemes.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/nexus/pages/LanguageAndRegion.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/nexus/pages/ServicesPage.qml; identifiers=Variants,Quickshell
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/modules/nexus/pages/panels/LauncherPanel.qml; identifiers=Variants
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/services/Brightness.qml; identifiers=Variants,Quickshell,IpcHandler
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/services/IdleInhibitor.qml; identifiers=PanelWindow,Quickshell,IpcHandler
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/services/NotifData.qml; identifiers=PanelWindow,Quickshell,Notification
+candidate: root=SYSTEM_QUICKSHELL; relative-path=caelestia/services/ShellState.qml; identifiers=ShellRoot,Variants,Quickshell
+qml-files-scanned=573; candidate-count=39; scan-truncated=no
+Static token matches are leads only; they do not prove the active entry point or API compatibility.
+
+============================================================================
+CPU, MEMORY, CLOCK AND SESSION CAPABILITIES
+============================================================================
+CPU counters: available; aggregate counters present
+Memory fields: MemTotal:        7880012 kB; MemAvailable:    4165596 kB; SwapTotal:       9977180 kB; SwapFree:        9977180 kB
+Timezone: Asia/Jakarta
+Locale character map: UTF-8
+Clock sample format: 2026-11-13 02:33:04 WIB
+
+============================================================================
+ACTIVE PROCESSES (NAMES ONLY; NO COMMAND-LINE ARGUMENTS)
+============================================================================
+No matching process names observed.
+Process arguments, environment variables, usernames, PIDs, and executable paths are intentionally excluded.
+
+============================================================================
+NOTIFICATION PROVIDER AND DBUS
+============================================================================
+notify-send: AVAILABLE
+gdbus: AVAILABLE
+busctl: AVAILABLE
+freedesktop notification interface: exit=0
+  methods: none parsed
+  signals: none parsed
+  properties: none parsed
+  parser: gdbus section/signature parser; member names only
+No test notification is sent.
+
+============================================================================
+HYPRLAND MONITOR AND LAYER EVIDENCE
+============================================================================
+monitor: name=eDP-1; resolution=1920x1080; scale=1.5; position=0,0
+monitor-count=1
+layer namespaces: eDP-1
+Hyprland config errors command: exit=0; 
+
+============================================================================
+BATTERY AND POWER SUPPLY
+============================================================================
+device=AC type=Mains, online=0
+device=BAT0 type=Battery, status=Discharging, capacity=66, energy_now=28940000, energy_full=43660000, power_now=5787000, voltage_now=11668000, model_name=01AV470, manufacturer=LGC
+device=ucsi-source-psy-USBC000:001 type=USB, status=Not charging, online=0, current_now=0, voltage_now=0
+device=ucsi-source-psy-USBC000:002 type=USB, status=Not charging, online=0, current_now=0, voltage_now=0
+power-supply entries inspected=4
+
+============================================================================
+ACTIVE QUICKSHELL CONFIGURATION AND HOST INTEGRATION
+============================================================================
+EXPECTED_CAelestia_HOST: present; bytes=1065; sha256=728de72cdf30a89d
+EXPECTED_CAelestia_HOST structure: ShellRoot=[19]; id-root=[21]; watchFiles=[23]
+EXPECTED_CAelestia_HOST integration: imports=[12]; instances=[20]
+EXPECTED_CAelestia_HOST instance-before-id-root=yes
+DEPLOYED_K41_TOPBAR: present; bytes=3247; sha256=1027240d57d4b2f3
+DEPLOYED_K41_TOPBAR structure: ShellRoot=[]; id-root=[]; watchFiles=[]
+DEPLOYED_K41_TOPBAR integration: imports=[]; instances=[]
+DEPLOYED_K41_TOPBAR instance-before-id-root=unknown
+
+============================================================================
+ACTIVE QUICKSHELL PROCESS
+============================================================================
+process: name=qs; explicit-config=caelestia
+
+============================================================================
+QML VALIDATION TOOLING
+============================================================================
+qmllint: NOT_FOUND
+qmlformat: NOT_FOUND
+qml: NOT_FOUND
+
+============================================================================
+RECENT QUICKSHELL/QML JOURNAL
+============================================================================
+journal query: exit=0; matching-lines=0
+
+============================================================================
+K41 IMPLEMENTATION REFERENCES
+============================================================================
+WS04 modules: present
+  entries: topbar
+WS04 scripts: present
+  entries: k41-audit-topbar.sh, k41-implement-topbar.sh
+WS04 tests: absent
+WS04 docs: absent
+Bottombar source is a reference for project conventions only; it is not assumed to be a reusable Topbar implementation.
+
+============================================================================
+AUDIT HANDOFF AND LIMITATIONS
+============================================================================
+Design order: CPU, RAM, Notifications, Battery, Clock (left to right).
+Visual target: top horizontal panel, 32-36 px initial height, dark translucent, minimal radius, subtle shadow.
+Visibility target: always visible, all monitors; fullscreen behavior requires runtime verification.
+Notification interaction: icon click opens a notification tray/panel; tray is not permanently open.
+Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.
+This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.
+QML discovery is a bounded static scan; candidate relative paths and recognized identifiers are leads, not proof of the active entry point.
+Configuration source contents, source lines, comments, literals, process arguments, environment variables, serial numbers, and absolute home paths are never published.
+Review findings before writing the separate implementation/deployment script.
