@@ -151,5 +151,3 @@ Tidak ada script cleanup visual yang boleh menghapus atau memodifikasi PAM, pass
 ## Acceptance dan penutupan
 
 Pengguna secara eksplisit menerima Workstream 02 sebagai selesai pada 12 November 2026. Karena itu status workstream adalah **COMPLETED / USER ACCEPTED**. Penutupan ini menerima implementasi dan dokumentasi dalam scope yang disepakati; tidak mengubah status bukti runtime yang belum tersedia menjadi VERIFIED.
-
-Guest Mode (ID 03) tetap **NOT IMPLEMENTED / DEFERRED** dan berada di luar scope Workstream 02.
