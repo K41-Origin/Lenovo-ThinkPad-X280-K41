@@ -36,7 +36,13 @@ run_installer() {
 }
 source="$fixture/$workstream/modules/bottombar/Dock.qml"
 target="$config/quickshell/k41/modules/bottombar/Dock.qml"
+legacy_case="$config/quickshell/k41/modules/bottombar/Dock.Qml"
 backup_root="$state/k41/backups/bottombar"
+
+# Simulate the existing X280 case-variant file. The installer must not use,
+# overwrite, rename, or delete it; cleanup remains an explicit manual action.
+printf 'legacy-case-variant-preserve-me\\n' >"$legacy_case"
+cp -- "$legacy_case" "$tmp/legacy-case.before"
 legacy_import='import "modules/k41dock" as K41Dock'
 new_import='import "../k41/modules/bottombar" as K41Bottombar'
 
@@ -44,17 +50,20 @@ new_import='import "../k41/modules/bottombar" as K41Bottombar'
 run_installer
 cmp -s "$source" "$target"
 [[ $(stat -c %a "$target") == 644 ]]
+cmp -s "$legacy_case" "$tmp/legacy-case.before"
+[[ -f $legacy_case && ! -L $legacy_case ]]
 grep -Fqx "$new_import" "$shell"
 grep -Eq '^[[:space:]]*K41Bottombar\.Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell"
 ! grep -Fq "$legacy_import" "$shell"
 grep -Fq 'ShellRoot {' "$shell"
 compgen -G "$backup_root/*/shell.qml" >/dev/null
 
-# Exact repeat is idempotent and creates no new backup.
+# Exact repeat is idempotent and leaves the legacy case-variant untouched.
 before_count=("$backup_root"/*)
 run_installer
 after_count=("$backup_root"/*)
 [[ ${#before_count[@]} -eq ${#after_count[@]} ]]
+cmp -s "$legacy_case" "$tmp/legacy-case.before"
 
 # Repair only the module when its runtime copy has drifted.
 printf 'locally-corrupted-module\n' >"$target"
