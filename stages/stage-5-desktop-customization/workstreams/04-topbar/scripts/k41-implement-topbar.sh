@@ -84,7 +84,7 @@ if [[ $import_n == 0 && $instance_n == 0 ]]; then
     host_change=1
 elif [[ $import_n == 1 && $instance_n == 1 ]]; then
     instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
-    (( instance_line > root_id_line )) || die 'Instance Topbar harus berada setelah deklarasi id: root.'
+    if (( instance_line <= root_id_line )); then host_change=1; fi
     :
 else
     die 'Integrasi Topbar parsial/duplikat terdeteksi; tidak ada perubahan.'
@@ -188,6 +188,7 @@ awk -v replacement="$new_import" '
         print
         next
     }
+    $0 ~ /^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$/ { next }
     $0 ~ /^[[:space:]]*id:[[:space:]]*root[[:space:]]*$/ {
         print
         print "    K41Topbar.Topbar {}"
@@ -198,6 +199,8 @@ awk -v replacement="$new_import" '
 chmod --reference="$shell_file" "$shell_tmp"
 grep -Fqx -- "$new_import" "$shell_tmp" || die 'Staging shell.qml tidak memiliki import Topbar.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" || die 'Staging shell.qml tidak memiliki instance Topbar.'
+staged_instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" || true)"
+(( staged_instance_n == 1 )) || die 'Staging shell.qml harus memiliki tepat satu instance Topbar.'
 staged_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
 staged_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
 (( staged_instance_line > staged_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root pada staging.'
@@ -212,6 +215,8 @@ mv -fT -- "$shell_tmp" "$shell_file"
 shell_tmp=''
 grep -Fqx -- "$new_import" "$shell_file" || die 'Import Topbar tidak ditemukan setelah deployment.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || die 'Instance Topbar tidak ditemukan setelah deployment.'
+final_instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
+(( final_instance_n == 1 )) || die 'shell.qml harus memiliki tepat satu instance Topbar setelah deployment.'
 final_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 (( final_instance_line > final_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root setelah deployment.'
