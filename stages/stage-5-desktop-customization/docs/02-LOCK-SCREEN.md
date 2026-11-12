@@ -200,7 +200,7 @@ Report lama tetap menjadi artefak historis, tetapi session event yang muncul sel
 
 ## Perbaikan startup X280 — 11 November 2026
 
-Report aktual terbaru: `reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261111T074137Z/report.txt`.
+Report aktual terbaru: `reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261112T040241Z/report.txt`.
 
 ### Temuan runtime yang terkonfirmasi
 
