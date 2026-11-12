@@ -174,8 +174,6 @@ for relative in "${source_files[@]}"; do
         if [[ -e "$root/$relative" || -L "$root/$relative" ]]; then
             [[ -f "$root/$relative" && ! -L "$root/$relative" ]] || die "Unsafe existing mirror file: $root/$relative"
             install -D -m 0600 -- "$root/$relative" "$backup/mirror-$label/$relative"
-        else
-            : > "$backup/mirror-$label/ABSENT-$relative"
         fi
     done
 done
