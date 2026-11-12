@@ -364,3 +364,17 @@ Fixture test diperbarui untuk memakai QML standalone sintetis dan menguji:
 Test tersebut belum dijalankan pada checkout lokal atau X280. Status saat ini: deployer dan entry point **IMPLEMENTED**; adaptasi module/services **PLANNED/BLOCKED**; runtime deployment dan verifikasi **NOT TESTED**.
 
 Jangan jalankan `qs -c k41` dulu. K41 belum memiliki Topbar mandiri yang siap dirender, dan kepemilikan D-Bus `org.freedesktop.Notifications` belum ditransisikan dari Caelestia. Menjalankan dua NotificationServer bersamaan dapat menimbulkan konflik kepemilikan service. Setelah adaptasi modul dan strategi transisi notification server selesai, jalankan fixture test dan validasi QML sebelum runtime deployment.
+
+
+### Koreksi arsitektur entry point — 13 November 2026
+
+Koreksi keputusan: **entry point tetap `~/.config/quickshell/caelestia/shell.qml`**. K41 bukan shell Quickshell terpisah. K41 Topbar adalah modul mandiri yang dimiliki/dipelihara K41, dipasang pada namespace `~/.config/quickshell/caelestia/k41/modules/topbar/`, lalu di-import dan di-instantiate oleh entry point Caelestia yang sudah ada.
+
+Konsekuensinya:
+- File `workstreams/04-topbar/shell.qml` mandiri tidak digunakan dan telah dihapus.
+- Deployer hanya menambahkan import dan instance K41 ke `caelestia/shell.qml`, serta memasang modul K41 di bawah config root Caelestia.
+- Source modul K41 tetap tidak boleh menggunakan API internal Caelestia seperti `Caelestia.Services`, `qs.services`, `ShellState`, `Notifs`, atau `Time`.
+- Menggunakan entry point Caelestia tidak berarti K41 harus bergantung pada service internal Caelestia. Namun K41 tetap berjalan di proses/config Quickshell yang sama.
+- NotificationServer K41 masih membutuhkan desain kepemilikan D-Bus agar tidak bersaing dengan NotificationServer Caelestia. Ini belum diimplementasikan.
+
+Status: deployer telah dikoreksi untuk mempertahankan entry point Caelestia; migrasi source Topbar ke API mandiri K41 masih diperlukan sebelum deployer dapat digunakan. Fixture test baru belum dijalankan.
