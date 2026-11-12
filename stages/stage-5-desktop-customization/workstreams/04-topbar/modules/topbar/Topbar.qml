@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import "services" as Services
 
 // K41Topbar: K41-owned presentation and service bindings.
 Variants {
@@ -13,12 +14,12 @@ Variants {
         id: scope
         required property ShellScreen modelData
 
-        Cpu { id: cpu }
-        Memory { id: memory }
-        Battery { id: battery }
-        Clock { id: clock }
-        Notifications { id: notifications }
-        TopbarState { id: state }
+        Services.Cpu { id: cpu }
+        Services.Memory { id: memory }
+        Services.Battery { id: battery }
+        Services.Clock { id: clock }
+        Services.Notifications { id: notifications }
+        Services.TopbarState { id: state }
 
         PanelWindow {
             id: bar
@@ -65,7 +66,7 @@ Variants {
 
                     Text {
                         text: battery.available
-                              ? `Battery ${Math.round(battery.percentage * 100)}% · ${battery.onBattery ? "On battery" : "AC"}`
+                              ? `Battery ${Math.round(battery.percentage)}% · ${battery.onBattery ? "On battery" : "AC"}`
                               : "Battery N/A"
                         color: "#f4f1fa"
                         font.pixelSize: 12
