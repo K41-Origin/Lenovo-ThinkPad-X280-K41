@@ -147,6 +147,11 @@ if [[ -f $target_file ]]; then
 else
     previous_module_sha=ABSENT
 fi
+legacy_mirror_had=0
+if [[ -f $legacy_target_file ]]; then
+    legacy_mirror_had=1
+    cp -a -- "$legacy_target_file" "$backup_root/Dock.qml.legacy"
+fi
 cp -a -- "$shell_file" "$backup_root/shell.qml"
 previous_shell_sha="$(sha256sum -- "$shell_file" | awk '{print $1}')"
 {
@@ -159,6 +164,7 @@ chmod 0600 "$backup_root/manifest.txt"
 module_tmp=''
 shell_tmp=''
 module_replaced=0
+legacy_replaced=0
 shell_replaced=0
 rollback() {
     local rc=$1 restore
@@ -189,6 +195,20 @@ rollback() {
                 printf 'ROLLBACK: Dock.qml baru dihapus.\n' >&2
             fi
         fi
+        if (( legacy_replaced )); then
+            if (( legacy_mirror_had )); then
+                restore="$(mktemp "$legacy_module_root/.Dock.qml.restore.XXXXXX")" || {
+                    printf 'CRITICAL: compatibility mirror gagal dipulihkan; backup %s\n' "$backup_root" >&2; exit "$rc";
+                }
+                if cp -a -- "$backup_root/Dock.qml.legacy" "$restore" && mv -fT -- "$restore" "$legacy_target_file"; then
+                    printf 'ROLLBACK: compatibility mirror dipulihkan.\n' >&2
+                else
+                    rm -f -- "$restore"; printf 'CRITICAL: rollback compatibility mirror gagal; backup %s\n' "$backup_root" >&2
+                fi
+            else
+                rm -f -- "$legacy_target_file"
+            fi
+        fi
     fi
     [[ -z $module_tmp ]] || rm -f -- "$module_tmp"
     [[ -z $shell_tmp ]] || rm -f -- "$shell_tmp"
@@ -202,7 +222,7 @@ cmp -s -- "$source_file" "$module_tmp" || die 'Staging Dock.qml gagal diverifika
 if (( host_change )); then
     shell_tmp="$(mktemp "$caelestia_root/.shell.install.XXXXXX")"
     awk -v replacement="$new_import" '
-        $0 ~ /^[[:space:]]*import[[:space:]]+"modules\/k41dock"[[:space:]]+as[[:space:]]+K41Dock[[:space:]]*$/ {
+        $0 ~ /^[[:space:]]*import[[:space:]]+"modules\/k41dock"[[:space:]]+as[[:space:]]+K41Dock[[:space:]]*$/ || $0 ~ /^[[:space:]]*import[[:space:]]+"\.\.\/k41\/modules\/bottombar"[[:space:]]+as[[:space:]]+K41Bottombar[[:space:]]*$/ {
             print replacement
             next
         }
@@ -213,7 +233,7 @@ if (( host_change )); then
         { print }
     ' "$shell_file" >"$shell_tmp"
     chmod --reference="$shell_file" "$shell_tmp"
-    grep -Eq '^[[:space:]]*import "\.\./k41/modules/bottombar" as K41Bottombar[[:space:]]*$' "$shell_tmp" ||
+    grep -Fqx -- "$new_import" "$shell_tmp" ||
         die 'Staging shell.qml tidak memiliki import K41 baru.'
     grep -Eq '^[[:space:]]*K41Bottombar\.Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" ||
         die 'Staging shell.qml tidak memiliki instance Dock baru.'
@@ -227,6 +247,7 @@ cmp -s -- "$source_file" "$target_file" || die 'Content Dock.qml tidak cocok set
 legacy_tmp="$(mktemp "$legacy_module_root/.Dock.qml.mirror.XXXXXX")"
 install -m 0644 -- "$source_file" "$legacy_tmp"
 cmp -s -- "$source_file" "$legacy_tmp" || { rm -f -- "$legacy_tmp"; die 'Staging compatibility mirror gagal diverifikasi.'; }
+legacy_replaced=1
 mv -fT -- "$legacy_tmp" "$legacy_target_file"
 cmp -s -- "$source_file" "$legacy_target_file" || die 'Compatibility mirror Dock.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Dock.qml bukan 0644.'
@@ -240,13 +261,14 @@ if (( host_change )); then
     shell_replaced=1
     mv -fT -- "$shell_tmp" "$shell_file"
     shell_tmp=''
-    grep -Eq '^[[:space:]]*import "\.\./k41/modules/bottombar" as K41Bottombar[[:space:]]*$' "$shell_file" ||
+    grep -Fqx -- "$new_import" "$shell_file" ||
         die 'Import K41 tidak ditemukan setelah update shell.qml.'
     grep -Eq '^[[:space:]]*K41Bottombar\.Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" ||
         die 'Instance Dock tidak ditemukan setelah update shell.qml.'
 fi
 
 module_replaced=0
+legacy_replaced=0
 shell_replaced=0
 trap - EXIT
 info "Module K41 aktif: $target_file"
