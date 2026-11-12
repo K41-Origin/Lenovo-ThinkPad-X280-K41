@@ -51,7 +51,7 @@ import_line='import "modules/k41dock" as K41Dock'
 component_line='K41Dock.K41Dock {'
 [[ $(grep -Fxc -- "$import_line" "$shell_file" || true) -eq 1 ]] ||
     die 'shell.qml harus memiliki tepat satu import modules/k41dock sebagai K41Dock.'
-[[ $(grep -Fxc -- "$component_line" "$shell_file" || true) -eq 1 ]] ||
+[[ $(grep -Fc -- "$component_line" "$shell_file" || true) -eq 1 ]] ||
     die 'shell.qml harus memiliki tepat satu instance K41Dock.K41Dock.'
 
 # Capture host entrypoint state; the installer must never modify it.
