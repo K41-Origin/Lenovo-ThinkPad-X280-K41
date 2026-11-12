@@ -1,0 +1,61 @@
+event	status	timestamp_with_timezone	source	evidence
+HELPER_STARTED	OBSERVED	2026-11-12T02:13:23Z	startup-20261112T021323Z-3035.log	[2026-11-12T02:13:23Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-12T01:37:14Z	startup-20261112T013714Z-2043.log	[2026-11-12T01:37:14Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-12T00:04:37Z	startup-20261112T000437Z-1083.log	[2026-11-12T00:04:37Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-11T23:59:58Z	startup-20261111T235958Z-608.log	[2026-11-11T23:59:58Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-11T15:02:12Z	startup-20261111T150212Z-1220.log	[2026-11-11T15:02:12Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-11T15:01:34Z	startup-20261111T150134Z-985.log	[2026-11-11T15:01:34Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-11T15:00:27Z	startup-20261111T150027Z-599.log	[2026-11-11T15:00:27Z] Lock startup helper started.
+HELPER_STARTED	OBSERVED	2026-11-11T14:58:46Z	startup-20261111T145846Z-604.log	[2026-11-11T14:58:46Z] Lock startup helper started.
+CAELESTIA_IPC_READY	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+LOCK_REQUEST_ACCEPTED	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+LOCK_STATE_VERIFIED	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+LOCK_READINESS_MARKER_PUBLISHED	OBSERVED	2026-11-12T00:00:29Z	startup-20261111T235958Z-608.log	[2026-11-12T00:00:29Z] Readiness marker published.
+LOCK_READINESS_MARKER_PUBLISHED	OBSERVED	2026-11-11T15:00:58Z	startup-20261111T150027Z-599.log	[2026-11-11T15:00:58Z] Readiness marker published.
+LOCK_READINESS_MARKER_PUBLISHED	OBSERVED	2026-11-11T14:59:17Z	startup-20261111T145846Z-604.log	[2026-11-11T14:59:17Z] Readiness marker published.
+CAELESTIA_IPC_TIMEOUT	OBSERVED	2026-11-12T00:00:28Z	startup-20261111T235958Z-608.log	[2026-11-12T00:00:28Z] Caelestia lock IPC did not become ready within 30s.
+CAELESTIA_IPC_TIMEOUT	OBSERVED	2026-11-11T15:00:57Z	startup-20261111T150027Z-599.log	[2026-11-11T15:00:57Z] Caelestia lock IPC did not become ready within 30s.
+CAELESTIA_IPC_TIMEOUT	OBSERVED	2026-11-11T14:59:16Z	startup-20261111T145846Z-604.log	[2026-11-11T14:59:16Z] Caelestia lock IPC did not become ready within 30s.
+LOCK_STATE_TIMEOUT	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+HYPRLOCK_FALLBACK_STARTED	OBSERVED	2026-11-12T00:00:28Z	startup-20261111T235958Z-608.log	[2026-11-12T00:00:28Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+HYPRLOCK_FALLBACK_STARTED	OBSERVED	2026-11-11T15:00:57Z	startup-20261111T150027Z-599.log	[2026-11-11T15:00:57Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+HYPRLOCK_FALLBACK_STARTED	OBSERVED	2026-11-11T14:59:16Z	startup-20261111T145846Z-604.log	[2026-11-11T14:59:16Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+LOCK_STATE_RETRY	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+LOCK_REQUEST_REJECTED	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+HELPER_TERMINAL_ERROR	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+HYPRLOCK_FALLBACK_EXITED	OBSERVED	2026-11-12T00:00:34Z	startup-20261111T235958Z-608.log	[2026-11-12T00:00:34Z] Hyprlock fallback exited (exit=0).
+HYPRLOCK_FALLBACK_EXITED	OBSERVED	2026-11-11T15:01:03Z	startup-20261111T150027Z-599.log	[2026-11-11T15:01:03Z] Hyprlock fallback exited (exit=0).
+HYPRLOCK_FALLBACK_EXITED	OBSERVED	2026-11-11T14:59:23Z	startup-20261111T145846Z-604.log	[2026-11-11T14:59:23Z] Hyprlock fallback exited (exit=0).
+HYPRLOCK_FALLBACK_RUNNING	OBSERVED	2026-11-12T00:00:29Z	startup-20261111T235958Z-608.log	[2026-11-12T00:00:29Z] Hyprlock fallback is running (pid=820); waiting for unlock/exit.
+HYPRLOCK_FALLBACK_RUNNING	OBSERVED	2026-11-11T15:00:58Z	startup-20261111T150027Z-599.log	[2026-11-11T15:00:58Z] Hyprlock fallback is running (pid=812); waiting for unlock/exit.
+HYPRLOCK_FALLBACK_RUNNING	OBSERVED	2026-11-11T14:59:17Z	startup-20261111T145846Z-604.log	[2026-11-11T14:59:17Z] Hyprlock fallback is running (pid=816); waiting for unlock/exit.
+AUTH_SUCCESS	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+AUTH_FAILURE	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+UNLOCK_EVENT	NOT_OBSERVED	UNKNOWN	UNKNOWN	No matching evidence in collected sources
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T06:59:58.835171+07:00	journalctl -b	2026-11-12T06:59:58.835171+07:00 x280 systemd[534]: Reached target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T06:59:58.835528+07:00	journalctl -b	2026-11-12T06:59:58.835528+07:00 x280 systemd[534]: Reached target Current graphical user session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T06:59:58.835862+07:00	journalctl -b	2026-11-12T06:59:58.835862+07:00 x280 systemd[534]: Reached target Hyprland session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T07:00:29.804103+07:00	journalctl -b	2026-11-12T07:00:29.804103+07:00 x280 systemd[1]: Reached target Graphical Interface.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T07:04:37.181166+07:00	journalctl -b	2026-11-12T07:04:37.181166+07:00 x280 systemd[534]: Reached target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T07:04:37.181421+07:00	journalctl -b	2026-11-12T07:04:37.181421+07:00 x280 systemd[534]: Reached target Current graphical user session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T07:04:37.181666+07:00	journalctl -b	2026-11-12T07:04:37.181666+07:00 x280 systemd[534]: Reached target Hyprland session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T08:37:14.617739+07:00	journalctl -b	2026-11-12T08:37:14.617739+07:00 x280 systemd[534]: Reached target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T08:37:14.617989+07:00	journalctl -b	2026-11-12T08:37:14.617989+07:00 x280 systemd[534]: Reached target Current graphical user session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T08:37:14.618289+07:00	journalctl -b	2026-11-12T08:37:14.618289+07:00 x280 systemd[534]: Reached target Hyprland session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T09:13:23.806657+07:00	journalctl -b	2026-11-12T09:13:23.806657+07:00 x280 systemd[534]: Reached target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T09:13:23.806804+07:00	journalctl -b	2026-11-12T09:13:23.806804+07:00 x280 systemd[534]: Reached target Current graphical user session.
+HYPRLAND_SESSION_START	OBSERVED	2026-11-12T09:13:23.806936+07:00	journalctl -b	2026-11-12T09:13:23.806936+07:00 x280 systemd[534]: Reached target Hyprland session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T07:02:37.245710+07:00	journalctl -b	2026-11-12T07:02:37.245710+07:00 x280 systemd[534]: Stopped target Hyprland session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T07:02:37.245866+07:00	journalctl -b	2026-11-12T07:02:37.245866+07:00 x280 systemd[534]: Stopped target Current graphical user session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T07:02:37.246246+07:00	journalctl -b	2026-11-12T07:02:37.246246+07:00 x280 systemd[534]: Stopped target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T07:04:39.337856+07:00	journalctl -b	2026-11-12T07:04:39.337856+07:00 x280 systemd[534]: Stopped target Hyprland session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T07:04:39.338091+07:00	journalctl -b	2026-11-12T07:04:39.338091+07:00 x280 systemd[534]: Stopped target Current graphical user session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T07:04:39.341671+07:00	journalctl -b	2026-11-12T07:04:39.341671+07:00 x280 systemd[534]: Stopped target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T08:37:16.837338+07:00	journalctl -b	2026-11-12T08:37:16.837338+07:00 x280 systemd[534]: Stopped target Hyprland session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T08:37:16.837648+07:00	journalctl -b	2026-11-12T08:37:16.837648+07:00 x280 systemd[534]: Stopped target Current graphical user session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T08:37:16.838669+07:00	journalctl -b	2026-11-12T08:37:16.838669+07:00 x280 systemd[534]: Stopped target Session services which should run early before the graphical session is brought up.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T09:13:25.974511+07:00	journalctl -b	2026-11-12T09:13:25.974511+07:00 x280 systemd[534]: Stopped target Hyprland session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T09:13:25.975041+07:00	journalctl -b	2026-11-12T09:13:25.975041+07:00 x280 systemd[534]: Stopped target Current graphical user session.
+HYPRLAND_SESSION_STOP	OBSERVED	2026-11-12T09:13:25.976381+07:00	journalctl -b	2026-11-12T09:13:25.976381+07:00 x280 systemd[534]: Stopped target Session services which should run early before the graphical session is brought up.
+LOCK_SURFACE_VISIBLE	NOT_INSTRUMENTED	UNKNOWN	UNKNOWN	No reliable event source currently emits this event
+DESKTOP_RESTORED_AFTER_UNLOCK	NOT_INSTRUMENTED	UNKNOWN	UNKNOWN	No reliable event source currently emits this event
