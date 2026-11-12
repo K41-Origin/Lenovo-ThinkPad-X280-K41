@@ -85,6 +85,7 @@ grep -Fq 'umask 077' "$script"
 grep -Fq 'chmod 0600 "$report"' "$script"
 grep -Fq 'chmod 0700 "$run_dir"' "$script"
 grep -Fq 'password|passwd|token|secret|authorization|cookie|api[_-]?key' "$script"
+grep -Fq '<SSID-REDACTED>' "$script"
 ! grep -Eq 'git[[:space:]].*push.*--force' "$script"
 
 # A read-only audit must never execute start-hyprland: it launches a session,
