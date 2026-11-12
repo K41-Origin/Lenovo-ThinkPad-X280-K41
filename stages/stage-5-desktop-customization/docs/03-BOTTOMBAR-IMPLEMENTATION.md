@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Workstream 03 menghasilkan komponen Bottombar bernama `K41Dock.qml`. Komponen ini menjadi pola awal pengembangan komponen K41 yang terpisah dari fitur upstream Caelestia dan dapat dikembangkan bertahap menuju proyek mandiri **k41-dots**.
+Workstream 03 memiliki baseline implementasi historis berupa komponen Bottombar `K41Dock.qml`. Dokumen ini mencatat implementasi lama untuk kebutuhan audit dan bukan spesifikasi target refactoring. Penyelarasan alur kerja dan arsitektur akan ditetapkan setelah audit.
 
 ## Source dan lokasi runtime
 
@@ -76,4 +76,4 @@ Jangan membuat struktur runtime mandiri `~/.config/quickshell/k41-dots/` atau me
 
 ## Status
 
-K41Dock telah diserahkan dan pengguna mengonfirmasi hasil workstream berhasil. Status workstream: **COMPLETED / USER CONFIRMED SUCCESS**. Perubahan baru tetap memerlukan audit dan regression check.
+Pengguna sebelumnya mengonfirmasi hasil implementasi lama berhasil digunakan. Konfirmasi tersebut tetap menjadi bukti historis penerimaan, tetapi status workstream saat ini adalah **AUDIT IN PROGRESS**. Belum ada refactoring, migrasi, atau runtime verification baru yang dilakukan dalam audit ini.
