@@ -122,15 +122,15 @@ done
 # or fetch against the user's active checkout. This keeps local refs, index,
 # FETCH_HEAD, branch, and worktree metadata isolated from report publication.
 ! grep -Fq 'git -C "$repo_root" fetch' "$script" || {
-    printf 'FAIL: audit publication fetches into the user's local checkout.\\n' >&2
+    printf 'FAIL: audit publication fetches into the user's local checkout.\n' >&2
     exit 1
 }
 ! grep -Fq 'git -C "$repo_root" worktree' "$script" || {
-    printf 'FAIL: audit publication mutates local checkout worktree metadata.\\n' >&2
+    printf 'FAIL: audit publication mutates local checkout worktree metadata.\n' >&2
     exit 1
 }
 ! grep -Fq 'git -C "$repo_root" worktree add' "$script" || {
-    printf 'FAIL: audit publication uses a linked worktree.\\n' >&2
+    printf 'FAIL: audit publication uses a linked worktree.\n' >&2
     exit 1
 }
 grep -Fq 'git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"' "$script"
