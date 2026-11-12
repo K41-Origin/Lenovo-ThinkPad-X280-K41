@@ -68,10 +68,8 @@ if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$notifs"; then
     echo 'Caelestia NotificationServer was not disabled.' >&2
     exit 1
 fi
-test -f "$state/k41/backups/topbar/$(basename "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | head -n1)")/Notifs.qml" || {
-    backup_notifs="$(find "$state/k41/backups/topbar" -mindepth 2 -maxdepth 2 -name Notifs.qml -print -quit)"
-    test -n "$backup_notifs"
-}
+backup_root="$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d -print -quit)"
+test -f "$backup_root/Notifs.qml"
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
 
 run_installer
@@ -79,7 +77,7 @@ test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l
 
 # An unrecognized Caelestia source must fail before any further mutation.
 host_after_install="$(sha256sum "$host" | cut -d' ' -f1)"
-printf 'pragma Singleton\\nSingleton { }\\n' >"$notifs"
+printf 'pragma Singleton\nSingleton { }\n' >"$notifs"
 if run_installer >/dev/null 2>&1; then
     echo 'Expected unknown Caelestia source rejection.' >&2
     exit 1
