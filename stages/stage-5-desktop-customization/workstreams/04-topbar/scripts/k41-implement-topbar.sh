@@ -21,6 +21,25 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topb
 [[ -f $source_file && ! -L $source_file ]] || die 'Source canonical Topbar.qml tidak tersedia atau berupa symlink.'
 owned "$source_file" || die 'Source canonical bukan milik user aktif.'
 
+# Fail closed if the module stops using the backend services verified in the WS04 audit.
+for contract in \
+    'import Caelestia.Services' \
+    'import Quickshell.Services.UPower' \
+    'service: Cpu' \
+    'service: Memory' \
+    'Cpu.percentage' \
+    'Memory.percentage' \
+    'UPower.displayDevice.percentage' \
+    'UPower.onBattery' \
+    'Time.format(' \
+    'Notifs.notClosed.length' \
+    'ShellState.forScreen(modelData)'; do
+    grep -Fq -- "$contract" "$source_file" || die "Kontrak backend Topbar tidak lengkap: $contract"
+done
+if grep -Eq '/proc/(stat|meminfo)|/sys/class/power_supply|new Date\\(|Timer[[:space:]]*\\{|NotificationServer|trayWindow' "$source_file"; then
+    die 'Provider/polling duplikat terdeteksi pada Topbar.qml.'
+fi
+
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 [[ $config_home == /* && -d $config_home && ! -L $config_home ]] || die 'XDG_CONFIG_HOME tidak aman atau tidak tersedia.'
 owned "$config_home" || die 'XDG_CONFIG_HOME bukan milik user aktif.'
