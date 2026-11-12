@@ -38,8 +38,8 @@ Wrapper tahap 2 dan 3 mendelegasikan ke implementasi internal. Jangan menduplika
 | Eksekusi dan prosedur Stage 5 | `stages/stage-5-desktop-customization/docs/README.md` |
 | Peta fisik implementasi Stage 5 | `stages/stage-5-desktop-customization/README.md` |
 | Bottombar — Workstream 03 | `stages/stage-5-desktop-customization/docs/03-BOTTOMBAR.md` dan `03-BOTTOMBAR-IMPLEMENTATION.md` |
-| Clean up Caelestia — Workstream 09 | `stages/stage-5-desktop-customization/docs/09-CLEAN-UP-CAELESTIA.md` |
-| Topbar | `stages/stage-5-desktop-customization/docs/05-TOPBAR.md` |
+| Clean up Caelestia — Workstream 08 | `stages/stage-5-desktop-customization/docs/08-CLEAN-UP-CAELESTIA.md` |
+| Topbar — Workstream 04 | `stages/stage-5-desktop-customization/docs/04-TOPBAR.md` |
 
 Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Update dokumen pemilik dan hanya ringkasan/cross-reference yang terdampak.
 
@@ -49,11 +49,11 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 - Workstream 02 — Lock Screen: **COMPLETED / USER ACCEPTED (12 November 2026)**. Proses audit visual/startup, source K41, bounded lock helper/updater, deployment dengan backup/checksum/log dan automated sanitized-log push, cleanup hook legacy, serta cleanup sembilan komponen visual Caelestia telah didokumentasikan di `stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md`. Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED; lihat dokumen pemilik dan `docs/06-STATUS.md` untuk batas bukti serta konsekuensi tracked deletions pada checkout Caelestia.
 - **Dashboard dihapus dari daftar workstream Stage 5 pada 2026-11-11.** Fitur runtime dinonaktifkan melalui `k41-cleanup-caelestia.sh`; jangan menghapus source QML upstream atau menambahkan dashboard kembali.
 - **Workstream 03 — Bottombar: COMPLETED / USER ACCEPTED.** Source canonical dan installer integrasi K41 → Caelestia telah disiapkan sesuai arsitektur yang disepakati. Pengguna menyatakan legacy K41Dock telah dihapus manual. Status ini tidak mengklaim Bash/ShellCheck/fixture/QML/runtime regression telah TESTED atau VERIFIED; lihat dokumen pemilik.
-- **Workstream 09 — Clean up Caelestia** adalah pekerjaan terakhir Stage 5 setelah semua workstream komponen selesai dan diterima. Jangan memulai cleanup luas lebih awal; ikuti dokumen pemilik `stages/stage-5-desktop-customization/docs/09-CLEAN-UP-CAELESTIA.md`.
-- **Workstream 05 — Topbar** adalah pekerjaan Stage 5 berikutnya. Elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
+- **Workstream 08 — Clean up Caelestia** adalah pekerjaan terakhir Stage 5 setelah semua workstream komponen selesai dan diterima. Jangan memulai cleanup luas lebih awal; ikuti dokumen pemilik `stages/stage-5-desktop-customization/docs/08-CLEAN-UP-CAELESTIA.md`.
+- **Workstream 04 — Topbar** adalah pekerjaan Stage 5 berikutnya. Elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
 - Cleanup dashboard diimplementasikan melalui `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`. Default dry-run; `--apply` mem-backup dan mengatur `dashboard.enabled=false` pada konfigurasi global serta override monitor yang relevan; `--rollback` memulihkan backup. Audit terbaru harus ditinjau sebelum apply. Script tidak menghapus source checkout upstream, keybind, package, atau service.
 - Guest Mode telah dipindahkan ke `archive/guest-mode/` dan bukan bagian dari urutan/workstream aktif. Workstream aktif setelah Lock Screen adalah Workstream 03 — Bottombar.
-- Workstream 06 Launcher, 07 Sidebar, dan 08 Utilities mengikuti status di `docs/06-STATUS.md`.
+- Workstream 05 Launcher, 06 Sidebar, dan 07 Utilities mengikuti status di `docs/06-STATUS.md`.
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
 - Stage 5 menjadi fondasi bertahap **k41-dots**; hindari asumsi perlu membangun shell mandiri penuh atau mengganti Caelestia.
