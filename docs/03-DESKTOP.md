@@ -38,7 +38,7 @@ Peta fisik implementasi: [Stage 5 — Desktop Customization](../stages/stage-5-d
 Urutan workstream aktif:
 1. [Boot Experience — ID 01: PAUSED](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md)
 2. [Lock Screen — ID 02: COMPLETED / USER ACCEPTED](../stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md)
-3. [Bottombar / K41Dock — ID 04: COMPLETED / USER CONFIRMED SUCCESS](../stages/stage-5-desktop-customization/docs/04-TASKBAR-PANEL.md)
+3. [Bottombar — ID 04: COMPLETED / USER CONFIRMED SUCCESS](../stages/stage-5-desktop-customization/docs/04-BOTTOMBAR.md)
 4. [Topbar — ID 05: NEXT / PLANNED](../stages/stage-5-desktop-customization/docs/05-TOPBAR.md)
 5. [Launcher — ID 06: PLANNED](../stages/stage-5-desktop-customization/docs/05-LAUNCHER.md)
 6. [Sidebar — ID 07: PLANNED](../stages/stage-5-desktop-customization/docs/06-SIDEBAR.md)
