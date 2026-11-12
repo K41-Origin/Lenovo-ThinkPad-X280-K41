@@ -58,11 +58,13 @@ run_installer() {
         bash "$fixture/$workstream/scripts/k41-implement-topbar.sh"
 }
 
-target="$config/quickshell/k41/modules/topbar/Topbar.qml"
+target="$config/quickshell/caelestia/k41/modules/topbar/Topbar.qml"
+legacy_target="$config/quickshell/k41/modules/topbar/Topbar.qml"
 run_installer
 test -f "$target"
 cmp -s "$target" "$qml"
-grep -Fqx 'import "../k41/modules/topbar" as K41Topbar' "$shell"
+cmp -s "$legacy_target" "$qml"
+grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$shell"
 grep -Fqx '    K41Topbar.Topbar {}' "$shell"
 root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell" | cut -d: -f1)"
 topbar_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell" | cut -d: -f1)"
