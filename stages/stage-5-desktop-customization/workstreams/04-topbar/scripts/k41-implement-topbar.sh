@@ -21,9 +21,7 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topb
 [[ -f $source_file && ! -L $source_file ]] || die 'Source Topbar.qml tidak tersedia atau bukan regular file.'
 owned "$source_file" || die 'Source Topbar.qml bukan milik user aktif.'
 
-# Require every K41 service file before deployment. The five non-notification
-# service/state components are implemented; Notifications.qml remains a safe
-# placeholder until org.freedesktop.Notifications ownership is handed off.
+# Require all K41 service sources before deployment.
 service_source_dir="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services"
 required_services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 [[ -d $service_source_dir && ! -L $service_source_dir ]] || die 'Direktori service K41 belum tersedia; migrasi service harus diselesaikan sebelum deployment Topbar.'
@@ -55,20 +53,30 @@ service_target_dir="$module_root/services"
 [[ -f $host_file && ! -L $host_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$host_root" && owned "$host_file" || die 'Caelestia host bukan milik user aktif.'
 
-# Notification deployment is fail-closed until both sides of the handoff are
-# explicitly prepared. A placeholder must never be treated as a working backend.
+# Preflight both sides of the ownership handoff. Only the audited
+# NotificationServer block is removed; Caelestia's DND, IPC and legacy model
+# remain intact for compatibility.
 notification_source="$service_source_dir/Notifications.qml"
 caelestia_notifs_file="$host_root/services/Notifs.qml"
 grep -Fq 'K41_NOTIFICATION_BACKEND_READY' "$notification_source" \
-    || die 'Notification backend K41 belum lengkap; Notifications.qml masih placeholder atau belum ditandai siap.'
+    || die 'Backend notifikasi K41 belum memiliki implementasi lengkap.'
 [[ -f $caelestia_notifs_file && ! -L $caelestia_notifs_file ]] \
-    || die 'Caelestia services/Notifs.qml tidak ditemukan sebagai regular file; handoff tidak dapat diverifikasi.'
+    || die 'Caelestia services/Notifs.qml tidak ditemukan sebagai regular file.'
 owned "$caelestia_notifs_file" \
-    || die 'Caelestia Notifs.qml bukan milik user aktif; handoff tidak boleh mengubah file yang tidak dimiliki user.'
-grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$caelestia_notifs_file" \
-    || die 'Handoff Caelestia belum disiapkan; NotificationServer Caelestia belum dinonaktifkan secara eksplisit.'
-if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$caelestia_notifs_file"; then
-    die 'NotificationServer Caelestia masih dideklarasikan; menolak kemungkinan dua D-Bus owner.'
+    || die 'Caelestia Notifs.qml bukan milik user aktif.'
+handoff_needed=0
+if grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$caelestia_notifs_file"; then
+    if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$caelestia_notifs_file"; then
+        die 'Marker handoff ditemukan tetapi NotificationServer Caelestia masih aktif.'
+    fi
+else
+    server_count="$(grep -Ec '^[[:space:]]*NotificationServer[[:space:]]*\{' "$caelestia_notifs_file" || true)"
+    (( server_count == 1 )) || die 'Struktur NotificationServer Caelestia tidak dikenal; tidak mengubah file secara spekulatif.'
+    grep -Fq 'notif.tracked = true;' "$caelestia_notifs_file" \
+        || die 'Implementasi Notifs.qml tidak cocok dengan baseline yang diaudit.'
+    grep -Fq 'root.list = [comp, ...root.list];' "$caelestia_notifs_file" \
+        || die 'Model Notifs.qml tidak cocok dengan baseline yang diaudit.'
+    handoff_needed=1
 fi
 for path in "$host_root/k41" "$host_root/k41/modules" "$module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
@@ -102,7 +110,7 @@ for service in "${required_services[@]}"; do
         break
     fi
 done
-if (( import_n == 1 && instance_n == 1 && services_match == 1 )) && cmp -s "$source_file" "$target_file"; then
+if (( import_n == 1 && instance_n == 1 && services_match == 1 && handoff_needed == 0 )) && cmp -s "$source_file" "$target_file"; then
     info 'K41 services dan Topbar sudah terpasang pada Caelestia host; tidak ada perubahan.'
     exit 0
 fi
@@ -133,17 +141,22 @@ if [[ -d $service_target_dir ]]; then
     cp -a "$service_target_dir" "$backup_root/services"
 fi
 cp -a "$host_file" "$backup_root/shell.qml"
+cp -a "$caelestia_notifs_file" "$backup_root/Notifs.qml"
 {
     printf 'module_target=%s\nmodule_previous=%s\nmodule_source_sha256=%s\n' "$target_file" "$had_module" "$(sha256sum "$source_file" | cut -d' ' -f1)"
     printf 'host_target=%s\nhost_previous_sha256=%s\n' "$host_file" "$(sha256sum "$host_file" | cut -d' ' -f1)"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
-module_tmp=''; host_tmp=''; services_tmp=''; module_replaced=0; host_replaced=0; services_replaced=0
+module_tmp=''; host_tmp=''; services_tmp=''; notifs_tmp=''; module_replaced=0; host_replaced=0; services_replaced=0; notifs_replaced=0
 rollback() {
     local rc=$1 restore
     trap - EXIT
     if (( rc != 0 )); then
+        if (( notifs_replaced )); then
+            restore="$(mktemp "$host_root/.Notifs.restore.XXXXXX")"
+            if cp -a "$backup_root/Notifs.qml" "$restore" && mv -fT "$restore" "$caelestia_notifs_file"; then printf 'ROLLBACK: Caelestia Notifs.qml dipulihkan.\\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback Notifs.qml gagal; backup %s\\n' "$backup_root" >&2; fi
+        fi
         if (( host_replaced )); then
             restore="$(mktemp "$host_root/.shell.restore.XXXXXX")"
             if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$host_file"; then printf 'ROLLBACK: Caelestia shell.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback host gagal; backup %s\n' "$backup_root" >&2; fi
@@ -167,6 +180,7 @@ rollback() {
     [[ -z $module_tmp ]] || rm -f "$module_tmp"
     [[ -z $host_tmp ]] || rm -f "$host_tmp"
     [[ -z $services_tmp ]] || rm -rf "$services_tmp"
+    [[ -z $notifs_tmp ]] || rm -f "$notifs_tmp"
     exit "$rc"
 }
 trap 'rollback $?' EXIT
@@ -199,15 +213,66 @@ grep -Fqx "$new_import" "$host_tmp" || die 'Import K41 tidak ada pada staging.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_tmp" || die 'Instance K41 tidak ada pada staging.'
 cmp -s "$source_file" "$module_tmp" || die 'Verifikasi staging module gagal.'
 
+# Prepare the Caelestia handoff without mutating the live file.
+if (( handoff_needed )); then
+    notifs_tmp="$(mktemp "$host_root/.Notifs.install.XXXXXX")"
+    awk '
+        /^[[:space:]]*NotificationServer[[:space:]]*\{/ {
+            if (inside) exit 41
+            inside=1
+            blocks++
+            line=$0
+            opens=gsub(/\{/, "", line)
+            closes=gsub(/\}/, "", line)
+            depth += opens - closes
+            if (depth <= 0) {
+                print "    // K41_NOTIFICATION_SERVER_DISABLED_BY_K41: ownership handed to K41."
+                inside=0
+            }
+            next
+        }
+        inside {
+            line=$0
+            opens=gsub(/\{/, "", line)
+            closes=gsub(/\}/, "", line)
+            depth += opens - closes
+            if (depth <= 0) {
+                print "    // K41_NOTIFICATION_SERVER_DISABLED_BY_K41: ownership handed to K41."
+                inside=0
+            }
+            next
+        }
+        { print }
+        END { if (inside || blocks != 1) exit 42 }
+    ' "$caelestia_notifs_file" >"$notifs_tmp" || die 'Tidak dapat mengisolasi NotificationServer Caelestia secara aman.'
+    chmod --reference="$caelestia_notifs_file" "$notifs_tmp"
+    grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs_tmp" || die 'Marker handoff tidak ditemukan pada staging.'
+    if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs_tmp"; then
+        die 'NotificationServer masih ada pada staging Caelestia.'
+    fi
+fi
+
 module_replaced=1; mv -fT "$module_tmp" "$target_file"; module_tmp=''
 cmp -s "$source_file" "$target_file" || die 'Verifikasi module setelah install gagal.'
 host_replaced=1; mv -fT "$host_tmp" "$host_file"; host_tmp=''
 grep -Fqx "$new_import" "$host_file" || die 'Import K41 tidak ditemukan setelah install.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
-module_replaced=0; host_replaced=0; services_replaced=0; trap - EXIT
+if (( handoff_needed )); then
+    notifs_replaced=1
+    mv -fT "$notifs_tmp" "$caelestia_notifs_file"
+    notifs_tmp=''
+fi
+grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$caelestia_notifs_file" || die 'Marker handoff Caelestia tidak ditemukan setelah publikasi.'
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$caelestia_notifs_file"; then
+    die 'NotificationServer Caelestia masih aktif setelah handoff.'
+fi
+module_replaced=0; host_replaced=0; services_replaced=0; notifs_replaced=0; trap - EXIT
 info "K41 services: $service_target_dir"
 info "K41 module: $target_file"
 info "Entrypoint host tetap: $host_file"
 info "Backup privat: $backup_root"
-info 'Caelestia shell.qml hanya menerima import dan instance K41; source Caelestia lainnya tidak diubah.'
+info "Notification handoff: $caelestia_notifs_file"
+info "Backup privat (termasuk Notifs.qml asli): $backup_root"
+info 'Caelestia NotificationServer dinonaktifkan; K41 menjadi server tunggal setelah reload.'
+info 'Model historis dan DND Caelestia dipertahankan; notifikasi baru tampil pada K41 dock.'
 info 'Tidak melakukan reload/restart Quickshell atau mengubah autostart.'
