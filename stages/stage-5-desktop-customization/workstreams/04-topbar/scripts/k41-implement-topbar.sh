@@ -3,8 +3,8 @@
 set -Eeuo pipefail
 umask 077
 
-die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
-info() { printf 'INFO: %s\\n' "$*"; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*"; }
 owned() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 
 [[ $# -eq 0 ]] || die 'Script ini tidak menerima opsi.'
@@ -22,7 +22,7 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topb
 owned "$source_file" || die 'Source Topbar.qml bukan milik user aktif.'
 
 # K41 module is self-contained: no private Caelestia modules/services are allowed.
-if grep -En 'Caelestia|qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.' "$source_file"; then
+if grep -En 'Caelestia|qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.' "$source_file"; then
     die 'Dependency internal Caelestia terdeteksi; migrasikan source ke API mandiri K41 terlebih dahulu.'
 fi
 grep -Fq 'K41Topbar' "$source_file" || die 'Source tidak memiliki marker K41Topbar.'
@@ -49,7 +49,7 @@ fi
 
 new_import='import qs.k41.modules.topbar as K41Topbar'
 import_n="$(grep -Fc "$new_import" "$host_file" || true)"
-instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*$' "$host_file" || true)"
+instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || true)"
 root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_file" || true)"
 (( root_id_n == 1 )) || die 'Caelestia shell.qml harus memiliki tepat satu id: root.'
 (( import_n <= 1 && instance_n <= 1 )) || die 'Integrasi K41 duplikat terdeteksi.'
@@ -80,8 +80,8 @@ had_module=0
 if [[ -f $target_file ]]; then had_module=1; cp -a "$target_file" "$backup_root/Topbar.qml"; fi
 cp -a "$host_file" "$backup_root/shell.qml"
 {
-    printf 'module_target=%s\\nmodule_previous=%s\\nmodule_source_sha256=%s\\n' "$target_file" "$had_module" "$(sha256sum "$source_file" | cut -d' ' -f1)"
-    printf 'host_target=%s\\nhost_previous_sha256=%s\\n' "$host_file" "$(sha256sum "$host_file" | cut -d' ' -f1)"
+    printf 'module_target=%s\nmodule_previous=%s\nmodule_source_sha256=%s\n' "$target_file" "$had_module" "$(sha256sum "$source_file" | cut -d' ' -f1)"
+    printf 'host_target=%s\nhost_previous_sha256=%s\n' "$host_file" "$(sha256sum "$host_file" | cut -d' ' -f1)"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
@@ -92,12 +92,12 @@ rollback() {
     if (( rc != 0 )); then
         if (( host_replaced )); then
             restore="$(mktemp "$host_root/.shell.restore.XXXXXX")"
-            if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$host_file"; then printf 'ROLLBACK: Caelestia shell.qml dipulihkan.\\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback host gagal; backup %s\\n' "$backup_root" >&2; fi
+            if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$host_file"; then printf 'ROLLBACK: Caelestia shell.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback host gagal; backup %s\n' "$backup_root" >&2; fi
         fi
         if (( module_replaced )); then
             if (( had_module )); then
                 restore="$(mktemp "$module_root/.Topbar.restore.XXXXXX")"
-                if cp -a "$backup_root/Topbar.qml" "$restore" && mv -fT "$restore" "$target_file"; then printf 'ROLLBACK: Topbar.qml dipulihkan.\\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback module gagal; backup %s\\n' "$backup_root" >&2; fi
+                if cp -a "$backup_root/Topbar.qml" "$restore" && mv -fT "$restore" "$target_file"; then printf 'ROLLBACK: Topbar.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback module gagal; backup %s\n' "$backup_root" >&2; fi
             else rm -f "$target_file"; fi
         fi
     fi
@@ -112,21 +112,21 @@ host_tmp="$(mktemp "$host_root/.shell.install.XXXXXX")"
 install -m 0644 "$source_file" "$module_tmp"
 awk -v new_import="$new_import" '
     $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ && !added_import { print new_import; added_import=1 }
-    $0 ~ /^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*$/ { next }
+    $0 ~ /^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$/ { next }
     $0 ~ /^[[:space:]]*id:[[:space:]]*root[[:space:]]*$/ { print; print "    K41Topbar.Topbar {}"; added_instance=1; next }
     { print }
     END { if (!added_import || !added_instance) exit 42 }
 ' "$host_file" >"$host_tmp" || die 'Tidak dapat menyisipkan K41 Topbar secara aman ke host.'
 chmod --reference="$host_file" "$host_tmp"
 grep -Fqx "$new_import" "$host_tmp" || die 'Import K41 tidak ada pada staging.'
-grep -Eq '^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*$' "$host_tmp" || die 'Instance K41 tidak ada pada staging.'
+grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_tmp" || die 'Instance K41 tidak ada pada staging.'
 cmp -s "$source_file" "$module_tmp" || die 'Verifikasi staging module gagal.'
 
 module_replaced=1; mv -fT "$module_tmp" "$target_file"; module_tmp=''
 cmp -s "$source_file" "$target_file" || die 'Verifikasi module setelah install gagal.'
 host_replaced=1; mv -fT "$host_tmp" "$host_file"; host_tmp=''
 grep -Fqx "$new_import" "$host_file" || die 'Import K41 tidak ditemukan setelah install.'
-grep -Eq '^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
+grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
 module_replaced=0; host_replaced=0; trap - EXIT
 info "K41 module: $target_file"
 info "Entrypoint host tetap: $host_file"
