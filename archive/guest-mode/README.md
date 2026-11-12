@@ -1,14 +1,14 @@
-# Guest Mode — Archived Planning Artifacts
+# Guest Mode — Arsip Artefak Perencanaan
 
-**Status: ARCHIVED — NOT PART OF THE ACTIVE PROJECT.**
+**Status: DIARSIPKAN — BUKAN BAGIAN DARI PROYEK AKTIF.**
 
-Guest Mode was explicitly excluded from the active project scope. These files are retained only as historical planning/audit artifacts; they are not a workstream, roadmap item, implementation target, or acceptance gate.
+Guest Mode telah dikeluarkan secara eksplisit dari scope proyek aktif. File di direktori ini dipertahankan hanya sebagai artefak historis perencanaan/audit; bukan workstream, item roadmap, target implementasi, atau acceptance gate.
 
-## Contents
+## Isi arsip
 
-- `scripts/k41-guest-storage-audit.sh`: one consolidated copy of the former read-only audit collector. The duplicate root-level and Stage 5 copies were identical and have been consolidated here.
-- `tests/test-guest-storage-audit.sh`: historical static safety/contract test. It is intentionally excluded from `tests/run.sh`.
+- `scripts/k41-guest-storage-audit.sh`: satu salinan konsolidasi dari collector audit read-only terdahulu. Dua salinan identik yang sebelumnya berada di root `scripts/` dan Stage 5 telah digabungkan menjadi satu.
+- `tests/test-guest-storage-audit.sh`: test kontrak dan safety statis historis. Test ini sengaja tidak dimasukkan ke `tests/run.sh`.
 
-The archived test references the archived collector and can be run manually from the repository root if historical review is needed. It is not part of the supported test suite.
+Test arsip mengacu ke collector di direktori arsip ini dan hanya dapat dijalankan manual dari root repository bila diperlukan untuk review historis. Test tersebut bukan bagian dari test suite yang didukung.
 
-No Guest account, service, mount, storage policy, or runtime workflow is installed or maintained by this repository.
+Repository ini tidak memasang atau memelihara akun Guest, service, mount, storage policy, maupun workflow runtime Guest.
