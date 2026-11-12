@@ -12,7 +12,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
-| 3 | 04 | [Bottombar](04-BOTTOMBAR.md) | Berhasil; menjadi pola komponen K41 |
+| 3 | 04 | [Bottombar](04-BOTTOMBAR.md) | COMPLETED / USER CONFIRMED SUCCESS |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
@@ -33,7 +33,7 @@ ID workstream adalah identitas komponen yang stabil, bukan nomor urutan pengerja
 
 ## Peta implementasi repository
 
-Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md).
+Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Source, installer, dan batas acceptance Workstream 04 dicatat di [Bottombar](04-BOTTOMBAR.md); detail implementasi tersedia di [Bottombar — Implementation](04-BOTTOMBAR-IMPLEMENTATION.md).
 
 ## Alur kolaborasi dan verifikasi
 
