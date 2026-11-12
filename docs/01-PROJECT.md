@@ -9,7 +9,7 @@ Membangun instalasi Arch Linux yang modular, aman, reproducible, dan dapat diuji
 2. **Basic Arch installation:** instalasi dasar Arch pada SSD target setelah pemeriksaan identitas dan konfirmasi eksplisit. Destruktif. Detail: [Stage 2](../stages/stage-2-basic-arch-install/README.md).
 3. **Desktop installation:** setup desktop dari Arch terpasang melalui TTY. Detail: [Stage 3](../stages/stage-3-desktop-install/README.md).
 4. **Desktop functional validation:** pemeriksaan otomatis sesi, konfigurasi, proses, IPC, service, audio, jaringan, baterai, thermal, dan journal. Tidak menggantikan review interaksi pengguna. Detail: [Stage 4](../stages/stage-4-desktop-validation/README.md).
-5. **Desktop customization:** tujuh workstream berurutan. Detail: [Stage 5 docs](../stages/stage-5-desktop-customization/docs/README.md). Arah desain lintas-komponen ada di [Design System](07-DESKTOP-DESIGN-SYSTEM.md).
+5. **Desktop customization:** tujuh workstream aktif dengan ID komponen 01, 02, 04, 05, 06, 07, dan 08; urutan pengerjaan ditetapkan pada indeks Stage 5. Detail: [Stage 5 docs](../stages/stage-5-desktop-customization/docs/README.md). Arah desain lintas-komponen ada di [Design System](07-DESKTOP-DESIGN-SYSTEM.md).
 6. **Desktop & hardware optimization:** CPU/GPU, thermal/fan, daya/baterai, suspend/hibernate/resume, stabilitas dan pengukuran baseline.
 7. **Release:** hanya setelah acceptance, regression, dokumentasi, dan bukti final ditinjau.
 
