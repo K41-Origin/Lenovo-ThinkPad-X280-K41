@@ -339,3 +339,28 @@ Audit ini read-only: tidak menjalankan Quickshell baru, tidak melakukan reload/r
 
 Regression guard: `stages/stage-5-desktop-customization/tests/test-topbar-runtime-audit.sh`, terdaftar pada `tests/run.sh`. Penambahan test belum berarti test telah dijalankan pada X280.
 
+
+
+## Implementasi deployer standalone — 13 November 2026
+
+Arah implementasi deployer kini sudah dipindahkan dari integrasi host Caelestia ke konfigurasi mandiri K41:
+
+- Entry point canonical: `workstreams/04-topbar/shell.qml`.
+- Target runtime: `$XDG_CONFIG_HOME/quickshell/k41/shell.qml` dan `$XDG_CONFIG_HOME/quickshell/k41/modules/topbar/Topbar.qml`.
+- Perintah pemilihan konfigurasi yang direncanakan: `qs -c k41` (harus dikonfirmasi terhadap versi Quickshell yang terpasang).
+- Deployer tidak mengedit `quickshell/caelestia/shell.qml`, tidak menulis ke direktori Caelestia, tidak mengubah autostart, dan tidak me-reload/restart Quickshell.
+- Deployer memvalidasi ownership, symlink, file type, dependency Caelestia yang diketahui, melakukan backup privat, staging, atomic replacement, verifikasi hasil, dan rollback saat operasi gagal.
+- Source QML harus memiliki marker standalone K41. Import `Caelestia`, `qs.services`, `ShellState`, `Notifs`, `Time.format`, dan `ServiceRef` ditolak oleh preflight.
+
+**Penting:** source canonical `modules/topbar/Topbar.qml` yang saat ini ada di repository masih memakai API Caelestia. Karena itu deployer baru akan berhenti secara fail-closed dan belum boleh dijalankan untuk deployment aktual sampai source tersebut dimigrasikan ke implementasi K41-owned. Entry point mandiri telah dibuat, tetapi modul belum mandiri. Tidak ada runtime deployment pada perubahan ini.
+
+Fixture test diperbarui untuk memakai QML standalone sintetis dan menguji:
+1. Instalasi ke namespace `quickshell/k41`.
+2. Tidak berubahnya file host Caelestia.
+3. Idempotensi tanpa backup tambahan.
+4. Penolakan source yang kembali mengimpor Caelestia.
+5. Penolakan symlink pada target.
+
+Test tersebut belum dijalankan pada checkout lokal atau X280. Status saat ini: deployer dan entry point **IMPLEMENTED**; adaptasi module/services **PLANNED/BLOCKED**; runtime deployment dan verifikasi **NOT TESTED**.
+
+Jangan jalankan `qs -c k41` dulu. K41 belum memiliki Topbar mandiri yang siap dirender, dan kepemilikan D-Bus `org.freedesktop.Notifications` belum ditransisikan dari Caelestia. Menjalankan dua NotificationServer bersamaan dapat menimbulkan konflik kepemilikan service. Setelah adaptasi modul dan strategi transisi notification server selesai, jalankan fixture test dan validasi QML sebelum runtime deployment.
