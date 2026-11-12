@@ -18,8 +18,8 @@ Pengguna tidak diminta mengedit file, menulis kode, menjalankan perintah manual,
 ## Source dan runtime
 
 - Repository adalah sumber kanonis source yang direview, script, test, dan dokumentasi.
-- Runtime modul K41 berada di `~/.config/quickshell/k41/modules/<feature>/`.
-- Contoh Lock Screen: `~/.config/quickshell/k41/modules/lockscreen/`.
+- Runtime utama modul yang diimpor Caelestia berada di `~/.config/quickshell/caelestia/k41/modules/<feature>/`; sibling `~/.config/quickshell/k41/modules/<feature>/` adalah compatibility mirror.
+- Contoh WS02 Lock Screen: overlay aktif `~/.config/quickshell/caelestia/modules/lock/`, dengan mirror di kedua namespace K41; detail ada di dokumen WS02.
 - Caelestia tetap menjadi host/runtime selama belum ada keputusan baru.
 - Namespace K41 dipisahkan dari `~/.config/quickshell/caelestia/`.
 - Backup runtime tidak di-commit.
