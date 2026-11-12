@@ -30,6 +30,7 @@ for token in \
     'Launcher execution: NOT PERFORMED' \
     'K41 LAUNCHER SOURCE: REPOSITORY' \
     'K41 LAUNCHER SOURCE: INSTALLED' \
+    'HYPRLAND STARTUP LOG AND ROTATED PREVIOUS LOG' \
     '.local/state/caelestia' \
     'chmod 0644' \
     'LOCK LIFECYCLE: LOGIN SESSION STATE' \
