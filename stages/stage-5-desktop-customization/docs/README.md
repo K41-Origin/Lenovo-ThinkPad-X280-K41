@@ -18,7 +18,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
 | 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
 
-ID workstream adalah identitas komponen; urutan adalah urutan pengerjaan. Nomor pada beberapa nama file dokumentasi dipertahankan untuk menjaga tautan lama. Guest Mode (ID 03) deferred dan bukan bagian dari urutan implementasi aktif.
+ID workstream adalah identitas komponen, bukan nomor urutan. Urutan di atas adalah urutan kerja aktif yang disepakati. ID 03 tidak dialokasikan pada roadmap aktif; jangan menafsirkan celah nomor sebagai pekerjaan, prioritas, atau acceptance gate.
 
 ## Prinsip penyimpanan dan ownership
 
@@ -61,7 +61,3 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 ## Cleanup Caelestia
 
 Dashboard dinonaktifkan melalui dashboard.enabled=false pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script scripts/k41-cleanup-caelestia.sh menonaktifkan konfigurasi tanpa menghapus source QML upstream. Jika modul upstream hilang dari checkout user, scripts/k41-repair-caelestia-modules.sh memulihkan hanya modules/dashboard dari instalasi package di /etc/xdg/quickshell/caelestia; default dry-run, --apply menyalin secara atomik setelah memverifikasi source dimiliki pacman, dan tidak menimpa direktori tujuan yang sudah ada. Jalankan --check setelah repair. Test fixture: tests/test-caelestia-module-repair.sh. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
-
-## Guest Mode
-
-Guest Mode **NOT IMPLEMENTED / DEFERRED**. Fitur ini bukan bagian dari workstream lock screen dan tidak otomatis aktif setelah Lock Screen diterima. Lihat [spesifikasi Guest Mode](03-GUEST-MODE.md). Implementasi memerlukan keputusan teknis dan persetujuan eksplisit yang baru.
