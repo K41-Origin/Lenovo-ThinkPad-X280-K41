@@ -33,7 +33,6 @@ while (($#)); do
 done
 
 [[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
-command -v python3 >/dev/null 2>&1 || die 'python3 is required.'
 command -v pacman >/dev/null 2>&1 || die 'pacman is required to verify the upstream source owner.'
 
 config_root=${XDG_CONFIG_HOME:-$HOME/.config}
@@ -93,6 +92,7 @@ find "$stage/dashboard" -type f -name '*.qml' -print -quit | grep -q . \
   || die 'Staged Dashboard directory contains no QML files.'
 
 # Atomic rename: never partially populate the live module directory.
-mv -T -- "$stage/dashboard" "$local_dashboard"
+mv -Tn -- "$stage/dashboard" "$local_dashboard"
+[[ ! -e $stage/dashboard && -d $local_dashboard ]] || die 'Destination appeared during repair; refusing to overwrite it.'
 info "RESTORED $local_dashboard"
 info 'Run --check, then launch `qs -c caelestia` from the active Wayland session.'
