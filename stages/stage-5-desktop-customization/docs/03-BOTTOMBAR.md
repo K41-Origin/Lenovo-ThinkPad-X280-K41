@@ -22,7 +22,7 @@ Urutan pengerjaan mengikuti pola Workstream 02. Audit dan implementasi memiliki 
 | 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — audit X280 selesai; baseline 2026-11-12** |
 | 2 | `scripts/k41-implement-bottombar.sh` | Deploy `Dock.qml` ke namespace K41 dan migrasikan import/instance Bottombar di Caelestia `shell.qml` dari `k41dock` ke modul canonical K41. Backup privat, atomic replacement, verifikasi, dan rollback dua target. | **IMPLEMENTED — VALIDASI BELUM DIJALANKAN** |
 
-Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.qml`. Target runtime adalah `~/.config/quickshell/caelestia/k41/modules/bottombar/Dock.qml` (primary; imported by `qs.k41.modules.bottombar`) dan `~/.config/quickshell/k41/modules/bottombar/Dock.qml` (compatibility mirror).. Caelestia tetap dijalankan melalui `~/.config/quickshell/caelestia/shell.qml` dan mengimpor direktori K41 melalui path relatif `../k41/modules/bottombar`.
+Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.qml`. Target runtime adalah `~/.config/quickshell/caelestia/k41/modules/bottombar/Dock.qml` (primary; imported by `qs.k41.modules.bottombar`) dan `~/.config/quickshell/k41/modules/bottombar/Dock.qml` (compatibility mirror).. Caelestia tetap dijalankan melalui `~/.config/quickshell/caelestia/shell.qml` dan mengimpor modul utama melalui `qs.k41.modules.bottombar`; path sibling tetap menjadi compatibility mirror.
 
 ### Tahap 1 — Audit dan pengumpulan bukti
 
@@ -79,17 +79,17 @@ Jalankan dari Git checkout sebagai user desktop biasa:
 bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-implement-bottombar.sh
 ```
 
-Installer dan fixture test menggunakan target `~/.config/quickshell/k41/modules/bottombar/Dock.qml`. Script tetap satu operasi install/repair. Selain deployment modul, script mengganti tepat satu pasangan import/instance legacy `K41Dock` di Caelestia `shell.qml` menjadi import relatif `../k41/modules/bottombar` dan instance `K41Bottombar.Dock {}`. Perubahan host dan modul memiliki backup privat, staging, verifikasi, serta rollback jika salah satu atomic replacement gagal.
+Installer dan fixture test memverifikasi modul utama di `~/.config/quickshell/caelestia/k41/modules/bottombar/Dock.qml`, compatibility mirror di `~/.config/quickshell/k41/modules/bottombar/Dock.qml`, serta migrasi import/instance host ke `qs.k41.modules.bottombar` dan `K41Bottombar.Dock {}`. Perubahan host dan modul memiliki backup privat, staging, verifikasi, serta rollback jika salah satu atomic replacement gagal.
 
 **Pemetaan source, runtime module, dan host:**
 
 ```text
 Source kanonis: stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.qml
-Runtime module: ~/.config/quickshell/k41/modules/bottombar/Dock.qml
+Runtime module utama: ~/.config/quickshell/caelestia/k41/modules/bottombar/Dock.qml; compatibility mirror: ~/.config/quickshell/k41/modules/bottombar/Dock.qml
 Caelestia host: ~/.config/quickshell/caelestia/shell.qml
 ```
 
-Namespace `~/.config/quickshell/k41` hanya menjadi lokasi ownership/deployment modul K41, bukan shell mandiri. Caelestia tetap menjadi host; `shell.qml` mengimpor `../k41/modules/bottombar` dan menginstansiasi `K41Bottombar.Dock {}`.
+Namespace `~/.config/quickshell/caelestia/k41` adalah lokasi modul utama di dalam config root Caelestia. Namespace sibling `~/.config/quickshell/k41` dipertahankan sebagai compatibility mirror, bukan shell mandiri.
 
 Perilaku script:
 - Menolak root/sumber/target symlink, path tidak aman, dan file yang bukan regular file.
@@ -134,7 +134,7 @@ Ini adalah deskripsi source QML historis, bukan hasil regression test terkini.
 
 Audit harus memverifikasi versi Quickshell, Caelestia, Hyprland, Qt, modul QML, dan API yang benar-benar terpasang. Minimal telusuri `PanelWindow`, `WlrLayershell`, `HyprlandMonitor`, `Screens`, `Hypr.workspaces`, `Hypr.focusWorkspace()`, `ScriptModel`, dan dependency transitif. Petakan entry point, konfigurasi, lifecycle, monitor behavior, dan ownership. Dokumentasikan batas pemindaian statis; validasi upstream/API tidak boleh disimpulkan hanya dari nama import.
 
-Kontrak integrasi yang dipakai: `shell.qml` Caelestia mengimpor `../k41/modules/bottombar` sebagai `K41Bottombar` dan membuat `K41Bottombar.Dock {}`. Ini menggunakan relative directory import QML; nama file harus berakhiran `.qml` agar otomatis diekspos sebagai type tanpa `qmldir`. Kompatibilitas runtime tetap harus diuji pada Quickshell/Caelestia yang terpasang di X280.
+Kontrak integrasi yang dipakai: `shell.qml` Caelestia mengimpor `qs.k41.modules.bottombar` sebagai `K41Bottombar` dan membuat `K41Bottombar.Dock {}`. `qs` mengacu pada config root yang memuat `shell.qml`; karena itu modul utama harus berada di dalam `caelestia/k41/modules/`. Kompatibilitas runtime tetap harus diuji pada Quickshell/Caelestia yang terpasang di X280.
 
 ## Automated testing dan runtime verification — PLANNED
 
