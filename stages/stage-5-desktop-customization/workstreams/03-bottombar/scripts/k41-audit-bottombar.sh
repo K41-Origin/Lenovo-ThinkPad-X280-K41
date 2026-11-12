@@ -202,7 +202,7 @@ for label, root in k41_roots:
         if rel == "shell.qml" and safe_file(entry):
             lines = entry.read_text(encoding="utf-8", errors="replace").splitlines()
             for i, line in enumerate(lines, 1):
-                if re.search(r"import\\s+|bottombar|Dock\\.Qml|ShellRoot\\s*\\{", line, re.I):
+                if re.search(r"import\s+|bottombar|Dock\.Qml|ShellRoot\s*\{", line, re.I):
                     add(f"    {i}: {clean(line[:500])}")
     target = root / "modules/bottombar/Dock.Qml"
     add(f"  Bottombar target: {clean(target)} | {describe(target)}")
