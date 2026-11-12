@@ -85,6 +85,7 @@ if [[ $import_n == 0 && $instance_n == 0 ]]; then
 elif [[ $import_n == 1 && $instance_n == 1 ]]; then
     instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
     (( instance_line > root_id_line )) || die 'Instance Topbar harus berada setelah deklarasi id: root.'
+    :
 else
     die 'Integrasi Topbar parsial/duplikat terdeteksi; tidak ada perubahan.'
 fi
@@ -200,6 +201,9 @@ grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*
 staged_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
 staged_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
 (( staged_instance_line > staged_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root pada staging.'
+
+module_replaced=1
+mv -fT -- "$module_tmp" "$target_file"
 module_tmp=''
 cmp -s -- "$source_file" "$target_file" || die 'Content Topbar.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Topbar.qml bukan 0644.'
@@ -211,6 +215,9 @@ grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*
 final_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 (( final_instance_line > final_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root setelah deployment.'
+
+module_replaced=0
+shell_replaced=0
 trap - EXIT
 info "Module K41 canonical: $target_file"
 info "Caelestia host: $shell_file"
