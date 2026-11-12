@@ -21,7 +21,9 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topb
 [[ -f $source_file && ! -L $source_file ]] || die 'Source Topbar.qml tidak tersedia atau bukan regular file.'
 owned "$source_file" || die 'Source Topbar.qml bukan milik user aktif.'
 
-# Migration-first gate: K41-owned providers must exist before Topbar can be deployed.
+# Require every K41 service file before deployment. The five non-notification
+# service/state components are implemented; Notifications.qml remains a safe
+# placeholder until org.freedesktop.Notifications ownership is handed off.
 service_source_dir="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services"
 required_services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 [[ -d $service_source_dir && ! -L $service_source_dir ]] || die 'Direktori service K41 belum tersedia; migrasi service harus diselesaikan sebelum deployment Topbar.'
