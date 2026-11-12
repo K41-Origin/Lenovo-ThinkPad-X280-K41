@@ -50,26 +50,43 @@ shell_file="$caelestia_root/shell.qml"
 [[ -f $shell_file && ! -L $shell_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$caelestia_root" && owned "$shell_file" || die 'Host Caelestia bukan milik user aktif.'
 
-runtime_root="$qs_root/k41"
-modules_root="$runtime_root/modules"
-module_root="$modules_root/topbar"
+# Primary module location is inside the active Caelestia config root so qs.* imports resolve.
+caelestia_k41_root="$caelestia_root/k41"
+caelestia_modules_root="$caelestia_k41_root/modules"
+module_root="$caelestia_modules_root/topbar"
 target_file="$module_root/Topbar.qml"
+# Compatibility mirror retained at the historical sibling namespace.
+legacy_runtime_root="$qs_root/k41"
+legacy_modules_root="$legacy_runtime_root/modules"
+legacy_module_root="$legacy_modules_root/topbar"
+legacy_target_file="$legacy_module_root/Topbar.qml"
 for standalone_entry in "$runtime_root/shell.qml" "$runtime_root/qmldir" "$modules_root/qmldir" "$module_root/qmldir"; do
     [[ ! -e $standalone_entry && ! -L $standalone_entry ]] || die "Namespace K41 bukan module-only; review manual diperlukan: $standalone_entry"
 done
-for path in "$runtime_root" "$modules_root" "$module_root"; do
+for path in "$legacy_runtime_root" "$legacy_modules_root" "$legacy_module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then
         [[ -d $path ]] || die "Path runtime bukan direktori: $path"
         owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
     fi
 done
+for path in "$caelestia_k41_root" "$caelestia_modules_root" "$module_root"; do
+    [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
+    if [[ -e $path ]]; then
+        [[ -d $path ]] || die "Path runtime bukan direktori: $path"
+        owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
+    fi
+done
+if [[ -e $legacy_target_file || -L $legacy_target_file ]]; then
+    [[ -f $legacy_target_file && ! -L $legacy_target_file ]] || die 'Legacy mirror target bukan regular file.'
+    owned "$legacy_target_file" || die 'Legacy mirror target bukan milik user aktif.'
+fi
 if [[ -e $target_file || -L $target_file ]]; then
     [[ -f $target_file && ! -L $target_file ]] || die 'Target Topbar.qml bukan regular file.'
     owned "$target_file" || die 'Target Topbar.qml bukan milik user aktif.'
 fi
 
-new_import='import "../k41/modules/topbar" as K41Topbar'
+new_import='import qs.k41.modules.topbar as K41Topbar'
 import_n="$(grep -Fc -- "$new_import" "$shell_file" || true)"
 instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
 shell_root_n="$(grep -Ec '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' "$shell_file" || true)"
@@ -92,7 +109,8 @@ fi
 
 source_sha="$(sha256sum -- "$source_file" | awk '{print $1}')"
 module_matches=0
-if [[ -f $target_file ]] && cmp -s -- "$source_file" "$target_file"; then module_matches=1; fi
+if [[ -f $target_file && -f $legacy_target_file ]] &&
+   cmp -s -- "$source_file" "$target_file" && cmp -s -- "$source_file" "$legacy_target_file"; then module_matches=1; fi
 if (( module_matches && ! host_change )); then
     info 'Modul Topbar dan integrasi Caelestia sudah sesuai; tidak ada perubahan.'
     exit 0
@@ -108,7 +126,7 @@ for path in "$state_home" "$state_home/k41" "$state_home/k41/backups" "$backup_p
         owned "$path" || die "Path backup bukan milik user aktif: $path"
     fi
 done
-mkdir -p -- "$module_root" "$backup_parent"
+mkdir -p -- "$module_root" "$legacy_module_root" "$backup_parent"
 chmod 0700 "$backup_parent"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup_root="$backup_parent/$stamp"
@@ -209,6 +227,11 @@ module_replaced=1
 mv -fT -- "$module_tmp" "$target_file"
 module_tmp=''
 cmp -s -- "$source_file" "$target_file" || die 'Content Topbar.qml tidak cocok setelah deployment.'
+legacy_tmp="$(mktemp "$legacy_module_root/.Topbar.qml.mirror.XXXXXX")"
+install -m 0644 -- "$source_file" "$legacy_tmp"
+cmp -s -- "$source_file" "$legacy_tmp" || { rm -f -- "$legacy_tmp"; die 'Staging compatibility mirror gagal diverifikasi.'; }
+mv -fT -- "$legacy_tmp" "$legacy_target_file"
+cmp -s -- "$source_file" "$legacy_target_file" || die 'Compatibility mirror Topbar.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Topbar.qml bukan 0644.'
 shell_replaced=1
 mv -fT -- "$shell_tmp" "$shell_file"
@@ -224,7 +247,8 @@ final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:
 module_replaced=0
 shell_replaced=0
 trap - EXIT
-info "Module K41 canonical: $target_file"
+info "Module K41 aktif: $target_file"
+info "Compatibility mirror: $legacy_target_file"
 info "Caelestia host: $shell_file"
 info "Backup privat: $backup_root"
 info 'Integrasi menggunakan modul K41Topbar.Topbar; source upstream Caelestia tidak diubah.'
