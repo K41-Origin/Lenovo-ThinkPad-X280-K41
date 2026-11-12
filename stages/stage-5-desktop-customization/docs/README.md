@@ -12,11 +12,13 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
-| 3 | 04 | [Bottombar / K41Dock](04-TASKBAR-PANEL.md) | Berhasil; menjadi pola komponen K41 |
+| 3 | 04 | [Bottombar](04-BOTTOMBAR.md) | Berhasil; menjadi pola komponen K41 |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
 | 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
+
+Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Karena itu, Bottombar menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen.
 
 ID workstream adalah identitas komponen yang stabil, bukan nomor urutan pengerjaan. Urutan pada tabel adalah urutan eksekusi; nomor ID tidak perlu dibuat berurutan atau diubah hanya untuk menghilangkan celah. Hanya workstream yang tercantum pada tabel yang termasuk roadmap Stage 5 aktif.
 
