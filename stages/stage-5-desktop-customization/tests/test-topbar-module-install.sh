@@ -50,7 +50,7 @@ Singleton {
 QML
 
 run_installer() {
-    HOME="$home" XDG_CONFIG_HOME="$config" XDG_STATE_HOME="$state" \
+    HOME="$home" XDG_CONFIG_HOME="$config" XDG_STATE_HOME="$state" PATH="${TEST_PATH:-$PATH}" \
         bash "$fixture/$workstream/scripts/k41-implement-topbar.sh"
 }
 
@@ -74,6 +74,32 @@ test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l
 
 run_installer
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
+
+# Inject a failure at the final Caelestia publication and verify rollback.
+cp "$backup_root/Notifs.qml" "$notifs"
+notifs_before_rollback="$(sha256sum "$notifs" | cut -d' ' -f1)"
+host_before_rollback="$(sha256sum "$host" | cut -d' ' -f1)"
+mkdir -p "$tmp/bin"
+cat >"$tmp/bin/mv" <<'SH'
+#!/usr/bin/env bash
+for arg in "$@"; do
+    case "$arg" in
+        *.Notifs.install.*) exit 97 ;;
+    esac
+done
+exec /usr/bin/mv "$@"
+SH
+chmod 0755 "$tmp/bin/mv"
+if TEST_PATH="$tmp/bin:$PATH" run_installer >/dev/null 2>&1; then
+    echo 'Expected injected Caelestia publication failure.' >&2
+    exit 1
+fi
+test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
+test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
+cmp -s "$target" "$qml"
+for service in "${services[@]}"; do
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+done
 
 # An unrecognized Caelestia source must fail before any further mutation.
 host_after_install="$(sha256sum "$host" | cut -d' ' -f1)"
