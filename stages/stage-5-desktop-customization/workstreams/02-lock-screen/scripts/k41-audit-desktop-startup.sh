@@ -814,7 +814,7 @@ The collector does not modify configuration, packages, services, authentication,
   
   K41_AUDIT_RUN_QS_PROBE=1 bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
 
-The probe is skipped if Wayland session variables/socket are missing or a Quickshell/Caelestia process is already running. It may briefly display shell windows. The report is private locally and a redacted copy is published.
+The probe is skipped if Wayland session variables/socket are missing or a Quickshell/Caelestia process is already running. It may briefly display shell windows. The local report is stored privately outside the Git checkout at ~/.local/state/k41/lockscreen/startup-audits/; only a redacted copy is published.
 The script publishes a sanitized copy of this run directory (report.txt, README.txt, lifecycle-timeline.tsv) to GitHub main using existing Git credentials. The local report remains private (0600); if publication fails, the report stays local and the script exits non-zero. Review the published report for any residual private information.
 EOF
 chmod 0600 "$run_dir/README.txt"
@@ -856,7 +856,7 @@ publish_report() {
        ! git -C "$publish_dir" config user.name "K41 Startup Audit" ||
        ! git -C "$publish_dir" config user.email "k41-startup-audit@users.noreply.github.com"; then
         rm -rf -- "$publish_tmp"
-        printf 'ERROR: isolated clone preparation failed; report remains local.\\n' >&2
+        printf 'ERROR: isolated clone preparation failed; report remains local.\n' >&2
         return 1
     fi
     if ! git -C "$publish_dir" add -- "$relative_dir" ||
