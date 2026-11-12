@@ -33,10 +33,18 @@ Jalankan dari Git checkout repository, branch `main`, sebagai user desktop biasa
 bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-audit-bottombar.sh
 ```
 
-Laporan disimpan privat di:
+Laporan lengkap disimpan privat di:
 
 ```text
 ~/.local/state/k41/bottombar/audits/<timestamp>/bottombar-audit.txt
+```
+
+Setelah report selesai dibuat, script otomatis membuat salinan tersanitasi dan mempublikasikannya ke branch `main` melalui temporary independent clone di:
+
+```text
+reports/stage-5-desktop-customization/03-bottombar/audits/<timestamp>/
+├── report.txt
+└── README.txt
 ```
 
 Audit mengumpulkan:
@@ -51,9 +59,9 @@ Audit mengumpulkan:
 - Inventaris tests, source, dokumentasi, dan artefak workstream yang relevan.
 - Ringkasan keterbatasan dan input yang dibutuhkan untuk desain implementasi.
 
-Audit bersifat read-only terhadap source, runtime, konfigurasi, package, service, dan Git. Satu-satunya write adalah report privat di luar checkout. Script tidak melakukan fetch, checkout, reset, clean, stash, add, commit, push, atau mengubah index/HEAD/FETCH_HEAD. Karena report tidak ditulis ke dalam repository, audit tidak meninggalkan untracked report yang dapat menghalangi pull atau perpindahan branch.
+Audit bersifat read-only terhadap source, runtime, konfigurasi, package, dan service. Report lengkap hanya ditulis ke state directory privat. Publikasi dilakukan melalui clone baru yang memiliki direktori `.git` sendiri; fetch, commit, dan push hanya berjalan di clone sementara tersebut. Script tidak menjalankan operasi Git mutatif pada checkout aktif, sehingga branch, HEAD, index, FETCH_HEAD, dan worktree metadata checkout lokal tidak disentuh. Report publik berada pada path yang berbeda dari report lokal; tidak ada untracked report di checkout yang dapat menghalangi `git pull`.
 
-Report berisi cuplikan source dan metadata host/package. Review dan sanitasi sebelum dibagikan. Audit statis tidak membuktikan QML compile atau runtime behavior.
+Sebelum publikasi, script membuat salinan UTF-8 tersanitasi yang mengganti home/repository path, username, hostname, UID/GID, alamat IP/MAC, SSID, URL user-info, dan pola credential umum. Sanitasi otomatis bukan jaminan bahwa semua data sensitif terhapus. Review report publik di GitHub tetap wajib. Jika clone/commit/push gagal, report privat tetap tersedia dan script keluar dengan status non-zero. Audit statis tidak membuktikan QML compile atau runtime behavior.
 
 **Acceptance tahap audit:** report lengkap tersedia; setiap target/source runtime diklasifikasikan; dependency/API dan integration map memiliki bukti; unknown/missing data ditandai; tidak ada perubahan runtime atau Git checkout.
 
@@ -134,8 +142,8 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 - Tidak menggunakan sudo untuk deployment user-level.
 - Tidak mengubah PAM, autentikasi, lock/session protocol, system services, atau boot configuration.
 - Tidak menimpa file lokal/upstream yang belum diidentifikasi.
-- Audit tidak mengubah runtime atau Git metadata.
-- Log/report privat; review dan sanitasi sebelum publikasi.
+- Audit tidak mengubah runtime atau Git metadata checkout aktif.
+- Report lengkap bersifat privat; hanya salinan tersanitasi yang dipublikasikan otomatis melalui independent clone. Review report publik tetap wajib.
 - Jangan mengklaim rollback, idempotensi, QML compatibility, atau runtime safety tanpa test yang relevan.
 
 ## Validasi, status, dan acceptance
