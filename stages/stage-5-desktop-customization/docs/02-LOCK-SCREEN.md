@@ -175,7 +175,7 @@ Status: **IMPLEMENTED** pada updater dan regression test; **CI/RUNTIME NOT YET V
 
 ## Diagnostik Quickshell/Caelestia — 12 November 2026
 
-Report `20261112T041236Z` menunjukkan perintah startup Caelestia telah berada di konfigurasi Lua aktif, tetapi proses Quickshell tidak bertahan dan IPC tidak tersedia. Report itu belum menangkap log QML/plugin/import yang diperlukan untuk membedakan kesalahan konfigurasi, dependency Qt/QML, dan kegagalan runtime.
+Report `20261112T041236Z` menunjukkan perintah startup Caelestia telah berada di konfigurasi Lua aktif, tetapi proses Quickshell tidak bertahan dan IPC tidak tersedia. Report berikutnya (`20261112T042459Z`) tidak dapat dibaca oleh endpoint teks GitHub; pembacaan blob gagal pada byte non-UTF-8. Jadi laporan itu belum bisa dipakai untuk menilai hasil probe. Collector kini menormalkan byte invalid/control-character menjadi UTF-8 valid sebelum publikasi dan menolak report kosong. Report itu belum menangkap log QML/plugin/import yang diperlukan untuk membedakan kesalahan konfigurasi, dependency Qt/QML, dan kegagalan runtime.
 
 Collector `workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh` diperluas untuk:
 - Mengambil daftar instance Quickshell (`qs list --all`) dan log konfigurasi Caelestia (`qs log -c caelestia --tail 400 --no-color`).
