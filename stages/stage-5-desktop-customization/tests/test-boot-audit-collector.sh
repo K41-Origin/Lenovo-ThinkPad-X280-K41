@@ -27,6 +27,8 @@ grep -Fq 'chmod 0700 "$OUT"' "$SCRIPT"
 grep -Fq 'chmod 0600 "$REPORT"' "$SCRIPT"
 grep -Fq 'SUDO_UID' "$SCRIPT"
 grep -Fq 'chown -R "$AUDIT_UID:$AUDIT_GID" "$OUT_ROOT"' "$SCRIPT"
+grep -Fq 'chown "$AUDIT_UID:$AUDIT_GID" "$REPORT"' "$SCRIPT"
+grep -Fq 'chown "$AUDIT_UID:$AUDIT_GID" "$OUT/README.txt"' "$SCRIPT"
 grep -Fq 'chmod u+rwx "$dir"' "$SCRIPT"
 
 # Reject executable mutation commands; read-only status/list/discovery are allowed.
