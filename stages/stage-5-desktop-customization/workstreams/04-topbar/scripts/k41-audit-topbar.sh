@@ -332,6 +332,522 @@ else:
     add("power_supply sysfs path unavailable.")
 
 
+
+section("ACTIVE QUICKSHELL CONFIGURATION AND HOST INTEGRATION")
+home = pathlib.Path.home()
+xdg_config = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", str(home / ".config")))
+qs_user_root = xdg_config / "quickshell"
+expected_host = qs_user_root / "caelestia" / "shell.qml"
+k41_module = qs_user_root / "k41" / "modules" / "topbar" / "Topbar.qml"
+
+def display_path(path):
+    try:
+        value = str(path)
+        home_value = str(home)
+        if value == home_value or value.startswith(home_value + os.sep):
+            return "~" + value[len(home_value):]
+        return value
+    except Exception:
+        return "[path unavailable]"
+
+def inspect_host(path, label):
+    add(f"{label}: {'present' if path.is_file() and not path.is_symlink() else 'absent_or_not_regular'}")
+    if not path.is_file() or path.is_symlink():
+        return
+    try:
+        if path.stat().st_size > 1024 * 1024:
+            add(f"{label}: skipped; file exceeds 1 MiB")
+            return
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError as exc:
+        add(f"{label}: read failed ({type(exc).__name__})")
+        return
+    def line_of(pattern):
+        for number, line in enumerate(lines, 1):
+            if re.search(pattern, line):
+                return number
+        return None
+    root_line = line_of(r"^\s*ShellRoot\s*\{\s*$")
+    id_line = line_of(r"^\s*id\s*:\s*root\s*$")
+    watch_line = line_of(r"^\s*settings\.watchFiles\s*:\s*true\s*$")
+    import_lines = [i for i, line in enumerate(lines, 1)
+                    if re.search(r'^\s*import\s+"\.\./k41/modules/topbar"\s+as\s+K41Topbar\s*
+ws = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar"
+for rel in ("modules", "scripts", "tests", "docs"):
+    path = ws / rel
+    add(f"WS04 {rel}: {'present' if path.is_dir() else 'absent'}")
+    if path.is_dir():
+        names = sorted(p.name for p in path.iterdir() if not p.is_symlink())
+        add("  entries: " + (", ".join(names[:60]) if names else "(empty)"))
+add("Bottombar source is a reference for project conventions only; it is not assumed to be a reusable Topbar implementation.")
+
+section("AUDIT HANDOFF AND LIMITATIONS")
+add("Design order: CPU, RAM, Notifications, Battery, Clock (left to right).")
+add("Visual target: top horizontal panel, 32-36 px initial height, dark translucent, minimal radius, subtle shadow.")
+add("Visibility target: always visible, all monitors; fullscreen behavior requires runtime verification.")
+add("Notification interaction: icon click opens a notification tray/panel; tray is not permanently open.")
+add("Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.")
+add("This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.")
+add("QML discovery is a bounded static scan; candidate relative paths and recognized identifiers are leads, not proof of the active entry point.")
+add("Configuration source contents, source lines, comments, literals, process arguments, environment variables, serial numbers, and absolute home paths are never published.")
+add("Review findings before writing the separate implementation/deployment script.")
+report.write_text("\n".join(out) + "\n", encoding="utf-8")
+print(f"Private audit report created; bytes={report.stat().st_size}")
+PY
+
+[[ -s "$report" ]] || die 'Audit tidak menghasilkan report valid.'
+report_bytes="$(stat -c %s -- "$report")"
+(( report_bytes <= 65536 )) || die "Report melebihi batas 64 KiB: $report_bytes bytes."
+
+# Public copy is the same deliberately minimized report; no raw command lines,
+# source excerpts, environment values, host identity, or absolute home paths exist.
+cp -- "$report" "$published_report"
+chmod 0600 "$published_report"
+published_bytes="$(stat -c %s -- "$published_report")"
+(( published_bytes <= 65536 )) || die 'Published summary melebihi batas 64 KiB.'
+
+cat >"$run_dir/README.txt" <<EOF
+K41 Topbar environment audit
+============================
+Run as the regular desktop user from the repository checkout on branch main:
+
+  bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audit-topbar.sh
+
+The audit is observational and does not modify runtime configuration, packages,
+services, source files, or the active Git checkout. The full report is stored
+privately at ~/.local/state/k41/topbar/audits/<timestamp>/topbar-audit.txt.
+
+Only a bounded, privacy-minimized summary is published. It excludes source/config
+contents, process command-line arguments, environment variables, host identity,
+user identity, and absolute home paths. Automated minimization is not a guarantee
+against every possible disclosure; inspect the summary before sharing further.
+
+Caelestia has no native Topbar in this project baseline. The audit does not
+assume one exists; it inventories the available shell/runtime environment so
+K41 can implement its own Topbar using a verified integration point.
+EOF
+chmod 0600 "$run_dir/README.txt"
+
+publish_tmp=""
+cleanup() {
+    if [[ -n $publish_tmp && -d $publish_tmp ]]; then
+        rm -rf -- "$publish_tmp"
+    fi
+}
+trap cleanup EXIT
+
+publish_report() {
+    local remote_url publish_dir relative_dir publish_target
+    remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
+        { printf 'ERROR: Git origin tidak tersedia; report tetap lokal.\n' >&2; return 1; }
+    case "$remote_url" in
+        https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
+        *) printf 'ERROR: Git origin bukan repository K41 yang diizinkan; report tetap lokal.\n' >&2; return 1 ;;
+    esac
+    publish_tmp="$(mktemp -d "${TMPDIR:-/tmp}/k41-topbar-audit-publish.XXXXXX")" || return 1
+    publish_dir="$publish_tmp/repository"
+    if ! GIT_TERMINAL_PROMPT=0 git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"; then
+        printf 'ERROR: isolated clone gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    relative_dir="reports/stage-5-desktop-customization/04-topbar/audits/${run_dir##*/}"
+    publish_target="$publish_dir/$relative_dir"
+    if [[ -e $publish_target || -L $publish_target ]]; then
+        printf 'ERROR: target report sudah ada; tidak akan ditimpa.\n' >&2
+        return 1
+    fi
+    if ! mkdir -p -- "$publish_target" ||
+       ! cp -- "$published_report" "$publish_target/report.txt" ||
+       ! cp -- "$run_dir/README.txt" "$publish_target/README.txt" ||
+       ! chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" ||
+       ! chmod 0755 "$publish_target"; then
+        printf 'ERROR: staging report gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" -c user.name="K41 Topbar Audit" -c user.email="k41-topbar-audit@users.noreply.github.com" add -- "$relative_dir" ||
+       ! git -C "$publish_dir" -c user.name="K41 Topbar Audit" -c user.email="k41-topbar-audit@users.noreply.github.com" commit -m "Add K41 Topbar environment audit"; then
+        printf 'ERROR: commit report gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+        printf 'INFO: main berubah saat push; mencoba fetch/rebase satu kali pada clone terisolasi.\n'
+        if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" fetch --no-tags origin main ||
+           ! git -C "$publish_dir" rebase FETCH_HEAD ||
+           ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+            printf 'ERROR: publikasi gagal; report privat tetap tersedia: %s\n' "$report" >&2
+            return 1
+        fi
+    fi
+    printf 'INFO: sanitized summary published: %s\n' "$relative_dir"
+    printf 'INFO: active checkout Git metadata was not used for publication.\n'
+}
+
+printf 'Private audit report: %s\n' "$report"
+printf 'Report size: %s bytes\n' "$report_bytes"
+if publish_report; then
+    printf 'Automated publication succeeded.\n'
+else
+    printf 'WARNING: publication failed; private report retained locally.\n' >&2
+    exit 1
+fi
+printf 'Runtime and active checkout state were not modified.\n'
+, line)]
+    instance_lines = [i for i, line in enumerate(lines, 1)
+                      if re.search(r"^\s*K41Topbar\.Topbar\s*\{\s*\}\s*$", line)]
+    add(f"{label} structural: ShellRoot-line={root_line or 'not_found'}; id-root-line={id_line or 'not_found'}; watchFiles-true-line={watch_line or 'not_found'}")
+    add(f"{label} K41 integration: import-count={len(import_lines)}; instance-count={len(instance_lines)}")
+    if import_lines:
+        add(f"{label} import-line-numbers: " + ",".join(map(str, import_lines[:8])))
+    if instance_lines:
+        add(f"{label} instance-line-numbers: " + ",".join(map(str, instance_lines[:8])))
+    if root_line and id_line and instance_lines:
+        add(f"{label} instance-order: {'instance_before_root_id' if instance_lines[0] < id_line else 'instance_after_root_id'}")
+    else:
+        add(f"{label} instance-order: cannot_determine")
+    add(f"{label} file-bytes={path.stat().st_size}; sha256={__import__('hashlib').sha256(path.read_bytes()).hexdigest()[:16]}")
+    add(f"{label} contains ShellRoot exactly once={'yes' if sum(bool(re.search(r'^\s*ShellRoot\s*\{\s*
+ws = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar"
+for rel in ("modules", "scripts", "tests", "docs"):
+    path = ws / rel
+    add(f"WS04 {rel}: {'present' if path.is_dir() else 'absent'}")
+    if path.is_dir():
+        names = sorted(p.name for p in path.iterdir() if not p.is_symlink())
+        add("  entries: " + (", ".join(names[:60]) if names else "(empty)"))
+add("Bottombar source is a reference for project conventions only; it is not assumed to be a reusable Topbar implementation.")
+
+section("AUDIT HANDOFF AND LIMITATIONS")
+add("Design order: CPU, RAM, Notifications, Battery, Clock (left to right).")
+add("Visual target: top horizontal panel, 32-36 px initial height, dark translucent, minimal radius, subtle shadow.")
+add("Visibility target: always visible, all monitors; fullscreen behavior requires runtime verification.")
+add("Notification interaction: icon click opens a notification tray/panel; tray is not permanently open.")
+add("Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.")
+add("This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.")
+add("QML discovery is a bounded static scan; candidate relative paths and recognized identifiers are leads, not proof of the active entry point.")
+add("Configuration source contents, source lines, comments, literals, process arguments, environment variables, serial numbers, and absolute home paths are never published.")
+add("Review findings before writing the separate implementation/deployment script.")
+report.write_text("\n".join(out) + "\n", encoding="utf-8")
+print(f"Private audit report created; bytes={report.stat().st_size}")
+PY
+
+[[ -s "$report" ]] || die 'Audit tidak menghasilkan report valid.'
+report_bytes="$(stat -c %s -- "$report")"
+(( report_bytes <= 65536 )) || die "Report melebihi batas 64 KiB: $report_bytes bytes."
+
+# Public copy is the same deliberately minimized report; no raw command lines,
+# source excerpts, environment values, host identity, or absolute home paths exist.
+cp -- "$report" "$published_report"
+chmod 0600 "$published_report"
+published_bytes="$(stat -c %s -- "$published_report")"
+(( published_bytes <= 65536 )) || die 'Published summary melebihi batas 64 KiB.'
+
+cat >"$run_dir/README.txt" <<EOF
+K41 Topbar environment audit
+============================
+Run as the regular desktop user from the repository checkout on branch main:
+
+  bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audit-topbar.sh
+
+The audit is observational and does not modify runtime configuration, packages,
+services, source files, or the active Git checkout. The full report is stored
+privately at ~/.local/state/k41/topbar/audits/<timestamp>/topbar-audit.txt.
+
+Only a bounded, privacy-minimized summary is published. It excludes source/config
+contents, process command-line arguments, environment variables, host identity,
+user identity, and absolute home paths. Automated minimization is not a guarantee
+against every possible disclosure; inspect the summary before sharing further.
+
+Caelestia has no native Topbar in this project baseline. The audit does not
+assume one exists; it inventories the available shell/runtime environment so
+K41 can implement its own Topbar using a verified integration point.
+EOF
+chmod 0600 "$run_dir/README.txt"
+
+publish_tmp=""
+cleanup() {
+    if [[ -n $publish_tmp && -d $publish_tmp ]]; then
+        rm -rf -- "$publish_tmp"
+    fi
+}
+trap cleanup EXIT
+
+publish_report() {
+    local remote_url publish_dir relative_dir publish_target
+    remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
+        { printf 'ERROR: Git origin tidak tersedia; report tetap lokal.\n' >&2; return 1; }
+    case "$remote_url" in
+        https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
+        *) printf 'ERROR: Git origin bukan repository K41 yang diizinkan; report tetap lokal.\n' >&2; return 1 ;;
+    esac
+    publish_tmp="$(mktemp -d "${TMPDIR:-/tmp}/k41-topbar-audit-publish.XXXXXX")" || return 1
+    publish_dir="$publish_tmp/repository"
+    if ! GIT_TERMINAL_PROMPT=0 git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"; then
+        printf 'ERROR: isolated clone gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    relative_dir="reports/stage-5-desktop-customization/04-topbar/audits/${run_dir##*/}"
+    publish_target="$publish_dir/$relative_dir"
+    if [[ -e $publish_target || -L $publish_target ]]; then
+        printf 'ERROR: target report sudah ada; tidak akan ditimpa.\n' >&2
+        return 1
+    fi
+    if ! mkdir -p -- "$publish_target" ||
+       ! cp -- "$published_report" "$publish_target/report.txt" ||
+       ! cp -- "$run_dir/README.txt" "$publish_target/README.txt" ||
+       ! chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" ||
+       ! chmod 0755 "$publish_target"; then
+        printf 'ERROR: staging report gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" -c user.name="K41 Topbar Audit" -c user.email="k41-topbar-audit@users.noreply.github.com" add -- "$relative_dir" ||
+       ! git -C "$publish_dir" -c user.name="K41 Topbar Audit" -c user.email="k41-topbar-audit@users.noreply.github.com" commit -m "Add K41 Topbar environment audit"; then
+        printf 'ERROR: commit report gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+        printf 'INFO: main berubah saat push; mencoba fetch/rebase satu kali pada clone terisolasi.\n'
+        if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" fetch --no-tags origin main ||
+           ! git -C "$publish_dir" rebase FETCH_HEAD ||
+           ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+            printf 'ERROR: publikasi gagal; report privat tetap tersedia: %s\n' "$report" >&2
+            return 1
+        fi
+    fi
+    printf 'INFO: sanitized summary published: %s\n' "$relative_dir"
+    printf 'INFO: active checkout Git metadata was not used for publication.\n'
+}
+
+printf 'Private audit report: %s\n' "$report"
+printf 'Report size: %s bytes\n' "$report_bytes"
+if publish_report; then
+    printf 'Automated publication succeeded.\n'
+else
+    printf 'WARNING: publication failed; private report retained locally.\n' >&2
+    exit 1
+fi
+printf 'Runtime and active checkout state were not modified.\n'
+, x)) for x in lines) == 1 else 'no'}")
+    add(f"{label} contains import QtQuick exactly once={'yes' if sum(bool(re.search(r'^\s*import\s+QtQuick\s*
+ws = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar"
+for rel in ("modules", "scripts", "tests", "docs"):
+    path = ws / rel
+    add(f"WS04 {rel}: {'present' if path.is_dir() else 'absent'}")
+    if path.is_dir():
+        names = sorted(p.name for p in path.iterdir() if not p.is_symlink())
+        add("  entries: " + (", ".join(names[:60]) if names else "(empty)"))
+add("Bottombar source is a reference for project conventions only; it is not assumed to be a reusable Topbar implementation.")
+
+section("AUDIT HANDOFF AND LIMITATIONS")
+add("Design order: CPU, RAM, Notifications, Battery, Clock (left to right).")
+add("Visual target: top horizontal panel, 32-36 px initial height, dark translucent, minimal radius, subtle shadow.")
+add("Visibility target: always visible, all monitors; fullscreen behavior requires runtime verification.")
+add("Notification interaction: icon click opens a notification tray/panel; tray is not permanently open.")
+add("Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.")
+add("This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.")
+add("QML discovery is a bounded static scan; candidate relative paths and recognized identifiers are leads, not proof of the active entry point.")
+add("Configuration source contents, source lines, comments, literals, process arguments, environment variables, serial numbers, and absolute home paths are never published.")
+add("Review findings before writing the separate implementation/deployment script.")
+report.write_text("\n".join(out) + "\n", encoding="utf-8")
+print(f"Private audit report created; bytes={report.stat().st_size}")
+PY
+
+[[ -s "$report" ]] || die 'Audit tidak menghasilkan report valid.'
+report_bytes="$(stat -c %s -- "$report")"
+(( report_bytes <= 65536 )) || die "Report melebihi batas 64 KiB: $report_bytes bytes."
+
+# Public copy is the same deliberately minimized report; no raw command lines,
+# source excerpts, environment values, host identity, or absolute home paths exist.
+cp -- "$report" "$published_report"
+chmod 0600 "$published_report"
+published_bytes="$(stat -c %s -- "$published_report")"
+(( published_bytes <= 65536 )) || die 'Published summary melebihi batas 64 KiB.'
+
+cat >"$run_dir/README.txt" <<EOF
+K41 Topbar environment audit
+============================
+Run as the regular desktop user from the repository checkout on branch main:
+
+  bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audit-topbar.sh
+
+The audit is observational and does not modify runtime configuration, packages,
+services, source files, or the active Git checkout. The full report is stored
+privately at ~/.local/state/k41/topbar/audits/<timestamp>/topbar-audit.txt.
+
+Only a bounded, privacy-minimized summary is published. It excludes source/config
+contents, process command-line arguments, environment variables, host identity,
+user identity, and absolute home paths. Automated minimization is not a guarantee
+against every possible disclosure; inspect the summary before sharing further.
+
+Caelestia has no native Topbar in this project baseline. The audit does not
+assume one exists; it inventories the available shell/runtime environment so
+K41 can implement its own Topbar using a verified integration point.
+EOF
+chmod 0600 "$run_dir/README.txt"
+
+publish_tmp=""
+cleanup() {
+    if [[ -n $publish_tmp && -d $publish_tmp ]]; then
+        rm -rf -- "$publish_tmp"
+    fi
+}
+trap cleanup EXIT
+
+publish_report() {
+    local remote_url publish_dir relative_dir publish_target
+    remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
+        { printf 'ERROR: Git origin tidak tersedia; report tetap lokal.\n' >&2; return 1; }
+    case "$remote_url" in
+        https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
+        *) printf 'ERROR: Git origin bukan repository K41 yang diizinkan; report tetap lokal.\n' >&2; return 1 ;;
+    esac
+    publish_tmp="$(mktemp -d "${TMPDIR:-/tmp}/k41-topbar-audit-publish.XXXXXX")" || return 1
+    publish_dir="$publish_tmp/repository"
+    if ! GIT_TERMINAL_PROMPT=0 git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"; then
+        printf 'ERROR: isolated clone gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    relative_dir="reports/stage-5-desktop-customization/04-topbar/audits/${run_dir##*/}"
+    publish_target="$publish_dir/$relative_dir"
+    if [[ -e $publish_target || -L $publish_target ]]; then
+        printf 'ERROR: target report sudah ada; tidak akan ditimpa.\n' >&2
+        return 1
+    fi
+    if ! mkdir -p -- "$publish_target" ||
+       ! cp -- "$published_report" "$publish_target/report.txt" ||
+       ! cp -- "$run_dir/README.txt" "$publish_target/README.txt" ||
+       ! chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" ||
+       ! chmod 0755 "$publish_target"; then
+        printf 'ERROR: staging report gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" -c user.name="K41 Topbar Audit" -c user.email="k41-topbar-audit@users.noreply.github.com" add -- "$relative_dir" ||
+       ! git -C "$publish_dir" -c user.name="K41 Topbar Audit" -c user.email="k41-topbar-audit@users.noreply.github.com" commit -m "Add K41 Topbar environment audit"; then
+        printf 'ERROR: commit report gagal; report privat tetap tersedia.\n' >&2
+        return 1
+    fi
+    if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+        printf 'INFO: main berubah saat push; mencoba fetch/rebase satu kali pada clone terisolasi.\n'
+        if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" fetch --no-tags origin main ||
+           ! git -C "$publish_dir" rebase FETCH_HEAD ||
+           ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+            printf 'ERROR: publikasi gagal; report privat tetap tersedia: %s\n' "$report" >&2
+            return 1
+        fi
+    fi
+    printf 'INFO: sanitized summary published: %s\n' "$relative_dir"
+    printf 'INFO: active checkout Git metadata was not used for publication.\n'
+}
+
+printf 'Private audit report: %s\n' "$report"
+printf 'Report size: %s bytes\n' "$report_bytes"
+if publish_report; then
+    printf 'Automated publication succeeded.\n'
+else
+    printf 'WARNING: publication failed; private report retained locally.\n' >&2
+    exit 1
+fi
+printf 'Runtime and active checkout state were not modified.\n'
+, x)) for x in lines) == 1 else 'no'}")
+
+inspect_host(expected_host, "EXPECTED_CAELestia_HOST")
+add("K41 Topbar deployed module: " + ("present" if k41_module.is_file() and not k41_module.is_symlink() else "absent_or_not_regular"))
+if k41_module.is_file() and not k41_module.is_symlink():
+    add(f"K41 Topbar module bytes={k41_module.stat().st_size}; sha256={__import__('hashlib').sha256(k41_module.read_bytes()).hexdigest()[:16]}")
+    try:
+        module_text = k41_module.read_text(encoding="utf-8", errors="replace")
+        battery_expr = re.search(r"UPower\.displayDevice\.percentage.{0,100}", module_text)
+        add("Battery percentage expression: " + (bounded(battery_expr.group(0), 180) if battery_expr else "not recognized"))
+        add("Topbar QML imports: " + "; ".join(line.strip()[:160] for line in module_text.splitlines()
+            if re.match(r"^\s*import\s+", line))[:700])
+    except OSError:
+        add("Topbar module content: unreadable")
+
+section("ACTIVE QUICKSHELL PROCESS AND CONFIG SELECTION")
+processes = []
+for proc in pathlib.Path("/proc").glob("[0-9]*"):
+    try:
+        comm = (proc / "comm").read_text(encoding="utf-8", errors="replace").strip()
+        if not re.search(r"quickshell|^qs$", comm, re.I):
+            continue
+        raw = (proc / "cmdline").read_bytes()
+        args = [x.decode("utf-8", "replace") for x in raw.split(b"\0") if x]
+        normalized = []
+        selected = None
+        i = 0
+        while i < len(args):
+            arg = args[i]
+            if arg in ("-c", "--config", "--path") and i + 1 < len(args):
+                value = args[i + 1]
+                if arg in ("-c", "--config"):
+                    selected = value
+                normalized.append(arg + "=" + display_path(pathlib.Path(value)))
+                i += 2
+                continue
+            if arg.startswith("--config="):
+                selected = arg.split("=", 1)[1]
+                normalized.append("--config=" + display_path(pathlib.Path(selected)))
+            elif arg.startswith("--path="):
+                normalized.append("--path=" + display_path(pathlib.Path(arg.split("=", 1)[1])))
+            elif i == 0:
+                normalized.append(pathlib.Path(arg).name)
+            elif arg.startswith("-") and len(arg) < 100:
+                normalized.append(arg)
+            else:
+                normalized.append("[argument-redacted]")
+            i += 1
+        processes.append((comm[:80], selected, normalized[:24]))
+    except (OSError, PermissionError):
+        continue
+if processes:
+    for comm, selected, args in processes[:12]:
+        add(f"process: comm={comm}; explicit-config={display_path(pathlib.Path(selected)) if selected else 'not_specified'}")
+        add("  normalized-arguments: " + " ".join(args))
+else:
+    add("No Quickshell/qs process found in /proc at capture time.")
+add("Process IDs, raw command lines, environment variables, and unrelated arguments are not published.")
+add("If no explicit -c/--config is present, the default configuration selection must be confirmed from the installed Quickshell version and runtime context.")
+
+section("QML STATIC VALIDATION AVAILABILITY")
+for tool_name in ("qmllint", "qmlformat", "qml"):
+    tool_path = shutil.which(tool_name)
+    if not tool_path:
+        add(f"{tool_name}: NOT_FOUND")
+        continue
+    rc, value = run([tool_path, "--version"], timeout=8)
+    add(f"{tool_name}: available; version-exit={rc}; {bounded(value, 240)}")
+if shutil.which("qmllint"):
+    for label, candidate in (("expected-host", expected_host), ("deployed-topbar", k41_module)):
+        if candidate.is_file() and not candidate.is_symlink():
+            rc, value = run([shutil.which("qmllint"), str(candidate)], timeout=20)
+            normalized = bounded(value, 1800).replace(str(home), "~")
+            add(f"qmllint {label}: exit={rc}")
+            add("  output: " + (normalized.replace("\n", " | ") if normalized else "(no diagnostics)"))
+else:
+    add("qmllint execution: skipped; tool unavailable.")
+add("qmllint results are static diagnostics only; they do not prove successful Quickshell runtime loading or visual rendering.")
+
+section("RECENT QUICKSHELL/QML JOURNAL DIAGNOSTICS")
+journal = shutil.which("journalctl")
+if journal:
+    rc, value = run([journal, "--user", "-b", "--no-pager", "-n", "500",
+                     "-o", "short-iso"], timeout=12)
+    if rc == 0:
+        relevant = []
+        for line in value.splitlines():
+            if re.search(r"quickshell|(^|[^a-z])qs([^a-z]|$)|qml|K41Topbar|topbar", line, re.I):
+                line = line.replace(str(home), "~")
+                line = re.sub(r"\bpid[=: ]+\d+\b", "pid=[redacted]", line, flags=re.I)
+                relevant.append(bounded(line, 360))
+        add(f"journalctl user boot tail: exit=0; relevant-lines={len(relevant)}")
+        for line in relevant[-30:]:
+            add("  " + line)
+        if not relevant:
+            add("  no matching entries in last 500 user-journal records")
+    else:
+        add(f"journalctl user boot tail: exit={rc}; {bounded(value, 500)}")
+else:
+    add("journalctl: NOT_FOUND")
+add("Journal sample is bounded to the last 500 user records; absence of matches does not prove absence of earlier errors.")
+
 section("K41 IMPLEMENTATION REFERENCES")
 ws = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar"
 for rel in ("modules", "scripts", "tests", "docs"):
