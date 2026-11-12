@@ -46,7 +46,6 @@ hl.config({ general = { gaps_in = 5 } })
 hl.on("hyprland.start", function()
     hl.exec_cmd("sh -c 'mkdir -p \"$HOME/.cache/k41\"; qs -c k41-boot-splash >/dev/null 2>&1 &'")
     -- K41 ANIMATED BOOT SPLASH START
-    hl.exec_cmd("caelestia shell -d")
     hl.exec_cmd("/home/test/.local/bin/k41-lock-caelestia-after-start")
 end)
 -- K41 CAELESTIA AUTOLOCK END
@@ -78,8 +77,12 @@ grep -Fq 'k41-lock-caelestia-after-start' "$home/.config/hypr/hyprland.lua" ||
     fail 'updater removed the lock helper invocation'
 ! grep -Fq 'qs -c k41-boot-splash' "$home/.config/hypr/hyprland.lua" ||
     fail 'updater left the obsolete splash command'
-! grep -Fq 'caelestia shell -d' "$home/.config/hypr/hyprland.lua" ||
-    fail 'updater left the duplicate Caelestia startup command'
+[[ $(grep -Fc 'hl.exec_cmd("caelestia shell -d")' "$home/.config/hypr/hyprland.lua") == 1 ]] ||
+    fail 'updater did not add exactly one Caelestia startup command to the active Lua config'
+caelestia_line="$(grep -nF 'hl.exec_cmd("caelestia shell -d")' "$home/.config/hypr/hyprland.lua" | cut -d: -f1)"
+helper_line="$(grep -nF 'k41-lock-caelestia-after-start' "$home/.config/hypr/hyprland.lua" | cut -d: -f1)"
+(( caelestia_line < helper_line )) || fail 'Caelestia startup does not precede the lock helper'
+pass 'active Lua config starts Caelestia before the readiness helper'
 pass 'updater installs managed fallback and normalizes only the marked Lua block'
 
 # Idempotent second run must not create another backup or change the config.
