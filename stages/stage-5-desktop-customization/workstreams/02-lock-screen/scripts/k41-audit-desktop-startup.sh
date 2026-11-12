@@ -523,10 +523,10 @@ runtime_qs_root="${XDG_RUNTIME_DIR:-/run/user/$EUID}/quickshell"
 if [[ -d $runtime_qs_root && ! -L $runtime_qs_root ]]; then
     while IFS= read -r -d '' qs_log_file; do
         [[ -f $qs_log_file && ! -L $qs_log_file ]] || continue
-        printf '\\n-- %s --\\n' "${qs_log_file#"$HOME"/}" | redact >>"$report"
+        printf '\n-- %s --\n' "${qs_log_file#"$HOME"/}" | redact >>"$report"
         stat -c 'size=%s modified=%y mode=%A' "$qs_log_file" 2>&1 | redact >>"$report" || true
         tail -n 500 -- "$qs_log_file" | redact >>"$report" || true
-    done < <(find "$runtime_qs_root" -maxdepth 5 -type f -name 'log.qslog' -printf '%T@ %p\\0' 2>/dev/null |
+    done < <(find "$runtime_qs_root" -maxdepth 5 -type f -name 'log.qslog' -printf '%T@ %p\0' 2>/dev/null |
         sort -z -nr | head -z -n 8 | cut -z -d' ' -f2-)
 else
     note '[Quickshell runtime log directory unavailable]'
@@ -557,7 +557,7 @@ if [[ ${K41_AUDIT_RUN_QS_PROBE:-0} == 1 ]]; then
             else
                 probe_rc=$?
             fi
-            printf 'Probe exit status: %s\\n' "$probe_rc" >>"$report"
+            printf 'Probe exit status: %s\n' "$probe_rc" >>"$report"
             case "$probe_rc" in
                 124|137) note 'Probe reached its time limit; this alone does not prove successful QML loading.' ;;
                 0) note 'Quickshell exited before the time limit; inspect output for the cause.' ;;
