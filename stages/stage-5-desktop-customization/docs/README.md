@@ -24,14 +24,14 @@ ID workstream adalah identitas komponen; urutan adalah urutan pengerjaan. Nomor 
 
 - Repository adalah sumber kanonis untuk source, installer, dokumentasi, dan test.
 - Source runtime komponen Quickshell pada laptop berada di bawah ~/.config/quickshell/.
-- Untuk integrasi Lock Screen saat ini, source upstream aktif berada pada ~/.config/quickshell/caelestia/; empat file visual K41 disimpan di workstreams/02-lock-screen/modules/lockscreen/ dan dideploy sebagai overlay ke modules/lock/ setelah runtime stabil.
+- Untuk integrasi Lock Screen, Caelestia tetap menjadi host/runtime pada ~/.config/quickshell/caelestia/; empat file visual K41 dikelola di workstreams/02-lock-screen/modules/lockscreen/ dan deployment overlay disediakan oleh script Workstream 02. Cleanup visual upstream menghapus sembilan komponen yang tidak digunakan dari user checkout saja; detail dan risiko tracked deletions ada di dokumen pemilik.
 - Source milik K41 disimpan di direktori ownership khusus pada workstream; lokasi runtime mengikuti integrasi yang sudah diaudit. Jangan mengasumsikan seluruh fitur menggunakan namespace runtime k41-dots sebelum migrasi terbukti.
 - Jangan mengedit source upstream atau file package-owned jika komponen K41 terpisah dapat digunakan.
 - Perubahan runtime harus memiliki preflight, backup, verifikasi pascaperubahan, dan rollback yang sesuai.
 
 ## Peta implementasi repository
 
-Source visual Workstream 02 berada di workstreams/02-lock-screen/modules/lockscreen/; helper lock startup dan updater berada di workstreams/02-lock-screen/scripts/. Deployment overlay ke Caelestia ditahan sampai fix startup diuji pada X280. Artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream tetap menjadi acuan prosedur dan acceptance.
+Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md).
 
 ## Alur kolaborasi dan verifikasi
 
