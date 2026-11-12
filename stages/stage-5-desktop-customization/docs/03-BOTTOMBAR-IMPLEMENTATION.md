@@ -1,79 +1,69 @@
-# Bottombar — Implementation
+# Bottombar — Historical Implementation Record
 
-## Tujuan
+## Tujuan dokumen
 
-Workstream 03 memiliki baseline implementasi historis berupa komponen Bottombar `K41Dock.qml`. Dokumen ini mencatat implementasi lama untuk kebutuhan audit dan bukan spesifikasi target refactoring. Penyelarasan alur kerja dan arsitektur akan ditetapkan setelah audit.
+Dokumen ini menyimpan catatan implementasi Bottombar sebelum audit dan refactoring Workstream 03. Isinya adalah baseline historis, bukan spesifikasi arsitektur target atau instruksi deployment yang telah disetujui.
 
-## Source dan lokasi runtime
+Status dan workflow kanonis berada di [Workstream 03 — Bottombar](03-BOTTOMBAR.md). Workstream saat ini **AUDIT IN PROGRESS**. Jangan menjalankan installer historis atau memigrasikan source/runtime berdasarkan dokumen ini.
+
+## Lokasi historis
 
 | Jenis | Path |
 |---|---|
-| Source kanonis di repository | `stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
-| Source aktif pada laptop | `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
-| Entry point Caelestia aktif | `~/.config/quickshell/caelestia/shell.qml` |
-| Runtime config Caelestia | `~/.config/caelestia/shell.json` |
-| Backup dan log installer | `~/.local/state/k41/backups/caelestia-dock/<timestamp>/` |
+| Source repository historis | `stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
+| Runtime target installer historis | `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
+| Entry point Caelestia yang dimodifikasi | `~/.config/quickshell/caelestia/shell.qml` |
+| Runtime config yang dimodifikasi | `~/.config/caelestia/shell.json` |
+| Backup dan log historis | `~/.local/state/k41/backups/caelestia-dock/<timestamp>/` |
 
-Repository menyimpan source yang dapat direview dan direproduksi. Laptop menjalankan salinan runtime di bawah `~/.config/quickshell/`. Jangan menjadikan salinan runtime sebagai satu-satunya tempat penyimpanan source; setelah perubahan diuji, sinkronkan kembali hasil yang disetujui ke repository.
+Path tersebut menjelaskan implementasi lama yang ditemukan pada source installer. Keberadaan path tidak membuktikan kondisi runtime laptop saat ini.
 
-## Perilaku K41Dock
+## Perilaku historis K41Dock
 
 - Menampilkan workspace pada monitor yang sesuai.
-- Workspace aktif memiliki indikator lebih menonjol; workspace yang memiliki window diberi penanda berbeda.
+- Workspace aktif memiliki indikator lebih menonjol; workspace berisi window memiliki penanda berbeda.
 - Klik indikator memanggil `Hypr.focusWorkspace()`.
 - Trigger hover selebar layar berada di tepi bawah.
 - Dock tetap terlihat ketika pointer berada di dock dan disembunyikan setelah pointer meninggalkannya.
-- `exclusiveZone: 0`; dock tidak memesan ruang layout workspace.
+- Menggunakan `exclusiveZone: 0`.
 - Dock disembunyikan ketika monitor memiliki fullscreen toplevel aktif.
 - Menggunakan `PanelWindow`, `WlrLayershell`, dan API Hyprland melalui Quickshell.
 
-## Integrasi saat ini
+Perilaku di atas adalah deskripsi source QML historis, bukan hasil regression test terbaru.
 
-Installer `scripts/k41-install-caelestia-dock.sh`:
-1. Memastikan dijalankan sebagai user biasa.
-2. Memeriksa source checkout Caelestia dan runtime config.
-3. Memvalidasi struktur `shell.qml`, `shell.json`, dan QML sebelum perubahan.
-4. Membuat backup `shell.qml`, target `K41Dock.qml` (atau mencatat bahwa target belum ada), dan `shell.json`.
-5. Menyalin modul ke `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml`.
-6. Menambahkan import dan instance K41Dock ke `shell.qml`.
-7. Menonaktifkan entry bar upstream pada `shell.json` sambil mempertahankan pengaturan lain.
-8. Memeriksa hasil perubahan.
+## Installer historis
 
-Installer tidak menggunakan sudo, tidak memasang paket, tidak me-restart service, dan tidak me-reload Quickshell secara otomatis.
+Entry point:
 
-## Install, check, dan rollback
+`stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh`
 
-Dari root repository:
+Mode yang tersedia:
 
-```bash
-bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh --check
-bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh --install
-```
+- `--check`: memeriksa beberapa precondition struktur source/runtime.
+- `--install`: membuat backup target, menyalin QML, memodifikasi `shell.qml`, dan mengubah `bar.entries` pada `shell.json`.
+- `--rollback BACKUP_DIRECTORY`: memulihkan target dari manifest backup.
 
-Untuk rollback, gunakan direktori backup persis yang dicetak installer:
+Batas yang diketahui dari inspeksi statis:
 
-```bash
-bash stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh --rollback "$HOME/.local/state/k41/backups/caelestia-dock/<timestamp>"
-```
+- Tidak menggunakan sudo atau memasang paket.
+- Tidak me-restart service atau me-reload Quickshell secara otomatis.
+- Rollback dijalankan manual.
+- Tidak ditemukan automatic rollback untuk kegagalan parsial dalam source yang diperiksa.
+- Validasi source dan hasil perubahan belum membuktikan QML compile atau runtime behavior.
 
-Path source dapat dioverride melalui `K41_CAELESTIA_SOURCE=/path/to/caelestia`.
+Jangan gunakan perintah install/rollback di dokumen lama ini sebelum audit dan refactoring menghasilkan prosedur baru yang disetujui.
 
-## Pola pengembangan menuju k41-dots
+## Catatan penerimaan historis
 
-Scope k41-dots dibatasi pada fondasi komponen desktop yang dibutuhkan. Workstream 01 — Boot Experience berada di luar scope karena boot/splash menggunakan Plymouth.
+Pengguna sebelumnya mengonfirmasi Bottombar berhasil digunakan. Catatan ini dipertahankan sebagai histori penerimaan desain/implementasi terdahulu. Hal itu tidak membuktikan seluruh skenario multi-monitor, fullscreen, dependency compatibility, resource usage, atau regression telah diuji.
 
-K41Dock menjadi referensi proses, bukan alasan untuk menyalin seluruh source Caelestia. Untuk setiap komponen Stage 5 berikutnya:
+## Perubahan yang menunggu audit
 
-1. Audit API, source aktif, config, versi, dan dependensi upstream.
-2. Tentukan ownership dan interface komponen.
-3. Simpan source K41 di direktori workstream repository yang terpisah.
-4. Deploy salinan runtime ke `~/.config/quickshell/` menggunakan installer yang aman dan dapat di-rollback.
-5. Uji komponen secara terisolasi dan integrasinya dengan shell aktif.
-6. Catat hasil, batasan, dan keputusan penerimaan.
-7. Pertahankan pemisahan antara kode K41 dan kode upstream agar komponen dapat diekstrak ke proyek k41-dots.
+- Konsolidasi identitas direktori menjadi Workstream 03.
+- Pemisahan source K41 dan integrasi host Caelestia.
+- Penetapan namespace/runtime target setelah API loading Quickshell diverifikasi.
+- Perbaikan preflight, staging, atomic deployment, failure handling, rollback, logging, dan idempotensi.
+- Automated tests dan runtime verification.
+- Penetapan acceptance criteria dan dokumentasi operasional baru.
 
-Jangan membuat struktur runtime mandiri `~/.config/quickshell/k41-dots/` atau mengganti entry point shell aktif sebelum desain bootstrap dan integrasi Quickshell diputuskan. Itu merupakan pekerjaan arsitektur proyek lanjutan, bukan asumsi untuk setiap workstream Stage 5.
-
-## Status
-
-Pengguna sebelumnya mengonfirmasi hasil implementasi lama berhasil digunakan. Konfirmasi tersebut tetap menjadi bukti historis penerimaan, tetapi status workstream saat ini adalah **AUDIT IN PROGRESS**. Belum ada refactoring, migrasi, atau runtime verification baru yang dilakukan dalam audit ini.
+Semua butir tersebut masih PLANNED sampai implementasi dan bukti tersedia.
