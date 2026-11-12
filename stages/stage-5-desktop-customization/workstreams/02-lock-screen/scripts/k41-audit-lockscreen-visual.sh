@@ -261,8 +261,10 @@ else:
         else:
             try: source_bytes = source.read_bytes(); source_state = "PRESENT"
             except OSError: source_state = "UNREADABLE"
-        if installed_bytes is not None:
-            if source_bytes is not None and installed_bytes == source_bytes:
+        if source_bytes is None:
+            decision = "BLOCKED_SOURCE_MISSING_OR_UNREADABLE"
+        elif installed_bytes is not None:
+            if installed_bytes == source_bytes:
                 decision = "ALREADY_DEPLOYED"
             elif upstream is not None and installed_bytes == upstream:
                 decision = "SAFE_TO_REPLACE"
@@ -278,6 +280,8 @@ else:
             action = "Stop; do not follow or replace symlink. Resolve path ownership/layout manually."
         elif decision == "BLOCKED_MISSING":
             action = "Stop; restore/identify the required upstream target before deployment."
+        elif decision == "BLOCKED_SOURCE_MISSING_OR_UNREADABLE":
+            action = "Stop; restore the K41 source file or fix read permissions before deployment."
         else:
             action = "Stop; make installed/source/upstream bytes readable and rerun audit."
         installed_hash = hashlib.sha256(installed_bytes).hexdigest() if installed_bytes is not None else "<none>"
