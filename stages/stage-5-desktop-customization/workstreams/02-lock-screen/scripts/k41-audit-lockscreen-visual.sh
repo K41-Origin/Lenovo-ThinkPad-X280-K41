@@ -216,6 +216,11 @@ deploy_origin_match = re.search(r'readonly upstream_url="([^"]+)"', deploy_text)
 deploy_revision_match = re.search(r'readonly upstream_revision="([^"]+)"', deploy_text)
 deploy_origin = deploy_origin_match.group(1) if deploy_origin_match else "<not parsed>"
 deploy_revision = deploy_revision_match.group(1) if deploy_revision_match else "<not parsed>"
+legacy_match = re.search(r'declare -Ar legacy_deployed_sha256=\\((.*?)\\)', deploy_text, re.S)
+deploy_legacy_hashes = {}
+if legacy_match:
+    deploy_legacy_hashes = dict(re.findall(r'\\["([^"]+)\\"]="([0-9a-f]{64})"', legacy_match.group(1)))
+add("Deployment legacy hashes parsed: " + str(len(deploy_legacy_hashes)))
 add("Audit pin:   " + expected_origin + " @ " + expected_revision)
 add("Deploy pin:  " + deploy_origin + " @ " + deploy_revision)
 pins_match = deploy_origin == expected_origin and deploy_revision == expected_revision
@@ -268,12 +273,16 @@ else:
                 decision = "ALREADY_DEPLOYED"
             elif upstream is not None and installed_bytes == upstream:
                 decision = "SAFE_TO_REPLACE"
+            elif hashlib.sha256(installed_bytes).hexdigest() == deploy_legacy_hashes.get(relative):
+                decision = "SAFE_TO_UPGRADE_LEGACY_K41"
             else:
                 decision = "REVIEW_REQUIRED"
         if decision == "ALREADY_DEPLOYED":
             action = "No QML replacement needed; retain file and verify runtime."
         elif decision == "SAFE_TO_REPLACE":
             action = "Deploy script may replace this exact pinned-upstream file with K41 source."
+        elif decision == "SAFE_TO_UPGRADE_LEGACY_K41":
+            action = "Deploy script recognizes this exact audited legacy K41 hash and may safely upgrade it to current K41 source."
         elif decision == "REVIEW_REQUIRED":
             action = "Inspect the full unified diff above; preserve or deliberately reconcile local edits before changing deploy guard."
         elif decision == "BLOCKED_SYMLINK":
