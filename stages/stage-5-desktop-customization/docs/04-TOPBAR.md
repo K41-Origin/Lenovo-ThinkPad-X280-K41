@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: IMPLEMENTED — SOURCE, DEPLOYER, AND FIXTURE TEST DIREVISI; REGRESSION TEST SETELAH REVISI MASIH PENDING.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
+**Status: PENDING — REBOOT DAN RUNTIME VERIFICATION.** Source dan deployer tersedia; audit X280 terakhir menunjukkan file runtime cocok dengan source dan host terintegrasi secara struktural. Pengguna mengidentifikasi reboot sebagai langkah berikutnya untuk memuat perubahan pada sesi baru. Reboot belum diklaim telah dilakukan dan tampilan/fungsi Topbar belum VERIFIED. Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
 
 ## Tujuan dan batas ownership
 
@@ -127,8 +127,8 @@ Implementasi awal membaca `/proc/stat`, `/proc/meminfo`, dan `/sys/class/power_s
 
 - **IMPLEMENTED:** QML, deployer, dan fixture test direvisi untuk backend Caelestia/Quickshell yang diaudit.
 - **SOURCE-LEVEL REVIEWED:** API CPU, RAM, UPower, Time, Notifs, dan ShellState diperiksa pada revision Caelestia yang dipin.
-- **NOT YET TESTED IN THIS UPDATE:** Bash syntax, fixture deployment, ShellCheck, QML lint/compile, dan runtime load.
-- **NOT VERIFIED:** tampilan pada X280, nilai provider saat runtime, klik indikator dan pembukaan sidebar, fullscreen, multi-monitor/hotplug, scaling, serta regression Bottombar.
+- **TEST EVIDENCE:** Bash syntax dan fixture deployer pernah dilaporkan lulus untuk revisi sebelumnya; hasil tersebut tidak otomatis mencakup revisi terakhir. Bash syntax/fixture regression setelah revisi terakhir belum dikonfirmasi dalam dokumentasi ini. ShellCheck dan QML lint/compile belum dijalankan.
+- **NOT VERIFIED:** QML load/instantiation/rendering, tampilan pada X280, nilai provider saat runtime, klik indikator dan pembukaan sidebar, fullscreen, multi-monitor/hotplug, scaling, serta regression Bottombar.
 - **DEPLOYMENT:** belum dijalankan ke runtime X280. Jangan deploy sebelum fixture/syntax test dan review QML selesai.
 
 ## Batas scope
@@ -276,3 +276,27 @@ Backup runtime tidak di-commit. Catat lokasi backup, checksum/manifest, target p
 ## Gate keluar
 
 Workstream 04 hanya dapat ditutup setelah acceptance criteria ditinjau dan pengguna menyatakan menerima hasil, atau pengguna secara eksplisit menyetujui pengecualian yang dicatat. Setelah itu lanjut ke [Workstream 05 — Launcher](05-LAUNCHER.md). Cleanup Caelestia tetap ditunda sampai seluruh workstream komponen selesai dan diterima.
+
+
+## Status runtime dan langkah berikutnya — 13 November 2026
+
+Audit X280 terbaru yang dipublikasikan pada commit `faef1785050da16ae3a437099ee1b8e5249e5714` menunjukkan:
+
+- File module canonical dan runtime memiliki SHA-256 yang sama.
+- Host `~/.config/quickshell/caelestia/shell.qml` memiliki import dan satu instance Topbar; instance berada setelah `id: root`.
+- Satu proses Quickshell terdeteksi dengan selector konfigurasi eksplisit `caelestia`.
+- Audit tidak menemukan `qmllint`, `qmlformat`, atau `qml` melalui PATH.
+- Hasil tersebut membuktikan kesesuaian file dan struktur integrasi, bukan bahwa QML berhasil dimuat atau panel dirender.
+
+Pengguna menyampaikan bahwa reboot diperlukan untuk melihat perubahan yang telah diterapkan. Karena itu WS04 ditandai **PENDING** sampai sesi baru setelah reboot diperiksa. Tidak ada reboot yang dijalankan oleh proses dokumentasi ini.
+
+### Langkah verifikasi setelah reboot
+
+1. Pastikan sesi Hyprland dan proses Quickshell aktif normal.
+2. Periksa log startup/runtime Quickshell untuk error import, unresolved type/property, binding, atau instantiation.
+3. Pastikan Topbar terlihat dan lima indikator menampilkan data yang masuk akal.
+4. Uji klik notification indicator dan pastikan Notification Dock Caelestia terbuka pada monitor yang benar.
+5. Periksa fullscreen, multi-monitor, scaling 1.5, dan regression Bottombar.
+6. Catat hasil aktual. Jika panel tetap tidak tampil, kumpulkan log runtime sebelum mengubah source atau melakukan restart tambahan.
+
+Jangan menganggap reboot saja sebagai bukti keberhasilan. Gate WS04 tetap memerlukan observasi runtime dan penerimaan pengguna.
