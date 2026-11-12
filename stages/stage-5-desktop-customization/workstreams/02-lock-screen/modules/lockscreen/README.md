@@ -13,6 +13,18 @@ modules/lockscreen/
     └── PasswordInput.qml
 ```
 
+## Audit visual dan diagnosis preflight
+
+Sebelum deployment, jalankan audit dari checkout repository sebagai user desktop biasa:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh
+```
+
+Laporan dibuat di `reports/lockscreen-visual-audit/<timestamp>/lockscreen-visual-audit.log`. Selain inventaris QML dan dependency visual, audit kini memuat diagnosis empat target deployment (`LockSurface.qml`, `Content.qml`, `Center.qml`, dan `center/PasswordInput.qml`): origin dan HEAD Caelestia, status checkout, status Git per file, keberadaan/symlink/owner/mode/ukuran/checksum file terpasang dan source K41, checksum blob dari revision upstream yang dipin, hasil kesetaraan, serta unified diff antara file terpasang dengan pinned upstream dan source K41.
+
+Bagian **DEPLOYMENT PREFLIGHT DIAGNOSTICS** ditujukan untuk mengidentifikasi apakah file yang ditolak deployment merupakan modifikasi lokal, masih versi upstream, sudah sama dengan source K41, atau tidak dapat dibandingkan. Audit bersifat read-only selain membuat laporan. Periksa dan redaksi laporan sebelum dibagikan karena laporan juga memuat source QML, path lokal, dan metadata host.
+
 ## Deployment dan aktivasi
 
 Satu script melakukan seluruh langkah deployment dan reload Caelestia. Tidak ada opsi `--install`, `--status`, atau `--rollback`.
