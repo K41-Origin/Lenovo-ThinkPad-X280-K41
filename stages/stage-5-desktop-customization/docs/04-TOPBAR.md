@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: PLANNED — DOCUMENTATION READY; AUDIT NOT STARTED.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
+**Status: PLANNED — DESIGN DECISIONS RECORDED; AUDIT NOT STARTED.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
 
 ## Tujuan dan batas ownership
 
@@ -15,34 +15,83 @@ Prinsip ownership:
 - Audit bersifat read-only. Deployment/implementasi merupakan operasi terpisah dan eksplisit.
 - Workstream 08 — Clean up Caelestia tetap menjadi pekerjaan terakhir; WS04 tidak boleh melakukan cleanup upstream yang tidak diperlukan untuk Topbar.
 
-## Keputusan desain awal
+## Keputusan desain
 
-Yang sudah diputuskan:
+Keputusan berikut telah disepakati bersama pengguna dan menjadi baseline desain WS04.
 
-- Posisi di tepi atas layar.
-- Orientasi horizontal.
-- Menjadi komponen terpisah dari Bottombar.
-- Mengikuti Design System K41 dan mempertahankan area kerja tetap luas.
+### Pendekatan dan susunan elemen
 
-Yang belum diputuskan dan wajib diselesaikan sebelum implementasi:
+- Gaya **Minimal**: hanya menampilkan lima elemen informasi/status yang disepakati.
+- Topbar berbentuk panel horizontal di tepi atas layar.
+- Urutan elemen dari kiri ke kanan:
 
-- Elemen yang ditampilkan dan alasan/fungsi setiap elemen.
-- Sumber data/backend untuk setiap elemen serta perilaku saat data unavailable/error.
-- Alignment kiri/tengah/kanan dan urutan elemen.
-- Tinggi, margin, padding, transparansi, radius, dan tipografi.
-- Visibility: persistent, auto-hide, atau perilaku lain.
-- Interaksi, menu, tray, dan keybind yang benar-benar diperlukan.
-- Perilaku terhadap fullscreen, fokus, multi-monitor, dan perubahan resolusi/scaling.
+| Posisi | Elemen | Informasi |
+|---|---|---|
+| Paling kiri | CPU | Penggunaan CPU |
+| Di sebelah kanan CPU | RAM | Penggunaan RAM |
+| Di sebelah kiri baterai | Notifications | Indikator notifikasi |
+| Di sebelah kiri waktu | Battery | Status dan persentase baterai |
+| Paling kanan | Clock | Jam, hari, dan tanggal |
+
+Representasi urutan:
+
+```text
+┌──────────────────────────────────────────────────────────────────────┐
+│ CPU  RAM                                      NOTIFICATIONS BATTERY CLOCK │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+Urutan tersebut adalah urutan relatif elemen dari kiri ke kanan. Pembagian ruang, alignment internal, dan jarak final ditetapkan setelah audit dan review spesifikasi teknis.
+
+### Properti visual
+
+| Properti | Keputusan desain |
+|---|---|
+| Posisi | Top |
+| Orientasi | Horizontal |
+| Tinggi | Target awal 32–36 px; perlu validasi pada display X280 |
+| Background | Dark translucent |
+| Border radius | Minimal |
+| Shadow | Subtle |
+| Typography | Mengikuti Design System K41 |
+| Karakter desain | Minimalis, elegan, ringkas, dan mudah dibaca |
+| Visibility | Always visible; tidak menggunakan auto-hide |
+| Monitor | Tampil pada seluruh monitor |
+| Fullscreen | Intent desain: tetap terlihat; implementasi dan kompatibilitas compositor harus diverifikasi saat audit/runtime testing |
+
+Keputusan visual merupakan target desain, bukan klaim bahwa nilai teknis atau tampilan runtime telah diuji.
+
+### Prinsip desain
+
+- **Minimal information:** hanya lima elemen yang disetujui.
+- **Compact:** tidak menghabiskan ruang layar secara berlebihan.
+- **Readable:** informasi tetap mudah dibaca.
+- **Consistent:** mengikuti identitas visual Bottombar dan Design System K41.
+- **Non-duplicative:** tidak menduplikasi fungsi Bottombar.
+- **Lightweight:** menghindari indikator dan proses yang tidak diperlukan.
+- **Always visible:** tidak menghilang otomatis dan direncanakan tampil pada semua monitor.
+
+### Hal yang masih terbuka
+
+Keputusan desain utama di atas sudah dicatat. Hal teknis berikut tetap harus ditentukan berdasarkan audit, tanpa mengubah keputusan pengguna secara sepihak:
+
+- Backend/sumber data untuk CPU, RAM, notifikasi, baterai, serta jam/tanggal/hari.
+- Format tampilan dan satuan CPU/RAM; detail status baterai.
+- Bentuk indikator notifikasi dan perilaku saat tidak ada notifikasi atau provider unavailable.
+- Format jam/tanggal/hari dan locale/timezone yang digunakan runtime.
+- Alignment dan pembagian ruang final, spacing, margin, padding, serta nilai tinggi final.
+- Perilaku exclusive zone, fullscreen, fokus, monitor hotplug, resolusi, dan scaling.
+- Interaksi, menu, tray, dan keybind tambahan tidak termasuk baseline; hanya ditambahkan jika ada kebutuhan dan persetujuan baru.
 - Pilihan integrasi: native Caelestia bar, modul QML K41, atau pendekatan lain yang didukung API upstream terverifikasi.
 
-Jangan menambahkan elemen hanya karena tersedia di upstream. Jangan menampilkan status yang ditebak atau membuat provider duplikat tanpa kebutuhan.
+Jangan menambahkan elemen lain tanpa persetujuan. Jangan menampilkan status yang ditebak atau membuat provider duplikat tanpa kebutuhan.
 
 ## Batas scope
 
 Termasuk:
 
 - Audit dan desain Topbar.
-- Layout, elemen status/informasi yang disetujui, visibility, dan interaksi terkait.
+- Lima elemen yang telah disepakati, data source, visibility, dan perilaku multi-monitor.
 - Integrasi minimum dengan host/runtime yang telah diaudit.
 - Source K41, deployment/repair yang diperlukan, test, dokumentasi, dan rollback.
 
@@ -61,10 +110,10 @@ Urutan mengikuti pola Workstream 02 dan 03: audit read-only lebih dahulu, keputu
 | Urutan | Tahap | Tanggung jawab | Status |
 |---:|---|---|---|
 | 1 | Audit Topbar | Inventaris source/runtime aktif, versi, dependency/API, panel/bar yang tersedia, konfigurasi, monitor/scaling, tray/status providers, lifecycle, dan titik integrasi. Read-only. | **PLANNED** |
-| 2 | Review audit dan spesifikasi | Klasifikasikan dependency upstream vs source K41; tetapkan elemen, data source, layout, visibility, interaksi, dan acceptance bersama pengguna. | **PLANNED — USER DECISION REQUIRED** |
-| 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **PLANNED — GATED BY DESIGN APPROVAL** |
+| 2 | Review audit dan spesifikasi | Validasi keputusan desain yang sudah disepakati terhadap bukti teknis; tetapkan backend, format data, detail layout, dan acceptance final. | **PLANNED** |
+| 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **PLANNED — GATED BY AUDIT AND SPECIFICATION REVIEW** |
 | 4 | Automated testing | Bash syntax/ShellCheck untuk script; fixture/mock untuk path, backup, idempotensi, failure, rollback, serta kontrak integrasi yang dapat diuji statis. | **PLANNED** |
-| 5 | Runtime verification dan review | Verifikasi QML/API pada versi X280, visual/interaksi, multi-monitor, fullscreen/fokus, restart, error log, dan resource. | **PLANNED** |
+| 5 | Runtime verification dan review | Verifikasi QML/API pada versi X280, visual/interaksi, seluruh monitor, fullscreen/fokus, restart, error log, dan resource. | **PLANNED** |
 | 6 | Acceptance dan handoff | Tinjau bukti, catat batas yang belum diverifikasi, minta penerimaan pengguna, lalu perbarui status dan lanjutkan ke WS05 bila gate terpenuhi. | **PLANNED** |
 
 ### Tahap 1 — Audit read-only
@@ -85,24 +134,21 @@ Audit tidak boleh mengubah source/runtime, package, konfigurasi, service, atau G
 
 **Acceptance audit:** report tersedia dan direview; source aktif serta titik integrasi teridentifikasi; dependency/API memiliki bukti; konflik/duplikasi dan unknown dicatat; tidak ada perubahan runtime atau checkout.
 
-### Tahap 2 — Review dan persetujuan desain
+### Tahap 2 — Review dan spesifikasi
 
-Sebelum implementasi, sediakan spesifikasi ringkas yang dapat ditinjau pengguna:
+Keputusan pendekatan, lima elemen, urutan, properti visual, visibility, dan cakupan monitor sudah disetujui dan dicatat di bagian Keputusan desain. Setelah audit, siapkan spesifikasi teknis ringkas untuk:
 
-- Daftar elemen dan fungsi masing-masing.
-- Backend/sumber data aktual dan fallback/error state.
-- Alignment dan urutan elemen.
-- Ukuran, spacing, typography, bentuk, dan transparansi.
-- Visibility serta perilaku fullscreen/fokus.
-- Interaksi, tray/menu, dan keybind.
-- Target monitor dan perilaku multi-monitor/scaling.
+- Backend/sumber data aktual dan fallback/error state setiap elemen.
+- Format tampilan CPU, RAM, baterai, notifikasi, dan waktu.
+- Alignment, pembagian ruang, ukuran, spacing, typography, bentuk, dan transparansi final.
+- Perilaku exclusive zone, fullscreen/fokus, seluruh monitor, monitor hotplug, resolusi, dan scaling.
 - Batas integrasi Caelestia dan dependency yang tetap dimiliki upstream.
 
-Jangan mulai membuat atau mengubah source runtime sebelum keputusan desain dan acceptance disetujui pengguna. Jika audit menunjukkan kebutuhan tidak jelas atau API belum terverifikasi, tandai BLOCKED dan lakukan investigasi terarah.
+Jangan mulai mengubah source runtime sebelum audit direview dan spesifikasi teknis disetujui pengguna. Jika audit menunjukkan kebutuhan tidak jelas atau API belum terverifikasi, tandai BLOCKED dan lakukan investigasi terarah.
 
 ### Tahap 3 — Implementasi dan deployment
 
-Implementasi harus mengikuti hasil audit dan desain yang disetujui:
+Implementasi harus mengikuti hasil audit dan spesifikasi yang disetujui:
 
 1. Tetapkan source canonical K41, target runtime, host file yang perlu diintegrasikan, dan dependency.
 2. Buat perubahan sekecil mungkin; hindari menyalin seluruh modul upstream.
@@ -137,8 +183,9 @@ Pada ThinkPad X280, verifikasi sekurang-kurangnya:
 
 - QML load/compile dan tidak ada error runtime yang relevan.
 - Posisi, alignment, ukuran, keterbacaan, dan data aktual.
-- Tray/menu/interaksi sesuai desain yang disetujui.
-- Tidak mengganggu input, fokus window, aplikasi fullscreen, atau Bottombar.
+- Kelima elemen berfungsi dan menangani kondisi data unavailable/error dengan benar.
+- Topbar tampil pada seluruh monitor dan tetap terlihat sesuai keputusan desain, termasuk pengujian fullscreen.
+- Tidak mengganggu input, fokus window, atau Bottombar.
 - Perilaku pada monitor/resolusi/scaling yang benar-benar tersedia.
 - Shell restart/reload dan pemulihan setelah kegagalan, bila termasuk scope.
 - Konsumsi resource dan stabilitas yang wajar.
@@ -147,11 +194,12 @@ Review visual dan interaksi dilakukan langsung oleh pengguna pada X280. Screensh
 
 ## Acceptance criteria
 
-- Spesifikasi desain disetujui sebelum implementasi.
-- Topbar berada di tepi atas dan hanya memuat elemen yang disetujui.
+- Keputusan desain baseline sesuai bagian Keputusan desain dan tidak berubah tanpa persetujuan pengguna.
+- Topbar berada di tepi atas, memuat tepat lima elemen yang disetujui, dengan urutan CPU, RAM, Notifications, Battery, Clock dari kiri ke kanan.
 - Setiap status berasal dari backend aktual; unavailable/error ditangani secara jelas.
+- Topbar selalu terlihat dan tampil pada seluruh monitor; perilaku fullscreen diuji dan keterbatasan teknis didokumentasikan.
 - Tidak menduplikasi fungsi Bottombar atau komponen lain.
-- Tidak menghalangi input, fokus window, atau aplikasi fullscreen.
+- Tidak menghalangi input atau fokus window.
 - Ukuran, alignment, dan keterbacaan sesuai display X280.
 - Integrasi upstream minimal dan dependency yang tersisa terdokumentasi.
 - Backup, verifikasi, idempotensi, dan rollback memiliki bukti test yang sesuai.
