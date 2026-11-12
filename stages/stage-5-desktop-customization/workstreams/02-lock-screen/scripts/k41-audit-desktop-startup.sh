@@ -227,6 +227,40 @@ if [[ -r $HOME/.config/hypr/hyprland.lua ]]; then
         redact >>"$report" || note '[no matching startup/lock lines]'
 else note '[~/.config/hypr/hyprland.lua unavailable]'; fi
 
+section 'IMPLEMENTATION SOURCE REVISION AND INSTALLED CONFIG COMPARISON'
+implementation_files=(
+    "$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-update-lockscreen-startup-helper.sh"
+    "$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lock-caelestia-after-start.sh"
+    "$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/hyprlock-fallback.conf"
+    "$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh"
+    "$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-lockscreen-visual.sh"
+)
+for implementation_file in "${implementation_files[@]}"; do
+    relative="${implementation_file#"$repo_root"/}"
+    if [[ -f $implementation_file && ! -L $implementation_file ]]; then
+        printf 'REPOSITORY_SOURCE %s\n' "$relative" >>"$report"
+        stat -c 'size=%s mode=%A modified=%y' "$implementation_file" 2>&1 | redact >>"$report" || true
+        if have sha256sum; then sha256sum "$implementation_file" 2>&1 | redact >>"$report" || true; fi
+    else
+        printf 'REPOSITORY_SOURCE_MISSING %s\n' "$relative" >>"$report"
+    fi
+done
+fallback_source="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/config/hyprlock-fallback.conf"
+fallback_installed="$HOME/.config/k41/hyprlock-fallback.conf"
+if [[ -f $fallback_source && ! -L $fallback_source && -f $fallback_installed && ! -L $fallback_installed ]]; then
+    if cmp -s "$fallback_source" "$fallback_installed"; then
+        note 'Installed Hyprlock fallback config byte comparison: MATCHES repository source.'
+    else
+        note 'Installed Hyprlock fallback config byte comparison: DIFFERS from repository source.'
+    fi
+    if have sha256sum; then sha256sum "$fallback_source" "$fallback_installed" 2>&1 | redact >>"$report" || true; fi
+else
+    note 'Installed Hyprlock fallback config byte comparison: NOT POSSIBLE (source/runtime file missing or unsafe).'
+fi
+if have hyprctl; then
+    run 'IMPLEMENTATION PROBE: HYPRLAND INSTANCE METADATA' hyprctl instances
+fi
+
 section 'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON'
 installed_helper="$HOME/.local/bin/k41-lock-caelestia-after-start"
 source_helper="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lock-caelestia-after-start.sh"
@@ -780,50 +814,61 @@ EOF
 chmod 0600 "$run_dir/README.txt"
 
 publish_report() {
-    local remote_url publish_dir relative_dir publish_target
+    local remote_url publish_tmp publish_dir relative_dir publish_target
     remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
         { printf 'ERROR: tidak dapat membaca Git origin; report tetap lokal.\n' >&2; return 1; }
     case "$remote_url" in
         https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
         *) printf 'ERROR: Git origin bukan repository K41 yang diizinkan; report tetap lokal.\n' >&2; return 1 ;;
     esac
-    git -C "$repo_root" fetch --no-tags origin main ||
-        { printf 'ERROR: fetch origin/main gagal; report tetap lokal.\n' >&2; return 1; }
-    publish_dir="$(mktemp -d "${TMPDIR:-/tmp}/k41-startup-audit-publish.XXXXXX")" || return 1
-    rmdir -- "$publish_dir" || { rm -rf -- "$publish_dir"; return 1; }
-    if ! git -C "$repo_root" worktree add --detach "$publish_dir" FETCH_HEAD; then
-        rm -rf -- "$publish_dir"
-        printf 'ERROR: isolated worktree gagal dibuat; report tetap lokal.\n' >&2
+
+    # Publish through a completely independent clone. A linked worktree shares
+    # the checkout's .git metadata; fetch/worktree registration/cleanup there
+    # previously risked leaving the user's local repository in a broken state.
+    # This clone has its own .git directory and cannot rewrite local refs,
+    # FETCH_HEAD, index, branch, or worktree registration in the user's checkout.
+    publish_tmp="$(mktemp -d "${TMPDIR:-/tmp}/k41-startup-audit-publish.XXXXXX")" || return 1
+    publish_dir="$publish_tmp/repository"
+    if ! git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: isolated clone failed; report remains local.\n' >&2
         return 1
     fi
+
     relative_dir="${run_dir#"$repo_root"/}"
     publish_target="$publish_dir/$relative_dir"
-    mkdir -p -- "$publish_target"
-    cp -- "$report" "$publish_target/report.txt"
-    cp -- "$run_dir/README.txt" "$publish_target/README.txt"
-    cp -- "$timeline_file" "$publish_target/lifecycle-timeline.tsv"
+    if ! mkdir -p -- "$publish_target" ||
+       ! cp -- "$report" "$publish_target/report.txt" ||
+       ! cp -- "$run_dir/README.txt" "$publish_target/README.txt" ||
+       ! cp -- "$timeline_file" "$publish_target/lifecycle-timeline.tsv"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: could not stage sanitized report in isolated clone; report remains local.\n' >&2
+        return 1
+    fi
     chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" "$publish_target/lifecycle-timeline.tsv"
     chmod 0755 "$publish_target"
     git -C "$publish_dir" config user.name "K41 Startup Audit"
     git -C "$publish_dir" config user.email "k41-startup-audit@users.noreply.github.com"
     if ! git -C "$publish_dir" add -- "$relative_dir" ||
        ! git -C "$publish_dir" commit -m "Add X280 desktop startup diagnostic"; then
-        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
-        printf 'ERROR: commit report gagal; report tetap lokal.\n' >&2
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: report commit failed in isolated clone; report remains local.\n' >&2
         return 1
     fi
     if ! git -C "$publish_dir" push origin HEAD:main; then
-        printf 'INFO: push tertahan update main; mencoba rebase satu kali.\n'
+        printf 'INFO: push raced with an update to main; retrying once after rebase in isolated clone.\n'
         if ! git -C "$publish_dir" fetch --no-tags origin main ||
            ! git -C "$publish_dir" rebase FETCH_HEAD ||
            ! git -C "$publish_dir" push origin HEAD:main; then
-            git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
-            printf 'ERROR: publikasi report gagal; report tetap lokal: %s\n' "$report" >&2
+            rm -rf -- "$publish_tmp"
+            printf 'ERROR: report publication failed; local report remains at %s\n' "$report" >&2
             return 1
         fi
     fi
-    git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+
+    rm -rf -- "$publish_tmp"
     printf 'INFO: report tersanitasi dipublikasikan ke GitHub main: %s\n' "$relative_dir"
+    printf 'INFO: local checkout Git metadata was not used for publication and remains untouched.\n'
 }
 
 printf 'Audit report created: %s\n' "$report"
