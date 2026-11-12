@@ -164,6 +164,20 @@ bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41
 
 Jangan deploy ulang visual Lock Screen atau membersihkan source upstream sebelum jalur lock readiness terbukti berfungsi. Jangan mengubah PAM, password handling, fingerprint/Howdy policy, session-lock protocol, atau Plymouth untuk mengatasi bug timeout ini.
 
+
+## Koreksi keselamatan collector audit — 12 November 2026
+
+Review source terhadap report startup terbaru menemukan defect pada collector: loop pemeriksaan versi menjalankan `start-hyprland --version`. `start-hyprland` adalah session launcher, bukan utilitas versi; pemanggilan tersebut dapat memulai sesi Hyprland sungguhan. Karena itu, report `20261112T021320Z` yang dibuat oleh versi collector lama memuat session start/stop yang dapat dipicu oleh audit itu sendiri dan **tidak boleh dipakai sebagai bukti bahwa boot normal atau lock lifecycle berjalan demikian**.
+
+Collector telah diperbaiki:
+- `start-hyprland` tidak lagi dieksekusi. Audit hanya mencatat path, metadata, hash, dan pemilik package binary.
+- Source launcher K41 repository dan file terpasang dibandingkan serta dicatat.
+- Log startup utama dan rotasinya dikumpulkan dengan metadata.
+- Coredump diperiksa melalui inventory read-only, bukan dengan menjalankan launcher.
+- Regression test memastikan daftar executable version probe tidak mencakup `start-hyprland`.
+
+Report lama tetap menjadi artefak historis, tetapi session event yang muncul selama audit tersebut harus dianggap **CONTAMINATED BY AUDIT SIDE EFFECT**. Gunakan report baru yang dibuat oleh collector setelah perbaikan untuk diagnosis berikutnya. Koreksi ini tidak membuktikan penyebab kegagalan lock startup dan tidak mengubah status runtime X280 yang masih **NOT VERIFIED**.
+
 ### Batas status
 
 - Desain Floating Password Card: **COMPLETED / USER ACCEPTED**.
