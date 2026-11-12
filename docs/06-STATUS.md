@@ -57,3 +57,13 @@ Bukti Stage 4 historis tetap tersimpan pada commit arsip 02f6194ed04c8f13ea64eda
 - **IMPLEMENTED:** regression test updated to reject local-checkout fetch/worktree operations and require the independent clone path.
 - **NOT TESTED YET:** Bash syntax, ShellCheck, regression suite, end-to-end push simulation, and fresh X280 audit report. No claim of runtime verification is made.
 - **Scope note:** automatic deployment-log publisher in `k41-deploy-lockscreen-visual.sh` still uses the older linked-worktree pattern and remains a separate follow-up; this change only corrects the startup audit publisher.
+
+
+## Lock Screen deployment publisher correction — 12 November 2026
+
+- **IMPLEMENTED:** `k41-deploy-lockscreen-visual.sh` now publishes sanitized deployment logs through an independent temporary clone of the approved repository. It no longer runs `git fetch` or `git worktree add/remove` against the user's active checkout.
+- **IMPLEMENTED:** publication failure is separated from deployment outcome. A failed clone/push emits a warning and retains the private local log; it does not change the deployment exit status or trigger rollback. Rollback remains tied to deployment/copy/reload failure.
+- **IMPLEMENTED:** log sanitization masks both the home directory and repository checkout path.
+- **IMPLEMENTED:** regression test now checks the independent-clone publisher pattern and guards against local-checkout fetch/worktree operations and publication failure changing deployment status.
+- **NOT TESTED YET:** Bash syntax/regression suite/ShellCheck execution and end-to-end publication simulation have not been run in this session. No deployment on the ThinkPad X280 has been performed.
+- **DEPLOYMENT GATE:** latest startup audit supports moving to a deployment preflight, but the deployment script still requires the actual X280 Caelestia checkout origin, exact pinned HEAD, target-file state, and active Hyprland environment to pass its runtime guards. Do not describe visual deployment or rendering as verified until it is run and checked on the device.
