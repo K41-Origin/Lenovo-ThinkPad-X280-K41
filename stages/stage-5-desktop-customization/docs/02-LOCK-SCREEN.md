@@ -54,6 +54,13 @@ Source K41 menggantikan empat file visual terpilih di user runtime:
 
 `~/.config/quickshell/caelestia/modules/lock/`
 
+**Catatan arsitektur dual-location (13 November 2026):** deployment WS02 juga menyimpan salinan empat file visual yang sama pada kedua namespace K41 berikut:
+
+- `~/.config/quickshell/k41/modules/lockscreen/` — compatibility mirror pada namespace sibling Quickshell.
+- `~/.config/quickshell/caelestia/k41/modules/lockscreen/` — mirror di dalam config root Caelestia.
+
+Kedua direktori adalah mirror source/asset K41, bukan shell atau konfigurasi Quickshell mandiri. Overlay aktif tetap `caelestia/modules/lock/`, karena Lock Screen Caelestia mengonsumsi empat file melalui struktur modul upstream yang sudah ada. Jangan mengubah `Lock.qml`, `Pam.qml`, atau import upstream hanya untuk mengaktifkan mirror. Kedua mirror harus identik dengan source canonical di repository; deployment memverifikasi kesetaraan dan menyertakan pemulihan dari backup saat operasi gagal.
+
 Caelestia tetap menyediakan host/runtime, lock object, PAM object, dan session-lock integration. Source visual K41 tidak mengambil alih autentikasi atau protokol lock.
 
 ### 4. Deployment, backup, log, dan automated push
