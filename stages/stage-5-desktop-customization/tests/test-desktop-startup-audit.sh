@@ -25,7 +25,11 @@ for token in \
     'Installed helper byte comparison' \
     'INSTALLED K41 LOCK VISUAL SOURCE COMPARISON' \
     'k41-boot-splash' \
-    'coredumpctl info start-hyprland' \
+    'coredumpctl list --no-pager' \
+    'START-HYPRLAND LAUNCHER — NON-EXECUTING INSPECTION' \
+    'Launcher execution: NOT PERFORMED' \
+    'K41 LAUNCHER SOURCE: REPOSITORY' \
+    'K41 LAUNCHER SOURCE: INSTALLED' \
     '.local/state/caelestia' \
     'chmod 0644' \
     'LOCK LIFECYCLE: LOGIN SESSION STATE' \
@@ -77,6 +81,16 @@ grep -Fq 'chmod 0600 "$report"' "$script"
 grep -Fq 'chmod 0700 "$run_dir"' "$script"
 grep -Fq 'password|passwd|token|secret|authorization|cookie|api[_-]?key' "$script"
 ! grep -Eq 'git[[:space:]].*push.*--force' "$script"
+
+# A read-only audit must never execute start-hyprland: it launches a session,
+# and --version is not a safe/version-only invocation for this command.
+version_loop="$(sed -n '/^for bin in /,/^done$/p' "$script")"
+[[ -n $version_loop ]] || { printf 'FAIL: executable version loop missing.\\n' >&2; exit 1; }
+if grep -Eq 'for bin in .*start-hyprland|^[[:space:]]*start-hyprland[|)]|timeout[^|]*start-hyprland.*--version' <<<"$version_loop"; then
+    printf 'FAIL: audit attempts to execute the start-hyprland session launcher.\\n' >&2
+    exit 1
+fi
+grep -Fq 'Launcher execution: NOT PERFORMED' "$script"
 
 for token in \
     'IMPLEMENTATION INPUTS: ACTIVE SESSION AND PROCESS CONTEXT' \
