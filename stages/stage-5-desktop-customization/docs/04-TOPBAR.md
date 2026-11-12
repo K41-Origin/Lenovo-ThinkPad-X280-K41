@@ -9,7 +9,7 @@ Membuat panel horizontal di tepi atas layar sebagai area informasi/status deskto
 Prinsip ownership:
 
 - Repository K41 adalah sumber kanonis source, script, test, dan dokumentasi yang dikelola proyek.
-- Caelestia tetap menjadi host/runtime selama audit tidak menemukan alasan teknis yang memerlukan keputusan arsitektur baru.
+- Caelestia/Quickshell dapat menjadi host/runtime berdasarkan kondisi aktual yang diaudit, tetapi Caelestia tidak menyediakan Topbar siap pakai dalam baseline proyek ini. Topbar adalah komponen milik K41 yang harus dirancang dan diintegrasikan secara terpisah; jangan mengasumsikan ada native bar, modul Topbar, atau entry point khusus Topbar dari Caelestia.
 - Source K41 harus dipisahkan dari source upstream; jangan mengubah file upstream lebih luas dari titik integrasi minimum yang terbukti diperlukan.
 - Lokasi source dan target runtime final ditetapkan setelah audit; jangan mengasumsikan path atau API sebelum diverifikasi.
 - Audit bersifat read-only. Deployment/implementasi merupakan operasi terpisah dan eksplisit.
