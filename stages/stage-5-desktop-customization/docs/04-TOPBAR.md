@@ -29,7 +29,7 @@ Keputusan berikut telah disepakati bersama pengguna dan menjadi baseline desain 
 |---|---|---|
 | Paling kiri | CPU | Penggunaan CPU |
 | Di sebelah kanan CPU | RAM | Penggunaan RAM |
-| Di sebelah kiri baterai | Notifications | Indikator notifikasi |
+| Di sebelah kiri baterai | Notifications | Ikon notifikasi yang dapat diklik untuk membuka tray/panel berisi daftar notifikasi |
 | Di sebelah kiri waktu | Battery | Status dan persentase baterai |
 | Paling kanan | Clock | Jam, hari, dan tanggal |
 
@@ -42,6 +42,14 @@ Representasi urutan:
 ```
 
 Urutan tersebut adalah urutan relatif elemen dari kiri ke kanan. Pembagian ruang, alignment internal, dan jarak final ditetapkan setelah audit dan review spesifikasi teknis.
+
+### Interaksi notifikasi
+
+- Notifikasi ditampilkan pada Topbar sebagai sebuah ikon, bukan daftar notifikasi permanen.
+- Ketika ikon notifikasi diklik, sebuah tray/panel notifikasi akan terbuka untuk menampilkan notifikasi.
+- Tray/panel merupakan tampilan yang muncul sebagai respons terhadap klik; bukan elemen tambahan yang selalu memenuhi Topbar.
+- Mekanisme membuka/menutup, penempatan, tampilan daftar, sumber notifikasi, dan perilaku ketika tidak ada notifikasi ditentukan setelah audit terhadap API/runtime yang tersedia.
+- Implementasi harus menggunakan sumber notifikasi yang benar-benar aktif dan menghindari duplikasi daemon/provider.
 
 ### Properti visual
 
@@ -77,11 +85,11 @@ Keputusan desain utama di atas sudah dicatat. Hal teknis berikut tetap harus dit
 
 - Backend/sumber data untuk CPU, RAM, notifikasi, baterai, serta jam/tanggal/hari.
 - Format tampilan dan satuan CPU/RAM; detail status baterai.
-- Bentuk indikator notifikasi dan perilaku saat tidak ada notifikasi atau provider unavailable.
+- Detail visual ikon notifikasi, isi dan layout tray, serta perilaku saat tidak ada notifikasi atau provider unavailable.
 - Format jam/tanggal/hari dan locale/timezone yang digunakan runtime.
 - Alignment dan pembagian ruang final, spacing, margin, padding, serta nilai tinggi final.
 - Perilaku exclusive zone, fullscreen, fokus, monitor hotplug, resolusi, dan scaling.
-- Interaksi, menu, tray, dan keybind tambahan tidak termasuk baseline; hanya ditambahkan jika ada kebutuhan dan persetujuan baru.
+- Interaksi notifikasi berupa klik ikon untuk membuka tray notifikasi termasuk baseline yang telah disetujui. Interaksi/menu/keybind lain di luar itu memerlukan kebutuhan dan persetujuan baru.
 - Pilihan integrasi: native Caelestia bar, modul QML K41, atau pendekatan lain yang didukung API upstream terverifikasi.
 
 Jangan menambahkan elemen lain tanpa persetujuan. Jangan menampilkan status yang ditebak atau membuat provider duplikat tanpa kebutuhan.
@@ -91,7 +99,7 @@ Jangan menambahkan elemen lain tanpa persetujuan. Jangan menampilkan status yang
 Termasuk:
 
 - Audit dan desain Topbar.
-- Lima elemen yang telah disepakati, data source, visibility, dan perilaku multi-monitor.
+- Lima elemen yang telah disepakati, termasuk ikon dan tray notifikasi, data source, visibility, dan perilaku multi-monitor.
 - Integrasi minimum dengan host/runtime yang telah diaudit.
 - Source K41, deployment/repair yang diperlukan, test, dokumentasi, dan rollback.
 
@@ -123,7 +131,7 @@ Audit dilakukan terhadap kondisi aktual, bukan asumsi atau snapshot lama. Cakupa
 - Identitas repository/branch dan status checkout sebagai observasi read-only.
 - Versi Quickshell, Caelestia, Hyprland, Qt, package, dan tooling QML yang tersedia.
 - Source Caelestia user/system XDG yang benar-benar aktif, entry point, provenance/revision, konfigurasi, dan ownership file.
-- Panel/bar yang sudah berjalan, konfigurasi native bar, tray host, status provider, serta kemungkinan duplikasi.
+- Panel/bar yang sudah berjalan, konfigurasi native bar, tray host, notification daemon/provider dan API untuk membuka/menampilkan notification tray, serta kemungkinan duplikasi.
 - Monitor aktif, resolusi, scaling, posisi/geometry panel, exclusive zone, dan perilaku fullscreen.
 - QML imports, type/API, resource, relative imports, serta dependency transitif yang relevan.
 - Keybind, menu, interaksi, lifecycle/reload, serta konflik dengan Bottombar dan komponen desktop lain.
@@ -138,8 +146,8 @@ Audit tidak boleh mengubah source/runtime, package, konfigurasi, service, atau G
 
 Keputusan pendekatan, lima elemen, urutan, properti visual, visibility, dan cakupan monitor sudah disetujui dan dicatat di bagian Keputusan desain. Setelah audit, siapkan spesifikasi teknis ringkas untuk:
 
-- Backend/sumber data aktual dan fallback/error state setiap elemen.
-- Format tampilan CPU, RAM, baterai, notifikasi, dan waktu.
+- Backend/sumber data aktual dan fallback/error state setiap elemen, termasuk mekanisme notification tray.
+- Format tampilan CPU, RAM, baterai, dan waktu; desain ikon serta isi/tray notifikasi.
 - Alignment, pembagian ruang, ukuran, spacing, typography, bentuk, dan transparansi final.
 - Perilaku exclusive zone, fullscreen/fokus, seluruh monitor, monitor hotplug, resolusi, dan scaling.
 - Batas integrasi Caelestia dan dependency yang tetap dimiliki upstream.
@@ -183,7 +191,7 @@ Pada ThinkPad X280, verifikasi sekurang-kurangnya:
 
 - QML load/compile dan tidak ada error runtime yang relevan.
 - Posisi, alignment, ukuran, keterbacaan, dan data aktual.
-- Kelima elemen berfungsi dan menangani kondisi data unavailable/error dengan benar.
+- Kelima elemen berfungsi dan menangani kondisi data unavailable/error dengan benar; klik ikon notifikasi membuka tray yang menampilkan notifikasi aktual, dan tray dapat ditutup kembali.
 - Topbar tampil pada seluruh monitor dan tetap terlihat sesuai keputusan desain, termasuk pengujian fullscreen.
 - Tidak mengganggu input, fokus window, atau Bottombar.
 - Perilaku pada monitor/resolusi/scaling yang benar-benar tersedia.
