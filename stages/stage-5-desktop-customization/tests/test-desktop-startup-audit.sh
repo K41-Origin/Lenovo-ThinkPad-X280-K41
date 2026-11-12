@@ -136,4 +136,14 @@ done
 grep -Fq 'git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"' "$script"
 grep -Fq 'rm -rf -- "$publish_tmp"' "$script"
 
+
+# Local diagnostics must never occupy the same path as the published report.
+# Otherwise a later git pull would refuse to overwrite the untracked local file.
+grep -Fq 'report_root="$HOME/.local/state/k41/lockscreen/startup-audits"' "$script"
+grep -Fq 'relative_dir="reports/stage-5-desktop-customization/02-lock-screen/startup-audits/${run_dir##*/}"' "$script"
+! grep -Fq 'report_root="$repo_root/reports' "$script" || {
+    printf 'FAIL: audit stores local reports inside the Git checkout.\\n' >&2
+    exit 1
+}
+
 printf 'PASS: desktop startup audit syntax, tty/session coverage, privacy guard, and read-only contract.\n'
