@@ -1,129 +1,61 @@
 #!/usr/bin/env bash
-# Deploy the canonical K41 Topbar module and add its Caelestia host instance.
+# Install the standalone K41 Quickshell configuration without touching Caelestia.
 set -Eeuo pipefail
 umask 077
 
-die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
-info() { printf 'INFO: %s\n' "$*"; }
+die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\\n' "$*"; }
 owned() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 
 [[ $# -eq 0 ]] || die 'Script ini tidak menerima opsi.'
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk grep cut; do
+for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
 script_dir="$(cd -- "$(dirname -- "$0")" && pwd -P)"
 repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)" || die 'Git checkout tidak ditemukan.'
 repo_root="$(cd -- "$repo_root" && pwd -P)"
-source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
-[[ -f $source_file && ! -L $source_file ]] || die 'Source canonical Topbar.qml tidak tersedia atau berupa symlink.'
-owned "$source_file" || die 'Source canonical bukan milik user aktif.'
-
-# Fail closed if the module stops using the backend services verified in the WS04 audit.
-for contract in \
-    'import Caelestia.Services' \
-    'import Quickshell.Services.UPower' \
-    'service: Cpu' \
-    'service: Memory' \
-    'Cpu.percentage' \
-    'Memory.percentage' \
-    'UPower.displayDevice.percentage' \
-    'UPower.onBattery' \
-    'Time.format(' \
-    'Notifs.notClosed.length' \
-    'ShellState.forScreen(modelData)'; do
-    grep -Fq -- "$contract" "$source_file" || die "Kontrak backend Topbar tidak lengkap: $contract"
+source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar"
+source_shell="$source_root/shell.qml"
+source_topbar="$source_root/modules/topbar/Topbar.qml"
+for file in "$source_shell" "$source_topbar"; do
+    [[ -f $file && ! -L $file ]] || die "Source canonical tidak tersedia/regular file: $file"
+    owned "$file" || die "Source canonical bukan milik user aktif: $file"
 done
-if grep -Eq '/proc/(stat|meminfo)|/sys/class/power_supply|new Date\(|Timer[[:space:]]*\{|NotificationServer|trayWindow' "$source_file"; then
-    die 'Provider/polling duplikat terdeteksi pada Topbar.qml.'
-fi
+
+# Standalone contract: refuse all known Caelestia runtime/service dependencies.
+for file in "$source_shell" "$source_topbar"; do
+    if grep -En 'Caelestia|qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.' "$file"; then
+        die "Dependency internal Caelestia/qs.* terdeteksi pada source: $file"
+    fi
+done
+grep -Fq 'K41StandaloneTopbar' "$source_shell" || die 'Entry point tidak memiliki root marker K41StandaloneTopbar.'
+grep -Fq 'K41StandaloneTopbar' "$source_topbar" || die 'Topbar tidak memiliki marker standalone K41.'
 
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 [[ $config_home == /* && -d $config_home && ! -L $config_home ]] || die 'XDG_CONFIG_HOME tidak aman atau tidak tersedia.'
 owned "$config_home" || die 'XDG_CONFIG_HOME bukan milik user aktif.'
 qs_root="$config_home/quickshell"
-caelestia_root="$qs_root/caelestia"
-shell_file="$caelestia_root/shell.qml"
-[[ -d $qs_root && ! -L $qs_root && -d $caelestia_root && ! -L $caelestia_root ]] || die 'Direktori Quickshell/Caelestia tidak tersedia atau berupa symlink.'
-[[ -f $shell_file && ! -L $shell_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
-owned "$qs_root" && owned "$caelestia_root" && owned "$shell_file" || die 'Host Caelestia bukan milik user aktif.'
+runtime_root="$qs_root/k41"
+module_root="$runtime_root/modules/topbar"
+target_shell="$runtime_root/shell.qml"
+target_topbar="$module_root/Topbar.qml"
 
-# Primary module location is inside the active Caelestia config root so qs.* imports resolve.
-caelestia_k41_root="$caelestia_root/k41"
-caelestia_modules_root="$caelestia_k41_root/modules"
-module_root="$caelestia_modules_root/topbar"
-target_file="$module_root/Topbar.qml"
-# Compatibility mirror retained at the historical sibling namespace.
-legacy_runtime_root="$qs_root/k41"
-legacy_modules_root="$legacy_runtime_root/modules"
-# Compatibility aliases used by the existing standalone-entry guards.
-runtime_root="$legacy_runtime_root"
-modules_root="$legacy_modules_root"
-legacy_module_root="$legacy_modules_root/topbar"
-legacy_target_file="$legacy_module_root/Topbar.qml"
-for standalone_entry in "$runtime_root/shell.qml" "$runtime_root/qmldir" "$modules_root/qmldir" "$module_root/qmldir"; do
-    [[ ! -e $standalone_entry && ! -L $standalone_entry ]] || die "Namespace K41 bukan module-only; review manual diperlukan: $standalone_entry"
-done
-for path in "$legacy_runtime_root" "$legacy_modules_root" "$legacy_module_root"; do
+for path in "$qs_root" "$runtime_root" "$runtime_root/modules" "$module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then
         [[ -d $path ]] || die "Path runtime bukan direktori: $path"
         owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
     fi
 done
-for standalone_entry in "$caelestia_k41_root/shell.qml" "$caelestia_k41_root/qmldir" "$caelestia_modules_root/qmldir" "$module_root/qmldir"; do
-    [[ ! -e $standalone_entry && ! -L $standalone_entry ]] || die "Caelestia K41 namespace harus module-only; review manual diperlukan: $standalone_entry"
-done
-for path in "$caelestia_k41_root" "$caelestia_modules_root" "$module_root"; do
-    [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
-    if [[ -e $path ]]; then
-        [[ -d $path ]] || die "Path runtime bukan direktori: $path"
-        owned "$path" || die "Direktori runtime bukan milik user aktif: $path"
+for file in "$target_shell" "$target_topbar"; do
+    if [[ -e $file || -L $file ]]; then
+        [[ -f $file && ! -L $file ]] || die "Target bukan regular file: $file"
+        owned "$file" || die "Target bukan milik user aktif: $file"
     fi
 done
-if [[ -e $legacy_target_file || -L $legacy_target_file ]]; then
-    [[ -f $legacy_target_file && ! -L $legacy_target_file ]] || die 'Legacy mirror target bukan regular file.'
-    owned "$legacy_target_file" || die 'Legacy mirror target bukan milik user aktif.'
-fi
-if [[ -e $target_file || -L $target_file ]]; then
-    [[ -f $target_file && ! -L $target_file ]] || die 'Target Topbar.qml bukan regular file.'
-    owned "$target_file" || die 'Target Topbar.qml bukan milik user aktif.'
-fi
-
-legacy_import='import "../k41/modules/topbar" as K41Topbar'
-new_import='import qs.k41.modules.topbar as K41Topbar'
-import_n="$(grep -Fc -- "$new_import" "$shell_file" || true)"
-legacy_import_n="$(grep -Fc -- "$legacy_import" "$shell_file" || true)"
-instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
-shell_root_n="$(grep -Ec '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' "$shell_file" || true)"
-root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" || true)"
-qtquick_import_n="$(grep -Ec '^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$' "$shell_file" || true)"
-(( shell_root_n == 1 && root_id_n == 1 && qtquick_import_n == 1 )) || die 'shell.qml harus memiliki tepat satu ShellRoot, id: root, dan import QtQuick.'
-shell_root_line="$(grep -nE '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' "$shell_file" | cut -d: -f1)"
-root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
-(( root_id_line > shell_root_line )) || die 'id: root tidak berada di dalam ShellRoot.'
-host_change=0
-if [[ $import_n == 0 && $legacy_import_n == 0 && $instance_n == 0 ]]; then
-    host_change=1
-elif [[ $instance_n == 1 && ( $import_n == 1 || $legacy_import_n == 1 ) && ( $import_n == 0 || $import_n == 1 ) && ( $legacy_import_n == 0 || $legacy_import_n == 1 ) ]]; then
-    if [[ $legacy_import_n == 1 ]]; then host_change=1; fi
-    instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
-    if (( instance_line <= root_id_line )); then host_change=1; fi
-    :
-else
-    die 'Integrasi Topbar parsial/duplikat terdeteksi; tidak ada perubahan.'
-fi
-
-source_sha="$(sha256sum -- "$source_file" | awk '{print $1}')"
-module_matches=0
-if [[ -f $target_file && -f $legacy_target_file ]] &&
-   cmp -s -- "$source_file" "$target_file" && cmp -s -- "$source_file" "$legacy_target_file"; then module_matches=1; fi
-if (( module_matches && ! host_change )); then
-    info 'Modul Topbar dan integrasi Caelestia sudah sesuai; tidak ada perubahan.'
-    exit 0
-fi
 
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}"
 [[ $state_home == /* ]] || die 'XDG_STATE_HOME harus absolut.'
@@ -135,164 +67,82 @@ for path in "$state_home" "$state_home/k41" "$state_home/k41/backups" "$backup_p
         owned "$path" || die "Path backup bukan milik user aktif: $path"
     fi
 done
-mkdir -p -- "$module_root" "$legacy_module_root" "$backup_parent"
+
+if [[ -f $target_shell && -f $target_topbar ]] &&
+   cmp -s -- "$source_shell" "$target_shell" && cmp -s -- "$source_topbar" "$target_topbar"; then
+    info 'Standalone K41 Topbar sudah sesuai; tidak ada perubahan.'
+    exit 0
+fi
+
+mkdir -p -- "$module_root" "$backup_parent"
 chmod 0700 "$backup_parent"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup_root="$backup_parent/$stamp"
 n=0
 while ! mkdir -- "$backup_root" 2>/dev/null; do
     [[ -e $backup_root || -L $backup_root ]] || die 'Gagal membuat direktori backup.'
-    n=$((n + 1))
-    backup_root="$backup_parent/$stamp-$n"
+    n=$((n + 1)); backup_root="$backup_parent/$stamp-$n"
 done
 chmod 0700 "$backup_root"
 
-had_module=0
-if [[ -f $target_file ]]; then
-    had_module=1
-    cp -a -- "$target_file" "$backup_root/Topbar.qml"
-    previous_module_sha="$(sha256sum -- "$target_file" | awk '{print $1}')"
-else
-    previous_module_sha=ABSENT
-fi
-legacy_mirror_had=0
-if [[ -f $legacy_target_file ]]; then
-    legacy_mirror_had=1
-    cp -a -- "$legacy_target_file" "$backup_root/Topbar.qml.legacy"
-fi
-cp -a -- "$shell_file" "$backup_root/shell.qml"
-previous_shell_sha="$(sha256sum -- "$shell_file" | awk '{print $1}')"
+had_shell=0; had_topbar=0
+if [[ -f $target_shell ]]; then had_shell=1; cp -a -- "$target_shell" "$backup_root/shell.qml"; fi
+if [[ -f $target_topbar ]]; then had_topbar=1; cp -a -- "$target_topbar" "$backup_root/Topbar.qml"; fi
 {
-    printf 'module_target=%s\nmodule_previous_sha256=%s\nmodule_source_sha256=%s\n' "$target_file" "$previous_module_sha" "$source_sha"
-    printf 'host_target=%s\nhost_previous_sha256=%s\n' "$shell_file" "$previous_shell_sha"
-    printf 'host_import=%s\nhost_instance=K41Topbar.Topbar {}\n' "$new_import"
+    printf 'target_shell=%s\\nsource_shell_sha256=%s\\n' "$target_shell" "$(sha256sum "$source_shell" | cut -d' ' -f1)"
+    printf 'target_topbar=%s\\nsource_topbar_sha256=%s\\n' "$target_topbar" "$(sha256sum "$source_topbar" | cut -d' ' -f1)"
+    printf 'previous_shell=%s\\nprevious_topbar=%s\\n' "$had_shell" "$had_topbar"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
-module_tmp=''
-shell_tmp=''
-module_replaced=0
-legacy_replaced=0
-shell_replaced=0
+shell_tmp=''; topbar_tmp=''; shell_replaced=0; topbar_replaced=0
 rollback() {
     local rc=$1 restore
     trap - EXIT
     if (( rc != 0 )); then
+        if (( topbar_replaced )); then
+            if (( had_topbar )); then
+                restore="$(mktemp "$module_root/.Topbar.restore.XXXXXX")"
+                if cp -a "$backup_root/Topbar.qml" "$restore" && mv -fT "$restore" "$target_topbar"; then
+                    printf 'ROLLBACK: Topbar.qml dipulihkan.\\n' >&2
+                else rm -f "$restore"; printf 'CRITICAL: rollback Topbar.qml gagal; backup %s\\n' "$backup_root" >&2; fi
+            else rm -f "$target_topbar"; fi
+        fi
         if (( shell_replaced )); then
-            restore="$(mktemp "$caelestia_root/.shell.restore.XXXXXX")" || {
-                printf 'CRITICAL: shell.qml gagal dipulihkan; backup %s\n' "$backup_root" >&2; exit "$rc";
-            }
-            if cp -a -- "$backup_root/shell.qml" "$restore" && mv -fT -- "$restore" "$shell_file"; then
-                printf 'ROLLBACK: shell.qml dipulihkan.\n' >&2
-            else
-                rm -f -- "$restore"; printf 'CRITICAL: rollback shell.qml gagal; backup %s\n' "$backup_root" >&2
-            fi
-        fi
-        if (( module_replaced )); then
-            if (( had_module )); then
-                restore="$(mktemp "$module_root/.Topbar.restore.XXXXXX")" || {
-                    printf 'CRITICAL: Topbar.qml gagal dipulihkan; backup %s\n' "$backup_root" >&2; exit "$rc";
-                }
-                if cp -a -- "$backup_root/Topbar.qml" "$restore" && mv -fT -- "$restore" "$target_file"; then
-                    printf 'ROLLBACK: Topbar.qml dipulihkan.\n' >&2
-                else
-                    rm -f -- "$restore"; printf 'CRITICAL: rollback Topbar.qml gagal; backup %s\n' "$backup_root" >&2
-                fi
-            else
-                rm -f -- "$target_file"
-                printf 'ROLLBACK: Topbar.qml baru dihapus.\n' >&2
-            fi
-        fi
-        if (( legacy_replaced )); then
-            if (( legacy_mirror_had )); then
-                restore="$(mktemp "$legacy_module_root/.Topbar.qml.restore.XXXXXX")" || {
-                    printf 'CRITICAL: compatibility mirror gagal dipulihkan; backup %s\n' "$backup_root" >&2; exit "$rc";
-                }
-                if cp -a -- "$backup_root/Topbar.qml.legacy" "$restore" && mv -fT -- "$restore" "$legacy_target_file"; then
-                    printf 'ROLLBACK: compatibility mirror dipulihkan.\n' >&2
-                else
-                    rm -f -- "$restore"; printf 'CRITICAL: rollback compatibility mirror gagal; backup %s\n' "$backup_root" >&2
-                fi
-            else
-                rm -f -- "$legacy_target_file"
-            fi
+            if (( had_shell )); then
+                restore="$(mktemp "$runtime_root/.shell.restore.XXXXXX")"
+                if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$target_shell"; then
+                    printf 'ROLLBACK: shell.qml dipulihkan.\\n' >&2
+                else rm -f "$restore"; printf 'CRITICAL: rollback shell.qml gagal; backup %s\\n' "$backup_root" >&2; fi
+            else rm -f "$target_shell"; fi
         fi
     fi
-    [[ -z $module_tmp ]] || rm -f -- "$module_tmp"
-    [[ -z $shell_tmp ]] || rm -f -- "$shell_tmp"
+    [[ -z $shell_tmp ]] || rm -f "$shell_tmp"
+    [[ -z $topbar_tmp ]] || rm -f "$topbar_tmp"
     exit "$rc"
 }
 trap 'rollback $?' EXIT
 
-module_tmp="$(mktemp "$module_root/.Topbar.install.XXXXXX")"
-install -m 0644 -- "$source_file" "$module_tmp"
-cmp -s -- "$source_file" "$module_tmp" || die 'Staging Topbar.qml gagal diverifikasi.'
+shell_tmp="$(mktemp "$runtime_root/.shell.install.XXXXXX")"
+topbar_tmp="$(mktemp "$module_root/.Topbar.install.XXXXXX")"
+install -m 0644 -- "$source_shell" "$shell_tmp"
+install -m 0644 -- "$source_topbar" "$topbar_tmp"
+cmp -s "$source_shell" "$shell_tmp" || die 'Verifikasi staging shell.qml gagal.'
+cmp -s "$source_topbar" "$topbar_tmp" || die 'Verifikasi staging Topbar.qml gagal.'
 
-shell_tmp="$(mktemp "$caelestia_root/.shell.install.XXXXXX")"
-awk -v replacement="$new_import" '
-    $0 ~ /^[[:space:]]*import[[:space:]]+"\.\.\/k41\/modules\/topbar"[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ {
-        print replacement
-        seen_k41_import=1
-        next
-    }
-    $0 ~ /^[[:space:]]*import[[:space:]]+qs\.k41\.modules\.topbar[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ {
-        print
-        seen_k41_import=1
-        next
-    }
-    $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ {
-        if (!seen_k41_import) print replacement
-        seen_k41_import=1
-        print
-        next
-    }
-    $0 ~ /^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$/ { next }
-    $0 ~ /^[[:space:]]*id:[[:space:]]*root[[:space:]]*$/ {
-        print
-        print "    K41Topbar.Topbar {}"
-        next
-    }
-    { print }
-' "$shell_file" >"$shell_tmp"
-chmod --reference="$shell_file" "$shell_tmp"
-grep -Fqx -- "$new_import" "$shell_tmp" || die 'Staging shell.qml tidak memiliki import Topbar.'
-grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" || die 'Staging shell.qml tidak memiliki instance Topbar.'
-staged_instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" || true)"
-(( staged_instance_n == 1 )) || die 'Staging shell.qml harus memiliki tepat satu instance Topbar.'
-staged_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
-staged_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
-(( staged_instance_line > staged_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root pada staging.'
-
-module_replaced=1
-mv -fT -- "$module_tmp" "$target_file"
-module_tmp=''
-cmp -s -- "$source_file" "$target_file" || die 'Content Topbar.qml tidak cocok setelah deployment.'
-legacy_tmp="$(mktemp "$legacy_module_root/.Topbar.qml.mirror.XXXXXX")"
-install -m 0644 -- "$source_file" "$legacy_tmp"
-cmp -s -- "$source_file" "$legacy_tmp" || { rm -f -- "$legacy_tmp"; die 'Staging compatibility mirror gagal diverifikasi.'; }
-legacy_replaced=1
-mv -fT -- "$legacy_tmp" "$legacy_target_file"
-cmp -s -- "$source_file" "$legacy_target_file" || die 'Compatibility mirror Topbar.qml tidak cocok setelah deployment.'
-[[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Topbar.qml bukan 0644.'
 shell_replaced=1
-mv -fT -- "$shell_tmp" "$shell_file"
-shell_tmp=''
-grep -Fqx -- "$new_import" "$shell_file" || die 'Import Topbar tidak ditemukan setelah deployment.'
-grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || die 'Instance Topbar tidak ditemukan setelah deployment.'
-final_instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
-(( final_instance_n == 1 )) || die 'shell.qml harus memiliki tepat satu instance Topbar setelah deployment.'
-final_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
-final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
-(( final_instance_line > final_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root setelah deployment.'
+mv -fT -- "$shell_tmp" "$target_shell"; shell_tmp=''
+cmp -s "$source_shell" "$target_shell" || die 'Verifikasi shell.qml setelah install gagal.'
+topbar_replaced=1
+mv -fT -- "$topbar_tmp" "$target_topbar"; topbar_tmp=''
+cmp -s "$source_topbar" "$target_topbar" || die 'Verifikasi Topbar.qml setelah install gagal.'
+[[ $(stat -c %a "$target_shell") == 644 && $(stat -c %a "$target_topbar") == 644 ]] || die 'Permission file runtime bukan 0644.'
 
-module_replaced=0
-legacy_replaced=0
-shell_replaced=0
+shell_replaced=0; topbar_replaced=0
 trap - EXIT
-info "Module K41 aktif: $target_file"
-info "Compatibility mirror: $legacy_target_file"
-info "Caelestia host: $shell_file"
+info "Entry point mandiri: $target_shell"
+info "Module K41: $target_topbar"
 info "Backup privat: $backup_root"
-info 'Integrasi menggunakan modul K41Topbar.Topbar; source upstream Caelestia tidak diubah.'
-info 'Tidak dibuat shell.qml/qmldir mandiri pada namespace K41.'
-info 'Quickshell tidak di-reload atau di-restart.'
+info 'Tidak ada file di direktori Caelestia yang dibaca atau diubah.'
+info 'Tidak melakukan reload/restart Quickshell atau mengubah autostart.'
+info 'Jalankan manual setelah dependency dan kepemilikan NotificationServer diverifikasi: qs -c k41'
