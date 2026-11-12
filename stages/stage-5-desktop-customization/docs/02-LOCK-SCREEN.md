@@ -178,6 +178,7 @@ Status: **IMPLEMENTED** pada updater dan regression test; **CI/RUNTIME NOT YET V
 Report `20261112T041236Z` menunjukkan perintah startup Caelestia telah berada di konfigurasi Lua aktif, tetapi proses Quickshell tidak bertahan dan IPC tidak tersedia. Report berikutnya (`20261112T042459Z`) tidak dapat dibaca oleh endpoint teks GitHub; pembacaan blob gagal pada byte non-UTF-8. Jadi laporan itu belum bisa dipakai untuk menilai hasil probe. Collector kini menormalkan byte invalid/control-character menjadi UTF-8 valid sebelum publikasi dan menolak report kosong. Report itu belum menangkap log QML/plugin/import yang diperlukan untuk membedakan kesalahan konfigurasi, dependency Qt/QML, dan kegagalan runtime.
 
 Collector `workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh` diperluas untuk:
+- Mengumpulkan hash dan metadata revision source implementasi yang relevan (startup updater, lock helper, fallback config, visual deployer, dan visual auditor), membandingkan fallback config terpasang dengan source repository, serta merekam metadata instance Hyprland untuk membantu perubahan implementasi berikutnya.
 - Mengambil daftar instance Quickshell (`qs list --all`) dan log konfigurasi Caelestia (`qs log -c caelestia --tail 400 --no-color`).
 - Mengumpulkan `log.qslog` dari runtime directory Quickshell, selain log helper dan journal yang sudah dikumpulkan.
 - Menambahkan probe startup foreground yang eksplisit opt-in. Probe menjalankan `qs -c caelestia` maksimal 15 detik dengan `QT_DEBUG_PLUGINS=1` dan `QML_IMPORT_TRACE=1`, menangkap stdout/stderr, lalu menghentikan proses. Probe dilewati jika Wayland socket/session tidak valid atau proses Quickshell/Caelestia sudah berjalan, untuk menghindari instance duplikat.
@@ -273,3 +274,11 @@ bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41
 Collector akan menerbitkan report diagnostik baru. Jangan jalankan visual deployment dahulu. Jangan mengubah PAM, autentikasi, Plymouth, getty, systemd unit, bootloader, atau initramfs secara manual.
 
 **Status:** CI run `42987653538` pada commit `d5280a8aa6c6e51d27ef57c769be63e6e896b39d` PASS: Bash syntax, embedded Python syntax, ShellCheck, formatting, dan 39 test scripts (39 PASS, 0 FAIL, 0 SKIP). Runtime X280 tetap NOT VERIFIED sampai reboot aktual dilakukan.
+
+## Koreksi isolasi Git saat publikasi otomatis audit — 12 November 2026
+
+Review terhadap `k41-audit-desktop-startup.sh` menemukan bahwa publisher sebelumnya menjalankan `git fetch` pada checkout utama, lalu membuat dan menghapus linked worktree dari repository yang sama. Walaupun report disiapkan di worktree terpisah, linked worktree berbagi metadata `.git` dengan checkout pengguna; kegagalan cleanup atau registrasi worktree dapat meninggalkan metadata worktree yang stale dan membuat operasi Git lokal bermasalah.
+
+Publisher audit sekarang menggunakan **clone independen sementara** di direktori temporary. Commit dan push report dilakukan seluruhnya di clone tersebut, termasuk satu kali fetch/rebase retry bila `main` bergerak. Checkout lokal tidak lagi dipakai untuk `fetch`, `worktree add/remove`, commit, atau push; karena itu branch aktif, `HEAD`, index, `FETCH_HEAD`, remote-tracking refs, dan metadata worktree lokal tidak disentuh oleh proses publikasi. Hanya file report lokal yang memang dibuat oleh audit tetap berada di bawah `reports/`.
+
+Regression test `test-desktop-startup-audit.sh` kini menolak publisher yang melakukan fetch atau operasi worktree pada checkout utama dan mensyaratkan clone independen. Perubahan source dan test berstatus **IMPLEMENTED**; eksekusi ShellCheck, Bash syntax, regression test, dan uji perangkat masih **PENDING** sampai CI/perangkat menjalankannya. Perbaikan ini khusus publisher audit startup; publisher log pada deployment visual masih perlu diaudit terpisah sebelum menganggap pola publikasinya aman.
