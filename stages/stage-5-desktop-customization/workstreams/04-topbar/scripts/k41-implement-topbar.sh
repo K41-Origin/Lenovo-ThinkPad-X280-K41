@@ -276,5 +276,5 @@ info "Notification handoff: $caelestia_notifs_file"
 info "Backup privat (termasuk Notifs.qml asli): $backup_root"
 info 'Caelestia NotificationServer dinonaktifkan; K41 menjadi server shell setelah reload.'
 info 'Pastikan tidak ada notification daemon pihak ketiga yang bersaing atas nama D-Bus.'
-info 'Model historis dan DND Caelestia dipertahankan; notifikasi baru tampil pada K41 dock.'
+info 'Singleton/model historis/DND/IPC Caelestia dipertahankan; notifikasi baru tampil pada K41 dock.'
 info 'Tidak melakukan reload/restart Quickshell atau mengubah autostart.'
