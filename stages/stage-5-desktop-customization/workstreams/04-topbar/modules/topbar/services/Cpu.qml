@@ -10,7 +10,7 @@ QtObject {
 
     function updateFromStat(data) {
         const line = data.trim().split("\n")[0]
-        const fields = line.trim().split(/\\s+/)
+        const fields = line.trim().split(/\s+/)
         if (fields.length < 5 || fields[0] !== "cpu")
             return
         let total = 0
