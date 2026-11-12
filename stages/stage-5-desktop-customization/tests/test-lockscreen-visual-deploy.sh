@@ -9,6 +9,19 @@ origin="https://github.com/caelestia-dots/shell.git"
 
 [[ -s $script ]] || { printf 'FAIL: deployment script missing.\n' >&2; exit 1; }
 bash -n "$script"
+# Log publishing must use a separate clone and must not mutate the user's checkout.
+grep -q 'git clone --quiet --branch main --single-branch' "$script" || {
+    printf 'FAIL: deployment log publisher must use an independent clone.\\n' >&2
+    exit 1
+}
+! grep -Eq 'git -C "\$repo_root" (fetch|worktree)' "$script" || {
+    printf 'FAIL: publisher must not fetch/register worktrees in the user's checkout.\\n' >&2
+    exit 1
+}
+! grep -q 'rc=1' <(sed -n '/if ! publish_logs; then/,/fi/p' "$script") || {
+    printf 'FAIL: log publication failure must not change deployment exit status.\\n' >&2
+    exit 1
+}
 ! grep -Eq -- '--(install|status|rollback)' "$script" || {
     printf 'FAIL: deployment script must not expose install/status/rollback options.\n' >&2
     exit 1
