@@ -1,0 +1,28 @@
+INFO: Already current: modules/lock/LockSurface.qml
+INFO: Already current: modules/lock/Content.qml
+INFO: Already current: modules/lock/Center.qml
+INFO: Already current: modules/lock/center/PasswordInput.qml
+LockSurface.qml: OK
+Content.qml: OK
+Center.qml: OK
+center/PasswordInput.qml: OK
+LockSurface.qml: OK
+Content.qml: OK
+Center.qml: OK
+center/PasswordInput.qml: OK
+INFO: K41 Floating Password Card overlay deployed into Caelestia modules/lock/.
+INFO: Four visual source files mirrored to: ~/.config/quickshell/k41/modules/lockscreen and ~/.config/quickshell/caelestia/k41/modules/lockscreen
+INFO: Original files backed up to: ~/.local/state/k41/lockscreen/backups/20261112T204011Z
+INFO: Restarting Caelestia shell to activate the new QML.
+[32m  INFO[0m: Launching config: "~/.config/quickshell/caelestia/shell.qml"
+[32m  INFO[0m: Shell ID: "069ea8c6e9889cca46d05922bc04af46" Path ID "069ea8c6e9889cca46d05922bc04af46"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/v62zepeot/log.qslog"
+[33m  WARN[97m quickshell.qmlscanner[0m: Module path "~/.config/quickshell/k41/modules/bottombar" is outside of the config folder.
+[33m  WARN[97m quickshell.qmlscanner[0m: Module path "~/.config/quickshell/k41/modules/topbar" is outside of the config folder.
+[31m ERROR[0m: Failed to load configuration
+[31m ERROR[0m:   caused by @shell.qml[46:5]: Type K41Topbar.Topbar unavailable
+[31m ERROR[0m:   caused by qrc:/qs-blackhole[-1:-1]: No such file or directory
+INFO: Caelestia reload command completed. The new visual source is now selected by the existing modules/lock import.
+INFO: Authentication, PAM, Lock.qml, session-lock protocol, Hyprland configuration, and system services were not changed.
+INFO: Visual acceptance still requires observing a real lock/unlock cycle on the ThinkPad X280.
+INFO: Deployment finished with exit status 0.
