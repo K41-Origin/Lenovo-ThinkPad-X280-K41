@@ -145,6 +145,7 @@ cp -a "$caelestia_notifs_file" "$backup_root/Notifs.qml"
 {
     printf 'module_target=%s\nmodule_previous=%s\nmodule_source_sha256=%s\n' "$target_file" "$had_module" "$(sha256sum "$source_file" | cut -d' ' -f1)"
     printf 'host_target=%s\nhost_previous_sha256=%s\n' "$host_file" "$(sha256sum "$host_file" | cut -d' ' -f1)"
+    printf 'caelestia_notifs_target=%s\ncaelestia_notifs_previous_sha256=%s\n' "$caelestia_notifs_file" "$(sha256sum "$caelestia_notifs_file" | cut -d' ' -f1)"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
@@ -155,7 +156,7 @@ rollback() {
     if (( rc != 0 )); then
         if (( notifs_replaced )); then
             restore="$(mktemp "$host_root/.Notifs.restore.XXXXXX")"
-            if cp -a "$backup_root/Notifs.qml" "$restore" && mv -fT "$restore" "$caelestia_notifs_file"; then printf 'ROLLBACK: Caelestia Notifs.qml dipulihkan.\\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback Notifs.qml gagal; backup %s\\n' "$backup_root" >&2; fi
+            if cp -a "$backup_root/Notifs.qml" "$restore" && mv -fT "$restore" "$caelestia_notifs_file"; then printf 'ROLLBACK: Caelestia Notifs.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback Notifs.qml gagal; backup %s\\n' "$backup_root" >&2; fi
         fi
         if (( host_replaced )); then
             restore="$(mktemp "$host_root/.shell.restore.XXXXXX")"
@@ -273,6 +274,7 @@ info "Entrypoint host tetap: $host_file"
 info "Backup privat: $backup_root"
 info "Notification handoff: $caelestia_notifs_file"
 info "Backup privat (termasuk Notifs.qml asli): $backup_root"
-info 'Caelestia NotificationServer dinonaktifkan; K41 menjadi server tunggal setelah reload.'
+info 'Caelestia NotificationServer dinonaktifkan; K41 menjadi server shell setelah reload.'
+info 'Pastikan tidak ada notification daemon pihak ketiga yang bersaing atas nama D-Bus.'
 info 'Model historis dan DND Caelestia dipertahankan; notifikasi baru tampil pada K41 dock.'
 info 'Tidak melakukan reload/restart Quickshell atau mengubah autostart.'
