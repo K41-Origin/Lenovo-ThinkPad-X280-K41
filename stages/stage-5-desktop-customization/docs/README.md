@@ -60,7 +60,7 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 
 ## Cleanup Caelestia
 
-Dashboard dinonaktifkan melalui `dashboard.enabled=false` pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script `scripts/k41-cleanup-caelestia.sh` berjalan tanpa argumen, menolak root, memvalidasi JSON, membuat backup, dan tidak menghapus source QML upstream. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
+Dashboard dinonaktifkan melalui `dashboard.enabled=false` pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script `scripts/k41-cleanup-caelestia.sh` menonaktifkan konfigurasi tanpa menghapus source QML upstream. Jika modul upstream hilang dari checkout user, `scripts/k41-repair-caelestia-modules.sh` memulihkan hanya `modules/dashboard` dari instalasi package di `/etc/xdg/quickshell/caelestia`; default dry-run, `--apply` menyalin secara atomik setelah memverifikasi source dimiliki pacman, dan tidak menimpa direktori tujuan yang sudah ada. Jalankan `--check` setelah repair. Test fixture: `tests/test-caelestia-module-repair.sh`. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
 
 ## Guest Mode
 
