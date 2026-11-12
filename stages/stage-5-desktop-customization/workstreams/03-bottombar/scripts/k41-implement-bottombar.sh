@@ -16,7 +16,7 @@ info() {
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
 
-for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv date; do
+for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv date grep awk; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
@@ -35,7 +35,10 @@ config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 [[ $(stat -c %u -- "$config_home") == "$EUID" ]] ||
     die 'XDG_CONFIG_HOME bukan milik user aktif.'
 
-runtime_root="$config_home/quickshell/caelestia"
+quickshell_dir="$config_home/quickshell"
+[[ -d $quickshell_dir && ! -L $quickshell_dir ]] || die "Quickshell user config directory tidak ditemukan atau tidak aman: $quickshell_dir"
+[[ $(stat -c %u -- "$quickshell_dir") == "$EUID" ]] || die "Quickshell user config directory bukan milik user aktif."
+runtime_root="$quickshell_dir/caelestia"
 shell_file="$runtime_root/shell.qml"
 [[ -d $runtime_root && ! -L $runtime_root ]] ||
     die "Caelestia user runtime tidak ditemukan atau tidak aman: $runtime_root"
@@ -120,15 +123,14 @@ fi
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 if (( had_target )); then
-    chmod 0600 "$backup_root/K41Dock.qml"
 fi
 
 temp_file=''
 mutation_started=0
 rollback() {
-    local rc=$?
-    trap - ERR
-    if (( mutation_started )); then
+    local rc=$1
+    trap - EXIT
+    if (( rc != 0 && mutation_started )); then
         if (( had_target )); then
             local restore_tmp
             restore_tmp="$(mktemp "$module_dir/.K41Dock.restore.XXXXXX")" || {
@@ -150,7 +152,7 @@ rollback() {
     [[ -z $temp_file ]] || rm -f -- "$temp_file"
     exit "$rc"
 }
-trap rollback ERR
+trap 'rollback $?' EXIT
 
 temp_file="$(mktemp "$module_dir/.K41Dock.install.XXXXXX")"
 install -m 0644 -- "$source_file" "$temp_file"
@@ -163,7 +165,7 @@ temp_file=''
 cmp -s -- "$source_file" "$target_file" || die 'Checksum/content target tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Mode permission target tidak sesuai.'
 mutation_started=0
-trap - ERR
+trap - EXIT
 
 info "Bottombar berhasil dipasang/diperbaiki: $target_file"
 info "Source kanonis: $source_file"
