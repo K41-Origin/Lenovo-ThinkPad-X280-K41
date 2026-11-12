@@ -10,7 +10,7 @@ fixture="$tmp/repository"
 home="$tmp/home"
 config="$tmp/config"
 state="$tmp/state"
-mkdir -p "$fixture/$workstream/modules/bottombar" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia"
+mkdir -p "$fixture/$workstream/modules/bottombar" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia" "$config/caelestia"
 cp -- "$root/$workstream/modules/bottombar/Dock.Qml" "$fixture/$workstream/modules/bottombar/Dock.Qml"
 cp -- "$root/$workstream/scripts/k41-implement-bottombar.sh" "$fixture/$workstream/scripts/k41-implement-bottombar.sh"
 git -C "$fixture" init -q
@@ -33,12 +33,14 @@ run_installer() {
 }
 
 target="$config/quickshell/caelestia/modules/k41dock/K41Dock.qml"
+k41_target="$config/quickshell/k41/modules/bottombar/Dock.Qml"
 source="$fixture/$workstream/modules/bottombar/Dock.Qml"
 
 # First run installs only the module.
 run_installer
 cmp -s "$source" "$target"
 [[ $(stat -c %a "$target") == 644 ]]
+[[ ! -e $k41_target ]]
 
 # Second run is idempotent and does not create another backup.
 backup_root="$state/k41/backups/bottombar"
@@ -93,4 +95,4 @@ if grep -Eiq 'pacman[[:space:]]|systemctl[[:space:]]|shell\.json|sed[[:space:]].
     exit 1
 fi
 
-printf 'PASS: Bottombar module install, repair, idempotency, backup, rollback, and host isolation.\n'
+printf 'PASS: Caelestia-host module install/repair, idempotency, backup, rollback, and host isolation.\n'
