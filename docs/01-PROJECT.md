@@ -48,16 +48,21 @@ K41-Dots dibangun **sederhana dan bertahap** sebagai kumpulan modul Quickshell m
 
 ### Struktur runtime yang dituju
 
-Semua modul K41 ditempatkan di namespace milik K41:
+Caelestia adalah host aktif. Modul yang diimpor dari shell Caelestia disimpan di bawah config root Caelestia; namespace sibling dipertahankan sebagai compatibility mirror:
 
 ```text
-~/.config/quickshell/k41/
-└── modules/
-    ├── lockscreen/
+~/.config/quickshell/caelestia/
+├── shell.qml
+└── k41/modules/
     ├── bottombar/
     ├── topbar/
-    ├── launcher/
+    ├── lockscreen/   # WS02 source mirror
     └── ...
+
+~/.config/quickshell/k41/modules/
+├── bottombar/       # compatibility mirror
+├── topbar/          # compatibility mirror
+└── lockscreen/      # WS02 compatibility mirror
 ```
 
 Untuk modul yang diimpor oleh shell Caelestia, lokasi utama berada di `~/.config/quickshell/caelestia/k41/modules/<feature>/`, karena `qs.*` di-resolve relatif terhadap config root yang berisi `shell.qml`. Path sibling `~/.config/quickshell/k41/modules/<feature>/` dipertahankan sebagai compatibility mirror, bukan lokasi import utama dari Caelestia. WS02 juga mempertahankan overlay aktif `caelestia/modules/lock/` dan mencerminkan empat file visual ke kedua namespace K41.
