@@ -1,0 +1,116 @@
+
+============================================================================
+AUDIT SCOPE
+============================================================================
+Purpose: establish evidence for K41 Topbar technical design and implementation planning.
+Mode: observational/read-only; no package, service, runtime, configuration, source, or Git mutation.
+Captured UTC: 2026-11-12T19:00:57.324281+00:00
+Repository HEAD: d75fcdb
+Repository branch: main
+Checkout status: clean
+Note: local changes are observed but never staged, committed, stashed, or reset.
+
+============================================================================
+IMPORTANT ARCHITECTURE CONTEXT
+============================================================================
+Caelestia does not provide a Topbar in this environment/project baseline.
+Do not treat absence of a native Caelestia Topbar as an error or assume a native bar integration point.
+Audit discovers available Quickshell/Caelestia shell configuration and active runtime only.
+Topbar is a K41-owned component to be designed and integrated after this evidence is reviewed.
+No existing panel/bar source is copied or modified by this audit.
+
+============================================================================
+RUNTIME AND PACKAGE EVIDENCE
+============================================================================
+qs: path-present; version-exit=0; Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+quickshell: path-present; version-exit=0; Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+caelestia: path-present; version-exit=0; Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (pa
+hyprctl: path-present; version-exit=1; usage: hyprctl [flags] <command> [args...|--help]
+
+commands:
+    activewindow        → Gets the active window name and its properties
+    activeworkspace     → Gets the active workspace and its properties
+    animations          → Gets the 
+qmllint: NOT_FOUND
+qmlformat: NOT_FOUND
+package caelestia-shell: caelestia-shell 2.5.0-1
+package quickshell: quickshell-git 0.3.2.r11.g9b0f339-1
+package quickshell-git: quickshell-git 0.3.2.r11.g9b0f339-1
+package hyprland: hyprland 0.57.1-1
+package qt6-base: qt6-base 6.12.0-3
+package qt6-declarative: qt6-declarative 6.12.0-4
+package qt6-wayland: not installed or pacman unavailable
+
+============================================================================
+SHELL CONFIGURATION INVENTORY (NO SOURCE CONTENT)
+============================================================================
+XDG_QUICKSHELL: PRESENT
+  file-count-by-type: .cmake=3, .cpp=65, .fish=1, .frag=1, .gif=2, .hpp=84, .js=2, .json=1, .lock=1, .md=2, .nix=3, .png=1, .py=2, .qml=290, .sh=1, .sha256=1, .svg=1, .ttf=1, .txt=12, .vert=1, .webp=1, .yml=13, [no-extension]=10
+  files-counted=499; truncated=no
+SYSTEM_XDG_QUICKSHELL: PRESENT
+  file-count-by-type: .gif=2, .js=2, .png=1, .qml=282, .sh=1, .svg=1, .ttf=1, .webp=1, [no-extension]=5
+  files-counted=296; truncated=no
+SYSTEM_SHARE_QUICKSHELL: ABSENT_OR_NOT_DIRECTORY
+XDG_CAeleSTIA: PRESENT
+  file-count-by-type: .json=3
+  files-counted=3; truncated=no
+SYSTEM_CAelestia_ETC: ABSENT_OR_NOT_DIRECTORY
+SYSTEM_CAelestia_SHARE: ABSENT_OR_NOT_DIRECTORY
+
+============================================================================
+ACTIVE PROCESSES (NAMES ONLY; NO COMMAND-LINE ARGUMENTS)
+============================================================================
+No matching process names observed.
+Process arguments, environment variables, usernames, PIDs, and executable paths are intentionally excluded.
+
+============================================================================
+NOTIFICATION PROVIDER AND DBUS
+============================================================================
+notify-send: AVAILABLE
+gdbus: AVAILABLE
+busctl: AVAILABLE
+freedesktop notification interface: exit=0
+interface members: introspection succeeded; member parsing unavailable
+No test notification is sent.
+
+============================================================================
+HYPRLAND MONITOR AND LAYER EVIDENCE
+============================================================================
+monitor: name=eDP-1; resolution=1920x1080; scale=1.5; position=0,0
+monitor-count=1
+layer namespaces: eDP-1
+Hyprland config errors command: exit=0; 
+
+============================================================================
+BATTERY AND POWER SUPPLY
+============================================================================
+
+============================================================================
+K41 IMPLEMENTATION REFERENCES
+============================================================================
+WS04 modules: absent
+WS04 scripts: present
+  entries: k41-audit-topbar.sh
+WS04 tests: absent
+WS04 docs: absent
+Bottombar source is a reference for project conventions only; it is not assumed to be a reusable Topbar implementation.
+
+============================================================================
+AUDIT HANDOFF AND LIMITATIONS
+============================================================================
+Design order: CPU, RAM, Notifications, Battery, Clock (left to right).
+Visual target: top horizontal panel, 32-36 px initial height, dark translucent, minimal radius, subtle shadow.
+Visibility target: always visible, all monitors; fullscreen behavior requires runtime verification.
+Notification interaction: icon click opens a notification tray/panel; tray is not permanently open.
+Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.
+This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.
+Configuration inventory contains bounded relative filenames and file sizes only; source/configuration contents and process arguments are never published.
+Review findings before writing the separate implementation/deployment script.
