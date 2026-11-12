@@ -40,9 +40,9 @@ Script:
 2. Memastikan checkout Caelestia user-local tersedia di `~/.config/quickshell/caelestia`, berasal dari upstream yang diaudit, dan berada pada revision yang dipin.
 3. Memastikan empat file target masih versi upstream asli atau sudah sama dengan source K41. Modifikasi lokal lain ditolak.
 4. Membuat backup bertimestamp dari empat file visual.
-5. Mengganti empat file di `~/.config/quickshell/caelestia/modules/lock/` dengan source Stage 5.
-6. Memverifikasi hasil dengan checksum/perbandingan file.
-7. Menjalankan `caelestia shell -r -d` untuk memuat ulang shell.\n8. Menyimpan log privat di `~/.local/state/k41/lockscreen/deployment-logs/`; publikasi log yang telah disanitasi memakai clone sementara independen sehingga tidak mengubah branch, index, `FETCH_HEAD`, atau metadata worktree checkout pengguna. Kegagalan publikasi hanya menghasilkan peringatan dan tidak mengubah hasil deployment.
+5. Mengganti empat file overlay di `~/.config/quickshell/caelestia/modules/lock/`.
+6. Menyalin empat file yang sama ke `~/.config/quickshell/k41/modules/lockscreen/` dan `~/.config/quickshell/caelestia/k41/modules/lockscreen/`.
+7. Memverifikasi ketiga set file dan menjalankan `caelestia shell -r -d` untuk memuat ulang shell.\n8. Menyimpan log privat di `~/.local/state/k41/lockscreen/deployment-logs/`; publikasi log yang telah disanitasi memakai clone sementara independen sehingga tidak mengubah branch, index, `FETCH_HEAD`, atau metadata worktree checkout pengguna. Kegagalan publikasi hanya menghasilkan peringatan dan tidak mengubah hasil deployment.
 
 Tidak perlu sudo. Script tidak membuat partial config overlay, tidak mengubah `shell.qml`, `Lock.qml`, `Pam.qml`, `InputField.qml`, PAM/authentication, session-lock protocol, Hyprland, maupun system services. Jika preflight tidak cocok, script berhenti tanpa menimpa file. Jika penyalinan atau reload gagal, empat file awal dipulihkan otomatis dari backup. Kegagalan publikasi log tidak membatalkan atau mengubah status deployment; log lokal tetap tersedia.
 
