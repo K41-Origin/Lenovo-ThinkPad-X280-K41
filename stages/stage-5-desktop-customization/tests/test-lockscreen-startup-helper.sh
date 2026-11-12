@@ -6,13 +6,22 @@ base="$root/stages/stage-5-desktop-customization/workstreams/02-lock-screen"
 helper="$base/scripts/k41-lock-caelestia-after-start.sh"
 updater="$base/scripts/k41-update-lockscreen-startup-helper.sh"
 config="$base/config/hyprlock-fallback.conf"
+audit="$base/scripts/k41-audit-desktop-startup.sh"
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 pass() { printf 'PASS: %s\n' "$*"; }
 
-for script in "$helper" "$updater"; do
+for script in "$helper" "$updater" "$audit"; do
     [[ -s $script ]] || fail "missing script: $script"
     bash -n "$script" || fail "invalid Bash syntax: $script"
 done
+grep -Fq 'qs log -c caelestia --tail 400 --no-color' "$audit" ||
+    fail 'audit collector does not capture Caelestia Quickshell logs'
+grep -Fq 'K41_AUDIT_RUN_QS_PROBE=1' "$audit" ||
+    fail 'audit collector does not document the opt-in Quickshell startup probe'
+grep -Fq 'timeout --signal=TERM --kill-after=3 15s qs -c caelestia' "$audit" ||
+    fail 'audit Quickshell startup probe is not bounded'
+grep -Fq '[[ ! -S $wayland_socket ]]' "$audit" ||
+    fail 'audit Quickshell startup probe does not validate the Wayland socket'
 [[ -s $config ]] || fail 'managed Hyprlock fallback config is missing'
 grep -Fq 'hyprlock --config "$hyprlock_config"' "$helper" || fail 'helper does not pass the managed config explicitly'
 grep -Fq 'hyprlock --config' "$helper" || fail 'explicit Hyprlock config argument missing'
