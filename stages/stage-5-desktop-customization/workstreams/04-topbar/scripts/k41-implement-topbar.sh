@@ -65,7 +65,7 @@ grep -Fq 'K41_NOTIFICATION_BACKEND_READY' "$notification_source" \
     || die 'Caelestia services/Notifs.qml tidak ditemukan sebagai regular file; handoff tidak dapat diverifikasi.'
 owned "$caelestia_notifs_file" \
     || die 'Caelestia Notifs.qml bukan milik user aktif; handoff tidak boleh mengubah file yang tidak dimiliki user.'
-grep -Fq 'K41_CAELestia_NOTIFICATION_HANDOFF' "$caelestia_notifs_file" \
+grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$caelestia_notifs_file" \
     || die 'Handoff Caelestia belum disiapkan; NotificationServer Caelestia belum dinonaktifkan secara eksplisit.'
 if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$caelestia_notifs_file"; then
     die 'NotificationServer Caelestia masih dideklarasikan; menolak kemungkinan dua D-Bus owner.'
