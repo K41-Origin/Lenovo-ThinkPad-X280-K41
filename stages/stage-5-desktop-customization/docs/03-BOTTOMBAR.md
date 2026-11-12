@@ -90,7 +90,7 @@ Runtime module: ~/.config/quickshell/k41/modules/bottombar/Dock.qml
 Caelestia host: ~/.config/quickshell/caelestia/shell.qml
 ```
 
-Target namespace standalone `~/.config/quickshell/k41/modules/bottombar/Dock.Qml` tetap menjadi arah arsitektur jangka panjang, tetapi belum menjadi target deployment sampai ada entry point/loading contract K41 yang dirancang dan diuji. File pada namespace K41 tidak otomatis dimuat oleh host Caelestia.
+Namespace `~/.config/quickshell/k41` hanya menjadi lokasi ownership/deployment modul K41, bukan shell mandiri. Caelestia tetap menjadi host; `shell.qml` mengimpor `../k41/modules/bottombar` dan menginstansiasi `K41Bottombar.Dock {}`.
 
 Perilaku script:
 - Menolak root/sumber/target symlink, path tidak aman, dan file yang bukan regular file.
