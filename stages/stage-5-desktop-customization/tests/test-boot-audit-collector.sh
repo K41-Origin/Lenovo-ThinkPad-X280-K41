@@ -25,6 +25,9 @@ grep -Fq 'UKI embedded initramfs: Plymouth/theme/crypto entries' "$SCRIPT"
 grep -Fq 'collect_plymouth_journal' "$SCRIPT"
 grep -Fq 'chmod 0700 "$OUT"' "$SCRIPT"
 grep -Fq 'chmod 0600 "$REPORT"' "$SCRIPT"
+grep -Fq 'SUDO_UID' "$SCRIPT"
+grep -Fq 'chown -R "$AUDIT_UID:$AUDIT_GID" "$OUT_ROOT"' "$SCRIPT"
+grep -Fq 'chmod u+rwx "$dir"' "$SCRIPT"
 
 # Reject executable mutation commands; read-only status/list/discovery are allowed.
 ! grep -Eq '^[[:space:]]*(systemctl[[:space:]]+(enable|disable|start|stop|restart)|mkinitcpio[[:space:]]+-P|bootctl[[:space:]]+(install|update)|efibootmgr[[:space:]]+-[acCo]|systemd-cryptenroll[[:space:]].*--tpm2-device=auto|cryptsetup[[:space:]]+(luksAddKey|luksRemoveKey|luksErase|luksFormat))' "$SCRIPT"
