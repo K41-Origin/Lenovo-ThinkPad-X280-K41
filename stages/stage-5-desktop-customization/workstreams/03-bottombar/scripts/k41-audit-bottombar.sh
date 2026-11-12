@@ -196,6 +196,14 @@ else:
 section("K41 RUNTIME NAMESPACE — REQUIRED DEPLOYMENT TARGET")
 for label, root in k41_roots:
     add(f"{label}: {clean(root)} | {describe(root)}")
+    for rel in ("shell.qml", "qmldir", "modules/qmldir", "modules"):
+        entry = root / rel
+        add(f"  K41 entry {rel}: {clean(entry)} | {describe(entry)}")
+        if rel == "shell.qml" and safe_file(entry):
+            lines = entry.read_text(encoding="utf-8", errors="replace").splitlines()
+            for i, line in enumerate(lines, 1):
+                if re.search(r"import\\s+|bottombar|Dock\\.Qml|ShellRoot\\s*\\{", line, re.I):
+                    add(f"    {i}: {clean(line[:500])}")
     target = root / "modules/bottombar/Dock.Qml"
     add(f"  Bottombar target: {clean(target)} | {describe(target)}")
     module_dir = root / "modules/bottombar"
