@@ -86,7 +86,7 @@ fi
 
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}"
 [[ $state_home == /* ]] || die 'XDG_STATE_HOME harus berupa path absolut.'
-for path in "$HOME/.local" "$state_home" "$state_home/k41" "$state_home/k41/backups" "$state_home/k41/backups/bottombar"; do
+for path in "$state_home" "$state_home/k41" "$state_home/k41/backups" "$state_home/k41/backups/bottombar"; do
     [[ ! -L $path ]] || die "Symlink pada backup path ditolak: $path"
     if [[ -e $path ]]; then
         [[ -d $path ]] || die "Backup path bukan direktori: $path"
@@ -96,7 +96,7 @@ for path in "$HOME/.local" "$state_home" "$state_home/k41" "$state_home/k41/back
 done
 
 mkdir -p -- "$module_dir" "$state_home/k41/backups/bottombar"
-chmod 0700 "$state_home/k41" "$state_home/k41/backups" "$state_home/k41/backups/bottombar"
+chmod 0700 "$state_home/k41/backups/bottombar"
 
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup_root="$state_home/k41/backups/bottombar/$stamp"
