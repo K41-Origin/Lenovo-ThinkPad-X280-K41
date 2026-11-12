@@ -18,7 +18,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
 | 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
 
-ID workstream adalah identitas komponen, bukan nomor urutan. Urutan di atas adalah urutan kerja aktif yang disepakati. ID 03 tidak dialokasikan pada roadmap aktif; jangan menafsirkan celah nomor sebagai pekerjaan, prioritas, atau acceptance gate.
+ID workstream adalah identitas komponen yang stabil, bukan nomor urutan pengerjaan. Urutan pada tabel adalah urutan eksekusi; nomor ID tidak perlu dibuat berurutan atau diubah hanya untuk menghilangkan celah. Hanya workstream yang tercantum pada tabel yang termasuk roadmap Stage 5 aktif.
 
 ## Prinsip penyimpanan dan ownership
 
