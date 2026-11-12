@@ -35,7 +35,8 @@ run_installer() {
         bash "$fixture/$workstream/scripts/k41-implement-bottombar.sh"
 }
 source="$fixture/$workstream/modules/bottombar/Dock.qml"
-target="$config/quickshell/k41/modules/bottombar/Dock.qml"
+target="$config/quickshell/caelestia/k41/modules/bottombar/Dock.qml"
+legacy_target="$config/quickshell/k41/modules/bottombar/Dock.qml"
 legacy_case="$config/quickshell/k41/modules/bottombar/Dock.Qml"
 k41_root="$config/quickshell/k41"
 backup_root="$state/k41/backups/bottombar"
@@ -45,11 +46,12 @@ backup_root="$state/k41/backups/bottombar"
 printf 'legacy-case-variant-preserve-me\\n' >"$legacy_case"
 cp -- "$legacy_case" "$tmp/legacy-case.before"
 legacy_import='import "modules/k41dock" as K41Dock'
-new_import='import "../k41/modules/bottombar" as K41Bottombar'
+new_import='import qs.k41.modules.bottombar as K41Bottombar'
 
 # Deploy the canonical K41 file and migrate the existing Caelestia reference.
 run_installer
 cmp -s "$source" "$target"
+cmp -s "$source" "$legacy_target"
 [[ $(stat -c %a "$target") == 644 ]]
 [[ ! -e "$k41_root/shell.qml" && ! -e "$k41_root/qmldir" ]]
 [[ ! -e "$k41_root/modules/qmldir" && ! -e "$k41_root/modules/bottombar/qmldir" ]]
@@ -73,6 +75,7 @@ printf 'locally-corrupted-module\n' >"$target"
 cp -- "$shell" "$tmp/shell.before-repair"
 run_installer
 cmp -s "$source" "$target"
+cmp -s "$source" "$legacy_target"
 cmp -s "$shell" "$tmp/shell.before-repair"
 
 # Inject a failed module replacement; prior module and host must remain intact.
