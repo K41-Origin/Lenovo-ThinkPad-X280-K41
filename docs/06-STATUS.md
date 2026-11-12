@@ -51,6 +51,15 @@ Urutan di bawah adalah urutan eksekusi. Bottombar menggunakan ID 03; ID 04 tidak
 
 Bukti Stage 4 historis tetap tersimpan pada commit arsip 02f6194ed04c8f13ea64eda35b7afb94f7006504. Snapshot tersebut bukan laporan runtime terkini.
 
+## Bottombar audit publisher correction — 12 November 2026
+
+- **IMPLEMENTED:** Workstream 03 audit now keeps the complete diagnostic report privately under `~/.local/state/k41/bottombar/audits/` and automatically publishes a separately sanitized copy under `reports/stage-5-desktop-customization/03-bottombar/audits/<timestamp>/`.
+- **IMPLEMENTED:** Publication uses a temporary independent clone of the approved repository. Fetch/commit/push/rebase operations are confined to that clone; the active checkout's HEAD, branch, index, FETCH_HEAD, and worktree metadata are not used for writes.
+- **IMPLEMENTED:** A regression test was added to reject local-checkout Git mutations and require isolated-clone publication; the test is included in `tests/run.sh`. CI also compiles the embedded Python block in the Bottombar audit.
+- **NOT TESTED YET:** Bash syntax, ShellCheck, repository regression suite, simulated end-to-end push, and a fresh X280 audit/publication have not been executed in this session. No claim of runtime verification is made.
+- **PRIVACY NOTE:** Sanitization masks common host/user/network/credential identifiers, but cannot guarantee that every sensitive value is removed. Review the published report on GitHub.
+- **FAILURE BEHAVIOR:** If clone, commit, or push fails, the private local report is retained and the audit exits non-zero; the active checkout remains untouched.
+
 ## Lock Screen audit publisher correction — 12 November 2026
 
 - **IMPLEMENTED:** `k41-audit-desktop-startup.sh` stores private local reports under `~/.local/state/k41/lockscreen/startup-audits/`, outside the checkout, while publishing only the sanitized copy under `reports/` in a temporary independent clone. This prevents the same-path untracked-file collision that can make the next `git pull` fail.
