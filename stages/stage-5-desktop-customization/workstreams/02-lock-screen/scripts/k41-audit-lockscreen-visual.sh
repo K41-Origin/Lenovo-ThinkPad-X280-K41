@@ -289,9 +289,9 @@ else:
         add(f"  Pinned upstream SHA-256: {upstream_hash}")
         add(f"  Implementation action: {action}")
 deploy_files_match = False
-files_match = re.search(r'readonly source_files=\\(([^)]+)\\)', deploy_text)
+files_match = re.search(r'readonly source_files=\(([^)]+)\)', deploy_text)
 if files_match:
-    deploy_files = re.findall(r'[^\\s"]+', files_match.group(1))
+    deploy_files = re.findall(r'[^\s"]+', files_match.group(1))
     deploy_files_match = deploy_files == target_files
 add("Audit/deploy target list: " + ("PASS" if deploy_files_match else "FAIL — target lists differ or deploy list could not be parsed"))
 add("Session prerequisites:")
