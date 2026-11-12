@@ -19,7 +19,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 | 7 | 07 | [Utilities](07-UTILITIES.md) | PLANNED |
 | 8 | 08 | [Clean up Caelestia](08-CLEAN-UP-CAELESTIA.md) | **PLANNED — FINAL WORKSTREAM AFTER ALL COMPONENT WORKSTREAMS** |
 
-Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen. Workflow kolaborasi merupakan prosedur lintas-workstream, bukan workstream bernomor. Workstream 08 — Clean up Caelestia tetap menjadi tahap konsolidasi terakhir setelah seluruh workstream komponen 02/03/05/06/07/08 selesai dan diterima.
+Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen. Workflow kolaborasi merupakan prosedur lintas-workstream, bukan workstream bernomor. Workstream 08 — Clean up Caelestia tetap menjadi tahap konsolidasi terakhir setelah seluruh workstream komponen 02/03/04/05/06/07 selesai dan diterima.
 
 ID workstream aktif sekarang berurutan 01–08. Topbar menggunakan ID 04; Launcher 05; Sidebar 06; Utilities 07; dan Clean up Caelestia 08 sebagai pekerjaan terakhir. Workflow kolaborasi adalah prosedur lintas-workstream, bukan workstream tersendiri.
 
