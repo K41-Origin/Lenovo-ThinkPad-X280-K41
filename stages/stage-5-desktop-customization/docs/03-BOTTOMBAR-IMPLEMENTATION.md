@@ -4,7 +4,7 @@
 
 Dokumen ini menyimpan catatan implementasi Bottombar sebelum audit dan refactoring Workstream 03. Isinya adalah baseline historis, bukan spesifikasi arsitektur target atau instruksi deployment yang telah disetujui.
 
-Status dan workflow kanonis berada di [Workstream 03 — Bottombar](03-BOTTOMBAR.md). Workstream saat ini **AUDIT IN PROGRESS**. Jangan menjalankan installer historis atau memigrasikan source/runtime berdasarkan dokumen ini.
+Status dan workflow kanonis berada di [Workstream 03 — Bottombar](03-BOTTOMBAR.md). Workstream saat ini telah memiliki installer integrasi K41 → Caelestia; validasi fixture dan runtime masih pending. Jangan menjalankan installer historis atau memigrasikan source/runtime berdasarkan dokumen ini.
 
 ## Lokasi historis
 
@@ -61,9 +61,9 @@ Pengguna sebelumnya mengonfirmasi Bottombar berhasil digunakan. Catatan ini dipe
 
 - Konsolidasi identitas direktori menjadi Workstream 03.
 - Pemisahan source K41 dan integrasi host Caelestia.
-- Penetapan namespace/runtime target setelah API loading Quickshell diverifikasi.
+- Deployment modul K41 dengan nama file `.qml` dan relative directory import dari Caelestia.
 - Perbaikan preflight, staging, atomic deployment, failure handling, rollback, logging, dan idempotensi.
 - Automated tests dan runtime verification.
 - Penetapan acceptance criteria dan dokumentasi operasional baru.
 
-Semua butir tersebut masih PLANNED sampai implementasi dan bukti tersedia.
+Catatan historis ini tidak lagi menjadi instruksi implementasi. Status aktual, target canonical, dan prosedur deployment berada di `03-BOTTOMBAR.md`.
