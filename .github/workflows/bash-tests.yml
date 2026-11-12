@@ -61,7 +61,7 @@ jobs:
           ]
           for script in scripts:
               text = script.read_text(encoding="utf-8")
-              blocks = re.findall(r"<<'PY'\\n(.*?)\\nPY(?:\\n|$)", text, re.DOTALL)
+              blocks = re.findall(r"<<'PY'\n(.*?)\nPY(?:\n|$)", text, re.DOTALL)
               if not blocks:
                   raise SystemExit(f"Expected embedded Python blocks in {script}")
               for index, source in enumerate(blocks, 1):
