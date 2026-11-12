@@ -276,6 +276,62 @@ for file in \
     fi
 done
 
+section 'IMPLEMENTATION INPUTS: ACTIVE SESSION AND PROCESS CONTEXT'
+printf 'Audit context: tty=%s; XDG_SESSION_TYPE=%s; WAYLAND_DISPLAY=%s; HYPRLAND_INSTANCE_SIGNATURE=%s; XDG_RUNTIME_DIR=%s\\n' \
+    "$(tty 2>/dev/null || printf unknown)" "${XDG_SESSION_TYPE:-absent}" "${WAYLAND_DISPLAY:-absent}" \
+    "${HYPRLAND_INSTANCE_SIGNATURE:+present}" "${XDG_RUNTIME_DIR:-absent}" | redact >>"$report"
+if have loginctl; then
+    loginctl list-sessions --no-legend 2>&1 | redact >>"$report" || true
+fi
+if have ps; then
+    ps -eo pid,ppid,etimes,stat,comm,cgroup --sort=pid 2>/dev/null |
+        awk 'NR==1 || tolower($0) ~ /hyprland|quickshell|caelestia|hyprlock|systemd --user/' |
+        redact >>"$report" || true
+fi
+# Read-only probes deliberately use the same Caelestia CLI contract as the
+# installed lock helper. Never send the mutating "lock" IPC request here.
+if have caelestia; then
+    run 'IMPLEMENTATION PROBE: CAELESTIA SHELL EXPORTS' caelestia shell -s
+    run 'IMPLEMENTATION PROBE: CAELESTIA LOCK STATE' caelestia shell lock isLocked
+else
+    note '[caelestia executable unavailable; helper IPC contract cannot be probed]'
+fi
+if have systemctl; then
+    run 'IMPLEMENTATION PROBE: USER SESSION ENVIRONMENT' systemctl --user show-environment
+    for unit in caelestia.service quickshell.service hyprland-session.target graphical-session.target; do
+        run "IMPLEMENTATION PROBE: USER UNIT CAT $unit" systemctl --user cat "$unit"
+    done
+fi
+
+section 'IMPLEMENTATION INPUTS: ALLOWLISTED CONFIG CONTENT'
+# Capture only files directly relevant to the lock lifecycle. Do not dump
+# arbitrary user configuration, credentials, or the complete environment.
+for file in \
+    "$HOME/.config/caelestia/shell.json" \
+    "$HOME/.config/quickshell/caelestia/shell.qml" \
+    "$HOME/.config/hypr/hyprland.conf" \
+    "$HOME/.config/hypr/hyprland.lua" \
+    "$HOME/.config/k41/hyprlock-fallback.conf" \
+    "$HOME/.local/bin/k41-lock-caelestia-after-start"; do
+    section "IMPLEMENTATION CONFIG CONTENT: ${file#"$HOME"/}"
+    if [[ -f $file && ! -L $file && -r $file ]]; then
+        stat -c 'size=%s mode=%A uid=%u gid=%g modified=%y' "$file" 2>&1 | redact >>"$report" || true
+        if have sha256sum; then sha256sum "$file" 2>&1 | redact >>"$report" || true; fi
+        head -c 65536 "$file" | head -n 800 | redact >>"$report" || true
+    else
+        note '[missing, unreadable, symlinked, or not a regular file]'
+    fi
+done
+
+section 'IMPLEMENTATION INPUTS: REPOSITORY LOCKSCREEN TREE'
+repo_lock_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen"
+if [[ -d $repo_lock_root && ! -L $repo_lock_root ]]; then
+    find "$repo_lock_root" -maxdepth 5 -type f \\( -name '*.qml' -o -name '*.conf' -o -name '*.json' -o -name '*.lua' -o -name '*.sh' -o -name '*.service' -o -name '*.target' \\) \\
+        -printf '%P (%s bytes)\\n' 2>/dev/null | sort | head -n 300 | redact >>"$report" || true
+else
+    note '[repository lockscreen workstream directory missing or unsafe]'
+fi
+
 section 'HYPRLAND CONFIG FILE INVENTORY'
 for base in "$HOME/.config/hypr" "$HOME/.config/quickshell/caelestia" "$HOME/.config/caelestia"; do
     [[ -d $base && ! -L $base ]] || continue
