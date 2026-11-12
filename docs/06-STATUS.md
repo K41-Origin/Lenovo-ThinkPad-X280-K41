@@ -99,3 +99,8 @@ Bukti Stage 4 historis tetap tersimpan pada commit arsip 02f6194ed04c8f13ea64eda
 - **BLOCKED:** source `modules/topbar/Topbar.qml` canonical masih mengandung import/service Caelestia. Deployer baru sengaja menolak source tersebut sampai adaptasi K41-owned selesai. Karena itu deployer belum dapat dipakai untuk instalasi runtime.
 - **NOT TESTED:** Bash syntax dan fixture test belum dijalankan terhadap checkout lokal/X280. Tidak ada deployment, reload, restart, autostart change, atau perubahan NotificationServer yang dilakukan.
 - **NEXT:** adaptasi QML/services menjadi milik K41, termasuk NotificationServer + Notification Dock, setelah mekanisme transisi kepemilikan D-Bus dari Caelestia dipastikan aman.
+
+
+### Koreksi arsitektur WS04 — 13 November 2026
+
+Entry point tetap `~/.config/quickshell/caelestia/shell.qml`. K41 Topbar dipelihara sebagai modul mandiri di namespace Caelestia config (`caelestia/k41/modules/topbar`) dan di-mount oleh host tersebut. Shell entry point K41 terpisah tidak digunakan. Deployer sudah dikoreksi untuk model ini; migrasi QML/services K41 dan penyelesaian konflik kepemilikan NotificationServer masih pending. Fixture test belum dijalankan.
