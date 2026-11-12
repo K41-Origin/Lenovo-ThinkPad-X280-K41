@@ -1,6 +1,6 @@
 # Workstream 03 — Bottombar
 
-**Status: IMPLEMENTATION SCRIPT IMPLEMENTED — TEST PENDING.** Audit aktual X280 telah ditinjau. Source kanonis Bottombar dan script install/repair sudah ditambahkan; pengujian fixture dan runtime pada X280 masih harus dijalankan.
+**Status: AUDIT SCRIPT UPDATED — IMPLEMENTER ALIGNMENT REQUIRED.** Audit kini memeriksa namespace runtime K41 dan integrasi host. Jangan jalankan installer sampai target runtime dan test fixture diselaraskan dengan hasil audit baru.
 
 Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan kerja mengikuti Workstream 02, tetapi implementasi Bottombar tetap disesuaikan dengan hasil audit dan kontrak Quickshell/Caelestia yang benar-benar terverifikasi.
 
@@ -23,7 +23,7 @@ Urutan pengerjaan mengikuti pola Workstream 02. Ketiga script memiliki ownership
 | 2 | `scripts/k41-implement-bottombar.sh` | Satu operasi: memasang atau memperbaiki modul QML Bottombar. Backup privat, atomic replacement, verifikasi, dan automatic rollback adalah mekanisme keselamatan operasi tersebut; tidak mengelola host integration/configuration. | **IMPLEMENTED — TEST PENDING** |
 | 3 | `scripts/k41-cleanup-bottombar.sh` | Audit target cleanup, dry-run, backup, penghapusan/nonaktifkan komponen yang disetujui, verifikasi, dan rollback. | PLANNED |
 
-Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.Qml`. Script berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/`.
+Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.Qml`. Target runtime arsitektural adalah `~/.config/quickshell/k41/modules/bottombar/Dock.Qml`. Script berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/`.
 
 ### Tahap 1 — Audit dan pengumpulan bukti
 
@@ -51,7 +51,8 @@ Audit mengumpulkan:
 
 - Repository HEAD, status branch/worktree/index sebagai observasi read-only.
 - Source K41 legacy, seluruh file terkait, ukuran dan SHA-256.
-- Root Caelestia user/XDG/system yang ditemukan, provenance Git jika tersedia, metadata runtime, dan file Bottombar yang sudah terpasang.
+- Root runtime K41 dan Caelestia user/XDG/system, target `modules/bottombar/Dock.Qml`, entry point, provenance Git jika tersedia, metadata, ownership, permission, dan file modul yang sudah terpasang.
+- Direktori konfigurasi Quickshell, konfigurasi bernama yang tersedia, proses Quickshell aktif (command line saja), serta referensi K41/Bottombar dalam QML/JS host.
 - Titik integrasi pada `shell.qml` serta metadata `bar.entries` dari konfigurasi JSON tanpa mencetak seluruh konfigurasi.
 - Isi installer historis, mode operasi, target perubahan, backup/manifest, dan indikasi rollback.
 - Import QML, API yang dipakai, relative import, dan kandidat type yang perlu diverifikasi.
@@ -79,19 +80,19 @@ Jalankan dari Git checkout sebagai user desktop biasa:
 bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-implement-bottombar.sh
 ```
 
-Script hanya memiliki satu operasi: memasang atau memperbaiki modul. Tidak ada mode `--check`, `--rollback`, cleanup, package management, atau service management.
+Script implementasi saat ini belum boleh dijalankan: audit sebelumnya menunjukkan target lama di namespace Caelestia, sedangkan arsitektur menetapkan namespace K41. Perbarui installer dan fixture test agar menggunakan `~/.config/quickshell/k41/modules/bottombar/Dock.Qml`, lalu validasi host-loading contract secara terpisah. Script tetap dibatasi pada satu operasi: memasang atau memperbaiki modul; tidak ada mode `--check`, `--rollback`, cleanup, package management, atau service management.
 
-**Pemetaan source ke runtime:** audit membuktikan bahwa Caelestia `shell.qml` saat ini mengimpor `modules/k41dock` sebagai `K41Dock` dan membuat `K41Dock.K41Dock {}`. Agar host contract yang sudah berjalan tetap kompatibel tanpa mengubah file host, source `Dock.Qml` dipasang dengan nama runtime:
+**Pemetaan source ke runtime:** target kanonis modul K41 adalah:
 
 ```text
-~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml
+~/.config/quickshell/k41/modules/bottombar/Dock.Qml
 ```
 
-Nama file runtime `K41Dock.qml` dipertahankan karena nama tersebut menyediakan tipe QML `K41Dock` yang dipakai oleh import/instance Caelestia. Source repository tetap menggunakan struktur baru `modules/bottombar/Dock.Qml`.
+Keberadaan file pada namespace K41 tidak otomatis membuatnya dimuat oleh Caelestia/Quickshell. Host harus memiliki import/reference yang valid atau dijalankan melalui konfigurasi Quickshell yang memuat modul tersebut. Audit harus menunjukkan entry point dan kontrak import/type aktual sebelum perubahan integrasi disetujui. Jangan mengasumsikan bahwa file `K41Dock.qml` di namespace Caelestia lama adalah target deployment yang benar.
 
 Perilaku script:
 - Menolak root/sumber/target symlink, path tidak aman, dan file yang bukan regular file.
-- Memastikan user runtime Caelestia dan host import/instance yang ditemukan audit tersedia.
+- Memastikan target namespace K41, parent directory, ownership, permission, dan source valid sesuai hasil audit.
 - Tidak mengubah `shell.qml`, `shell.json`, konfigurasi system-wide, paket, atau service.
 - Jika source dan target sudah sama, berhenti tanpa perubahan.
 - Jika target berbeda, membuat backup privat dan manifest checksum sebelum atomic replacement.
