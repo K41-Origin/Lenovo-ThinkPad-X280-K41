@@ -13,7 +13,32 @@ fi
 STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
 OUT_ROOT="$REPO_ROOT/reports/stage-5-desktop-customization/01-boot-experience/audits"
 OUT="$OUT_ROOT/$STAMP"
+
+# When invoked through sudo, keep generated audit artifacts writable/readable
+# by the repository owner rather than leaving root-owned files that block git.
+AUDIT_UID="$EUID"
+AUDIT_GID="$(id -g)"
+if (( EUID == 0 )) && [[ ${SUDO_UID:-} =~ ^[0-9]+$ ]] &&
+  [[ ${SUDO_GID:-} =~ ^[0-9]+$ ]] && (( SUDO_UID > 0 )); then
+  AUDIT_UID="$SUDO_UID"
+  AUDIT_GID="$SUDO_GID"
+fi
+
 mkdir -p -- "$OUT"
+if (( EUID == 0 )); then
+  # Repair ownership of this audit history only; do not recurse over all reports
+  # or modify the repository's .git directory.
+  for dir in \
+    "$REPO_ROOT/reports" \
+    "$REPO_ROOT/reports/stage-5-desktop-customization" \
+    "$REPO_ROOT/reports/stage-5-desktop-customization/01-boot-experience" \
+    "$OUT_ROOT"; do
+    chown "$AUDIT_UID:$AUDIT_GID" "$dir"
+    chmod u+rwx "$dir"
+  done
+  chown -R "$AUDIT_UID:$AUDIT_GID" "$OUT_ROOT"
+fi
+
 chmod 0700 "$OUT"
 REPORT="$OUT/report.txt"
 : >"$REPORT"
