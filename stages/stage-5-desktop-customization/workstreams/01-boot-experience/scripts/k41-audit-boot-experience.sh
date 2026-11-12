@@ -233,6 +233,93 @@ collect_k41_files() {
   done
 }
 
+collect_plymouth_assets() {
+  local source_dir="$REPO_ROOT/stages/stage-5-desktop-customization/workstreams/01-boot-experience/themes/plymouth/k41"
+  local installed_dir="/usr/share/plymouth/themes/k41"
+  local file
+  echo "--- Plymouth selected theme ---"
+  if command -v plymouth-set-default-theme >/dev/null 2>&1; then
+    plymouth-set-default-theme 2>&1 || true
+    plymouth-set-default-theme -l 2>&1 || true
+  else
+    echo '[plymouth-set-default-theme unavailable]'
+  fi
+  echo
+  echo "--- Plymouth daemon configuration ---"
+  if [[ -r /etc/plymouth/plymouthd.conf ]]; then
+    sed -E 's/(password|passphrase|token|credential)(=[^[:space:]]*)?/\1=<REDACTED>/Ig' /etc/plymouth/plymouthd.conf
+  else
+    echo '[not readable or absent]'
+  fi
+  for file in "$source_dir/k41.plymouth" "$source_dir/k41.script" "$installed_dir/k41.plymouth" "$installed_dir/k41.script"; do
+    echo
+    echo "--- $file ---"
+    if [[ -f $file ]]; then
+      stat -c 'type=%F mode=%a size=%s mtime=%y' "$file" 2>&1 || true
+      sha256sum "$file" 2>&1 || true
+      pacman -Qo "$file" 2>&1 || true
+      sed -n '1,260p' "$file"
+    else
+      echo '[missing]'
+    fi
+  done
+  echo
+  echo "--- Theme source/deployed checksum comparison ---"
+  for file in k41.plymouth k41.script; do
+    if [[ -f $source_dir/$file && -f $installed_dir/$file ]]; then
+      if cmp -s "$source_dir/$file" "$installed_dir/$file"; then echo "$file: MATCH"; else echo "$file: DIFFERENT"; fi
+    else
+      echo "$file: SOURCE_OR_DEPLOYED_FILE_MISSING"
+    fi
+  done
+}
+
+collect_uki_evidence() {
+  local preset=/etc/mkinitcpio.d/linux.preset uki_path=''
+  echo "--- Relevant preset definitions ---"
+  if [[ -r $preset ]]; then
+    grep -nE '^(ALL_|PRESETS=|default_|fallback_|uki_|initrd_|image=|options=)' "$preset" || true
+    mapfile -t paths < <(sed -nE 's/^[[:space:]]*default_uki="([^"]+)".*/\1/p' "$preset")
+    if (( \${#paths[@]} == 1 )); then uki_path=\${paths[0]}; fi
+  else
+    echo '[linux.preset missing or unreadable]'
+  fi
+  echo
+  echo "--- UKI metadata ---"
+  if [[ -n $uki_path && -f $uki_path ]]; then
+    printf 'Configured default_uki=%s\n' "$uki_path"
+    stat -c 'type=%F mode=%a size=%s mtime=%y' "$uki_path" 2>&1 || true
+    sha256sum "$uki_path" 2>&1 || true
+    file "$uki_path" 2>&1 || true
+    objdump -h "$uki_path" 2>&1 || true
+    ukify inspect "$uki_path" 2>&1 || true
+    if command -v lsinitcpio >/dev/null 2>&1; then
+      echo "--- UKI embedded initramfs: Plymouth/theme/crypto entries ---"
+      lsinitcpio -a "$uki_path" 2>&1 | grep -Ei 'plymouth|themes/k41|\.plymouth|\.script|crypt|encrypt|tpm|systemd' | head -n 240 || true
+      echo "--- UKI embedded initramfs: theme paths ---"
+      lsinitcpio -l "$uki_path" 2>&1 | grep -Ei 'plymouth|themes/k41|\.plymouth|\.script' | head -n 160 || true
+    else
+      echo '[lsinitcpio unavailable]'
+    fi
+  else
+    printf 'Configured default_uki=%s; file missing, empty, or preset ambiguous\n' "\${uki_path:-UNKNOWN}"
+  fi
+  echo
+  echo "--- Boot entry references to UKI ---"
+  bootctl list --no-pager 2>&1 | grep -Ei -C 3 'arch-linux|linux\.efi|uki|default' | head -n 160 || true
+}
+
+collect_plymouth_journal() {
+  local boot
+  for boot in 0 -1; do
+    echo
+    echo "--- journalctl -b $boot Plymouth/initramfs/crypt messages ---"
+    journalctl -b "$boot" --no-pager -o short-monotonic 2>&1 |
+      grep -Ei 'plymouth|splash|initramfs|mkinitcpio|cryptsetup|systemd-cryptsetup|sd-encrypt|firmware|simpledrm|drm|fbcon' |
+      tail -n 350 || true
+  done
+}
+
 redact_journal() {
   grep -Ei 'plymouth|systemd-boot|systemd-crypt|cryptsetup|mkinitcpio|initramfs|dracut|luks|tpm|secure boot|efi|kernel command|k41|hyprland|quickshell|caelestia|agetty' |
     tail -n 500 |
@@ -272,7 +359,8 @@ run "MOUNT TABLE (BOOT-RELATED)" collect_mounts
 run "ROOT SOURCE" findmnt -no SOURCE,FSTYPE,OPTIONS /
 run "CRYPT DEVICE STATUS (NO KEYS)" collect_crypt_status
 run "LUKS METADATA SUMMARY (NO KEY MATERIAL)" collect_luks_metadata
-read_file "KERNEL COMMAND LINE (SENSITIVE FIELDS REDACTED)" /etc/kernel/cmdline
+read_file "KERNEL COMMAND LINE CONFIGURATION (SENSITIVE FIELDS REDACTED)" /etc/kernel/cmdline
+read_file "RUNNING KERNEL COMMAND LINE (SENSITIVE FIELDS REDACTED)" /proc/cmdline
 read_file "FILESYSTEM TABLE" /etc/fstab
 run "CRYPTTAB (KEYFILE PATHS REDACTED)" collect_crypttab
 read_file "MKINITCPIO HOOKS CONFIGURATION" /etc/mkinitcpio.conf
@@ -282,6 +370,8 @@ run "INITRAMFS TOOL VERSION" mkinitcpio --version
 run "INITRAMFS CONTENTS — PLYMOUTH / CRYPT / TPM MATCHES" collect_initramfs
 run "KERNEL / PACKAGE VERSIONS" collect_versions
 run "PLYMOUTH THEME / PACKAGE" collect_plymouth
+run "PLYMOUTH CONFIGURATION AND K41 SOURCE/DEPLOYED ASSETS" collect_plymouth_assets
+run "UKI BUILD ARTIFACT AND EMBEDDED CONTENT EVIDENCE" collect_uki_evidence
 run "PLYMOUTH / CRYPT / TPM SYSTEMD UNITS" systemctl list-unit-files 'plymouth*' 'systemd-cryptsetup*' 'getty@tty1.service' 'k41-*' --no-pager
 run "ACTIVE CRYPTSETUP UNITS" systemctl list-units --all --no-pager 'systemd-cryptsetup*'
 run "BOOTLOADER / KERNEL INSTALL FILES" bash -c '
@@ -310,6 +400,7 @@ section "CURRENT AND PREVIOUS BOOT JOURNAL (FILTERED)"
 if command -v journalctl >/dev/null 2>&1; then
   journalctl -b --no-pager -o short-monotonic 2>&1 | redact_journal >>"$REPORT" || true
   journalctl -b -1 --no-pager -o short-monotonic 2>&1 | redact_journal >>"$REPORT" || true
+  collect_plymouth_journal >>"$REPORT" 2>&1 || true
 else
   note "[journalctl unavailable]"
 fi
