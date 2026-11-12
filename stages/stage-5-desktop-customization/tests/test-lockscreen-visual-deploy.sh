@@ -73,9 +73,7 @@ if [[ ${1:-} == -C ]]; then
             exit 0
             ;;
         show)
-            file=${2#HEAD:}
-            cat "$repo/$file"
-            exit 0
+            exec /usr/bin/git -C "$repo" show "$@"
             ;;
     esac
 fi
