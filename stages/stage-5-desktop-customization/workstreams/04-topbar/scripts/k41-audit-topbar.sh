@@ -89,34 +89,31 @@ def version(binary):
         return
     rc, value = run([path, "--version"])
     add(f"{binary}: path-present; version-exit={rc}; {bounded(value, 240)}")
-def safe_inventory(label, root, limit=160):
+def safe_inventory(label, root, limit=5000):
     add(f"{label}: {'PRESENT' if root.is_dir() and not root.is_symlink() else 'ABSENT_OR_NOT_DIRECTORY'}")
     if not root.is_dir() or root.is_symlink():
         return
-    count = 0
+    counts = {}
+    total = 0
     truncated = False
     for base, dirs, names in os.walk(root, followlinks=False):
         dirs[:] = sorted(d for d in dirs if d not in {
             ".git", "node_modules", "build", ".cache", "__pycache__", ".venv"
         } and not (pathlib.Path(base) / d).is_symlink())
-        for name in sorted(names):
+        for name in names:
             p = pathlib.Path(base) / name
             if p.is_symlink() or not p.is_file():
                 continue
-            try:
-                rel = p.relative_to(root).as_posix()
-                suffix = p.suffix.lower() or "[no-extension]"
-                size = p.stat().st_size
-            except OSError:
-                continue
-            add(f"  file: {rel[:180]} | type={suffix} | bytes={size}")
-            count += 1
-            if count >= limit:
+            suffix = p.suffix.lower() or "[no-extension]"
+            counts[suffix] = counts.get(suffix, 0) + 1
+            total += 1
+            if total >= limit:
                 truncated = True
                 break
         if truncated:
             break
-    add(f"  files-listed={count}; truncated={'yes' if truncated else 'no'}")
+    add("  file-count-by-type: " + (", ".join(f"{k}={v}" for k, v in sorted(counts.items())) or "none"))
+    add(f"  files-counted={total}; truncated={'yes' if truncated else 'no'}")
 def parse_json_command(args):
     rc, value = run(args)
     if rc != 0:
