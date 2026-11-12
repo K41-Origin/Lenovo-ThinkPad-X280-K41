@@ -38,6 +38,11 @@ grep -Fq 'service: Memory' "$qml"
 grep -Fq 'Cpu.percentage' "$qml"
 grep -Fq 'Memory.percentage' "$qml"
 grep -Fq 'UPower.displayDevice.percentage' "$qml"
+grep -Fq 'Math.round(UPower.displayDevice.percentage)' "$qml"
+if grep -Fq 'UPower.displayDevice.percentage * 100' "$qml"; then
+    printf 'UPower percentage must not be multiplied by 100.\n' >&2
+    exit 1
+fi
 grep -Fq 'UPower.onBattery' "$qml"
 grep -Fq 'Time.format(' "$qml"
 grep -Fq 'Notifs.notClosed.length' "$qml"
@@ -59,6 +64,9 @@ test -f "$target"
 cmp -s "$target" "$qml"
 grep -Fqx 'import "../k41/modules/topbar" as K41Topbar' "$shell"
 grep -Fqx '    K41Topbar.Topbar {}' "$shell"
+root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell" | cut -d: -f1)"
+topbar_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell" | cut -d: -f1)"
+test "$topbar_line" -gt "$root_id_line"
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
 
 # A second run must be idempotent and must not create another backup.
@@ -74,5 +82,26 @@ if run_installer >/dev/null 2>&1; then
 fi
 after="$(sha256sum "$target" | awk '{print $1}')"
 test "$before" == "$after"
+
+# A host without the expected root id must fail before creating a backup or changing files.
+cat >"$shell" <<'QML'
+import "modules"
+import QtQuick
+import Quickshell
+import qs.services
+
+ShellRoot {
+    Background {}
+}
+QML
+backup_count_before="$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)"
+if run_installer >/dev/null 2>&1; then
+    printf 'Expected missing-root-id failure.\n' >&2
+    exit 1
+fi
+after="$(sha256sum "$target" | awk '{print $1}')"
+test "$before" == "$after"
+backup_count_after="$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)"
+test "$backup_count_before" -eq "$backup_count_after"
 
 printf 'PASS: provider contract, deployment, host integration, backup, idempotency, and fail-closed fixture.\n'
