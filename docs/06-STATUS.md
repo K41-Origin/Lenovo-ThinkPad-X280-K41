@@ -24,7 +24,6 @@
 6. **Workstream 06 — Launcher: PLANNED.**
 7. **Workstream 07 — Sidebar: PLANNED.**
 8. **Workstream 08 — Utilities: PLANNED.**
-9. Guest Mode (ID 03) **NOT IMPLEMENTED / DEFERRED** dan bukan pekerjaan aktif.
 
 ## Prinsip Stage 5 dan K41-dots
 
