@@ -1,7 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: IN PROGRESS — RENDERING USER-CONFIRMED; FUNCTIONAL REVIEW AND STANDALONE MIGRATION PENDING.** Pengguna telah mengonfirmasi Topbar tampil setelah reboot. Rendering dasar diterima, tetapi seluruh fungsi dan acceptance belum VERIFIED. Anomali battery percentage (laporan pengguna pernah 1%, sedangkan audit UPower berikutnya 55%) dan perilaku klik Notifications masih perlu dituntaskan. Arah migrasi terbaru adalah membuat Topbar sebagai konfigurasi Quickshell mandiri milik K41, tidak di-import ke `caelestia/shell.qml`, dan tidak memodifikasi source Caelestia. Script deployment saat ini masih menerapkan arsitektur lama; migrasi script ditahan sampai kepemilikan Notification D-Bus dan mekanisme start/stop dua shell ditetapkan. Status proyek mengikuti `docs/06-STATUS.md`.
-
+**Status: IN PROGRESS — K41 SERVICE MIGRATION IMPLEMENTED (5/6 FUNCTIONAL BACKENDS); NOT YET TESTED ON X280.** Source Topbar sekarang tidak lagi mengimpor service internal Caelestia. CPU dan RAM membaca kernel procfs melalui Quickshell Process; Battery memakai Quickshell UPower; Clock memakai Qt Date/Timer; TopbarState dimiliki K41. Notifications sengaja masih nonaktif (count placeholder) sampai ownership D-Bus `org.freedesktop.Notifications` dialihkan dengan aman. Deployer tetap mempertahankan entry point `~/.config/quickshell/caelestia/shell.qml` dan memasang modul K41 di bawah config root yang sama. Deployment, Bash/QML validation, dan runtime X280 belum dilakukan.
 ## Tujuan dan batas ownership
 
 Membuat panel horizontal di tepi atas layar sebagai area informasi/status desktop yang ringkas. Topbar melengkapi Bottombar tanpa menduplikasi indikator workspace atau mengambil terlalu banyak ruang vertikal.
@@ -378,3 +377,20 @@ Konsekuensinya:
 - NotificationServer K41 masih membutuhkan desain kepemilikan D-Bus agar tidak bersaing dengan NotificationServer Caelestia. Ini belum diimplementasikan.
 
 Status: deployer telah dikoreksi untuk mempertahankan entry point Caelestia; migrasi source Topbar ke API mandiri K41 masih diperlukan sebelum deployer dapat digunakan. Fixture test baru belum dijalankan.
+
+
+## Implementasi migrasi service — 13 November 2026
+
+**IMPLEMENTED pada repository:**
+- `services/Cpu.qml`: sampling `/proc/stat` setiap 2 detik dan menghitung delta total/idle.
+- `services/Memory.qml`: membaca `/proc/meminfo` setiap 5 detik; persentase dihitung dari `MemTotal` dan `MemAvailable`.
+- `services/Battery.qml`: memakai `Quickshell.Services.UPower`; nilai `percentage` UPower sudah dalam satuan persen (tidak dikalikan 100).
+- `services/Clock.qml`: jam/tanggal memakai `Qt.formatDateTime` dan Timer.
+- `services/TopbarState.qml`: state panel notifikasi dimiliki K41.
+- `Topbar.qml`: seluruh binding menggunakan service lokal melalui relative import `services`; tidak lagi mengimpor `Caelestia.Services`, `qs.services`, `ShellState`, `Notifs`, atau `Time`.
+
+**PENDING / SAFETY GATE — Notifications:** `services/Notifications.qml` saat ini hanya menyediakan status placeholder dan count 0. Belum membuat `NotificationServer`, karena server aktif lain dapat memiliki nama D-Bus `org.freedesktop.Notifications`. Jangan menganggap tray/notifikasi sudah dimigrasikan. Implementasi NotificationServer dan Notification Dock baru boleh diaktifkan setelah audit membuktikan mekanisme handoff/disable server lama dan memastikan satu owner saja.
+
+**Testing status:** file dan commit GitHub telah ditulis serta dapat di-fetch kembali. Bash syntax, fixture test, QML parse/load, ShellCheck, dan runtime belum dinyatakan TESTED. Fixture test kini menyalin enam service dan memeriksa instalasi service-first, idempotensi, dependency guard, serta symlink guard; test belum dijalankan.
+
+**Cara uji setelah memperbarui checkout lokal:** jalankan fixture test terlebih dahulu, lalu deployer sebagai user desktop biasa tanpa sudo. Deployer hanya menulis file dan host integration; tidak me-restart Quickshell atau mengubah autostart. Reboot atau reload Quickshell dilakukan secara manual setelah hasil preflight/test lulus.
