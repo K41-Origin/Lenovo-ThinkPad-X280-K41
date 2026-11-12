@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: PLANNED — DESIGN DECISIONS RECORDED; AUDIT NOT STARTED.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
+**Status: IMPLEMENTED — SOURCE, DEPLOYER, AND FIXTURE TEST CREATED; RUNTIME VERIFICATION PENDING.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
 
 ## Tujuan dan batas ownership
 
@@ -81,18 +81,45 @@ Keputusan visual merupakan target desain, bukan klaim bahwa nilai teknis atau ta
 
 ### Hal yang masih terbuka
 
-Keputusan desain utama di atas sudah dicatat. Hal teknis berikut tetap harus ditentukan berdasarkan audit, tanpa mengubah keputusan pengguna secara sepihak:
+Backend awal telah dipilih berdasarkan audit X280 dan source upstream yang dipin ke revision Caelestia `d999d4878ee4cec134168e60d913714566a8cfa6` serta dokumentasi Quickshell 0.3.2. Detail berikut tetap memerlukan verifikasi atau review perangkat:
 
-- Backend/sumber data untuk CPU, RAM, notifikasi, baterai, serta jam/tanggal/hari.
-- Format tampilan dan satuan CPU/RAM; detail status baterai.
-- Detail visual ikon notifikasi, isi dan layout tray, serta perilaku saat tidak ada notifikasi atau provider unavailable.
-- Format jam/tanggal/hari dan locale/timezone yang digunakan runtime.
-- Alignment dan pembagian ruang final, spacing, margin, padding, serta nilai tinggi final.
-- Perilaku exclusive zone, fullscreen, fokus, monitor hotplug, resolusi, dan scaling.
-- Interaksi notifikasi berupa klik ikon untuk membuka tray notifikasi termasuk baseline yang telah disetujui. Interaksi/menu/keybind lain di luar itu memerlukan kebutuhan dan persetujuan baru.
-- Pilihan integrasi: native Caelestia bar, modul QML K41, atau pendekatan lain yang didukung API upstream terverifikasi.
+- Typography final, ukuran ikon, alignment, spacing, padding, dan detail visual tray.
+- Format tanggal/locale aktual pada sesi X280 dan keterbacaan pada scaling 1.5.
+- Perilaku overlay layer saat fullscreen pada Hyprland aktual; penggunaan `WlrLayer.Overlay` adalah implementasi awal, bukan bukti runtime.
+- Hotplug, multi-monitor, tray positioning, dan respons ketika data source tidak tersedia.
+- Validasi QML compile/runtime pada versi paket yang terpasang.
 
-Jangan menambahkan elemen lain tanpa persetujuan. Jangan menampilkan status yang ditebak atau membuat provider duplikat tanpa kebutuhan.
+Jangan menambahkan elemen lain tanpa persetujuan. Jangan menampilkan status yang ditebak atau membuat provider/notification daemon duplikat.
+
+## Baseline implementasi awal — 13 November 2026
+
+Source dan deployer awal telah dibuat dengan pola ownership dan deployment WS02/WS03:
+
+| Artefak | Lokasi canonical |
+|---|---|
+| QML module | `workstreams/04-topbar/modules/topbar/Topbar.qml` |
+| Deployment script | `workstreams/04-topbar/scripts/k41-implement-topbar.sh` |
+| Fixture test | `tests/test-topbar-module-install.sh` |
+| Runtime module | `~/.config/quickshell/k41/modules/topbar/Topbar.qml` |
+| Caelestia host | `~/.config/quickshell/caelestia/shell.qml` |
+
+Backend yang dipakai:
+
+- CPU: delta counter aggregate `/proc/stat`, diperbarui setiap 2 detik.
+- RAM: `MemTotal` dan `MemAvailable` dari `/proc/meminfo`, diperbarui setiap 2 detik.
+- Battery: `/sys/class/power_supply/BAT0/capacity` dan `status`, diperbarui setiap 15 detik. Nama BAT0 sesuai hasil audit X280; perangkat lain belum didukung otomatis.
+- Clock: Qt locale formatter, diperbarui setiap detik.
+- Notifications: singleton Caelestia `Notifs` melalui `qs.services`; tray memakai `Notifs.notClosed` dan `NotifData.close()`. Tidak membuat notification daemon atau NotificationServer kedua. API diverifikasi terhadap source Caelestia revision yang tercatat di atas.
+
+Topbar memakai Quickshell `Variants` atas `Quickshell.screens`, `PanelWindow` setinggi 34 px, exclusive zone 34 px, keyboard focus none, dan `WlrLayer.Overlay` sebagai upaya memenuhi intent tetap terlihat saat fullscreen. Tray notifikasi dibuka dari ikon/count dan dapat ditutup melalui tombol close. Source upstream Caelestia tidak disalin atau dimodifikasi; host hanya menerima satu import dan satu instance K41.
+
+Deployment script berjalan sebagai user desktop biasa, menolak root, memvalidasi ownership/file type/symlink/host structure, membuat backup privat plus manifest, memakai staging dan atomic replacement, memverifikasi hasil, mendukung idempotensi, serta rollback untuk dua target. Script tidak me-restart atau me-reload Quickshell secara otomatis.
+
+**Batas bukti saat ini:**
+- IMPLEMENTED: source QML, deployer, dan fixture test telah ditambahkan ke repository.
+- TESTED: `bash -n` untuk deployer dan fixture; fixture dijalankan sebagai user non-root dan lulus untuk deployment, integrasi host, backup, idempotensi, dan fail-closed pada integrasi parsial.
+- NOT TESTED: ShellCheck tidak tersedia pada lingkungan validasi; `qmllint`/QML compiler tidak tersedia pada audit X280.
+- NOT VERIFIED: QML compile/load, data provider pada runtime, tampilan, klik/tray, exclusive zone, fullscreen, seluruh monitor, scaling, dan regression Bottombar. Deployment ke X280 belum dijalankan.
 
 ## Batas scope
 
@@ -117,10 +144,10 @@ Urutan mengikuti pola Workstream 02 dan 03: audit read-only lebih dahulu, keputu
 
 | Urutan | Tahap | Tanggung jawab | Status |
 |---:|---|---|---|
-| 1 | Audit Topbar | Inventaris source/runtime aktif, versi, dependency/API, panel/bar yang tersedia, konfigurasi, monitor/scaling, tray/status providers, lifecycle, dan titik integrasi. Read-only. | **PLANNED** |
-| 2 | Review audit dan spesifikasi | Validasi keputusan desain yang sudah disepakati terhadap bukti teknis; tetapkan backend, format data, detail layout, dan acceptance final. | **PLANNED** |
-| 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **PLANNED — GATED BY AUDIT AND SPECIFICATION REVIEW** |
-| 4 | Automated testing | Bash syntax/ShellCheck untuk script; fixture/mock untuk path, backup, idempotensi, failure, rollback, serta kontrak integrasi yang dapat diuji statis. | **PLANNED** |
+| 1 | Audit Topbar | Inventaris source/runtime aktif, versi, dependency/API, panel/bar yang tersedia, konfigurasi, monitor/scaling, tray/status providers, lifecycle, dan titik integrasi. Read-only. | **IMPLEMENTED — audit X280 2026-11-12 direview; source Caelestia dipin dan API Notifs diperiksa** |
+| 2 | Review audit dan spesifikasi | Validasi keputusan desain yang sudah disepakati terhadap bukti teknis; tetapkan backend, format data, detail layout, dan acceptance final. | **IMPLEMENTED — baseline backend/integrasi awal ditetapkan; detail visual/runtime masih perlu review** |
+| 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **IMPLEMENTED — source/deployer dibuat; deployment X280 belum dijalankan** |
+| 4 | Automated testing | Bash syntax/ShellCheck untuk script; fixture/mock untuk path, backup, idempotensi, failure, rollback, serta kontrak integrasi yang dapat diuji statis. | **PARTIALLY TESTED — bash -n dan fixture lulus; ShellCheck/QML lint belum tersedia** |
 | 5 | Runtime verification dan review | Verifikasi QML/API pada versi X280, visual/interaksi, seluruh monitor, fullscreen/fokus, restart, error log, dan resource. | **PLANNED** |
 | 6 | Acceptance dan handoff | Tinjau bukti, catat batas yang belum diverifikasi, minta penerimaan pengguna, lalu perbarui status dan lanjutkan ke WS05 bila gate terpenuhi. | **PLANNED** |
 
@@ -152,7 +179,7 @@ Keputusan pendekatan, lima elemen, urutan, properti visual, visibility, dan caku
 - Perilaku exclusive zone, fullscreen/fokus, seluruh monitor, monitor hotplug, resolusi, dan scaling.
 - Batas integrasi Caelestia dan dependency yang tetap dimiliki upstream.
 
-Jangan mulai mengubah source runtime sebelum audit direview dan spesifikasi teknis disetujui pengguna. Jika audit menunjukkan kebutuhan tidak jelas atau API belum terverifikasi, tandai BLOCKED dan lakukan investigasi terarah.
+Source canonical K41 boleh disiapkan setelah baseline teknis disepakati, tetapi deployment runtime tetap menunggu review implementasi dan validasi preflight pada X280. Jika audit menunjukkan kebutuhan tidak jelas atau API belum terverifikasi, tandai BLOCKED dan lakukan investigasi terarah.
 
 ### Tahap 3 — Implementasi dan deployment
 
@@ -169,13 +196,13 @@ Implementasi harus mengikuti hasil audit dan spesifikasi yang disetujui:
 9. Jangan restart/reload shell secara otomatis kecuali diperlukan, disetujui, dan mekanisme pemulihannya jelas.
 10. Simpan log privat; publikasi hanya salinan tersanitasi dan setelah review.
 
-Nama script, path source, target runtime, serta detail API belum ditetapkan. Semua itu baru boleh diputuskan setelah audit; jangan mengarang entry point atau menganggap kompatibilitas berdasarkan nama API.
+Nama script, source, target runtime, dan API baseline telah ditetapkan pada tabel Baseline implementasi awal. Perubahan terhadap titik integrasi host tetap fail-closed jika struktur Caelestia lokal tidak cocok dengan pola yang dikenali.
 
 ### Tahap 4 — Automated testing
 
 Test minimum ditentukan oleh desain final dan mencakup, bila relevan:
 
-- Bash syntax dan ShellCheck.
+- Bash syntax dan ShellCheck. Bash syntax telah diuji; ShellCheck belum dijalankan karena tidak tersedia pada lingkungan validasi.
 - Audit tetap read-only terhadap runtime dan Git checkout.
 - Missing dependency/source/target, symlink, file type, ownership, dan host state ambigu.
 - Deploy/repair, idempotensi, backup/checksum, failure injection, rollback, dan fail-closed.
