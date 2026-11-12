@@ -77,8 +77,15 @@ instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*
 root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_file" || true)"
 (( root_id_n == 1 )) || die 'Caelestia shell.qml harus memiliki tepat satu id: root.'
 (( import_n <= 1 && instance_n <= 1 )) || die 'Integrasi K41 duplikat terdeteksi.'
-if (( import_n == 1 && instance_n == 1 )) && cmp -s "$source_file" "$target_file"; then
-    info 'K41 Topbar sudah terpasang pada Caelestia host; tidak ada perubahan.'
+services_match=1
+for service in "${required_services[@]}"; do
+    if ! cmp -s "$service_source_dir/$service" "$service_target_dir/$service"; then
+        services_match=0
+        break
+    fi
+done
+if (( import_n == 1 && instance_n == 1 && services_match == 1 )) && cmp -s "$source_file" "$target_file"; then
+    info 'K41 services dan Topbar sudah terpasang pada Caelestia host; tidak ada perubahan.'
     exit 0
 fi
 if (( (import_n == 1) != (instance_n == 1) )); then
