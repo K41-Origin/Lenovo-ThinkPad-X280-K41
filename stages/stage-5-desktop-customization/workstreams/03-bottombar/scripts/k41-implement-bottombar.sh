@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
-# Install or repair only the K41 Bottombar QML module.
+# Deploy the canonical K41 Bottombar into the audited, currently loaded Caelestia host.
+# This is a compatibility deployment; it does not create or activate a standalone K41 shell.
 set -Eeuo pipefail
 umask 077
 
-die() {
-    printf 'ERROR: %s\n' "$*" >&2
-    exit 1
-}
-
-info() {
-    printf 'INFO: %s\n' "$*"
-}
+die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\\n' "$*"; }
 
 [[ $# -eq 0 ]] || die 'Script ini hanya menjalankan install/repair; tidak menerima opsi.'
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
@@ -32,12 +27,17 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/03-bott
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
 [[ $config_home == /* && -d $config_home && ! -L $config_home ]] ||
     die 'XDG_CONFIG_HOME harus berupa direktori absolut yang sudah ada dan bukan symlink.'
-[[ $(stat -c %u -- "$config_home") == "$EUID" ]] ||
-    die 'XDG_CONFIG_HOME bukan milik user aktif.'
+[[ $(stat -c %u -- "$config_home") == "$EUID" ]] || die 'XDG_CONFIG_HOME bukan milik user aktif.'
 
 quickshell_dir="$config_home/quickshell"
-[[ -d $quickshell_dir && ! -L $quickshell_dir ]] || die "Quickshell user config directory tidak ditemukan atau tidak aman: $quickshell_dir"
-[[ $(stat -c %u -- "$quickshell_dir") == "$EUID" ]] || die "Quickshell user config directory bukan milik user aktif."
+[[ -d $quickshell_dir && ! -L $quickshell_dir ]] ||
+    die "Quickshell user config directory tidak ditemukan atau tidak aman: $quickshell_dir"
+[[ $(stat -c %u -- "$quickshell_dir") == "$EUID" ]] ||
+    die 'Quickshell user config directory bukan milik user aktif.'
+
+# The X280 audit observed the active process as: qs -c caelestia -n -d.
+# Its user-level shell.qml imports modules/k41dock and instantiates K41Dock.K41Dock.
+# Deploy to that exact import location so this run exercises the real host contract.
 runtime_root="$quickshell_dir/caelestia"
 shell_file="$runtime_root/shell.qml"
 [[ -d $runtime_root && ! -L $runtime_root ]] ||
@@ -47,25 +47,32 @@ shell_file="$runtime_root/shell.qml"
 [[ -f $shell_file && ! -L $shell_file ]] ||
     die 'shell.qml tidak ditemukan atau berupa symlink; deployment dibatalkan.'
 
-# The audited host already imports modules/k41dock and instantiates
-# K41Dock.K41Dock. Preserve that contract; do not edit shell.qml or shell.json.
-grep -Fq 'import "modules/k41dock" as K41Dock' "$shell_file" ||
-    die 'Host import K41Dock tidak cocok dengan hasil audit; tidak mengubah integrasi host.'
-grep -Fq 'K41Dock.K41Dock {' "$shell_file" ||
-    die 'Host component K41Dock tidak ditemukan; tidak mengubah integrasi host.'
+import_line='import "modules/k41dock" as K41Dock'
+component_line='K41Dock.K41Dock {'
+[[ $(grep -Fxc -- "$import_line" "$shell_file" || true) -eq 1 ]] ||
+    die 'shell.qml harus memiliki tepat satu import modules/k41dock sebagai K41Dock.'
+[[ $(grep -Fxc -- "$component_line" "$shell_file" || true) -eq 1 ]] ||
+    die 'shell.qml harus memiliki tepat satu instance K41Dock.K41Dock.'
+
+# Capture host entrypoint state; the installer must never modify it.
+shell_sha_before="$(sha256sum -- "$shell_file" | awk '{print $1}')"
+[[ $shell_sha_before =~ ^[0-9a-f]{64}$ ]] || die 'Tidak dapat memverifikasi shell.qml.'
+json_file="$config_home/caelestia/shell.json"
+json_sha_before='ABSENT'
+if [[ -e $json_file || -L $json_file ]]; then
+    [[ -f $json_file && ! -L $json_file ]] || die 'Caelestia shell.json bukan regular file; deployment dibatalkan.'
+    json_sha_before="$(sha256sum -- "$json_file" | awk '{print $1}')"
+fi
 
 modules_dir="$runtime_root/modules"
 module_dir="$modules_dir/k41dock"
 target_file="$module_dir/K41Dock.qml"
 
 for path in "$modules_dir" "$module_dir"; do
-    if [[ -L $path ]]; then
-        die "Symlink pada direktori runtime ditolak: $path"
-    fi
+    if [[ -L $path ]]; then die "Symlink pada direktori runtime ditolak: $path"; fi
     if [[ -e $path ]]; then
         [[ -d $path ]] || die "Path runtime bukan direktori: $path"
-        [[ $(stat -c %u -- "$path") == "$EUID" ]] ||
-            die "Direktori runtime bukan milik user aktif: $path"
+        [[ $(stat -c %u -- "$path") == "$EUID" ]] || die "Direktori runtime bukan milik user aktif: $path"
     fi
 done
 
@@ -80,7 +87,9 @@ source_sha="$(sha256sum -- "$source_file" | awk '{print $1}')"
 [[ $source_sha =~ ^[0-9a-f]{64}$ ]] || die 'Tidak dapat menghitung checksum source.'
 
 if [[ -f $target_file ]] && cmp -s -- "$source_file" "$target_file"; then
-    info 'Bottombar sudah terpasang dan sesuai source; tidak ada perubahan.'
+    info 'Bottombar sudah terpasang pada host Caelestia aktif dan identik dengan source kanonis.'
+    info "Runtime: $target_file"
+    info 'Tidak ada file yang diubah; shell.qml dan shell.json tetap dipertahankan.'
     exit 0
 fi
 
@@ -90,8 +99,7 @@ for path in "$state_home" "$state_home/k41" "$state_home/k41/backups" "$state_ho
     [[ ! -L $path ]] || die "Symlink pada backup path ditolak: $path"
     if [[ -e $path ]]; then
         [[ -d $path ]] || die "Backup path bukan direktori: $path"
-        [[ $(stat -c %u -- "$path") == "$EUID" ]] ||
-            die "Backup path bukan milik user aktif: $path"
+        [[ $(stat -c %u -- "$path") == "$EUID" ]] || die "Backup path bukan milik user aktif: $path"
     fi
 done
 
@@ -117,11 +125,13 @@ else
 fi
 
 {
-    printf 'target=%s\n' "$target_file"
-    printf 'previous_sha256=%s\n' "$previous_sha"
-    printf 'source_sha256=%s\n' "$source_sha"
+    printf 'target=%s\\n' "$target_file"
+    printf 'previous_sha256=%s\\n' "$previous_sha"
+    printf 'source_sha256=%s\\n' "$source_sha"
+    printf 'deployment_kind=audited-caelestia-host-compatibility\\n'
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
+
 temp_file=''
 mutation_started=0
 rollback() {
@@ -131,19 +141,19 @@ rollback() {
         if (( had_target )); then
             local restore_tmp
             restore_tmp="$(mktemp "$module_dir/.K41Dock.restore.XXXXXX")" || {
-                printf 'CRITICAL: gagal membuat file restore; backup tersedia di %s\n' "$backup_root" >&2
+                printf 'CRITICAL: gagal membuat file restore; backup tersedia di %s\\n' "$backup_root" >&2
                 exit "$rc"
             }
             if cp -a -- "$backup_root/K41Dock.qml" "$restore_tmp" &&
                 mv -fT -- "$restore_tmp" "$target_file"; then
-                printf 'ROLLBACK: target dipulihkan dari %s\n' "$backup_root" >&2
+                printf 'ROLLBACK: target dipulihkan dari %s\\n' "$backup_root" >&2
             else
                 rm -f -- "$restore_tmp"
-                printf 'CRITICAL: rollback gagal; backup tersedia di %s\n' "$backup_root" >&2
+                printf 'CRITICAL: rollback gagal; backup tersedia di %s\\n' "$backup_root" >&2
             fi
         else
             rm -f -- "$target_file"
-            printf 'ROLLBACK: file baru dihapus setelah verifikasi gagal.\n' >&2
+            printf 'ROLLBACK: file baru dihapus setelah verifikasi gagal.\\n' >&2
         fi
     fi
     [[ -z $temp_file ]] || rm -f -- "$temp_file"
@@ -161,11 +171,22 @@ temp_file=''
 [[ -f $target_file && ! -L $target_file ]] || die 'Target tidak valid setelah deployment.'
 cmp -s -- "$source_file" "$target_file" || die 'Checksum/content target tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Mode permission target tidak sesuai.'
+[[ $(sha256sum -- "$shell_file" | awk '{print $1}') == "$shell_sha_before" ]] ||
+    die 'shell.qml berubah selama deployment; periksa kondisi host.'
+if [[ $json_sha_before == ABSENT ]]; then
+    [[ ! -e $json_file && ! -L $json_file ]] || die 'shell.json muncul/berubah selama deployment.'
+else
+    [[ -f $json_file && ! -L $json_file ]] || die 'shell.json hilang/berubah selama deployment.'
+    [[ $(sha256sum -- "$json_file" | awk '{print $1}') == "$json_sha_before" ]] ||
+        die 'shell.json berubah selama deployment.'
+fi
+
 mutation_started=0
 trap - EXIT
-
-info "Bottombar berhasil dipasang/diperbaiki: $target_file"
-info "Source kanonis: $source_file"
+info "Bottombar berhasil dipasang/diperbaiki pada host Caelestia: $target_file"
+info "Source kanonis K41: $source_file"
 info "Backup privat: $backup_root"
-info 'shell.qml, shell.json, paket, service, dan konfigurasi system-wide tidak diubah.'
+info 'shell.qml dan shell.json tidak diubah.'
+info 'Tidak ada perubahan pada namespace K41 standalone, paket, service, atau konfigurasi system-wide.'
 info 'Quickshell tidak di-reload atau di-restart.'
+info 'Catatan: ini deployment kompatibilitas ke host Caelestia yang saat ini memuat modul; migrasi standalone K41 tetap pekerjaan terpisah.'
