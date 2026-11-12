@@ -22,7 +22,7 @@ Urutan pengerjaan mengikuti pola Workstream 02. Audit dan implementasi memiliki 
 | 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — audit X280 selesai; baseline 2026-11-12** |
 | 2 | `scripts/k41-implement-bottombar.sh` | Deploy `Dock.qml` ke namespace K41 dan migrasikan import/instance Bottombar di Caelestia `shell.qml` dari `k41dock` ke modul canonical K41. Backup privat, atomic replacement, verifikasi, dan rollback dua target. | **IMPLEMENTED — VALIDASI BELUM DIJALANKAN** |
 
-Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.qml`. Target runtime adalah `~/.config/quickshell/caelestia/k41/modules/bottombar/Dock.qml` (primary; imported by `qs.k41.modules.bottombar`) dan `~/.config/quickshell/k41/modules/bottombar/Dock.qml` (compatibility mirror).. Caelestia tetap dijalankan melalui `~/.config/quickshell/caelestia/shell.qml` dan mengimpor modul utama melalui `qs.k41.modules.bottombar`; path sibling tetap menjadi compatibility mirror.
+Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.qml`. Target runtime adalah `~/.config/quickshell/caelestia/k41/modules/bottombar/Dock.qml` (primary; imported by `qs.k41.modules.bottombar`) dan `~/.config/quickshell/k41/modules/bottombar/Dock.qml` (compatibility mirror). Caelestia tetap dijalankan melalui `~/.config/quickshell/caelestia/shell.qml` dan mengimpor modul utama melalui `qs.k41.modules.bottombar`; path sibling tetap menjadi compatibility mirror.
 
 ### Tahap 1 — Audit dan pengumpulan bukti
 
