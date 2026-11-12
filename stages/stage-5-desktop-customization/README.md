@@ -20,7 +20,7 @@ Source yang direview disimpan di repository. Script penyiapan mendeploy modul ke
     └── ...
 ```
 
-Contoh lokasi runtime Lock Screen: `~/.config/quickshell/k41/modules/lockscreen/`.
+WS02 menyimpan mirror visual Lock Screen pada `~/.config/quickshell/k41/modules/lockscreen/` dan `~/.config/quickshell/caelestia/k41/modules/lockscreen/`; overlay aktif tetap `~/.config/quickshell/caelestia/modules/lock/`. Untuk Bottombar dan Topbar, lokasi import utama berada di dalam config root Caelestia.
 
 ## Alur minimum per fitur
 
