@@ -105,9 +105,9 @@ for relative in "${source_files[@]}"; do
 done
 
 # Confirm required upstream lock host files remain present. They are not replaced.
-for relative in Lock.qml LockSurface.qml Content.qml Center.qml center/PasswordInput.qml center/InputField.qml; do
+for relative in Lock.qml Pam.qml LockSurface.qml Content.qml Center.qml center/PasswordInput.qml center/InputField.qml center/Clock.qml center/StateMessage.qml; do
     [[ -s "$lock_root/$relative" && ! -L "$lock_root/$relative" ]] ||
-        die "Required Caelestia lock runtime file is missing: modules/lock/$relative"
+        die "Required Caelestia lock runtime dependency is missing: modules/lock/$relative"
 done
 
 # Accept only current K41 files, pristine pinned-upstream files, or exact
