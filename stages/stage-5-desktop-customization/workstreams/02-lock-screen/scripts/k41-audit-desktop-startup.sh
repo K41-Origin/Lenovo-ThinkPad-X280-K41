@@ -419,7 +419,7 @@ for base in "$HOME/.local/state/k41" "$HOME/.local/state/caelestia" "$HOME/.loca
                 tail -n 300 -- "$file" | redact >>"$report" || true
                 ;;
         esac
-    done < <(find "$base" -maxdepth 4 -type f \( -name '*.log' -o -name '*.txt' \) -printf '%p\0' 2>/dev/null)
+    done < <(find "$base" -maxdepth 4 -type f \( -name '*.log' -o -name '*.txt' -o -name '*.qslog' \) -printf '%p\0' 2>/dev/null)
 done
 
 section 'HYPRLAND IPC (only succeeds if compositor is running)'
@@ -513,7 +513,7 @@ fi
 if have qs; then
     run 'QUICKSHELL VERSION' qs --version
     run 'QUICKSHELL INSTANCE INVENTORY' qs list --all
-    run 'QUICKSHELL CAELESTIA LOG (LATEST 400 LINES)' qs log -c caelestia -t 400 --no-color
+    run 'QUICKSHELL CAELESTIA LOG (LATEST 400 LINES)' qs log -c caelestia --tail 400 --no-color
 else
     note '[qs executable unavailable]'
 fi
