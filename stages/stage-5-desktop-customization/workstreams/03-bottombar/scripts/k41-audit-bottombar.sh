@@ -141,8 +141,8 @@ add("Mode: read-only audit; no runtime/config/package/service/source/Git mutatio
 add("Report location is outside the checkout under ~/.local/state/k41/bottombar/audits/.")
 add("No Git fetch, checkout, reset, clean, stash, add, commit, push or index operation is performed.")
 add("Captured UTC: " + datetime.now(timezone.utc).isoformat())
-add("Host label: " + clean(os.uname().nodename) + " | kernel: " + os.uname().release)
-add("UID/GID: " + str(os.getuid()) + "/" + str(os.getgid()))
+add("Host label: <HOST-REDACTED> | kernel: " + os.uname().release)
+add("UID/GID: <LOCAL-IDENTITY-REDACTED>")
 add("Repository: " + clean(repo))
 rc, value = run(["git", "-C", str(repo), "rev-parse", "HEAD"])
 add("Repository HEAD: " + (value if rc == 0 else "UNKNOWN"))
@@ -320,15 +320,139 @@ add("It does not decide the target runtime namespace, host-loading contract, or 
 add("The QML scan is static and heuristic; it is not a Qt/QML linker or runtime compatibility proof.")
 add("Package metadata and executable --version output are observations from this machine, not upstream compatibility guarantees.")
 add("No QML compile, shell reload, workspace interaction, multi-monitor, fullscreen, or resource benchmark was executed.")
-add("Review this private report before sharing: source excerpts and host/package metadata may be sensitive.")
-add("No Git write command was invoked; report is outside the checkout and cannot create an untracked file in the repository.")
-add("Report: " + clean(report))
+add("This is the private local report. A separately sanitized copy is published to the repository; review it on GitHub for residual sensitive information.")
+add("Git publication is performed only through an independent temporary clone; the active checkout Git metadata is not used for writes.")
+add("Private local report: " + clean(report))
 report.write_text("\n".join(out) + "\n", encoding="utf-8")
 print(f"Bottombar audit report created: {report}")
 print(f"Report size: {report.stat().st_size} bytes")
 PY
 
 [[ -s "$report" ]] || die 'Audit tidak menghasilkan report valid.'
-printf '\nAudit selesai: %s\n' "$report"
-printf 'Mode: read-only; report privat berada di luar Git checkout.\n'
-printf 'Review/redaksi report sebelum dibagikan.\n'
+
+# Keep the complete local evidence private. Publish only a separately
+# sanitized UTF-8 copy through an independent clone of the approved remote.
+published_report="$run_dir/published-report.txt"
+python3 - "$report" "$published_report" <<'PY'
+from pathlib import Path
+import os, pwd, re, sys
+source, destination = map(Path, sys.argv[1:3])
+text = source.read_bytes().decode("utf-8", errors="replace")
+home = os.environ.get("HOME", "")
+repo = os.environ.get("K41_AUDIT_REPO", "")
+if home and home != "/":
+    text = text.replace(home, "<HOME>")
+if repo:
+    text = text.replace(repo, "<REPOSITORY_CHECKOUT>")
+try:
+    username = pwd.getpwuid(os.getuid()).pw_name
+    if username:
+        text = re.sub(r"(?<![A-Za-z0-9_.-])" + re.escape(username) + r"(?![A-Za-z0-9_.-])", "<USER>", text)
+except KeyError:
+    pass
+# Remove host identity, local numeric ownership, common network identifiers,
+# URL user-info, and credential-like values before public publication.
+text = re.sub(r"(?m)^Host label:.*$", "Host label: <HOST-REDACTED>", text)
+text = re.sub(r"(?m)^UID/GID:.*$", "UID/GID: <LOCAL-IDENTITY-REDACTED>", text)
+text = re.sub(r"(?i)(https?://)[^/@\s]+@", r"\1<REDACTED>@", text)
+text = re.sub(r"(?i)\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\b([=: ]+)[^\s,;]+", r"\1\2<REDACTED>", text)
+text = re.sub(r"(?i)(\bSSID\s*[:=]\s*)(?:'[^']*'|\"[^\"]*\"|[^\s,;)]+)", r"\1<SSID-REDACTED>", text)
+text = re.sub(r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b", "<IP-REDACTED>", text)
+text = re.sub(r"\b(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}\b", "<MAC-REDACTED>", text)
+text = "".join(ch for ch in text if ch in "\n\r\t" or ord(ch) >= 32)
+destination.write_text(text, encoding="utf-8")
+if destination.stat().st_size == 0:
+    raise SystemExit("ERROR: sanitized report is empty; refusing publication")
+print(f"Sanitized publication copy: PASS ({destination.stat().st_size} bytes)")
+PY
+chmod 0600 "$published_report"
+
+cat >"$run_dir/README.txt" <<EOF
+K41 Bottombar audit
+===================
+Run as the regular desktop user from the repository checkout on branch main:
+
+  bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-audit-bottombar.sh
+
+The collector is read-only with respect to runtime configuration, packages,
+services, and the active Git checkout. The complete report is retained locally
+under ~/.local/state/k41/bottombar/audits/ with private permissions.
+A sanitized copy is automatically published to GitHub main under:
+
+  reports/stage-5-desktop-customization/03-bottombar/audits/<timestamp>/
+
+Publication uses a fresh independent temporary clone, not a linked worktree.
+It does not fetch, checkout, reset, clean, stash, add, commit, or push from the
+active checkout and does not change its HEAD, branch, index, FETCH_HEAD, or
+worktree metadata. If publication fails, the private local report is retained
+and the script exits non-zero. Review the public report for residual sensitive
+information; automated redaction cannot guarantee removal of every secret.
+EOF
+chmod 0600 "$run_dir/README.txt"
+
+publish_report() {
+    local remote_url publish_tmp publish_dir relative_dir publish_target
+    remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
+        { printf 'ERROR: tidak dapat membaca Git origin; report tetap lokal.\n' >&2; return 1; }
+    case "$remote_url" in
+        https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
+        *) printf 'ERROR: Git origin bukan repository K41 yang diizinkan; report tetap lokal.\n' >&2; return 1 ;;
+    esac
+
+    # Independent clone isolates all fetch/commit/push/ref operations from
+    # the user's checkout. Never use git worktree with the local .git dir.
+    publish_tmp="$(mktemp -d "${TMPDIR:-/tmp}/k41-bottombar-audit-publish.XXXXXX")" || return 1
+    publish_dir="$publish_tmp/repository"
+    if ! GIT_TERMINAL_PROMPT=0 git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: isolated clone failed; private report remains local.\n' >&2
+        return 1
+    fi
+
+    relative_dir="reports/stage-5-desktop-customization/03-bottombar/audits/${run_dir##*/}"
+    publish_target="$publish_dir/$relative_dir"
+    if ! mkdir -p -- "$publish_target" ||
+       ! cp -- "$published_report" "$publish_target/report.txt" ||
+       ! cp -- "$run_dir/README.txt" "$publish_target/README.txt"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: could not stage report in isolated clone; private report remains local.\n' >&2
+        return 1
+    fi
+    if ! chmod 0644 "$publish_target/report.txt" "$publish_target/README.txt" ||
+       ! chmod 0755 "$publish_target" ||
+       ! git -C "$publish_dir" config user.name "K41 Bottombar Audit" ||
+       ! git -C "$publish_dir" config user.email "k41-bottombar-audit@users.noreply.github.com"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: isolated clone preparation failed; private report remains local.\n' >&2
+        return 1
+    fi
+    if ! git -C "$publish_dir" add -- "$relative_dir" ||
+       ! git -C "$publish_dir" commit -m "Add X280 Bottombar audit report"; then
+        rm -rf -- "$publish_tmp"
+        printf 'ERROR: report commit failed in isolated clone; private report remains local.\n' >&2
+        return 1
+    fi
+    if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+        printf 'INFO: push raced with an update to main; retrying once after rebase in isolated clone.\n'
+        if ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" fetch --no-tags origin main ||
+           ! git -C "$publish_dir" rebase FETCH_HEAD ||
+           ! GIT_TERMINAL_PROMPT=0 git -C "$publish_dir" push origin HEAD:main; then
+            rm -rf -- "$publish_tmp"
+            printf 'ERROR: report publication failed; private report remains at %s\n' "$report" >&2
+            return 1
+        fi
+    fi
+
+    rm -rf -- "$publish_tmp"
+    printf 'INFO: sanitized report published to GitHub main: %s\n' "$relative_dir"
+    printf 'INFO: active checkout Git metadata was not used for publication.\n'
+}
+
+printf 'Private audit report: %s\n' "$report"
+if publish_report; then
+    printf 'Automated publication succeeded.\n'
+else
+    printf 'WARNING: publication failed; private report retained locally.\n' >&2
+    exit 1
+fi
+printf 'Runtime and active checkout state were not modified.\n'
