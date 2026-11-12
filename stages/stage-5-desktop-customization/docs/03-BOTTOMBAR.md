@@ -1,6 +1,6 @@
 # Workstream 03 — Bottombar
 
-**Status: COMPLETED / USER ACCEPTED.** Implementasi Bottombar K41 dan integrasi host Caelestia sesuai arsitektur yang disepakati telah diselesaikan. Cleanup sisa fitur Caelestia dipisahkan ke Workstream 09 dan dikerjakan paling akhir.
+**Status: COMPLETED / USER ACCEPTED.** Implementasi Bottombar K41 dan integrasi host Caelestia sesuai arsitektur yang disepakati telah diselesaikan. Cleanup sisa fitur Caelestia dipisahkan ke Workstream 08 dan dikerjakan paling akhir.
 
 Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan kerja mengikuti Workstream 02, tetapi implementasi Bottombar tetap disesuaikan dengan hasil audit dan kontrak Quickshell/Caelestia yang benar-benar terverifikasi.
 
@@ -167,6 +167,6 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 - Fixture test mencakup deploy, migrasi host, idempotensi, repair, rollback, dan host state ambigu; eksekusinya belum diklaim.
 - Bash syntax, ShellCheck, fixture execution, QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
 - Workstream 03 ditutup sebagai COMPLETED / USER ACCEPTED sesuai keputusan pengguna; status ini tidak menyatakan seluruh detail teknis telah TESTED atau VERIFIED.
-- Audit dan cleanup legacy Caelestia yang lebih luas dipindahkan ke Workstream 09 — Clean up Caelestia, yang wajib dikerjakan setelah semua workstream Stage 5 selesai.
+- Audit dan cleanup legacy Caelestia yang lebih luas dipindahkan ke Workstream 08 — Clean up Caelestia, yang wajib dikerjakan setelah semua workstream Stage 5 selesai.
 
 Acceptance berikutnya: jalankan `bash -n`, ShellCheck, fixture test, lalu installer pada X280 sebagai user biasa. Setelah deployment, verifikasi QML/runtime dan perilaku visual/interaksi secara terpisah. Deployment modul dan perubahan import belum membuktikan QML berhasil dimuat atau tampilan bekerja; verifikasi runtime pada Caelestia tetap wajib. Catat IMPLEMENTED, TESTED, VERIFIED, dan penerimaan pengguna secara terpisah.
