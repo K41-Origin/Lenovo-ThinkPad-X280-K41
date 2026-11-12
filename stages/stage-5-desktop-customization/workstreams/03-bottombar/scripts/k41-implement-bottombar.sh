@@ -36,6 +36,20 @@ runtime_root="$qs_root/k41"
 modules_root="$runtime_root/modules"
 module_root="$modules_root/bottombar"
 target_file="$module_root/Dock.qml"
+legacy_case_file="$module_root/Dock.Qml"
+
+# Dock.qml is the sole canonical runtime filename. Preserve any pre-existing
+# case-variant file for explicit user-managed cleanup; never deploy to it.
+legacy_case_present=0
+legacy_case_sha=''
+if [[ -e $legacy_case_file || -L $legacy_case_file ]]; then
+    [[ -f $legacy_case_file && ! -L $legacy_case_file ]] ||
+        die 'Legacy Dock.Qml bukan regular file atau berupa symlink; tidak ada perubahan.'
+    owned "$legacy_case_file" || die 'Legacy Dock.Qml bukan milik user aktif.'
+    legacy_case_present=1
+    legacy_case_sha="$(sha256sum -- "$legacy_case_file" | awk '{print $1}')"
+fi
+
 for path in "$runtime_root" "$modules_root" "$module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then
@@ -177,6 +191,12 @@ module_tmp=''
 [[ -f $target_file && ! -L $target_file ]] || die 'Target Dock.qml tidak valid setelah deployment.'
 cmp -s -- "$source_file" "$target_file" || die 'Content Dock.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Dock.qml bukan 0644.'
+if (( legacy_case_present )); then
+    [[ -f $legacy_case_file && ! -L $legacy_case_file ]] ||
+        die 'Dock.Qml berubah tipe selama deployment; periksa runtime secara manual.'
+    [[ $(sha256sum -- "$legacy_case_file" | awk '{print $1}') == "$legacy_case_sha" ]] ||
+        die 'Dock.Qml berubah selama deployment; file tidak disentuh oleh installer.'
+fi
 if (( host_change )); then
     shell_replaced=1
     mv -fT -- "$shell_tmp" "$shell_file"
@@ -190,7 +210,11 @@ fi
 module_replaced=0
 shell_replaced=0
 trap - EXIT
-info "Module K41: $target_file"
+info "Module K41 canonical: $target_file"
+if (( legacy_case_present )); then
+    info "Legacy case-variant preserved unchanged: $legacy_case_file"
+    info 'Hapus Dock.Qml secara manual hanya setelah Dock.qml diverifikasi aktif.'
+fi
 info "Caelestia host: $shell_file"
 info "Backup privat: $backup_root"
 info 'shell.qml tetap milik Caelestia; hanya import/instance Bottombar yang dimigrasikan.'
