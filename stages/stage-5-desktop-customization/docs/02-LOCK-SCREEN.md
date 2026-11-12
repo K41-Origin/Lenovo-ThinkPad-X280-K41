@@ -78,7 +78,7 @@ Urutan operasi:
 5. Membuat backup empat file target dan checksum manifest.
 6. Menyiapkan file di staging directory, memverifikasi checksum, lalu mengganti target.
 7. Memverifikasi hasil penyalinan dan menjalankan `caelestia shell -r -d`.
-8. Jika deployment atau reload gagal, mencoba memulihkan empat file dari backup.
+8. Jika deployment atau reload gagal, memulihkan empat file overlay dan mengembalikan/menghapus mirror K41 sesuai snapshot sebelum deployment.
 9. Menyimpan log lokal privat di `~/.local/state/k41/lockscreen/deployment-logs/`.
 10. Menerbitkan log tersanitasi ke `reports/lockscreen-deployment/` melalui temporary independent clone dan push non-force ke `main`.
 
