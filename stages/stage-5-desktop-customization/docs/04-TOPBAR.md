@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: PENDING — REBOOT DAN RUNTIME VERIFICATION.** Source dan deployer tersedia; audit X280 terakhir menunjukkan file runtime cocok dengan source dan host terintegrasi secara struktural. Pengguna mengidentifikasi reboot sebagai langkah berikutnya untuk memuat perubahan pada sesi baru. Reboot belum diklaim telah dilakukan dan tampilan/fungsi Topbar belum VERIFIED. Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
+**Status: IN PROGRESS — RENDERING USER-CONFIRMED; FUNCTIONAL REVIEW AND STANDALONE MIGRATION PENDING.** Pengguna telah mengonfirmasi Topbar tampil setelah reboot. Rendering dasar diterima, tetapi seluruh fungsi dan acceptance belum VERIFIED. Anomali battery percentage (laporan pengguna pernah 1%, sedangkan audit UPower berikutnya 55%) dan perilaku klik Notifications masih perlu dituntaskan. Arah migrasi terbaru adalah membuat Topbar sebagai konfigurasi Quickshell mandiri milik K41, tidak di-import ke `caelestia/shell.qml`, dan tidak memodifikasi source Caelestia. Script deployment saat ini masih menerapkan arsitektur lama; migrasi script ditahan sampai kepemilikan Notification D-Bus dan mekanisme start/stop dua shell ditetapkan. Status proyek mengikuti `docs/06-STATUS.md`.
 
 ## Tujuan dan batas ownership
 
@@ -14,6 +14,7 @@ Prinsip ownership:
 - Lokasi source dan target runtime final ditetapkan setelah audit; jangan mengasumsikan path atau API sebelum diverifikasi.
 - Audit bersifat read-only. Deployment/implementasi merupakan operasi terpisah dan eksplisit.
 - Workstream 08 — Clean up Caelestia tetap menjadi pekerjaan terakhir; WS04 tidak boleh melakukan cleanup upstream yang tidak diperlukan untuk Topbar.
+- **Keputusan arah WS04 (13 November 2026):** Topbar target adalah shell/configuration Quickshell mandiri milik K41, bukan modul yang di-host oleh `caelestia/shell.qml`. K41 akan memiliki QML, komponen, service/logic, dan tray yang diperlukan sendiri. Source Caelestia boleh dipelajari sebagai referensi dan bagian yang benar-benar diperlukan boleh diadaptasi dengan mempertahankan atribusi serta lisensi upstream; file/source Caelestia yang terpasang tidak boleh diubah. Implementasi/deployer lama yang mengedit host Caelestia dianggap transitional dan akan diganti setelah desain notifikasi D-Bus diselesaikan.
 
 ## Keputusan desain
 
@@ -277,6 +278,18 @@ Backup runtime tidak di-commit. Catat lokasi backup, checksum/manifest, target p
 
 Workstream 04 hanya dapat ditutup setelah acceptance criteria ditinjau dan pengguna menyatakan menerima hasil, atau pengguna secara eksplisit menyetujui pengecualian yang dicatat. Setelah itu lanjut ke [Workstream 05 — Launcher](05-LAUNCHER.md). Cleanup Caelestia tetap ditunda sampai seluruh workstream komponen selesai dan diterima.
 
+
+## Target arsitektur mandiri — keputusan 13 November 2026
+
+Target WS04 diperbarui: K41 Topbar akan berjalan dari konfigurasi Quickshell milik K41 sendiri, dengan entry point terpisah (misalnya `~/.config/quickshell/k41/shell.qml`). Topbar tidak lagi membutuhkan import, instance, `ShellState`, `Notifs`, `Time`, atau service internal Caelestia. Script deployer final tidak boleh mengedit `~/.config/quickshell/caelestia/shell.qml` maupun menyalin file ke namespace Caelestia.
+
+K41 boleh mempelajari dan mengadaptasi bagian source Caelestia yang relevan sebagai referensi implementasi. Source hasil adaptasi harus berada sepenuhnya di direktori K41, diberi atribusi dan lisensi upstream yang sesuai, serta menggunakan API Quickshell/Qt yang telah diverifikasi. Tidak boleh ada patch terhadap file upstream Caelestia.
+
+**Gate teknis sebelum perubahan deployer:** Quickshell `NotificationServer` mengimplementasikan Desktop Notifications Specification dan menerima notifikasi dari aplikasi. Karena hanya satu pemilik service D-Bus `org.freedesktop.Notifications` yang dapat aktif pada satu sesi, shell K41 mandiri berpotensi bersaing dengan NotificationServer Caelestia. Sebelum K41 mengambil alih server dan tray, audit harus memastikan siapa pemilik service aktif dan menentukan transisi yang tidak membuat notifikasi hilang/duplikat. Jangan membuat dua NotificationServer aktif dan jangan menganggap Caelestia Notification Dock dapat dipakai tanpa ketergantungan Caelestia.
+
+CPU/RAM harus memakai service/logic yang dimiliki K41; battery dapat menggunakan Quickshell UPower API; clock menggunakan Qt/QML. Semua API harus diverifikasi terhadap versi Quickshell yang benar-benar terpasang pada X280. Target lokasi, autostart, single-instance, lifecycle, dan rollback deployer juga harus ditetapkan sebelum deployment.
+
+Status migrasi: **PLANNED**. Belum ada shell mandiri, service K41, perubahan deployer, atau runtime migration yang diimplementasikan/diuji. Deployer lama masih mengintegrasikan module ke Caelestia dan tidak memenuhi target arsitektur baru; jangan jalankan sebagai implementasi mandiri.
 
 ## Status runtime dan langkah berikutnya — 13 November 2026
 
