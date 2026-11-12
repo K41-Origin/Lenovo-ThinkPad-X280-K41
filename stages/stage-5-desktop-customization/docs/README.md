@@ -11,7 +11,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 | Urutan | ID | Workstream | Status/arah |
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
-| 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | Design accepted; bounded startup fix implemented; X280 validation pending |
+| 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
 | 3 | 04 | [Bottombar / K41Dock](04-TASKBAR-PANEL.md) | Berhasil; menjadi pola komponen K41 |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
