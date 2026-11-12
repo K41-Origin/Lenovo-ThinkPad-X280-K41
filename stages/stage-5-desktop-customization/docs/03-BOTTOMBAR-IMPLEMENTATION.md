@@ -4,7 +4,7 @@
 
 Dokumen ini menyimpan catatan implementasi Bottombar sebelum audit dan refactoring Workstream 03. Isinya adalah baseline historis, bukan spesifikasi arsitektur target atau instruksi deployment yang telah disetujui.
 
-Status dan workflow kanonis berada di [Workstream 03 — Bottombar](03-BOTTOMBAR.md). Workstream saat ini telah memiliki installer integrasi K41 → Caelestia; validasi fixture dan runtime masih pending. Jangan menjalankan installer historis atau memigrasikan source/runtime berdasarkan dokumen ini.
+Status dan workflow kanonis berada di [Workstream 03 — Bottombar](03-BOTTOMBAR.md), yang telah ditutup sebagai COMPLETED / USER ACCEPTED. Catatan ini hanya baseline historis; jangan menjalankan installer historis atau memigrasikan source/runtime berdasarkan dokumen ini. Penghapusan legacy K41Dock secara manual oleh pengguna bukan bukti cleanup seluruh Caelestia selesai; audit luas dijadwalkan pada [Workstream 09 — Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md).
 
 ## Lokasi historis
 
