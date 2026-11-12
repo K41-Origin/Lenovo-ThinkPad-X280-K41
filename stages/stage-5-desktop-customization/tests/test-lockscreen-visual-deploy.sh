@@ -113,6 +113,14 @@ for file in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
         exit 1
     }
 done
+for mirror in "$home/.config/quickshell/k41/modules/lockscreen" "$host/k41/modules/lockscreen"; do
+    for file in LockSurface.qml Content.qml Center.qml center/PasswordInput.qml; do
+        cmp -s "$source/$file" "$mirror/$file" || {
+            printf 'FAIL: K41 mirror missing or stale: %s/%s\n' "$mirror" "$file" >&2
+            exit 1
+        }
+    done
+done
 [[ -s "$tmp/deploy-logs/latest.log" ]] || {
     printf 'FAIL: persistent latest deployment log was not written.\n' >&2
     exit 1
