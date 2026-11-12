@@ -57,7 +57,8 @@ home = pathlib.Path.home()
 config_home = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", str(home / ".config")))
 qs_root = config_home / "quickshell"
 host = qs_root / "caelestia" / "shell.qml"
-module = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
+module = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "Topbar.qml"
+compat_module = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
 source_module = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
 out = []
 
@@ -131,13 +132,16 @@ for package in ("caelestia-shell","quickshell","quickshell-git","hyprland","qt6-
 
 section("EXPECTED RUNTIME FILES")
 add("Host expected: ~/.config/quickshell/caelestia/shell.qml")
-add("Module expected: ~/.config/quickshell/k41/modules/topbar/Topbar.qml")
+add("Primary module expected: ~/.config/quickshell/caelestia/k41/modules/topbar/Topbar.qml")
+add("Compatibility mirror expected: ~/.config/quickshell/k41/modules/topbar/Topbar.qml")
 file_block("RUNTIME CAELESTIA HOST SHELL", host, True)
-file_block("RUNTIME K41 TOPBAR MODULE", module, True)
+file_block("RUNTIME PRIMARY K41 TOPBAR MODULE", module, True)
+file_block("RUNTIME COMPATIBILITY TOPBAR MODULE", compat_module, True)
 file_block("CANONICAL K41 TOPBAR SOURCE", source_module, True)
-if module.is_file() and not module.is_symlink() and source_module.is_file() and not source_module.is_symlink():
-    add("Runtime module equals canonical source: " + ("YES" if module.read_bytes() == source_module.read_bytes() else "NO"))
-else: add("Runtime module equals canonical source: UNKNOWN")
+for label, runtime_path in (("primary", module), ("compatibility", compat_module)):
+    if runtime_path.is_file() and not runtime_path.is_symlink() and source_module.is_file() and not source_module.is_symlink():
+        add(f"Runtime {label} module equals canonical source: " + ("YES" if runtime_path.read_bytes() == source_module.read_bytes() else "NO"))
+    else: add(f"Runtime {label} module equals canonical source: UNKNOWN")
 if host.is_file() and not host.is_symlink():
     text = host.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
@@ -174,6 +178,86 @@ add("No PID, complete command line, or unrestricted process environment is recor
 
 command_block("QUICKSHELL INSTANCE INVENTORY", ["qs","list","--all"])
 command_block("QUICKSHELL CAELESTIA LOG (LATEST 400 LINES)", ["qs","log","-c","caelestia","--tail","400","--no-color"], max_chars=24000)
+
+section("BATTERY TELEMETRY — UPOWER AND KERNEL SYSFS")
+add("Read-only comparison; serial numbers and device identifiers are deliberately omitted.")
+rc, value = run(["upower", "-e"], 8)
+add(f"upower -e exit={rc}")
+device_paths = [line.strip() for line in value.splitlines() if line.strip().startswith("/org/freedesktop/UPower/devices/")]
+if not device_paths:
+    add("UPower device enumeration unavailable or returned no device paths.")
+for device_path in device_paths:
+    rc, detail = run(["upower", "-i", device_path], 8)
+    add(f"DEVICE {device_path} exit={rc}")
+    if rc == 0:
+        allowed = ("native-path", "vendor", "model", "power supply", "updated",
+                   "present", "rechargeable", "state", "warning-level", "energy",
+                   "energy-empty", "energy-full", "energy-full-design", "energy-rate",
+                   "voltage", "percentage", "capacity", "technology", "icon-name",
+                   "time to empty", "time to full")
+        for line in detail.splitlines():
+            key = line.strip().split(":", 1)[0].lower() if ":" in line else ""
+            if key in allowed:
+                add(redact(line.strip()))
+rc, value = run(["upower", "-d"], 10)
+add(f"upower -d exit={rc}")
+if rc != 0: add(redact(value[:3000]))
+battery_root = pathlib.Path("/sys/class/power_supply")
+batteries = sorted(battery_root.glob("BAT*")) if battery_root.is_dir() else []
+for battery in batteries:
+    if battery.is_symlink() or not battery.is_dir():
+        continue
+    section(f"KERNEL BATTERY {battery.name} — ALLOWLISTED ATTRIBUTES")
+    for attr in ("type", "present", "status", "capacity", "energy_now", "energy_full",
+                 "energy_full_design", "charge_now", "charge_full", "charge_full_design",
+                 "power_now", "current_now", "voltage_now", "technology", "cycle_count",
+                 "manufacturer", "model_name"):
+        target = battery / attr
+        try:
+            if target.is_file() and not target.is_symlink():
+                raw = target.read_text(encoding="utf-8", errors="replace").strip()
+                add(f"{attr}={redact(raw[:300])}")
+        except OSError as exc:
+            add(f"{attr}=READ_FAILED:{type(exc).__name__}")
+if not batteries:
+    add("No BAT* sysfs directory found.")
+command_block("UPower SYSTEM SERVICE STATUS", ["systemctl","status","upower.service","--no-pager"], 8, 3000)
+
+section("NOTIFICATION SIDEBAR / DOCK SOURCE DISCOVERY")
+add("Bounded source references identify Caelestia's notification-dock selection API; no API is inferred or invoked.")
+source_roots = [qs_root / "caelestia", pathlib.Path("/usr/share/caelestia"),
+                pathlib.Path("/usr/lib/caelestia"), pathlib.Path("/usr/share/quickshell/caelestia")]
+seen_roots = set()
+matches = 0
+for root in source_roots:
+    if root in seen_roots or root.is_symlink() or not root.is_dir():
+        continue
+    seen_roots.add(root)
+    add(f"SOURCE_ROOT {redact(root)}")
+    candidates = []
+    for pattern in ("*.qml", "*.js"):
+        candidates.extend(root.rglob(pattern))
+    for source_path in sorted(candidates):
+        if source_path.is_symlink() or not source_path.is_file():
+            continue
+        try:
+            lines = source_path.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for number, line in enumerate(lines, 1):
+            if re.search(r"sidebar|notification|notifs|utilities|drawer|activeTab|selectedTab|currentTab", line, re.I):
+                rel = source_path.relative_to(root).as_posix()
+                add(f"{rel}:{number}: {redact(line.strip()[:260])}")
+                matches += 1
+                if matches >= 240:
+                    break
+        if matches >= 240:
+            break
+    if matches >= 240:
+        add("SOURCE_MATCH_LIMIT_REACHED=240")
+        break
+if matches == 0:
+    add("No matching readable Caelestia QML/JS source lines found.")
 command_block("HYPRLAND CONFIG ERRORS", ["hyprctl","configerrors"])
 command_block("HYPRLAND MONITORS", ["hyprctl","-j","monitors"])
 command_block("USER SERVICE UNITS RELATED TO QUICKSHELL/CAELESIA", ["systemctl","--user","list-units","--all","--no-legend","--no-pager"])
@@ -216,6 +300,8 @@ else: add("qmllint unavailable; no package installation attempted.")
 add("Static lint does not prove Quickshell runtime instantiation; import context and runtime services may differ.")
 
 section("DIAGNOSTIC LIMITATIONS")
+add("- Battery telemetry is observed only; no UPower, kernel, firmware, or power-management state is changed.")
+add("- Notification source discovery reads installed QML/JS files only; no sidebar action is triggered.")
 add("- No Quickshell process is launched; no duplicate shell or temporary panel is created.")
 add("- No reload/restart/deployment or config edit is performed.")
 add("- Journal visibility depends on the current user's permissions.")
@@ -236,7 +322,7 @@ Run as the regular desktop user, preferably from TTY after the failed desktop st
 
   bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audit-topbar-runtime.sh
 
-The collector is read-only. It does not deploy files, launch Quickshell, reload/restart services, install packages, or edit configuration. The complete local report is private under ~/.local/state/k41/topbar/runtime-audits/.
+The collector is read-only. It records runtime Topbar files, Quickshell logs, UPower device telemetry, kernel battery sysfs values, and bounded Caelestia notification/sidebar QML source references. It does not deploy files, launch Quickshell, trigger notification/sidebar actions, reload/restart services, install packages, or edit configuration. The complete local report is private under ~/.local/state/k41/topbar/runtime-audits/.
 
 A separately redacted copy is published to the repository reports directory through an independent temporary clone. Review the published report for residual sensitive information. If publication fails, the private local report remains available and the script exits non-zero.
 EOF
