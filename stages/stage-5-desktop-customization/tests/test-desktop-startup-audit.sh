@@ -56,7 +56,7 @@ for token in \
     'LOCK_SURFACE_VISIBLE' \
     'DESKTOP_RESTORED_AFTER_UNLOCK' \
     'subprocess.run(' \
-    'Desktop restoration cannot be proven retrospectively'; do
+    'LOCK_SURFACE_VISIBLE and DESKTOP_RESTORED_AFTER_UNLOCK are NOT_INSTRUMENTED'; do
     grep -Fq -- "$token" "$script" || {
         printf 'FAIL: audit collector missing diagnostic coverage: %s\n' "$token" >&2
         exit 1
