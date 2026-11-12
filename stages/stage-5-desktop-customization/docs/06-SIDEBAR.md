@@ -1,4 +1,4 @@
-# Workstream 07 — Sidebar
+# Workstream 06 — Sidebar
 
 ## Tujuan
 
