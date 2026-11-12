@@ -11,7 +11,7 @@ owner_is_user() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
 
-for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk; do
+for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk grep; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
@@ -195,7 +195,78 @@ if (( host_change )); then
     ' "$shell_file" >"$shell_tmp"
     chmod --reference="$shell_file" "$shell_tmp"
     grep -Fqx "$new_import" "$shell_tmp" || die 'Staging shell.qml tidak memiliki import K41 baru.'
-    grep -Fqx "$new_instance" "$shell_tmp" || die 'Staging shell.qml tidak memiliki instance Dock baru.'
+    grep -Eq '^[[:space:]]*K41Bottombar\.Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]* || die 'Staging shell.qml tidak memiliki instance Dock baru.'
+fi
+
+# Commit module first, then host. Any failure restores every path already replaced.
+module_mutated=1
+mv -fT -- "$module_tmp" "$target_file"
+module_tmp=''
+[[ -f $target_file && ! -L $target_file ]] || die 'Target Dock.qml tidak valid setelah deployment.'
+cmp -s -- "$source_file" "$target_file" || die 'Checksum/content Dock.qml tidak cocok setelah deployment.'
+[[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Mode permission Dock.qml tidak sesuai.'
+
+if (( host_change )); then
+    shell_mutated=1
+    mv -fT -- "$shell_tmp" "$shell_file"
+    shell_tmp=''
+    grep -Fqx "$new_import" "$shell_file" || die 'Import K41 tidak ditemukan setelah update shell.qml.'
+    grep -Eq '^[[:space:]]*K41Bottombar\.Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]* || die 'Instance Dock tidak ditemukan setelah update shell.qml.'
+fi
+
+module_mutated=0
+shell_mutated=0
+trap - EXIT
+info "Modul K41 terpasang: $target_file"
+info "Caelestia host diarahkan ke modul K41: $shell_file"
+info "Source kanonis: $source_file"
+info "Backup privat: $backup_root"
+info 'shell.qml tetap milik Caelestia; hanya import dan instance Bottombar K41 yang dimigrasikan.'
+info 'File legacy k41dock tidak dihapus; cleanup harus dilakukan terpisah setelah runtime verification.'
+info 'Quickshell tidak di-reload atau di-restart.'
+ "$shell_tmp" || die 'Staging shell.qml tidak memiliki instance Dock baru.'
+fi
+
+# Commit module first, then host. Any failure restores every path already replaced.
+module_mutated=1
+mv -fT -- "$module_tmp" "$target_file"
+module_tmp=''
+[[ -f $target_file && ! -L $target_file ]] || die 'Target Dock.qml tidak valid setelah deployment.'
+cmp -s -- "$source_file" "$target_file" || die 'Checksum/content Dock.qml tidak cocok setelah deployment.'
+[[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Mode permission Dock.qml tidak sesuai.'
+
+if (( host_change )); then
+    shell_mutated=1
+    mv -fT -- "$shell_tmp" "$shell_file"
+    shell_tmp=''
+    grep -Fqx "$new_import" "$shell_file" || die 'Import K41 tidak ditemukan setelah update shell.qml.'
+    grep -Fqx "$new_instance" "$shell_file" || die 'Instance Dock tidak ditemukan setelah update shell.qml.'
+fi
+
+module_mutated=0
+shell_mutated=0
+trap - EXIT
+info "Modul K41 terpasang: $target_file"
+info "Caelestia host diarahkan ke modul K41: $shell_file"
+info "Source kanonis: $source_file"
+info "Backup privat: $backup_root"
+info 'shell.qml tetap milik Caelestia; hanya import dan instance Bottombar K41 yang dimigrasikan.'
+info 'File legacy k41dock tidak dihapus; cleanup harus dilakukan terpisah setelah runtime verification.'
+info 'Quickshell tidak di-reload atau di-restart.'
+ "$shell_file" || die 'Instance Dock tidak ditemukan setelah update shell.qml.'
+fi
+
+module_mutated=0
+shell_mutated=0
+trap - EXIT
+info "Modul K41 terpasang: $target_file"
+info "Caelestia host diarahkan ke modul K41: $shell_file"
+info "Source kanonis: $source_file"
+info "Backup privat: $backup_root"
+info 'shell.qml tetap milik Caelestia; hanya import dan instance Bottombar K41 yang dimigrasikan.'
+info 'File legacy k41dock tidak dihapus; cleanup harus dilakukan terpisah setelah runtime verification.'
+info 'Quickshell tidak di-reload atau di-restart.'
+ "$shell_tmp" || die 'Staging shell.qml tidak memiliki instance Dock baru.'
 fi
 
 # Commit module first, then host. Any failure restores every path already replaced.
