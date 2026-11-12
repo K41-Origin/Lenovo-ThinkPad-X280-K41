@@ -257,7 +257,7 @@ collect_plymouth_assets() {
     if [[ -f $file ]]; then
       stat -c 'type=%F mode=%a size=%s mtime=%y' "$file" 2>&1 || true
       sha256sum "$file" 2>&1 || true
-      pacman -Qo "$file" 2>&1 || true
+      if command -v pacman >/dev/null 2>&1; then pacman -Qo "$file" 2>&1 || true; fi
       sed -n '1,260p' "$file"
     else
       echo '[missing]'
@@ -290,9 +290,9 @@ collect_uki_evidence() {
     printf 'Configured default_uki=%s\n' "$uki_path"
     stat -c 'type=%F mode=%a size=%s mtime=%y' "$uki_path" 2>&1 || true
     sha256sum "$uki_path" 2>&1 || true
-    file "$uki_path" 2>&1 || true
-    objdump -h "$uki_path" 2>&1 || true
-    ukify inspect "$uki_path" 2>&1 || true
+    if command -v file >/dev/null 2>&1; then file "$uki_path" 2>&1 || true; fi
+    if command -v objdump >/dev/null 2>&1; then objdump -h "$uki_path" 2>&1 || true; fi
+    if command -v ukify >/dev/null 2>&1; then ukify inspect "$uki_path" 2>&1 || true; fi
     if command -v lsinitcpio >/dev/null 2>&1; then
       echo "--- UKI embedded initramfs: Plymouth/theme/crypto entries ---"
       lsinitcpio -a "$uki_path" 2>&1 | grep -Ei 'plymouth|themes/k41|\.plymouth|\.script|crypt|encrypt|tpm|systemd' | head -n 240 || true
