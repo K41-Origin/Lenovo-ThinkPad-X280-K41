@@ -66,7 +66,7 @@ Variants {
 
                     Text {
                         text: battery.available
-                              ? `Battery ${Math.round(battery.percentage)}% · ${battery.onBattery ? "On battery" : "AC"}`
+                              ? `Battery ${Math.round(battery.percentage * 100)}% · ${battery.onBattery ? "On battery" : "AC"}`
                               : "Battery N/A"
                         color: "#f4f1fa"
                         font.pixelSize: 12
