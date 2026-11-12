@@ -97,7 +97,7 @@ for source in root.rglob("*"):
         problems.append(f"UNREADABLE {relative}")
         continue
     for stem, candidate in stems.items():
-        if re.search(rf"\\b{re.escape(stem)}\\s*\\{{", text):
+        if re.search(r"\b" + re.escape(stem) + r"\s*\{", text):
             problems.append(f"REFERENCE {relative} -> {candidate}")
 if problems:
     print("\n".join(problems), file=sys.stderr)
@@ -159,7 +159,7 @@ rollback_on_exit() {
     local rc=$?
     if (( rc != 0 && cleanup_complete == 0 )); then
         info "Removal failed; restoring candidate files from $backup."
-        restore_backup || printf 'CRITICAL: automatic restore failed; backup retained at %s\\n' "$backup" >&2
+        restore_backup || printf 'CRITICAL: automatic restore failed; backup retained at %s\n' "$backup" >&2
     fi
     return "$rc"
 }
