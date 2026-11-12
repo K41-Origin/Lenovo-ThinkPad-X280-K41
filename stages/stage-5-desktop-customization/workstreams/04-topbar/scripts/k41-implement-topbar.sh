@@ -136,6 +136,8 @@ previous_shell_sha="$(sha256sum -- "$shell_file" | awk '{print $1}')"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
+module_replaced=1
+mv -fT -- "$module_tmp" "$target_file"
 module_tmp=''
 shell_tmp=''
 module_replaced=0
@@ -192,8 +194,6 @@ awk -v replacement="$new_import" '
         print "    K41Topbar.Topbar {}"
         next
     }
-        next
-    }
     { print }
 ' "$shell_file" >"$shell_tmp"
 chmod --reference="$shell_file" "$shell_tmp"
@@ -213,6 +213,8 @@ grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*
 final_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 (( final_instance_line > final_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root setelah deployment.'
+module_replaced=0
+shell_replaced=0
 trap - EXIT
 info "Module K41 canonical: $target_file"
 info "Caelestia host: $shell_file"
