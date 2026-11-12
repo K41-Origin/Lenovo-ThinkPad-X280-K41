@@ -22,13 +22,19 @@ repo_root="$(cd -- "$repo_root" && pwd -P)"
 [[ $(stat -c %u -- "$repo_root") == "$EUID" ]] ||
     die 'Repository bukan milik user aktif; jangan gunakan sudo/chown.'
 
-report_parent="$repo_root/reports"
-report_root="$report_parent/stage-5-desktop-customization/02-lock-screen/startup-audits"
-for path in "$report_parent" "$report_parent/stage-5-desktop-customization" "$report_parent/stage-5-desktop-customization/02-lock-screen" "$report_root"; do
+# Keep the private local report outside the checkout. Publishing a copy
+# under reports/ on GitHub while leaving an untracked file at the same path
+# locally makes the next git pull fail with an untracked-file collision.
+report_root="$HOME/.local/state/k41/lockscreen/startup-audits"
+for path in "$HOME/.local" "$HOME/.local/state" "$HOME/.local/state/k41" "$HOME/.local/state/k41/lockscreen" "$report_root"; do
     [[ ! -L $path ]] || die "Symlink report path ditolak: $path"
     [[ ! -e $path || -d $path ]] || die "Report path bukan direktori: $path"
+    if [[ -e $path ]]; then
+        [[ $(stat -c %u -- "$path") == "$EUID" ]] || die "Report path bukan milik user aktif: $path"
+    fi
 done
 mkdir -p -- "$report_root"
+chmod 0700 "$report_root"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 run_dir="$report_root/$stamp"
 suffix=0
@@ -793,7 +799,7 @@ note '- Journal mungkin tidak dapat dibaca lengkap oleh user biasa; permission-d
 note '- Report memuat QML lockscreen repository/runtime yang dipilih, potongan log, metadata, dan hash. Redaksi otomatis tidak menjamin seluruh data pribadi terhapus.'
 note '- Salinan report tersanitasi dipublikasikan otomatis; redaksi tidak menjamin seluruh data privat terhapus, jadi tinjau report di GitHub dan hapus data sensitif bila ditemukan.'
 note '- TTY2 fallback dapat merupakan konsekuensi eksplisit dari k41-plymouth-quit-after-lock.sh setelah timeout 75 detik; bukti journal menentukan apakah mekanisme itu yang berjalan.'
-note "Report: ${report#"$repo_root"/}"
+note "Local report: ~/.local/state/k41/lockscreen/startup-audits/${run_dir##*/}/report.txt"
 
 cat >"$run_dir/README.txt" <<EOF
 K41 desktop startup diagnostic
@@ -835,7 +841,7 @@ publish_report() {
         return 1
     fi
 
-    relative_dir="${run_dir#"$repo_root"/}"
+    relative_dir="reports/stage-5-desktop-customization/02-lock-screen/startup-audits/${run_dir##*/}"
     publish_target="$publish_dir/$relative_dir"
     if ! mkdir -p -- "$publish_target" ||
        ! cp -- "$report" "$publish_target/report.txt" ||
