@@ -352,7 +352,7 @@ Fixture test dan runtime deployment untuk revisi aktif tetap belum dinyatakan lu
 
 **IMPLEMENTED — Notification backend dan handoff source:**
 - `services/Notifications.qml` sekarang memiliki satu `NotificationServer` K41, model notifikasi aktif, penghentian melalui dismiss/expire, pemanggilan action, expiry, dan penyimpanan/pemulihan riwayat non-transient melalui `FileView` pada `Quickshell.statePath("k41-notifications.json")`.
-- K41 hanya mengiklankan kemampuan yang ditampilkan oleh dock: body text dan actions. Inline reply, hyperlink, body image, image preview, markup, dan action icons belum diiklankan/ditampilkan.
+- K41 hanya mengiklankan kemampuan yang ditampilkan oleh dock: body text dan actions. Inline reply, hyperlink, body image, image preview, markup, dan action icons belum diiklankan/ditampilkan. Implementasi saat ini memakai tray/panel (tanpa toast popup), grouping, atau pengaturan DND K41; DND Caelestia yang dipertahankan hanya berlaku pada state/UI Caelestia lama dan belum dihubungkan ke backend K41.
 - `Topbar.qml` membuat satu instance service di luar `Variants`, sehingga beberapa monitor tidak membuat NotificationServer ganda. Dock K41 menampilkan jumlah, aplikasi, summary, body, actions, dismiss per item, dan clear all.
 - Deployer memvalidasi struktur Caelestia `services/Notifs.qml` yang dikenal, membuat backup privat, menghapus tepat satu balanced `NotificationServer { ... }` block, menambahkan marker handoff, dan mempertahankan singleton, DND, IPC, serta model historis Caelestia. Jika struktur tidak cocok, proses berhenti sebelum mutasi.
 - Rollback deployer mencakup pemulihan `Notifs.qml`, `shell.qml`, Topbar, dan service directory bila publikasi gagal. Deployer tidak melakukan reload/restart Quickshell.
