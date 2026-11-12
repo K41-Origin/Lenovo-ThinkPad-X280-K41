@@ -2,6 +2,8 @@
 # Read-only Bottombar audit. Report data is kept outside the Git checkout.
 set -Eeuo pipefail
 umask 077
+# Prevent optional index refresh writes by observational Git commands in this checkout.
+export GIT_OPTIONAL_LOCKS=0
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 2; }
 have() { command -v "$1" >/dev/null 2>&1; }
