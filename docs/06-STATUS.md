@@ -79,3 +79,13 @@ Bukti Stage 4 historis tetap tersimpan pada commit arsip 02f6194ed04c8f13ea64eda
 - **IMPLEMENTED:** regression test now checks the independent-clone publisher pattern and guards against local-checkout fetch/worktree operations and publication failure changing deployment status.
 - **NOT TESTED YET:** Bash syntax/regression suite/ShellCheck execution and end-to-end publication simulation have not been run in this session. No deployment on the ThinkPad X280 has been performed.
 - **DEPLOYMENT GATE:** latest startup audit supports moving to a deployment preflight, but the deployment script still requires the actual X280 Caelestia checkout origin, exact pinned HEAD, target-file state, and active Hyprland environment to pass its runtime guards. Do not describe visual deployment or rendering as verified until it is run and checked on the device.
+
+
+## K41 dual runtime namespace migration — 13 November 2026
+
+- **IMPLEMENTED:** WS02 visual deployer now preserves the four-file Caelestia lock overlay and mirrors the same four canonical QML files into both `~/.config/quickshell/k41/modules/lockscreen/` and `~/.config/quickshell/caelestia/k41/modules/lockscreen/`. Existing mirror files are snapshotted for rollback; post-copy comparisons cover overlay and both mirrors.
+- **IMPLEMENTED:** WS03 Bottombar and WS04 Topbar deploy their active module copies inside the Caelestia config root and keep the historical sibling `~/.config/quickshell/k41/modules/<feature>/` as a compatibility mirror. Caelestia imports use `qs.k41.modules.bottombar` and `qs.k41.modules.topbar`.
+- **IMPLEMENTED:** WS02 owner documentation, WS02 module README, WS03/WS04 docs, Stage 5 overview, and project architecture docs record the dual-location policy. The active Lock Screen overlay remains under `caelestia/modules/lock/`; the two K41 directories are source mirrors, not independent shells.
+- **IMPLEMENTED:** fixture expectations were updated for the two K41 module locations and new `qs.*` imports.
+- **NOT TESTED YET:** No Bash syntax check, ShellCheck, regression fixture, global test runner, Quickshell QML load, or X280 runtime deployment has been executed after these edits. GitHub fetch confirms the updated file contents only; it is not evidence that scripts run successfully.
+- **SAFETY GATE:** Do not run the deployment scripts on the laptop until local checkout is updated and the Bash syntax/regression tests pass. After that, run each deployment from the repository as the normal desktop user; WS02 reloads Caelestia, WS03/WS04 do not restart Quickshell. Verify both copies with SHA-256 and validate imports after restart/reboot.
