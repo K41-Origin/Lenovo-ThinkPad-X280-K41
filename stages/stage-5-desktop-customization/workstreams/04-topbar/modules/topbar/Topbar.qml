@@ -92,7 +92,7 @@ Variants {
                     }
 
                     Text {
-                        text: `Battery ${Math.round(UPower.displayDevice.percentage * 100)}% · ${UPower.onBattery ? "On battery" : "AC"}`
+                        text: `Battery ${Math.round(UPower.displayDevice.percentage)}% · ${UPower.onBattery ? "On battery" : "AC"}`
                         color: "#f4f1fa"
                         font.pixelSize: 12
                     }
