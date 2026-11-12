@@ -78,4 +78,19 @@ grep -Fq 'chmod 0700 "$run_dir"' "$script"
 grep -Fq 'password|passwd|token|secret|authorization|cookie|api[_-]?key' "$script"
 ! grep -Eq 'git[[:space:]].*push.*--force' "$script"
 
+for token in \
+    'IMPLEMENTATION INPUTS: ACTIVE SESSION AND PROCESS CONTEXT' \
+    'IMPLEMENTATION PROBE: CAELESTIA SHELL EXPORTS' \
+    'IMPLEMENTATION PROBE: CAELESTIA LOCK STATE' \
+    'IMPLEMENTATION PROBE: USER SESSION ENVIRONMENT' \
+    'IMPLEMENTATION CONFIG CONTENT: .config/caelestia/shell.json' \
+    'IMPLEMENTATION CONFIG CONTENT: .config/quickshell/caelestia/shell.qml' \
+    'IMPLEMENTATION CONFIG CONTENT: .config/k41/hyprlock-fallback.conf' \
+    'IMPLEMENTATION INPUTS: REPOSITORY LOCKSCREEN TREE'; do
+    grep -Fq -- "$token" "$script" || {
+        printf 'FAIL: implementation evidence coverage missing: %s\\n' "$token" >&2
+        exit 1
+    }
+done
+
 printf 'PASS: desktop startup audit syntax, tty/session coverage, privacy guard, and read-only contract.\n'
