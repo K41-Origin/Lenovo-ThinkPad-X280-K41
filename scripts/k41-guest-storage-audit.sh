@@ -1,1 +1,0 @@
-../stages/stage-5-desktop-customization/scripts/k41-guest-storage-audit.sh
