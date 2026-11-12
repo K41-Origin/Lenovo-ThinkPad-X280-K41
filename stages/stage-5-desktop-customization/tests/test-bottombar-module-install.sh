@@ -49,7 +49,7 @@ run_installer
 after_count=("$backup_root"/*)
 [[ ${#before_count[@]} -eq ${#after_count[@]} ]]
 
-# A modified module at the dedicated audited K41 path is backed up and repaired.
+# A modified module at the audited Caelestia host import path is backed up and repaired.
 printf 'locally-corrupted-module\n' >"$target"
 run_installer
 cmp -s "$source" "$target"
