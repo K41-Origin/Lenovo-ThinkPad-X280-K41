@@ -1,0 +1,1093 @@
+
+========================================================================================
+PURPOSE, SCOPE AND SAFETY
+========================================================================================
+Goal: collect implementation inputs for Workstream 03 Bottombar/K41Dock.
+Mode: read-only audit; no runtime/config/package/service/source/Git mutations.
+Report location is outside the checkout under ~/.local/state/k41/bottombar/audits/.
+No Git fetch, checkout, reset, clean, stash, add, commit, push or index operation is performed.
+Captured UTC: 2026-11-12T16:57:32.418270+00:00
+Host label: <HOST-REDACTED>
+UID/GID: <LOCAL-IDENTITY-REDACTED>
+Repository: ~/Lenovo-ThinkPad-X280-K41
+Repository HEAD: 3b210bbf39aa022ef11b598edd3eee9895a525ce
+Repository status before/at audit: ## main...origin/main
+Tracked worktree diff: CLEAN
+Index diff: CLEAN
+
+========================================================================================
+REPOSITORY SOURCE INVENTORY
+========================================================================================
+Legacy source directory: PRESENT | files=1
+stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml | bytes=5663 | sha256=381bfcaf25a6a776edef57cbb7300faf4ded32c7d444988a966e39451d3b92b7
+--- BEGIN FILE LEGACY K41Dock.qml | bytes=5663 | sha256=381bfcaf25a6a776edef57cbb7300faf4ded32c7d444988a966e39451d3b92b7 ---
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Quickshell
+import Quickshell.Hyprland
+import Quickshell.Wayland
+import qs.services
+
+Variants {
+    model: Screens.screens
+
+    Scope {
+        id: scope
+        required property ShellScreen modelData
+
+        PanelWindow {
+            id: root
+
+            screen: scope.modelData
+
+            anchors {
+                bottom: true
+                left: true
+                right: true
+            }
+
+            implicitHeight: 58
+            color: "transparent"
+            exclusiveZone: 0
+
+            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+            // Only the trigger strip and dock accept pointer input.
+            mask: Region {
+                item: dock
+                Region {
+                    item: trigger
+                }
+            }
+
+            readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
+            readonly property int activeWorkspaceId: monitor?.activeWorkspace?.id ?? 1
+            readonly property bool hasFullscreen: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
+
+            property bool revealed: false
+            property bool triggerHovered: false
+            property bool dockHovered: false
+
+            function updateHover(inside: bool, isTrigger: bool): void {
+                if (isTrigger)
+                    triggerHovered = inside;
+                else
+                    dockHovered = inside;
+
+                if (inside) {
+                    hideTimer.stop();
+                    revealed = true;
+                } else {
+                    hideTimer.restart();
+                }
+            }
+
+            onHasFullscreenChanged: {
+                if (hasFullscreen)
+                    revealed = false;
+            }
+
+            Timer {
+                id: hideTimer
+                interval: 550
+                repeat: false
+                onTriggered: {
+                    if (!root.triggerHovered && !root.dockHovered)
+                        root.revealed = false;
+                }
+            }
+
+            // A narrow bottom-edge trigger; it does not reserve an exclusive zone.
+            Item {
+                id: trigger
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: 4
+                visible: !root.hasFullscreen
+
+                HoverHandler {
+                    onHoveredChanged: root.updateHover(hovered, true)
+                }
+            }
+
+            Rectangle {
+                id: dock
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: root.revealed && !root.hasFullscreen ? 8 : -(height - 3)
+
+                width: workspaceRow.implicitWidth + 28
+                height: 42
+                radius: 21
+                color: "#e51b1d27"
+                border.width: 1
+                border.color: "#35ffffff"
+                opacity: root.revealed && !root.hasFullscreen ? 1 : 0.08
+                visible: !root.hasFullscreen
+
+                Behavior on anchors.bottomMargin {
+                    NumberAnimation {
+                        duration: 190
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 160
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                HoverHandler {
+                    onHoveredChanged: root.updateHover(hovered, false)
+                }
+
+                Row {
+                    id: workspaceRow
+                    anchors.centerIn: parent
+                    spacing: 9
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: root.monitor
+                                ? Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor)
+                                : []
+                        }
+
+                        delegate: Item {
+                            id: workspaceItem
+
+                            required property var modelData
+                            required property int index
+
+                            readonly property bool active: modelData.id === root.activeWorkspaceId
+                            readonly property bool occupied: modelData.toplevels.values.length > 0
+
+                            width: active ? 24 : 14
+                            height: 18
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: parent.active ? 22 : 9
+                                height: parent.active ? 9 : 9
+                                radius: 5
+                                color: parent.active ? "#f4f1fa" : parent.occupied ? "#aaa6b5" : "#686573"
+
+                                Behavior on width {
+                                    NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton
+                                onClicked: Hypr.focusWorkspace(workspaceItem.modelData.id)
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+--- END FILE LEGACY K41Dock.qml ---
+
+========================================================================================
+RUNTIME CAELESTIA ROOTS AND PROVENANCE
+========================================================================================
+XDG_CONFIG: PRESENT ~/.config/quickshell/caelestia
+  shell.qml: FILE | bytes=981 | mode=0600 | uid=<REDACTED> | sha256=9af3487e7d87ac8c68ff3bcd67d2e43431ddb06bf55aca07f1ba4b8c5befba4d
+  modules/k41dock/K41Dock.qml: FILE | bytes=5663 | mode=0644 | uid=<REDACTED> | sha256=381bfcaf25a6a776edef57cbb7300faf4ded32c7d444988a966e39451d3b92b7
+  modules/bar/Bar.qml: FILE | bytes=7280 | mode=0600 | uid=<REDACTED> | sha256=7223977acf4279d694414843885d07a1ca49d7ae00793a94e6b96c3de0024a15
+  Git origin: https://github.com/caelestia-dots/shell.git
+  Git HEAD: d999d4878ee4cec134168e60d913714566a8cfa6
+  Git working tree: M modules/lock/Center.qml
+ M modules/lock/Content.qml
+ M modules/lock/LockSurface.qml
+ M modules/lock/center/PasswordInput.qml
+ M shell.qml
+?? modules/k41dock/
+SYSTEM_XDG: PRESENT /etc/xdg/quickshell/caelestia
+  shell.qml: FILE | bytes=848 | mode=0644 | uid=<REDACTED> | sha256=2f565b2496db98684b1799a8961e7e7669723b3bad4cb84426d39036b7366fbb
+  modules/k41dock/K41Dock.qml: MISSING
+  modules/bar/Bar.qml: FILE | bytes=7280 | mode=0644 | uid=<REDACTED> | sha256=7223977acf4279d694414843885d07a1ca49d7ae00793a94e6b96c3de0024a15
+  Git metadata: absent (possibly package-managed or exported tree)
+SYSTEM_SHARE: NOT_PRESENT /usr/share/quickshell/caelestia
+
+========================================================================================
+ACTIVE SHELL ENTRY POINTS AND CONFIGURATION
+========================================================================================
+XDG_CONFIG shell.qml: ~/.config/quickshell/caelestia/shell.qml | bytes=981 | sha256=9af3487e7d87ac8c68ff3bcd67d2e43431ddb06bf55aca07f1ba4b8c5befba4d
+  7: import "modules"
+  8: import "modules/drawers"
+  9: import "modules/background"
+  10: import "modules/areapicker"
+  11: import "modules/lock"
+  12: import QtQuick
+  13: import Quickshell
+  14: import qs.services
+  16: import "modules/k41dock" as K41Dock
+  46:     K41Dock.K41Dock {}
+SYSTEM_XDG shell.qml: /etc/xdg/quickshell/caelestia/shell.qml | bytes=848 | sha256=2f565b2496db98684b1799a8961e7e7669723b3bad4cb84426d39036b7366fbb
+  7: import "modules"
+  8: import "modules/drawers"
+  9: import "modules/background"
+  10: import "modules/areapicker"
+  11: import "modules/lock"
+  12: import QtQuick
+  13: import Quickshell
+  14: import qs.services
+CONFIG ~/.config/caelestia/shell.json | bytes=10751 | sha256=abe4467d09460acbc33ef849300d7e4be35076afb48062de4567528e06d2e262
+  bar keys: activeWindow, clock, dragThreshold, entries, excludedScreens, persistent, popouts, scrollActions, showOnHover, statusIcons, tray, workspaces
+  bar.entries[0]: {"enabled": false, "id": "workspaces"}
+  bar.entries[1]: {"enabled": false, "id": "spacer"}
+  bar.entries[2]: {"enabled": false, "id": "activeWindow"}
+  bar.entries[3]: {"enabled": false, "id": "spacer"}
+  bar.entries[4]: {"enabled": false, "id": "tray"}
+  bar.entries[5]: {"enabled": false, "id": "clock"}
+  bar.entries[6]: {"enabled": false, "id": "statusIcons"}
+  bar.entries[7]: {"enabled": false, "id": "power"}
+CONFIG ~/.config/caelestia/shell.json | bytes=10751 | sha256=abe4467d09460acbc33ef849300d7e4be35076afb48062de4567528e06d2e262
+  bar keys: activeWindow, clock, dragThreshold, entries, excludedScreens, persistent, popouts, scrollActions, showOnHover, statusIcons, tray, workspaces
+  bar.entries[0]: {"enabled": false, "id": "workspaces"}
+  bar.entries[1]: {"enabled": false, "id": "spacer"}
+  bar.entries[2]: {"enabled": false, "id": "activeWindow"}
+  bar.entries[3]: {"enabled": false, "id": "spacer"}
+  bar.entries[4]: {"enabled": false, "id": "tray"}
+  bar.entries[5]: {"enabled": false, "id": "clock"}
+  bar.entries[6]: {"enabled": false, "id": "statusIcons"}
+  bar.entries[7]: {"enabled": false, "id": "power"}
+
+========================================================================================
+LEGACY INSTALLER SOURCE AND BEHAVIOR
+========================================================================================
+--- BEGIN FILE HISTORICAL INSTALLER | bytes=10783 | sha256=8ffd98dc9b1afb60d3e17d6a19e9af90f9e9388b26067a67f5eab4fc349913af ---
+#!/usr/bin/env bash
+# Install/rollback the K41 horizontal Caelestia workspace dock.
+set -Eeuo pipefail
+umask 077
+
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*"; }
+
+usage() {
+    cat <<'EOF'
+Usage:
+  bash k41-install-caelestia-dock.sh [--install]
+  bash k41-install-caelestia-dock.sh --check
+  bash k41-install-caelestia-dock.sh --rollback BACKUP_DIRECTORY
+
+Install backs up every target before changing it. No sudo, package changes,
+service restart, Quickshell reload, or automatic rollback is performed.
+EOF
+}
+
+mode=${1:---install}
+case "$mode" in
+    --install) ;;
+    --check) ;;
+    --rollback)
+        [[ $# -eq 2 ]] || { usage >&2; exit 2; }
+        rollback_dir=$2
+        ;;
+    -h|--help) usage; exit 0 ;;
+    *) usage >&2; exit 2 ;;
+esac
+
+[[ $EUID -ne 0 ]] || die 'Run as the regular desktop user; do not use sudo.'
+for cmd in git python3 install cp tee date; do
+    command -v "$cmd" >/dev/null 2>&1 || die "Required command not found: $cmd"
+done
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+repo_root="$(git -C "$script_dir" rev-parse --show-toplevel 2>/dev/null)" ||
+    die 'Cannot locate the project Git repository.'
+source_root="${K41_CAELESTIA_SOURCE:-$HOME/.config/quickshell/caelestia}"
+config_file="${XDG_CONFIG_HOME:-$HOME/.config}/caelestia/shell.json"
+dock_source="$repo_root/stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml"
+dock_target="$source_root/modules/k41dock/K41Dock.qml"
+shell_file="$source_root/shell.qml"
+
+if [[ $mode != --rollback ]]; then
+    [[ -f $shell_file ]] || die "Caelestia source entry point not found: $shell_file"
+    [[ -f $config_file ]] || die "Runtime Caelestia config not found: $config_file"
+fi
+
+if [[ $mode == --check ]]; then
+    [[ -f $dock_source ]] || die "Dock QML source missing from repository: $dock_source"
+    python3 - "$shell_file" "$config_file" "$dock_source" <<'PY'
+import json, pathlib, sys
+shell, config, dock = map(pathlib.Path, sys.argv[1:])
+text = shell.read_text(encoding="utf-8")
+if text.count("ShellRoot {") != 1:
+    raise SystemExit("FAIL: expected exactly one ShellRoot { declaration")
+if "K41Dock.K41Dock {" in text:
+    raise SystemExit("FAIL: K41 dock is already wired into shell.qml")
+if "import \"modules/k41dock\" as K41Dock" in text:
+    raise SystemExit("FAIL: K41 dock import already exists")
+data = json.loads(config.read_text(encoding="utf-8"))
+if not isinstance(data.get("bar"), dict) or not isinstance(data["bar"].get("entries"), list):
+    raise SystemExit("FAIL: shell.json does not have the expected bar.entries structure")
+print("PASS: source layout, runtime JSON, and deployment preconditions")
+PY
+    exit 0
+fi
+
+backup_base="${XDG_STATE_HOME:-$HOME/.local/state}/k41/backups/caelestia-dock"
+timestamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+if [[ $mode == --install ]]; then
+    mkdir -p -- "$backup_base"
+    chmod 700 "$backup_base"
+    backup_dir="$backup_base/$timestamp"
+    suffix=0
+    while ! mkdir -- "$backup_dir" 2>/dev/null; do
+        suffix=$((suffix + 1))
+        backup_dir="$backup_base/$timestamp-$suffix"
+    done
+    chmod 700 "$backup_dir"
+    mkdir -p -- "$backup_dir/files"
+    : >"$backup_dir/manifest.tsv"
+    log_file="$backup_dir/implementation.log"
+else
+    [[ -d $rollback_dir && -f $rollback_dir/manifest.tsv ]] ||
+        die 'Backup directory or manifest not found.'
+    backup_dir="$(cd -- "$rollback_dir" && pwd -P)"
+    log_file="$backup_dir/rollback.log"
+fi
+exec > >(tee -a "$log_file") 2>&1
+
+backup_one() {
+    local target=$1 rel=$2 stored="$backup_dir/files/$2"
+    if [[ -e $target || -L $target ]]; then
+        mkdir -p -- "$(dirname -- "$stored")"
+        cp -a -- "$target" "$stored"
+        printf 'PRESENT\t%s\n' "$rel" >>"$backup_dir/manifest.tsv"
+        info "BACKUP_CREATED $rel"
+    else
+        printf 'ABSENT\t%s\n' "$rel" >>"$backup_dir/manifest.tsv"
+        info "BACKUP_RECORDED_ABSENT $rel"
+    fi
+}
+
+atomic_install() {
+    local source=$1 target=$2 mode_bits=$3 tmp
+    mkdir -p -- "$(dirname -- "$target")"
+    tmp="$(mktemp "$(dirname -- "$target")/.k41-dock.XXXXXX")"
+    install -m "$mode_bits" -- "$source" "$tmp"
+    mv -f -- "$tmp" "$target"
+}
+
+if [[ $mode == --rollback ]]; then
+    info "ROLLBACK_START backup=$backup_dir"
+    while IFS=$'\t' read -r state rel; do
+        [[ -n $state && -n $rel ]] || continue
+        case "$rel" in
+            source/shell.qml) target=$shell_file ;;
+            source/modules/k41dock/K41Dock.qml) target=$dock_target ;;
+            config/shell.json) target=$config_file ;;
+            *) die "Refusing unknown manifest path: $rel" ;;
+        esac
+        case "$state" in
+            PRESENT)
+                stored="$backup_dir/files/$rel"
+                [[ -f $stored ]] || die "Backup payload missing: $rel"
+                mkdir -p -- "$(dirname -- "$target")"
+                cp -a -- "$stored" "$target.restore"
+                mv -f -- "$target.restore" "$target"
+                info "RESTORED $rel"
+                ;;
+            ABSENT)
+                rm -f -- "$target"
+                info "REMOVED_NEW_FILE $rel"
+                ;;
+            *) die "Invalid manifest state: $state" ;;
+        esac
+    done <"$backup_dir/manifest.tsv"
+    rmdir -- "$(dirname -- "$dock_target")" 2>/dev/null || true
+    info 'ROLLBACK_COMPLETED; Quickshell was not reloaded.'
+    exit 0
+fi
+
+[[ -f $dock_source ]] || die "Dock QML source missing from repository: $dock_source"
+[[ -f $shell_file ]] || die 'Caelestia shell.qml disappeared during preflight.'
+[[ -f $config_file ]] || die 'Caelestia shell.json disappeared during preflight.'
+
+# Validate every input before creating backups or changing runtime files.
+python3 - "$shell_file" "$config_file" "$dock_source" <<'PY'
+import json, pathlib, sys
+shell, config, dock = map(pathlib.Path, sys.argv[1:])
+text = shell.read_text(encoding="utf-8")
+if text.count("ShellRoot {") != 1:
+    raise SystemExit("Preflight failed: expected exactly one ShellRoot { declaration")
+if "K41Dock.K41Dock {" in text or 'import "modules/k41dock" as K41Dock' in text:
+    raise SystemExit("Preflight failed: K41 dock already appears in shell.qml")
+data = json.loads(config.read_text(encoding="utf-8"))
+bar = data.get("bar")
+if not isinstance(bar, dict) or not isinstance(bar.get("entries"), list):
+    raise SystemExit("Preflight failed: shell.json bar.entries is missing or has an unexpected type")
+if not all(isinstance(item, dict) and "enabled" in item for item in bar["entries"]):
+    raise SystemExit("Preflight failed: bar.entries contains an unsupported entry")
+qml = dock.read_text(encoding="utf-8")
+if "PanelWindow" not in qml or "Hypr.focusWorkspace" not in qml:
+    raise SystemExit("Preflight failed: dock QML does not match the expected implementation")
+print("PASS: deployment preflight")
+PY
+
+# Back up all mutation targets, including absent paths, before the first write.
+backup_one "$shell_file" source/shell.qml
+backup_one "$dock_target" source/modules/k41dock/K41Dock.qml
+backup_one "$config_file" config/shell.json
+printf 'BACKUP_DIRECTORY=%s\n' "$backup_dir" | tee "$backup_dir/backup-location.txt"
+info 'BACKUP_PHASE_COMPLETED'
+
+# Stage the QML payload in the target tree.
+atomic_install "$dock_source" "$dock_target" 0644
+info 'INSTALLED modules/k41dock/K41Dock.qml'
+
+# Preserve the user's current shell.qml and append only the import + component.
+python3 - "$shell_file" <<'PY'
+import os, pathlib, sys, tempfile
+path = pathlib.Path(sys.argv[1])
+text = path.read_text(encoding="utf-8")
+if text.count("ShellRoot {") != 1:
+    raise SystemExit("Refusing shell.qml patch: ShellRoot structure changed")
+if "K41Dock.K41Dock {" in text or 'import "modules/k41dock" as K41Dock' in text:
+    raise SystemExit("Refusing duplicate K41 dock injection")
+marker = "ShellRoot {"
+text = text.replace(marker, 'import "modules/k41dock" as K41Dock\n\n' + marker, 1)
+end = text.rstrip()
+if not end.endswith("}"):
+    raise SystemExit("Refusing shell.qml patch: final ShellRoot brace not found")
+end = end[:-1].rstrip() + "\n\n    // K41 horizontal workspace dock (managed by the project installer).\n    K41Dock.K41Dock {}\n}\n"
+fd, temp_name = tempfile.mkstemp(prefix=".k41-shell.", dir=str(path.parent))
+try:
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        handle.write(end)
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.chmod(temp_name, path.stat().st_mode & 0o777)
+    os.replace(temp_name, path)
+except Exception:
+    try: os.unlink(temp_name)
+    except FileNotFoundError: pass
+    raise
+PY
+info 'PATCHED shell.qml without replacing its existing content'
+
+# Disable the stock vertical bar entries; all unrelated JSON settings remain intact.
+python3 - "$config_file" <<'PY'
+import json, os, pathlib, sys, tempfile
+path = pathlib.Path(sys.argv[1])
+data = json.loads(path.read_text(encoding="utf-8"))
+bar = data["bar"]
+bar["persistent"] = False
+bar["showOnHover"] = False
+for entry in bar["entries"]:
+    entry["enabled"] = False
+fd, temp_name = tempfile.mkstemp(prefix=".k41-shell-json.", dir=str(path.parent))
+try:
+    with os.fdopen(fd, "w", encoding="utf-8") as handle:
+        json.dump(data, handle, indent=2, ensure_ascii=False)
+        handle.write("\n")
+        handle.flush()
+        os.fsync(handle.fileno())
+    os.chmod(temp_name, path.stat().st_mode & 0o777)
+    os.replace(temp_name, path)
+except Exception:
+    try: os.unlink(temp_name)
+    except FileNotFoundError: pass
+    raise
+PY
+info 'UPDATED runtime shell.json: stock bar entries disabled'
+
+# Post-write integrity checks. Any failure leaves the backup intact for rollback.
+python3 - "$shell_file" "$config_file" "$dock_target" <<'PY'
+import json, pathlib, sys
+shell, config, dock = map(pathlib.Path, sys.argv[1:])
+text = shell.read_text(encoding="utf-8")
+if text.count('import "modules/k41dock" as K41Dock') != 1 or text.count("K41Dock.K41Dock {}") != 1:
+    raise SystemExit("FAIL: shell.qml integration markers are not unique")
+data = json.loads(config.read_text(encoding="utf-8"))
+if data["bar"]["persistent"] or data["bar"]["showOnHover"] or any(x["enabled"] for x in data["bar"]["entries"]):
+    raise SystemExit("FAIL: stock bar configuration was not fully disabled")
+qml = dock.read_text(encoding="utf-8")
+if "PanelWindow" not in qml or "Hypr.focusWorkspace" not in qml:
+    raise SystemExit("FAIL: deployed dock QML integrity check failed")
+print("PASS: shell.qml markers, runtime JSON, and deployed QML integrity")
+PY
+
+info "IMPLEMENTATION_FILES_CHANGED=source/shell.qml,source/modules/k41dock/K41Dock.qml,config/shell.json"
+info "BACKUP_DIRECTORY=$backup_dir"
+info 'IMPLEMENTED; Quickshell was not reloaded or restarted.'
+info 'Review the backup and implementation.log before reloading the shell.'
+--- END FILE HISTORICAL INSTALLER ---
+Installer marker '--check': PRESENT
+Installer marker '--install': PRESENT
+Installer marker '--rollback': PRESENT
+Installer marker 'backup': PRESENT
+Installer marker 'manifest': PRESENT
+Installer marker 'shell.qml': PRESENT
+Installer marker 'shell.json': PRESENT
+Installer marker 'sudo': PRESENT
+Installer marker 'quickshell': PRESENT
+
+========================================================================================
+LOCAL QML DEPENDENCY AND INTEGRATION SCAN
+========================================================================================
+--- BEGIN FILE RUNTIME XDG_CONFIG: modules/k41dock/K41Dock.qml | bytes=5663 | sha256=381bfcaf25a6a776edef57cbb7300faf4ded32c7d444988a966e39451d3b92b7 ---
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import Quickshell
+import Quickshell.Hyprland
+import Quickshell.Wayland
+import qs.services
+
+Variants {
+    model: Screens.screens
+
+    Scope {
+        id: scope
+        required property ShellScreen modelData
+
+        PanelWindow {
+            id: root
+
+            screen: scope.modelData
+
+            anchors {
+                bottom: true
+                left: true
+                right: true
+            }
+
+            implicitHeight: 58
+            color: "transparent"
+            exclusiveZone: 0
+
+            WlrLayershell.layer: WlrLayer.Top
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+            // Only the trigger strip and dock accept pointer input.
+            mask: Region {
+                item: dock
+                Region {
+                    item: trigger
+                }
+            }
+
+            readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
+            readonly property int activeWorkspaceId: monitor?.activeWorkspace?.id ?? 1
+            readonly property bool hasFullscreen: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false
+
+            property bool revealed: false
+            property bool triggerHovered: false
+            property bool dockHovered: false
+
+            function updateHover(inside: bool, isTrigger: bool): void {
+                if (isTrigger)
+                    triggerHovered = inside;
+                else
+                    dockHovered = inside;
+
+                if (inside) {
+                    hideTimer.stop();
+                    revealed = true;
+                } else {
+                    hideTimer.restart();
+                }
+            }
+
+            onHasFullscreenChanged: {
+                if (hasFullscreen)
+                    revealed = false;
+            }
+
+            Timer {
+                id: hideTimer
+                interval: 550
+                repeat: false
+                onTriggered: {
+                    if (!root.triggerHovered && !root.dockHovered)
+                        root.revealed = false;
+                }
+            }
+
+            // A narrow bottom-edge trigger; it does not reserve an exclusive zone.
+            Item {
+                id: trigger
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: 4
+                visible: !root.hasFullscreen
+
+                HoverHandler {
+                    onHoveredChanged: root.updateHover(hovered, true)
+                }
+            }
+
+            Rectangle {
+                id: dock
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: root.revealed && !root.hasFullscreen ? 8 : -(height - 3)
+
+                width: workspaceRow.implicitWidth + 28
+                height: 42
+                radius: 21
+                color: "#e51b1d27"
+                border.width: 1
+                border.color: "#35ffffff"
+                opacity: root.revealed && !root.hasFullscreen ? 1 : 0.08
+                visible: !root.hasFullscreen
+
+                Behavior on anchors.bottomMargin {
+                    NumberAnimation {
+                        duration: 190
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 160
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                HoverHandler {
+                    onHoveredChanged: root.updateHover(hovered, false)
+                }
+
+                Row {
+                    id: workspaceRow
+                    anchors.centerIn: parent
+                    spacing: 9
+
+                    Repeater {
+                        model: ScriptModel {
+                            values: root.monitor
+                                ? Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor)
+                                : []
+                        }
+
+                        delegate: Item {
+                            id: workspaceItem
+
+                            required property var modelData
+                            required property int index
+
+                            readonly property bool active: modelData.id === root.activeWorkspaceId
+                            readonly property bool occupied: modelData.toplevels.values.length > 0
+
+                            width: active ? 24 : 14
+                            height: 18
+
+                            Rectangle {
+                                anchors.centerIn: parent
+                                width: parent.active ? 22 : 9
+                                height: parent.active ? 9 : 9
+                                radius: 5
+                                color: parent.active ? "#f4f1fa" : parent.occupied ? "#aaa6b5" : "#686573"
+
+                                Behavior on width {
+                                    NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                acceptedButtons: Qt.LeftButton
+                                onClicked: Hypr.focusWorkspace(workspaceItem.modelData.id)
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+--- END FILE RUNTIME XDG_CONFIG: modules/k41dock/K41Dock.qml ---
+QML API 3: import QtQuick
+QML API 4: import Quickshell
+QML API 5: import Quickshell.Hyprland
+QML API 6: import Quickshell.Wayland
+QML API 7: import qs.services
+QML API 9: Variants {
+QML API 10: model: Screens.screens
+QML API 16: PanelWindow {
+QML API 29: exclusiveZone: 0
+QML API 31: WlrLayershell.layer: WlrLayer.Top
+QML API 32: WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+QML API 35: mask: Region {
+QML API 37: Region {
+QML API 42: readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
+QML API 57: hideTimer.stop();
+QML API 60: hideTimer.restart();
+QML API 69: Timer {
+QML API 70: id: hideTimer
+QML API 88: HoverHandler {
+QML API 123: HoverHandler {
+QML API 133: model: ScriptModel {
+QML API 135: ? Hypr.workspaces.values.filter(w => w.id > 0 && w.monitor === root.monitor)
+QML API 163: MouseArea {
+QML API 166: onClicked: Hypr.focusWorkspace(workspaceItem.modelData.id)
+Direct QML imports: QtQuick; Quickshell; Quickshell.Hyprland; Quickshell.Wayland; qs.services
+Potential instantiated QML types: HoverHandler, Item, MouseArea, NumberAnimation, PanelWindow, Rectangle, Region, Repeater, Row, Scope, Timer, Variants
+
+========================================================================================
+VERSION, PACKAGE AND TOOL EVIDENCE
+========================================================================================
+qs: /usr/bin/qs
+  --version exit=0: Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+quickshell: /usr/bin/quickshell
+  --version exit=0: Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+caelestia: /usr/bin/caelestia
+  --version exit=0: Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (package: caelestia-shell)
+
+Quickshell:
+    Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+
+Local copy of shell found:
+    Last merged upstream commit: unknown
+    Last local commit: d999d48 (ci: update workflows (#2041))
+hyprctl: /usr/bin/hyprctl
+[quickshell]
+
+[quickshell-git]
+
+[caelestia-shell]
+
+[hyprland]
+
+[qt6-base]
+
+[qt6-declarative]
+
+qmllint: NOT_FOUND
+qmlformat: NOT_FOUND
+shellcheck: /usr/bin/shellcheck
+
+========================================================================================
+TEST, DOCUMENTATION AND RELATED IMPLEMENTATION INVENTORY
+========================================================================================
+tests:
+  tests/README.md | bytes=1154 | sha256=744a2787c445c89b15ba7ad3e3a6ea2f0126732710318d0cec84a35ebb10d3b4
+  tests/run.sh | bytes=7032 | sha256=7c644e9c9f44edfdab356f44b46e45f547a38704855a6ef10a65754f1ea8411b
+  tests/test-bootstrap-archiso.sh | bytes=3536 | sha256=9c7811dcb778cc9e38c7c15c9061cc0b03f45a6339a785a1700c0cd6508a272d
+  tests/test-common-preflight.sh | bytes=5591 | sha256=d132f4c2d214df345d03d3380732aeff651c8cac18e0223a0914c6a29dc14726
+  tests/test-inventory.sh | bytes=4761 | sha256=a17c61cd825cc54cea7aabdc46a86aba40fe231f6ebcff80558b6ca6acd7cd34
+  tests/test-native-storage-handle.sh | bytes=1108 | sha256=b1b4bb455a4b44c1b54ce783993bccb2a00678fbf586877bd9d884eb2f9d5e08
+  tests/test-pinned-device-path.sh | bytes=3320 | sha256=11ae9e03a0ae260c508fa19b710ad70f5cd4b5fc68367e2e06af66f6b9eff68c
+  tests/test-preflight-gate.sh | bytes=2294 | sha256=5a6af87b3459881d463bf1cc7faca11cb520a960dfbee045df0e956a8c070256
+  tests/test-storage-confirmation.sh | bytes=5423 | sha256=e9b2d4a7fb5c4f5de395defaefb17fe38939aa96851e79d7c0db4bbcb4f287c9
+  tests/test-storage-discovery.sh | bytes=7254 | sha256=b36e6d92c1ec3ffbbc4bb9379dbdfdbe37dd566ad267254c8fae1e27e133c00a
+  tests/test-storage-execution-boundary.sh | bytes=8711 | sha256=37f9fe14a3c7201d0dac5829075456ad28b7f5fd230c36b094f6c4ea32763173
+  tests/test-storage-execution-dry-run.sh | bytes=5298 | sha256=5d4d0f86cad7a5e9af6f7c3fa1a50fbe853832b0df36f8ee4def7e3f757bcbdf
+  tests/test-storage-plan.sh | bytes=8969 | sha256=7d7ee140b88af1e1cb387a172702dd9b40e3224efaeb4074b2c9321179beb8ac
+  tests/test-storage-prerequisites.sh | bytes=4360 | sha256=0f2dc97a981d6c673060df5163a7c4aa3489c45236b530da3446ef27e60f3b8d
+  tests/test-storage-topology.sh | bytes=9336 | sha256=24076621aa35714fa39ecf611455b40534f2753b70c8f5d7ed0aaed7d98af087
+  tests/helpers/storage-fixtures.sh | bytes=843 | sha256=156c7a98e4ce6f9ad1c16dbe49c7aabe40773e601e371fa6d9b3fbf4f1bfd0cc
+stages/stage-5-desktop-customization/tests:
+  stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh | bytes=6571 | sha256=b71f1eb32a0a7f0d3d62b01c6a3b1753d0506855afe73de37aefa4c2726b71c3
+  stages/stage-5-desktop-customization/tests/test-boot-audit-collector.sh | bytes=3103 | sha256=0d93b462d97e327a376ce9c6a4d1305f8ff52ee9d920b852fa807960977e0581
+  stages/stage-5-desktop-customization/tests/test-boot-experience.sh | bytes=1690 | sha256=9818777e1195d6fa1f10daf778321d441d9a77dc9f4bfa5435665d088931f3a7
+  stages/stage-5-desktop-customization/tests/test-boot-visual-diagnostics.sh | bytes=624 | sha256=5b36ceee69d5047f9ec2c956afa45269dd4f5c8728cd52861dbe9469c9f55180
+  stages/stage-5-desktop-customization/tests/test-bottombar-audit-publisher.sh | bytes=2692 | sha256=c1222b58cb556e0482d60484bed6812b885ee36734cdf9e80fff87a29697daa8
+  stages/stage-5-desktop-customization/tests/test-bottombar-module-install.sh | bytes=3457 | sha256=62be77283745f53b809f75cd991c7e38d86fbde8f9967401f7ec1dd2580d3697
+  stages/stage-5-desktop-customization/tests/test-caelestia-dashboard-cleanup.sh | bytes=2561 | sha256=5d5dff22591cef09fa341917f6dff87eeff8737c65882d7080093727ea4033dd
+  stages/stage-5-desktop-customization/tests/test-caelestia-module-repair.sh | bytes=2678 | sha256=1e8a6dfcdd123639dc131b160a0670f88e9654a1c6241e9daaefe187ad39e0cb
+  stages/stage-5-desktop-customization/tests/test-desktop-startup-audit.sh | bytes=6520 | sha256=ff30a31a53cb12764bd1699a5104a02728bc3b3baf150416f81b781c2ba952e8
+  stages/stage-5-desktop-customization/tests/test-lockscreen-design.sh | bytes=3296 | sha256=8e5a55ab3fc6e9b5cb647d2435f6cb0a9b37246d58df7715f53b087280229bb0
+  stages/stage-5-desktop-customization/tests/test-lockscreen-startup-helper.sh | bytes=10204 | sha256=29fc4f4a61e02ea6ef0dff59b4cef5a259909358460d8b0e1678b340314ed8f1
+  stages/stage-5-desktop-customization/tests/test-lockscreen-visual-deploy.sh | bytes=9391 | sha256=adacde2e1a2111441d40df1a338d7a29f5a732604e0def101451c77dac1dc657
+  stages/stage-5-desktop-customization/tests/test-lockscreen-visual-module.sh | bytes=1477 | sha256=6f1f6d6706d7b2ac359b4378ef86edc47f1fa470a563168f6ca430ff1274fbaf
+  stages/stage-5-desktop-customization/tests/test-plymouth-k41-theme.sh | bytes=1760 | sha256=325b49ecd1c845507b268b913f6405b3c32161219f85a366f6b08c55c93e6561
+  stages/stage-5-desktop-customization/tests/test-plymouth-only-boot.sh | bytes=980 | sha256=5e6b74cdd8ad66e7c6de7cfc68f53a0c36033f4f1cea6edade2d8d676fbe6c4d
+stages/stage-5-desktop-customization/workstreams/03-bottombar:
+  stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.Qml | bytes=5663 | sha256=381bfcaf25a6a776edef57cbb7300faf4ded32c7d444988a966e39451d3b92b7
+  stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-audit-bottombar.sh | bytes=22971 | sha256=bf92aa2e7e7e2f55e97bb39b5a1821ca59d4fb23d05f46fef465d230ac78b090
+  stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-implement-bottombar.sh | bytes=6952 | sha256=866bd25078d5417d058622696d66bea9af424b191f9bade5a9032dbd090f7337
+stages/stage-5-desktop-customization/workstreams/04-taskbar-panel:
+  stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml | bytes=5663 | sha256=381bfcaf25a6a776edef57cbb7300faf4ded32c7d444988a966e39451d3b92b7
+--- BEGIN FILE stages/stage-5-desktop-customization/docs/03-BOTTOMBAR.md | bytes=12346 | sha256=68e09dd83ace300ad66ab77f126d6ce18ba1ee21d70fa7078d168322609945ac ---
+# Workstream 03 — Bottombar
+
+**Status: IMPLEMENTATION SCRIPT IMPLEMENTED — TEST PENDING.** Audit aktual X280 telah ditinjau. Source kanonis Bottombar dan script install/repair sudah ditambahkan; pengujian fixture dan runtime pada X280 masih harus dijalankan.
+
+Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan kerja mengikuti Workstream 02, tetapi implementasi Bottombar tetap disesuaikan dengan hasil audit dan kontrak Quickshell/Caelestia yang benar-benar terverifikasi.
+
+## Tujuan dan batas ownership
+
+- Menyediakan Bottombar K41 untuk indikator dan navigasi workspace Hyprland.
+- Menjaga source, script, test, dan dokumentasi K41 di repository sebagai sumber kanonis.
+- Memisahkan komponen K41 dari source milik Caelestia sejauh didukung arsitektur Quickshell yang telah diverifikasi.
+- Mempertahankan perilaku Bottombar yang sebelumnya diterima pengguna kecuali audit menemukan masalah atau perubahan disetujui.
+- Memastikan setiap perubahan runtime memiliki preflight, backup, verifikasi pascaperubahan, logging, dan rollback yang diuji.
+- Audit harus read-only terhadap runtime dan Git checkout.
+
+## Workflow kanonis — tiga script
+
+Urutan pengerjaan mengikuti pola Workstream 02. Ketiga script memiliki ownership dan tanggung jawab terpisah; tidak boleh digabung menjadi satu installer serba guna.
+
+| Urutan | Script | Tanggung jawab | Status |
+|---:|---|---|---|
+| 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — report aktual X280 tersedia dan telah ditinjau** |
+| 2 | `scripts/k41-implement-bottombar.sh` | Satu operasi: memasang atau memperbaiki modul QML Bottombar. Backup privat, atomic replacement, verifikasi, dan automatic rollback adalah mekanisme keselamatan operasi tersebut; tidak mengelola host integration/configuration. | **IMPLEMENTED — TEST PENDING** |
+| 3 | `scripts/k41-cleanup-bottombar.sh` | Audit target cleanup, dry-run, backup, penghapusan/nonaktifkan komponen yang disetujui, verifikasi, dan rollback. | PLANNED |
+
+Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.Qml`. Script berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/`.
+
+### Tahap 1 — Audit dan pengumpulan bukti
+
+Jalankan dari Git checkout repository, branch `main`, sebagai user desktop biasa tanpa sudo:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-audit-bottombar.sh
+```
+
+Laporan lengkap disimpan privat di:
+
+```text
+~/.local/state/k41/bottombar/audits/<timestamp>/bottombar-audit.txt
+```
+
+Setelah report selesai dibuat, script otomatis membuat salinan tersanitasi dan mempublikasikannya ke branch `main` melalui temporary independent clone di:
+
+```text
+reports/stage-5-desktop-customization/03-bottombar/audits/<timestamp>/
+├── report.txt
+└── README.txt
+```
+
+Audit mengumpulkan:
+
+- Repository HEAD, status branch/worktree/index sebagai observasi read-only.
+- Source K41 legacy, seluruh file terkait, ukuran dan SHA-256.
+- Root Caelestia user/XDG/system yang ditemukan, provenance Git jika tersedia, metadata runtime, dan file Bottombar yang sudah terpasang.
+- Titik integrasi pada `shell.qml` serta metadata `bar.entries` dari konfigurasi JSON tanpa mencetak seluruh konfigurasi.
+- Isi installer historis, mode operasi, target perubahan, backup/manifest, dan indikasi rollback.
+- Import QML, API yang dipakai, relative import, dan kandidat type yang perlu diverifikasi.
+- Versi Quickshell/Caelestia/Hyprland/Qt, package metadata, serta ketersediaan `qmllint`, `qmlformat`, dan ShellCheck.
+- Inventaris tests, source, dokumentasi, dan artefak workstream yang relevan.
+- Ringkasan keterbatasan dan input yang dibutuhkan untuk desain implementasi.
+
+Audit bersifat read-only terhadap source, runtime, konfigurasi, package, dan service. Report lengkap hanya ditulis ke state directory privat. Publikasi dilakukan melalui clone baru yang memiliki direktori `.git` sendiri; fetch, commit, dan push hanya berjalan di clone sementara tersebut. Script tidak menjalankan operasi Git mutatif pada checkout aktif, sehingga branch, HEAD, index, FETCH_HEAD, dan worktree metadata checkout lokal tidak disentuh. Report publik berada pada path yang berbeda dari report lokal; tidak ada untracked report di checkout yang dapat menghalangi `git pull`.
+
+Sebelum publikasi, script membuat salinan UTF-8 tersanitasi yang mengganti home/repository path, username, hostname, UID/GID, alamat IP/MAC, SSID, URL user-info, dan pola credential umum. Sanitasi otomatis bukan jaminan bahwa semua data sensitif terhapus. Review report publik di GitHub tetap wajib. Jika clone/commit/push gagal, report privat tetap tersedia dan script keluar dengan status non-zero. Audit statis tidak membuktikan QML compile atau runtime behavior.
+
+**Acceptance tahap audit:** report lengkap tersedia; setiap target/source runtime diklasifikasikan; dependency/API dan integration map memiliki bukti; unknown/missing data ditandai; tidak ada perubahan runtime atau Git checkout.
+
+### Tahap 2 — Implementasi modul
+
+Source kanonis:
+
+```text
+workstreams/03-bottombar/modules/bottombar/Dock.Qml
+```
+
+Jalankan dari Git checkout sebagai user desktop biasa:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-implement-bottombar.sh
+```
+
+Script hanya memiliki satu operasi: memasang atau memperbaiki modul. Tidak ada mode `--check`, `--rollback`, cleanup, package management, atau service management.
+
+**Pemetaan source ke runtime:** audit membuktikan bahwa Caelestia `shell.qml` saat ini mengimpor `modules/k41dock` sebagai `K41Dock` dan membuat `K41Dock.K41Dock {}`. Agar host contract yang sudah berjalan tetap kompatibel tanpa mengubah file host, source `Dock.Qml` dipasang dengan nama runtime:
+
+```text
+~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml
+```
+
+Nama file runtime `K41Dock.qml` dipertahankan karena nama tersebut menyediakan tipe QML `K41Dock` yang dipakai oleh import/instance Caelestia. Source repository tetap menggunakan struktur baru `modules/bottombar/Dock.Qml`.
+
+Perilaku script:
+- Menolak root/sumber/target symlink, path tidak aman, dan file yang bukan regular file.
+- Memastikan user runtime Caelestia dan host import/instance yang ditemukan audit tersedia.
+- Tidak mengubah `shell.qml`, `shell.json`, konfigurasi system-wide, paket, atau service.
+- Jika source dan target sudah sama, berhenti tanpa perubahan.
+- Jika target berbeda, membuat backup privat dan manifest checksum sebelum atomic replacement.
+- Memverifikasi hasil; kegagalan setelah perubahan memicu pemulihan otomatis dari backup.
+- Tidak me-reload atau me-restart Quickshell.
+
+Backup disimpan di `$XDG_STATE_HOME/k41/backups/bottombar/<timestamp>/` (atau `~/.local/state/...` jika XDG_STATE_HOME tidak disetel). File backup dan manifest berada di direktori privat.
+
+Script tidak mengedit integrasi host. Jika host import/instance berbeda dari hasil audit, script berhenti; jangan memperluas tanggung jawabnya untuk mengubah Caelestia.
+
+### Tahap 3 — Cleanup
+
+Script cleanup dibuat terpisah dan hanya dijalankan setelah implementasi baru diverifikasi serta pengguna menyetujui target cleanup. Tanggung jawab minimal:
+
+- Inventarisasi referensi, dependency, konfigurasi, dan file upstream yang menjadi target.
+- Default dry-run; tampilkan tepat apa yang akan diubah/dihapus.
+- Tolak target yang tidak cocok dengan provenance/hash yang diaudit.
+- Backup seluruh target dan catat manifest.
+- Terapkan hanya cleanup yang disetujui, verifikasi hasil, dan sediakan rollback.
+- Jangan menghapus source Caelestia atau mengubah konfigurasi global secara luas tanpa bukti dependency dan persetujuan eksplisit.
+
+## Baseline historis dan temuan awal
+
+Source historis yang ditemukan:
+
+- QML: `workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml`.
+- Installer lama: `stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh`.
+- Runtime target installer lama: `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml`.
+- Entry point host yang pernah dimodifikasi: `~/.config/quickshell/caelestia/shell.qml`.
+- Konfigurasi yang pernah dimodifikasi: `~/.config/caelestia/shell.json`.
+
+Inspeksi statis sebelumnya menunjukkan installer lama memiliki `--check`, `--install`, dan `--rollback`; membuat backup tiga target; menyalin QML; menambahkan import/instance ke `shell.qml`; serta menonaktifkan `bar.entries` di `shell.json`. Tidak ditemukan automatic rollback untuk kegagalan parsial. Temuan ini harus diperiksa ulang oleh audit baru terhadap perangkat dan source terkini.
+
+Identitas workstream kini 03, sedangkan source historis masih berada pada direktori bernama `04-taskbar-panel`. Jangan memindahkan atau mengganti path sebelum seluruh referensi, ownership, dan dependency diperiksa.
+
+## Perilaku baseline yang perlu dipertahankan atau diuji
+
+- Menampilkan workspace pada monitor terkait.
+- Membedakan workspace aktif dan workspace yang memiliki window.
+- Mengganti workspace melalui klik.
+- Menampilkan dock melalui trigger hover di tepi bawah.
+- Menjaga dock tetap terlihat ketika pointer berada di dock dan menyembunyikannya setelah pointer keluar.
+- Menyembunyikan dock ketika fullscreen toplevel aktif.
+- Tidak memesan exclusive zone.
+
+Ini adalah deskripsi source QML historis, bukan hasil regression test terkini.
+
+## Dependency, API, dan desain integrasi — PLANNED
+
+Audit harus memverifikasi versi Quickshell, Caelestia, Hyprland, Qt, modul QML, dan API yang benar-benar terpasang. Minimal telusuri `PanelWindow`, `WlrLayershell`, `HyprlandMonitor`, `Screens`, `Hypr.workspaces`, `Hypr.focusWorkspace()`, `ScriptModel`, dan dependency transitif. Petakan entry point, konfigurasi, lifecycle, monitor behavior, dan ownership. Dokumentasikan batas pemindaian statis; validasi upstream/API tidak boleh disimpulkan hanya dari nama import.
+
+Hasil wajib: dependency map, integration map, daftar risiko/unknown, keputusan namespace source/runtime, dan kontrak host-loading yang dapat direview sebelum implementasi.
+
+## Automated testing dan runtime verification — PLANNED
+
+Test plan minimum:
+
+- Bash syntax dan ShellCheck.
+- Audit tidak mengubah HEAD, branch, index, tracked worktree, atau menulis report ke checkout.
+- Path symlink, ownership salah, HOME/XDG path tidak aman, dependency hilang, dan source/runtime tidak tersedia.
+- Installer install/repair, failure injection, automatic rollback, idempotensi, serta verifikasi bahwa `shell.qml` dan `shell.json` tidak berubah.
+- QML lint/compile terhadap versi runtime yang dipin.
+- Workspace switch, hover, fullscreen, monitor, reload, dan regression komponen Caelestia.
+- Resource usage dan stabilitas yang relevan.
+
+Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pada ThinkPad X280 dan mencatat versi, kondisi, perintah, hasil, serta batasan. Konfirmasi visual/interaksi akhir dilakukan pengguna.
+
+## Batas keamanan
+
+- Tidak menggunakan sudo untuk deployment user-level.
+- Tidak mengubah PAM, autentikasi, lock/session protocol, system services, atau boot configuration.
+- Tidak menimpa file lokal/upstream yang belum diidentifikasi.
+- Audit tidak mengubah runtime atau Git metadata checkout aktif.
+- Report lengkap bersifat privat; hanya salinan tersanitasi yang dipublikasikan otomatis melalui independent clone. Review report publik tetap wajib.
+- Jangan mengklaim rollback, idempotensi, QML compatibility, atau runtime safety tanpa test yang relevan.
+
+## Validasi, status, dan acceptance
+
+- Report audit aktual X280 tersedia di `reports/stage-5-desktop-customization/03-bottombar/audits/20261112T164446Z/` dan telah ditinjau.
+- Source kanonis `modules/bottombar/Dock.Qml` dan script install/repair telah ditambahkan.
+- Automated fixture test telah ditambahkan ke `tests/run.sh`; eksekusinya belum diklaim.
+- QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
+- Cleanup script tetap PLANNED dan tidak menjadi bagian dari installer.
+
+Acceptance berikutnya: jalankan fixture test, ShellCheck, lalu installer pada X280 dan verifikasi perilaku visual/interaksi. Catat IMPLEMENTED, TESTED, VERIFIED, dan penerimaan pengguna secara terpisah.
+--- END FILE stages/stage-5-desktop-customization/docs/03-BOTTOMBAR.md ---
+--- BEGIN FILE stages/stage-5-desktop-customization/docs/03-BOTTOMBAR-IMPLEMENTATION.md | bytes=3638 | sha256=d2c8f4eb7b01c8b746c5128d879c3b1a956fcb7bbbfc11449740c55f30212279 ---
+# Bottombar — Historical Implementation Record
+
+## Tujuan dokumen
+
+Dokumen ini menyimpan catatan implementasi Bottombar sebelum audit dan refactoring Workstream 03. Isinya adalah baseline historis, bukan spesifikasi arsitektur target atau instruksi deployment yang telah disetujui.
+
+Status dan workflow kanonis berada di [Workstream 03 — Bottombar](03-BOTTOMBAR.md). Workstream saat ini **AUDIT IN PROGRESS**. Jangan menjalankan installer historis atau memigrasikan source/runtime berdasarkan dokumen ini.
+
+## Lokasi historis
+
+| Jenis | Path |
+|---|---|
+| Source repository historis | `stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
+| Runtime target installer historis | `~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml` |
+| Entry point Caelestia yang dimodifikasi | `~/.config/quickshell/caelestia/shell.qml` |
+| Runtime config yang dimodifikasi | `~/.config/caelestia/shell.json` |
+| Backup dan log historis | `~/.local/state/k41/backups/caelestia-dock/<timestamp>/` |
+
+Path tersebut menjelaskan implementasi lama yang ditemukan pada source installer. Keberadaan path tidak membuktikan kondisi runtime laptop saat ini.
+
+## Perilaku historis K41Dock
+
+- Menampilkan workspace pada monitor yang sesuai.
+- Workspace aktif memiliki indikator lebih menonjol; workspace berisi window memiliki penanda berbeda.
+- Klik indikator memanggil `Hypr.focusWorkspace()`.
+- Trigger hover selebar layar berada di tepi bawah.
+- Dock tetap terlihat ketika pointer berada di dock dan disembunyikan setelah pointer meninggalkannya.
+- Menggunakan `exclusiveZone: 0`.
+- Dock disembunyikan ketika monitor memiliki fullscreen toplevel aktif.
+- Menggunakan `PanelWindow`, `WlrLayershell`, dan API Hyprland melalui Quickshell.
+
+Perilaku di atas adalah deskripsi source QML historis, bukan hasil regression test terbaru.
+
+## Installer historis
+
+Entry point:
+
+`stages/stage-5-desktop-customization/scripts/k41-install-caelestia-dock.sh`
+
+Mode yang tersedia:
+
+- `--check`: memeriksa beberapa precondition struktur source/runtime.
+- `--install`: membuat backup target, menyalin QML, memodifikasi `shell.qml`, dan mengubah `bar.entries` pada `shell.json`.
+- `--rollback BACKUP_DIRECTORY`: memulihkan target dari manifest backup.
+
+Batas yang diketahui dari inspeksi statis:
+
+- Tidak menggunakan sudo atau memasang paket.
+- Tidak me-restart service atau me-reload Quickshell secara otomatis.
+- Rollback dijalankan manual.
+- Tidak ditemukan automatic rollback untuk kegagalan parsial dalam source yang diperiksa.
+- Validasi source dan hasil perubahan belum membuktikan QML compile atau runtime behavior.
+
+Jangan gunakan perintah install/rollback di dokumen lama ini sebelum audit dan refactoring menghasilkan prosedur baru yang disetujui.
+
+## Catatan penerimaan historis
+
+Pengguna sebelumnya mengonfirmasi Bottombar berhasil digunakan. Catatan ini dipertahankan sebagai histori penerimaan desain/implementasi terdahulu. Hal itu tidak membuktikan seluruh skenario multi-monitor, fullscreen, dependency compatibility, resource usage, atau regression telah diuji.
+
+## Perubahan yang menunggu audit
+
+- Konsolidasi identitas direktori menjadi Workstream 03.
+- Pemisahan source K41 dan integrasi host Caelestia.
+- Penetapan namespace/runtime target setelah API loading Quickshell diverifikasi.
+- Perbaikan preflight, staging, atomic deployment, failure handling, rollback, logging, dan idempotensi.
+- Automated tests dan runtime verification.
+- Penetapan acceptance criteria dan dokumentasi operasional baru.
+
+Semua butir tersebut masih PLANNED sampai implementasi dan bukti tersedia.
+--- END FILE stages/stage-5-desktop-customization/docs/03-BOTTOMBAR-IMPLEMENTATION.md ---
+
+========================================================================================
+IMPLEMENTATION HANDOFF SUMMARY
+========================================================================================
+This report is evidence for designing the separate audit/implementation/cleanup workflow.
+It does not decide the target runtime namespace, host-loading contract, or whether Caelestia bar config should be changed.
+The QML scan is static and heuristic; it is not a Qt/QML linker or runtime compatibility proof.
+Package metadata and executable --version output are observations from this machine, not upstream compatibility guarantees.
+No QML compile, shell reload, workspace interaction, multi-monitor, fullscreen, or resource benchmark was executed.
+This is the private local report. A separately sanitized copy is published to the repository; review it on GitHub for residual sensitive information.
+Git publication is performed only through an independent temporary clone; the active checkout Git metadata is not used for writes.
+Private local report: ~/.local/state/k41/bottombar/audits/20261112T165732Z/bottombar-audit.txt
