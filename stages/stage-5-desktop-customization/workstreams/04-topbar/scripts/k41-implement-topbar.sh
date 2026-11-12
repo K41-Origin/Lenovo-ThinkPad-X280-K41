@@ -89,8 +89,10 @@ if [[ -e $target_file || -L $target_file ]]; then
     owned "$target_file" || die 'Target Topbar.qml bukan milik user aktif.'
 fi
 
+legacy_import='import "../k41/modules/topbar" as K41Topbar'
 new_import='import qs.k41.modules.topbar as K41Topbar'
 import_n="$(grep -Fc -- "$new_import" "$shell_file" || true)"
+legacy_import_n="$(grep -Fc -- "$legacy_import" "$shell_file" || true)"
 instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
 shell_root_n="$(grep -Ec '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' "$shell_file" || true)"
 root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" || true)"
@@ -100,9 +102,10 @@ shell_root_line="$(grep -nE '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' 
 root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
 (( root_id_line > shell_root_line )) || die 'id: root tidak berada di dalam ShellRoot.'
 host_change=0
-if [[ $import_n == 0 && $instance_n == 0 ]]; then
+if [[ $import_n == 0 && $legacy_import_n == 0 && $instance_n == 0 ]]; then
     host_change=1
-elif [[ $import_n == 1 && $instance_n == 1 ]]; then
+elif [[ $instance_n == 1 && ( $import_n == 1 || $legacy_import_n == 1 ) && ( $import_n == 0 || $import_n == 1 ) && ( $legacy_import_n == 0 || $legacy_import_n == 1 ) ]]; then
+    if [[ $legacy_import_n == 1 ]]; then host_change=1; fi
     instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
     if (( instance_line <= root_id_line )); then host_change=1; fi
     :
@@ -149,6 +152,11 @@ if [[ -f $target_file ]]; then
 else
     previous_module_sha=ABSENT
 fi
+legacy_mirror_had=0
+if [[ -f $legacy_target_file ]]; then
+    legacy_mirror_had=1
+    cp -a -- "$legacy_target_file" "$backup_root/Topbar.qml.legacy"
+fi
 cp -a -- "$shell_file" "$backup_root/shell.qml"
 previous_shell_sha="$(sha256sum -- "$shell_file" | awk '{print $1}')"
 {
@@ -161,6 +169,7 @@ chmod 0600 "$backup_root/manifest.txt"
 module_tmp=''
 shell_tmp=''
 module_replaced=0
+legacy_replaced=0
 shell_replaced=0
 rollback() {
     local rc=$1 restore
@@ -191,6 +200,20 @@ rollback() {
                 printf 'ROLLBACK: Topbar.qml baru dihapus.\n' >&2
             fi
         fi
+        if (( legacy_replaced )); then
+            if (( legacy_mirror_had )); then
+                restore="$(mktemp "$legacy_module_root/.Topbar.qml.restore.XXXXXX")" || {
+                    printf 'CRITICAL: compatibility mirror gagal dipulihkan; backup %s\n' "$backup_root" >&2; exit "$rc";
+                }
+                if cp -a -- "$backup_root/Topbar.qml.legacy" "$restore" && mv -fT -- "$restore" "$legacy_target_file"; then
+                    printf 'ROLLBACK: compatibility mirror dipulihkan.\n' >&2
+                else
+                    rm -f -- "$restore"; printf 'CRITICAL: rollback compatibility mirror gagal; backup %s\n' "$backup_root" >&2
+                fi
+            else
+                rm -f -- "$legacy_target_file"
+            fi
+        fi
     fi
     [[ -z $module_tmp ]] || rm -f -- "$module_tmp"
     [[ -z $shell_tmp ]] || rm -f -- "$shell_tmp"
@@ -204,8 +227,13 @@ cmp -s -- "$source_file" "$module_tmp" || die 'Staging Topbar.qml gagal diverifi
 
 shell_tmp="$(mktemp "$caelestia_root/.shell.install.XXXXXX")"
 awk -v replacement="$new_import" '
-    $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ {
+    $0 ~ /^[[:space:]]*import[[:space:]]+"\.\.\/k41\/modules\/topbar"[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ {
         print replacement
+        next
+    }
+    $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ {
+        if (!seen_k41_import) print replacement
+        seen_k41_import=1
         print
         next
     }
@@ -233,6 +261,7 @@ cmp -s -- "$source_file" "$target_file" || die 'Content Topbar.qml tidak cocok s
 legacy_tmp="$(mktemp "$legacy_module_root/.Topbar.qml.mirror.XXXXXX")"
 install -m 0644 -- "$source_file" "$legacy_tmp"
 cmp -s -- "$source_file" "$legacy_tmp" || { rm -f -- "$legacy_tmp"; die 'Staging compatibility mirror gagal diverifikasi.'; }
+legacy_replaced=1
 mv -fT -- "$legacy_tmp" "$legacy_target_file"
 cmp -s -- "$source_file" "$legacy_target_file" || die 'Compatibility mirror Topbar.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Topbar.qml bukan 0644.'
@@ -248,6 +277,7 @@ final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:
 (( final_instance_line > final_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root setelah deployment.'
 
 module_replaced=0
+legacy_replaced=0
 shell_replaced=0
 trap - EXIT
 info "Module K41 aktif: $target_file"
