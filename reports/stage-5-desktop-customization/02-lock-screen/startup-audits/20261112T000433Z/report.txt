@@ -1,0 +1,3414 @@
+K41 DESKTOP STARTUP DIAGNOSTIC
+Captured UTC: 20261112T000433Z
+Scope: tty fallback, start-hyprland/Hyprland startup, user session and Caelestia handoff.
+Mode: read-only; no service, package, boot, authentication, permission or configuration changes.
+Host: <REDACTED>
+Kernel: Linux 7.2.14-arch1-1
+User UID/GID: 1000/1000
+Current TTY: /dev/tty1
+Shell: /bin/bash
+Repository HEAD: 3f836251ed218c86d3cd694f004b9cf3b3e3617a
+Repository status: ?? reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261112T000433Z/ 
+XDG_SESSION_ID: present
+XDG_SESSION_TYPE: present
+XDG_CURRENT_DESKTOP: absent
+WAYLAND_DISPLAY: absent
+DISPLAY: absent
+HYPRLAND_INSTANCE_SIGNATURE: absent
+XDG_RUNTIME_DIR: present
+DBUS_SESSION_BUS_ADDRESS: present
+
+
+========== LOGIN AND TTY INVENTORY ==========
+
+
+========== WHO ==========
+           system boot  2026-11-12 06:59
+<USER>      - tty1         2026-11-12 06:59   .           516
+           pts/0        2026-11-12 07:03               893 id=ts/0  term=0 exit=0
+
+
+========== LOGINCTL SESSIONS ==========
+1 1000 <USER> seat0 516 user    tty1 no -
+2 1000 <USER> -     534 manager -    no -
+
+
+========== LOGINCTL CURRENT USER ==========
+RuntimePath=/run/user/1000
+Display=1
+State=active
+Sessions=2 1
+Linger=no
+
+
+========== FOREGROUND CONSOLE ==========
+1
+
+
+========== TTY GETTY UNITS ==========
+● getty@tty1.service - Getty on tty1
+     Loaded: loaded (/usr/lib/systemd/system/getty@.service; enabled; preset: enabled)
+    Drop-In: /etc/systemd/system/getty@tty1.service.d
+             └─k41-autologin.conf
+     Active: active (running) since Thu 2026-11-12 06:59:55 WIB; 4min 38s ago
+ Invocation: 8e4e8351ccaa4f3d91fb2ba2be5db87a
+       Docs: man:agetty(8)
+             man:systemd-getty-generator(8)
+             https://0pointer.de/blog/projects/serial-console.html
+   Main PID: 516 (login)
+      Tasks: 0 (limit: 9191)
+     Memory: 4.9M (peak: 5.4M)
+        CPU: 38ms
+     CGroup: /system.slice/system-getty.slice/getty@tty1.service
+             ‣ 516 "login -- <USER>"
+
+Nov 12 06:59:55 x280 systemd[1]: Started Getty on tty1.
+Nov 12 06:59:55 x280 login[516]: pam_unix(login:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+
+○ getty@tty2.service - Getty on tty2
+     Loaded: loaded (/usr/lib/systemd/system/getty@.service; disabled; preset: enabled)
+     Active: inactive (dead)
+       Docs: man:agetty(8)
+             man:systemd-getty-generator(8)
+             https://0pointer.de/blog/projects/serial-console.html
+[command exit: 3]
+
+
+========== FAILED SYSTEM UNITS ==========
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+
+
+========== DEFAULT AND ACTIVE TARGETS ==========
+graphical.target
+
+
+========== ACTIVE TARGET CHECKS ==========
+active
+active
+active
+
+
+========== SYSTEMD UNIT: getty@tty1.service ==========
+LoadState=loaded
+ActiveState=active
+SubState=running
+FragmentPath=/usr/lib/systemd/system/getty@.service
+DropInPaths=/etc/systemd/system/getty@tty1.service.d/k41-autologin.conf
+Result=success
+NRestarts=0
+ExecMainCode=0
+ExecMainStatus=0
+
+
+========== SYSTEMD UNIT: getty@tty2.service ==========
+LoadState=loaded
+ActiveState=inactive
+SubState=dead
+FragmentPath=/usr/lib/systemd/system/getty@.service
+DropInPaths=
+Result=success
+NRestarts=0
+ExecMainCode=0
+ExecMainStatus=0
+
+
+========== SYSTEMD UNIT: plymouth-quit.service ==========
+LoadState=loaded
+ActiveState=active
+SubState=exited
+FragmentPath=/usr/lib/systemd/system/plymouth-quit.service
+DropInPaths=/etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf
+Result=success
+NRestarts=0
+ExecMainCode=1
+ExecMainStatus=0
+
+
+========== SYSTEMD UNIT: k41-plymouth-release.service ==========
+LoadState=loaded
+ActiveState=active
+SubState=exited
+FragmentPath=/etc/systemd/system/k41-plymouth-release.service
+DropInPaths=
+Result=success
+NRestarts=0
+ExecMainCode=1
+ExecMainStatus=0
+
+
+========== SYSTEMD UNIT: user@1000.service ==========
+LoadState=loaded
+ActiveState=active
+SubState=running
+FragmentPath=/usr/lib/systemd/system/user@.service
+DropInPaths=/usr/lib/systemd/system/user@.service.d/10-login-barrier.conf
+Result=success
+NRestarts=0
+ExecMainCode=0
+ExecMainStatus=0
+
+
+========== USER SYSTEMD SESSION ==========
+
+
+========== USER FAILED UNITS ==========
+  UNIT LOAD ACTIVE SUB DESCRIPTION
+
+0 loaded units listed.
+
+
+========== USER ACTIVE SERVICES ==========
+  UNIT                           LOAD      ACTIVE   SUB     DESCRIPTION
+  dbus-broker.service            loaded    active   running D-Bus User Message Bus
+  dconf.service                  loaded    active   running User preferences database
+  dirmngr.service                loaded    inactive dead    GnuPG network certificate management daemon
+  gpg-agent.service              loaded    inactive dead    GnuPG cryptographic agent and passphrase cache
+  keyboxd.service                loaded    inactive dead    GnuPG public key management service
+  p11-kit-server.service         loaded    inactive dead    p11-kit server
+● pipewire-media-session.service not-found inactive dead    pipewire-media-session.service
+  pipewire-pulse.service         loaded    inactive dead    PipeWire PulseAudio
+  pipewire.service               loaded    inactive dead    PipeWire Multimedia Service
+● pulseaudio.service             not-found inactive dead    pulseaudio.service
+  systemd-importd.service        loaded    inactive dead    Disk Image Download Service
+  systemd-machined.service       loaded    inactive dead    Virtual Machine and Container Registration Service
+● systemd-remount-fs.service     not-found inactive dead    systemd-remount-fs.service
+  wireplumber.service            loaded    inactive dead    Multimedia Service Session Manager
+
+Legend: LOAD   → Reflects whether the unit definition was properly loaded.
+        ACTIVE → The high-level unit activation state, i.e. generalization of SUB.
+        SUB    → The low-level unit activation state, values depend on unit type.
+
+14 loaded units listed.
+To show all installed unit files use 'systemctl list-unit-files'.
+
+
+========== USER UNIT STATE: default.target ==========
+LoadState=loaded
+ActiveState=active
+SubState=active
+
+
+========== USER UNIT STATE: graphical-session.target ==========
+LoadState=loaded
+ActiveState=inactive
+SubState=dead
+
+
+========== USER UNIT STATE: hyprland-session.target ==========
+LoadState=loaded
+ActiveState=inactive
+SubState=dead
+
+
+========== USER UNIT STATE: caelestia.service ==========
+LoadState=not-found
+ActiveState=inactive
+SubState=dead
+Result=success
+NRestarts=0
+ExecMainCode=0
+ExecMainStatus=0
+
+
+========== USER UNIT STATE: quickshell.service ==========
+LoadState=not-found
+ActiveState=inactive
+SubState=dead
+Result=success
+NRestarts=0
+ExecMainCode=0
+ExecMainStatus=0
+
+
+========== PROCESS INVENTORY (names only; no arguments or environment) ==========
+    PID    PPID TT       STAT COMMAND
+      1       0 ?        Ss   systemd
+    300       1 ?        Ss   systemd-journal
+    331       1 ?        Ss   systemd-userdbd
+    344       1 ?        Ss   systemd-udevd
+    438     331 ?        S    systemd-userwor
+    439     331 ?        S    systemd-userwor
+    440     331 ?        S    systemd-userwor
+    462       1 ?        Ss   systemd-logind
+    534       1 ?        Ss   systemd
+    543     516 tty1     Ss   bash
+    945     543 tty1     S+   bash
+   1041     945 tty1     S+   bash
+
+
+========== EXECUTABLE AND PACKAGE VERSIONS ==========
+start-hyprland: /usr/bin/start-hyprland
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794441874_276409267/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Hyprland: /usr/bin/Hyprland
+Hyprland 0.57.1 built from branch v0.57.1 at commit acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9 clean ([gha] Nix: update inputs).
+Date: Tue Nov 3 09:45:48 2026
+Tag: v0.57.1, commits: 7993
+
+Libraries:
+Hyprgraphics: built against 0.6.0, system has 0.6.0
+Hyprutils: built against 0.14.3, system has 0.14.3
+Hyprcursor: built against 0.1.13, system has 0.1.13
+Hyprlang: built against 0.6.8, system has 0.6.8
+Aquamarine: built against 0.16.0, system has 0.16.0
+
+Version ABI string: acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_aq_0.16_hu_0.14_hg_0.6_hc_0.1_hlg_0.6
+no flags were set
+
+hyprland: /usr/bin/hyprland
+Hyprland 0.57.1 built from branch v0.57.1 at commit acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9 clean ([gha] Nix: update inputs).
+Date: Tue Nov 3 09:45:48 2026
+Tag: v0.57.1, commits: 7993
+
+Libraries:
+Hyprgraphics: built against 0.6.0, system has 0.6.0
+Hyprutils: built against 0.14.3, system has 0.14.3
+Hyprcursor: built against 0.1.13, system has 0.1.13
+Hyprlang: built against 0.6.8, system has 0.6.8
+Aquamarine: built against 0.16.0, system has 0.16.0
+
+Version ABI string: acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_aq_0.16_hu_0.14_hg_0.6_hc_0.1_hlg_0.6
+no flags were set
+
+hyprctl: /usr/bin/hyprctl
+usage: hyprctl [flags] <command> [args...|--help]
+
+commands:
+    activewindow        → Gets the active window name and its properties
+    activeworkspace     → Gets the active workspace and its properties
+    animations          → Gets the current config'd info about animations
+                          and beziers
+    binds               → Lists all registered binds
+    clients             → Lists all windows with their properties
+    configerrors        → Lists all current config parsing errors
+    cursorpos           → Gets the current cursor position in global layout
+                          coordinates
+    decorations <window_regex> → Lists all decorations and their info
+    devices             → Lists all connected keyboards and mice
+    dismissnotify [amount] → Dismisses all or up to AMOUNT notifications
+    dispatch <dispatcher> [args] → Issue a dispatch to call a keybind
+                          dispatcher with arguments
+    eval <code>         → Issue a Lua string to execute
+    getoption <option>  → Gets the config option status (values)
+    globalshortcuts     → Lists all global shortcuts
+    hyprpaper ...       → Issue a hyprpaper request
+    hyprsunset ...      → Issue a hyprsunset request
+    instances           → Lists all running instances of Hyprland with
+                          their info
+    keyword <name> <value> → Issue a keyword to call a config keyword
+                          dynamically
+    kill                → Issue a kill to get into a kill mode, where you can
+                          kill an app by clicking on it. You can exit it
+                          with ESCAPE
+    layers              → Lists all the surface layers
+    layouts             → Lists all layouts available (including plugin'd ones)
+    monitors            → Lists active outputs with their properties,
+                          'monitors all' lists active and inactive outputs
+    notify ...          → Sends a notification using the built-in Hyprland
+                          notification system
+    output ...          → Allows you to add and remove fake outputs to your
+                          preferred backend
+    plugin ...          → Issue a plugin request
+    reload [config-only] → Issue a reload to force reload the config. Pass
+                          'config-only' to disable monitor reload
+    repl [code]         → Enter interactive Lua REPL mode (^D to exit)
+                          or issue a Lua string and print the result
+    rollinglog          → Prints tail of the log. Also supports -f/--follow
+                          option
+    setcursor <theme> <size> → Sets the cursor theme and reloads the cursor
+                          manager
+    seterror <color> <message...> → Sets the hyprctl error string. Color has
+                          the same format as in colors in config. Will reset
+                          when Hyprland's config is reloaded
+    setprop ...         → Sets a window property
+    getprop ...         → Gets a window property
+    splash              → Get the current splash
+    status              → Get internal status information
+    switchxkblayout ... → Sets the xkb layout index for a keyboard
+    systeminfo          → Get system info
+    version             → Prints the hyprland version, meaning flags, commit
+                          and branch of build.
+    workspacerules      → Lists all workspace rules
+    workspaces          → Lists all workspaces with their properties
+
+flags:
+    -j                  → Output in JSON
+    -r                  → Refresh state after issuing command (e.g. for
+                          updating variables)
+    --batch             → Execute a batch of commands, separated by ';'
+    --instance (-i)     → use a specific instance. Can be either signature or
+                          index in hyprctl instances (0, 1, etc)
+    --quiet (-q)        → Disable the output of hyprctl
+
+--help:
+    Can be used to print command's arguments that did not fit into this page
+    (three dots)
+caelestia: /usr/bin/caelestia
+Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (package: caelestia-shell)
+
+Quickshell:
+    Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+
+Local copy of shell found:
+    Last merged upstream commit: unknown
+    Last local commit: d999d48 (ci: update workflows (#2041))
+qs: /usr/bin/qs
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+quickshell: /usr/bin/quickshell
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+hyprlock: /usr/bin/hyprlock
+Hyprlock version v0.9.7
+
+
+========== INSTALLED RELEVANT PACKAGES ==========
+error: package 'hyprland-git' was not found
+error: package 'qt6-wayland' was not found
+hyprland 0.57.1-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+quickshell-git 0.3.2.r11.g9b0f339-1
+caelestia-shell 2.5.0-1
+caelestia-cli 1.1.3-1
+xorg-xwayland 24.1.14-1
+mesa 1:26.2.6-1
+[command exit: 1]
+
+
+========== K41 STARTUP AND LOCKSCREEN FILE METADATA ==========
+FILE -rw-r--r-- uid=1000 gid=1000 size=540 <HOME>/.bash_profile
+FILE -rwxr-xr-x uid=1000 gid=1000 size=1075 <HOME>/.local/bin/k41-start-hyprland
+FILE -rwxr-xr-x uid=1000 gid=1000 size=6600 <HOME>/.local/bin/k41-lock-caelestia-after-start
+FILE -rw------- uid=1000 gid=1000 size=55791 <HOME>/.local/state/k41/hyprland-startup.log
+FILE -rw-r--r-- uid=1000 gid=1000 size=14312 <HOME>/.config/hypr/hyprland.lua
+FILE -rw-r--r-- uid=1000 gid=1000 size=10751 <HOME>/.config/caelestia/shell.json
+FILE -rw------- uid=1000 gid=1000 size=981 <HOME>/.config/quickshell/caelestia/shell.qml
+FILE -rw------- uid=1000 gid=1000 size=1571 <HOME>/.config/quickshell/caelestia/modules/lock/Lock.qml
+FILE -rw------- uid=1000 gid=1000 size=6404 <HOME>/.config/quickshell/caelestia/modules/lock/LockSurface.qml
+FILE -rw------- uid=1000 gid=1000 size=420 <HOME>/.config/quickshell/caelestia/modules/lock/Content.qml
+FILE -rw------- uid=1000 gid=1000 size=1390 <HOME>/.config/quickshell/caelestia/modules/lock/Center.qml
+
+
+========== BASH PROFILE K41 AUTOLOGIN BLOCK ==========
+# K41 HYPRLAND AUTOLOGIN START
+# Start only on tty1; other TTYs retain their normal password <REDACTED>
+if [[ -z ${WAYLAND_DISPLAY:-} && -z ${DISPLAY:-} && -z ${K41_AUTOLOGIN_SESSION:-} ]] &&
+   [[ "$(tty 2>/dev/null || true)" == /dev/tty1 ]] &&
+   command -v start-hyprland >/dev/null 2>&1; then
+    export K41_AUTOLOGIN_SESSION=1
+    mkdir -p "$HOME/.cache/k41"
+    rm -f -- "$HOME/.cache/k41/boot-lock-ready"
+    "$HOME/.local/bin/k41-start-hyprland"
+fi
+# K41 HYPRLAND AUTOLOGIN END
+
+
+========== HYPRLAND CONFIG STARTUP INTEGRATION ==========
+\n-- .config/hypr/hyprland.conf --\n55-bind = $mainMod, up, movefocus, u
+56-bind = $mainMod, down, movefocus, d
+57-
+58-# Start the shell only when its package is installed.
+59:exec-once = systemctl --user start pipewire.socket pipewire-pulse.socket wireplumber.service
+60:exec-once = systemctl --user start hyprpolkitagent.service
+61:exec-once = caelestia shell -d
+\n-- .config/hypr/hyprland.lua --\n374-
+375-
+376--- K41_OBSIDIAN_APPEARANCE_BEGIN
+377--- K41 Obsidian Minimalism — appearance overlay.
+378:-- Keep the compositor cursor theme aligned with GTK and Caelestia.
+379-hl.env("XCURSOR_THEME", "Adwaita")
+380--- Loaded at the end of the existing Hyprland Lua config by the apply script.
+381--- Keep this module limited to visual settings; do not redefine keybinds or input.
+382-
+--
+411-    },
+412-})
+413--- K41_OBSIDIAN_APPEARANCE_END
+414-
+415:-- K41 CAELESTIA AUTOLOCK START
+416:-- Start Caelestia only if no existing startup entry was detected.
+417--- K41 BOOT VISUAL SUPPRESSION START
+418-hl.config({
+419-    misc = {
+420-        disable_hyprland_logo = true,
+--
+426--- K41 BOOT VISUAL SUPPRESSION END
+427-
+428-hl.on("hyprland.start", function()
+429-
+430:    hl.exec_cmd("<HOME>/.local/bin/k41-lock-caelestia-after-start")
+431-end)
+432:-- K41 CAELESTIA AUTOLOCK END
+
+
+========== HYPRLAND LUA STARTUP / LOCK INTEGRATION LINES ==========
+49--- Autostart necessary processes (like notifications daemons, status bars, etc.)
+50--- Or execute your favorite apps at launch like this:
+51---
+52:-- hl.on("hyprland.start", function () 
+53:--   hl.exec_cmd(terminal)
+54:--   hl.exec_cmd("nm-applet")
+55:--   hl.exec_cmd("waybar & hyprpaper & firefox")
+56--- end)
+57-
+58-
+--
+272-local mainMod = "SUPER" -- Sets "Windows" key as main modifier
+273-
+274--- Example binds, see https://wiki.hypr.land/configuring/core/binds/ for more
+275:hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
+276-local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
+277--- closeWindowBind:set_enabled(false)
+278:hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
+279:hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
+280-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+281:hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
+282-hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
+283-hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
+284-
+--
+309-hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
+310-
+311--- Laptop multimedia keys for volume and LCD brightness
+312:hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
+313:hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
+314:hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
+315:hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
+316:hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
+317:hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
+318-
+319--- Requires playerctl
+320:hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
+321:hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+322:hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+323:hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+324-
+325-
+326---------------------------------
+--
+373-})
+374-
+375-
+376:-- K41_OBSIDIAN_APPEARANCE_BEGIN
+377:-- K41 Obsidian Minimalism — appearance overlay.
+378:-- Keep the compositor cursor theme aligned with GTK and Caelestia.
+379-hl.env("XCURSOR_THEME", "Adwaita")
+380--- Loaded at the end of the existing Hyprland Lua config by the apply script.
+381--- Keep this module limited to visual settings; do not redefine keybinds or input.
+--
+410-        disable_hyprland_logo = true,
+411-    },
+412-})
+413:-- K41_OBSIDIAN_APPEARANCE_END
+414-
+415:-- K41 CAELESTIA AUTOLOCK START
+416:-- Start Caelestia only if no existing startup entry was detected.
+417:-- K41 BOOT VISUAL SUPPRESSION START
+418-hl.config({
+419-    misc = {
+420-        disable_hyprland_logo = true,
+--
+423-        background_color = 0x000000,
+424-    },
+425-})
+426:-- K41 BOOT VISUAL SUPPRESSION END
+427-
+428:hl.on("hyprland.start", function()
+429-
+430:    hl.exec_cmd("<HOME>/.local/bin/k41-lock-caelestia-after-start")
+431-end)
+432:-- K41 CAELESTIA AUTOLOCK END
+
+
+========== INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON ==========
+Installed helper: mode=-rwxr-xr-x uid=1000 gid=1000 size=6600
+0f8f0402af2b83640a36d0fed0408ab7b7f4fa109fbbf6a6543610aa259f885a  <HOME>/.local/bin/k41-lock-caelestia-after-start
+0f8f0402af2b83640a36d0fed0408ab7b7f4fa109fbbf6a6543610aa259f885a  <HOME>/p/Lenovo-ThinkPad-X280-K41/stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-lock-caelestia-after-start.sh
+Installed helper byte comparison: MATCHES repository source.
+Installed helper Bash syntax: PASS
+
+
+========== INSTALLED LOCK HELPER SOURCE (redacted) ==========
+#!/usr/bin/env bash
+# Start and verify the Caelestia session lock before publishing the Plymouth handoff marker.
+# Hyprlock fallback uses a repository-managed config passed explicitly with --config.
+set -Eeuo pipefail
+umask 077
+
+die() {
+    printf 'K41 lock startup: ERROR: %s\n' "$*" >&2
+    exit 1
+}
+log() {
+    printf '[%s] %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')" "$*"
+}
+
+(( EUID != 0 )) || die 'Run as the regular desktop user, never with sudo.'
+[[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME is missing or invalid.'
+
+for command_name in caelestia date chmod mkdir mktemp mv sleep stat timeout grep kill; do
+    command -v "$command_name" >/dev/null 2>&1 || die "Required command is unavailable: $command_name"
+done
+
+state_root="$HOME/.local/state"
+k41_state="$state_root/k41"
+log_root="$k41_state/lockscreen"
+for path in "$HOME/.local" "$state_root" "$k41_state" "$log_root"; do
+    [[ ! -L $path ]] || die "Refusing symlinked state path: $path"
+    [[ ! -e $path || -d $path ]] || die "State path is not a directory: $path"
+    if [[ -e $path ]]; then
+        [[ $(stat -c %u -- "$path") == "$EUID" ]] || die "State path is not owned by the desktop user: $path"
+    fi
+done
+mkdir -p -- "$log_root"
+[[ -d $log_root && ! -L $log_root && $(stat -c %u -- "$log_root") == "$EUID" ]] ||
+    die 'Cannot establish a user-owned lock startup log directory.'
+
+stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
+log_file="$log_root/startup-$stamp-${BASHPID}.log"
+[[ ! -e $log_file && ! -L $log_file ]] || die "Refusing to overwrite existing log: $log_file"
+( set -o noclobber; : >"$log_file" ) 2>/dev/null || die "Cannot create startup log: $log_file"
+chmod 0600 "$log_file"
+exec >>"$log_file" 2>&1
+
+log "Lock startup helper started."
+log "Readiness budget: ${K41_LOCK_READY_TIMEOUT:-30}s; verification attempts: ${K41_LOCK_VERIFY_RETRIES:-10}."
+
+ready_timeout=${K41_LOCK_READY_TIMEOUT:-30}
+interval=${K41_LOCK_INTERVAL:-1}
+verify_attempts=${K41_LOCK_VERIFY_RETRIES:-10}
+command_timeout=1
+
+[[ $ready_timeout =~ ^[1-9][0-9]*$ ]] || die 'K41_LOCK_READY_TIMEOUT must be a positive integer.'
+(( ready_timeout <= 30 )) || die 'K41_LOCK_READY_TIMEOUT must not exceed 30 seconds.'
+[[ $interval =~ ^[01]$ ]] || die 'K41_LOCK_INTERVAL must be 0 or 1 second.'
+[[ $verify_attempts =~ ^[1-9][0-9]*$ ]] || die 'K41_LOCK_VERIFY_RETRIES must be a positive integer.'
+(( verify_attempts <= 10 )) || die 'K41_LOCK_VERIFY_RETRIES must not exceed 10 attempts.'
+
+marker_dir="$HOME/.cache/k41"
+for path in "$HOME/.cache" "$marker_dir"; do
+    [[ ! -L $path ]] || die "Refusing symlinked marker path: $path"
+    [[ ! -e $path || -d $path ]] || die "Marker path is not a directory: $path"
+    if [[ -e $path ]]; then
+        [[ $(stat -c %u -- "$path") == "$EUID" ]] || die "Marker path is not owned by the desktop user: $path"
+    fi
+done
+mkdir -p -- "$marker_dir"
+[[ -d $marker_dir && ! -L $marker_dir && $(stat -c %u -- "$marker_dir") == "$EUID" ]] ||
+    die 'Cannot establish a user-owned readiness marker directory.'
+
+marker="$marker_dir/boot-lock-ready"
+if [[ -e $marker || -L $marker ]]; then
+    [[ -f $marker && ! -L $marker && $(stat -c %u -- "$marker") == "$EUID" ]] ||
+        die 'Existing readiness marker is not a regular user-owned file.'
+fi
+
+mark_ready() {
+    local temporary
+    temporary="$(mktemp "$marker_dir/.boot-lock-ready.XXXXXX")" ||
+        die 'Cannot create temporary readiness marker.'
+    chmod 0600 "$temporary"
+    mv -f -- "$temporary" "$marker"
+    log 'Readiness marker published.'
+}
+
+last_ipc_output=''
+lock_ipc_ready() {
+    local listing
+    if ! listing="$(timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell -s 2>&1)"; then
+        last_ipc_output=$listing
+        return 1
+    fi
+    if grep -Eq 'target[[:space:]]+lock([[:space:]]|$)' <<<"$listing" &&
+       grep -Eq 'function[[:space:]]+isLocked\(\):[[:space:]]*bool' <<<"$listing"; then
+        return 0
+    fi
+    last_ipc_output=$listing
+    return 1
+}
+
+is_locked() {
+    local state
+    state="$(timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell lock isLocked 2>&1)" ||
+        return 1
+    [[ $state =~ ^[[:space:]]*true[[:space:]]*$ ]]
+}
+
+# Discovery and verification are separate bounded phases. No nested retry multiplication.
+deadline=$((SECONDS + ready_timeout))
+ipc_ready=0
+while (( SECONDS < deadline )); do
+    if lock_ipc_ready; then
+        ipc_ready=1
+        log 'Caelestia lock IPC is ready.'
+        break
+    fi
+    sleep "$interval"
+done
+
+if (( ipc_ready == 1 )); then
+    if timeout --signal=TERM --kill-after=1 "${command_timeout}s" caelestia shell lock lock; then
+        log 'Caelestia lock request accepted.'
+        for ((attempt = 1; attempt <= verify_attempts; attempt++)); do
+            if is_locked; then
+                log "Caelestia lock state verified on attempt $attempt."
+                mark_ready
+                exit 0
+            fi
+            log "Caelestia lock state not yet verified ($attempt/$verify_attempts)."
+            sleep "$interval"
+        done
+        log 'Caelestia lock did not reach verified state within the bounded verification window.'
+    else
+        log 'Caelestia lock IPC rejected or timed out on the lock request.'
+    fi
+else
+    log "Caelestia lock IPC did not become ready within ${ready_timeout}s."
+    if [[ -n $last_ipc_output ]]; then
+        log "Last Caelestia IPC response: ${last_ipc_output:0:1200}"
+    else
+        log 'Caelestia IPC returned no diagnostic output.'
+    fi
+fi
+
+# The fallback must use a known, managed config; never depend on an implicit search path.
+if ! command -v hyprlock >/dev/null 2>&1; then
+    die 'Caelestia lock was not verified and Hyprlock fallback is unavailable.'
+fi
+hyprlock_config="$HOME/.config/k41/hyprlock-fallback.conf"
+[[ -f $hyprlock_config && ! -L $hyprlock_config && -s $hyprlock_config ]] ||
+    die "Managed Hyprlock fallback config is missing or unsafe: $hyprlock_config"
+[[ $(stat -c %u -- "$hyprlock_config") == "$EUID" ]] ||
+    die 'Managed Hyprlock fallback config is not owned by the desktop user.'
+
+log "Starting Hyprlock fallback with explicit config: $hyprlock_config"
+hyprlock --config "$hyprlock_config" &
+lock_pid=$!
+sleep 1
+if ! jobs -pr | grep -Fxq "$lock_pid"; then
+    set +e
+    wait "$lock_pid"
+    fallback_status=$?
+    set -e
+    die "Hyprlock exited before readiness could be established (exit=$fallback_status)."
+fi
+
+mark_ready
+log "Hyprlock fallback is running (pid=$lock_pid); waiting for unlock/exit."
+set +e
+wait "$lock_pid"
+fallback_status=$?
+set -e
+log "Hyprlock fallback exited (exit=$fallback_status)."
+exit "$fallback_status"
+
+
+========== PREVIOUS INSTALLED LOCK HELPER BACKUPS ==========
+
+-- BACKUP .local/state/k41/lockscreen/helper-backups/k41-lock-caelestia-after-start-20261111T073902Z-1845.sh --
+mode=-rw------- uid=1000 gid=1000 size=2527
+4225163b813cd9ff9cf093b917c6f4eedc474c00e6157f31e05b6721d13429ed  <HOME>/.local/state/k41/lockscreen/helper-backups/k41-lock-caelestia-after-start-20261111T073902Z-1845.sh
+#!/usr/bin/env bash
+# Wait for Caelestia's lock IPC, request a lock, verify it, then dismiss K41 overlay.
+set -Eeuo pipefail
+
+die() { printf 'K41 Caelestia lock: %s\n' "$*" >&2; exit 1; }
+mark_ready() {
+    local marker="$HOME/.cache/k41/boot-lock-ready"
+    install -d -m 0700 "$(dirname -- "$marker")"
+    : >"$marker"
+    chmod 0600 "$marker"
+}
+dismiss_splash() {
+    local pid_file="$HOME/.cache/k41/boot-splash.pid" pid
+    if [[ -f $pid_file && ! -L $pid_file ]]; then
+        IFS= read -r pid <"$pid_file" || true
+        if [[ $pid =~ ^[1-9][0-9]*$ ]] && kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null || true
+        fi
+        rm -f -- "$pid_file"
+    fi
+}
+command -v caelestia >/dev/null 2>&1 || die 'caelestia CLI is unavailable.'
+command -v sleep >/dev/null 2>&1 || die 'sleep is unavailable.'
+command -v grep >/dev/null 2>&1 || die 'grep is unavailable.'
+
+attempts=${K41_LOCK_RETRIES:-45}
+interval=${K41_LOCK_INTERVAL:-1}
+verify_attempts=${K41_LOCK_VERIFY_RETRIES:-10}
+[[ $attempts =~ ^[1-9][0-9]*$ ]] || die 'K41_LOCK_RETRIES must be a positive integer.'
+[[ $interval =~ ^[0-9]+([.][0-9]+)?$ ]] || die 'K41_LOCK_INTERVAL must be numeric.'
+[[ $verify_attempts =~ ^[1-9][0-9]*$ ]] || die 'K41_LOCK_VERIFY_RETRIES must be a positive integer.'
+
+lock_ipc_ready() {
+    caelestia shell -s 2>/dev/null |
+        grep -Eq 'target[[:space:]]+lock([[:space:]]|$)' &&
+    caelestia shell -s 2>/dev/null |
+        grep -Eq 'function[[:space:]]+isLocked\(\):[[:space:]]*bool'
+}
+is_locked() {
+    local state
+    state=$(caelestia shell lock isLocked 2>/dev/null) || return 1
+    [[ $state =~ ^[[:space:]]*true[[:space:]]*$ ]]
+}
+for ((i = 1; i <= attempts; i++)); do
+    if lock_ipc_ready && caelestia shell lock lock; then
+        for ((v = 1; v <= verify_attempts; v++)); do
+            if is_locked; then
+                printf 'K41 Caelestia lock: lock state verified.\n'
+                dismiss_splash
+                mark_ready
+                exit 0
+            fi
+            sleep "$interval"
+        done
+    fi
+    sleep "$interval"
+done
+
+printf 'K41 Caelestia lock: ERROR: lock IPC did not reach a verified locked state; starting Hyprlock fallback.\n' >&2
+if command -v hyprlock >/dev/null 2>&1; then
+    hyprlock &
+    lock_pid=$!
+    sleep 1
+    if kill -0 "$lock_pid" 2>/dev/null; then
+        dismiss_splash
+        mark_ready
+        wait "$lock_pid"
+        exit $?
+    fi
+    wait "$lock_pid" || true
+fi
+die 'Caelestia lock could not be verified and Hyprlock fallback is unavailable.'
+
+
+========== INSTALLED K41 LOCK VISUAL SOURCE COMPARISON ==========
+MATCH LockSurface.qml
+dd3a398d2488cab948541e5e455f3306dfa9c4824612f3cbe939a75ec119dd75  <HOME>/p/Lenovo-ThinkPad-X280-K41/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/LockSurface.qml
+dd3a398d2488cab948541e5e455f3306dfa9c4824612f3cbe939a75ec119dd75  <HOME>/.config/quickshell/caelestia/modules/lock/LockSurface.qml
+DIFFERS Content.qml
+ffb2bc75e75324d32b3f4f156fc2efc7db9e0de45b6c49e29e4fe65531b84444  <HOME>/p/Lenovo-ThinkPad-X280-K41/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/Content.qml
+20264d13d2ee31510168aa96a61f4a754a194844bba54268e0858fa3ec540ab4  <HOME>/.config/quickshell/caelestia/modules/lock/Content.qml
+DIFFERS Center.qml
+af1ff6def598f42c7b459b10dc7008df733e786597c6608e121ec6284668d081  <HOME>/p/Lenovo-ThinkPad-X280-K41/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/Center.qml
+74e1f98643f5c6abee60efb211ccd4a4d65e0af21f0c4e3344ae6cb56347e562  <HOME>/.config/quickshell/caelestia/modules/lock/Center.qml
+DIFFERS center/PasswordInput.qml
+6de47c845d8f29002a9be9a72991f4521a131391343105637121365fb4c31a4b  <HOME>/p/Lenovo-ThinkPad-X280-K41/stages/stage-5-desktop-customization/workstreams/02-lock-screen/modules/lockscreen/center/PasswordInput.qml
+e7bb8981fdb5a83552277fe024bd56a60f26060e6e987c3a24fe6a880439bb5d  <HOME>/.config/quickshell/caelestia/modules/lock/center/PasswordInput.qml
+
+
+========== HYPRLAND CONFIG FILE INVENTORY ==========
+
+[<HOME>/.config/hypr]
+hyprland.conf (1636 bytes)
+hyprland.lua (14312 bytes)
+scheme/current.lua (3217 bytes)
+
+[<HOME>/.config/quickshell/caelestia]
+.vscode/settings.json (154 bytes)
+components/AnchorAnim.qml (1708 bytes)
+components/Anim.qml (2151 bytes)
+components/AnimLoader.qml (845 bytes)
+components/CAnim.qml (163 bytes)
+components/Logo.qml (3242 bytes)
+components/MaterialIcon.qml (349 bytes)
+components/ScreenState.qml (393 bytes)
+components/StateLayer.qml (6082 bytes)
+components/StyledClippingRect.qml (151 bytes)
+components/StyledRect.qml (117 bytes)
+components/StyledText.qml (789 bytes)
+components/containers/StyledFlickable.qml (614 bytes)
+components/containers/StyledListView.qml (613 bytes)
+components/containers/StyledWindow.qml (356 bytes)
+components/containers/VerticalFadeFlickable.qml (1918 bytes)
+components/containers/VerticalFadeListView.qml (1952 bytes)
+components/controls/ButtonBase.qml (2768 bytes)
+components/controls/CircularIndicator.qml (2825 bytes)
+components/controls/CircularProgress.qml (3909 bytes)
+components/controls/CustomMouseArea.qml (537 bytes)
+components/controls/FilledSlider.qml (3268 bytes)
+components/controls/IconButton.qml (1710 bytes)
+components/controls/IconTextButton.qml (2252 bytes)
+components/controls/LoadingIndicator.qml (3586 bytes)
+components/controls/Menu.qml (6887 bytes)
+components/controls/MenuItem.qml (238 bytes)
+components/controls/SearchBar.qml (2403 bytes)
+components/controls/SplitButton.qml (4760 bytes)
+components/controls/StyledProgressBar.qml (7733 bytes)
+components/controls/StyledRadioButton.qml (1537 bytes)
+components/controls/StyledScrollBar.qml (6386 bytes)
+components/controls/StyledSlider.qml (5525 bytes)
+components/controls/StyledSpinBox.qml (4725 bytes)
+components/controls/StyledSwitch.qml (6073 bytes)
+components/controls/StyledTextField.qml (10596 bytes)
+components/controls/TextButton.qml (1427 bytes)
+components/controls/TextFieldBase.qml (2350 bytes)
+components/effects/ColouredIcon.qml (655 bytes)
+components/effects/Colouriser.qml (242 bytes)
+components/effects/Elevation.qml (400 bytes)
+components/effects/Mask.qml (111 bytes)
+components/filedialog/CurrentItem.qml (3112 bytes)
+components/filedialog/DialogButtons.qml (2786 bytes)
+components/filedialog/FileDialog.qml (2494 bytes)
+components/filedialog/FolderContents.qml (6510 bytes)
+components/filedialog/HeaderBar.qml (5017 bytes)
+components/filedialog/Sidebar.qml (4145 bytes)
+components/filedialog/Sizes.qml (118 bytes)
+components/images/CachingIconImage.qml (1014 bytes)
+components/images/CachingImage.qml (365 bytes)
+components/images/FadeImage.qml (1862 bytes)
+components/misc/CustomShortcut.qml (143 bytes)
+components/misc/Ref.qml (158 bytes)
+components/widgets/CoverArt.qml (2497 bytes)
+components/widgets/ExtraIndicator.qml (1079 bytes)
+components/widgets/WavyTopRect.qml (1185 bytes)
+modules/BatteryMonitor.qml (2602 bytes)
+modules/GSFLoader.qml (171 bytes)
+modules/IdleMonitors.qml (2356 bytes)
+modules/ServiceLoader.qml (385 bytes)
+modules/Shortcuts.qml (5147 bytes)
+modules/areapicker/AreaPicker.qml (3498 bytes)
+modules/areapicker/Picker.qml (7855 bytes)
+modules/background/Background.qml (4899 bytes)
+modules/background/DesktopClock.qml (5859 bytes)
+modules/background/Visualiser.qml (2744 bytes)
+modules/background/Wallpaper.qml (3797 bytes)
+modules/bar/Bar.qml (7280 bytes)
+modules/bar/BarWrapper.qml (2511 bytes)
+modules/bar/components/ActiveWindow.qml (4113 bytes)
+modules/bar/components/Clock.qml (4486 bytes)
+modules/bar/components/OsIcon.qml (1156 bytes)
+modules/bar/components/Power.qml (855 bytes)
+modules/bar/components/StatusIcons.qml (5777 bytes)
+modules/bar/components/Tray.qml (3599 bytes)
+modules/bar/components/TrayItem.qml (822 bytes)
+modules/bar/popouts/ActiveWindow.qml (2818 bytes)
+modules/bar/popouts/AudioPopout.qml (3324 bytes)
+modules/bar/popouts/Battery.qml (8226 bytes)
+modules/bar/popouts/Bluetooth.qml (7071 bytes)
+modules/bar/popouts/ClipWrapper.qml (1627 bytes)
+modules/bar/popouts/Content.qml (6608 bytes)
+modules/bar/popouts/LockStatus.qml (380 bytes)
+modules/bar/popouts/Network.qml (13816 bytes)
+modules/bar/popouts/PopoutState.qml (132 bytes)
+modules/bar/popouts/TrayMenu.qml (7481 bytes)
+modules/bar/popouts/WirelessPassword.qml (22653 bytes)
+modules/bar/popouts/Wrapper.qml (5997 bytes)
+modules/drawers/ContentWindow.qml (10994 bytes)
+modules/drawers/Drawers.qml (405 bytes)
+modules/drawers/Exclusions.qml (768 bytes)
+modules/drawers/Interactions.qml (13485 bytes)
+modules/drawers/Panels.qml (4228 bytes)
+modules/drawers/Regions.qml (2370 bytes)
+modules/k41dock/K41Dock.qml (5663 bytes)
+modules/launcher/AppList.qml (6913 bytes)
+modules/launcher/Content.qml (4355 bytes)
+modules/launcher/ContentList.qml (4695 bytes)
+modules/launcher/WallpaperList.qml (3289 bytes)
+modules/launcher/Wrapper.qml (1631 bytes)
+modules/launcher/items/ActionItem.qml (1722 bytes)
+modules/launcher/items/AppItem.qml (2465 bytes)
+modules/launcher/items/CalcItem.qml (3752 bytes)
+modules/launcher/items/SchemeItem.qml (2940 bytes)
+modules/launcher/items/VariantItem.qml (2092 bytes)
+modules/launcher/items/WallpaperItem.qml (2744 bytes)
+modules/launcher/services/Actions.qml (2013 bytes)
+modules/launcher/services/Apps.qml (2409 bytes)
+modules/launcher/services/M3Variants.qml (3071 bytes)
+modules/launcher/services/Schemes.qml (2382 bytes)
+modules/lock/Center.qml (1390 bytes)
+modules/lock/Content.qml (420 bytes)
+modules/lock/Fetch.qml (6346 bytes)
+modules/lock/Lock.qml (1571 bytes)
+modules/lock/LockSurface.qml (6404 bytes)
+modules/lock/Media.qml (3326 bytes)
+modules/lock/NotifDock.qml (4013 bytes)
+modules/lock/NotifGroup.qml (12584 bytes)
+modules/lock/Pam.qml (7585 bytes)
+modules/lock/Resources.qml (5353 bytes)
+modules/lock/WeatherInfo.qml (1315 bytes)
+modules/lock/center/Clock.qml (2588 bytes)
+modules/lock/center/InputField.qml (7525 bytes)
+modules/lock/center/PasswordInput.qml (6229 bytes)
+modules/lock/center/ProfilePic.qml (1244 bytes)
+modules/lock/center/StateMessage.qml (8038 bytes)
+modules/lock/weather/BriefInfo.qml (1953 bytes)
+modules/lock/weather/Forecast.qml (3542 bytes)
+modules/nexus/NavPane.qml (1222 bytes)
+modules/nexus/Nexus.qml (2950 bytes)
+modules/nexus/NexusState.qml (914 bytes)
+modules/nexus/PageCompRegistry.qml (5605 bytes)
+modules/nexus/PageRegistry.qml (2501 bytes)
+modules/nexus/Pages.qml (2459 bytes)
+modules/nexus/WindowFactory.qml (1378 bytes)
+modules/nexus/common/AnimatedLogo.qml (16469 bytes)
+modules/nexus/common/AudioDeviceList.qml (3106 bytes)
+modules/nexus/common/BlobPopup.qml (3296 bytes)
+modules/nexus/common/ConnectedRect.qml (528 bytes)
+modules/nexus/common/DialogRowButton.qml (7721 bytes)
+modules/nexus/common/DialogSelectButton.qml (3152 bytes)
+modules/nexus/common/EthernetSection.qml (9288 bytes)
+modules/nexus/common/InfoRow.qml (2040 bytes)
+modules/nexus/common/ItemList.qml (2827 bytes)
+modules/nexus/common/ListEditor.qml (9528 bytes)
+modules/nexus/common/NavRow.qml (91 bytes)
+modules/nexus/common/NetworkList.qml (6533 bytes)
+modules/nexus/common/PageBase.qml (2232 bytes)
+modules/nexus/common/PopupRow.qml (3550 bytes)
+modules/nexus/common/RowButton.qml (2273 bytes)
+modules/nexus/common/SectionHeader.qml (480 bytes)
+modules/nexus/common/SelectRow.qml (1805 bytes)
+modules/nexus/common/SliderRow.qml (2526 bytes)
+modules/nexus/common/StackPage.qml (3073 bytes)
+modules/nexus/common/StepperRow.qml (1603 bytes)
+modules/nexus/common/TextFieldRow.qml (2551 bytes)
+modules/nexus/common/ToggleRow.qml (2173 bytes)
+modules/nexus/common/WallItem.qml (2996 bytes)
+modules/nexus/navpane/NavLocations.qml (5253 bytes)
+modules/nexus/pages/AboutPage.qml (4298 bytes)
+modules/nexus/pages/AppsPage.qml (6132 bytes)
+modules/nexus/pages/AudioPage.qml (2701 bytes)
+modules/nexus/pages/BluetoothPage.qml (8714 bytes)
+modules/nexus/pages/LanguageAndRegion.qml (6128 bytes)
+modules/nexus/pages/NetworkPage.qml (14264 bytes)
+modules/nexus/pages/PanelsPage.qml (1760 bytes)
+modules/nexus/pages/ServicesPage.qml (7067 bytes)
+modules/nexus/pages/WallpaperAndStyle.qml (6660 bytes)
+modules/notifications/Content.qml (6437 bytes)
+modules/notifications/Notification.qml (19226 bytes)
+modules/notifications/Wrapper.qml (600 bytes)
+modules/osd/Content.qml (4219 bytes)
+modules/osd/Wrapper.qml (2868 bytes)
+modules/session/Content.qml (3875 bytes)
+modules/session/Wrapper.qml (1056 bytes)
+modules/sidebar/Content.qml (914 bytes)
+modules/sidebar/Notif.qml (5755 bytes)
+modules/sidebar/NotifActionList.qml (6034 bytes)
+modules/sidebar/NotifDock.qml (5910 bytes)
+modules/sidebar/NotifDockList.qml (4381 bytes)
+modules/sidebar/NotifGroup.qml (9798 bytes)
+modules/sidebar/NotifGroupList.qml (4703 bytes)
+modules/sidebar/Props.qml (118 bytes)
+modules/sidebar/Wrapper.qml (1199 bytes)
+modules/utilities/Background.qml (1477 bytes)
+modules/utilities/Content.qml (2052 bytes)
+modules/utilities/RecordingDeleteModal.qml (7729 bytes)
+modules/utilities/Wrapper.qml (2788 bytes)
+modules/utilities/cards/IdleInhibit.qml (3747 bytes)
+modules/utilities/cards/Record.qml (10202 bytes)
+modules/utilities/cards/RecordingList.qml (7285 bytes)
+modules/utilities/cards/Toggles.qml (5385 bytes)
+modules/utilities/toasts/ToastItem.qml (4570 bytes)
+modules/utilities/toasts/Toasts.qml (4172 bytes)
+modules/windowinfo/Buttons.qml (5656 bytes)
+modules/windowinfo/Details.qml (5488 bytes)
+modules/windowinfo/Preview.qml (3037 bytes)
+modules/windowinfo/WindowInfo.qml (1498 bytes)
+services/Audio.qml (6146 bytes)
+
+[<HOME>/.config/caelestia]
+cli.json (235 bytes)
+monitors/eDP-1/shell.json (4 bytes)
+shell.json (10751 bytes)
+
+
+========== BOOT HANDOFF UNIT CONFIGURATION (selected directives only) ==========
+\n-- /etc/systemd/system/plymouth-quit.service.d/k41-lock-handoff.conf --\n2:After=getty@tty1.service
+5:ExecStart=
+6:ExecStart=/usr/local/libexec/k41-plymouth-quit-after-lock "<HOME>/.cache/k41/boot-lock-ready"
+7:TimeoutStartSec=85
+\n-- /etc/systemd/system/k41-plymouth-release.service --\n2:Description=Retain splash frame and release Plymouth display ownership before K41 Hyprland startup
+3:Wants=plymouth-start.service
+4:After=plymouth-start.service
+5:Before=getty@tty1.service
+8:Type=oneshot
+9:ExecStartPre=/usr/bin/rm -f -- "<HOME>/.cache/k41/boot-lock-ready"
+10:ExecStart=-/usr/bin/plymouth quit --retain-splash
+14:WantedBy=multi-user.target
+
+
+========== HYPRLAND STARTUP LOG ==========
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794376651_639623040/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794376936_1259338680/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794379544_141655288/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794382787_617089576/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794407134_1324838252/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794407344_2031667731/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794409124_2124573965/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+(EE) could not connect to wayland server
+[1;32mDEBUG [0mfrom start-hyprland ]: hyprland exit, breaking poll, checking state
+[1;32mDEBUG [0mfrom start-hyprland ]: Hyprland exit cleanly.
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794409225_1918611055/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+(EE) could not connect to wayland server
+[1;32mDEBUG [0mfrom start-hyprland ]: hyprland exit, breaking poll, checking state
+[1;32mDEBUG [0mfrom start-hyprland ]: Hyprland exit cleanly.
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794441596_1917660176/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+(EE) could not connect to wayland server
+[1;32mDEBUG [0mfrom start-hyprland ]: hyprland exit, breaking poll, checking state
+[1;32mDEBUG [0mfrom start-hyprland ]: Hyprland exit cleanly.
+
+
+========== RECENT USER LOG FILES ==========
+
+
+========== LOG FILE: .local/state/k41/backups/caelestia-dock/20261110T165348Z/implementation.log ==========
+PASS: deployment preflight
+INFO: BACKUP_CREATED source/shell.qml
+INFO: BACKUP_RECORDED_ABSENT source/modules/k41dock/K41Dock.qml
+INFO: BACKUP_CREATED config/shell.json
+BACKUP_DIRECTORY=<HOME>/.local/state/k41/backups/caelestia-dock/20261110T165348Z
+INFO: BACKUP_PHASE_COMPLETED
+INFO: INSTALLED modules/k41dock/K41Dock.qml
+INFO: PATCHED shell.qml without replacing its existing content
+INFO: UPDATED runtime shell.json: stock bar entries disabled
+PASS: shell.qml markers, runtime JSON, and deployed QML integrity
+INFO: IMPLEMENTATION_FILES_CHANGED=source/shell.qml,source/modules/k41dock/K41Dock.qml,config/shell.json
+INFO: BACKUP_DIRECTORY=<HOME>/.local/state/k41/backups/caelestia-dock/20261110T165348Z
+INFO: IMPLEMENTED; Quickshell was not reloaded or restarted.
+INFO: Review the backup and implementation.log before reloading the shell.
+
+
+========== LOG FILE: .local/state/k41/backups/caelestia-dock/20261110T165348Z/backup-location.txt ==========
+BACKUP_DIRECTORY=<HOME>/.local/state/k41/backups/caelestia-dock/20261110T165348Z
+
+
+========== LOG FILE: .local/state/k41/hyprland-startup.log ==========
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794407134_1324838252/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794407344_2031667731/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+(EE) could not connect to wayland server
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794409124_2124573965/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+(EE) could not connect to wayland server
+[1;32mDEBUG [0mfrom start-hyprland ]: hyprland exit, breaking poll, checking state
+[1;32mDEBUG [0mfrom start-hyprland ]: Hyprland exit cleanly.
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794409225_1918611055/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+(EE) could not connect to wayland server
+[1;32mDEBUG [0mfrom start-hyprland ]: hyprland exit, breaking poll, checking state
+[1;32mDEBUG [0mfrom start-hyprland ]: Hyprland exit cleanly.
+Welcome to Hyprland!
+
+
+                     YY    UJ
+                    YYY    UUJ
+                   XXXY    UUUU
+                  zXXXX    UUUUU
+                zzzzX        UUUUJ
+               cczzz          UUUUJ
+             vccccz            UUUUUJ
+            vvcccc              UUUUUJ
+           vvvvv                  UUUUJ
+          uuuvv                    UUUUJ
+         uuuuu                      UUUUU
+        nnnuu                        UUUUU
+       nnnnn                          YUUUU
+       xxnn                            YUUU
+       xxxn                            YYUU
+      xxxx                              YYUU
+      rxxx                              YYYY
+      rrrx                              YYYY
+       rrrx                            XXXY
+       rrrr                            XXXX
+        rrrr                          zzXX
+         rrrr                        zzzz
+          rrrrr                    ccczz
+           rrrrrx                vccccc
+             rrrrxxxx        uuvvvvvc
+                rrxxxxxxnnnnuuuuuv
+                    xxxxxnnnnu
+
+
+
+DEBUG ]: [CCompositor::bumpNofile] Old rlimit: soft -> 1024, hard -> 524288
+DEBUG ]: [CCompositor::bumpNofile] New rlimit: soft -> 524288, hard -> 524288
+DEBUG ]: [CCompositor::initManagers] Creating the EventLoopManager!
+DEBUG ]: [CCompositor::initManagers] Creating the KeybindManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AnimationManager!
+DEBUG ]: [CCompositor::initManagers] Creating the DynamicPermissionManager!
+DEBUG ]: [CCompositor::initManagers] Creating the MonitorState!
+DEBUG ]: [CCompositor::initManagers] Creating the WorkspaceState!
+DEBUG ]: [CCompositor::initManagers] Creating the ConfigManager!
+DEBUG ]: [Config::initConfigManager] [cfg] Regular config at <HOME>/.config/hypr/hyprland.lua
+DEBUG ]: [CCompositor::initManagers] Creating the Error Overlay!
+DEBUG ]: [CCompositor::initManagers] Creating the LayoutManager!
+DEBUG ]: [CCompositor::initManagers] Creating the TokenManager!
+DEBUG ]: [Config::Lua::CConfigManager::postConfigReload] Disabling stdout logs (debug.enable_stdout_logs = 0). Further logs will be written to /run/user/1000/hypr/acc1aa0bfd4bd575dcb0f76c35ccf12b660a1ab9_1794441596_1917660176/hyprland.log
+DEBUG ]: [CCompositor::initManagers] Creating the PointerManager!
+DEBUG ]: [CCompositor::initManagers] Creating the AsyncResourceGatherer!
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning:          Unsupported maximum keycode 709, clipping.
+>                   X11 cannot support keycodes above 255.
+> Warning:          Virtual modifier Hyper multiply defined
+>                   Using 0, ignoring 0
+> Warning:          Virtual modifier ScrollLock multiply defined
+>                   Using 0, ignoring 0
+Errors from xkbcomp are not fatal to the X server
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+[1;32mDEBUG [0mfrom start-hyprland ]: got an event from hyprland
+(EE) could not connect to wayland server
+[1;32mDEBUG [0mfrom start-hyprland ]: hyprland exit, breaking poll, checking state
+[1;32mDEBUG [0mfrom start-hyprland ]: Hyprland exit cleanly.
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T142906Z-601.log ==========
+[2026-11-11T14:29:06Z] Lock startup helper started.
+[2026-11-11T14:29:06Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T14:29:36Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T14:29:36Z] Starting Hyprlock fallback.
+Hyprlock version v0.9.7
+[1;35mCRIT [0m]:  Config path error: Could not find config. Searched in order: XDG_CONFIG_HOME, HOME, XDG_CONFIG_DIRS, /etc/xdg
+K41 lock startup: ERROR: Hyprlock exited before readiness could be established (exit=1).
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T150027Z-599.log ==========
+[2026-11-11T15:00:27Z] Lock startup helper started.
+[2026-11-11T15:00:27Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T15:00:57Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T15:00:57Z] Last Caelestia IPC response: Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+[2026-11-11T15:00:57Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+Hyprlock version v0.9.7
+[1;32mDEBUG [0m]:   | got iface: wl_seat v9
+[1;32mDEBUG [0m]:    > Bound to wl_seat v9
+[1;32mDEBUG [0m]:   | got iface: wl_data_device_manager v3
+[1;32mDEBUG [0m]:   | got iface: wl_compositor v6
+[1;32mDEBUG [0m]:    > Bound to wl_compositor v6
+[1;32mDEBUG [0m]:   | got iface: wl_subcompositor v1
+[1;32mDEBUG [0m]:   | got iface: wl_shm v2
+[1;32mDEBUG [0m]:    > Bound to wl_shm v2
+[1;32mDEBUG [0m]:   | got iface: wp_viewporter v1
+[1;32mDEBUG [0m]:    > Bound to wp_viewporter v1
+[1;32mDEBUG [0m]:   | got iface: wp_tearing_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_output_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:    > Bound to wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_idle_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_relative_pointer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_decoration_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_alpha_modifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_gamma_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_list_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_gestures_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwlr_foreign_toplevel_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v3 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_constraints_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_power_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_activation_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_idle_notifier_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_lock_notifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_input_method_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_virtual_keyboard_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_virtual_pointer_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_manager_v1 v4
+[1;32mDEBUG [0m]:   | got iface: org_kde_kwin_server_decoration_manager v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_focus_grab_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_tablet_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_layer_shell_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wp_presentation v2
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_base v7
+[1;32mDEBUG [0m]:   | got iface: zwlr_data_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_primary_selection_device_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xwayland_shell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_mapping_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_global_shortcuts_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_dialog_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_single_pixel_buffer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_security_context_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_ctm_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_input_capture_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_surface_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_content_type_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_toplevel_tag_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_system_bell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: vicinae_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xx_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_workspace_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_data_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_pointer_warp_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fifo_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_exporter_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_importer_v2 v1
+[1;32mDEBUG [0m]:   | got iface: ext_background_effect_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_commit_timing_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:    > Bound to zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_export_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: ext_output_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_workspace_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_image_copy_capture_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_color_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_drm_lease_device_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_linux_drm_syncobj_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wl_drm v2
+[1;32mDEBUG [0m]:   | got iface: zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:    > Bound to zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wl_output v4
+[1;32mDEBUG [0m]:    > Bound to wl_output v4
+[1;32mDEBUG [0m]: Exposed seat name: Hyprland
+[1;32mDEBUG [0m]: [core] dmabufFeedbackMainDevice
+[1;32mDEBUG [0m]: output eDP-1 name eDP-1
+[1;32mDEBUG [0m]: output 73 description InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6  (eDP-1)
+[1;32mDEBUG [0m]: output 73 make InfoVision Optoelectronics (Kunshan) Co.,Ltd China model 0x04E6
+[1;32mDEBUG [0m]: output 73 done
+[1;32mDEBUG [0m]: Running on Hyprland
+[1;32mDEBUG [0m]: eglQueryDmaBufModifiersEXT found 4 mods
+[1;32mDEBUG [0m]: [bo] has 2 plane(s)
+[1;32mDEBUG [0m]: [bo] chose modifier 100000000000004
+[1;32mDEBUG [0m]: Got dma frame with size [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Gathered all screencopy frames - removing dmabuf listeners
+[1;32mDEBUG [0m]: Resources gathered after 14 milliseconds
+[1;32mDEBUG [0m]: Locking session
+[1;32mDEBUG [0m]: Starting fade in
+[1;32mDEBUG [0m]: Got fractional scale: 150.0%
+[1;32mDEBUG [0m]: configure with serial 1
+[1;32mDEBUG [0m]: Configuring surface for logical [Vector2D: x: 1280, y: 720] and pixel [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Updating placeholder text: Enter password...
+[1;32mDEBUG [0m]: PAMPROMPT: Password: 
+[1;32mDEBUG [0m]: onLockLocked called
+[2026-11-11T15:00:58Z] Readiness marker published.
+[2026-11-11T15:00:58Z] Hyprlock fallback is running (pid=812); waiting for unlock/exit.
+[1;32mDEBUG [0m]: Authenticating
+[1;32mDEBUG [0m]: auth: authenticated for hyprlock
+[1;32mDEBUG [0m]: Unlocking session
+[1;32mDEBUG [0m]: Unlocked, exiting!
+[1;32mDEBUG [0m]: Reached the end, exiting
+[2026-11-11T15:01:03Z] Hyprlock fallback exited (exit=0).
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T074141Z-1214.log ==========
+[2026-11-11T07:41:41Z] Lock startup helper started.
+[2026-11-11T07:41:41Z] Readiness budget: 30s; verification attempts: 10.
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261112T000437Z-1083.log ==========
+[2026-11-12T00:04:37Z] Lock startup helper started.
+[2026-11-12T00:04:37Z] Readiness budget: 30s; verification attempts: 10.
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T074242Z-1740.log ==========
+[2026-11-11T07:42:42Z] Lock startup helper started.
+[2026-11-11T07:42:42Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T07:43:13Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T07:43:13Z] Starting Hyprlock fallback.
+Hyprlock version v0.9.7
+[1;35mCRIT [0m]:  Config path error: Could not find config. Searched in order: XDG_CONFIG_HOME, HOME, XDG_CONFIG_DIRS, /etc/xdg
+K41 lock startup: ERROR: Hyprlock exited before readiness could be established (exit=1).
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T145846Z-604.log ==========
+[2026-11-11T14:58:46Z] Lock startup helper started.
+[2026-11-11T14:58:46Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T14:59:16Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T14:59:16Z] Last Caelestia IPC response: Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+[2026-11-11T14:59:16Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+Hyprlock version v0.9.7
+[1;32mDEBUG [0m]:   | got iface: wl_seat v9
+[1;32mDEBUG [0m]:    > Bound to wl_seat v9
+[1;32mDEBUG [0m]:   | got iface: wl_data_device_manager v3
+[1;32mDEBUG [0m]:   | got iface: wl_compositor v6
+[1;32mDEBUG [0m]:    > Bound to wl_compositor v6
+[1;32mDEBUG [0m]:   | got iface: wl_subcompositor v1
+[1;32mDEBUG [0m]:   | got iface: wl_shm v2
+[1;32mDEBUG [0m]:    > Bound to wl_shm v2
+[1;32mDEBUG [0m]:   | got iface: wp_viewporter v1
+[1;32mDEBUG [0m]:    > Bound to wp_viewporter v1
+[1;32mDEBUG [0m]:   | got iface: wp_tearing_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_output_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:    > Bound to wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_idle_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_relative_pointer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_decoration_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_alpha_modifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_gamma_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_list_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_gestures_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwlr_foreign_toplevel_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v3 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_constraints_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_power_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_activation_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_idle_notifier_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_lock_notifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_input_method_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_virtual_keyboard_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_virtual_pointer_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_manager_v1 v4
+[1;32mDEBUG [0m]:   | got iface: org_kde_kwin_server_decoration_manager v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_focus_grab_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_tablet_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_layer_shell_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wp_presentation v2
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_base v7
+[1;32mDEBUG [0m]:   | got iface: zwlr_data_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_primary_selection_device_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xwayland_shell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_mapping_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_global_shortcuts_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_dialog_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_single_pixel_buffer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_security_context_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_ctm_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_input_capture_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_surface_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_content_type_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_toplevel_tag_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_system_bell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: vicinae_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xx_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_workspace_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_data_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_pointer_warp_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fifo_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_exporter_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_importer_v2 v1
+[1;32mDEBUG [0m]:   | got iface: ext_background_effect_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_commit_timing_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:    > Bound to zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_export_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: ext_output_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_workspace_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_image_copy_capture_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_color_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_drm_lease_device_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_linux_drm_syncobj_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wl_drm v2
+[1;32mDEBUG [0m]:   | got iface: zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:    > Bound to zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wl_output v4
+[1;32mDEBUG [0m]:    > Bound to wl_output v4
+[1;32mDEBUG [0m]: Exposed seat name: Hyprland
+[1;32mDEBUG [0m]: [core] dmabufFeedbackMainDevice
+[1;32mDEBUG [0m]: output eDP-1 name eDP-1
+[1;32mDEBUG [0m]: output 73 description InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6  (eDP-1)
+[1;32mDEBUG [0m]: output 73 make InfoVision Optoelectronics (Kunshan) Co.,Ltd China model 0x04E6
+[1;32mDEBUG [0m]: output 73 done
+[1;32mDEBUG [0m]: Running on Hyprland
+[1;32mDEBUG [0m]: eglQueryDmaBufModifiersEXT found 4 mods
+[1;32mDEBUG [0m]: [bo] has 2 plane(s)
+[1;32mDEBUG [0m]: [bo] chose modifier 100000000000004
+[1;32mDEBUG [0m]: Got dma frame with size [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Gathered all screencopy frames - removing dmabuf listeners
+[1;32mDEBUG [0m]: Resources gathered after 14 milliseconds
+[1;32mDEBUG [0m]: Locking session
+[1;32mDEBUG [0m]: Starting fade in
+[1;32mDEBUG [0m]: Got fractional scale: 150.0%
+[1;32mDEBUG [0m]: configure with serial 1
+[1;32mDEBUG [0m]: Configuring surface for logical [Vector2D: x: 1280, y: 720] and pixel [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Updating placeholder text: Enter password...
+[1;32mDEBUG [0m]: PAMPROMPT: Password: 
+[1;32mDEBUG [0m]: onLockLocked called
+[2026-11-11T14:59:17Z] Readiness marker published.
+[2026-11-11T14:59:17Z] Hyprlock fallback is running (pid=816); waiting for unlock/exit.
+[1;32mDEBUG [0m]: Authenticating
+[1;32mDEBUG [0m]: auth: authenticated for hyprlock
+[1;32mDEBUG [0m]: Unlocking session
+[1;32mDEBUG [0m]: Unlocked, exiting!
+[1;32mDEBUG [0m]: Reached the end, exiting
+[2026-11-11T14:59:23Z] Hyprlock fallback exited (exit=0).
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T150212Z-1220.log ==========
+[2026-11-11T15:02:12Z] Lock startup helper started.
+[2026-11-11T15:02:12Z] Readiness budget: 30s; verification attempts: 10.
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T142536Z-603.log ==========
+[2026-11-11T14:25:36Z] Lock startup helper started.
+[2026-11-11T14:25:36Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T14:26:06Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T14:26:06Z] Starting Hyprlock fallback.
+Hyprlock version v0.9.7
+[1;35mCRIT [0m]:  Config path error: Could not find config. Searched in order: XDG_CONFIG_HOME, HOME, XDG_CONFIG_DIRS, /etc/xdg
+K41 lock startup: ERROR: Hyprlock exited before readiness could be established (exit=1).
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T143116Z-1217.log ==========
+[2026-11-11T14:31:16Z] Lock startup helper started.
+[2026-11-11T14:31:16Z] Readiness budget: 30s; verification attempts: 10.
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T150134Z-985.log ==========
+[2026-11-11T15:01:34Z] Lock startup helper started.
+[2026-11-11T15:01:34Z] Readiness budget: 30s; verification attempts: 10.
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T073949Z-602.log ==========
+[2026-11-11T07:39:49Z] Lock startup helper started.
+[2026-11-11T07:39:49Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T07:40:19Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T07:40:19Z] Starting Hyprlock fallback.
+Hyprlock version v0.9.7
+[1;35mCRIT [0m]:  Config path error: Could not find config. Searched in order: XDG_CONFIG_HOME, HOME, XDG_CONFIG_DIRS, /etc/xdg
+K41 lock startup: ERROR: Hyprlock exited before readiness could be established (exit=1).
+
+
+========== LOG FILE: .local/state/k41/lockscreen/startup-20261111T235958Z-608.log ==========
+[2026-11-11T23:59:58Z] Lock startup helper started.
+[2026-11-11T23:59:58Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-12T00:00:28Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-12T00:00:28Z] Last Caelestia IPC response: Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+[2026-11-12T00:00:28Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+Hyprlock version v0.9.7
+[1;32mDEBUG [0m]:   | got iface: wl_seat v9
+[1;32mDEBUG [0m]:    > Bound to wl_seat v9
+[1;32mDEBUG [0m]:   | got iface: wl_data_device_manager v3
+[1;32mDEBUG [0m]:   | got iface: wl_compositor v6
+[1;32mDEBUG [0m]:    > Bound to wl_compositor v6
+[1;32mDEBUG [0m]:   | got iface: wl_subcompositor v1
+[1;32mDEBUG [0m]:   | got iface: wl_shm v2
+[1;32mDEBUG [0m]:    > Bound to wl_shm v2
+[1;32mDEBUG [0m]:   | got iface: wp_viewporter v1
+[1;32mDEBUG [0m]:    > Bound to wp_viewporter v1
+[1;32mDEBUG [0m]:   | got iface: wp_tearing_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_output_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:    > Bound to wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_idle_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_relative_pointer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_decoration_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_alpha_modifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_gamma_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_list_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_gestures_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwlr_foreign_toplevel_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v3 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_constraints_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_power_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_activation_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_idle_notifier_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_lock_notifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_input_method_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_virtual_keyboard_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_virtual_pointer_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_manager_v1 v4
+[1;32mDEBUG [0m]:   | got iface: org_kde_kwin_server_decoration_manager v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_focus_grab_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_tablet_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_layer_shell_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wp_presentation v2
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_base v7
+[1;32mDEBUG [0m]:   | got iface: zwlr_data_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_primary_selection_device_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xwayland_shell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_mapping_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_global_shortcuts_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_dialog_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_single_pixel_buffer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_security_context_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_ctm_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_input_capture_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_surface_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_content_type_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_toplevel_tag_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_system_bell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: vicinae_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xx_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_workspace_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_data_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_pointer_warp_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fifo_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_exporter_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_importer_v2 v1
+[1;32mDEBUG [0m]:   | got iface: ext_background_effect_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_commit_timing_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:    > Bound to zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_export_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: ext_output_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_workspace_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_image_copy_capture_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_color_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_drm_lease_device_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_linux_drm_syncobj_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wl_drm v2
+[1;32mDEBUG [0m]:   | got iface: zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:    > Bound to zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wl_output v4
+[1;32mDEBUG [0m]:    > Bound to wl_output v4
+[1;32mDEBUG [0m]: Exposed seat name: Hyprland
+[1;32mDEBUG [0m]: [core] dmabufFeedbackMainDevice
+[1;32mDEBUG [0m]: output eDP-1 name eDP-1
+[1;32mDEBUG [0m]: output 73 description InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6  (eDP-1)
+[1;32mDEBUG [0m]: output 73 make InfoVision Optoelectronics (Kunshan) Co.,Ltd China model 0x04E6
+[1;32mDEBUG [0m]: output 73 done
+[1;32mDEBUG [0m]: Running on Hyprland
+[1;32mDEBUG [0m]: eglQueryDmaBufModifiersEXT found 4 mods
+[1;32mDEBUG [0m]: [bo] has 2 plane(s)
+[1;32mDEBUG [0m]: [bo] chose modifier 100000000000004
+[1;32mDEBUG [0m]: Got dma frame with size [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Gathered all screencopy frames - removing dmabuf listeners
+[1;32mDEBUG [0m]: Resources gathered after 13 milliseconds
+[1;32mDEBUG [0m]: Locking session
+[1;32mDEBUG [0m]: Starting fade in
+[1;32mDEBUG [0m]: Got fractional scale: 150.0%
+[1;32mDEBUG [0m]: configure with serial 1
+[1;32mDEBUG [0m]: Configuring surface for logical [Vector2D: x: 1280, y: 720] and pixel [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Updating placeholder text: Enter password...
+[1;32mDEBUG [0m]: PAMPROMPT: Password: 
+[1;32mDEBUG [0m]: onLockLocked called
+[2026-11-12T00:00:29Z] Readiness marker published.
+[2026-11-12T00:00:29Z] Hyprlock fallback is running (pid=820); waiting for unlock/exit.
+[1;32mDEBUG [0m]: Authenticating
+[1;32mDEBUG [0m]: auth: authenticated for hyprlock
+[1;32mDEBUG [0m]: Unlocking session
+[1;32mDEBUG [0m]: Unlocked, exiting!
+[1;32mDEBUG [0m]: Reached the end, exiting
+[2026-11-12T00:00:34Z] Hyprlock fallback exited (exit=0).
+
+
+========== LOG FILE: .local/state/caelestia/wallpaper/path.txt ==========
+/etc/xdg/quickshell/caelestia/assets/wallpaper.webp
+
+========== LOG FILE: .local/state/caelestia/sequences.txt ==========
+]10;rgb:dc/e8/e6\]11;rgb:0a/0f/0f\]12;rgb:b0/cc/c9\]17;rgb:b0/cc/c9\]4;0;rgb:34/34/34\]4;1;rgb:76/9e/00\]4;2;rgb:56/e2/c0\]4;3;rgb:81/fc/ce\]4;4;rgb:76/b6/b3\]4;5;rgb:7a/ae/e9\]4;6;rgb:83/d8/c9\]4;7;rgb:cd/dc/d3\]4;8;rgb:9a/a5/9e\]4;9;rgb:85/b9/00\]4;10;rgb:41/f7/d0\]4;11;rgb:cd/ff/e9\]4;12;rgb:a3/c8/c3\]4;13;rgb:a2/c0/f7\]4;14;rgb:8b/ed/d9\]4;15;rgb:ff/ff/ff\]4;16;rgb:9b/d0/cc\]4;17;rgb:b0/cc/c9\]4;18;rgb:d5/ef/ff\
+
+========== HYPRLAND IPC (only succeeds if compositor is running) ==========
+
+
+========== HYPRLAND INSTANCES ==========
+
+
+
+
+========== HYPRLAND VERSION VIA IPC ==========
+HYPRLAND_INSTANCE_SIGNATURE not set! (is hyprland running?)
+
+[command exit: 1]
+
+
+========== HYPRLAND MONITORS ==========
+HYPRLAND_INSTANCE_SIGNATURE not set! (is hyprland running?)
+
+[command exit: 1]
+
+
+========== START-HYPRLAND COREDUMP SUMMARY ==========
+           PID: 1278 (start-hyprland)
+           TID: 1282 (start-hyprland)
+           UID: 1000 (<USER>)
+           GID: 1000 (<USER>)
+        Signal: 6 (ABRT) si_code: SI_TKILL
+     Timestamp: Wed 2026-11-11 14:01:45 WIB (17h ago)
+  Command Line: start-hyprland --version
+    Executable: /usr/bin/start-hyprland
+ Control Group: /user.slice/user-1000.slice/session-3.scope
+          Unit: session-3.scope
+         Slice: user-1000.slice
+       Session: 3
+     Owner UID: 1000 (<USER>)
+       Boot ID: 45e322bacde24c8782e87feaab78048c
+    Machine ID: 9a6665662f4746648dd58b2ea6cf3bb6
+      Hostname: x280
+       Storage: /var/lib/systemd/coredump/core.start-hyprland.1000.45e322bacde24c8782e87feaab78048c.1278.1794380505000000.zst (present)
+  Size on Disk: 66.1K
+       Message: Process 1278 (start-hyprland) of user 1000 dumped core.
+                
+                Stack trace of thread 1282:
+                #0  0x00007f5c7029a11c n/a (libc.so.6 + 0x9a11c)
+                #1  0x00007f5c7023e5d0 raise (libc.so.6 + 0x3e5d0)
+                #2  0x00007f5c70225685 abort (libc.so.6 + 0x25685)
+                #3  0x00007f5c7069ac54 n/a (libstdc++.so.6 + 0x9ac54)
+                #4  0x00007f5c706b581a n/a (libstdc++.so.6 + 0xb581a)
+                #5  0x00007f5c7069a5ed _ZSt9terminatev (libstdc++.so.6 + 0x9a5ed)
+                #6  0x00007f5c706b5ad6 __cxa_throw (libstdc++.so.6 + 0xb5ad6)
+                #7  0x00007f5c706a0006 _ZSt20__throw_system_errori (libstdc++.so.6 + 0xa0006)
+                #8  0x00007f5c706a006b n/a (libstdc++.so.6 + 0xa006b)
+                #9  0x000055e2d7d01b02 n/a (start-hyprland + 0x35b02)
+                #10 0x00007f5c7023e6f0 n/a (libc.so.6 + 0x3e6f0)
+                #11 0x00007f5c702a08f0 n/a (libc.so.6 + 0xa08f0)
+                #12 0x00007f5c703054cb wait4 (libc.so.6 + 0x1054cb)
+                #13 0x000055e2d7cdaaa5 n/a (start-hyprland + 0xeaa5)
+                #14 0x00007f5c706ea859 n/a (libstdc++.so.6 + 0xea859)
+                #15 0x00007f5c70298042 n/a (libc.so.6 + 0x98042)
+                #16 0x00007f5c7032072c n/a (libc.so.6 + 0x12072c)
+                
+                Stack trace of thread 1278:
+                #0  0x00007f5c702a08f2 n/a (libc.so.6 + 0xa08f2)
+                #1  0x00007f5c70294c79 n/a (libc.so.6 + 0x94c79)
+                #2  0x00007f5c70299e8d n/a (libc.so.6 + 0x99e8d)
+                #3  0x00007f5c706ea8e4 _ZNSt6thread4joinEv (libstdc++.so.6 + 0xea8e4)
+                #4  0x000055e2d7d01b02 n/a (start-hyprland + 0x35b02)
+                #5  0x00007f5c7023e6f0 n/a (libc.so.6 + 0x3e6f0)
+                #6  0x00007f5c702a08f2 n/a (libc.so.6 + 0xa08f2)
+                #7  0x00007f5c703112e5 __poll (libc.so.6 + 0x1112e5)
+                #8  0x000055e2d7cda8a4 _ZN17CHyprlandInstance3runEbb (start-hyprland + 0xe8a4)
+                #9  0x000055e2d7cd6e1c main (start-hyprland + 0xae1c)
+                #10 0x00007f5c70227781 n/a (libc.so.6 + 0x27781)
+                #11 0x00007f5c702278b9 __libc_start_main (libc.so.6 + 0x278b9)
+                #12 0x000055e2d7cd7405 _start (start-hyprland + 0xb405)
+                ELF object binary architecture: AMD x86-64
+
+
+========== GRAPHICS DEVICE INVENTORY ==========
+
+
+========== DRM DEVICE NODES ==========
+total 0
+drwxr-xr-x  2 root root         80 Nov 12 06:59 by-path
+crw-rw----+ 1 root video  226,   1 Nov 12 07:04 card1
+crw-rw-rw-  1 root render 226, 128 Nov 12 06:59 renderD128
+00:02.0 VGA compatible controller [0300]: Intel Corporation Kaby Lake-R GT2 [UHD Graphics 620] [8086:5917] (rev 07)
+	Subsystem: Lenovo Device [17aa:2256]
+	Kernel driver in use: i915
+	Kernel modules: i915
+00:04.0 Signal processing controller [1180]: Intel Corporation Xeon E3-1200 v5/E3-1500 v5/6th Gen Core Processor Thermal Subsystem [8086:1903] (rev 08)
+
+
+========== CURRENT BOOT JOURNAL — STARTUP / SESSION EVENTS ==========
+[    1.409771] archlinux kernel: ACPI: bus type drm_connector registered
+[    1.417578] archlinux kernel: simple-framebuffer simple-framebuffer.0: [drm] Registered 1 planes with drm panic
+[    1.417594] archlinux kernel: [drm] Initialized simpledrm 1.0.0 for simple-framebuffer.0 on minor 0
+[    1.418350] archlinux kernel: simple-framebuffer simple-framebuffer.0: [drm] fb0: simpledrmdrmfb frame buffer device
+[    1.577077] archlinux systemd[1]: Starting Show Plymouth Boot Screen...
+[    1.592386] archlinux systemd[1]: Received SIGRTMIN+20 from PID 191 (plymouthd).
+[    1.633479] archlinux systemd[1]: Started Show Plymouth Boot Screen.
+[    1.634675] archlinux systemd[1]: Received SIGRTMIN+20 from PID 191 (plymouthd).
+[    1.640053] archlinux systemd[1]: Dispatch Password <REDACTED> to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[    1.640438] archlinux systemd[1]: Started Forward Password <REDACTED> to Plymouth Directory Watch.
+[    1.676916] archlinux systemd[1]: Found device WDC PC SN730 SDBQNTY-256G-1001 K41-ROOT.
+[    2.342165] archlinux kernel: i915 0000:00:02.0: enabling device (0006 -> 0007)
+[    2.342477] archlinux kernel: i915 0000:00:02.0: [drm] Found kabylake (device ID 5917) integrated display version 9.00 stepping C0
+[    2.357055] archlinux kernel: i915 0000:00:02.0: vgaarb: deactivate vga console
+[    2.362064] archlinux kernel: i915 0000:00:02.0: [drm] Finished loading DMC firmware i915/kbl_dmc_ver1_04.bin (v1.4)
+[    2.396062] archlinux kernel: i915 0000:00:02.0: vgaarb: VGA decodes changed: olddecodes=io+mem,decodes=io:owns=mem
+[    2.416061] archlinux kernel: i915 0000:00:02.0: [drm] Registered 3 planes with drm panic
+[    2.424091] archlinux kernel: [drm] Initialized i915 1.6.0 for 0000:00:02.0 on minor 1
+[    2.615059] archlinux kernel: fbcon: i915drmfb (fb0) is primary device
+[    2.615135] archlinux kernel: i915 0000:00:02.0: [drm] fb0: i915drmfb frame buffer device
+[    6.300609] archlinux systemd-fsck[238]: K41_ROOT: clean, 155201/15564800 files, 6810247/62248273 blocks
+[    6.401083] archlinux systemd[1]: Starting Plymouth switch root service...
+[    6.440738] archlinux systemd[1]: Finished Plymouth switch root service.
+[   13.958188] x280 systemd[1]: Dispatch Password <REDACTED> to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   13.959117] x280 systemd[1]: Load Kernel Module drm skipped, unmet condition check ConditionKernelModuleLoaded=!drm
+[   13.959173] x280 systemd[1]: plymouth-switch-root.service: Deactivated successfully.
+[   13.959192] x280 systemd[1]: Stopped Plymouth switch root service.
+[   14.251563] x280 systemd[1]: Condition check resulted in WDC PC SN730 SDBQNTY-256G-1001 K41_EFI being skipped.
+[   14.503964] x280 kernel: mei_hdcp 0000:00:16.0-b638ab7e-94e2-4ea2-a552-d1c54b627f04: bound 0000:00:02.0 (ops i915_hdcp_ops [i915])
+[   14.519274] x280 kernel: RAPL PMU: hw unit of domain pp1-gpu 2^-14 Joules
+[   14.601745] x280 systemd[1]: Dispatch Password <REDACTED> to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   14.917011] x280 kernel: snd_hda_intel 0000:00:1f.3: bound 0000:00:02.0 (ops intel_audio_component_bind_ops [i915])
+[   14.935864] x280 systemd[1]: Starting Tell Plymouth To Write Out Runtime Data...
+[   14.970571] x280 systemd[1]: Received SIGRTMIN+20 from PID 191 (plymouthd).
+[   14.973308] x280 systemd[1]: Finished Tell Plymouth To Write Out Runtime Data.
+[   15.163117] x280 systemd[1]: Starting Retain splash frame and release Plymouth display ownership before K41 Hyprland startup...
+[   15.227091] x280 systemd[1]: Received SIGRTMIN+21 from PID 191 (plymouthd).
+[   15.254234] x280 systemd-logind[462]: New seat seat0.
+[   15.271139] x280 systemd-logind[462]: Watching system buttons on /dev/input/event2 (Power Button)
+[   15.275074] x280 systemd-logind[462]: Watching system buttons on /dev/input/event1 (Lid Switch)
+[   15.275132] x280 systemd-logind[462]: Watching system buttons on /dev/input/event0 (Sleep Button)
+[   15.275192] x280 systemd-logind[462]: Watching system buttons on /dev/input/event3 (AT Translated Set 2 keyboard)
+[   15.275221] x280 systemd-logind[462]: Watching system buttons on /dev/input/event4 (ThinkPad Extra Buttons)
+[   15.299086] x280 systemd[1]: Finished Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+[   16.208837] x280 systemd[1]: Started Getty on tty1.
+[   16.210343] x280 systemd[1]: Starting Terminate Plymouth Boot Screen...
+[   16.260735] x280 systemd-vconsole-setup[519]: Failed to enable UTF-8 kbdmode on /dev/tty1: Input/output error
+[   16.325562] x280 login[516]: pam_unix(login:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+[   16.367915] x280 systemd-logind[462]: New session '1' of user '<USER>' with class 'user' and type 'tty'.
+[   16.449979] x280 (systemd)[534]: pam_warn(systemd-user:setcred): function=[pam_sm_setcred] flags=0x8002 service=[systemd-user] terminal=[] user=[<USER>] ruser=[<unknown>] rhost=[<unknown>]
+[   16.450258] x280 (systemd)[534]: pam_unix(systemd-user:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+[   16.451834] x280 systemd-logind[462]: New session '2' of user '<USER>' with class 'manager' and type 'unspecified'.
+[   16.572760] x280 login[516]: LOGIN ON tty1 BY <USER>
+[   19.383346] x280 systemd[534]: Reached target Hyprland session.
+[   50.349831] x280 systemd[1]: Finished Terminate Plymouth Boot Screen.
+[  177.793193] x280 systemd[534]: Stopped target Hyprland session.
+[  236.579067] x280 sudo[893]:      <USER> : TTY=tty1 ; PWD=<HOME>/p ; USER=root ; COMMAND=/usr/bin/rm -rf Lenovo-ThinkPad-X280-K41/
+[  236.579903] x280 sudo[893]: pam_unix(sudo:session): session opened for user root(uid=0) by <USER>(uid=1000)
+[  236.625411] x280 sudo[893]: pam_unix(sudo:session): session closed for user root
+[  297.729149] x280 systemd[534]: Reached target Hyprland session.
+[  299.885339] x280 systemd[534]: Stopped target Hyprland session.
+
+
+========== PREVIOUS BOOT JOURNAL — STARTUP / SESSION EVENTS ==========
+[    1.372744] archlinux kernel: ACPI: bus type drm_connector registered
+[    1.379743] archlinux kernel: simple-framebuffer simple-framebuffer.0: [drm] Registered 1 planes with drm panic
+[    1.379755] archlinux kernel: [drm] Initialized simpledrm 1.0.0 for simple-framebuffer.0 on minor 0
+[    1.379909] archlinux kernel: simple-framebuffer simple-framebuffer.0: [drm] fb0: simpledrmdrmfb frame buffer device
+[    1.543792] archlinux systemd[1]: Starting Show Plymouth Boot Screen...
+[    1.559889] archlinux systemd[1]: Received SIGRTMIN+20 from PID 183 (plymouthd).
+[    1.599233] archlinux systemd[1]: Received SIGRTMIN+20 from PID 183 (plymouthd).
+[    1.599514] archlinux systemd[1]: Started Show Plymouth Boot Screen.
+[    1.599989] archlinux systemd[1]: Dispatch Password <REDACTED> to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[    1.600170] archlinux systemd[1]: Started Forward Password <REDACTED> to Plymouth Directory Watch.
+[    1.635190] archlinux systemd[1]: Found device WDC PC SN730 SDBQNTY-256G-1001 K41-ROOT.
+[    2.342253] archlinux kernel: i915 0000:00:02.0: enabling device (0006 -> 0007)
+[    2.342552] archlinux kernel: i915 0000:00:02.0: [drm] Found kabylake (device ID 5917) integrated display version 9.00 stepping C0
+[    2.356020] archlinux kernel: i915 0000:00:02.0: vgaarb: deactivate vga console
+[    2.361091] archlinux kernel: i915 0000:00:02.0: [drm] Finished loading DMC firmware i915/kbl_dmc_ver1_04.bin (v1.4)
+[    2.395068] archlinux kernel: i915 0000:00:02.0: vgaarb: VGA decodes changed: olddecodes=io+mem,decodes=io:owns=mem
+[    2.410067] archlinux kernel: i915 0000:00:02.0: [drm] Registered 3 planes with drm panic
+[    2.419102] archlinux kernel: [drm] Initialized i915 1.6.0 for 0000:00:02.0 on minor 1
+[    2.606090] archlinux kernel: fbcon: i915drmfb (fb0) is primary device
+[    2.606165] archlinux kernel: i915 0000:00:02.0: [drm] fb0: i915drmfb frame buffer device
+[    6.305969] archlinux systemd-fsck[234]: K41_ROOT: clean, 155173/15564800 files, 6808121/62248273 blocks
+[    6.405207] archlinux systemd[1]: Starting Plymouth switch root service...
+[    6.445262] archlinux systemd[1]: Finished Plymouth switch root service.
+[   13.988563] x280 systemd[1]: Dispatch Password <REDACTED> to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   13.989435] x280 systemd[1]: Load Kernel Module drm skipped, unmet condition check ConditionKernelModuleLoaded=!drm
+[   13.989501] x280 systemd[1]: plymouth-switch-root.service: Deactivated successfully.
+[   13.989526] x280 systemd[1]: Stopped Plymouth switch root service.
+[   14.275563] x280 systemd[1]: Condition check resulted in WDC PC SN730 SDBQNTY-256G-1001 K41_EFI being skipped.
+[   14.507879] x280 kernel: mei_hdcp 0000:00:16.0-b638ab7e-94e2-4ea2-a552-d1c54b627f04: bound 0000:00:02.0 (ops i915_hdcp_ops [i915])
+[   14.564491] x280 kernel: RAPL PMU: hw unit of domain pp1-gpu 2^-14 Joules
+[   14.617660] x280 systemd[1]: Dispatch Password <REDACTED> to Console Directory Watch skipped, unmet condition check ConditionPathExists=!/run/plymouth/pid
+[   14.919011] x280 kernel: snd_hda_intel 0000:00:1f.3: bound 0000:00:02.0 (ops intel_audio_component_bind_ops [i915])
+[   14.978785] x280 systemd[1]: Starting Tell Plymouth To Write Out Runtime Data...
+[   15.008014] x280 systemd[1]: Received SIGRTMIN+20 from PID 183 (plymouthd).
+[   15.009117] x280 systemd[1]: Finished Tell Plymouth To Write Out Runtime Data.
+[   15.213568] x280 systemd[1]: Starting Retain splash frame and release Plymouth display ownership before K41 Hyprland startup...
+[   15.265262] x280 systemd[1]: Received SIGRTMIN+21 from PID 183 (plymouthd).
+[   15.302537] x280 systemd-logind[458]: New seat seat0.
+[   15.316156] x280 systemd-logind[458]: Watching system buttons on /dev/input/event2 (Power Button)
+[   15.321830] x280 systemd-logind[458]: Watching system buttons on /dev/input/event1 (Lid Switch)
+[   15.321882] x280 systemd-logind[458]: Watching system buttons on /dev/input/event0 (Sleep Button)
+[   15.321928] x280 systemd-logind[458]: Watching system buttons on /dev/input/event3 (AT Translated Set 2 keyboard)
+[   15.321989] x280 systemd-logind[458]: Watching system buttons on /dev/input/event4 (ThinkPad Extra Buttons)
+[   15.340441] x280 systemd[1]: Finished Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+[   16.265393] x280 systemd[1]: Started Getty on tty1.
+[   16.267759] x280 systemd[1]: Starting Terminate Plymouth Boot Screen...
+[   16.353119] x280 systemd[1]: systemd-vconsole-setup.service: Failed with result 'exit-code'.
+[   16.353556] x280 systemd[1]: Failed to start Virtual Console Setup.
+[   16.367720] x280 login[506]: pam_unix(login:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+[   16.406723] x280 systemd-logind[458]: New session '1' of user '<USER>' with class 'user' and type 'tty'.
+[   16.496036] x280 (systemd)[525]: pam_warn(systemd-user:setcred): function=[pam_sm_setcred] flags=0x8002 service=[systemd-user] terminal=[] user=[<USER>] ruser=[<unknown>] rhost=[<unknown>]
+[   16.496262] x280 (systemd)[525]: pam_unix(systemd-user:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+[   16.497686] x280 systemd-logind[458]: New session '2' of user '<USER>' with class 'manager' and type 'unspecified'.
+[   16.637726] x280 login[506]: LOGIN ON tty1 BY <USER>
+[   19.450187] x280 systemd[525]: Reached target Hyprland session.
+[   50.419924] x280 systemd[1]: Finished Terminate Plymouth Boot Screen.
+[   61.498320] x280 systemd[525]: Starting Portal service (Hyprland implementation)...
+[   61.514747] x280 systemd[525]: Started Portal service (Hyprland implementation).
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG] Initializing xdph...
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG] XDG_CURRENT_DESKTOP set to Hyprland
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG] Gathering exported interfaces
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wl_seat (ver 9)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wl_data_device_manager (ver 3)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wl_compositor (ver 6)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wl_subcompositor (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wl_shm (ver 2)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_viewporter (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_tearing_control_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_fractional_scale_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zxdg_output_manager_v1 (ver 3)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_cursor_shape_manager_v1 (ver 2)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_idle_inhibit_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_relative_pointer_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zxdg_decoration_manager_v1 (ver 2)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_alpha_modifier_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_gamma_control_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_foreign_toplevel_list_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_pointer_gestures_v1 (ver 3)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_foreign_toplevel_manager_v1 (ver 3)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG] [toplevel] (activate) locks: 1
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_keyboard_shortcuts_inhibit_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_text_input_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_text_input_manager_v3 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_pointer_constraints_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_output_power_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xdg_activation_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_idle_notifier_v1 (ver 2)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_lock_notifier_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_session_lock_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_input_method_manager_v2 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_virtual_keyboard_manager_v1 (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_virtual_pointer_manager_v1 (ver 2)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_output_manager_v1 (ver 4)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: org_kde_kwin_server_decoration_manager (ver 1)
+[   61.518520] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_focus_grab_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_tablet_manager_v2 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_layer_shell_v1 (ver 5)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_presentation (ver 2)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xdg_wm_base (ver 7)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_data_control_manager_v1 (ver 2)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwp_primary_selection_device_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xwayland_shell_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_toplevel_mapping_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG] [toplevel mapping] registered manager
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_global_shortcuts_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG] [globalshortcuts] registered
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xdg_wm_dialog_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_single_pixel_buffer_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_security_context_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_ctm_control_manager_v1 (ver 2)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_input_capture_manager_v1 (ver 2)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG] [input-capture] initializing input capture portal
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG] [input-capture] init successful
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_surface_manager_v1 (ver 2)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_content_type_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xdg_toplevel_tag_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xdg_system_bell_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: vicinae_hotkey_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: xx_hotkey_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_workspace_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_data_control_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_pointer_warp_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_fifo_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zxdg_exporter_v2 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zxdg_importer_v2 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_background_effect_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: wp_commit_timing_manager_v1 (ver 1)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: zwlr_screencopy_manager_v1 (ver 3)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG] [pipewire] connected
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG] [screencopy] init successful
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: hyprland_toplevel_export_manager_v1 (ver 2)
+[   61.520181] x280 xdg-desktop-portal-hyprland[918]: [LOG]  | Got interface: ext_output_image_capture_source_manager_v1 (ver 1)
+[   91.029223] x280 xdg-desktop-portal-hyprland[918]: [LOG]
+[   91.036433] x280 systemd[525]: xdg-desktop-portal-gtk.service: Failed with result 'exit-code'.
+[   91.042148] x280 systemd[525]: Stopped target Hyprland session.
+[  124.418410] x280 systemd[525]: Reached target Hyprland session.
+[  126.560587] x280 systemd[525]: Stopped target Hyprland session.
+[ 1910.477520] x280 systemd-logind[458]: poweroff requested from client PID 1693 ('poweroff') (unit session-1.scope)...
+[ 1910.477768] x280 systemd-logind[458]: System is powering down.
+[ 1910.487981] x280 login[506]: pam_unix(login:session): session closed for user <USER>
+[ 1910.482355] x280 systemd-logind[458]: The system will power off now!
+[ 1910.494751] x280 systemd[1]: getty@tty1.service: Deactivated successfully.
+[ 1910.502419] x280 systemd[1]: Stopped Getty on tty1.
+[ 1910.513190] x280 systemd-logind[458]: Session 1 logged out. Waiting for processes to exit.
+[ 1910.515124] x280 systemd[1]: k41-plymouth-release.service: Deactivated successfully.
+[ 1910.515303] x280 systemd[1]: Stopped Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+[ 1910.516745] x280 systemd[1]: Starting Show Plymouth Power Off Screen...
+[ 1910.516760] x280 systemd[1]: plymouth-quit-wait.service: Deactivated successfully.
+[ 1910.516963] x280 systemd[1]: plymouth-quit.service: Deactivated successfully.
+[ 1910.517049] x280 systemd[1]: Stopped Terminate Plymouth Boot Screen.
+[ 1910.517985] x280 systemd-logind[458]: Removed session 1.
+[ 1910.536373] x280 systemd[1]: Received SIGRTMIN+20 from PID 1733 (plymouthd).
+[ 1910.599865] x280 (sd-pam)[527]: pam_unix(systemd-user:session): session closed for user <USER>
+[ 1910.600013] x280 systemd-logind[458]: Removed session 2.
+[ 1910.648957] x280 mkinitcpio[1701]:   -> Running build hook: [plymouth-shutdown]
+[ 1910.705134] x280 systemd[1]: Received SIGRTMIN+20 from PID 1733 (plymouthd).
+[ 1910.715259] x280 systemd[1]: systemd-logind.service: Deactivated successfully.
+[ 1910.735991] x280 systemd[1]: Started Show Plymouth Power Off Screen.
+[ 1910.766086] x280 systemd[1]: Starting Tell Plymouth To Jump To initramfs...
+[ 1910.791888] x280 systemd[1]: Finished Tell Plymouth To Jump To initramfs.
+[ 1910.823072] x280 systemd[1]: systemd-ask-password-plymouth.path: Deactivated successfully.
+[ 1910.823506] x280 systemd[1]: Stopped Forward Password <REDACTED> to Plymouth Directory Watch.
+[ 1910.833339] x280 systemd[1]: systemd-logind-varlink.socket: Deactivated successfully.
+
+
+========== CURRENT USER JOURNAL — STARTUP / SESSION EVENTS ==========
+[   19.383346] x280 systemd[534]: Reached target Hyprland session.
+[  177.793193] x280 systemd[534]: Stopped target Hyprland session.
+[  236.579067] x280 sudo[893]:      <USER> : TTY=tty1 ; PWD=<HOME>/p ; USER=root ; COMMAND=/usr/bin/rm -rf Lenovo-ThinkPad-X280-K41/
+[  297.729149] x280 systemd[534]: Reached target Hyprland session.
+[  299.885339] x280 systemd[534]: Stopped target Hyprland session.
+
+
+========== LOCK LIFECYCLE: LOGIN SESSION STATE ==========
+
+
+========== LOGIN SESSION DETAILS: 1 ==========
+Id=1
+User=1000
+Name=<USER>
+Seat=seat0
+TTY=tty1
+Display=
+Remote=no
+Service=login
+Scope=session-1.scope
+Leader=516
+Type=tty
+Class=user
+Active=yes
+State=active
+
+
+========== LOGIN SESSION DETAILS: 2 ==========
+Id=2
+User=1000
+Name=<USER>
+Seat=
+TTY=
+Display=
+Remote=no
+Service=systemd-user
+Scope=
+Leader=534
+Type=unspecified
+Class=manager
+Active=yes
+State=active
+
+
+========== LOCK LIFECYCLE: HELPER INVOCATIONS AND PHASE TRANSITIONS ==========
+
+-- .local/state/k41/lockscreen/startup-20261112T000437Z-1083.log --
+size=125 modified=2026-11-12 07:04:37.139602569 +0700 mode=-rw-------
+ac3626e527803f495d9790819539c6f44c547d2641c3dd0dc170cd5f01f467f1  <HOME>/.local/state/k41/lockscreen/startup-20261112T000437Z-1083.log
+[2026-11-12T00:04:37Z] Lock startup helper started.
+[2026-11-12T00:04:37Z] Readiness budget: 30s; verification attempts: 10.
+
+-- .local/state/k41/lockscreen/startup-20261111T235958Z-608.log --
+size=8474 modified=2026-11-12 07:00:34.183604916 +0700 mode=-rw-------
+600810ff84293a8b630677099d00a4c4dc5356f63bd627dc7577ddb87eeea192  <HOME>/.local/state/k41/lockscreen/startup-20261111T235958Z-608.log
+[2026-11-11T23:59:58Z] Lock startup helper started.
+[2026-11-11T23:59:58Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-12T00:00:28Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-12T00:00:28Z] Last Caelestia IPC response: Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+[2026-11-12T00:00:28Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+Hyprlock version v0.9.7
+[1;32mDEBUG [0m]:   | got iface: wl_seat v9
+[1;32mDEBUG [0m]:    > Bound to wl_seat v9
+[1;32mDEBUG [0m]:   | got iface: wl_data_device_manager v3
+[1;32mDEBUG [0m]:   | got iface: wl_compositor v6
+[1;32mDEBUG [0m]:    > Bound to wl_compositor v6
+[1;32mDEBUG [0m]:   | got iface: wl_subcompositor v1
+[1;32mDEBUG [0m]:   | got iface: wl_shm v2
+[1;32mDEBUG [0m]:    > Bound to wl_shm v2
+[1;32mDEBUG [0m]:   | got iface: wp_viewporter v1
+[1;32mDEBUG [0m]:    > Bound to wp_viewporter v1
+[1;32mDEBUG [0m]:   | got iface: wp_tearing_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_output_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:    > Bound to wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_idle_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_relative_pointer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_decoration_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_alpha_modifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_gamma_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_list_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_gestures_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwlr_foreign_toplevel_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v3 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_constraints_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_power_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_activation_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_idle_notifier_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_lock_notifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_input_method_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_virtual_keyboard_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_virtual_pointer_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_manager_v1 v4
+[1;32mDEBUG [0m]:   | got iface: org_kde_kwin_server_decoration_manager v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_focus_grab_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_tablet_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_layer_shell_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wp_presentation v2
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_base v7
+[1;32mDEBUG [0m]:   | got iface: zwlr_data_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_primary_selection_device_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xwayland_shell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_mapping_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_global_shortcuts_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_dialog_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_single_pixel_buffer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_security_context_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_ctm_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_input_capture_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_surface_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_content_type_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_toplevel_tag_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_system_bell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: vicinae_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xx_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_workspace_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_data_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_pointer_warp_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fifo_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_exporter_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_importer_v2 v1
+[1;32mDEBUG [0m]:   | got iface: ext_background_effect_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_commit_timing_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:    > Bound to zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_export_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: ext_output_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_workspace_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_image_copy_capture_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_color_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_drm_lease_device_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_linux_drm_syncobj_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wl_drm v2
+[1;32mDEBUG [0m]:   | got iface: zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:    > Bound to zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wl_output v4
+[1;32mDEBUG [0m]:    > Bound to wl_output v4
+[1;32mDEBUG [0m]: Exposed seat name: Hyprland
+[1;32mDEBUG [0m]: [core] dmabufFeedbackMainDevice
+[1;32mDEBUG [0m]: output eDP-1 name eDP-1
+[1;32mDEBUG [0m]: output 73 description InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6  (eDP-1)
+[1;32mDEBUG [0m]: output 73 make InfoVision Optoelectronics (Kunshan) Co.,Ltd China model 0x04E6
+[1;32mDEBUG [0m]: output 73 done
+[1;32mDEBUG [0m]: Running on Hyprland
+[1;32mDEBUG [0m]: eglQueryDmaBufModifiersEXT found 4 mods
+[1;32mDEBUG [0m]: [bo] has 2 plane(s)
+[1;32mDEBUG [0m]: [bo] chose modifier 100000000000004
+[1;32mDEBUG [0m]: Got dma frame with size [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Gathered all screencopy frames - removing dmabuf listeners
+[1;32mDEBUG [0m]: Resources gathered after 13 milliseconds
+[1;32mDEBUG [0m]: Locking session
+[1;32mDEBUG [0m]: Starting fade in
+[1;32mDEBUG [0m]: Got fractional scale: 150.0%
+[1;32mDEBUG [0m]: configure with serial 1
+[1;32mDEBUG [0m]: Configuring surface for logical [Vector2D: x: 1280, y: 720] and pixel [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Updating placeholder text: Enter password...
+[1;32mDEBUG [0m]: PAMPROMPT: Password: 
+[1;32mDEBUG [0m]: onLockLocked called
+[2026-11-12T00:00:29Z] Readiness marker published.
+[2026-11-12T00:00:29Z] Hyprlock fallback is running (pid=820); waiting for unlock/exit.
+[1;32mDEBUG [0m]: Authenticating
+[1;32mDEBUG [0m]: auth: authenticated for hyprlock
+[1;32mDEBUG [0m]: Unlocking session
+[1;32mDEBUG [0m]: Unlocked, exiting!
+[1;32mDEBUG [0m]: Reached the end, exiting
+[2026-11-12T00:00:34Z] Hyprlock fallback exited (exit=0).
+
+-- .local/state/k41/lockscreen/startup-20261111T150212Z-1220.log --
+size=125 modified=2026-11-11 22:02:12.831887403 +0700 mode=-rw-------
+d6e88ee57c0124bb1f0336acd05e69a232d5c984f276dbf3b85bfee1bed9924d  <HOME>/.local/state/k41/lockscreen/startup-20261111T150212Z-1220.log
+[2026-11-11T15:02:12Z] Lock startup helper started.
+[2026-11-11T15:02:12Z] Readiness budget: 30s; verification attempts: 10.
+
+-- .local/state/k41/lockscreen/startup-20261111T150134Z-985.log --
+size=125 modified=2026-11-11 22:01:34.649887772 +0700 mode=-rw-------
+52bb33fc6312bfd7887e0cbfbf42dd62670b218d256644d6467053dfc1909180  <HOME>/.local/state/k41/lockscreen/startup-20261111T150134Z-985.log
+[2026-11-11T15:01:34Z] Lock startup helper started.
+[2026-11-11T15:01:34Z] Readiness budget: 30s; verification attempts: 10.
+
+-- .local/state/k41/lockscreen/startup-20261111T150027Z-599.log --
+size=8474 modified=2026-11-11 22:01:03.055888077 +0700 mode=-rw-------
+7e9c8ed671eee0a113cdf3cf13e441c5241e46fc40e878d529d304552f355276  <HOME>/.local/state/k41/lockscreen/startup-20261111T150027Z-599.log
+[2026-11-11T15:00:27Z] Lock startup helper started.
+[2026-11-11T15:00:27Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T15:00:57Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T15:00:57Z] Last Caelestia IPC response: Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+[2026-11-11T15:00:57Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+Hyprlock version v0.9.7
+[1;32mDEBUG [0m]:   | got iface: wl_seat v9
+[1;32mDEBUG [0m]:    > Bound to wl_seat v9
+[1;32mDEBUG [0m]:   | got iface: wl_data_device_manager v3
+[1;32mDEBUG [0m]:   | got iface: wl_compositor v6
+[1;32mDEBUG [0m]:    > Bound to wl_compositor v6
+[1;32mDEBUG [0m]:   | got iface: wl_subcompositor v1
+[1;32mDEBUG [0m]:   | got iface: wl_shm v2
+[1;32mDEBUG [0m]:    > Bound to wl_shm v2
+[1;32mDEBUG [0m]:   | got iface: wp_viewporter v1
+[1;32mDEBUG [0m]:    > Bound to wp_viewporter v1
+[1;32mDEBUG [0m]:   | got iface: wp_tearing_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_output_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:    > Bound to wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_idle_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_relative_pointer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_decoration_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_alpha_modifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_gamma_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_list_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_gestures_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwlr_foreign_toplevel_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v3 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_constraints_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_power_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_activation_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_idle_notifier_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_lock_notifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_input_method_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_virtual_keyboard_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_virtual_pointer_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_manager_v1 v4
+[1;32mDEBUG [0m]:   | got iface: org_kde_kwin_server_decoration_manager v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_focus_grab_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_tablet_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_layer_shell_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wp_presentation v2
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_base v7
+[1;32mDEBUG [0m]:   | got iface: zwlr_data_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_primary_selection_device_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xwayland_shell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_mapping_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_global_shortcuts_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_dialog_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_single_pixel_buffer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_security_context_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_ctm_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_input_capture_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_surface_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_content_type_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_toplevel_tag_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_system_bell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: vicinae_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xx_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_workspace_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_data_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_pointer_warp_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fifo_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_exporter_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_importer_v2 v1
+[1;32mDEBUG [0m]:   | got iface: ext_background_effect_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_commit_timing_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:    > Bound to zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_export_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: ext_output_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_workspace_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_image_copy_capture_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_color_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_drm_lease_device_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_linux_drm_syncobj_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wl_drm v2
+[1;32mDEBUG [0m]:   | got iface: zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:    > Bound to zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wl_output v4
+[1;32mDEBUG [0m]:    > Bound to wl_output v4
+[1;32mDEBUG [0m]: Exposed seat name: Hyprland
+[1;32mDEBUG [0m]: [core] dmabufFeedbackMainDevice
+[1;32mDEBUG [0m]: output eDP-1 name eDP-1
+[1;32mDEBUG [0m]: output 73 description InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6  (eDP-1)
+[1;32mDEBUG [0m]: output 73 make InfoVision Optoelectronics (Kunshan) Co.,Ltd China model 0x04E6
+[1;32mDEBUG [0m]: output 73 done
+[1;32mDEBUG [0m]: Running on Hyprland
+[1;32mDEBUG [0m]: eglQueryDmaBufModifiersEXT found 4 mods
+[1;32mDEBUG [0m]: [bo] has 2 plane(s)
+[1;32mDEBUG [0m]: [bo] chose modifier 100000000000004
+[1;32mDEBUG [0m]: Got dma frame with size [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Gathered all screencopy frames - removing dmabuf listeners
+[1;32mDEBUG [0m]: Resources gathered after 14 milliseconds
+[1;32mDEBUG [0m]: Locking session
+[1;32mDEBUG [0m]: Starting fade in
+[1;32mDEBUG [0m]: Got fractional scale: 150.0%
+[1;32mDEBUG [0m]: configure with serial 1
+[1;32mDEBUG [0m]: Configuring surface for logical [Vector2D: x: 1280, y: 720] and pixel [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Updating placeholder text: Enter password...
+[1;32mDEBUG [0m]: PAMPROMPT: Password: 
+[1;32mDEBUG [0m]: onLockLocked called
+[2026-11-11T15:00:58Z] Readiness marker published.
+[2026-11-11T15:00:58Z] Hyprlock fallback is running (pid=812); waiting for unlock/exit.
+[1;32mDEBUG [0m]: Authenticating
+[1;32mDEBUG [0m]: auth: authenticated for hyprlock
+[1;32mDEBUG [0m]: Unlocking session
+[1;32mDEBUG [0m]: Unlocked, exiting!
+[1;32mDEBUG [0m]: Reached the end, exiting
+[2026-11-11T15:01:03Z] Hyprlock fallback exited (exit=0).
+
+-- .local/state/k41/lockscreen/startup-20261111T145846Z-604.log --
+size=8474 modified=2026-11-11 21:59:23.285940100 +0700 mode=-rw-------
+829922d49ea73e6d514911fe9d6c5148493996f8ceecf1ff2f062ea190bc08de  <HOME>/.local/state/k41/lockscreen/startup-20261111T145846Z-604.log
+[2026-11-11T14:58:46Z] Lock startup helper started.
+[2026-11-11T14:58:46Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T14:59:16Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T14:59:16Z] Last Caelestia IPC response: Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+[2026-11-11T14:59:16Z] Starting Hyprlock fallback with explicit config: <HOME>/.config/k41/hyprlock-fallback.conf
+Hyprlock version v0.9.7
+[1;32mDEBUG [0m]:   | got iface: wl_seat v9
+[1;32mDEBUG [0m]:    > Bound to wl_seat v9
+[1;32mDEBUG [0m]:   | got iface: wl_data_device_manager v3
+[1;32mDEBUG [0m]:   | got iface: wl_compositor v6
+[1;32mDEBUG [0m]:    > Bound to wl_compositor v6
+[1;32mDEBUG [0m]:   | got iface: wl_subcompositor v1
+[1;32mDEBUG [0m]:   | got iface: wl_shm v2
+[1;32mDEBUG [0m]:    > Bound to wl_shm v2
+[1;32mDEBUG [0m]:   | got iface: wp_viewporter v1
+[1;32mDEBUG [0m]:    > Bound to wp_viewporter v1
+[1;32mDEBUG [0m]:   | got iface: wp_tearing_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to wp_fractional_scale_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_output_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:    > Bound to wp_cursor_shape_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_idle_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_relative_pointer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_decoration_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_alpha_modifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_gamma_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_list_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_gestures_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwlr_foreign_toplevel_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_text_input_manager_v3 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_pointer_constraints_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_power_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_activation_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_idle_notifier_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_lock_notifier_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:    > Bound to ext_session_lock_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_input_method_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_virtual_keyboard_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_virtual_pointer_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwlr_output_manager_v1 v4
+[1;32mDEBUG [0m]:   | got iface: org_kde_kwin_server_decoration_manager v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_focus_grab_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwp_tablet_manager_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_layer_shell_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wp_presentation v2
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_base v7
+[1;32mDEBUG [0m]:   | got iface: zwlr_data_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: zwp_primary_selection_device_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xwayland_shell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_mapping_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_global_shortcuts_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_wm_dialog_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_single_pixel_buffer_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_security_context_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_ctm_control_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_input_capture_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: hyprland_surface_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: wp_content_type_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_toplevel_tag_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xdg_system_bell_v1 v1
+[1;32mDEBUG [0m]:   | got iface: vicinae_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: xx_hotkey_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_workspace_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_data_control_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_pointer_warp_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_fifo_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_exporter_v2 v1
+[1;32mDEBUG [0m]:   | got iface: zxdg_importer_v2 v1
+[1;32mDEBUG [0m]:   | got iface: ext_background_effect_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_commit_timing_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:    > Bound to zwlr_screencopy_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: hyprland_toplevel_export_manager_v1 v2
+[1;32mDEBUG [0m]:   | got iface: ext_output_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: hyprland_workspace_image_capture_source_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: ext_image_copy_capture_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_color_manager_v1 v3
+[1;32mDEBUG [0m]:   | got iface: wp_drm_lease_device_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wp_linux_drm_syncobj_manager_v1 v1
+[1;32mDEBUG [0m]:   | got iface: wl_drm v2
+[1;32mDEBUG [0m]:   | got iface: zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:    > Bound to zwp_linux_dmabuf_v1 v5
+[1;32mDEBUG [0m]:   | got iface: wl_output v4
+[1;32mDEBUG [0m]:    > Bound to wl_output v4
+[1;32mDEBUG [0m]: Exposed seat name: Hyprland
+[1;32mDEBUG [0m]: [core] dmabufFeedbackMainDevice
+[1;32mDEBUG [0m]: output eDP-1 name eDP-1
+[1;32mDEBUG [0m]: output 73 description InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6  (eDP-1)
+[1;32mDEBUG [0m]: output 73 make InfoVision Optoelectronics (Kunshan) Co.,Ltd China model 0x04E6
+[1;32mDEBUG [0m]: output 73 done
+[1;32mDEBUG [0m]: Running on Hyprland
+[1;32mDEBUG [0m]: eglQueryDmaBufModifiersEXT found 4 mods
+[1;32mDEBUG [0m]: [bo] has 2 plane(s)
+[1;32mDEBUG [0m]: [bo] chose modifier 100000000000004
+[1;32mDEBUG [0m]: Got dma frame with size [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Gathered all screencopy frames - removing dmabuf listeners
+[1;32mDEBUG [0m]: Resources gathered after 14 milliseconds
+[1;32mDEBUG [0m]: Locking session
+[1;32mDEBUG [0m]: Starting fade in
+[1;32mDEBUG [0m]: Got fractional scale: 150.0%
+[1;32mDEBUG [0m]: configure with serial 1
+[1;32mDEBUG [0m]: Configuring surface for logical [Vector2D: x: 1280, y: 720] and pixel [Vector2D: x: 1920, y: 1080]
+[1;32mDEBUG [0m]: Updating placeholder text: Enter password...
+[1;32mDEBUG [0m]: PAMPROMPT: Password: 
+[1;32mDEBUG [0m]: onLockLocked called
+[2026-11-11T14:59:17Z] Readiness marker published.
+[2026-11-11T14:59:17Z] Hyprlock fallback is running (pid=816); waiting for unlock/exit.
+[1;32mDEBUG [0m]: Authenticating
+[1;32mDEBUG [0m]: auth: authenticated for hyprlock
+[1;32mDEBUG [0m]: Unlocking session
+[1;32mDEBUG [0m]: Unlocked, exiting!
+[1;32mDEBUG [0m]: Reached the end, exiting
+[2026-11-11T14:59:23Z] Hyprlock fallback exited (exit=0).
+
+-- .local/state/k41/lockscreen/startup-20261111T143116Z-1217.log --
+size=125 modified=2026-11-11 21:31:16.737410550 +0700 mode=-rw-------
+94bea8347bf931827fd19739d6a8aff49fd007ef7f03f02a96e8d7dbb05830a5  <HOME>/.local/state/k41/lockscreen/startup-20261111T143116Z-1217.log
+[2026-11-11T14:31:16Z] Lock startup helper started.
+[2026-11-11T14:31:16Z] Readiness budget: 30s; verification attempts: 10.
+
+-- .local/state/k41/lockscreen/startup-20261111T142906Z-601.log --
+size=494 modified=2026-11-11 21:29:37.344411510 +0700 mode=-rw-------
+3aadcaebb1946359a080d5e6248f74189eb68648da2db19134ddc98f71e68993  <HOME>/.local/state/k41/lockscreen/startup-20261111T142906Z-601.log
+[2026-11-11T14:29:06Z] Lock startup helper started.
+[2026-11-11T14:29:06Z] Readiness budget: 30s; verification attempts: 10.
+[2026-11-11T14:29:36Z] Caelestia lock IPC did not become ready within 30s.
+[2026-11-11T14:29:36Z] Starting Hyprlock fallback.
+Hyprlock version v0.9.7
+[1;35mCRIT [0m]:  Config path error: Could not find config. Searched in order: XDG_CONFIG_HOME, HOME, XDG_CONFIG_DIRS, /etc/xdg
+K41 lock startup: ERROR: Hyprlock exited before readiness could be established (exit=1).
+
+
+========== LOCK LIFECYCLE: CURRENT CAELESTIA IPC STATE (READ-ONLY) ==========
+
+
+========== CAELESTIA EXPORTED SHELL IPC TARGETS ==========
+Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 21, in run
+    self.print_ipc()
+    ~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 116, in print_ipc
+    print(self.shell("ipc", "show"), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['qs', '-c', 'caelestia', 'ipc', 'show']' returned non-zero exit status 255.
+[command exit: 1]
+
+
+========== CAELESTIA LOCK isLocked QUERY ==========
+Traceback (most recent call last):
+  File "/usr/bin/caelestia", line 8, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/__init__.py", line 12, in main
+    args.cls(args).run()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 35, in run
+    self.message(*self.args.message)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 129, in message
+    print(self.shell("ipc", "call", *args), end="")
+          ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/site-packages/caelestia/subcommands/shell.py", line 41, in shell
+    return subprocess.check_output(["qs", "-c", "caelestia", *args], text=True)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 473, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+               **kwargs).stdout
+               ^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['qs', '-c', 'caelestia', 'ipc', 'call', 'lock', 'isLocked']' returned non-zero exit status 255.
+[command exit: 1]
+
+
+========== QUICKSHELL VERSION ==========
+Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+
+
+========== LOCK LIFECYCLE: LOCKER AND COMPOSITOR PROCESS STATE ==========
+ELAPSED STAT COMMAND
+
+
+========== HYPRLAND IPC INSTANCE INVENTORY ==========
+
+
+
+
+========== HYPRLAND IPC MONITOR STATE ==========
+HYPRLAND_INSTANCE_SIGNATURE not set! (is hyprland running?)
+
+[command exit: 1]
+
+
+========== HYPRLAND LOCK-RELATED BINDINGS ==========
+[No matching lock/recovery binding or IPC unavailable]
+
+
+========== LOCK LIFECYCLE: AUTHENTICATION AND UNLOCK JOURNAL EVENTS ==========
+2026-11-12T06:59:55.778078+07:00 x280 login[516]: pam_unix(login:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+2026-11-12T06:59:55.902774+07:00 x280 (systemd)[534]: pam_unix(systemd-user:session): session opened for user <USER>(uid=1000) by <USER>(uid=0)
+2026-11-12T06:59:58.835171+07:00 x280 systemd[534]: Reached target Session services which should run early before the graphical session is brought up.
+2026-11-12T06:59:58.835528+07:00 x280 systemd[534]: Reached target Current graphical user session.
+2026-11-12T06:59:58.835862+07:00 x280 systemd[534]: Reached target Hyprland session.
+2026-11-12T06:59:58.945243+07:00 x280 wpa_supplicant[509]: wlp59s0: SME: Trying to authenticate with <MAC-REDACTED> (SSID='azmi5G' freq=5745 MHz)
+2026-11-12T06:59:58.954530+07:00 x280 kernel: wlp59s0: authenticate with <MAC-REDACTED> (local address=<MAC-REDACTED>)
+2026-11-12T06:59:58.955204+07:00 x280 NetworkManager[458]: <info>  [1794441598.9551] device (wlp59s0): supplicant interface state: disconnected -> authenticating
+2026-11-12T06:59:58.955217+07:00 x280 NetworkManager[458]: <info>  [1794441598.9552] device (p2p-dev-wlp59s0): supplicant management interface state: disconnected -> authenticating
+2026-11-12T06:59:58.963384+07:00 x280 NetworkManager[458]: <info>  [1794441598.9633] device (wlp59s0): supplicant interface state: authenticating -> associating
+2026-11-12T06:59:58.963395+07:00 x280 NetworkManager[458]: <info>  [1794441598.9633] device (p2p-dev-wlp59s0): supplicant management interface state: authenticating -> associating
+2026-11-12T06:59:58.963529+07:00 x280 kernel: wlp59s0: authenticated
+2026-11-12T07:00:29.804103+07:00 x280 systemd[1]: Reached target Graphical Interface.
+2026-11-12T07:02:37.245710+07:00 x280 systemd[534]: Stopped target Hyprland session.
+2026-11-12T07:02:37.245866+07:00 x280 systemd[534]: Stopped target Current graphical user session.
+2026-11-12T07:02:37.246246+07:00 x280 systemd[534]: Stopped target Session services which should run early before the graphical session is brought up.
+2026-11-12T07:03:36.032420+07:00 x280 sudo[893]: pam_unix(sudo:session): session opened for user root(uid=0) by <USER>(uid=1000)
+2026-11-12T07:03:36.077928+07:00 x280 sudo[893]: pam_unix(sudo:session): session closed for user root
+2026-11-12T07:04:37.181166+07:00 x280 systemd[534]: Reached target Session services which should run early before the graphical session is brought up.
+2026-11-12T07:04:37.181421+07:00 x280 systemd[534]: Reached target Current graphical user session.
+2026-11-12T07:04:37.181666+07:00 x280 systemd[534]: Reached target Hyprland session.
+2026-11-12T07:04:39.337856+07:00 x280 systemd[534]: Stopped target Hyprland session.
+2026-11-12T07:04:39.338091+07:00 x280 systemd[534]: Stopped target Current graphical user session.
+2026-11-12T07:04:39.341671+07:00 x280 systemd[534]: Stopped target Session services which should run early before the graphical session is brought up.
+
+
+========== LOCK LIFECYCLE: DEPLOYMENT AND VISUAL SOURCE PROVENANCE ==========
+[No local lockscreen visual deployment log directory found]
+
+
+========== LOCK LIFECYCLE: NORMALIZED EVIDENCE TIMELINE ==========
+
+===== NORMALIZED LOCK LIFECYCLE TIMELINE =====
+Evidence status is literal: NOT_OBSERVED does not mean the event did not happen.
+Authentication and unlock events may be absent because PAM/locker logging is implementation-dependent.
+Desktop restoration cannot be proven retrospectively unless the compositor/session emits a correlated event.
+Timeline file: lifecycle-timeline.tsv
+Helper logs inspected: startup-20261112T000437Z-1083.log, startup-20261111T235958Z-608.log, startup-20261111T150212Z-1220.log, startup-20261111T150134Z-985.log, startup-20261111T150027Z-599.log, startup-20261111T145846Z-604.log, startup-20261111T143116Z-1217.log, startup-20261111T142906Z-601.log
+Journal query: available
+HELPER_STARTED: OBSERVED (8)
+CAELESTIA_IPC_READY: NOT_OBSERVED
+LOCK_REQUEST_ACCEPTED: NOT_OBSERVED
+LOCK_STATE_VERIFIED: NOT_OBSERVED
+LOCK_READINESS_MARKER_PUBLISHED: OBSERVED (3)
+CAELESTIA_IPC_TIMEOUT: OBSERVED (4)
+LOCK_STATE_TIMEOUT: NOT_OBSERVED
+HYPRLOCK_FALLBACK_STARTED: OBSERVED (4)
+HYPRLOCK_FALLBACK_EXITED: OBSERVED (3)
+AUTH_SUCCESS: NOT_OBSERVED
+AUTH_FAILURE: NOT_OBSERVED
+UNLOCK_EVENT: NOT_OBSERVED
+HYPRLAND_SESSION_START: OBSERVED (7)
+HYPRLAND_SESSION_STOP: OBSERVED (6)
+LOCK_SURFACE_VISIBLE: NOT_OBSERVED
+DESKTOP_RESTORED_AFTER_UNLOCK: NOT_OBSERVED
+Normalized lifecycle timeline: /home/kai/p/Lenovo-ThinkPad-X280-K41/reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261112T000433Z/lifecycle-timeline.tsv
+Timeline statuses describe collected evidence only; NOT_OBSERVED is not proof that an event did not occur.
+The collector cannot prove successful unlock or desktop restoration without correlated runtime telemetry.
+
+
+========== DIAGNOSTIC LIMITATIONS ==========
+- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command.
+- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.
+- Journal mungkin tidak dapat dibaca lengkap oleh user biasa; permission-denied dicatat sebagai keterbatasan.
+- Report menyimpan potongan log yang relevan dan metadata konfigurasi. Redaksi otomatis tidak menjamin seluruh data pribadi terhapus.
+- Salinan report tersanitasi dipublikasikan otomatis; redaksi tidak menjamin seluruh data privat terhapus, jadi tinjau report di GitHub dan hapus data sensitif bila ditemukan.
+- TTY2 fallback dapat merupakan konsekuensi eksplisit dari k41-plymouth-quit-after-lock.sh setelah timeout 75 detik; bukti journal menentukan apakah mekanisme itu yang berjalan.
+Report: reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261112T000433Z/report.txt
