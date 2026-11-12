@@ -216,10 +216,10 @@ deploy_origin_match = re.search(r'readonly upstream_url="([^"]+)"', deploy_text)
 deploy_revision_match = re.search(r'readonly upstream_revision="([^"]+)"', deploy_text)
 deploy_origin = deploy_origin_match.group(1) if deploy_origin_match else "<not parsed>"
 deploy_revision = deploy_revision_match.group(1) if deploy_revision_match else "<not parsed>"
-legacy_match = re.search(r'declare -Ar legacy_deployed_sha256=\\((.*?)\\)', deploy_text, re.S)
+legacy_match = re.search(r'declare -Ar legacy_deployed_sha256=\((.*?)\)', deploy_text, re.S)
 deploy_legacy_hashes = {}
 if legacy_match:
-    deploy_legacy_hashes = dict(re.findall(r'\\["([^"]+)\\"]="([0-9a-f]{64})"', legacy_match.group(1)))
+    deploy_legacy_hashes = dict(re.findall(r'\["([^"]+)"\]="([0-9a-f]{64})"', legacy_match.group(1)))
 add("Deployment legacy hashes parsed: " + str(len(deploy_legacy_hashes)))
 add("Audit pin:   " + expected_origin + " @ " + expected_revision)
 add("Deploy pin:  " + deploy_origin + " @ " + deploy_revision)
