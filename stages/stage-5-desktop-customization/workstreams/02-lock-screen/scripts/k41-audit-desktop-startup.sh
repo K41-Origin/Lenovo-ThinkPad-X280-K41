@@ -134,19 +134,58 @@ ps -eo pid,ppid,tty,stat,comm --sort=pid 2>/dev/null |
     redact >>"$report" || true
 
 section 'EXECUTABLE AND PACKAGE VERSIONS'
-for bin in start-hyprland Hyprland hyprland hyprctl caelestia qs quickshell hyprlock; do
+# start-hyprland is a session launcher, not a version-reporting utility.
+# Executing it with an assumed --version flag can start a real Hyprland session.
+# Record its path/package/hash only; never execute it from this read-only audit.
+for bin in Hyprland hyprland hyprctl caelestia qs quickshell hyprlock; do
     if have "$bin"; then
-        printf '%s: %s\n' "$bin" "$(command -v "$bin")" >>"$report"
+        printf '%s: %s\\n' "$bin" "$(command -v "$bin")" >>"$report"
         case "$bin" in
-            start-hyprland|Hyprland|hyprland|hyprctl|caelestia|qs|quickshell|hyprlock)
+            Hyprland|hyprland|hyprctl|caelestia|qs|quickshell|hyprlock)
                 if have timeout; then timeout 5s "$bin" --version 2>&1 | redact >>"$report" || true; fi
                 ;;
         esac
     else
-        printf '%s: NOT FOUND in PATH\n' "$bin" >>"$report"
+        printf '%s: NOT FOUND in PATH\\n' "$bin" >>"$report"
     fi
 done
 run 'INSTALLED RELEVANT PACKAGES' pacman -Q hyprland hyprland-git quickshell quickshell-git caelestia-shell caelestia-cli xorg-xwayland mesa qt6-wayland
+
+section 'START-HYPRLAND LAUNCHER — NON-EXECUTING INSPECTION'
+launcher_binary="$(command -v start-hyprland 2>/dev/null || true)"
+if [[ -n $launcher_binary && -x $launcher_binary ]]; then
+    printf 'Launcher binary: %s\\n' "$launcher_binary" | redact >>"$report"
+    stat -Lc 'type=%F mode=%A uid=%u gid=%g size=%s modified=%y' -- "$launcher_binary" 2>&1 | redact >>"$report" || true
+    if have sha256sum; then sha256sum "$launcher_binary" 2>&1 | redact >>"$report" || true; fi
+    run 'START-HYPRLAND PACKAGE OWNER' pacman -Qo "$launcher_binary"
+    note 'Launcher execution: NOT PERFORMED; start-hyprland is a session launcher and is never invoked by this audit.'
+else
+    note 'start-hyprland: NOT FOUND or not executable; launcher was not invoked.'
+fi
+
+launcher_source="$repo_root/stages/stage-5-desktop-customization/workstreams/01-boot-experience/scripts/k41-start-hyprland.sh"
+launcher_installed="$HOME/.local/bin/k41-start-hyprland"
+for pair in "REPOSITORY:$launcher_source" "INSTALLED:$launcher_installed"; do
+    label="${pair%%:*}"
+    file="${pair#*:}"
+    section "K41 LAUNCHER SOURCE: $label"
+    if [[ -f $file && ! -L $file && -r $file ]]; then
+        stat -c 'size=%s mode=%A uid=%u gid=%g modified=%y' "$file" 2>&1 | redact >>"$report" || true
+        if have sha256sum; then sha256sum "$file" 2>&1 | redact >>"$report" || true; fi
+        sed -n '1,240p' "$file" | redact >>"$report" || true
+    else
+        note '[missing, unreadable, symlinked, or not a regular file]'
+    fi
+done
+if [[ -f $launcher_source && ! -L $launcher_source && -f $launcher_installed && ! -L $launcher_installed ]]; then
+    if cmp -s "$launcher_source" "$launcher_installed"; then
+        note 'Installed K41 launcher byte comparison: MATCHES repository source.'
+    else
+        note 'Installed K41 launcher byte comparison: DIFFERS from repository source.'
+    fi
+else
+    note 'Installed K41 launcher byte comparison: NOT POSSIBLE (source or installed file missing/unsafe).'
+fi
 
 section 'K41 STARTUP AND LOCKSCREEN FILE METADATA'
 for path in \
@@ -353,11 +392,18 @@ for unit_file in \
         redact >>"$report" || true
 done
 
-section 'HYPRLAND STARTUP LOG'
+section 'HYPRLAND STARTUP LOG AND ROTATED PREVIOUS LOG'
 startup_log="$HOME/.local/state/k41/hyprland-startup.log"
-if [[ -f $startup_log && ! -L $startup_log ]]; then
-    tail -n 500 -- "$startup_log" | redact >>"$report" || true
-else note '[K41 Hyprland startup log missing]'; fi
+for file in "$startup_log" "$startup_log.1"; do
+    if [[ -f $file && ! -L $file && -r $file ]]; then
+        printf '\\n-- %s --\\n' "${file#"$HOME"/}" | redact >>"$report"
+        stat -c 'size=%s mode=%A uid=%u gid=%g modified=%y' "$file" 2>&1 | redact >>"$report" || true
+        if have sha256sum; then sha256sum "$file" 2>&1 | redact >>"$report" || true; fi
+        tail -n 800 -- "$file" | redact >>"$report" || true
+    else
+        printf 'MISSING_OR_UNSAFE %s\\n' "${file#"$HOME"/}" | redact >>"$report"
+    fi
+done
 
 section 'RECENT USER LOG FILES'
 for base in "$HOME/.local/state/k41" "$HOME/.local/state/caelestia" "$HOME/.local/state/quickshell" "$HOME/.local/share/hyprland" "$HOME/.local/share/caelestia" "$HOME/.cache/hyprland" "$HOME/.cache/caelestia" "$HOME/.cache/qs" "$HOME/.cache/quickshell"; do
@@ -380,7 +426,14 @@ run 'HYPRLAND INSTANCES' hyprctl instances
 run 'HYPRLAND VERSION VIA IPC' hyprctl version
 run 'HYPRLAND MONITORS' hyprctl monitors
 
-run 'START-HYPRLAND COREDUMP SUMMARY' coredumpctl info start-hyprland
+section 'START-HYPRLAND COREDUMP INVENTORY (READ-ONLY)'
+if have coredumpctl; then
+    coredumpctl list --no-pager 2>&1 |
+        grep -iE -C 2 'start-hyprland|Hyprland|quickshell|caelestia|hyprlock' |
+        redact >>"$report" || note '[No matching coredump entries or coredumpctl returned no data]'
+else
+    note '[coredumpctl unavailable]'
+fi
 
 section 'GRAPHICS DEVICE INVENTORY'
 run 'DRM DEVICE NODES' ls -l /dev/dri
