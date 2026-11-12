@@ -406,6 +406,92 @@ for tool_name in ("qmllint", "qmlformat", "qml"):
                 rc, value = run([tool_path, str(candidate)], timeout=20)
                 add(f"qmllint {label}: exit={rc}; {bounded(value, 1200)}")
 
+section("DEPLOYMENT PARITY AND FILE METADATA")
+def file_evidence(label, path):
+    if path.is_symlink():
+        add(f"{label}: REJECTED_SYMLINK")
+        return None
+    if not path.exists():
+        add(f"{label}: ABSENT")
+        return None
+    if not path.is_file():
+        add(f"{label}: NOT_REGULAR_FILE")
+        return None
+    try:
+        st = path.stat()
+        digest = __import__("hashlib").sha256(path.read_bytes()).hexdigest()
+        add(f"{label}: PRESENT; bytes={st.st_size}; mode={oct(st.st_mode & 0o777)}; owner_uid={st.st_uid}; mtime_epoch={int(st.st_mtime)}; sha256={digest}")
+        return digest
+    except OSError as exc:
+        add(f"{label}: READ_FAILED={type(exc).__name__}")
+        return None
+
+canonical_module = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
+runtime_module = qs_root / "k41/modules/topbar/Topbar.qml"
+canonical_hash = file_evidence("CANONICAL_TOPBAR_MODULE", canonical_module)
+runtime_hash = file_evidence("RUNTIME_TOPBAR_MODULE", runtime_module)
+if canonical_hash and runtime_hash:
+    add("module_content_matches_repository=" + ("yes" if canonical_hash == runtime_hash else "NO"))
+else:
+    add("module_content_matches_repository=unknown")
+host_hash = file_evidence("CAELESTIA_HOST_SHELL_QML", host_file)
+add("expected_runtime_host_path=" + short_path(host_file))
+add("expected_runtime_module_path=" + short_path(runtime_module))
+add("XDG_CONFIG_HOME_effective=" + short_path(xdg_config))
+add("XDG_CONFIG_HOME_env_set=" + ("yes" if os.environ.get("XDG_CONFIG_HOME") else "no"))
+
+section("ACTIVE QUICKSHELL PROCESS CONFIGURATION")
+active_qs = 0
+for proc in pathlib.Path("/proc").glob("[0-9]*"):
+    try:
+        comm = (proc / "comm").read_text(encoding="utf-8", errors="replace").strip()
+        if comm.lower() not in {"qs", "quickshell"} and "quickshell" not in comm.lower():
+            continue
+        active_qs += 1
+        raw = [x.decode("utf-8", "replace") for x in (proc / "cmdline").read_bytes().split(b"\\0") if x]
+        exe_path = pathlib.Path(os.readlink(proc / "exe")).name
+        config_arg = None
+        for index, arg in enumerate(raw[:-1]):
+            if arg in {"-c", "--config"}:
+                config_arg = raw[index + 1]
+                break
+        add(f"process: executable={exe_path[:100]}; config_argument={short_path(pathlib.Path(config_arg)) if config_arg else 'not-explicit'}")
+        try:
+            env_items = {}
+            for item in (proc / "environ").read_bytes().split(b"\\0"):
+                if b"=" not in item:
+                    continue
+                key, value = item.split(b"=", 1)
+                key = key.decode("utf-8", "replace")
+                if key in {"XDG_CONFIG_HOME", "QS_CONFIG_NAME"}:
+                    env_items[key] = value.decode("utf-8", "replace")
+            for key, value in sorted(env_items.items()):
+                rendered = short_path(pathlib.Path(value)) if key == "XDG_CONFIG_HOME" else bounded(value, 100)
+                add(f"  process_env_{key}={rendered}")
+        except OSError:
+            add("  process_environment=unavailable")
+    except (OSError, PermissionError):
+        continue
+add(f"active_quickshell_process_count={active_qs}")
+add("Only executable basename, explicit config selector, and two allowlisted environment variables are reported; PIDs and full arguments are excluded.")
+
+section("USER SERVICE MANAGER EVIDENCE")
+systemctl = shutil.which("systemctl")
+if systemctl:
+    rc, value = run([systemctl, "--user", "list-units", "--all", "--no-legend", "--no-pager"], timeout=10)
+    if rc == 0:
+        units = [line.strip() for line in value.splitlines()
+                 if re.search(r"quickshell|caelestia", line, re.I)]
+        add(f"systemd_user_query=success; matching_units={len(units)}")
+        for line in units[:20]:
+            # Unit names and load/active/sub states only; omit descriptions.
+            fields = line.split()
+            add("  " + " ".join(fields[:4])[:240])
+    else:
+        add(f"systemd_user_query=exit_{rc}; {bounded(value, 300)}")
+else:
+    add("systemctl: NOT_FOUND")
+
 section("RECENT QUICKSHELL/QML JOURNAL")
 journal = shutil.which("journalctl")
 if journal:
