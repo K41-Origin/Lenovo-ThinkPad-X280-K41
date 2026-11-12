@@ -22,6 +22,12 @@ grep -Fq 'timeout --signal=TERM --kill-after=3 15s qs -c caelestia' "$audit" ||
     fail 'audit Quickshell startup probe is not bounded'
 grep -Fq '[[ ! -S $wayland_socket ]]' "$audit" ||
     fail 'audit Quickshell startup probe does not validate the Wayland socket'
+grep -Fq 'decode("utf-8", errors="replace")' "$audit" ||
+    fail 'audit report does not safely normalize non-UTF-8 log output'
+grep -Fq 'Report UTF-8 normalization: PASS' "$audit" ||
+    fail 'audit report does not confirm UTF-8 normalization'
+grep -Fq 'refusing publication' "$audit" ||
+    fail 'audit collector does not refuse an empty report'
 [[ -s $config ]] || fail 'managed Hyprlock fallback config is missing'
 grep -Fq 'hyprlock --config "$hyprlock_config"' "$helper" || fail 'helper does not pass the managed config explicitly'
 grep -Fq 'hyprlock --config' "$helper" || fail 'explicit Hyprlock config argument missing'
