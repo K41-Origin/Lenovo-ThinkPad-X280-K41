@@ -109,7 +109,12 @@ chmod 0700 "$state_home/k41/backups/bottombar"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 backup_root="$state_home/k41/backups/bottombar/$stamp"
 suffix=0
-while ! mkdir -- "$backup_root" 2>/dev/null; do
+while :; do
+    if mkdir -- "$backup_root" 2>/dev/null; then
+        break
+    fi
+    [[ -e $backup_root || -L $backup_root ]] ||
+        die "Tidak dapat membuat direktori backup: $backup_root"
     suffix=$((suffix + 1))
     backup_root="$state_home/k41/backups/bottombar/$stamp-$suffix"
 done
