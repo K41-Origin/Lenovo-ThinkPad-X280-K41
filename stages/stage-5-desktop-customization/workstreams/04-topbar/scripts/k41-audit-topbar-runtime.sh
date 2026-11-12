@@ -49,7 +49,7 @@ chmod 0600 "$report"
 
 export K41_AUDIT_REPO="$repo_root" K41_AUDIT_REPORT="$report"
 python3 <<'PY'
-import hashlib, os, pathlib, re, shutil, subprocess
+import hashlib, os, pathlib, pwd, re, shutil, subprocess
 from datetime import datetime, timezone
 
 repo = pathlib.Path(os.environ["K41_AUDIT_REPO"])
@@ -58,7 +58,6 @@ config_home = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", str(home / ".config
 qs_root = config_home / "quickshell"
 host = qs_root / "caelestia" / "shell.qml"
 module = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
-source_host = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/fixtures/caelestia/shell.qml"
 source_module = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
 out = []
 
@@ -73,7 +72,8 @@ def run(args, timeout=12):
         return 127, type(e).__name__
 def redact(s):
     s = str(s).replace(str(home), "<HOME>")
-    user = os.environ.get("USER", "")
+    try: user = pwd.getpwuid(os.getuid()).pw_name
+    except KeyError: user = os.environ.get("USER", "")
     if user:
         s = re.sub(r"(?<![A-Za-z0-9_.-])"+re.escape(user)+r"(?![A-Za-z0-9_.-])", "<USER>", s)
     s = re.sub(r"(?i)\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\b([=: ]+)[^\s,;]+", r"\1\2<REDACTED>", s)
