@@ -176,7 +176,7 @@ Collector telah diperbaiki:
 - Coredump diperiksa melalui inventory read-only, bukan dengan menjalankan launcher.
 - Regression test memastikan daftar executable version probe tidak mencakup `start-hyprland`.
 
-Report lama tetap menjadi artefak historis, tetapi session event yang muncul selama audit tersebut harus dianggap **CONTAMINATED BY AUDIT SIDE EFFECT**. Gunakan report baru yang dibuat oleh collector setelah perbaikan untuk diagnosis berikutnya. Koreksi ini tidak membuktikan penyebab kegagalan lock startup dan tidak mengubah status runtime X280 yang masih **NOT VERIFIED**.
+Report lama tetap menjadi artefak historis, tetapi session event yang muncul selama audit tersebut harus dianggap **CONTAMINATED BY AUDIT SIDE EFFECT**. Gunakan report baru yang dibuat oleh collector setelah perbaikan untuk diagnosis berikutnya. Koreksi ini tidak membuktikan penyebab kegagalan lock startup dan tidak mengubah status runtime X280 yang masih **NOT VERIFIED**. Selain itu, parser timeline lama hanya mencari sinyal autentikasi/unlock di journal PAM. Report tersebut juga menyimpan stdout/stderr Hyprlock di helper log, termasuk pesan `auth: authenticated for hyprlock` dan `Unlocked, exiting!`; karena sumber ini belum diparsing, label `AUTH_SUCCESS`/`UNLOCK_EVENT: NOT_OBSERVED` pada report lama tidak membuktikan autentikasi atau unlock gagal. Parser baru menambahkan event terpisah `HYPRLOCK_AUTH_SUCCESS`, `HYPRLOCK_AUTH_FAILURE`, `HYPRLOCK_UNLOCK_CONFIRMED`, dan `HYPRLOCK_CONFIG_ERROR`. Timestamp akan ditulis `UNKNOWN` bila Hyprlock sendiri tidak menyediakan timestamp; jangan mengarang waktu dari urutan log.
 
 ### Batas status
 
