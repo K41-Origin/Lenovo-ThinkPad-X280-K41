@@ -12,15 +12,15 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
-| 3 | 04 | [Bottombar](04-BOTTOMBAR.md) | COMPLETED / USER CONFIRMED SUCCESS |
+| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | COMPLETED / USER CONFIRMED SUCCESS |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
 | 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
 
-Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Karena itu, Bottombar menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen.
+Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen.
 
-ID workstream adalah identitas komponen yang stabil, bukan nomor urutan pengerjaan. Urutan pada tabel adalah urutan eksekusi; nomor ID tidak perlu dibuat berurutan atau diubah hanya untuk menghilangkan celah. Hanya workstream yang tercantum pada tabel yang termasuk roadmap Stage 5 aktif.
+ID workstream adalah identitas komponen. Bottombar kini ditetapkan sebagai ID 03 setelah Guest Mode diarsipkan; ID 04 tidak digunakan pada roadmap aktif. ID 05–08 dipertahankan agar referensi komponen yang sudah ada tidak berubah. Urutan pada tabel adalah urutan eksekusi. Hanya workstream yang tercantum pada tabel yang termasuk roadmap Stage 5 aktif.
 
 ## Prinsip penyimpanan dan ownership
 
@@ -33,7 +33,7 @@ ID workstream adalah identitas komponen yang stabil, bukan nomor urutan pengerja
 
 ## Peta implementasi repository
 
-Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Source, installer, dan batas acceptance Workstream 04 dicatat di [Bottombar](04-BOTTOMBAR.md); detail implementasi tersedia di [Bottombar — Implementation](04-BOTTOMBAR-IMPLEMENTATION.md).
+Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Source, installer, dan batas acceptance Workstream 03 dicatat di [Bottombar](03-BOTTOMBAR.md); detail implementasi tersedia di [Bottombar — Implementation](03-BOTTOMBAR-IMPLEMENTATION.md).
 
 ## Alur kolaborasi dan verifikasi
 
