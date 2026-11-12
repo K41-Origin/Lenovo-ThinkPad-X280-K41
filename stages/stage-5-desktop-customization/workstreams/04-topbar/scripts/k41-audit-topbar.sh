@@ -336,42 +336,92 @@ else:
 section("ACTIVE QUICKSHELL CONFIGURATION AND HOST INTEGRATION")
 home = pathlib.Path.home()
 xdg_config = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", str(home / ".config")))
-qs_user_root = xdg_config / "quickshell"
-expected_host = qs_user_root / "caelestia" / "shell.qml"
-k41_module = qs_user_root / "k41" / "modules" / "topbar" / "Topbar.qml"
+qs_root = xdg_config / "quickshell"
+host_file = qs_root / "caelestia" / "shell.qml"
+module_file = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
 
-def display_path(path):
-    try:
-        value = str(path)
-        home_value = str(home)
-        if value == home_value or value.startswith(home_value + os.sep):
-            return "~" + value[len(home_value):]
-        return value
-    except Exception:
-        return "[path unavailable]"
+def short_path(path):
+    value = str(path)
+    home_value = str(home)
+    if value == home_value or value.startswith(home_value + os.sep):
+        return "~" + value[len(home_value):]
+    return value
 
-def inspect_host(path, label):
-    add(f"{label}: {'present' if path.is_file() and not path.is_symlink() else 'absent_or_not_regular'}")
+def inspect_qml_file(path, label):
     if not path.is_file() or path.is_symlink():
+        add(f"{label}: absent_or_not_regular")
         return
     try:
-        if path.stat().st_size > 1024 * 1024:
-            add(f"{label}: skipped; file exceeds 1 MiB")
-            return
         lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        size = path.stat().st_size
     except OSError as exc:
-        add(f"{label}: read failed ({type(exc).__name__})")
+        add(f"{label}: read_failed={type(exc).__name__}")
         return
-    def line_of(pattern):
-        for number, line in enumerate(lines, 1):
-            if re.search(pattern, line):
-                return number
-        return None
-    root_line = line_of(r"^\s*ShellRoot\s*\{\s*$")
-    id_line = line_of(r"^\s*id\s*:\s*root\s*$")
-    watch_line = line_of(r"^\s*settings\.watchFiles\s*:\s*true\s*$")
-    import_lines = [i for i, line in enumerate(lines, 1)
-                    if re.search(r'^\s*import\s+"\.\./k41/modules/topbar"\s+as\s+K41Topbar\s*
+    def positions(value):
+        return [i for i, line in enumerate(lines, 1) if line.strip() == value]
+    roots = positions("ShellRoot {")
+    root_ids = positions("id: root")
+    imports = [i for i, line in enumerate(lines, 1)
+               if line.strip() == 'import "../k41/modules/topbar" as K41Topbar']
+    instances = positions("K41Topbar.Topbar {}")
+    watch = positions("settings.watchFiles: true")
+    add(f"{label}: present; bytes={size}; sha256={__import__('hashlib').sha256(path.read_bytes()).hexdigest()[:16]}")
+    add(f"{label} structure: ShellRoot={roots}; id-root={root_ids}; watchFiles={watch}")
+    add(f"{label} integration: imports={imports}; instances={instances}")
+    if root_ids and instances:
+        add(f"{label} instance-before-id-root={'yes' if instances[0] < root_ids[0] else 'no'}")
+    else:
+        add(f"{label} instance-before-id-root=unknown")
+
+inspect_qml_file(host_file, "EXPECTED_CAelestia_HOST")
+inspect_qml_file(module_file, "DEPLOYED_K41_TOPBAR")
+
+section("ACTIVE QUICKSHELL PROCESS")
+process_count = 0
+for proc in pathlib.Path("/proc").glob("[0-9]*"):
+    try:
+        comm = (proc / "comm").read_text(encoding="utf-8", errors="replace").strip()
+        if "quickshell" not in comm.lower() and comm.lower() != "qs":
+            continue
+        process_count += 1
+        raw_args = [x.decode("utf-8", "replace") for x in (proc / "cmdline").read_bytes().split(b"\\0") if x]
+        selected = None
+        for index, arg in enumerate(raw_args[:-1]):
+            if arg in ("-c", "--config"):
+                selected = raw_args[index + 1]
+                break
+        add(f"process: name={comm[:80]}; explicit-config={short_path(pathlib.Path(selected)) if selected else 'not_specified'}")
+    except OSError:
+        continue
+if process_count == 0:
+    add("No Quickshell/qs process observed.")
+
+section("QML VALIDATION TOOLING")
+for tool_name in ("qmllint", "qmlformat", "qml"):
+    tool_path = shutil.which(tool_name)
+    add(f"{tool_name}: {'available' if tool_path else 'NOT_FOUND'}")
+    if tool_name == "qmllint" and tool_path:
+        for label, candidate in (("host", host_file), ("module", module_file)):
+            if candidate.is_file() and not candidate.is_symlink():
+                rc, value = run([tool_path, str(candidate)], timeout=20)
+                add(f"qmllint {label}: exit={rc}; {bounded(value, 1200)}")
+
+section("RECENT QUICKSHELL/QML JOURNAL")
+journal = shutil.which("journalctl")
+if journal:
+    rc, value = run([journal, "--user", "-b", "--no-pager", "-n", "300"], timeout=12)
+    if rc == 0:
+        matches = [line for line in value.splitlines()
+                   if any(token in line.lower() for token in ("quickshell", "qml", "k41topbar", "topbar"))]
+        add(f"journal query: exit=0; matching-lines={len(matches)}")
+        for line in matches[-25:]:
+            add("  " + bounded(line.replace(str(home), "~"), 360))
+    else:
+        add(f"journal query: exit={rc}; {bounded(value, 400)}")
+else:
+    add("journalctl: NOT_FOUND")
+
+section("K41 IMPLEMENTATION REFERENCES")
 ws = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar"
 for rel in ("modules", "scripts", "tests", "docs"):
     path = ws / rel
