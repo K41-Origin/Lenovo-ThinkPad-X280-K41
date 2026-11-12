@@ -473,7 +473,7 @@ for proc in pathlib.Path("/proc").glob("[0-9]*"):
     except (OSError, PermissionError):
         continue
 add(f"active_quickshell_process_count={active_qs}")
-add("Only executable basename, explicit config selector, and two allowlisted environment variables are reported; PIDs and full arguments are excluded.")
+add("Only executable basename, explicit config selector, and two allowlisted environment variables are reported; PIDs and full command lines are excluded.")
 
 section("USER SERVICE MANAGER EVIDENCE")
 systemctl = shutil.which("systemctl")
@@ -530,7 +530,7 @@ add("Notification interaction: icon click opens a notification tray/panel; tray 
 add("Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.")
 add("This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.")
 add("QML discovery is a bounded static scan; candidate relative paths and recognized identifiers are leads, not proof of the active entry point.")
-add("Configuration source contents, source lines, comments, literals, process arguments, environment variables, serial numbers, and absolute home paths are never published.")
+add("Configuration source contents, source lines, comments, literals, full process command lines, non-allowlisted environment variables, serial numbers, and absolute home paths are never published. Only the explicit Quickshell config selector and allowlisted XDG_CONFIG_HOME/QS_CONFIG_NAME values are reported.")
 add("Review findings before writing the separate implementation/deployment script.")
 report.write_text("\n".join(out) + "\n", encoding="utf-8")
 print(f"Private audit report created; bytes={report.stat().st_size}")
