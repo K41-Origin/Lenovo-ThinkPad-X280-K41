@@ -45,4 +45,4 @@ Audit harus read-only. Penyiapan/deployment adalah langkah terpisah yang melakuk
 
 ## Status dan urutan
 
-Lihat [docs/06-STATUS.md](../../docs/06-STATUS.md) untuk status tunggal proyek dan [indeks workstream](docs/README.md) untuk rincian tiap fitur.
+Lihat [docs/06-STATUS.md](../../docs/06-STATUS.md) untuk status tunggal proyek dan [indeks workstream](docs/README.md) untuk rincian tiap fitur. Workstream 09 — Clean up Caelestia merupakan pekerjaan terakhir setelah seluruh workstream komponen Stage 5 selesai dan diterima.
