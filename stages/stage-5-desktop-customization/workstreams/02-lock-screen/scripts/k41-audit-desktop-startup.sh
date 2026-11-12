@@ -140,14 +140,14 @@ section 'EXECUTABLE AND PACKAGE VERSIONS'
 # Record its path/package/hash only; never execute it from this read-only audit.
 for bin in Hyprland hyprland hyprctl caelestia qs quickshell hyprlock; do
     if have "$bin"; then
-        printf '%s: %s\\n' "$bin" "$(command -v "$bin")" >>"$report"
+        printf '%s: %s\n' "$bin" "$(command -v "$bin")" >>"$report"
         case "$bin" in
             Hyprland|hyprland|hyprctl|caelestia|qs|quickshell|hyprlock)
                 if have timeout; then timeout 5s "$bin" --version 2>&1 | redact >>"$report" || true; fi
                 ;;
         esac
     else
-        printf '%s: NOT FOUND in PATH\\n' "$bin" >>"$report"
+        printf '%s: NOT FOUND in PATH\n' "$bin" >>"$report"
     fi
 done
 run 'INSTALLED RELEVANT PACKAGES' pacman -Q hyprland hyprland-git quickshell quickshell-git caelestia-shell caelestia-cli xorg-xwayland mesa qt6-wayland
@@ -155,7 +155,7 @@ run 'INSTALLED RELEVANT PACKAGES' pacman -Q hyprland hyprland-git quickshell qui
 section 'START-HYPRLAND LAUNCHER — NON-EXECUTING INSPECTION'
 launcher_binary="$(command -v start-hyprland 2>/dev/null || true)"
 if [[ -n $launcher_binary && -x $launcher_binary ]]; then
-    printf 'Launcher binary: %s\\n' "$launcher_binary" | redact >>"$report"
+    printf 'Launcher binary: %s\n' "$launcher_binary" | redact >>"$report"
     stat -Lc 'type=%F mode=%A uid=%u gid=%g size=%s modified=%y' -- "$launcher_binary" 2>&1 | redact >>"$report" || true
     if have sha256sum; then sha256sum "$launcher_binary" 2>&1 | redact >>"$report" || true; fi
     run 'START-HYPRLAND PACKAGE OWNER' pacman -Qo "$launcher_binary"
@@ -214,7 +214,7 @@ else note '[~/.bash_profile unavailable]'; fi
 section 'HYPRLAND CONFIG STARTUP INTEGRATION'
 for config_file in "$HOME/.config/hypr/hyprland.conf" "$HOME/.config/hypr/hyprland.lua"; do
     [[ -r $config_file && ! -L $config_file ]] || continue
-    printf '\\n-- %s --\\n' "${config_file#"$HOME"/}" | redact >>"$report"
+    printf '\n-- %s --\n' "${config_file#"$HOME"/}" | redact >>"$report"
     grep -nEi -C 4 'exec-once|exec[[:space:]]*=|caelestia|quickshell|(^|[[:space:]])qs([[:space:]]|$)|k41-boot-splash|hyprland\\.start|lock-caelestia' "$config_file" |
         redact >>"$report" || note "[no matching startup directives in ${config_file#"$HOME"/}]"
 done
@@ -317,7 +317,7 @@ for file in \
 done
 
 section 'IMPLEMENTATION INPUTS: ACTIVE SESSION AND PROCESS CONTEXT'
-printf 'Audit context: tty=%s; XDG_SESSION_TYPE=%s; WAYLAND_DISPLAY=%s; HYPRLAND_INSTANCE_SIGNATURE=%s; XDG_RUNTIME_DIR=%s\\n' \
+printf 'Audit context: tty=%s; XDG_SESSION_TYPE=%s; WAYLAND_DISPLAY=%s; HYPRLAND_INSTANCE_SIGNATURE=%s; XDG_RUNTIME_DIR=%s\n' \
     "$(tty 2>/dev/null || printf unknown)" "${XDG_SESSION_TYPE:-absent}" "${WAYLAND_DISPLAY:-absent}" \
     "${HYPRLAND_INSTANCE_SIGNATURE:+present}" "${XDG_RUNTIME_DIR:-absent}" | redact >>"$report"
 if have loginctl; then
@@ -388,7 +388,7 @@ for unit_file in \
     /etc/systemd/system/k41-plymouth-release.service.d/*.conf \
     /etc/systemd/system/getty@tty1.service.d/k41-autologin.conf; do
     [[ -f $unit_file && ! -L $unit_file ]] || continue
-    printf '\\n-- %s --\\n' "$unit_file" | redact >>"$report"
+    printf '\n-- %s --\n' "$unit_file" | redact >>"$report"
     grep -nE '^[[:space:]]*(Description|Type|User|Group|ExecStart|ExecStartPre|ExecStartPost|ExecStop|After|Before|Wants|Requires|WantedBy|PartOf|TimeoutStartSec|Restart|RestartSec)[[:space:]]*=' "$unit_file" |
         redact >>"$report" || true
 done
@@ -397,12 +397,12 @@ section 'HYPRLAND STARTUP LOG AND ROTATED PREVIOUS LOG'
 startup_log="$HOME/.local/state/k41/hyprland-startup.log"
 for file in "$startup_log" "$startup_log.1"; do
     if [[ -f $file && ! -L $file && -r $file ]]; then
-        printf '\\n-- %s --\\n' "${file#"$HOME"/}" | redact >>"$report"
+        printf '\n-- %s --\n' "${file#"$HOME"/}" | redact >>"$report"
         stat -c 'size=%s mode=%A uid=%u gid=%g modified=%y' "$file" 2>&1 | redact >>"$report" || true
         if have sha256sum; then sha256sum "$file" 2>&1 | redact >>"$report" || true; fi
         tail -n 800 -- "$file" | redact >>"$report" || true
     else
-        printf 'MISSING_OR_UNSAFE %s\\n' "${file#"$HOME"/}" | redact >>"$report"
+        printf 'MISSING_OR_UNSAFE %s\n' "${file#"$HOME"/}" | redact >>"$report"
     fi
 done
 
@@ -635,7 +635,7 @@ with timeline_path.open("w", encoding="utf-8") as out:
             out.write(f"{name}\tNOT_INSTRUMENTED\tUNKNOWN\tUNKNOWN\tNo reliable event source currently emits this event\n")
         elif matches:
             for stamp, source, evidence in matches:
-                safe = evidence.replace("\\t", " ").replace("\\n", " ")
+                safe = evidence.replace("\t", " ").replace("\n", " ")
                 home = os.environ.get("HOME", "")
                 if home and home != "/":
                     safe = safe.replace(home, "<HOME>")
