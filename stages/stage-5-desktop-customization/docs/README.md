@@ -12,7 +12,7 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
-| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | COMPLETED / USER CONFIRMED SUCCESS |
+| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **AUDIT IN PROGRESS** |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
@@ -33,7 +33,7 @@ ID workstream adalah identitas komponen. Bottombar kini ditetapkan sebagai ID 03
 
 ## Peta implementasi repository
 
-Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Source, installer, dan batas acceptance Workstream 03 dicatat di [Bottombar](03-BOTTOMBAR.md); detail implementasi tersedia di [Bottombar — Implementation](03-BOTTOMBAR-IMPLEMENTATION.md).
+Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Workstream 03 — Bottombar sedang berstatus **AUDIT IN PROGRESS**. Implementasi historis tetap dipertahankan selama audit; jangan melakukan deployment, migrasi, atau perubahan runtime sebelum audit dan rencana refactoring disetujui. Temuan dan acceptance baru akan dicatat di [Bottombar](03-BOTTOMBAR.md); detail implementasi lama tersedia di [Bottombar — Implementation](03-BOTTOMBAR-IMPLEMENTATION.md).
 
 ## Alur kolaborasi dan verifikasi
 
