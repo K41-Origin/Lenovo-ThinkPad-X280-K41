@@ -300,3 +300,29 @@ Pengguna menyampaikan bahwa reboot diperlukan untuk melihat perubahan yang telah
 6. Catat hasil aktual. Jika panel tetap tidak tampil, kumpulkan log runtime sebelum mengubah source atau melakukan restart tambahan.
 
 Jangan menganggap reboot saja sebagai bukti keberhasilan. Gate WS04 tetap memerlukan observasi runtime dan penerimaan pengguna.
+
+## Runtime audit terarah — 13 November 2026
+
+Untuk menindaklanjuti error QML setelah reboot, tersedia collector terpisah yang mengikuti pola audit startup WS02:
+
+`workstreams/04-topbar/scripts/k41-audit-topbar-runtime.sh`
+
+Jalankan sebagai user desktop biasa, dari TTY maupun terminal desktop, pada branch `main`:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audit-topbar-runtime.sh
+```
+
+Audit mengumpulkan:
+- Versi Quickshell, Caelestia, Hyprland, paket Qt, serta ketersediaan `qmllint`.
+- Isi dan SHA-256 host `shell.qml`, module Topbar runtime, dan source canonical K41; termasuk deteksi namespace lama `K41.Topbar.Topbar`.
+- Selector konfigurasi dan environment allowlisted dari proses Quickshell aktif tanpa merekam PID, command line lengkap, atau seluruh environment.
+- Inventaris instance Quickshell, log Caelestia, Hyprland config errors, monitor, service user, dan journal boot/session yang relevan.
+- Pemeriksaan `qmllint` bila tersedia; audit tidak memasang dependency.
+
+Laporan lengkap disimpan privat di `~/.local/state/k41/topbar/runtime-audits/<timestamp>/report.txt` dengan permission terbatas. Salinan yang disanitasi dipublikasikan melalui temporary independent clone ke `reports/stage-5-desktop-customization/04-topbar/runtime-audits/<timestamp>/`. Publisher tidak melakukan fetch, checkout, atau operasi worktree pada Git metadata checkout aktif. Jika publikasi gagal, report lokal dipertahankan dan script keluar non-zero.
+
+Audit ini read-only: tidak menjalankan Quickshell baru, tidak melakukan reload/restart, tidak menjalankan deployer, dan tidak mengubah package, service, maupun konfigurasi. Sanitasi otomatis tidak menjamin semua data sensitif terhapus; periksa report publik setelah audit. Jalankan dari TTY setelah kegagalan startup agar log boot dan konfigurasi yang bermasalah tetap tersedia.
+
+Regression guard: `stages/stage-5-desktop-customization/tests/test-topbar-runtime-audit.sh`, terdaftar pada `tests/run.sh`. Penambahan test belum berarti test telah dijalankan pada X280.
+
