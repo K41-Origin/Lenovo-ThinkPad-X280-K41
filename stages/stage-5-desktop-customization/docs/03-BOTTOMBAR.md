@@ -141,7 +141,7 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 ## Validasi, status, dan acceptance
 
 - Baseline QML dan installer historis telah diperiksa secara statis dari GitHub.
-- Audit script baru telah ditambahkan ke repository; eksekusi di ThinkPad X280 dan hasil report belum tersedia.
+- Audit script menggunakan publisher otomatis melalui independent clone; validasi statis publisher telah ditambahkan ke test suite. Eksekusi pada ThinkPad X280 dan hasil report aktual belum tersedia.
 - Dependency/API audit lengkap, desain arsitektur, implementasi, cleanup, QML runtime test, dan regression masih PLANNED.
 - Workstream tetap **AUDIT IN PROGRESS** sampai report aktual ditinjau dan arsitektur disetujui.
 
