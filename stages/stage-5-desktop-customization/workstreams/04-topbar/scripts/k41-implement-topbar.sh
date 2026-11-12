@@ -36,7 +36,7 @@ for contract in \
     'ShellState.forScreen(modelData)'; do
     grep -Fq -- "$contract" "$source_file" || die "Kontrak backend Topbar tidak lengkap: $contract"
 done
-if grep -Eq '/proc/(stat|meminfo)|/sys/class/power_supply|new Date\\(|Timer[[:space:]]*\\{|NotificationServer|trayWindow' "$source_file"; then
+if grep -Eq '/proc/(stat|meminfo)|/sys/class/power_supply|new Date\(|Timer[[:space:]]*\{|NotificationServer|trayWindow' "$source_file"; then
     die 'Provider/polling duplikat terdeteksi pada Topbar.qml.'
 fi
 
