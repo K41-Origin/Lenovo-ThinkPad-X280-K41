@@ -1,6 +1,6 @@
 # Workstream 03 — Bottombar
 
-**Status: AUDIT IN PROGRESS.** Tahap ini menetapkan workflow tiga script dan memperbarui alat audit. Refactoring komponen, deployment, dan cleanup runtime belum dilakukan atau diotorisasi.
+**Status: IMPLEMENTATION SCRIPT IMPLEMENTED — TEST PENDING.** Audit aktual X280 telah ditinjau. Source kanonis Bottombar dan script install/repair sudah ditambahkan; pengujian fixture dan runtime pada X280 masih harus dijalankan.
 
 Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan kerja mengikuti Workstream 02, tetapi implementasi Bottombar tetap disesuaikan dengan hasil audit dan kontrak Quickshell/Caelestia yang benar-benar terverifikasi.
 
@@ -20,10 +20,10 @@ Urutan pengerjaan mengikuti pola Workstream 02. Ketiga script memiliki ownership
 | Urutan | Script | Tanggung jawab | Status |
 |---:|---|---|---|
 | 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — audit diperbarui; eksekusi pada X280 menunggu** |
-| 2 | `scripts/k41-implement-bottombar.sh` | Preflight dan implementasi/deployment modul K41 berdasarkan keputusan arsitektur yang disetujui; backup, atomic staging, verifikasi, log, dan automatic rollback. | PLANNED |
+| 2 | `scripts/k41-implement-bottombar.sh` | Satu operasi: memasang atau memperbaiki modul QML Bottombar. Backup privat, atomic replacement, verifikasi, dan automatic rollback adalah mekanisme keselamatan operasi tersebut; tidak mengelola host integration/configuration. | **IMPLEMENTED — TEST PENDING** |
 | 3 | `scripts/k41-cleanup-bottombar.sh` | Audit target cleanup, dry-run, backup, penghapusan/nonaktifkan komponen yang disetujui, verifikasi, dan rollback. | PLANNED |
 
-Script ditempatkan di `stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/`. Source QML kanonis dan path runtime final belum dipindahkan/ditetapkan; jangan menyimpulkan bahwa path legacy otomatis menjadi arsitektur target.
+Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.Qml`. Script berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/`.
 
 ### Tahap 1 — Audit dan pengumpulan bukti
 
@@ -65,20 +65,42 @@ Sebelum publikasi, script membuat salinan UTF-8 tersanitasi yang mengganti home/
 
 **Acceptance tahap audit:** report lengkap tersedia; setiap target/source runtime diklasifikasikan; dependency/API dan integration map memiliki bukti; unknown/missing data ditandai; tidak ada perubahan runtime atau Git checkout.
 
-### Tahap 2 — Implementasi
+### Tahap 2 — Implementasi modul
 
-Script implementasi baru dibuat setelah report audit ditinjau dan arsitektur target disetujui. Tanggung jawab minimal:
+Source kanonis:
 
-1. Validasi user/session, versi, dependency, repository, source, dan target.
-2. Tolak symlink, ownership/path ambigu, serta file lokal yang tidak dikenal atau berubah.
-3. Pastikan kontrak host-loading dan konfigurasi yang dibutuhkan berdasarkan hasil audit.
-4. Buat backup/checksum manifest sebelum mutasi pertama.
-5. Stage file dan gunakan atomic replacement jika sesuai.
-6. Verifikasi seluruh hasil; lakukan automatic rollback jika tahapan deployment gagal.
-7. Simpan log privat dan sediakan check/dry-run tanpa mutasi.
-8. Idempotent saat dijalankan ulang; tidak reload/restart shell kecuali perilaku tersebut disetujui dan diuji.
+```text
+workstreams/03-bottombar/modules/bottombar/Dock.Qml
+```
 
-Tidak boleh mengimplementasikan berdasarkan asumsi namespace `~/.config/quickshell/k41/` atau mengubah `shell.qml`/`shell.json` sebelum kebutuhan dan API loading dibuktikan.
+Jalankan dari Git checkout sebagai user desktop biasa:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/03-bottombar/scripts/k41-implement-bottombar.sh
+```
+
+Script hanya memiliki satu operasi: memasang atau memperbaiki modul. Tidak ada mode `--check`, `--rollback`, cleanup, package management, atau service management.
+
+**Pemetaan source ke runtime:** audit membuktikan bahwa Caelestia `shell.qml` saat ini mengimpor `modules/k41dock` sebagai `K41Dock` dan membuat `K41Dock.K41Dock {}`. Agar host contract yang sudah berjalan tetap kompatibel tanpa mengubah file host, source `Dock.Qml` dipasang dengan nama runtime:
+
+```text
+~/.config/quickshell/caelestia/modules/k41dock/K41Dock.qml
+```
+
+Nama file runtime `K41Dock.qml` dipertahankan karena nama tersebut menyediakan tipe QML `K41Dock` yang dipakai oleh import/instance Caelestia. Source repository tetap menggunakan struktur baru `modules/bottombar/Dock.Qml`.
+
+Perilaku script:
+- Menolak root/sumber/target symlink, path tidak aman, dan file yang bukan regular file.
+- Memastikan user runtime Caelestia dan host import/instance yang ditemukan audit tersedia.
+- Tidak mengubah `shell.qml`, `shell.json`, konfigurasi system-wide, paket, atau service.
+- Jika source dan target sudah sama, berhenti tanpa perubahan.
+- Jika target berbeda, membuat backup privat dan manifest checksum sebelum atomic replacement.
+- Memverifikasi hasil; kegagalan setelah perubahan memicu pemulihan otomatis dari backup.
+- Tidak me-reload atau me-restart Quickshell.
+
+Backup disimpan di `$XDG_STATE_HOME/k41/backups/bottombar/<timestamp>/` (atau `~/.local/state/...` jika XDG_STATE_HOME tidak disetel). File backup dan manifest berada di direktori privat.
+
+Script tidak mengedit integrasi host. Jika host import/instance berbeda dari hasil audit, script berhenti; jangan memperluas tanggung jawabnya untuk mengubah Caelestia.
 
 ### Tahap 3 — Cleanup
 
@@ -130,7 +152,7 @@ Test plan minimum:
 - Bash syntax dan ShellCheck.
 - Audit tidak mengubah HEAD, branch, index, tracked worktree, atau menulis report ke checkout.
 - Path symlink, ownership salah, HOME/XDG path tidak aman, dependency hilang, dan source/runtime tidak tersedia.
-- Installer check/dry-run, install, failure injection, automatic rollback, rollback manual jika disediakan, dan idempotensi.
+- Installer install/repair, failure injection, automatic rollback, idempotensi, serta verifikasi bahwa `shell.qml` dan `shell.json` tidak berubah.
 - QML lint/compile terhadap versi runtime yang dipin.
 - Workspace switch, hover, fullscreen, monitor, reload, dan regression komponen Caelestia.
 - Resource usage dan stabilitas yang relevan.
@@ -148,9 +170,10 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 
 ## Validasi, status, dan acceptance
 
-- Baseline QML dan installer historis telah diperiksa secara statis dari GitHub.
-- Audit script menggunakan publisher otomatis melalui independent clone; validasi statis publisher telah ditambahkan ke test suite. Eksekusi pada ThinkPad X280 dan hasil report aktual belum tersedia.
-- Dependency/API audit lengkap, desain arsitektur, implementasi, cleanup, QML runtime test, dan regression masih PLANNED.
-- Workstream tetap **AUDIT IN PROGRESS** sampai report aktual ditinjau dan arsitektur disetujui.
+- Report audit aktual X280 tersedia di `reports/stage-5-desktop-customization/03-bottombar/audits/20261112T164446Z/` dan telah ditinjau.
+- Source kanonis `modules/bottombar/Dock.Qml` dan script install/repair telah ditambahkan.
+- Automated fixture test telah ditambahkan ke `tests/run.sh`; eksekusinya belum diklaim.
+- QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
+- Cleanup script tetap PLANNED dan tidak menjadi bagian dari installer.
 
-Sebelum script implementasi dibuat, harus tersedia: (1) report audit X280, (2) dependency/integration map, (3) keputusan source/runtime ownership dan host contract, (4) daftar target dan perubahan, (5) strategi backup/rollback/logging, serta (6) acceptance dan test plan. Penutupan workstream mencatat IMPLEMENTED, TESTED, VERIFIED, dan penerimaan pengguna secara terpisah.
+Acceptance berikutnya: jalankan fixture test, ShellCheck, lalu installer pada X280 dan verifikasi perilaku visual/interaksi. Catat IMPLEMENTED, TESTED, VERIFIED, dan penerimaan pengguna secara terpisah.
