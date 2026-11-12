@@ -275,17 +275,9 @@ Backup runtime tidak di-commit. Catat lokasi backup, checksum/manifest, target p
 Workstream 04 hanya dapat ditutup setelah acceptance criteria ditinjau dan pengguna menyatakan menerima hasil, atau pengguna secara eksplisit menyetujui pengecualian yang dicatat. Setelah itu lanjut ke [Workstream 05 — Launcher](05-LAUNCHER.md). Cleanup Caelestia tetap ditunda sampai seluruh workstream komponen selesai dan diterima.
 
 
-## Target arsitektur mandiri — keputusan 13 November 2026
+## Catatan perubahan arsitektur — 13 November 2026
 
-Target WS04 diperbarui: K41 Topbar akan berjalan dari konfigurasi Quickshell milik K41 sendiri, dengan entry point terpisah (misalnya `~/.config/quickshell/k41/shell.qml`). Topbar tidak lagi membutuhkan import, instance, `ShellState`, `Notifs`, `Time`, atau service internal Caelestia. Script deployer final tidak boleh mengedit `~/.config/quickshell/caelestia/shell.qml` maupun menyalin file ke namespace Caelestia.
-
-K41 boleh mempelajari dan mengadaptasi bagian source Caelestia yang relevan sebagai referensi implementasi. Source hasil adaptasi harus berada sepenuhnya di direktori K41, diberi atribusi dan lisensi upstream yang sesuai, serta menggunakan API Quickshell/Qt yang telah diverifikasi. Tidak boleh ada patch terhadap file upstream Caelestia.
-
-**Gate teknis sebelum perubahan deployer:** Quickshell `NotificationServer` mengimplementasikan Desktop Notifications Specification dan menerima notifikasi dari aplikasi. Karena hanya satu pemilik service D-Bus `org.freedesktop.Notifications` yang dapat aktif pada satu sesi, shell K41 mandiri berpotensi bersaing dengan NotificationServer Caelestia. Sebelum K41 mengambil alih server dan tray, audit harus memastikan siapa pemilik service aktif dan menentukan transisi yang tidak membuat notifikasi hilang/duplikat. Jangan membuat dua NotificationServer aktif dan jangan menganggap Caelestia Notification Dock dapat dipakai tanpa ketergantungan Caelestia.
-
-CPU/RAM harus memakai service/logic yang dimiliki K41; battery dapat menggunakan Quickshell UPower API; clock menggunakan Qt/QML. Semua API harus diverifikasi terhadap versi Quickshell yang benar-benar terpasang pada X280. Target lokasi, autostart, single-instance, lifecycle, dan rollback deployer juga harus ditetapkan sebelum deployment.
-
-Status migrasi: **PLANNED**. Belum ada shell mandiri, service K41, perubahan deployer, atau runtime migration yang diimplementasikan/diuji. Deployer lama masih mengintegrasikan module ke Caelestia dan tidak memenuhi target arsitektur baru; jangan jalankan sebagai implementasi mandiri.
+Catatan arsitektur mandiri dengan entry point `~/.config/quickshell/k41/shell.qml` yang pernah tercantum pada versi sebelumnya **sudah dibatalkan**. Keputusan aktif adalah mempertahankan entry point Caelestia `~/.config/quickshell/caelestia/shell.qml` dan memasang modul K41 di `~/.config/quickshell/caelestia/k41/modules/topbar/`. Deployer aktif mengikuti keputusan ini. Bagian historis yang menyebut shell K41 terpisah atau melarang perubahan host Caelestia tidak berlaku lagi.
 
 ## Status runtime dan langkah berikutnya — 13 November 2026
 
@@ -337,51 +329,23 @@ Regression guard: `stages/stage-5-desktop-customization/tests/test-topbar-runtim
 
 
 
-## Implementasi deployer standalone — 13 November 2026
+## Koreksi deployer dan entry point — 13 November 2026
 
-Arah implementasi deployer kini sudah dipindahkan dari integrasi host Caelestia ke konfigurasi mandiri K41:
+Deployer standalone dengan target `quickshell/k41/shell.qml` yang pernah dirancang telah digantikan. Kontrak implementasi aktif adalah:
+- Entry point tetap `~/.config/quickshell/caelestia/shell.qml`.
+- Modul dan service K41 dipasang di `~/.config/quickshell/caelestia/k41/modules/topbar/`.
+- Deployer menambahkan satu import dan satu instance Topbar pada host yang sudah ada.
+- Deployer mewajibkan enam file service, memvalidasi source, melakukan staging/verifikasi service terlebih dahulu, lalu memasang modul dan integrasi host dengan backup/rollback.
+- Tidak ada restart/reload otomatis atau perubahan autostart.
 
-- Entry point canonical: `workstreams/04-topbar/shell.qml`.
-- Target runtime: `$XDG_CONFIG_HOME/quickshell/k41/shell.qml` dan `$XDG_CONFIG_HOME/quickshell/k41/modules/topbar/Topbar.qml`.
-- Perintah pemilihan konfigurasi yang direncanakan: `qs -c k41` (harus dikonfirmasi terhadap versi Quickshell yang terpasang).
-- Deployer tidak mengedit `quickshell/caelestia/shell.qml`, tidak menulis ke direktori Caelestia, tidak mengubah autostart, dan tidak me-reload/restart Quickshell.
-- Deployer memvalidasi ownership, symlink, file type, dependency Caelestia yang diketahui, melakukan backup privat, staging, atomic replacement, verifikasi hasil, dan rollback saat operasi gagal.
-- Source QML harus memiliki marker standalone K41. Import `Caelestia`, `qs.services`, `ShellState`, `Notifs`, `Time.format`, dan `ServiceRef` ditolak oleh preflight.
-
-**Penting:** source canonical `modules/topbar/Topbar.qml` yang saat ini ada di repository masih memakai API Caelestia. Karena itu deployer baru akan berhenti secara fail-closed dan belum boleh dijalankan untuk deployment aktual sampai source tersebut dimigrasikan ke implementasi K41-owned. Entry point mandiri telah dibuat, tetapi modul belum mandiri. Tidak ada runtime deployment pada perubahan ini.
-
-Fixture test diperbarui untuk memakai QML standalone sintetis dan menguji:
-1. Instalasi ke namespace `quickshell/k41`.
-2. Tidak berubahnya file host Caelestia.
-3. Idempotensi tanpa backup tambahan.
-4. Penolakan source yang kembali mengimpor Caelestia.
-5. Penolakan symlink pada target.
-
-Test tersebut belum dijalankan pada checkout lokal atau X280. Status saat ini: deployer dan entry point **IMPLEMENTED**; adaptasi module/services **PLANNED/BLOCKED**; runtime deployment dan verifikasi **NOT TESTED**.
-
-Jangan jalankan `qs -c k41` dulu. K41 belum memiliki Topbar mandiri yang siap dirender, dan kepemilikan D-Bus `org.freedesktop.Notifications` belum ditransisikan dari Caelestia. Menjalankan dua NotificationServer bersamaan dapat menimbulkan konflik kepemilikan service. Setelah adaptasi modul dan strategi transisi notification server selesai, jalankan fixture test dan validasi QML sebelum runtime deployment.
-
-
-### Koreksi arsitektur entry point — 13 November 2026
-
-Koreksi keputusan: **entry point tetap `~/.config/quickshell/caelestia/shell.qml`**. K41 bukan shell Quickshell terpisah. K41 Topbar adalah modul mandiri yang dimiliki/dipelihara K41, dipasang pada namespace `~/.config/quickshell/caelestia/k41/modules/topbar/`, lalu di-import dan di-instantiate oleh entry point Caelestia yang sudah ada.
-
-Konsekuensinya:
-- File `workstreams/04-topbar/shell.qml` mandiri tidak digunakan dan telah dihapus.
-- Deployer hanya menambahkan import dan instance K41 ke `caelestia/shell.qml`, serta memasang modul K41 di bawah config root Caelestia.
-- Source modul K41 tetap tidak boleh menggunakan API internal Caelestia seperti `Caelestia.Services`, `qs.services`, `ShellState`, `Notifs`, atau `Time`.
-- Menggunakan entry point Caelestia tidak berarti K41 harus bergantung pada service internal Caelestia. Namun K41 tetap berjalan di proses/config Quickshell yang sama.
-- NotificationServer K41 masih membutuhkan desain kepemilikan D-Bus agar tidak bersaing dengan NotificationServer Caelestia. Ini belum diimplementasikan.
-
-Status: deployer telah dikoreksi untuk mempertahankan entry point Caelestia; migrasi source Topbar ke API mandiri K41 masih diperlukan sebelum deployer dapat digunakan. Fixture test baru belum dijalankan.
-
+Fixture test dan runtime deployment untuk revisi aktif tetap belum dinyatakan lulus. Jangan menggunakan instruksi lama `qs -c k41`.
 
 ## Implementasi migrasi service — 13 November 2026
 
 **IMPLEMENTED pada repository:**
-- `services/Cpu.qml`: sampling `/proc/stat` setiap 2 detik dan menghitung delta total/idle.
-- `services/Memory.qml`: membaca `/proc/meminfo` setiap 5 detik; persentase dihitung dari `MemTotal` dan `MemAvailable`.
-- `services/Battery.qml`: memakai `Quickshell.Services.UPower`; nilai `percentage` UPower sudah dalam satuan persen (tidak dikalikan 100).
+- `services/Cpu.qml`: membaca `/proc/stat` melalui Quickshell `Process` dengan interval sampling 1 detik dan menghitung delta total/idle.
+- `services/Memory.qml`: membaca `/proc/meminfo` melalui Quickshell `Process` dengan interval sampling 1 detik; persentase dihitung dari `MemTotal` dan `MemAvailable`.
+- `services/Battery.qml`: memakai `Quickshell.Services.UPower`; nilai `percentage` UPower berupa fraction 0.0–1.0 dan dikalikan 100 oleh `Topbar.qml` untuk tampilan persen.
 - `services/Clock.qml`: jam/tanggal memakai `Qt.formatDateTime` dan Timer.
 - `services/TopbarState.qml`: state panel notifikasi dimiliki K41.
 - `Topbar.qml`: seluruh binding menggunakan service lokal melalui relative import `services`; tidak lagi mengimpor `Caelestia.Services`, `qs.services`, `ShellState`, `Notifs`, atau `Time`.
