@@ -100,7 +100,7 @@ Source K41 dan deployer telah direvisi berdasarkan audit source Caelestia pada r
 | QML module | `workstreams/04-topbar/modules/topbar/Topbar.qml` |
 | Deployment script | `workstreams/04-topbar/scripts/k41-implement-topbar.sh` |
 | Fixture test | `tests/test-topbar-module-install.sh` |
-| Runtime module | `~/.config/quickshell/k41/modules/topbar/Topbar.qml` |
+| Runtime module | `~/.config/quickshell/caelestia/k41/modules/topbar/Topbar.qml` (primary; imported by `qs.k41.modules.topbar`) dan `~/.config/quickshell/k41/modules/topbar/Topbar.qml` (compatibility mirror). |
 | Caelestia host | `~/.config/quickshell/caelestia/shell.qml` |
 
 ### Backend kanonis
