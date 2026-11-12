@@ -150,62 +150,67 @@ restore_originals() {
     done
 }
 publish_logs() {
-    local remote_url publish_dir publish_root uploaded_log
+    local remote_url publish_tmp publish_repo publish_root uploaded_log
     if [[ ${K41_LOCKSCREEN_TEST_MODE:-0} == 1 ]]; then
         info "Test mode: remote log publication intentionally skipped."
         return 0
     fi
     remote_url="$(git -C "$repo_root" remote get-url origin 2>/dev/null)" ||
-        { printf 'ERROR: cannot read repository origin; deployment log remains local.\n' >&2; return 1; }
+        { printf 'WARNING: cannot read repository origin; deployment log remains local.\n' >&2; return 1; }
     case "$remote_url" in
         https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41|https://github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git|git@github.com:K41-Origin/Lenovo-ThinkPad-X280-K41.git|ssh://git@github.com/K41-Origin/Lenovo-ThinkPad-X280-K41.git) ;;
-        *) printf 'ERROR: repository origin is not the approved K41 GitHub repository; deployment log remains local.\n' >&2; return 1 ;;
+        *) printf 'WARNING: repository origin is not the approved K41 GitHub repository; deployment log remains local.\n' >&2; return 1 ;;
     esac
-    info "Publishing sanitized deployment log to GitHub main using existing Git credentials."
-    if ! git -C "$repo_root" fetch --no-tags origin main; then
-        printf 'ERROR: git fetch failed; deployment log remains local.\n' >&2
+
+    publish_tmp="$(mktemp -d "${TMPDIR:-/tmp}/k41-lockscreen-log-publish.XXXXXX")" || return 1
+    publish_repo="$publish_tmp/repository"
+    cleanup_publish() {
+        rm -rf -- "$publish_tmp"
+    }
+    info "Publishing sanitized deployment log through an independent temporary clone."
+    if ! git clone --quiet --branch main --single-branch "$remote_url" "$publish_repo"; then
+        cleanup_publish
+        printf 'WARNING: independent clone failed; deployment log remains local.\n' >&2
         return 1
     fi
-    publish_dir="$(mktemp -d "${TMPDIR:-/tmp}/k41-lockscreen-log-publish.XXXXXX")" || return 1
-    rmdir -- "$publish_dir" || { rm -rf -- "$publish_dir"; return 1; }
-    if ! git -C "$repo_root" worktree add --detach "$publish_dir" FETCH_HEAD; then
-        rm -rf -- "$publish_dir"
-        printf 'ERROR: isolated Git worktree creation failed; deployment log remains local.\n' >&2
+
+    publish_root="$publish_repo/reports/lockscreen-deployment"
+    if ! mkdir -p -- "$publish_root/history"; then
+        cleanup_publish
+        printf 'WARNING: cannot prepare report directory; deployment log remains local.\n' >&2
         return 1
     fi
-    publish_root="$publish_dir/reports/lockscreen-deployment"
-    mkdir -p -- "$publish_root/history"
     uploaded_log="$publish_root/history/$(basename -- "$log_file")"
-    if ! sed "s|$HOME|~|g" "$log_file" > "$uploaded_log"; then
-        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
-        printf 'ERROR: log sanitization failed; deployment log remains local.\n' >&2
+    if ! sed -e "s|$HOME|~|g" -e "s|$repo_root|<K41_REPO>|g" "$log_file" > "$uploaded_log"; then
+        cleanup_publish
+        printf 'WARNING: log sanitization failed; deployment log remains local.\n' >&2
         return 1
     fi
     chmod 0644 "$uploaded_log"
-    cp -- "$uploaded_log" "$publish_root/latest.log"
-    git -C "$publish_dir" config user.name "K41 Lock Screen Deployment Logger"
-    git -C "$publish_dir" config user.email "k41-lockscreen-logger@users.noreply.github.com"
-    if ! git -C "$publish_dir" add -- reports/lockscreen-deployment; then
-        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
-        printf 'ERROR: could not stage deployment logs; log remains local.\n' >&2
+    if ! cp -- "$uploaded_log" "$publish_root/latest.log"; then
+        cleanup_publish
+        printf 'WARNING: could not prepare latest deployment log; local log retained.\n' >&2
         return 1
     fi
-    if ! git -C "$publish_dir" commit -m "Record lockscreen deployment log"; then
-        git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
-        printf 'ERROR: could not commit deployment logs; log remains local.\n' >&2
+    git -C "$publish_repo" config user.name "K41 Lock Screen Deployment Logger"
+    git -C "$publish_repo" config user.email "k41-lockscreen-logger@users.noreply.github.com"
+    if ! git -C "$publish_repo" add -- reports/lockscreen-deployment ||
+       ! git -C "$publish_repo" commit --quiet -m "Record lockscreen deployment log"; then
+        cleanup_publish
+        printf 'WARNING: could not commit deployment log; local log retained.\n' >&2
         return 1
     fi
-    if ! git -C "$publish_dir" push origin HEAD:main; then
+    if ! git -C "$publish_repo" push origin HEAD:main; then
         info "Push raced with another main update; rebasing the isolated log commit once."
-        if ! git -C "$publish_dir" fetch --no-tags origin main ||
-           ! git -C "$publish_dir" rebase FETCH_HEAD ||
-           ! git -C "$publish_dir" push origin HEAD:main; then
-            git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
-            printf 'ERROR: GitHub log publication failed; local log retained at %s.\n' "$log_file" >&2
+        if ! git -C "$publish_repo" fetch --quiet --no-tags origin main ||
+           ! git -C "$publish_repo" rebase --quiet FETCH_HEAD ||
+           ! git -C "$publish_repo" push origin HEAD:main; then
+            cleanup_publish
+            printf 'WARNING: GitHub log publication failed; local log retained at %s.\n' "$log_file" >&2
             return 1
         fi
     fi
-    git -C "$repo_root" worktree remove --force "$publish_dir" >/dev/null 2>&1 || true
+    cleanup_publish
     info "Deployment log published to reports/lockscreen-deployment/ on GitHub main."
     return 0
 }
@@ -238,8 +243,7 @@ cleanup() {
             printf 'WARNING: Could not update latest.log; timestamped log remains at %s\n' "$log_file" >&2
         fi
         if ! publish_logs; then
-            printf 'WARNING: sanitized deployment log could not be published.\\n' >&2
-            rc=1
+            printf 'WARNING: sanitized deployment log could not be published; deployment result is unchanged.\n' >&2
         fi
     fi
     exit "$rc"
