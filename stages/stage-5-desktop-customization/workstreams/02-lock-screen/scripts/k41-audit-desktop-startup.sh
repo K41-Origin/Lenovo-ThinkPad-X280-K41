@@ -407,14 +407,14 @@ for file in "$startup_log" "$startup_log.1"; do
 done
 
 section 'RECENT USER LOG FILES'
-for base in "$HOME/.local/state/k41" "$HOME/.local/state/caelestia" "$HOME/.local/state/quickshell" "$HOME/.local/share/hyprland" "$HOME/.local/share/caelestia" "$HOME/.cache/hyprland" "$HOME/.cache/caelestia" "$HOME/.cache/qs" "$HOME/.cache/quickshell"; do
+for base in "$HOME/.local/state/k41" "$HOME/.local/state/caelestia" "$HOME/.local/state/quickshell" "$HOME/.local/share/hyprland" "$HOME/.local/share/caelestia" "$HOME/.cache/hyprland" "$HOME/.cache/caelestia" "$HOME/.cache/qs" "$HOME/.cache/quickshell" "${XDG_RUNTIME_DIR:-/run/user/$EUID}/quickshell"; do
     [[ -d $base && ! -L $base ]] || continue
     while IFS= read -r -d '' file; do
         [[ -f $file && ! -L $file ]] || continue
         size=$(stat -c %s "$file" 2>/dev/null || printf 0)
         (( size <= 2097152 )) || continue
         case "$file" in
-            *.log|*.txt)
+            *.log|*.txt|*.qslog)
                 section "LOG FILE: ${file#"$HOME"/}"
                 tail -n 300 -- "$file" | redact >>"$report" || true
                 ;;
@@ -512,8 +512,68 @@ else
 fi
 if have qs; then
     run 'QUICKSHELL VERSION' qs --version
+    run 'QUICKSHELL INSTANCE INVENTORY' qs list --all
+    run 'QUICKSHELL CAELESTIA LOG (LATEST 400 LINES)' qs log -c caelestia -t 400 --no-color
 else
     note '[qs executable unavailable]'
+fi
+
+section 'QUICKSHELL RUNTIME LOG FILES'
+runtime_qs_root="${XDG_RUNTIME_DIR:-/run/user/$EUID}/quickshell"
+if [[ -d $runtime_qs_root && ! -L $runtime_qs_root ]]; then
+    while IFS= read -r -d '' qs_log_file; do
+        [[ -f $qs_log_file && ! -L $qs_log_file ]] || continue
+        printf '\\n-- %s --\\n' "${qs_log_file#"$HOME"/}" | redact >>"$report"
+        stat -c 'size=%s modified=%y mode=%A' "$qs_log_file" 2>&1 | redact >>"$report" || true
+        tail -n 500 -- "$qs_log_file" | redact >>"$report" || true
+    done < <(find "$runtime_qs_root" -maxdepth 5 -type f -name 'log.qslog' -printf '%T@ %p\\0' 2>/dev/null |
+        sort -z -nr | head -z -n 8 | cut -z -d' ' -f2-)
+else
+    note '[Quickshell runtime log directory unavailable]'
+fi
+
+section 'OPTIONAL ACTIVE QUICKSHELL STARTUP PROBE'
+if [[ ${K41_AUDIT_RUN_QS_PROBE:-0} == 1 ]]; then
+    if ! have qs; then
+        note '[probe skipped: qs executable unavailable]'
+    elif [[ -z ${XDG_RUNTIME_DIR:-} || -z ${WAYLAND_DISPLAY:-} || -z ${HYPRLAND_INSTANCE_SIGNATURE:-} ]]; then
+        note '[probe skipped: run from an active Hyprland/Wayland terminal; required session variables are absent]'
+    else
+        case "$WAYLAND_DISPLAY" in
+            /*) wayland_socket="$WAYLAND_DISPLAY" ;;
+            *) wayland_socket="$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" ;;
+        esac
+        if [[ ! -S $wayland_socket ]]; then
+            note '[probe skipped: Wayland socket is not present]'
+        elif ps -eo comm= 2>/dev/null | awk '$1 ~ /^(qs|quickshell|caelestia)$/ { found=1 } END { exit !found }'; then
+            note '[probe skipped: a Quickshell/Caelestia process is already running; duplicate shell launch refused]'
+        else
+            probe_raw="$run_dir/quickshell-probe.raw.log"
+            section 'QUICKSHELL FOREGROUND STARTUP PROBE (MAX 15 SECONDS)'
+            note 'Command: qs -c caelestia (foreground; QT_DEBUG_PLUGINS=1; QML_IMPORT_TRACE=1)'
+            note 'This opt-in probe starts the real shell briefly and then terminates it; it may display shell windows during the probe.'
+            if QT_DEBUG_PLUGINS=1 QML_IMPORT_TRACE=1 timeout --signal=TERM --kill-after=3 15s qs -c caelestia >"$probe_raw" 2>&1; then
+                probe_rc=0
+            else
+                probe_rc=$?
+            fi
+            printf 'Probe exit status: %s\\n' "$probe_rc" >>"$report"
+            case "$probe_rc" in
+                124|137) note 'Probe reached its time limit; this alone does not prove successful QML loading.' ;;
+                0) note 'Quickshell exited before the time limit; inspect output for the cause.' ;;
+                *) note 'Quickshell exited with an error; inspect output for the first QML/plugin/import failure.' ;;
+            esac
+            if [[ -s $probe_raw ]]; then
+                section 'QUICKSHELL FOREGROUND STARTUP OUTPUT (REDACTED; MAX 256 KiB)'
+                head -c 262144 "$probe_raw" | redact >>"$report" || true
+            else
+                note '[probe produced no stdout/stderr]'
+            fi
+            rm -f -- "$probe_raw"
+        fi
+    fi
+else
+    note 'Probe not run. Set K41_AUDIT_RUN_QS_PROBE=1 only from an unlocked terminal inside the active Hyprland desktop.'
 fi
 
 section 'LOCK LIFECYCLE: LOCKER AND COMPOSITOR PROCESS STATE'
@@ -671,7 +731,8 @@ note 'Timeline statuses describe collected evidence only; NOT_OBSERVED is not pr
 note 'The collector cannot prove successful unlock or desktop restoration without correlated runtime telemetry.'
 
 section 'DIAGNOSTIC LIMITATIONS'
-note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command.'
+note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command secara default.'
+note '- Opt-in K41_AUDIT_RUN_QS_PROBE=1 menjalankan qs -c caelestia secara foreground maksimal 15 detik untuk menangkap QML/plugin/import error; probe dilewati jika session Wayland tidak valid atau Quickshell sudah berjalan.'
 note '- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.'
 note '- Hyprlock auth/unlock lines are parsed from helper-captured stdout/stderr; if upstream emits no timestamp, the timeline records UNKNOWN rather than inventing one.'
 note '- Journal-derived PAM/auth signals remain separate from Hyprlock helper-log signals; absence in one source does not negate evidence in the other.'
@@ -690,7 +751,11 @@ Run this script as the regular desktop user from tty2 or a normal shell:
 
 Report: report.txt
 
-The collector does not modify host system state and does not attempt to launch or repair Hyprland. It writes a private local report and publishes a sanitized copy.
+The collector does not modify configuration, packages, services, authentication, or boot state. By default it does not launch a shell. To run the optional 15-second foreground Quickshell diagnostic from an unlocked terminal inside the active Hyprland session, use:
+  
+  K41_AUDIT_RUN_QS_PROBE=1 bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
+
+The probe is skipped if Wayland session variables/socket are missing or a Quickshell/Caelestia process is already running. It may briefly display shell windows. The report is private locally and a redacted copy is published.
 The script publishes a sanitized copy of this run directory (report.txt, README.txt, lifecycle-timeline.tsv) to GitHub main using existing Git credentials. The local report remains private (0600); if publication fails, the report stays local and the script exits non-zero. Review the published report for any residual private information.
 EOF
 chmod 0600 "$run_dir/README.txt"
