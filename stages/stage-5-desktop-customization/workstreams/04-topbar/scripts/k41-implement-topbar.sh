@@ -67,7 +67,7 @@ owned "$caelestia_notifs_file" \
     || die 'Caelestia Notifs.qml bukan milik user aktif; handoff tidak boleh mengubah file yang tidak dimiliki user.'
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$caelestia_notifs_file" \
     || die 'Handoff Caelestia belum disiapkan; NotificationServer Caelestia belum dinonaktifkan secara eksplisit.'
-if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$caelestia_notifs_file"; then
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$caelestia_notifs_file"; then
     die 'NotificationServer Caelestia masih dideklarasikan; menolak kemungkinan dua D-Bus owner.'
 fi
 for path in "$host_root/k41" "$host_root/k41/modules" "$module_root"; do
