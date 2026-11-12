@@ -44,14 +44,13 @@ Jangan menduplikasi detail desain atau status implementasi ke banyak dokumen. Up
 
 ## Current project decisions
 
-- Stage 5 adalah tahap aktif. Workstream 01 — Boot Experience **COMPLETE untuk implementasi Plymouth-only**; runtime acceptance tema/UKI masih NOT VERIFIED. TTY2 fallback telah terbukti dipicu oleh lock-readiness timeout Workstream 02, bukan kegagalan renderer Plymouth.
+- Stage 5 adalah tahap aktif. Workstream 01 — Boot Experience **PAUSED — INVESTIGATION PENDING**. Implementasi Plymouth-only tersedia, tetapi splash tidak terlihat pada boot aktual; penyebab belum VERIFIED. Jangan lakukan perubahan boot sampai audit read-only dan rencana disetujui.
 - Workstream 02 — Lock Screen: **COMPLETED / USER ACCEPTED (12 November 2026)**. Proses audit visual/startup, source K41, bounded lock helper/updater, deployment dengan backup/checksum/log dan automated sanitized-log push, cleanup hook legacy, serta cleanup sembilan komponen visual Caelestia telah didokumentasikan di `stages/stage-5-desktop-customization/docs/02-LOCK-SCREEN.md`. Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED; lihat dokumen pemilik dan `docs/06-STATUS.md` untuk batas bukti serta konsekuensi tracked deletions pada checkout Caelestia.
 - **Dashboard dihapus dari daftar workstream Stage 5 pada 2026-11-11.** Fitur runtime dinonaktifkan melalui `k41-cleanup-caelestia.sh`; jangan menghapus source QML upstream atau menambahkan dashboard kembali.
 - **Workstream 04 — Bottombar / K41Dock COMPLETED / USER CONFIRMED SUCCESS.** Source kanonis berada di repository pada `workstreams/04-taskbar-panel/`; source runtime berada di bawah `~/.config/quickshell/caelestia/`. Lihat dokumen Bottombar.
 - **Workstream 05 — Topbar** adalah pekerjaan Stage 5 berikutnya. Elemen, alignment, ukuran, dan visibility harus disepakati sebelum implementasi.
 - Cleanup dashboard diimplementasikan melalui `stages/stage-5-desktop-customization/scripts/k41-cleanup-caelestia.sh`. Default dry-run; `--apply` mem-backup dan mengatur `dashboard.enabled=false` pada konfigurasi global serta override monitor yang relevan; `--rollback` memulihkan backup. Audit terbaru harus ditinjau sebelum apply. Script tidak menghapus source checkout upstream, keybind, package, atau service.
 - Workstream 06 Launcher, 07 Sidebar, dan 08 Utilities mengikuti status di `docs/06-STATUS.md`.
-- Guest Mode **NOT IMPLEMENTED** dan ditunda. Jangan membuat akun, service, mount, storage policy, atau workflow Guest tanpa keputusan eksplisit baru.
 - Screenshot **tidak digunakan**: jangan meminta, mengambil, mewajibkan, atau menjadikannya acceptance gate/artefak proyek.
 - Design System adalah spesifikasi lintas-komponen; status aktual implementasi tetap dimiliki `docs/06-STATUS.md` dan dokumen workstream.
 - Stage 5 menjadi fondasi bertahap **k41-dots**; hindari asumsi perlu membangun shell mandiri penuh atau mengganti Caelestia.
