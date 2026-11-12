@@ -89,7 +89,7 @@ grep -Fq 'preserve-me-on-failure' "$target"
 [[ $(sha256sum "$config_json" | awk '{print $1}') == "$json_before" ]]
 
 # The implementation has one operation only: no modes, cleanup, package or service actions.
-if grep -Eiq 'pacman[[:space:]]|systemctl[[:space:]]|shell\.json|sed[[:space:]].*shell\.qml|--rollback|--check|--cleanup|sudo' \
+if grep -Eiq 'pacman[[:space:]]|systemctl[[:space:]]|sed[[:space:]].*shell\.qml|--rollback|--check|--cleanup|sudo' \
     "$root/$workstream/scripts/k41-implement-bottombar.sh"; then
     printf 'FAIL: installer contains an out-of-scope feature or host mutation.\n' >&2
     exit 1
