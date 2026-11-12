@@ -111,6 +111,7 @@ for label, root in roots:
     else: add(f"{label}: ABSENT {clean(root)}")
 
 section("DEPLOYMENT PREFLIGHT DIAGNOSTICS — FOUR K41 VISUAL TARGETS")
+# Deployment currently hardcodes $HOME/.config; do not accidentally audit only XDG_CONFIG_HOME.
 # These values intentionally mirror the deployment script's audited pin.
 expected_origin = "https://github.com/caelestia-dots/shell.git"
 expected_revision = "d999d4878ee4cec134168e60d913714566a8cfa6"
@@ -122,7 +123,7 @@ target_files = [
     "center/PasswordInput.qml",
 ]
 for label, root in available:
-    if label != "USER_CONFIG" or not (root / ".git").exists():
+    if root != (home / ".config/quickshell/caelestia") or not (root / ".git").exists():
         continue
     add(f"Deployment candidate root: {clean(root)}")
     rc, actual_origin = run(["git", "-C", str(root), "remote", "get-url", "origin"])
@@ -220,7 +221,7 @@ add("Deploy pin:  " + deploy_origin + " @ " + deploy_revision)
 pins_match = deploy_origin == expected_origin and deploy_revision == expected_revision
 add("Audit/deploy pin consistency: " + ("PASS" if pins_match else "FAIL — fix duplicated pin constants before implementation"))
 candidate = next(((label, root) for label, root in available
-                  if label == "USER_CONFIG" and (root / ".git").exists()), None)
+                  if root == (home / ".config/quickshell/caelestia") and (root / ".git").exists()), None)
 if candidate is None:
     add("GLOBAL DECISION: BLOCKED — no user-local Git Caelestia checkout at the configured XDG path.")
 else:
