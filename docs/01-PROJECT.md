@@ -60,7 +60,7 @@ Semua modul K41 ditempatkan di namespace milik K41:
     └── ...
 ```
 
-Contoh: komponen Lock Screen K41 berada di `~/.config/quickshell/k41/modules/lockscreen/`. Nama direktori fitur menggunakan nama yang jelas dan konsisten; jangan menaruh modul K41 di dalam namespace `quickshell/caelestia/`.
+Untuk modul yang diimpor oleh shell Caelestia, lokasi utama berada di `~/.config/quickshell/caelestia/k41/modules/<feature>/`, karena `qs.*` di-resolve relatif terhadap config root yang berisi `shell.qml`. Path sibling `~/.config/quickshell/k41/modules/<feature>/` dipertahankan sebagai compatibility mirror, bukan lokasi import utama dari Caelestia. WS02 juga mempertahankan overlay aktif `caelestia/modules/lock/` dan mencerminkan empat file visual ke kedua namespace K41.
 
 ### Alur kerja minimum
 
