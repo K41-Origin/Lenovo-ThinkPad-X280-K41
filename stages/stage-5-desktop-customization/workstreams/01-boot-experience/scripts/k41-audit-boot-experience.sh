@@ -280,7 +280,7 @@ collect_uki_evidence() {
   if [[ -r $preset ]]; then
     grep -nE '^(ALL_|PRESETS=|default_|fallback_|uki_|initrd_|image=|options=)' "$preset" || true
     mapfile -t paths < <(sed -nE 's/^[[:space:]]*default_uki="([^"]+)".*/\1/p' "$preset")
-    if (( \${#paths[@]} == 1 )); then uki_path=\${paths[0]}; fi
+    if (( ${#paths[@]} == 1 )); then uki_path=${paths[0]}; fi
   else
     echo '[linux.preset missing or unreadable]'
   fi
@@ -302,7 +302,7 @@ collect_uki_evidence() {
       echo '[lsinitcpio unavailable]'
     fi
   else
-    printf 'Configured default_uki=%s; file missing, empty, or preset ambiguous\n' "\${uki_path:-UNKNOWN}"
+    printf 'Configured default_uki=%s; file missing, empty, or preset ambiguous\n' "${uki_path:-UNKNOWN}"
   fi
   echo
   echo "--- Boot entry references to UKI ---"
