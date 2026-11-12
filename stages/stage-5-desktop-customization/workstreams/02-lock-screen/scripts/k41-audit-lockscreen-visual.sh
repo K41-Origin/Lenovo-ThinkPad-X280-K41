@@ -155,16 +155,16 @@ for label, root in available:
         upstream = None
         try:
             p = subprocess.run(
-                ["git", "-C", str(root), "show", f"HEAD:modules/lock/{relative}"],
+                ["git", "-C", str(root), "show", f"{expected_revision}:modules/lock/{relative}"],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10
             )
             if p.returncode == 0:
                 upstream = p.stdout
-                add(f"  Pinned HEAD blob: PRESENT | bytes={len(upstream)} | sha256={hashlib.sha256(upstream).hexdigest()}")
+                add(f"  Pinned revision blob: PRESENT | bytes={len(upstream)} | sha256={hashlib.sha256(upstream).hexdigest()}")
             else:
-                add("  Pinned HEAD blob: MISSING/UNTRACKED")
+                add("  Pinned revision blob: MISSING/UNTRACKED")
         except (OSError, subprocess.TimeoutExpired) as e:
-            add(f"  Pinned HEAD blob: UNAVAILABLE ({type(e).__name__})")
+            add(f"  Pinned revision blob: UNAVAILABLE ({type(e).__name__})")
         installed_bytes = None
         try:
             if installed.is_file() and not installed.is_symlink():
@@ -199,7 +199,7 @@ for label, root in available:
                     lineterm="",
                 )
                 rendered = list(diff_lines)
-                add("\\n".join("    " + line for line in rendered) if rendered else "    <no textual diff>")
+                add("\n".join("    " + line for line in rendered) if rendered else "    <no textual diff>")
             except Exception as e:
                 add(f"    <diff failed: {type(e).__name__}>")
     break
