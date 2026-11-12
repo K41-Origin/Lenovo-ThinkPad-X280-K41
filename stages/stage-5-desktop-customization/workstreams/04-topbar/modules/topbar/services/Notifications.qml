@@ -1,8 +1,7 @@
 import QtQuick
 
-// Deliberately does not claim org.freedesktop.Notifications yet.
-// Caelestia currently owns the notification service; enabling a second
-// NotificationServer before an explicit ownership handoff is unsafe.
+// Do not claim org.freedesktop.Notifications until an explicit D-Bus
+// ownership handoff is implemented and validated.
 QtObject {
     readonly property int count: 0
     readonly property bool backendAvailable: false
