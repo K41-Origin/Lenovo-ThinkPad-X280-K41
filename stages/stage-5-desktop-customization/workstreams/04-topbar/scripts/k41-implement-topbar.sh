@@ -229,6 +229,12 @@ shell_tmp="$(mktemp "$caelestia_root/.shell.install.XXXXXX")"
 awk -v replacement="$new_import" '
     $0 ~ /^[[:space:]]*import[[:space:]]+"\.\.\/k41\/modules\/topbar"[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ {
         print replacement
+        seen_k41_import=1
+        next
+    }
+    $0 ~ /^[[:space:]]*import[[:space:]]+qs\.k41\.modules\.topbar[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ {
+        print
+        seen_k41_import=1
         next
     }
     $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ {
