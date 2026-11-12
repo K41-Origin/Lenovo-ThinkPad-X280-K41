@@ -21,6 +21,19 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topb
 [[ -f $source_file && ! -L $source_file ]] || die 'Source Topbar.qml tidak tersedia atau bukan regular file.'
 owned "$source_file" || die 'Source Topbar.qml bukan milik user aktif.'
 
+# Migration-first gate: K41-owned providers must exist before Topbar can be deployed.
+service_source_dir="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services"
+required_services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
+[[ -d $service_source_dir && ! -L $service_source_dir ]] || die 'Direktori service K41 belum tersedia; migrasi service harus diselesaikan sebelum deployment Topbar.'
+for service in "${required_services[@]}"; do
+    service_file="$service_source_dir/$service"
+    [[ -f $service_file && ! -L $service_file ]] || die "Service K41 belum dimigrasikan: $service"
+    owned "$service_file" || die "Source service bukan milik user aktif: $service"
+    if grep -En 'Caelestia|qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.' "$service_file"; then
+        die "Dependency internal Caelestia terdeteksi pada $service; migrasi belum mandiri."
+    fi
+done
+
 # K41 module is self-contained: no private Caelestia modules/services are allowed.
 if grep -En 'Caelestia|qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.' "$source_file"; then
     die 'Dependency internal Caelestia terdeteksi; migrasikan source ke API mandiri K41 terlebih dahulu.'
@@ -35,6 +48,7 @@ host_root="$qs_root/caelestia"
 host_file="$host_root/shell.qml"
 module_root="$host_root/k41/modules/topbar"
 target_file="$module_root/Topbar.qml"
+service_target_dir="$module_root/services"
 [[ -d $qs_root && ! -L $qs_root && -d $host_root && ! -L $host_root ]] || die 'Quickshell/Caelestia config directory tidak tersedia atau berupa symlink.'
 [[ -f $host_file && ! -L $host_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$host_root" && owned "$host_file" || die 'Caelestia host bukan milik user aktif.'
@@ -45,6 +59,16 @@ done
 if [[ -e $target_file || -L $target_file ]]; then
     [[ -f $target_file && ! -L $target_file ]] || die 'Target Topbar bukan regular file.'
     owned "$target_file" || die 'Target Topbar bukan milik user aktif.'
+fi
+if [[ -e $service_target_dir || -L $service_target_dir ]]; then
+    [[ -d $service_target_dir && ! -L $service_target_dir ]] || die 'Target service bukan direktori regular.'
+    owned "$service_target_dir" || die 'Target service bukan milik user aktif.'
+    for service in "${required_services[@]}"; do
+        if [[ -e $service_target_dir/$service || -L $service_target_dir/$service ]]; then
+            [[ -f $service_target_dir/$service && ! -L $service_target_dir/$service ]] || die "Target service tidak valid: $service"
+            owned "$service_target_dir/$service" || die "Target service bukan milik user aktif: $service"
+        fi
+    done
 fi
 
 new_import='import qs.k41.modules.topbar as K41Topbar'
@@ -78,6 +102,11 @@ done
 chmod 0700 "$backup_root"
 had_module=0
 if [[ -f $target_file ]]; then had_module=1; cp -a "$target_file" "$backup_root/Topbar.qml"; fi
+had_services=0
+if [[ -d $service_target_dir ]]; then
+    had_services=1
+    cp -a "$service_target_dir" "$backup_root/services"
+fi
 cp -a "$host_file" "$backup_root/shell.qml"
 {
     printf 'module_target=%s\nmodule_previous=%s\nmodule_source_sha256=%s\n' "$target_file" "$had_module" "$(sha256sum "$source_file" | cut -d' ' -f1)"
@@ -85,7 +114,7 @@ cp -a "$host_file" "$backup_root/shell.qml"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
-module_tmp=''; host_tmp=''; module_replaced=0; host_replaced=0
+module_tmp=''; host_tmp=''; services_tmp=''; module_replaced=0; host_replaced=0; services_replaced=0
 rollback() {
     local rc=$1 restore
     trap - EXIT
@@ -93,6 +122,15 @@ rollback() {
         if (( host_replaced )); then
             restore="$(mktemp "$host_root/.shell.restore.XXXXXX")"
             if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$host_file"; then printf 'ROLLBACK: Caelestia shell.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback host gagal; backup %s\n' "$backup_root" >&2; fi
+        fi
+        if (( services_replaced )); then
+            if (( had_services )); then
+                rm -rf -- "$service_target_dir"
+                cp -a "$backup_root/services" "$service_target_dir"
+                printf 'ROLLBACK: K41 services dipulihkan.\\n' >&2
+            else
+                rm -rf -- "$service_target_dir"
+            fi
         fi
         if (( module_replaced )); then
             if (( had_module )); then
@@ -103,9 +141,23 @@ rollback() {
     fi
     [[ -z $module_tmp ]] || rm -f "$module_tmp"
     [[ -z $host_tmp ]] || rm -f "$host_tmp"
+    [[ -z $services_tmp ]] || rm -rf "$services_tmp"
     exit "$rc"
 }
 trap 'rollback $?' EXIT
+
+# Stage and publish K41-owned services first. Topbar is installed only after this phase.
+services_tmp="$(mktemp -d "$module_root/.services.install.XXXXXX")"
+for service in "${required_services[@]}"; do
+    install -m 0644 "$service_source_dir/$service" "$services_tmp/$service"
+    cmp -s "$service_source_dir/$service" "$services_tmp/$service" || die "Verifikasi staging service gagal: $service"
+done
+if [[ -e $service_target_dir ]]; then
+    mv -T "$service_target_dir" "$backup_root/services.previous"
+fi
+services_replaced=1
+mv -T "$services_tmp" "$service_target_dir"
+services_tmp=''
 
 module_tmp="$(mktemp "$module_root/.Topbar.install.XXXXXX")"
 host_tmp="$(mktemp "$host_root/.shell.install.XXXXXX")"
@@ -127,7 +179,8 @@ cmp -s "$source_file" "$target_file" || die 'Verifikasi module setelah install g
 host_replaced=1; mv -fT "$host_tmp" "$host_file"; host_tmp=''
 grep -Fqx "$new_import" "$host_file" || die 'Import K41 tidak ditemukan setelah install.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
-module_replaced=0; host_replaced=0; trap - EXIT
+module_replaced=0; host_replaced=0; services_replaced=0; trap - EXIT
+info "K41 services: $service_target_dir"
 info "K41 module: $target_file"
 info "Entrypoint host tetap: $host_file"
 info "Backup privat: $backup_root"
