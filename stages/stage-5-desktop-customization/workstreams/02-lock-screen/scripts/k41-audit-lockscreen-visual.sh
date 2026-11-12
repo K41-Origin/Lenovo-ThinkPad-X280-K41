@@ -288,6 +288,39 @@ else:
         add(f"  K41 source SHA-256: {source_hash} ({source_state})")
         add(f"  Pinned upstream SHA-256: {upstream_hash}")
         add(f"  Implementation action: {action}")
+deploy_files_match = False
+files_match = re.search(r'readonly source_files=\\(([^)]+)\\)', deploy_text)
+if files_match:
+    deploy_files = re.findall(r'[^\\s"]+', files_match.group(1))
+    deploy_files_match = deploy_files == target_files
+add("Audit/deploy target list: " + ("PASS" if deploy_files_match else "FAIL — target lists differ or deploy list could not be parsed"))
+add("Session prerequisites:")
+add("  WAYLAND_DISPLAY: " + ("PRESENT" if os.environ.get("WAYLAND_DISPLAY") else "MISSING"))
+add("  HYPRLAND_INSTANCE_SIGNATURE: " + ("PRESENT" if os.environ.get("HYPRLAND_INSTANCE_SIGNATURE") else "MISSING"))
+for command_name in ("realpath", "stat", "git", "cmp", "install", "mktemp", "date", "cp", "mv", "rm", "sha256sum", "caelestia"):
+    add(f"  command {command_name}: " + (shutil.which(command_name) or "MISSING"))
+if candidate is not None:
+    host_root = candidate[1]
+    lock_root = host_root / "modules/lock"
+    add("Required host runtime files (deployment refuses if absent, empty, or symlinked):")
+    for relative in ("shell.qml", "modules/lock/Lock.qml", "modules/lock/center/InputField.qml"):
+        p = host_root / relative
+        if p.is_symlink():
+            add(f"  {relative}: BLOCKED_SYMLINK")
+        elif p.is_file() and p.stat().st_size > 0:
+            st = p.stat()
+            add(f"  {relative}: PRESENT | bytes={st.st_size} | uid={st.st_uid} | sha256={sha(p)}")
+        else:
+            add(f"  {relative}: MISSING_OR_EMPTY")
+    add("Target directory metadata:")
+    for p in (host_root, host_root / "modules", lock_root):
+        if p.is_symlink():
+            add(f"  {clean(p)}: SYMLINK — deployment rejects")
+        elif p.is_dir():
+            st = p.stat()
+            add(f"  {clean(p)}: DIRECTORY | uid={st.st_uid} | mode={st.st_mode & 0o777:04o} | current-user-owned={st.st_uid == os.getuid()}")
+        else:
+            add(f"  {clean(p)}: MISSING_OR_NOT_DIRECTORY")
 add("Important: REVIEW_REQUIRED is evidence of a content mismatch, not proof of who changed the file or why.")
 add("Do not weaken the deployment guard merely to make deployment pass. Any implementation change must preserve unknown local content through explicit backup/reconciliation and must be covered by regression tests.")
 add("The deployment script separately hardcodes upstream origin/revision; this section detects drift but does not mutate either script.")
