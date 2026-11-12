@@ -165,12 +165,12 @@ QtObject {
         id: server
         keepOnReload: false
         actionsSupported: true
-        actionIconsSupported: true
+        actionIconsSupported: false
         bodySupported: true
-        bodyMarkupSupported: true
-        bodyHyperlinksSupported: true
-        bodyImagesSupported: true
-        imageSupported: true
+        bodyMarkupSupported: false
+        bodyHyperlinksSupported: false
+        bodyImagesSupported: false
+        imageSupported: false
         persistenceSupported: true
 
         onNotification: notification => {
