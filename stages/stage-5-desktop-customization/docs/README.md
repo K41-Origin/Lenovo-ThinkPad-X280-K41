@@ -4,13 +4,13 @@ Stage 5 mengerjakan customization desktop secara bertahap dan satu workstream pa
 
 ## Batas fondasi k41-dots
 
-Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Implementasi Plymouth-only berstatus COMPLETE; runtime acceptance tema/UKI masih NOT VERIFIED. TTY2 fallback akibat lock-readiness timeout ditangani sebagai dependency Workstream 02, bukan dibuka kembali sebagai kegagalan renderer Plymouth. Workstream 01 tetap bagian dari proyek utama, tetapi bukan komponen, dependency, atau backlog k41-dots. Artefak Quickshell boot splash legacy telah dihapus dari branch aktif.
+Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yang dibangun seperlunya di atas Quickshell, bukan pengembangan shell mandiri berskala besar. **Workstream 01 — Boot Experience dikecualikan dari scope k41-dots.** Implementasi Plymouth-only tersedia di repository, tetapi Workstream 01 saat ini **PAUSED — INVESTIGATION PENDING** karena splash tidak terlihat pada boot aktual. Workstream 01 tetap bagian dari proyek utama, tetapi bukan komponen, dependency, atau backlog k41-dots. Artefak Quickshell boot splash legacy telah dihapus dari branch aktif.
 
 ## Urutan workstream
 
 | Urutan | ID | Workstream | Status/arah |
 |---:|---:|---|---|
-| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | COMPLETE — Plymouth implementation; runtime acceptance pending |
+| 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | Design accepted; bounded startup fix implemented; X280 validation pending |
 | 3 | 04 | [Bottombar / K41Dock](04-TASKBAR-PANEL.md) | Berhasil; menjadi pola komponen K41 |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
@@ -23,15 +23,15 @@ ID workstream adalah identitas komponen; urutan adalah urutan pengerjaan. Nomor 
 ## Prinsip penyimpanan dan ownership
 
 - Repository adalah sumber kanonis untuk source, installer, dokumentasi, dan test.
-- Source runtime komponen Quickshell pada laptop berada di bawah `~/.config/quickshell/`.
-- Untuk integrasi Lock Screen saat ini, source upstream aktif berada pada `~/.config/quickshell/caelestia/`; empat file visual K41 disimpan di `workstreams/02-lock-screen/modules/lockscreen/` dan dideploy sebagai overlay ke `modules/lock/` setelah runtime stabil.
-- Source milik K41 disimpan di direktori ownership khusus pada workstream; lokasi runtime mengikuti integrasi yang sudah diaudit. Jangan mengasumsikan seluruh fitur menggunakan namespace runtime `k41-dots` sebelum migrasi terbukti.
+- Source runtime komponen Quickshell pada laptop berada di bawah ~/.config/quickshell/.
+- Untuk integrasi Lock Screen saat ini, source upstream aktif berada pada ~/.config/quickshell/caelestia/; empat file visual K41 disimpan di workstreams/02-lock-screen/modules/lockscreen/ dan dideploy sebagai overlay ke modules/lock/ setelah runtime stabil.
+- Source milik K41 disimpan di direktori ownership khusus pada workstream; lokasi runtime mengikuti integrasi yang sudah diaudit. Jangan mengasumsikan seluruh fitur menggunakan namespace runtime k41-dots sebelum migrasi terbukti.
 - Jangan mengedit source upstream atau file package-owned jika komponen K41 terpisah dapat digunakan.
 - Perubahan runtime harus memiliki preflight, backup, verifikasi pascaperubahan, dan rollback yang sesuai.
 
 ## Peta implementasi repository
 
-Source visual Workstream 02 berada di `workstreams/02-lock-screen/modules/lockscreen/`; helper lock startup dan updater berada di `workstreams/02-lock-screen/scripts/`. Deployment overlay ke Caelestia ditahan sampai fix startup diuji pada X280. Artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream tetap menjadi acuan prosedur dan acceptance.
+Source visual Workstream 02 berada di workstreams/02-lock-screen/modules/lockscreen/; helper lock startup dan updater berada di workstreams/02-lock-screen/scripts/. Deployment overlay ke Caelestia ditahan sampai fix startup diuji pada X280. Artefak Workstream 04 dipetakan di [Stage 5 — Desktop Customization](../README.md). Dokumen workstream tetap menjadi acuan prosedur dan acceptance.
 
 ## Alur kolaborasi dan verifikasi
 
@@ -60,7 +60,7 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 
 ## Cleanup Caelestia
 
-Dashboard dinonaktifkan melalui `dashboard.enabled=false` pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script `scripts/k41-cleanup-caelestia.sh` menonaktifkan konfigurasi tanpa menghapus source QML upstream. Jika modul upstream hilang dari checkout user, `scripts/k41-repair-caelestia-modules.sh` memulihkan hanya `modules/dashboard` dari instalasi package di `/etc/xdg/quickshell/caelestia`; default dry-run, `--apply` menyalin secara atomik setelah memverifikasi source dimiliki pacman, dan tidak menimpa direktori tujuan yang sudah ada. Jalankan `--check` setelah repair. Test fixture: `tests/test-caelestia-module-repair.sh`. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
+Dashboard dinonaktifkan melalui dashboard.enabled=false pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script scripts/k41-cleanup-caelestia.sh menonaktifkan konfigurasi tanpa menghapus source QML upstream. Jika modul upstream hilang dari checkout user, scripts/k41-repair-caelestia-modules.sh memulihkan hanya modules/dashboard dari instalasi package di /etc/xdg/quickshell/caelestia; default dry-run, --apply menyalin secara atomik setelah memverifikasi source dimiliki pacman, dan tidak menimpa direktori tujuan yang sudah ada. Jalankan --check setelah repair. Test fixture: tests/test-caelestia-module-repair.sh. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
 
 ## Guest Mode
 
