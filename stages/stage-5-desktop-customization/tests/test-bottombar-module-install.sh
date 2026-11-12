@@ -88,7 +88,7 @@ grep -Fq 'preserve-me-on-failure' "$target"
 cmp -s "$shell" "$tmp/shell.before-failure"
 
 # An unknown/manual host edit must fail closed and preserve both files.
-printf 'custom-host-state\n' >>"$shell"
+printf '%s\n' "$legacy_import" >>"$shell"
 cp -- "$target" "$tmp/module.before-ambiguous"
 cp -- "$shell" "$tmp/shell.before-ambiguous"
 if run_installer; then
