@@ -200,7 +200,7 @@ for label, root in qml_roots:
             except OSError:
                 continue
             matched = [token for token in qml_tokens if re.search(r"\b" + re.escape(token) + r"\b", source)]
-            if matched and (re.search(r"\\b(?:ShellRoot|PanelWindow|Variants)\\b", source)
+            if matched and (re.search(r"\b(?:ShellRoot|PanelWindow|Variants)\\b", source)
                             or candidate.name.lower() in {"shell.qml", "main.qml", "quickshell.qml"}):
                 rel = candidate.relative_to(root).as_posix()
                 qml_candidates.append((label, rel[:180], matched))
