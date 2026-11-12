@@ -73,3 +73,16 @@ Dokumen rinci: [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md).
 Gunakan status kanonis dari [AGENTS.md](../../../AGENTS.md): PLANNED, IMPLEMENTED, TESTED, VERIFIED, COMPLETED / USER ACCEPTED, BLOCKED, dan RELEASED. Jelaskan bukti dan batas klaim untuk setiap status.
 
 Status keseluruhan Stage 5 hanya dicatat di [docs/06-STATUS.md](../../../docs/06-STATUS.md).
+
+
+## Protokol khusus Topbar — Workstream 04
+
+- Status awal: **PLANNED — DOCUMENTATION READY; AUDIT NOT STARTED**. Urutan, status, dan prioritas kanonis berada di [docs/06-STATUS.md](../../../docs/06-STATUS.md).
+- Ikuti pola Workstream 02 dan 03: audit read-only → review bukti → spesifikasi dan persetujuan desain → implementasi/deployment terpisah → automated tests → runtime verification → acceptance/handoff.
+- Jangan menggabungkan audit dengan deployment. Audit tidak boleh mengubah runtime, package, konfigurasi, service, atau Git metadata checkout.
+- Audit wajib memeriksa source/config yang benar-benar aktif, versi Quickshell/Caelestia/Hyprland/Qt, API QML, panel/bar yang sudah berjalan, tray/status providers, monitor/scaling, fullscreen/fokus, dan titik integrasi.
+- Elemen Topbar, sumber data, alignment, ukuran, visibility, interaksi, serta perilaku multi-monitor harus disepakati sebelum implementasi. Jangan menebak status atau menambahkan widget hanya karena tersedia upstream.
+- Implementasi harus memisahkan source K41 dari upstream dan mengubah host seminimal mungkin. Preflight, backup, checksum/manifest, staging, verifikasi, logging, idempotensi, fail-closed, dan rollback ditentukan berdasarkan target aktual.
+- Test fixture/mock tidak menggantikan verifikasi QML/runtime pada ThinkPad X280. Pengguna melakukan review visual/interaksi langsung; screenshot bukan acceptance gate.
+- Tidak ada cleanup Caelestia luas dalam WS04. Cleanup tetap milik Workstream 08 dan dikerjakan terakhir.
+- Dokumen pemilik: [Workstream 04 — Topbar](04-TOPBAR.md). Nama script dan path final ditetapkan setelah audit, bukan diasumsikan sebelumnya.
