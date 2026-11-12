@@ -89,3 +89,13 @@ Bukti Stage 4 historis tetap tersimpan pada commit arsip 02f6194ed04c8f13ea64eda
 - **IMPLEMENTED:** fixture expectations were updated for the two K41 module locations and new `qs.*` imports.
 - **NOT TESTED YET:** No Bash syntax check, ShellCheck, regression fixture, global test runner, Quickshell QML load, or X280 runtime deployment has been executed after these edits. GitHub fetch confirms the updated file contents only; it is not evidence that scripts run successfully.
 - **SAFETY GATE:** Do not run the deployment scripts on the laptop until local checkout is updated and the Bash syntax/regression tests pass. After that, run each deployment from the repository as the normal desktop user; WS02 reloads Caelestia, WS03/WS04 do not restart Quickshell. Verify both copies with SHA-256 and validate imports after restart/reboot.
+
+
+### WS04 — migrasi Topbar mandiri (13 November 2026)
+
+- **IMPLEMENTED:** deployer diarahkan ke `~/.config/quickshell/k41/` dan tidak lagi mengedit atau menyalin file ke namespace Caelestia.
+- **IMPLEMENTED:** entry point `stages/stage-5-desktop-customization/workstreams/04-topbar/shell.qml` ditambahkan.
+- **IMPLEMENTED:** fixture test dirancang ulang untuk memeriksa isolasi Caelestia, idempotensi, penolakan dependency internal Caelestia, dan symlink target.
+- **BLOCKED:** source `modules/topbar/Topbar.qml` canonical masih mengandung import/service Caelestia. Deployer baru sengaja menolak source tersebut sampai adaptasi K41-owned selesai. Karena itu deployer belum dapat dipakai untuk instalasi runtime.
+- **NOT TESTED:** Bash syntax dan fixture test belum dijalankan terhadap checkout lokal/X280. Tidak ada deployment, reload, restart, autostart change, atau perubahan NotificationServer yang dilakukan.
+- **NEXT:** adaptasi QML/services menjadi milik K41, termasuk NotificationServer + Notification Dock, setelah mekanisme transisi kepemilikan D-Bus dari Caelestia dipastikan aman.
