@@ -46,7 +46,9 @@ chmod 0600 "$report"
 redact() {
     python3 -c '
 import os, pwd, re, sys
-s = sys.stdin.read()
+# Logs and user configuration may contain non-UTF-8 bytes. Decode
+# lossily so one malformed byte cannot abort redaction or corrupt the report.
+s = sys.stdin.buffer.read().decode("utf-8", errors="replace")
 home = os.environ.get("HOME", "")
 try: user = pwd.getpwuid(os.getuid()).pw_name
 except KeyError: user = os.environ.get("USER", "")
@@ -727,6 +729,23 @@ with report_path.open("a", encoding="utf-8") as report:
 PY
 chmod 0600 "$timeline_file"
 note "Normalized lifecycle timeline: $run_dir/lifecycle-timeline.tsv"
+
+# GitHub's text/blob APIs require valid UTF-8. Normalize the completed report
+# before publishing; upstream logs/config snippets can contain arbitrary bytes.
+python3 - "$report" <<'PY'
+from pathlib import Path
+import sys
+path = Path(sys.argv[1])
+raw = path.read_bytes()
+text = raw.decode("utf-8", errors="replace")
+text = "".join(ch for ch in text if ch in "\\n\\r\\t" or ord(ch) >= 32)
+path.write_text(text, encoding="utf-8", errors="strict")
+if path.stat().st_size == 0:
+    raise SystemExit("ERROR: diagnostic report is empty; refusing publication")
+print(f"Report UTF-8 normalization: PASS ({path.stat().st_size} bytes)")
+PY
+chmod 0600 "$report"
+note 'Report encoding normalized to valid UTF-8; invalid bytes replaced and control characters removed.'
 note 'Timeline statuses describe collected evidence only; NOT_OBSERVED is not proof that an event did not occur.'
 note 'The collector cannot prove successful unlock or desktop restoration without correlated runtime telemetry.'
 
