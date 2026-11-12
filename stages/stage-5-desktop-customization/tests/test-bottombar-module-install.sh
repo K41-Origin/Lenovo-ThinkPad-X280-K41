@@ -37,6 +37,7 @@ run_installer() {
 source="$fixture/$workstream/modules/bottombar/Dock.qml"
 target="$config/quickshell/k41/modules/bottombar/Dock.qml"
 legacy_case="$config/quickshell/k41/modules/bottombar/Dock.Qml"
+k41_root="$config/quickshell/k41"
 backup_root="$state/k41/backups/bottombar"
 
 # Simulate the existing X280 case-variant file. The installer must not use,
@@ -50,6 +51,8 @@ new_import='import "../k41/modules/bottombar" as K41Bottombar'
 run_installer
 cmp -s "$source" "$target"
 [[ $(stat -c %a "$target") == 644 ]]
+[[ ! -e "$k41_root/shell.qml" && ! -e "$k41_root/qmldir" ]]
+[[ ! -e "$k41_root/modules/qmldir" && ! -e "$k41_root/modules/bottombar/qmldir" ]]
 cmp -s "$legacy_case" "$tmp/legacy-case.before"
 [[ -f $legacy_case && ! -L $legacy_case ]]
 grep -Fqx "$new_import" "$shell"
