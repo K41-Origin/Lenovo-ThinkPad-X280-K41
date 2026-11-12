@@ -103,6 +103,9 @@ instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*
 root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_file" || true)"
 (( root_id_n == 1 )) || die 'Caelestia shell.qml harus memiliki tepat satu id: root.'
 (( import_n <= 1 && instance_n <= 1 )) || die 'Integrasi K41 duplikat terdeteksi.'
+if (( handoff_needed && import_n == 1 && instance_n == 1 )); then
+    die 'K41 sudah terpasang sementara NotificationServer Caelestia masih aktif; hentikan dan audit kemungkinan D-Bus owner ganda sebelum melanjutkan.'
+fi
 services_match=1
 for service in "${required_services[@]}"; do
     if ! cmp -s "$service_source_dir/$service" "$service_target_dir/$service"; then
@@ -154,10 +157,8 @@ rollback() {
     local rc=$1 restore
     trap - EXIT
     if (( rc != 0 )); then
-        if (( notifs_replaced )); then
-            restore="$(mktemp "$host_root/.Notifs.restore.XXXXXX")"
-            if cp -a "$backup_root/Notifs.qml" "$restore" && mv -fT "$restore" "$caelestia_notifs_file"; then printf 'ROLLBACK: Caelestia Notifs.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback Notifs.qml gagal; backup %s\\n' "$backup_root" >&2; fi
-        fi
+        # Remove/restore the K41 host integration before re-enabling the
+        # Caelestia server. Quickshell file watching may reload between writes.
         if (( host_replaced )); then
             restore="$(mktemp "$host_root/.shell.restore.XXXXXX")"
             if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$host_file"; then printf 'ROLLBACK: Caelestia shell.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback host gagal; backup %s\n' "$backup_root" >&2; fi
@@ -177,6 +178,11 @@ rollback() {
                 if cp -a "$backup_root/Topbar.qml" "$restore" && mv -fT "$restore" "$target_file"; then printf 'ROLLBACK: Topbar.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback module gagal; backup %s\n' "$backup_root" >&2; fi
             else rm -f "$target_file"; fi
         fi
+        # Re-enable the old server only after the K41 host has been restored.
+        if (( notifs_replaced )); then
+            restore="$(mktemp "$host_root/.Notifs.restore.XXXXXX")"
+            if cp -a "$backup_root/Notifs.qml" "$restore" && mv -fT "$restore" "$caelestia_notifs_file"; then printf 'ROLLBACK: Caelestia Notifs.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback Notifs.qml gagal; backup %s\n' "$backup_root" >&2; fi
+        fi
     fi
     [[ -z $module_tmp ]] || rm -f "$module_tmp"
     [[ -z $host_tmp ]] || rm -f "$host_tmp"
@@ -186,18 +192,13 @@ rollback() {
 }
 trap 'rollback $?' EXIT
 
-# Stage and publish K41-owned services first. Topbar is installed only after this phase.
+# Stage every K41 file first. No host import is published until the
+# Caelestia NotificationServer has been disabled and verified.
 services_tmp="$(mktemp -d "$module_root/.services.install.XXXXXX")"
 for service in "${required_services[@]}"; do
     install -m 0644 "$service_source_dir/$service" "$services_tmp/$service"
     cmp -s "$service_source_dir/$service" "$services_tmp/$service" || die "Verifikasi staging service gagal: $service"
 done
-if [[ -e $service_target_dir ]]; then
-    mv -T "$service_target_dir" "$backup_root/services.previous"
-fi
-services_replaced=1
-mv -T "$services_tmp" "$service_target_dir"
-services_tmp=''
 
 module_tmp="$(mktemp "$module_root/.Topbar.install.XXXXXX")"
 host_tmp="$(mktemp "$host_root/.shell.install.XXXXXX")"
@@ -253,11 +254,9 @@ if (( handoff_needed )); then
     fi
 fi
 
-module_replaced=1; mv -fT "$module_tmp" "$target_file"; module_tmp=''
-cmp -s "$source_file" "$target_file" || die 'Verifikasi module setelah install gagal.'
-host_replaced=1; mv -fT "$host_tmp" "$host_file"; host_tmp=''
-grep -Fqx "$new_import" "$host_file" || die 'Import K41 tidak ditemukan setelah install.'
-grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
+# Handoff first: with file watching enabled this reloads the host without
+# either server briefly; the K41 server is only introduced by the host import
+# published below, after all K41 files are ready.
 if (( handoff_needed )); then
     notifs_replaced=1
     mv -fT "$notifs_tmp" "$caelestia_notifs_file"
@@ -267,6 +266,25 @@ grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$caelestia_notifs_file" || d
 if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$caelestia_notifs_file"; then
     die 'NotificationServer Caelestia masih aktif setelah handoff.'
 fi
+
+# Publish services and module only after the old server is disabled. Publish
+# shell.qml last because this is the point at which K41 starts its server.
+if [[ -e $service_target_dir ]]; then
+    mv -T "$service_target_dir" "$backup_root/services.previous"
+fi
+services_replaced=1
+mv -T "$services_tmp" "$service_target_dir"
+services_tmp=''
+
+module_replaced=1
+mv -fT "$module_tmp" "$target_file"
+module_tmp=''
+cmp -s "$source_file" "$target_file" || die 'Verifikasi module setelah install gagal.'
+host_replaced=1
+mv -fT "$host_tmp" "$host_file"
+host_tmp=''
+grep -Fqx "$new_import" "$host_file" || die 'Import K41 tidak ditemukan setelah install.'
+grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
 module_replaced=0; host_replaced=0; services_replaced=0; notifs_replaced=0; trap - EXIT
 info "K41 services: $service_target_dir"
 info "K41 module: $target_file"
