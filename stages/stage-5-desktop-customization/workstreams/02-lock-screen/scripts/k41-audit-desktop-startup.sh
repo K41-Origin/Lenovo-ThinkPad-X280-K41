@@ -579,6 +579,12 @@ events = {
     "HELPER_TERMINAL_ERROR": re.compile(r"K41 lock startup: ERROR:"),
     "HYPRLOCK_FALLBACK_EXITED": re.compile(r"Hyprlock fallback exited"),
     "HYPRLOCK_FALLBACK_RUNNING": re.compile(r"Hyprlock fallback is running"),
+    # Hyprlock stdout/stderr is captured inside each helper log. These lines
+    # are stronger evidence than PAM journal matching when upstream emits them.
+    "HYPRLOCK_AUTH_SUCCESS": re.compile(r"auth: authenticated for hyprlock|authenticated for hyprlock", re.I),
+    "HYPRLOCK_AUTH_FAILURE": re.compile(r"auth:.*(?:failed|failure)|authentication (?:failed|failure)", re.I),
+    "HYPRLOCK_UNLOCK_CONFIRMED": re.compile(r"Unlocked, exiting!|unlock successful|session unlocked", re.I),
+    "HYPRLOCK_CONFIG_ERROR": re.compile(r"Config path error|Could not find config|failed to load config", re.I),
 }
 observed = {name: [] for name in events}
 sources = []
@@ -645,7 +651,8 @@ with timeline_path.open("w", encoding="utf-8") as out:
 with report_path.open("a", encoding="utf-8") as report:
     report.write("\n===== NORMALIZED LOCK LIFECYCLE TIMELINE =====\n")
     report.write("Evidence status is literal: NOT_OBSERVED does not mean the event did not happen.\n")
-    report.write("Authentication and unlock events may be absent because PAM/locker logging is implementation-dependent.\n")
+    report.write("HYPRLOCK_AUTH_SUCCESS/HYPRLOCK_AUTH_FAILURE/HYPRLOCK_UNLOCK_CONFIRMED are parsed from helper-captured Hyprlock stdout/stderr; timestamp is UNKNOWN when upstream output has no timestamp.\\n")
+    report.write("AUTH_SUCCESS/AUTH_FAILURE/UNLOCK_EVENT remain separate journal-derived signals and may be absent because PAM logging is implementation-dependent.\\n")
     report.write("LOCK_SURFACE_VISIBLE and DESKTOP_RESTORED_AFTER_UNLOCK are NOT_INSTRUMENTED, not NOT_OBSERVED; no reliable correlated event source exists yet.\n")
     report.write("Timeline file: lifecycle-timeline.tsv\n")
     report.write("Helper logs inspected: " + (", ".join(p.name for p in sources) if sources else "none") + "\n")
@@ -665,6 +672,8 @@ note 'The collector cannot prove successful unlock or desktop restoration withou
 section 'DIAGNOSTIC LIMITATIONS'
 note '- Collector tidak menjalankan start-hyprland, Hyprland, Caelestia reload, atau lock command.'
 note '- Collector tidak mengubah service, package, bootloader, initramfs, TPM/LUKS, PAM, permission, ownership, maupun konfigurasi.'
+note '- Hyprlock auth/unlock lines are parsed from helper-captured stdout/stderr; if upstream emits no timestamp, the timeline records UNKNOWN rather than inventing one.'
+note '- Journal-derived PAM/auth signals remain separate from Hyprlock helper-log signals; absence in one source does not negate evidence in the other.'
 note '- Journal mungkin tidak dapat dibaca lengkap oleh user biasa; permission-denied dicatat sebagai keterbatasan.'
 note '- Report memuat QML lockscreen repository/runtime yang dipilih, potongan log, metadata, dan hash. Redaksi otomatis tidak menjamin seluruh data pribadi terhapus.'
 note '- Salinan report tersanitasi dipublikasikan otomatis; redaksi tidak menjamin seluruh data privat terhapus, jadi tinjau report di GitHub dan hapus data sensitif bila ditemukan.'
