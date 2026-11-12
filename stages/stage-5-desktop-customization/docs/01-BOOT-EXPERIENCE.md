@@ -1,105 +1,104 @@
 # Workstream 01 — Boot Experience
 
-**Status: COMPLETE — PLYMOUTH BOOT EXPERIENCE IMPLEMENTATION.** Runtime acceptance untuk tampilan tema/UKI masih NOT VERIFIED; desktop lock-readiness integration dimiliki Workstream 02.  
-Audit report reviewed: `reports/stage-5-desktop-customization/01-boot-experience/audits/20261111T063301Z/report.txt`.
+**Status: PAUSED — INVESTIGATION PENDING (2026-11-12).** Implementasi Plymouth/K41 tersedia di repository, tetapi pengguna melaporkan splash tidak terlihat pada boot aktual. Audit menunjukkan service Plymouth berhasil dimulai; hal tersebut belum membuktikan frame splash benar-benar terlihat. Jangan lanjutkan perubahan implementasi sampai penyebabnya diperiksa.
 
-## Keputusan tetap
+Status ini menggantikan label COMPLETE/USER ACCEPTED yang sebelumnya tercantum di beberapa dokumen. IMPLEMENTED tidak sama dengan runtime VERIFIED atau USER ACCEPTED.
+
+Audit read-only terbaru: reports/stage-5-desktop-customization/01-boot-experience/audits/20261112T051447Z/report.txt (2026-11-12 05:14 UTC). Laporan memuat identitas perangkat, UUID, jalur lokal, dan journal; jangan membagikannya tanpa pemeriksaan/redaksi.
+
+## Keputusan arsitektur yang tetap berlaku
 
 - Plymouth adalah satu-satunya renderer boot splash.
-- Tidak ada QML, Quickshell, Caelestia, Hyprland, atau compositor dalam jalur visual boot.
-- Identitas visual: background hitam, wordmark K41 putih, ring 12 glyph persegi panjang, satu glyph menyala bergantian.
-- Plymouth menangani prompt LUKS melalui integrasi initramfs yang tersedia.
-- Desktop lock screen dan transisi ke Hyprland adalah lifecycle terpisah dari renderer bootscreen.
-- TPM/LUKS, Secure Boot, bootloader, kernel command line, dan autentikasi tidak diubah oleh installer bootscreen.
+- Tidak menggunakan QML, Quickshell, Caelestia, Hyprland, atau compositor untuk menggambar boot splash.
+- Identitas visual K41: background hitam, wordmark K41 putih, ring 12 glyph persegi panjang, satu glyph menyala bergantian.
+- Plymouth menangani prompt LUKS melalui integrasi initramfs.
+- Desktop lock screen dan transisi ke Hyprland merupakan lifecycle terpisah dari renderer boot splash.
+- Jangan mengubah TPM/LUKS, Secure Boot, bootloader, kernel command line, autentikasi, atau unit sistem tanpa bukti dan rencana recovery.
 
-## Hasil audit perangkat — 11 November 2026
+## Status implementasi repository
 
-Laporan terbaru menunjukkan konfigurasi aktual berikut:
+Artefak implementasi yang tersedia:
+- Entry point: workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh
+- Installer tema: workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh
+- Theme descriptor/script: workstreams/01-boot-experience/themes/plymouth/k41/
+- Handoff helper: workstreams/01-boot-experience/scripts/k41-plymouth-quit-after-lock.sh
+- Hyprland launcher: workstreams/01-boot-experience/scripts/k41-start-hyprland.sh
+- Audit collector: workstreams/01-boot-experience/scripts/k41-audit-boot-experience.sh
+
+Installer tema memiliki efek sistem nyata: memeriksa konfigurasi boot, memasang tema, memilih tema, dan membangun ulang initramfs/UKI melalui mekanisme yang dipanggilnya. **Jangan jalankan ulang installer selama status PAUSED.**
+
+Installer tidak dimaksudkan untuk mengubah partisi, metadata/keyslot LUKS, TPM enrollment/PCR policy, Secure Boot, atau autentikasi.
+
+## Temuan audit perangkat — 2026-11-12
+
+Audit terbaru bersifat READ-ONLY. Ringkasan yang relevan:
 
 | Area | Temuan |
 |---|---|
-| Perangkat | Lenovo ThinkPad X280 |
-| Firmware | UEFI 64-bit; Secure Boot dilaporkan disabled |
-| Bootloader | systemd-boot 262.1-1-arch; entry aktif `arch-linux.efi` |
-| EFI System Partition | `/efi`, vfat, sekitar 1 GiB |
-| Root | NVMe partition → LUKS2 → `/dev/mapper/cryptroot` → ext4 |
-| Kernel command line | Memuat `rd.luks.name=…=cryptroot`, `root=/dev/mapper/cryptroot`, `quiet splash` |
-| Initramfs | mkinitcpio 42.2; HOOKS saat audit: `systemd → plymouth → sd-encrypt` dengan hook lain tetap dipertahankan |
-| UKI | Preset `linux.preset` menunjuk ke `/efi/EFI/Linux/arch-linux.efi` |
-| Plymouth | Paket 26.134.222-3 dan file tema K41 ditemukan |
-| TPM | Device `/dev/tpm0` dan `/dev/tpmrm0` terdeteksi; status token LUKS tidak dapat disimpulkan |
-| Desktop | Hyprland session target tercapai setelah boot |
+| Boot mode | UEFI; Secure Boot disabled |
+| Bootloader | systemd-boot; entry aktif berupa UKI arch-linux.efi |
+| Kernel command line | Memuat parameter root LUKS dan quiet splash |
+| Initramfs | HOOKS memuat systemd, plymouth, dan sd-encrypt dalam urutan tersebut |
+| UKI | UKI aktif ditemukan; inventory image menunjukkan binary Plymouth dan komponen terkait |
+| Plymouth theme | Theme default dilaporkan k41; file tema ditemukan |
+| DRM/framebuffer | simpledrm muncul lebih awal; i915 kemudian menjadi framebuffer utama |
+| Plymouth startup | plymouth-start.service berhasil dimulai di initramfs; switch-root service selesai |
+| Display handoff | k41-plymouth-release.service menjalankan plymouth quit --retain-splash sekitar detik ke-15 |
+| Console | Journal mencatat fbcon mengambil alih console sekitar detik ke-16 |
+| Plymouth quit | plymouth-quit.service selesai sekitar detik ke-22 |
 
-### Batas kualitas laporan
+### Interpretasi dan batas bukti
 
-Collector dijalankan sebagai user non-root. Karena itu sebagian pemeriksaan ditolak permission, termasuk pembacaan beberapa file EFI/loader, status device-mapper/LUKS, metadata LUKS, dan isi image initramfs. Laporan tidak membuktikan apakah TPM token terdaftar, apakah K41 merupakan theme default yang aktif, atau apakah isi UKI benar-benar memuat aset tema. Jangan mengubah TPM/LUKS berdasarkan laporan ini.
+1. Data mendukung bahwa Plymouth dimuat dan service lifecycle berjalan. Ini belum membuktikan frame tema K41 terlihat pada panel.
+2. Urutan release service, fbcon takeover, dan startup desktop membuat display handoff relevan untuk diperiksa. Belum terbukti bahwa salah satunya penyebab splash tidak terlihat.
+3. Keberadaan file tema dan binary dalam UKI tidak membuktikan script tema berhasil dieksekusi atau renderer berhasil menggambar frame.
+4. Belum ada bukti bahwa k41-repair-caelestia-modules.sh mengubah atau merusak Plymouth.
+5. Audit 11 November mencatat lock-readiness timeout 75 detik. Temuan historis itu tidak boleh dianggap otomatis menjelaskan boot terbaru tanpa pencocokan journal dan helper aktual.
 
-Laporan juga menunjukkan:
-- `k41-plymouth-release.service` aktif/enabled.
-- `plymouth-quit.service` memakai drop-in `k41-lock-handoff.conf`.
-- `getty@tty1` memiliki override autologin.
-- Log mencatat lock handoff tidak mencapai marker dalam 75 detik; helper menghentikan getty tty1 dan melepaskan Plymouth. Ini adalah masalah lifecycle sesi/lock, bukan masalah renderer tema. Tidak disentuh oleh installer tema pada perubahan ini.
+## Hipotesis yang masih harus diuji
 
-## Implementasi repository
+- Renderer/theme K41 gagal menggambar frame meskipun daemon berjalan.
+- Display ownership atau VT/framebuffer handoff menyebabkan frame tertutup atau diganti.
+- Theme asset atau konfigurasi runtime di UKI berbeda dari asumsi.
+- Interaksi release helper, getty, launcher Hyprland, atau startup desktop mengubah tampilan terlalu dini.
+- Repair script Caelestia berdampak tidak langsung pada jalur boot (belum ada bukti).
 
-### Entry point
+Semua poin di atas adalah HIPOTESIS, bukan akar masalah yang telah diverifikasi.
 
-`scripts/k41-configure-boot-experience.sh` kini hanya mendelegasikan ke `scripts/k41-install-plymouth-theme.sh`.
+## Batas ownership Workstream 01 dan 02
 
-Installer tema:
-1. Memastikan berjalan sebagai root dan memeriksa UEFI serta mount EFI `/efi`.
-2. Memeriksa filesystem EFI, file konfigurasi, preset UKI, dan file sumber tema.
-3. Memvalidasi HOOKS aktif dengan urutan `systemd → plymouth → sd-encrypt`; tidak mengedit HOOKS.
-4. Memastikan kernel command line sudah memuat `splash`; tidak mengedit command line.
-5. Membaca lokasi UKI dari `linux.preset`; tidak mengasumsikan lokasi selain hasil konfigurasi aktif.
-6. Membuat backup UKI, initramfs yang ada, konfigurasi Plymouth, dan tema sebelum perubahan.
-7. Memasang file tema K41 lalu menjalankan `plymouth-set-default-theme -R k41` untuk memilih tema dan membangun ulang initramfs/UKI.
-8. Memverifikasi theme terpilih dan file UKI tetap tersedia.
+- Workstream 01 memiliki Plymouth renderer, theme assets, installer tema, audit boot, serta kontrak handoff ke sesi desktop.
+- Workstream 02 memiliki visual Lock Screen, Caelestia/Quickshell IPC, lock invocation, dan penerbitan readiness marker.
+- Ketergantungan handoff terhadap readiness marker tidak memindahkan ownership implementasi Lock Screen ke Workstream 01.
+- Jangan menghidupkan kembali Quickshell boot splash legacy. Plymouth tetap satu-satunya renderer boot splash.
 
-Installer tidak:
-- Mengubah partisi, filesystem, bootloader entry, Secure Boot, kernel command line, atau HOOKS.
-- Menjalankan pacman atau mengubah paket.
-- Mengubah LUKS metadata/keyslot, mendaftarkan TPM, atau mengubah PCR policy.
-- Membuat/mengubah unit systemd, getty, autologin, PAM, lock screen, atau konfigurasi desktop.
-- Menggunakan QML/Quickshell.
+## Aturan selama PAUSED
 
-### Artefak kanonis
+- Jangan jalankan installer Workstream 01.
+- Jangan rebuild initramfs/UKI atau mengubah kernel command line, mkinitcpio hooks, systemd units, getty, autologin, TPM, LUKS, atau bootloader untuk eksperimen.
+- Jangan mengubah repair script Caelestia atau desktop startup sebagai workaround Plymouth tanpa bukti.
+- Pemeriksaan berikutnya harus read-only: telaah source helper dan unit aktual, status service, journal boot saat ini/sebelumnya, isi UKI/theme relevan, dan error renderer.
+- Pertahankan passphrase LUKS dan recovery path. Jangan reboot setelah perubahan boot yang belum diverifikasi.
+- Jika perubahan diperlukan, tetapkan hipotesis terukur, backup, rollback, dan acceptance criteria; minta persetujuan sebelum tindakan sistem berisiko.
 
-- Installer entry point: `workstreams/01-boot-experience/scripts/k41-configure-boot-experience.sh`
-- Installer tema: `workstreams/01-boot-experience/scripts/k41-install-plymouth-theme.sh`
-- Theme descriptor: `workstreams/01-boot-experience/themes/plymouth/k41/k41.plymouth`
-- Theme script: `workstreams/01-boot-experience/themes/plymouth/k41/k41.script`
-- Tests: `test-boot-experience.sh`, `test-plymouth-k41-theme.sh`, `test-plymouth-only-boot.sh`
+## Rencana untuk membuka kembali Workstream 01
 
-## Handoff boundary ke Workstream 02
-
-Implementasi Workstream 01 dinyatakan **COMPLETE** untuk scope renderer Plymouth, tema K41, installer tema, dan kontrak handoff boot. Workstream 01 menunggu satu readiness marker; ia tidak mengimplementasikan Caelestia IPC atau visual Lock Screen.
-
-Audit startup X280 tanggal 11 November 2026 membuktikan urutan berikut:
-- Hyprland session mencapai target sekitar 19 detik setelah boot.
-- `getty@tty1.service` dihentikan setelah helper handoff mencatat lock screen tidak siap selama 75 detik.
-- `getty@tty2.service` kemudian dimulai.
-- Hyprland session berhenti setelah tty1 dihentikan.
-
-Karena marker readiness tidak pernah tersedia, handoff Plymouth menjalankan fallback yang memang dirancang untuk kondisi tersebut. Ini bukan bukti kerusakan renderer Plymouth atau installer tema. Kegagalan penerbitan marker berada pada jalur Caelestia lock startup yang kini ditangani Workstream 02.
-
-Batas ownership:
-- Workstream 01: Plymouth renderer, theme assets, installer, UKI/initramfs validation, dan fail-safe handoff setelah marker/timer.
-- Workstream 02: Caelestia/Quickshell lock visual, IPC lock invocation, helper yang menerbitkan readiness marker, dan verifikasi lock state.
-- Jangan memindahkan diagnosis kegagalan Caelestia lock ke Workstream 01 hanya karena timer handoff berada di jalur boot.
-
-Tidak ada perubahan pada Plymouth, getty, autologin, systemd, bootloader, initramfs, TPM/LUKS, atau autentikasi sebagai bagian dari penyelesaian status ini.
+1. Review implementasi aktual k41-plymouth-release.service, k41-plymouth-quit-after-lock.sh, k41-start-hyprland.sh, dan unit terkait.
+2. Petakan urutan Plymouth → framebuffer/VT → getty/Hyprland berdasarkan bukti aktual.
+3. Periksa error theme/renderer dan isi UKI tanpa mengubah sistem.
+4. Nyatakan akar masalah atau batas ketidakpastian secara eksplisit.
+5. Ajukan perubahan minimum dengan backup/rollback, tes, dan persetujuan sebelum diterapkan.
+6. Uji runtime visual pada ThinkPad X280 dan minta konfirmasi pengguna.
 
 ## Validasi dan acceptance
 
-- Static tests memeriksa kontrak Plymouth-only dan memastikan installer tidak mengubah TPM/LUKS, bootloader, systemd lifecycle, atau autologin.
-- CI memvalidasi sintaks dan kontrak statis; CI bukan bukti boot fisik.
-- Installer belum dijalankan pada ThinkPad X280 setelah refactor ini.
-- Status runtime theme aktif, UKI contents, prompt LUKS, dan tampilan saat reboot tetap **NOT VERIFIED** sampai pengujian perangkat dilakukan.
+- Static tests historis hanya membuktikan kontrak/sintaks sesuai cakupannya; bukan bukti visual saat boot.
+- Audit perangkat 2026-11-12 adalah read-only dan tidak mengubah konfigurasi boot.
+- Runtime acceptance tema/UKI dan tampilan boot: **NOT VERIFIED**.
+- Status Workstream 01: **PAUSED — INVESTIGATION PENDING**.
 
 ## Referensi upstream
 
 - ArchWiki Plymouth: https://wiki.archlinux.org/title/Plymouth
-- Arch manual `plymouth-set-default-theme`: https://man.archlinux.org/man/plymouth-set-default-theme.1.en
-- Arch manual `mkinitcpio`: https://man.archlinux.org/man/mkinitcpio.8
-
+- Arch manual plymouth-set-default-theme: https://man.archlinux.org/man/plymouth-set-default-theme.1.en
+- Arch manual mkinitcpio: https://man.archlinux.org/man/mkinitcpio.8
