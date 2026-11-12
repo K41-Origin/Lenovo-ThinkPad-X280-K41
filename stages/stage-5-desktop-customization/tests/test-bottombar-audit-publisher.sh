@@ -20,7 +20,7 @@ for token in \
   'chmod 0700 "$run_dir"' \
   'HOST-REDACTED' \
   'LOCAL-IDENTITY-REDACTED' \
-  'REPOSITORY_CHECKOUT' \
+  'uid|gid' \\\n  'REPOSITORY_CHECKOUT' \
   'active checkout Git metadata was not used'; do
   grep -Fq -- "$token" "$script" || {
     printf 'FAIL: Bottombar audit publisher missing required behavior: %s\n' "$token" >&2
