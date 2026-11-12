@@ -58,6 +58,15 @@ state_root="$HOME/.local/state/k41/lockscreen/backups"
 readonly upstream_url="https://github.com/caelestia-dots/shell.git"
 readonly upstream_revision="d999d4878ee4cec134168e60d913714566a8cfa6"
 readonly source_files=(LockSurface.qml Content.qml Center.qml center/PasswordInput.qml)
+# Exact SHA-256 allowlist for three previously deployed K41 revisions.
+# Captured by the X280 startup audit on 2026-11-12; each differed from the
+# current K41 source only in its first descriptive comment line.
+# Unknown local content remains protected by the default refusal below.
+declare -Ar legacy_deployed_sha256=(
+    ["Content.qml"]="20264d13d2ee31510168aa96a61f4a754a194844bba54268e0858fa3ec540ab4"
+    ["Center.qml"]="74e1f98643f5c6abee60efb211ccd4a4d65e0af21f0c4e3344ae6cb56347e562"
+    ["center/PasswordInput.qml"]="e7bb8981fdb5a83552277fe024bd56a60f26060e6e987c3a24fe6a880439bb5d"
+)
 
 [[ -d "$source_root" && ! -L "$source_root" ]] || die "Stage 5 visual source is missing: $source_root"
 [[ $(stat -c %u "$repo_root") == "$EUID" ]] || die "Repository checkout is not owned by the current user."
@@ -101,23 +110,41 @@ for relative in Lock.qml LockSurface.qml Content.qml Center.qml center/PasswordI
         die "Required Caelestia lock runtime file is missing: modules/lock/$relative"
 done
 
-# Only replace clean upstream versions or a previous byte-identical K41 deployment.
+# Accept only current K41 files, pristine pinned-upstream files, or exact
+# hashes of audited legacy K41 deployments. Never accept arbitrary local edits.
 for relative in "${source_files[@]}"; do
     destination="$lock_root/$relative"
     [[ -f "$destination" && ! -L "$destination" ]] ||
         die "Expected a regular upstream file at $destination"
-    if ! cmp -s "$source_root/$relative" "$destination"; then
-        upstream_file="$(mktemp)"
-        if ! git -C "$host_root" show "HEAD:modules/lock/$relative" > "$upstream_file"; then
-            rm -f -- "$upstream_file"
-            die "File is not tracked by the pinned Caelestia checkout: modules/lock/$relative"
-        fi
-        if ! cmp -s "$upstream_file" "$destination"; then
-            rm -f -- "$upstream_file"
-            die "Local modifications detected at modules/lock/$relative; refusing to overwrite them."
-        fi
-        rm -f -- "$upstream_file"
+    if cmp -s "$source_root/$relative" "$destination"; then
+        info "Already current: modules/lock/$relative"
+        continue
     fi
+
+    upstream_file="$(mktemp)"
+    if ! git -C "$host_root" show "HEAD:modules/lock/$relative" > "$upstream_file"; then
+        rm -f -- "$upstream_file"
+        die "File is not tracked by the pinned Caelestia checkout: modules/lock/$relative"
+    fi
+    if cmp -s "$upstream_file" "$destination"; then
+        info "Approved upstream baseline: modules/lock/$relative"
+        rm -f -- "$upstream_file"
+        continue
+    fi
+    rm -f -- "$upstream_file"
+
+    legacy_hash="${legacy_deployed_sha256[$relative]:-}"
+    if [[ -n $legacy_hash ]]; then
+        destination_hash="$(sha256sum -- "$destination")" ||
+            die "Cannot calculate SHA-256 for modules/lock/$relative"
+        destination_hash="${destination_hash%% *}"
+        if [[ $destination_hash == "$legacy_hash" ]]; then
+            info "Recognized exact legacy K41 deployment: modules/lock/$relative ($destination_hash)"
+            continue
+        fi
+    fi
+
+    die "Unrecognized local modifications at modules/lock/$relative; refusing to overwrite them."
 done
 
 mkdir -p -- "$state_root"
