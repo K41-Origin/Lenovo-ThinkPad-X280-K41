@@ -54,6 +54,10 @@ source_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock
 config_root="$HOME/.config"
 host_root="$config_root/quickshell/caelestia"
 lock_root="$host_root/modules/lock"
+# Keep compatibility copies in both K41 namespaces. Caelestia remains the
+# active host; these are source mirrors, not separate shell configurations.
+legacy_k41_module_root="$config_root/quickshell/k41/modules/lockscreen"
+caelestia_k41_module_root="$host_root/k41/modules/lockscreen"
 state_root="$HOME/.local/state/k41/lockscreen/backups"
 readonly upstream_url="https://github.com/caelestia-dots/shell.git"
 readonly upstream_revision="d999d4878ee4cec134168e60d913714566a8cfa6"
@@ -91,7 +95,7 @@ assert_safe_path() {
         [[ ! -L $current ]] || die "Refusing symlink path component: $current"
     done
 }
-for path in "$config_root" "$config_root/quickshell" "$host_root" "$host_root/modules" "$lock_root" "$state_root"; do
+for path in "$config_root" "$config_root/quickshell" "$host_root" "$host_root/modules" "$lock_root" "$host_root/k41" "$host_root/k41/modules" "$caelestia_k41_module_root" "$config_root/quickshell/k41" "$config_root/quickshell/k41/modules" "$legacy_k41_module_root" "$state_root"; do
     assert_safe_path "$path"
     if [[ -e $path ]]; then
         [[ -d $path && $(stat -c %u "$path") == "$EUID" ]] ||
@@ -161,6 +165,20 @@ mkdir -p -- "$backup/center"
 for relative in "${source_files[@]}"; do
     install -m 0644 -- "$lock_root/$relative" "$backup/$relative"
 done
+# Snapshot any pre-existing K41 mirror files before updating either location.
+mkdir -p -- "$backup/mirror-legacy" "$backup/mirror-caelestia"
+for relative in "${source_files[@]}"; do
+    for pair in "legacy:$legacy_k41_module_root" "caelestia:$caelestia_k41_module_root"; do
+        label="${pair%%:*}"
+        root="${pair#*:}"
+        if [[ -e "$root/$relative" || -L "$root/$relative" ]]; then
+            [[ -f "$root/$relative" && ! -L "$root/$relative" ]] || die "Unsafe existing mirror file: $root/$relative"
+            install -D -m 0600 -- "$root/$relative" "$backup/mirror-$label/$relative"
+        else
+            : > "$backup/mirror-$label/ABSENT-$relative"
+        fi
+    done
+done
 printf 'Caelestia origin: %s\nCaelestia revision: %s\n' "$upstream_url" "$upstream_revision" > "$backup/manifest"
 (
     cd -- "$backup"
@@ -171,9 +189,18 @@ printf 'Caelestia origin: %s\nCaelestia revision: %s\n' "$upstream_url" "$upstre
 stage="$(mktemp -d "$lock_root/.k41-lockscreen-stage.XXXXXX")"
 changed=0
 restore_originals() {
-    local relative
+    local relative label root
     for relative in "${source_files[@]}"; do
         install -m 0644 -- "$backup/$relative" "$lock_root/$relative"
+        for pair in "legacy:$legacy_k41_module_root" "caelestia:$caelestia_k41_module_root"; do
+            label="${pair%%:*}"
+            root="${pair#*:}"
+            if [[ -f "$backup/mirror-$label/$relative" ]]; then
+                install -D -m 0644 -- "$backup/mirror-$label/$relative" "$root/$relative"
+            else
+                rm -f -- "$root/$relative"
+            fi
+        done
     done
 }
 publish_logs() {
@@ -293,14 +320,25 @@ changed=1
 for relative in "${source_files[@]}"; do
     mv -f -- "$stage/$relative" "$lock_root/$relative"
 done
+# Mirror the exact four visual sources into both K41 module namespaces.
+mkdir -p -- "$legacy_k41_module_root/center" "$caelestia_k41_module_root/center"
+for relative in "${source_files[@]}"; do
+    install -D -m 0644 -- "$source_root/$relative" "$legacy_k41_module_root/$relative"
+    install -D -m 0644 -- "$source_root/$relative" "$caelestia_k41_module_root/$relative"
+done
 for relative in "${source_files[@]}"; do
     cmp -s "$source_root/$relative" "$lock_root/$relative" ||
-        die "Post-deployment verification failed: $relative"
+        die "Post-deployment verification failed: Caelestia overlay $relative"
+    cmp -s "$source_root/$relative" "$legacy_k41_module_root/$relative" ||
+        die "Post-deployment verification failed: legacy K41 mirror $relative"
+    cmp -s "$source_root/$relative" "$caelestia_k41_module_root/$relative" ||
+        die "Post-deployment verification failed: Caelestia K41 mirror $relative"
 done
 rm -rf -- "$stage"
 stage=""
 
-info "K41 Floating Password Card visuals deployed into the active Caelestia lock module."
+info "K41 Floating Password Card overlay deployed into Caelestia modules/lock/."
+info "Four visual source files mirrored to: $legacy_k41_module_root and $caelestia_k41_module_root"
 info "Original files backed up to: $backup"
 info "Restarting Caelestia shell to activate the new QML."
 if ! caelestia shell -r -d; then
