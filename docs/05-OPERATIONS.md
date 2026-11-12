@@ -11,11 +11,11 @@
 
 ## Boot experience
 
-Workstream 1 — Boot Experience telah **COMPLETED / USER ACCEPTED pada 2026-11-10**. Status dan batas keputusan dimiliki [dokumen Workstream 1](08-STAGE-5/01-BOOT-EXPERIENCE.md). Catatan audit lama di bawah snapshot historis bukan backlog aktif dan tidak boleh mengubah status penutupan.
+Workstream 01 — Boot Experience saat ini **PAUSED — INVESTIGATION PENDING**. Implementasi Plymouth tersedia, tetapi pengguna melaporkan boot splash tidak terlihat dan runtime visual belum diverifikasi. Status kanonis, temuan audit, dan rencana investigasi berada di [dokumen Workstream 01](../stages/stage-5-desktop-customization/docs/01-BOOT-EXPERIENCE.md).
 
-Script boot memiliki efek sistem nyata. Jangan menjalankan ulang installer, mengubah TPM2/LUKS, membangun ulang UKI, atau mengubah unit hanya untuk membaca dokumentasi. Jika pengguna melaporkan masalah boot baru, audit kondisi aktual dan recovery path terlebih dahulu.
+Script boot memiliki efek sistem nyata. Selama investigasi, jangan menjalankan ulang installer, mengubah TPM2/LUKS, membangun ulang UKI, atau mengubah unit hanya untuk mencoba-coba. Mulai dengan audit read-only atas kondisi aktual, source helper, urutan service/VT, dan journal. Perubahan hanya setelah hipotesis, backup, rollback, dan acceptance criteria ditetapkan serta disetujui pengguna.
 
-Prinsip recovery yang tetap berlaku:
+Prinsip recovery:
 - Pertahankan passphrase LUKS sebagai jalur recovery; jangan menghapus keyslot passphrase.
 - TPM2 enrollment bersifat additive, tetapi keberhasilannya harus dibuktikan dari perangkat sebelum diklaim aktif.
 - PCR 7 bukan bukti Secure Boot verification bila Secure Boot tidak aktif.
@@ -28,9 +28,9 @@ Tahap 6 **PLANNED** dan baru dimulai setelah Stage 5 diterima.
 
 ### Baseline read-only
 
-- `scripts/audit-x280-hardware.sh` — inventaris hardware.
-- `scripts/audit-x280-power-management.sh` — baseline daya.
-- `scripts/set-x280-power-profile.sh --show` — membaca profil aktif; `--apply PROFILE` mengubah profil dan memverifikasi hasilnya. Jalankan sebagai user biasa tanpa sudo.
+- scripts/audit-x280-hardware.sh — inventaris hardware.
+- scripts/audit-x280-power-management.sh — baseline daya.
+- scripts/set-x280-power-profile.sh --show — membaca profil aktif; --apply PROFILE mengubah profil dan memverifikasi hasilnya. Jalankan sebagai user biasa tanpa sudo.
 
 Collector audit tidak melakukan tuning. Simpan hasil baseline sebelum perubahan dan ukur ulang pada kondisi workload yang sebanding.
 
