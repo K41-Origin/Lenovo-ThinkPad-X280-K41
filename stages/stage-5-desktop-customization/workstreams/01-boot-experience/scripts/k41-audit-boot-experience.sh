@@ -43,6 +43,9 @@ chmod 0700 "$OUT"
 REPORT="$OUT/report.txt"
 : >"$REPORT"
 chmod 0600 "$REPORT"
+if (( EUID == 0 )); then
+  chown "$AUDIT_UID:$AUDIT_GID" "$REPORT"
+fi
 
 section() { printf '\n\n===== %s =====\n' "$*" >>"$REPORT"; }
 note() { printf '%s\n' "$*" >>"$REPORT"; }
@@ -447,6 +450,9 @@ Never add passphrases, recovery keys, LUKS key material, or credentials.
 Generated locally under reports/stage-5-desktop-customization/01-boot-experience/audits/.
 EOF
 chmod 0600 "$OUT/README.txt"
+if (( EUID == 0 )); then
+  chown "$AUDIT_UID:$AUDIT_GID" "$OUT/README.txt"
+fi
 
 printf 'Audit report: %s\n' "$REPORT"
 printf 'Read-only collection complete. Review/redact the report before sharing.\n'
