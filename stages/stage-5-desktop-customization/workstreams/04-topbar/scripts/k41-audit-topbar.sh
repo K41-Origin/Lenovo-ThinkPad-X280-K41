@@ -420,7 +420,7 @@ def file_evidence(label, path):
     try:
         st = path.stat()
         digest = __import__("hashlib").sha256(path.read_bytes()).hexdigest()
-        add(f"{label}: PRESENT; bytes={st.st_size}; mode={oct(st.st_mode & 0o777)}; owner_uid={st.st_uid}; mtime_epoch={int(st.st_mtime)}; sha256={digest}")
+        add(f"{label}: PRESENT; bytes={st.st_size}; mode={oct(st.st_mode & 0o777)}; mtime_epoch={int(st.st_mtime)}; sha256={digest}")
         return digest
     except OSError as exc:
         add(f"{label}: READ_FAILED={type(exc).__name__}")
@@ -448,7 +448,7 @@ for proc in pathlib.Path("/proc").glob("[0-9]*"):
         if comm.lower() not in {"qs", "quickshell"} and "quickshell" not in comm.lower():
             continue
         active_qs += 1
-        raw = [x.decode("utf-8", "replace") for x in (proc / "cmdline").read_bytes().split(b"\\0") if x]
+        raw = [x.decode("utf-8", "replace") for x in (proc / "cmdline").read_bytes().split(b"\0") if x]
         exe_path = pathlib.Path(os.readlink(proc / "exe")).name
         config_arg = None
         for index, arg in enumerate(raw[:-1]):
@@ -458,7 +458,7 @@ for proc in pathlib.Path("/proc").glob("[0-9]*"):
         add(f"process: executable={exe_path[:100]}; config_argument={short_path(pathlib.Path(config_arg)) if config_arg else 'not-explicit'}")
         try:
             env_items = {}
-            for item in (proc / "environ").read_bytes().split(b"\\0"):
+            for item in (proc / "environ").read_bytes().split(b"\0"):
                 if b"=" not in item:
                     continue
                 key, value = item.split(b"=", 1)
@@ -495,13 +495,18 @@ else:
 section("RECENT QUICKSHELL/QML JOURNAL")
 journal = shutil.which("journalctl")
 if journal:
-    rc, value = run([journal, "--user", "-b", "--no-pager", "-n", "300"], timeout=12)
+    rc, value = run([journal, "--user", "-b", "--since=-30min", "--no-pager", "-o", "cat"], timeout=12)
     if rc == 0:
         matches = [line for line in value.splitlines()
-                   if any(token in line.lower() for token in ("quickshell", "qml", "k41topbar", "topbar"))]
-        add(f"journal query: exit=0; matching-lines={len(matches)}")
-        for line in matches[-25:]:
-            add("  " + bounded(line.replace(str(home), "~"), 360))
+                   if any(token in line.lower() for token in ("quickshell", "qml", "k41topbar", "topbar"))
+                   and any(token in line.lower() for token in ("error", "failed", "warning", "cannot", "unable", "exception"))]
+        add(f"journal query: exit=0; matching-error-lines={len(matches)}; window=30min")
+        for line in matches[-30:]:
+            line = line.replace(str(home), "~")
+            line = re.sub(r"/home/[^/\s]+", "/home/<user>", line)
+            line = re.sub(r"/run/user/\d+", "/run/user/<uid>", line)
+            line = re.sub(r"\bpid[=: ]+\d+\b", "pid=<pid>", line, flags=re.I)
+            add("  " + bounded(line, 360))
     else:
         add(f"journal query: exit={rc}; {bounded(value, 400)}")
 else:
