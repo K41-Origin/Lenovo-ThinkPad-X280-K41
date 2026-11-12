@@ -11,7 +11,7 @@ state="$tmp/state"
 workstream="stages/stage-5-desktop-customization/workstreams/04-topbar"
 services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 
-mkdir -p "$fixture/$workstream/modules/topbar/services" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia"
+mkdir -p "$fixture/$workstream/modules/topbar/services" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services"
 cp "$source_root/scripts/k41-implement-topbar.sh" "$fixture/$workstream/scripts/"
 for service in "${services[@]}"; do
     cp "$source_root/modules/topbar/services/$service" "$fixture/$workstream/modules/topbar/services/$service"
@@ -34,6 +34,21 @@ ShellRoot {
 QML
 host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
+notifs="$config/quickshell/caelestia/services/Notifs.qml"
+cat >"$notifs" <<'QML'
+pragma Singleton
+Singleton {
+    id: root
+    property list<var> list: []
+    NotificationServer {
+        onNotification: notif => {
+            notif.tracked = true;
+            root.list = [comp, ...root.list];
+        }
+    }
+}
+QML
+
 run_installer() {
     HOME="$home" XDG_CONFIG_HOME="$config" XDG_STATE_HOME="$state" \
         bash "$fixture/$workstream/scripts/k41-implement-topbar.sh"
@@ -48,10 +63,37 @@ for service in "${services[@]}"; do
 done
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
+grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$notifs"; then
+    echo 'Caelestia NotificationServer was not disabled.' >&2
+    exit 1
+fi
+test -f "$state/k41/backups/topbar/$(basename "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | head -n1)")/Notifs.qml" || {
+    backup_notifs="$(find "$state/k41/backups/topbar" -mindepth 2 -maxdepth 2 -name Notifs.qml -print -quit)"
+    test -n "$backup_notifs"
+}
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
 
 run_installer
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
+
+# An unrecognized Caelestia source must fail before any further mutation.
+host_after_install="$(sha256sum "$host" | cut -d' ' -f1)"
+printf 'pragma Singleton\\nSingleton { }\\n' >"$notifs"
+if run_installer >/dev/null 2>&1; then
+    echo 'Expected unknown Caelestia source rejection.' >&2
+    exit 1
+fi
+test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_after_install"
+# Restore the already-patched handoff state for the remaining guards.
+cat >"$notifs" <<'QML'
+pragma Singleton
+Singleton {
+    id: root
+    property list<var> list: []
+    // K41_NOTIFICATION_SERVER_DISABLED_BY_K41
+}
+QML
 
 # Dependency rejection must not mutate installed files.
 printf '\nimport Caelestia.Services\n' >>"$qml"
