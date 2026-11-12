@@ -91,9 +91,9 @@ Backend awal telah dipilih berdasarkan audit X280 dan source upstream yang dipin
 
 Jangan menambahkan elemen lain tanpa persetujuan. Jangan menampilkan status yang ditebak atau membuat provider/notification daemon duplikat.
 
-## Baseline implementasi awal — 13 November 2026
+## Implementasi setelah audit Caelestia — 13 November 2026
 
-Source dan deployer awal telah dibuat dengan pola ownership dan deployment WS02/WS03:
+Source K41 dan deployer telah direvisi berdasarkan audit source Caelestia pada revision `d999d4878ee4cec134168e60d913714566a8cfa6`. Topbar tetap merupakan panel horizontal milik K41, tetapi data dan interaksi menggunakan service/runtime yang sudah tersedia.
 
 | Artefak | Lokasi canonical |
 |---|---|
@@ -103,23 +103,33 @@ Source dan deployer awal telah dibuat dengan pola ownership dan deployment WS02/
 | Runtime module | `~/.config/quickshell/k41/modules/topbar/Topbar.qml` |
 | Caelestia host | `~/.config/quickshell/caelestia/shell.qml` |
 
-Backend yang dipakai:
+### Backend kanonis
 
-- CPU: delta counter aggregate `/proc/stat`, diperbarui setiap 2 detik.
-- RAM: `MemTotal` dan `MemAvailable` dari `/proc/meminfo`, diperbarui setiap 2 detik.
-- Battery: `/sys/class/power_supply/BAT0/capacity` dan `status`, diperbarui setiap 15 detik. Nama BAT0 sesuai hasil audit X280; perangkat lain belum didukung otomatis.
-- Clock: Qt locale formatter, diperbarui setiap detik.
-- Notifications: singleton Caelestia `Notifs` melalui `qs.services`; tray memakai `Notifs.notClosed` dan `NotifData.close()`. Tidak membuat notification daemon atau NotificationServer kedua. API diverifikasi terhadap source Caelestia revision yang tercatat di atas.
+- **CPU:** `Caelestia.Services.Cpu.percentage`; nilai 0.0–1.0 dikonversi menjadi persen. `ServiceRef { service: Cpu }` mengaktifkan TickingService Caelestia.
+- **RAM:** `Caelestia.Services.Memory.percentage`; nilai 0.0–1.0 dikonversi menjadi persen. `ServiceRef { service: Memory }` mengaktifkan service yang sama.
+- **Battery:** `Quickshell.Services.UPower`, melalui `UPower.displayDevice.percentage` dan `UPower.onBattery`. Tidak membaca BAT0/sysfs secara langsung.
+- **Clock:** singleton Caelestia `Time.format(...)`; tidak membuat `Date` sendiri atau timer clock tambahan.
+- **Notifications:** singleton `Notifs.notClosed` untuk jumlah notifikasi. Klik indikator meminta Caelestia membuka sidebar pada monitor yang sama melalui `ShellState.forScreen(screen).sidebar = true`; daftar notifikasi tetap ditangani oleh NotificationServer dan Notification Dock Caelestia yang sudah ada. K41 tidak membuat NotificationServer, notification store, atau tray duplikat.
 
-Topbar memakai Quickshell `Variants` atas `Quickshell.screens`, `PanelWindow` setinggi 34 px, exclusive zone 34 px, keyboard focus none, dan `WlrLayer.Overlay` sebagai upaya memenuhi intent tetap terlihat saat fullscreen. Tray notifikasi dibuka dari ikon/count dan dapat ditutup melalui tombol close. Source upstream Caelestia tidak disalin atau dimodifikasi; host hanya menerima satu import dan satu instance K41.
+CPU/RAM, battery, clock, dan notification backend tersebut diperiksa pada source Caelestia yang dipin di atas. `modules/sidebar/Content.qml` memasang `NotifDock`, sedangkan `ShellState.forScreen()` menyediakan state per monitor. Karena itu Topbar tidak membuat UI daftar notifikasi paralel.
 
-Deployment script berjalan sebagai user desktop biasa, menolak root, memvalidasi ownership/file type/symlink/host structure, membuat backup privat plus manifest, memakai staging dan atomic replacement, memverifikasi hasil, mendukung idempotensi, serta rollback untuk dua target. Script tidak me-restart atau me-reload Quickshell secara otomatis.
+### Deployment dan batas implementasi
 
-**Batas bukti saat ini:**
-- IMPLEMENTED: source QML, deployer, dan fixture test telah ditambahkan ke repository.
-- TESTED: `bash -n` untuk deployer dan fixture; fixture dijalankan sebagai user non-root dan lulus untuk deployment, integrasi host, backup, idempotensi, dan fail-closed pada integrasi parsial.
-- NOT TESTED: ShellCheck tidak tersedia pada lingkungan validasi; `qmllint`/QML compiler tidak tersedia pada audit X280.
-- NOT VERIFIED: QML compile/load, data provider pada runtime, tampilan, klik/tray, exclusive zone, fullscreen, seluruh monitor, scaling, dan regression Bottombar. Deployment ke X280 belum dijalankan.
+Deployment script tetap menjalankan integrasi minimum melalui satu import dan satu instance `K41Topbar.Topbar` di `shell.qml`. Sebelum deployment, script memeriksa kontrak backend QML dan menolak pola polling/provider duplikat yang sudah diketahui. Pola backup privat, staging, atomic replacement, verifikasi, idempotensi, rollback, serta larangan auto-restart tetap dipertahankan.
+
+Topbar memakai `Variants` atas `Quickshell.screens`, panel horizontal 34 px, exclusive zone 34 px, `WlrLayer.Overlay`, dan keyboard focus none. Properti layer/fullscreen masih harus diverifikasi di Hyprland pada X280; konfigurasi tersebut bukan bukti runtime bahwa panel selalu terlihat saat fullscreen.
+
+### Perubahan dari implementasi awal
+
+Implementasi awal membaca `/proc/stat`, `/proc/meminfo`, dan `/sys/class/power_supply/BAT0`, membuat timer polling sendiri, menggunakan `new Date()`, serta membuat tray notifikasi kedua. Semua pendekatan tersebut telah dikeluarkan dari QML canonical. Backend sekarang menggunakan service upstream sesuai audit, dan klik notifikasi membuka Notification Dock Caelestia yang sudah tersedia.
+
+### Status bukti
+
+- **IMPLEMENTED:** QML, deployer, dan fixture test direvisi untuk backend Caelestia/Quickshell yang diaudit.
+- **SOURCE-LEVEL REVIEWED:** API CPU, RAM, UPower, Time, Notifs, dan ShellState diperiksa pada revision Caelestia yang dipin.
+- **NOT YET TESTED IN THIS UPDATE:** Bash syntax, fixture deployment, ShellCheck, QML lint/compile, dan runtime load.
+- **NOT VERIFIED:** tampilan pada X280, nilai provider saat runtime, klik indikator dan pembukaan sidebar, fullscreen, multi-monitor/hotplug, scaling, serta regression Bottombar.
+- **DEPLOYMENT:** belum dijalankan ke runtime X280. Jangan deploy sebelum fixture/syntax test dan review QML selesai.
 
 ## Batas scope
 
