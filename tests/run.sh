@@ -11,6 +11,7 @@ tests=(
   stages/stage-3-desktop-install/tests/test-desktop-setup.sh
   stages/stage-5-desktop-customization/tests/test-autologin-desktop.sh
   stages/stage-5-desktop-customization/tests/test-desktop-startup-audit.sh
+  stages/stage-5-desktop-customization/tests/test-topbar-runtime-audit.sh
   stages/stage-5-desktop-customization/tests/test-bottombar-audit-publisher.sh
   stages/stage-5-desktop-customization/tests/test-bottombar-module-install.sh
   stages/stage-5-desktop-customization/tests/test-lockscreen-startup-helper.sh
