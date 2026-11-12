@@ -61,12 +61,9 @@ done
 [[ -f $hypr_conf && ! -L $hypr_conf && -f $hypr_lua && ! -L $hypr_lua ]] ||
     die 'Expected regular ~/.config/hypr/hyprland.conf and hyprland.lua files.'
 
-# Keep the single shell startup in hyprland.conf. The Lua hook only starts the
-# readiness helper; launching Caelestia from both files caused duplicate shells.
-conf_start_count="$(grep -Ec '^[[:space:]]*exec-once[[:space:]]*=[[:space:]]*caelestia shell -d[[:space:]]*$' "$hypr_conf" || true)"
-[[ $conf_start_count == 1 ]] ||
-    die "Expected exactly one 'exec-once = caelestia shell -d' in hyprland.conf; found $conf_start_count. No changes made."
-
+# The latest device report confirms Hyprland selects hyprland.lua as its
+# active config. An exec-once in the separate hyprland.conf is not active in
+# this session, so start Caelestia from the Lua hook before the readiness helper.
 mkdir -p -- "$bin_root" "$k41_config" "$backup_root"
 for path in "$bin_root" "$k41_config" "$backup_root"; do
     [[ -d $path && ! -L $path && $(stat -c %u -- "$path") == "$EUID" ]] ||
@@ -115,9 +112,13 @@ if len(helper_lines) != 1:
 splash_lines = [line for line in lines if "qs -c k41-boot-splash" in line]
 if len(splash_lines) > 1:
     raise SystemExit("Multiple legacy K41 boot-splash invocations found; refusing automatic cleanup.")
+
 caelestia_lines = [line for line in lines if "caelestia shell -d" in line]
 if len(caelestia_lines) > 1:
-    raise SystemExit("Multiple duplicate Caelestia startup commands found in Lua block; refusing automatic cleanup.")
+    raise SystemExit("Multiple Caelestia startup commands found in the K41 Lua block; refusing an ambiguous edit.")
+for line in caelestia_lines:
+    if not re.fullmatch(r"""\s*hl\.exec_cmd\(["']caelestia shell -d["']\)\s*\n?""", line):
+        raise SystemExit("Found a non-canonical Caelestia startup line in the K41 block; refusing to rewrite it.")
 
 cleaned = []
 for line in lines:
@@ -127,13 +128,29 @@ for line in lines:
         continue
     if line.strip() == "-- K41 ANIMATED BOOT SPLASH START":
         continue
+    if line.strip() == "-- Start Caelestia only if no existing startup entry was detected.":
+        continue
     cleaned.append(line)
 
+helper_index = next(
+    (index for index, line in enumerate(cleaned) if "k41-lock-caelestia-after-start" in line),
+    None,
+)
+if helper_index is None:
+    raise SystemExit("K41 lock-helper invocation disappeared during normalization.")
+helper_indent = re.match(r"^\s*", cleaned[helper_index]).group(0)
+line_ending = "\n" if cleaned[helper_index].endswith("\n") else ""
+cleaned.insert(helper_index, f'{helper_indent}hl.exec_cmd("caelestia shell -d"){line_ending}')
+
 new_block = "".join(cleaned)
-if "qs -c k41-boot-splash" in new_block or "caelestia shell -d" in new_block:
-    raise SystemExit("Legacy startup command remains after transformation.")
-if sum("k41-lock-caelestia-after-start" in line for line in cleaned) != 1:
+if new_block.count("caelestia shell -d") != 1:
+    raise SystemExit("Active Lua config must start Caelestia exactly once.")
+if new_block.count("k41-lock-caelestia-after-start") != 1:
     raise SystemExit("K41 lock-helper invocation was not preserved exactly once.")
+if new_block.index("caelestia shell -d") > new_block.index("k41-lock-caelestia-after-start"):
+    raise SystemExit("Caelestia must be launched before the lock readiness helper.")
+if "qs -c k41-boot-splash" in new_block:
+    raise SystemExit("Legacy non-Plymouth boot splash command remains.")
 destination.write_text(before + start + new_block + end + after)
 PY
 
@@ -183,12 +200,17 @@ cmp -s "$source_config" "$target_config" || die 'Installed fallback config faile
 [[ -x $target_helper && -f $target_config && ! -L $target_config ]] ||
     die 'Installed helper/config failed final type or executable checks.'
 grep -Fq -- '--config' "$target_helper" || die 'Installed helper does not use explicit fallback config.'
-if grep -Fq 'qs -c k41-boot-splash' "$hypr_lua" ||
-   grep -Fq 'caelestia shell -d' "$hypr_lua"; then
-    die 'Legacy duplicate startup directive remains in Hyprland Lua config.'
+if grep -Fq 'qs -c k41-boot-splash' "$hypr_lua"; then
+    die 'Legacy non-Plymouth boot splash directive remains in Hyprland Lua config.'
 fi
-grep -Fq 'k41-lock-caelestia-after-start' "$hypr_lua" ||
-    die 'K41 lock readiness helper invocation is missing from Hyprland Lua config.'
+lua_caelestia_line="$(grep -nF 'hl.exec_cmd("caelestia shell -d")' "$hypr_lua" | cut -d: -f1)"
+lua_helper_line="$(grep -nF 'k41-lock-caelestia-after-start' "$hypr_lua" | cut -d: -f1)"
+[[ -n $lua_caelestia_line && -n $lua_helper_line ]] ||
+    die 'Active Hyprland Lua config is missing Caelestia startup or the lock helper.'
+[[ $(grep -Fc 'hl.exec_cmd("caelestia shell -d")' "$hypr_lua") == 1 ]] ||
+    die 'Active Hyprland Lua config must start Caelestia exactly once.'
+(( lua_caelestia_line < lua_helper_line )) ||
+    die 'Caelestia startup must precede the lock readiness helper.'
 
 info 'Workstream 02 runtime preparation completed.'
 info "Installed helper: $target_helper"
@@ -196,5 +218,7 @@ info "Installed fallback config: $target_config"
 info "Hyprland Lua config normalized: $hypr_lua"
 info "Helper SHA-256: $(sha256sum "$target_helper" | awk '{print $1}')"
 info "Fallback config SHA-256: $(sha256sum "$target_config" | awk '{print $1}')"
+info 'Active Hyprland Lua hook now starts Caelestia before the lock readiness helper.'
+info 'The separate hyprland.conf is left unchanged; the audit identified hyprland.lua as the active config.'
 info 'Only user-local helper/config and the exact K41 Lua startup block were changed.'
 info 'No system service, package, Plymouth, getty, PAM, authentication, bootloader, initramfs, or system configuration was changed.'
