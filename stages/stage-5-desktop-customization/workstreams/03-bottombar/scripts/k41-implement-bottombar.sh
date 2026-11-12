@@ -11,7 +11,7 @@ owner_is_user() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
 
-for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv date awk; do
+for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
