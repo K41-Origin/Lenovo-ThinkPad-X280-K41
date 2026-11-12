@@ -151,3 +151,37 @@ Tidak ada script cleanup visual yang boleh menghapus atau memodifikasi PAM, pass
 ## Acceptance dan penutupan
 
 Pengguna secara eksplisit menerima Workstream 02 sebagai selesai pada 12 November 2026. Karena itu status workstream adalah **COMPLETED / USER ACCEPTED**. Penutupan ini menerima implementasi dan dokumentasi dalam scope yang disepakati; tidak mengubah status bukti runtime yang belum tersedia menjadi VERIFIED.
+
+
+## Audit startup lanjutan — 13 November 2026
+
+Audit startup lanjutan tersedia pada:
+
+- Commit: `db6e1d411bc0f2d2c186426052eeb1614bf56553`
+- Report: `reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261112T195531Z/report.txt`
+- Timeline: `reports/stage-5-desktop-customization/02-lock-screen/startup-audits/20261112T195531Z/lifecycle-timeline.tsv`
+
+Report ini menggabungkan bukti dari beberapa log startup dan journal sesi. Karena itu, event yang tercatat tidak boleh dibaca sebagai satu rangkaian boot tunggal.
+
+### Temuan yang teramati
+
+- Pada lima startup helper historis, Caelestia lock IPC teramati siap, lock request diterima, dan lock state terverifikasi pada attempt pertama.
+- Pada dua startup lain, helper tidak memperoleh Caelestia IPC readiness dalam batas 30 detik.
+- Pada startup terbaru yang tercatat dalam helper log (`2026-11-12T19:53:09Z`, setara 13 November 2026 02:53 WIB), Caelestia IPC timeout tercatat sekitar 30 detik setelah helper dimulai.
+- Pada startup terbaru tersebut, Hyprlock fallback dimulai, teramati berjalan, lalu keluar dengan exit 0. Log Hyprlock juga memuat bukti autentikasi berhasil dan pesan unlock.
+- Journal merekam target sesi Hyprland dan graphical interface tercapai sekitar 02:53 WIB. Ini membuktikan target session tercapai, bukan bahwa Lock Surface QML terlihat.
+- Event `LOCK_SURFACE_VISIBLE` dan `DESKTOP_RESTORED_AFTER_UNLOCK` ditandai `NOT_INSTRUMENTED`; collector belum memiliki sumber event yang dapat membuktikannya.
+
+### Interpretasi dan batas bukti
+
+1. Jalur Caelestia lock IPC **pernah berhasil** pada beberapa startup; karena itu tidak tepat menyimpulkan bahwa mekanisme Caelestia selalu gagal.
+2. Jalur startup terbaru yang tercatat justru mengalami IPC timeout dan menggunakan Hyprlock fallback. Ini merupakan temuan yang perlu ditindaklanjuti jika tujuan berikutnya adalah memastikan Caelestia lock surface menjadi jalur utama.
+3. Hyprlock fallback tampak berhasil menyelesaikan autentikasi dan unlock pada log yang dikumpulkan. Ini bukan bukti bahwa autentikasi Caelestia diuji pada run yang sama.
+4. Report merupakan agregasi beberapa log dan journal; urutan lintas-run tidak boleh diperlakukan sebagai satu timeline tunggal.
+5. Audit ini tidak membuktikan rendering QML, visibilitas Lock Surface, suspend/resume, atau seluruh skenario lock/unlock end-to-end.
+
+### Status setelah audit
+
+Status Workstream 02 tetap **COMPLETED / USER ACCEPTED** sesuai keputusan pengguna sebelumnya. Temuan audit ini memperbarui catatan bukti dan risiko runtime, tetapi tidak membatalkan penerimaan scope. Tidak ada perubahan pada PAM, autentikasi, helper, service, atau konfigurasi runtime yang dilakukan dalam pembaruan dokumentasi ini.
+
+**Tindak lanjut yang disarankan:** jika ingin meningkatkan status bukti runtime, lakukan pengujian lock/unlock terkontrol pada sesi X280 berikutnya dan kumpulkan satu log run yang terisolasi. Jangan mengubah helper atau fallback hanya berdasarkan agregasi report ini.
