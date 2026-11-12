@@ -138,6 +138,8 @@ chmod 0600 "$backup_root/manifest.txt"
 
 module_replaced=1
 mv -fT -- "$module_tmp" "$target_file"
+module_replaced=1
+mv -fT -- "$module_tmp" "$target_file"
 module_tmp=''
 shell_tmp=''
 module_replaced=0
