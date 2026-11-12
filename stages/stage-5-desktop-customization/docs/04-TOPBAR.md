@@ -394,3 +394,20 @@ Status: deployer telah dikoreksi untuk mempertahankan entry point Caelestia; mig
 **Testing status:** file dan commit GitHub telah ditulis serta dapat di-fetch kembali. Bash syntax, fixture test, QML parse/load, ShellCheck, dan runtime belum dinyatakan TESTED. Fixture test kini menyalin enam service dan memeriksa instalasi service-first, idempotensi, dependency guard, serta symlink guard; test belum dijalankan.
 
 **Cara uji setelah memperbarui checkout lokal:** jalankan fixture test terlebih dahulu, lalu deployer sebagai user desktop biasa tanpa sudo. Deployer hanya menulis file dan host integration; tidak me-restart Quickshell atau mengubah autostart. Reboot atau reload Quickshell dilakukan secara manual setelah hasil preflight/test lulus.
+
+## Strategi adaptasi service Caelestia — 13 November 2026
+
+Prinsip implementasi diperjelas: K41 tidak merancang algoritma metric dari nol. K41 mempelajari dan mengadaptasi perilaku service upstream Caelestia, lalu memisahkan runtime implementation dari namespace/internal plugin Caelestia agar Topbar tetap portabel dan tidak bergantung pada internal API Caelestia.
+
+Referensi upstream yang diperiksa pada branch `main` saat audit:
+- `plugin/src/Caelestia/Services/cpu.cpp` dan `cpu.hpp`: CPU memakai delta counter dari tujuh field awal baris aggregate `cpu` di `/proc/stat`, idle mencakup idle+iowait, dan menghitung `1 - idleDelta/totalDelta`. K41 mengadaptasi algoritma ini ke QML reader; sampling 1 detik. Counter guest tidak dihitung ulang karena sudah termasuk user/nice.
+- `plugin/src/Caelestia/Services/memory.cpp` dan `memory.hpp`: RAM terpakai = `MemTotal - MemAvailable`; persentase = used/total. K41 mempertahankan rumus dan hanya menerbitkan perubahan nilai.
+- `plugin/src/Caelestia/Services/tickingservice.cpp`: service upstream berjalan saat direferensikan melalui `ServiceRef`, memakai interval konfigurasi resource update (default 1000 ms), melakukan tick segera ketika start, dan berhenti ketika tidak lagi direferensikan. K41 saat ini memakai timer milik modul karena implementasi service dipindahkan dari plugin C++ upstream.
+- `services/Time.qml`: memakai `SystemClock` Quickshell, bukan membuat `Date` baru per tick. K41 mengadaptasi pola ini.
+- `modules/bar/components/status/BatteryStatus.qml` dan `modules/bar/popouts/Battery.qml`: menggunakan `UPower.displayDevice`, `isLaptopBattery`, `state`, dan `percentage`. Nilai UPower adalah pecahan 0.0–1.0; UI harus mengalikannya 100 untuk menampilkan persen.
+- `services/Notifs.qml` dan `services/NotifData.qml`: pola server, notification model, history, expiry, action, serta persistence. Service ini juga memuat banyak dependency Caelestia (Config, State, Hypr, Paths, translations, helpers) dan NotificationServer yang mengambil ownership D-Bus. Port K41 harus memisahkan dependency tersebut dan tidak mengaktifkan server kedua selama Caelestia masih menjadi owner.
+- `services/ShellState.qml`: state per-screen dibangun melalui `Variants` dan menyediakan lookup berdasarkan `ShellScreen`. K41 hanya membutuhkan state panel lokal per layar; jangan port seluruh ShellState/Hyprland helpers yang tidak diperlukan.
+
+File CPU, Memory, Clock, dan Battery sekarang memiliki komentar provenance/adaptasi. Source Caelestia berlisensi GPL-3.0; perubahan turunan wajib mempertahankan atribusi dan memenuhi ketentuan lisensi. Lihat upstream [Caelestia Shell](https://github.com/caelestia-dots/shell) dan [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html).
+
+**Belum selesai:** Notification service/model/dock belum dipindahkan. Jangan menganggap `Notifications.qml` placeholder sebagai hasil port. Sebelum mengaktifkan K41 NotificationServer, perlu keputusan dan uji eksklusivitas D-Bus. Source Caelestia `shell.qml` pada upstream memaksa singleton `Notifs` dimuat saat startup; selain itu UI sidebar menggunakan service tersebut. Karena itu sekadar menghapus referensi eager-load belum membuktikan server Caelestia berhenti.
