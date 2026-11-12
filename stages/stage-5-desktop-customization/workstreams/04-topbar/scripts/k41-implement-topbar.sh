@@ -54,6 +54,22 @@ service_target_dir="$module_root/services"
 [[ -d $qs_root && ! -L $qs_root && -d $host_root && ! -L $host_root ]] || die 'Quickshell/Caelestia config directory tidak tersedia atau berupa symlink.'
 [[ -f $host_file && ! -L $host_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$host_root" && owned "$host_file" || die 'Caelestia host bukan milik user aktif.'
+
+# Notification deployment is fail-closed until both sides of the handoff are
+# explicitly prepared. A placeholder must never be treated as a working backend.
+notification_source="$service_source_dir/Notifications.qml"
+caelestia_notifs_file="$host_root/services/Notifs.qml"
+grep -Fq 'K41_NOTIFICATION_BACKEND_READY' "$notification_source" \
+    || die 'Notification backend K41 belum lengkap; Notifications.qml masih placeholder atau belum ditandai siap.'
+[[ -f $caelestia_notifs_file && ! -L $caelestia_notifs_file ]] \
+    || die 'Caelestia services/Notifs.qml tidak ditemukan sebagai regular file; handoff tidak dapat diverifikasi.'
+owned "$caelestia_notifs_file" \
+    || die 'Caelestia Notifs.qml bukan milik user aktif; handoff tidak boleh mengubah file yang tidak dimiliki user.'
+grep -Fq 'K41_CAELestia_NOTIFICATION_HANDOFF' "$caelestia_notifs_file" \
+    || die 'Handoff Caelestia belum disiapkan; NotificationServer Caelestia belum dinonaktifkan secara eksplisit.'
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$caelestia_notifs_file"; then
+    die 'NotificationServer Caelestia masih dideklarasikan; menolak kemungkinan dua D-Bus owner.'
+fi
 for path in "$host_root/k41" "$host_root/k41/modules" "$module_root"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then [[ -d $path ]] || die "Path runtime bukan direktori: $path"; owned "$path" || die "Path bukan milik user aktif: $path"; fi
