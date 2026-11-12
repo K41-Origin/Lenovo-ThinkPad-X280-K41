@@ -384,7 +384,7 @@ for proc in pathlib.Path("/proc").glob("[0-9]*"):
         if "quickshell" not in comm.lower() and comm.lower() != "qs":
             continue
         process_count += 1
-        raw_args = [x.decode("utf-8", "replace") for x in (proc / "cmdline").read_bytes().split(b"\\0") if x]
+        raw_args = [x.decode("utf-8", "replace") for x in (proc / "cmdline").read_bytes().split(b"\0") if x]
         selected = None
         for index, arg in enumerate(raw_args[:-1]):
             if arg in ("-c", "--config"):
