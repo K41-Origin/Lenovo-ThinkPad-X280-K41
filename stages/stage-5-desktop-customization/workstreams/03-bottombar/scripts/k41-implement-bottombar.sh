@@ -122,9 +122,6 @@ fi
     printf 'source_sha256=%s\n' "$source_sha"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
-if (( had_target )); then
-fi
-
 temp_file=''
 mutation_started=0
 rollback() {
