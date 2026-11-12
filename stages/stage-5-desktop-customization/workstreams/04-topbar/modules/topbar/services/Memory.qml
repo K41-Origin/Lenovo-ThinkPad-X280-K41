@@ -9,7 +9,7 @@ QtObject {
     function updateFromMeminfo(data) {
         const values = {}
         for (const line of data.trim().split("\n")) {
-            const match = line.match(/^(MemTotal|MemAvailable):\\s+(\\d+)/)
+            const match = line.match(/^(MemTotal|MemAvailable):\s+(\d+)/)
             if (match)
                 values[match[1]] = Number(match[2])
         }
