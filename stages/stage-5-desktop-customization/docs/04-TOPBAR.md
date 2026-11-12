@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: IMPLEMENTED — SOURCE, DEPLOYER, AND FIXTURE TEST CREATED; RUNTIME VERIFICATION PENDING.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
+**Status: IMPLEMENTED — SOURCE, DEPLOYER, AND FIXTURE TEST DIREVISI; REGRESSION TEST SETELAH REVISI MASIH PENDING.** Dokumen ini menetapkan tujuan, batas, alur kerja, acceptance, dan gate Workstream 04. Status implementasi dan status proyek tetap mengikuti `docs/06-STATUS.md`.
 
 ## Tujuan dan batas ownership
 
@@ -157,7 +157,7 @@ Urutan mengikuti pola Workstream 02 dan 03: audit read-only lebih dahulu, keputu
 | 1 | Audit Topbar | Inventaris source/runtime aktif, versi, dependency/API, panel/bar yang tersedia, konfigurasi, monitor/scaling, tray/status providers, lifecycle, dan titik integrasi. Read-only. | **IMPLEMENTED — audit X280 2026-11-12 direview; source Caelestia dipin dan API Notifs diperiksa** |
 | 2 | Review audit dan spesifikasi | Validasi keputusan desain yang sudah disepakati terhadap bukti teknis; tetapkan backend, format data, detail layout, dan acceptance final. | **IMPLEMENTED — baseline backend/integrasi awal ditetapkan; detail visual/runtime masih perlu review** |
 | 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **IMPLEMENTED — source/deployer dibuat; deployment X280 belum dijalankan** |
-| 4 | Automated testing | Bash syntax/ShellCheck untuk script; fixture/mock untuk path, backup, idempotensi, failure, rollback, serta kontrak integrasi yang dapat diuji statis. | **PARTIALLY TESTED — bash -n dan fixture lulus; ShellCheck/QML lint belum tersedia** |
+| 4 | Automated testing | Bash syntax/ShellCheck untuk script; fixture/mock untuk path, backup, idempotensi, failure, rollback, serta kontrak integrasi yang dapat diuji statis. | **PENDING — hasil test versi implementasi awal tidak dianggap berlaku untuk revisi backend; bash -n dan fixture harus dijalankan ulang. ShellCheck/QML lint belum tersedia pada audit X280.** |
 | 5 | Runtime verification dan review | Verifikasi QML/API pada versi X280, visual/interaksi, seluruh monitor, fullscreen/fokus, restart, error log, dan resource. | **PLANNED** |
 | 6 | Acceptance dan handoff | Tinjau bukti, catat batas yang belum diverifikasi, minta penerimaan pengguna, lalu perbarui status dan lanjutkan ke WS05 bila gate terpenuhi. | **PLANNED** |
 
@@ -212,7 +212,7 @@ Nama script, source, target runtime, dan API baseline telah ditetapkan pada tabe
 
 Test minimum ditentukan oleh desain final dan mencakup, bila relevan:
 
-- Bash syntax dan ShellCheck. Bash syntax telah diuji; ShellCheck belum dijalankan karena tidak tersedia pada lingkungan validasi.
+- Bash syntax dan ShellCheck. Bash syntax dan fixture versi implementasi awal pernah diuji, tetapi hasil tersebut tidak berlaku otomatis untuk revisi ini. Jalankan ulang sebelum deployment; ShellCheck belum dijalankan karena tidak tersedia pada lingkungan validasi.
 - Audit tetap read-only terhadap runtime dan Git checkout.
 - Missing dependency/source/target, symlink, file type, ownership, dan host state ambigu.
 - Deploy/repair, idempotensi, backup/checksum, failure injection, rollback, dan fail-closed.
