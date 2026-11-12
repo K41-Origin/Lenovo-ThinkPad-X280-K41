@@ -20,7 +20,11 @@ for token in \
     'read-only' \
     'publish_report()' \
     'git -C "$publish_dir" push origin HEAD:main' \
-    'git -C "$repo_root" worktree add --detach "$publish_dir" FETCH_HEAD' \
+    'git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"' \
+    'isolated clone' \
+    'local checkout Git metadata was not used for publication' \
+    'IMPLEMENTATION SOURCE REVISION AND INSTALLED CONFIG COMPARISON' \
+    'Installed Hyprlock fallback config byte comparison' \
     'INSTALLED LOCK HELPER CONTENT AND SOURCE COMPARISON' \
     'Installed helper byte comparison' \
     'INSTALLED K41 LOCK VISUAL SOURCE COMPARISON' \
@@ -112,5 +116,24 @@ for token in \
         exit 1
     }
 done
+
+
+# Automatic publication must use an independent clone, never a linked worktree
+# or fetch against the user's active checkout. This keeps local refs, index,
+# FETCH_HEAD, branch, and worktree metadata isolated from report publication.
+! grep -Fq 'git -C "$repo_root" fetch' "$script" || {
+    printf 'FAIL: audit publication fetches into the user's local checkout.\\n' >&2
+    exit 1
+}
+! grep -Fq 'git -C "$repo_root" worktree' "$script" || {
+    printf 'FAIL: audit publication mutates local checkout worktree metadata.\\n' >&2
+    exit 1
+}
+! grep -Fq 'git -C "$repo_root" worktree add' "$script" || {
+    printf 'FAIL: audit publication uses a linked worktree.\\n' >&2
+    exit 1
+}
+grep -Fq 'git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"' "$script"
+grep -Fq 'rm -rf -- "$publish_tmp"' "$script"
 
 printf 'PASS: desktop startup audit syntax, tty/session coverage, privacy guard, and read-only contract.\n'
