@@ -738,7 +738,7 @@ import sys
 path = Path(sys.argv[1])
 raw = path.read_bytes()
 text = raw.decode("utf-8", errors="replace")
-text = "".join(ch for ch in text if ch in "\\n\\r\\t" or ord(ch) >= 32)
+text = "".join(ch for ch in text if ch in "\n\r\t" or ord(ch) >= 32)
 path.write_text(text, encoding="utf-8", errors="strict")
 if path.stat().st_size == 0:
     raise SystemExit("ERROR: diagnostic report is empty; refusing publication")
