@@ -63,4 +63,4 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 
 ## Cleanup Caelestia — Workstream 09
 
-Pekerjaan cleanup luas Caelestia ditunda sampai seluruh workstream komponen Stage 5 selesai dan diterima. Scope, audit read-only, dependency map, approval gate, dry-run, backup, rollback, dan acceptance dicatat di [Workstream 08 — Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md). Catatan dashboard yang sudah dinonaktifkan tetap menjadi histori; jangan menyamakan cleanup dashboard terdahulu dengan cleanup final seluruh Caelestia.
+Pekerjaan cleanup luas Caelestia ditunda sampai seluruh workstream komponen Stage 5 selesai dan diterima. Scope, audit read-only, dependency map, approval gate, dry-run, backup, rollback, dan acceptance dicatat di [Workstream 08 — Clean up Caelestia](08-CLEAN-UP-CAELESTIA.md). Catatan dashboard yang sudah dinonaktifkan tetap menjadi histori; jangan menyamakan cleanup dashboard terdahulu dengan cleanup final seluruh Caelestia.
