@@ -27,7 +27,7 @@ done
 
 # Standalone contract: refuse all known Caelestia runtime/service dependencies.
 for file in "$source_shell" "$source_topbar"; do
-    if grep -En 'Caelestia|qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.' "$file"; then
+    if grep -En 'Caelestia|qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.' "$file"; then
         die "Dependency internal Caelestia/qs.* terdeteksi pada source: $file"
     fi
 done
