@@ -349,12 +349,12 @@ for label, root in k41_roots:
         elif target.exists() and not target.is_file(): blockers.append(f"{label} target is not a regular file.")
 if not target_seen: add("No K41 runtime root currently exists; installer must explicitly create the user-level root after validating its parent.")
 if reference_count == 0:
-    add("HOST INTEGRATION STATUS: no current host reference detected. Module copy alone will not make Bottombar active.")
+    add("HOST INTEGRATION STATUS: no current reference detected. Installer requires the known legacy K41Dock pair or an already-migrated K41Bottombar pair; unknown host layouts fail closed.")
 else:
     add(f"HOST INTEGRATION STATUS: {reference_count} matching reference line(s) observed; review exact import/type contract above.")
 for item in blockers: add("BLOCKER: " + item)
 if not blockers: add("Static filesystem preflight blockers: none detected by this audit.")
-add("Readiness is not implied: verify target path ownership/permissions and decide host import/loading contract before deployment.")
+add("Readiness is not implied: verify target path ownership/permissions and review the fixed relative-directory-import contract before deployment.")
 add("This audit does not run QML compilation, mutate runtime files, reload Quickshell, or test visual/workspace behavior.")
 add("Report contains local observations, not upstream compatibility guarantees.")
 add("Private local report: " + clean(report))
