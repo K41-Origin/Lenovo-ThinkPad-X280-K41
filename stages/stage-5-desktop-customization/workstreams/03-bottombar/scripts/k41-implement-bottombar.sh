@@ -4,8 +4,8 @@
 set -Eeuo pipefail
 umask 077
 
-die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
-info() { printf 'INFO: %s\\n' "$*"; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+info() { printf 'INFO: %s\n' "$*"; }
 
 [[ $# -eq 0 ]] || die 'Script ini hanya menjalankan install/repair; tidak menerima opsi.'
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
@@ -125,10 +125,10 @@ else
 fi
 
 {
-    printf 'target=%s\\n' "$target_file"
-    printf 'previous_sha256=%s\\n' "$previous_sha"
-    printf 'source_sha256=%s\\n' "$source_sha"
-    printf 'deployment_kind=audited-caelestia-host-compatibility\\n'
+    printf 'target=%s\n' "$target_file"
+    printf 'previous_sha256=%s\n' "$previous_sha"
+    printf 'source_sha256=%s\n' "$source_sha"
+    printf 'deployment_kind=audited-caelestia-host-compatibility\n'
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
@@ -141,19 +141,19 @@ rollback() {
         if (( had_target )); then
             local restore_tmp
             restore_tmp="$(mktemp "$module_dir/.K41Dock.restore.XXXXXX")" || {
-                printf 'CRITICAL: gagal membuat file restore; backup tersedia di %s\\n' "$backup_root" >&2
+                printf 'CRITICAL: gagal membuat file restore; backup tersedia di %s\n' "$backup_root" >&2
                 exit "$rc"
             }
             if cp -a -- "$backup_root/K41Dock.qml" "$restore_tmp" &&
                 mv -fT -- "$restore_tmp" "$target_file"; then
-                printf 'ROLLBACK: target dipulihkan dari %s\\n' "$backup_root" >&2
+                printf 'ROLLBACK: target dipulihkan dari %s\n' "$backup_root" >&2
             else
                 rm -f -- "$restore_tmp"
-                printf 'CRITICAL: rollback gagal; backup tersedia di %s\\n' "$backup_root" >&2
+                printf 'CRITICAL: rollback gagal; backup tersedia di %s\n' "$backup_root" >&2
             fi
         else
             rm -f -- "$target_file"
-            printf 'ROLLBACK: file baru dihapus setelah verifikasi gagal.\\n' >&2
+            printf 'ROLLBACK: file baru dihapus setelah verifikasi gagal.\n' >&2
         fi
     fi
     [[ -z $temp_file ]] || rm -f -- "$temp_file"
