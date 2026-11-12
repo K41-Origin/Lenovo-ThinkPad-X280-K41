@@ -19,7 +19,7 @@ Urutan pengerjaan mengikuti pola Workstream 02. Ketiga script memiliki ownership
 
 | Urutan | Script | Tanggung jawab | Status |
 |---:|---|---|---|
-| 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — audit diperbarui; eksekusi pada X280 menunggu** |
+| 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — report aktual X280 tersedia dan telah ditinjau** |
 | 2 | `scripts/k41-implement-bottombar.sh` | Satu operasi: memasang atau memperbaiki modul QML Bottombar. Backup privat, atomic replacement, verifikasi, dan automatic rollback adalah mekanisme keselamatan operasi tersebut; tidak mengelola host integration/configuration. | **IMPLEMENTED — TEST PENDING** |
 | 3 | `scripts/k41-cleanup-bottombar.sh` | Audit target cleanup, dry-run, backup, penghapusan/nonaktifkan komponen yang disetujui, verifikasi, dan rollback. | PLANNED |
 
