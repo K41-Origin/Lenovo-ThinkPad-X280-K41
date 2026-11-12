@@ -13,16 +13,15 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
 | 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **COMPLETED / USER ACCEPTED** |
-| — | 04 | [Workflow Standardization](04-WORKFLOW.md) | **DOCUMENTATION IMPLEMENTED — proses lintas-workstream** |
-| 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
-| 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
-| 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
-| 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
-| 8 | 09 | [Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md) | **PLANNED — FINAL WORKSTREAM AFTER ALL COMPONENT WORKSTREAMS** |
+| 4 | 04 | [Topbar](04-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
+| 5 | 05 | [Launcher](05-LAUNCHER.md) | PLANNED |
+| 6 | 06 | [Sidebar](06-SIDEBAR.md) | PLANNED |
+| 7 | 07 | [Utilities](07-UTILITIES.md) | PLANNED |
+| 8 | 08 | [Clean up Caelestia](08-CLEAN-UP-CAELESTIA.md) | **PLANNED — FINAL WORKSTREAM AFTER ALL COMPONENT WORKSTREAMS** |
 
-Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen. Workstream 04 adalah standardisasi workflow dan dokumentasi proses; bukan komponen desktop dan tidak mengubah urutan eksekusi komponen. Workstream 09 — Clean up Caelestia tetap menjadi tahap konsolidasi terakhir setelah seluruh workstream komponen 02/03/05/06/07/08 selesai dan diterima.
+Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen. Workstream 04 adalah standardisasi workflow dan dokumentasi proses; bukan komponen desktop dan tidak mengubah urutan eksekusi komponen. Workstream 08 — Clean up Caelestia tetap menjadi tahap konsolidasi terakhir setelah seluruh workstream komponen 02/03/05/06/07/08 selesai dan diterima.
 
-ID 04 kini digunakan untuk Workstream Workflow Standardization sesuai keputusan pengguna. ID 05–08 dipertahankan agar referensi komponen yang sudah ada tidak berubah. Urutan pada tabel adalah urutan eksekusi komponen; Workstream 04 merupakan pekerjaan tata kelola lintas-workstream.
+ID workstream aktif sekarang berurutan 01–08. Topbar menggunakan ID 04; Launcher 05; Sidebar 06; Utilities 07; dan Clean up Caelestia 08 sebagai pekerjaan terakhir. Workflow kolaborasi adalah prosedur lintas-workstream, bukan workstream tersendiri.
 
 ## Prinsip penyimpanan dan ownership
 
@@ -39,7 +38,7 @@ Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual
 
 ## Alur kolaborasi dan verifikasi
 
-Ikuti [Workstream 04 — Workflow Standardization](04-WORKFLOW.md) sebagai standar proses tujuh tahap. [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) tetap menjadi panduan operasional Stage 5 untuk pembagian tanggung jawab, pembaruan melalui GitHub, sinkronisasi dan eksekusi pada X280, pemeriksaan privasi laporan, serta verifikasi hasil.
+Ikuti [Alur Kolaborasi, Audit, dan Verifikasi](00-COLLABORATION-WORKFLOW.md) sebagai standar proses lintas-workstream untuk pembagian tanggung jawab, pembaruan melalui GitHub, sinkronisasi dan eksekusi pada X280, pemeriksaan privasi laporan, serta verifikasi hasil.
 
 ## Dokumen acuan
 
@@ -64,4 +63,4 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 
 ## Cleanup Caelestia — Workstream 09
 
-Pekerjaan cleanup luas Caelestia ditunda sampai seluruh workstream komponen Stage 5 selesai dan diterima. Scope, audit read-only, dependency map, approval gate, dry-run, backup, rollback, dan acceptance dicatat di [Workstream 09 — Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md). Catatan dashboard yang sudah dinonaktifkan tetap menjadi histori; jangan menyamakan cleanup dashboard terdahulu dengan cleanup final seluruh Caelestia.
+Pekerjaan cleanup luas Caelestia ditunda sampai seluruh workstream komponen Stage 5 selesai dan diterima. Scope, audit read-only, dependency map, approval gate, dry-run, backup, rollback, dan acceptance dicatat di [Workstream 08 — Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md). Catatan dashboard yang sudah dinonaktifkan tetap menjadi histori; jangan menyamakan cleanup dashboard terdahulu dengan cleanup final seluruh Caelestia.
