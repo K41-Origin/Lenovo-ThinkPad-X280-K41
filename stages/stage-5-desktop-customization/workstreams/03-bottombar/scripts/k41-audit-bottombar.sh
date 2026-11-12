@@ -33,7 +33,8 @@ for path in "$HOME/.local" "$state_root" "$state_root/k41" "$state_root/k41/bott
     fi
 done
 mkdir -p -- "$report_root"
-chmod 0700 "$state_root/k41" "$state_root/k41/bottombar" "$report_root"
+report_mode="$(stat -c %a -- "$report_root")"
+(( (8#$report_mode & 8#077) == 0 )) || die "Report directory permissions are too broad: $report_mode (expected private 0700)."
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"
 run_dir="$report_root/$stamp"
 n=0
