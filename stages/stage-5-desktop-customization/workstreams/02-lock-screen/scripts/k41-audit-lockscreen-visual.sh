@@ -206,6 +206,93 @@ for label, root in available:
 else:
     add("No user-local Git Caelestia checkout found; deployment provenance cannot be evaluated.")
 
+section("IMPLEMENTATION HANDOFF — DEPLOYMENT DECISIONS")
+# This compact section translates the byte comparisons above into explicit,
+# per-file decisions for the implementation script. It never authorizes writes.
+deploy_script = repo / "stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-deploy-lockscreen-visual.sh"
+deploy_text = read(deploy_script)
+deploy_origin_match = re.search(r'readonly upstream_url="([^"]+)"', deploy_text)
+deploy_revision_match = re.search(r'readonly upstream_revision="([^"]+)"', deploy_text)
+deploy_origin = deploy_origin_match.group(1) if deploy_origin_match else "<not parsed>"
+deploy_revision = deploy_revision_match.group(1) if deploy_revision_match else "<not parsed>"
+add("Audit pin:   " + expected_origin + " @ " + expected_revision)
+add("Deploy pin:  " + deploy_origin + " @ " + deploy_revision)
+pins_match = deploy_origin == expected_origin and deploy_revision == expected_revision
+add("Audit/deploy pin consistency: " + ("PASS" if pins_match else "FAIL — fix duplicated pin constants before implementation"))
+candidate = next(((label, root) for label, root in available
+                  if label == "USER_CONFIG" and (root / ".git").exists()), None)
+if candidate is None:
+    add("GLOBAL DECISION: BLOCKED — no user-local Git Caelestia checkout at the configured XDG path.")
+else:
+    _, root = candidate
+    rc, actual_origin = run(["git", "-C", str(root), "remote", "get-url", "origin"])
+    rc_rev, actual_revision = run(["git", "-C", str(root), "rev-parse", "HEAD"])
+    origin_ok = rc == 0 and actual_origin == expected_origin
+    revision_ok = rc_rev == 0 and actual_revision == expected_revision
+    add("Runtime origin check: " + ("PASS" if origin_ok else "BLOCKED — origin mismatch/unavailable"))
+    add("Runtime revision check: " + ("PASS" if revision_ok else "BLOCKED — HEAD differs from pinned revision"))
+    global_ok = pins_match and origin_ok and revision_ok
+    add("GLOBAL DECISION: " + ("FILE-LEVEL PREFLIGHT ONLY — provenance checks pass; session/path/ownership checks still belong to deploy script." if global_ok else "BLOCKED — do not run deployment until the listed provenance/pin issue is resolved."))
+    add("Per-file decision legend: ALREADY_DEPLOYED = installed bytes equal K41 source; SAFE_TO_REPLACE = installed bytes equal pinned upstream; REVIEW_REQUIRED = neither accepted version; BLOCKED = missing, symlink, or unavailable comparison.")
+    for relative in target_files:
+        installed = root / "modules/lock" / relative
+        source = visual_source / relative
+        upstream = None
+        try:
+            p = subprocess.run(
+                ["git", "-C", str(root), "show", f"{expected_revision}:modules/lock/{relative}"],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=10
+            )
+            if p.returncode == 0: upstream = p.stdout
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        installed_bytes = None
+        if installed.is_symlink():
+            decision = "BLOCKED_SYMLINK"
+        elif not installed.is_file():
+            decision = "BLOCKED_MISSING"
+        else:
+            try: installed_bytes = installed.read_bytes()
+            except OSError: decision = "BLOCKED_UNREADABLE"
+        source_bytes = None
+        if source.is_symlink() or not source.is_file():
+            source_state = "MISSING_OR_SYMLINK"
+        else:
+            try: source_bytes = source.read_bytes(); source_state = "PRESENT"
+            except OSError: source_state = "UNREADABLE"
+        if installed_bytes is not None:
+            if source_bytes is not None and installed_bytes == source_bytes:
+                decision = "ALREADY_DEPLOYED"
+            elif upstream is not None and installed_bytes == upstream:
+                decision = "SAFE_TO_REPLACE"
+            else:
+                decision = "REVIEW_REQUIRED"
+        if decision == "ALREADY_DEPLOYED":
+            action = "No QML replacement needed; retain file and verify runtime."
+        elif decision == "SAFE_TO_REPLACE":
+            action = "Deploy script may replace this exact pinned-upstream file with K41 source."
+        elif decision == "REVIEW_REQUIRED":
+            action = "Inspect the full unified diff above; preserve or deliberately reconcile local edits before changing deploy guard."
+        elif decision == "BLOCKED_SYMLINK":
+            action = "Stop; do not follow or replace symlink. Resolve path ownership/layout manually."
+        elif decision == "BLOCKED_MISSING":
+            action = "Stop; restore/identify the required upstream target before deployment."
+        else:
+            action = "Stop; make installed/source/upstream bytes readable and rerun audit."
+        installed_hash = hashlib.sha256(installed_bytes).hexdigest() if installed_bytes is not None else "<none>"
+        source_hash = hashlib.sha256(source_bytes).hexdigest() if source_bytes is not None else "<none>"
+        upstream_hash = hashlib.sha256(upstream).hexdigest() if upstream is not None else "<none>"
+        add(f"FILE DECISION: modules/lock/{relative}")
+        add(f"  Decision: {decision}")
+        add(f"  Installed SHA-256: {installed_hash}")
+        add(f"  K41 source SHA-256: {source_hash} ({source_state})")
+        add(f"  Pinned upstream SHA-256: {upstream_hash}")
+        add(f"  Implementation action: {action}")
+add("Important: REVIEW_REQUIRED is evidence of a content mismatch, not proof of who changed the file or why.")
+add("Do not weaken the deployment guard merely to make deployment pass. Any implementation change must preserve unknown local content through explicit backup/reconciliation and must be covered by regression tests.")
+add("The deployment script separately hardcodes upstream origin/revision; this section detects drift but does not mutate either script.")
+add("Machine-readable-ish FILE DECISION lines and SHA-256 values are intended as direct inputs to the next implementation review.")
+
 section("LOCK-SCREEN VISUAL ENTRY POINTS")
 initial, index = [], {}
 for label, root in available:
