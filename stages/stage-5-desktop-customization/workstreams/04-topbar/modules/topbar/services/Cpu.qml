@@ -14,7 +14,8 @@ QtObject {
         if (fields.length < 5 || fields[0] !== "cpu")
             return
         let total = 0
-        for (let i = 1; i < fields.length; i++)
+        // Linux guest/guest_nice counters are already included in user/nice.
+        for (let i = 1; i < Math.min(fields.length, 9); i++)
             total += Number(fields[i])
         const idle = Number(fields[4]) + (Number(fields[5]) || 0)
         const totalDelta = total - previousTotal
