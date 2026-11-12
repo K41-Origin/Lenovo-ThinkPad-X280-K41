@@ -199,7 +199,7 @@ for label, root in qml_roots:
                 source = candidate.read_text(encoding="utf-8", errors="replace")
             except OSError:
                 continue
-            matched = [token for token in qml_tokens if re.search(r"\\b" + re.escape(token) + r"\\b", source)]
+            matched = [token for token in qml_tokens if re.search(r"\b" + re.escape(token) + r"\b", source)]
             if matched and (re.search(r"\\b(?:ShellRoot|PanelWindow|Variants)\\b", source)
                             or candidate.name.lower() in {"shell.qml", "main.qml", "quickshell.qml"}):
                 rel = candidate.relative_to(root).as_posix()
