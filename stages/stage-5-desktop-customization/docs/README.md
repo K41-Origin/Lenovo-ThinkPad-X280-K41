@@ -12,13 +12,14 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
-| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **AUDIT IN PROGRESS** |
+| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **COMPLETED / USER ACCEPTED** |
 | 4 | 05 | [Topbar](05-TOPBAR.md) | Spesifikasi; desain detail menunggu keputusan |
 | 5 | 06 | [Launcher](05-LAUNCHER.md) | Planned |
 | 6 | 07 | [Sidebar](06-SIDEBAR.md) | Planned |
 | 7 | 08 | [Utilities](07-UTILITIES.md) | Planned |
+| 8 | 09 | [Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md) | **PLANNED — FINAL WORKSTREAM AFTER ALL COMPONENT WORKSTREAMS** |
 
-Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen.
+Guest Mode berada di `archive/guest-mode/` dan bukan workstream aktif. Bottombar ditetapkan sebagai Workstream 03 dan menempati urutan eksekusi ke-3 setelah Boot Experience dan Lock Screen. Workstream 09 — Clean up Caelestia menjadi tahap konsolidasi terakhir setelah seluruh workstream komponen 02/03/05/06/07/08 selesai dan diterima.
 
 ID workstream adalah identitas komponen. Bottombar kini ditetapkan sebagai ID 03 setelah Guest Mode diarsipkan; ID 04 tidak digunakan pada roadmap aktif. ID 05–08 dipertahankan agar referensi komponen yang sudah ada tidak berubah. Urutan pada tabel adalah urutan eksekusi. Hanya workstream yang tercantum pada tabel yang termasuk roadmap Stage 5 aktif.
 
@@ -60,6 +61,6 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 8. Catat perintah, hasil aktual, keterbatasan, dan keputusan pengguna dalam teks. Jangan mengarang hasil atau menyamakan file tersedia dengan runtime VERIFIED.
 9. Lanjutkan ke workstream berikutnya setelah acceptance terpenuhi atau pengguna secara eksplisit menerima pengecualian.
 
-## Cleanup Caelestia
+## Cleanup Caelestia — Workstream 09
 
-Dashboard dinonaktifkan melalui dashboard.enabled=false pada konfigurasi Caelestia global dan override monitor yang memiliki bagian Dashboard. Script scripts/k41-cleanup-caelestia.sh menonaktifkan konfigurasi tanpa menghapus source QML upstream. Jika modul upstream hilang dari checkout user, scripts/k41-repair-caelestia-modules.sh memulihkan hanya modules/dashboard dari instalasi package di /etc/xdg/quickshell/caelestia; default dry-run, --apply menyalin secara atomik setelah memverifikasi source dimiliki pacman, dan tidak menimpa direktori tujuan yang sudah ada. Jalankan --check setelah repair. Test fixture: tests/test-caelestia-module-repair.sh. Entry Dashboard pada Nexus masih dapat terlihat; penghapusan halaman Nexus belum dilakukan.
+Pekerjaan cleanup luas Caelestia ditunda sampai seluruh workstream komponen Stage 5 selesai dan diterima. Scope, audit read-only, dependency map, approval gate, dry-run, backup, rollback, dan acceptance dicatat di [Workstream 09 — Clean up Caelestia](09-CLEAN-UP-CAELESTIA.md). Catatan dashboard yang sudah dinonaktifkan tetap menjadi histori; jangan menyamakan cleanup dashboard terdahulu dengan cleanup final seluruh Caelestia.
