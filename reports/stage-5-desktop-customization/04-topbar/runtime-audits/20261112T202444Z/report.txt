@@ -1,0 +1,939 @@
+
+==============================================================================
+AUDIT SCOPE
+==============================================================================
+K41 WS04 Topbar runtime diagnostic; read-only; no deployment, reload, restart, package, service, or configuration changes.
+Captured UTC: 2026-11-12T20:24:44.909015+00:00
+Repository HEAD: 02d1060aa9e730fd46aafbfd2ff6d1323c89792e
+Branch: main
+Checkout status: clean
+Session context: XDG_SESSION_TYPE=present; WAYLAND_DISPLAY=present; HYPRLAND_INSTANCE_SIGNATURE=present; XDG_RUNTIME_DIR=present; DBUS_SESSION_BUS_ADDRESS=present
+Effective config root: <HOME>/.config
+
+==============================================================================
+VERSIONS AND TOOLING
+==============================================================================
+qs: /usr/bin/qs; version_exit=0; Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+quickshell: /usr/bin/quickshell; version_exit=0; Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+caelestia: /usr/bin/caelestia; version_exit=0; Packages:
+    caelestia-shell  2.5.0-1
+    caelestia-cli    1.1.3-1
+    quickshell-git   0.3.2.r11.g9b0f339-1
+
+Dots: not installed
+
+Shell:
+    caelestia-shell 2.5.0, revision d999d4878ee4cec134168e60d913714566a8cfa6, distributed by: AUR (package: caelestia-shell)
+
+Quickshell:
+    Quickshell 0.3.2 (revision 9b0f339b19057f4731bf3b48293307d7ef241671, distributed by AUR (package: quickshell-git))
+
+Local copy of shell found:
+    Last merged upstream commit: unknown
+    Last local commit: d999d48 (ci:
+hyprctl: /usr/bin/hyprctl; version_exit=1; usage: hyprctl [flags] <command> [args...|--help]
+
+commands:
+    activewindow        → Gets the active window name and its properties
+    activeworkspace     → Gets the active workspace and its properties
+    animations          → Gets the current config'd info about animations
+                          and beziers
+    binds               → Lists all registered binds
+    clients             → Lists all windows with their properties
+    configerrors        → Lists all current config parsing error
+qmllint: NOT_FOUND
+qmlformat: NOT_FOUND
+qml: NOT_FOUND
+package caelestia-shell: caelestia-shell 2.5.0-1
+package quickshell: quickshell-git 0.3.2.r11.g9b0f339-1
+package quickshell-git: quickshell-git 0.3.2.r11.g9b0f339-1
+package hyprland: hyprland 0.57.1-1
+package qt6-base: qt6-base 6.12.0-3
+package qt6-declarative: qt6-declarative 6.12.0-4
+package qt6-wayland: not installed or pacman unavailable
+
+==============================================================================
+EXPECTED RUNTIME FILES
+==============================================================================
+Host expected: ~/.config/quickshell/caelestia/shell.qml
+Module expected: ~/.config/quickshell/k41/modules/topbar/Topbar.qml
+
+==============================================================================
+RUNTIME CAELESTIA HOST SHELL
+==============================================================================
+bytes=992 mode=0o600 uid=1000
+sha256=718fe5298638deb7ea46ab729a0764e4c9a058a64374f0a19dce6155b1ec047d
+--- BEGIN SOURCE (bounded) ---
+//@ pragma Env QS_CRASHREPORT_URL=https://github.com/caelestia-dots/shell/issues/new?template=crash.yml
+//@ pragma DefaultEnv QS_NO_RELOAD_POPUP=1
+//@ pragma DefaultEnv QS_DROP_EXPENSIVE_FONTS=1
+//@ pragma DefaultEnv QSG_RENDER_LOOP=threaded
+//@ pragma DefaultEnv QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
+
+import "modules"
+import "modules/drawers"
+import "modules/background"
+import "modules/areapicker"
+import "modules/lock"
+import QtQuick
+import Quickshell
+import qs.services
+
+import "../k41/modules/bottombar" as K41Bottombar
+import "../k41/modules/topbar" as K41Topbar
+
+ShellRoot {
+    id: root
+
+    settings.watchFiles: true
+
+    Binding {
+        target: ShellState
+        property: "shellRoot"
+        value: root
+    }
+
+    GSFLoader {}
+    ServiceLoader {}
+
+    Background {}
+    Drawers {}
+    AreaPicker {}
+    Lock {
+        id: lock
+    }
+
+    Shortcuts {}
+    BatteryMonitor {}
+    IdleMonitors {
+        lock: lock
+    }
+
+    K41Topbar.Topbar {}
+    K41Bottombar.Dock {}
+}
+
+--- END SOURCE ---
+
+==============================================================================
+RUNTIME K41 TOPBAR MODULE
+==============================================================================
+bytes=3241 mode=0o644 uid=1000
+sha256=4eb7988bbe652e9f63719f64b39de01a9f9962ab6852a93ac91aee839a2fcc2b
+--- BEGIN SOURCE (bounded) ---
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Services.UPower
+import Quickshell.Wayland
+import Caelestia.Services
+import qs.services
+
+Variants {
+    model: Quickshell.screens
+
+    Scope {
+        id: scope
+        required property ShellScreen modelData
+
+        function openNotifications(): void {
+            const screenState = ShellState.forScreen(modelData);
+            if (screenState)
+                screenState.sidebar = true;
+        }
+
+        // Start Caelestia's existing ticking services; do not add polling timers.
+        ServiceRef {
+            service: Cpu
+        }
+
+        ServiceRef {
+            service: Memory
+        }
+
+        PanelWindow {
+            id: bar
+            screen: scope.modelData
+            anchors {
+                top: true
+                left: true
+                right: true
+            }
+            implicitHeight: 34
+            color: "transparent"
+            exclusiveZone: 34
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+            Rectangle {
+                anchors.fill: parent
+                color: "#e51b1d27"
+                border.width: 1
+                border.color: "#35ffffff"
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 14
+                    spacing: 14
+
+                    Text {
+                        text: `CPU ${Math.round(Cpu.percentage * 100)}%`
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        text: `RAM ${Math.round(Memory.percentage * 100)}%`
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
+                    Item {
+                        implicitWidth: notificationLabel.implicitWidth + 12
+                        implicitHeight: parent.height
+
+                        Text {
+                            id: notificationLabel
+                            anchors.centerIn: parent
+                            text: `◉ ${Notifs.notClosed.length}`
+                            color: "#f4f1fa"
+                            font.pixelSize: 12
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: scope.openNotifications()
+                        }
+                    }
+
+                    Text {
+                        text: `Battery ${Math.round(UPower.displayDevice.percentage)}% · ${UPower.onBattery ? "On battery" : "AC"}`
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        text: Time.format("hh:mm  ddd, dd MMM")
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+                }
+            }
+        }
+    }
+}
+
+--- END SOURCE ---
+
+==============================================================================
+CANONICAL K41 TOPBAR SOURCE
+==============================================================================
+bytes=3241 mode=0o600 uid=1000
+sha256=4eb7988bbe652e9f63719f64b39de01a9f9962ab6852a93ac91aee839a2fcc2b
+--- BEGIN SOURCE (bounded) ---
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Services.UPower
+import Quickshell.Wayland
+import Caelestia.Services
+import qs.services
+
+Variants {
+    model: Quickshell.screens
+
+    Scope {
+        id: scope
+        required property ShellScreen modelData
+
+        function openNotifications(): void {
+            const screenState = ShellState.forScreen(modelData);
+            if (screenState)
+                screenState.sidebar = true;
+        }
+
+        // Start Caelestia's existing ticking services; do not add polling timers.
+        ServiceRef {
+            service: Cpu
+        }
+
+        ServiceRef {
+            service: Memory
+        }
+
+        PanelWindow {
+            id: bar
+            screen: scope.modelData
+            anchors {
+                top: true
+                left: true
+                right: true
+            }
+            implicitHeight: 34
+            color: "transparent"
+            exclusiveZone: 34
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+
+            Rectangle {
+                anchors.fill: parent
+                color: "#e51b1d27"
+                border.width: 1
+                border.color: "#35ffffff"
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 14
+                    anchors.rightMargin: 14
+                    spacing: 14
+
+                    Text {
+                        text: `CPU ${Math.round(Cpu.percentage * 100)}%`
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        text: `RAM ${Math.round(Memory.percentage * 100)}%`
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+
+                    Item {
+                        implicitWidth: notificationLabel.implicitWidth + 12
+                        implicitHeight: parent.height
+
+                        Text {
+                            id: notificationLabel
+                            anchors.centerIn: parent
+                            text: `◉ ${Notifs.notClosed.length}`
+                            color: "#f4f1fa"
+                            font.pixelSize: 12
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: scope.openNotifications()
+                        }
+                    }
+
+                    Text {
+                        text: `Battery ${Math.round(UPower.displayDevice.percentage)}% · ${UPower.onBattery ? "On battery" : "AC"}`
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+
+                    Text {
+                        text: Time.format("hh:mm  ddd, dd MMM")
+                        color: "#f4f1fa"
+                        font.pixelSize: 12
+                    }
+                }
+            }
+        }
+    }
+}
+
+--- END SOURCE ---
+Runtime module equals canonical source: YES
+Host token <REDACTED> "../k41/modules/topbar" as K41Topbar': lines=17
+Host token <REDACTED> {}': lines=46
+Host token <REDACTED> {}': lines=NOT_FOUND
+Host root-id lines=[20]; K41Topbar instance lines=[46]
+Structural placement after root id: YES
+
+==============================================================================
+ACTIVE QUICKSHELL PROCESS AND SELECTOR
+==============================================================================
+matching process count=0
+No PID, complete command line, or unrestricted process environment is recorded.
+
+==============================================================================
+QUICKSHELL INSTANCE INVENTORY
+==============================================================================
+exit=0
+No running instances.
+
+
+==============================================================================
+QUICKSHELL CAELESTIA LOG (LATEST 400 LINES)
+==============================================================================
+exit=0
+  INFO: Launching config: "<HOME>/.config/quickshell/caelestia/shell.qml"
+  INFO: Shell ID: "069ea8c6e9889cca46d05922bc04af46" Path ID "069ea8c6e9889cca46d05922bc04af46"
+  INFO: Saving logs to "/run/user/<UID>/quickshell/by-id/lu1mboeot/log.qslog"
+  WARN quickshell.qmlscanner: Module path "<HOME>/.config/quickshell/k41/modules/bottombar" is outside of the config folder.
+  WARN quickshell.qmlscanner: Module path "<HOME>/.config/quickshell/k41/modules/topbar" is outside of the config folder.
+ ERROR: Failed to load configuration
+ ERROR:   caused by @shell.qml[46:5]: Type K41Topbar.Topbar unavailable
+ ERROR:   caused by qrc:/qs-blackhole[-1:-1]: No such file or directory
+
+
+==============================================================================
+HYPRLAND CONFIG ERRORS
+==============================================================================
+exit=0
+
+
+
+
+==============================================================================
+HYPRLAND MONITORS
+==============================================================================
+exit=0
+[{
+    "id": 0,
+    "name": "eDP-1",
+    "description": "InfoVision Optoelectronics (Kunshan) Co.Ltd China 0x04E6",
+    "make": "InfoVision Optoelectronics (Kunshan) Co.,Ltd China",
+    "model": "0x04E6",
+    "serial": "",
+    "width": 1920,
+    "height": 1080,
+    "physicalWidth": 280,
+    "physicalHeight": 160,
+    "refreshRate": 60.00100,
+    "x": 0,
+    "y": 0,
+    "activeWorkspace": {
+        "address": "1",
+        "id": 1,
+        "type": "normal",
+        "name": "1"
+    },
+    "specialWorkspace": {
+        "address": "",
+        "type": "",
+        "name": ""
+    },
+    "reserved": [0, 0, 0, 0],
+    "scale": 1.5,
+    "transform": 0,
+    "focused": true,
+    "dpmsStatus": true,
+    "vrr": false,
+    "solitary": "0",
+    "solitaryBlockedBy": ["WINDOWED","CANDIDATE"],
+    "activelyTearing": false,
+    "tearingBlockedBy": ["NOT_TORN","USER","CANDIDATE"],
+    "directScanoutTo": "0",
+    "directScanoutBlockedBy": ["USER","CANDIDATE"],
+    "disabled": false,
+    "currentFormat": "XRGB8888",
+    "mirrorOf": "none",
+    "availableModes": ["1920x1080@60.00Hz"],
+    "colorManagementPreset": "srgb",
+    "sdrBrightness": 1,
+    "sdrSaturation": 1,
+    "sdrMinLuminance": 0.2,
+    "sdrMaxLuminance": 80,
+    "hardwareCursorsInUse": true,
+    "hardwareDetails": {
+        "backend": "drm",
+        "hdr": false,
+        "chroma": true,
+        "bt2020": false,
+        "vrrCapable": false
+    }
+}]
+
+
+==============================================================================
+USER SERVICE UNITS RELATED TO QUICKSHELL/CAELESIA
+==============================================================================
+exit=0
+-net-devices-enp0s31f6.device                                                                                          loaded    active   plugged   Ethernet Connection (4) I219-V
+  sys-subsystem-net-devices-wlp59s0.device                                                                                            loaded    active   plugged   Wireless 8265 / 8275 (Dual Band Wireless-AC 8265 [Windstorm Peak])
+  -.mount                                                                                                                             loaded    active   mounted   Root Mount
+  dev-hugepages.mount                                                                                                                 loaded    active   mounted   /dev/hugepages
+  dev-mqueue.mount                                                                                                                    loaded    active   mounted   /dev/mqueue
+  efi.mount                                                                                                                           loaded    active   mounted   /efi
+  run-credentials-getty\x40tty1.service.mount                                                                                         loaded    active   mounted   /run/credentials/getty@tty1.service
+  run-credentials-systemd\x2djournald.service.mount                                                                                   loaded    active   mounted   /run/credentials/systemd-journald.service
+  run-user-1000-doc.mount                                                                                                             loaded    active   mounted   /run/user/<UID>/doc
+  run-user-1000.mount                                                                                                                 loaded    active   mounted   /run/user/<UID>
+  sys-fs-fuse-connections.mount                                                                                                       loaded    active   mounted   /sys/fs/fuse/connections
+  sys-kernel-config.mount                                                                                                             loaded    active   mounted   /sys/kernel/config
+  sys-kernel-debug.mount                                                                                                              loaded    active   mounted   /sys/kernel/debug
+  sys-kernel-tracing.mount                                                                                                            loaded    active   mounted   /sys/kernel/tracing
+  tmp.mount                                                                                                                           loaded    active   mounted   /tmp
+  init.scope                                                                                                                          loaded    active   running   System and Service Manager
+  kitty-934-0.scope                                                                                                                   loaded    active   running   kitty child process: 942 launched by: 934
+  at-spi-dbus-bus.service                                                                                                             loaded    active   running   Accessibility services bus
+  dbus-:1.13-org.a11y.atspi.Registry@0.service                                                                                        loaded    active   running   dbus-:1.13-org.a11y.atspi.Registry@0.service
+  dbus-broker.service                                                                                                                 loaded    active   running   D-Bus User Message Bus
+  dconf.service                                                                                                                       loaded    active   running   User preferences database
+  dirmngr.service                                                                                                                     loaded    inactive dead      GnuPG network certificate management daemon
+  gpg-agent.service                                                                                                                   loaded    inactive dead      GnuPG cryptographic agent and passphrase cache
+  keyboxd.service                                                                                                                     loaded    inactive dead      GnuPG public key management service
+  p11-kit-server.service                                                                                                              loaded    inactive dead      p11-kit server
+● pipewire-media-session.service                                                                                                      not-found inactive dead      pipewire-media-session.service
+  pipewire-pulse.service                                                                                                              loaded    active   running   PipeWire PulseAudio
+  pipewire.service                                                                                                                    loaded    active   running   PipeWire Multimedia Service
+● pulseaudio.service                                                                                                                  not-found inactive dead      pulseaudio.service
+  systemd-importd.service                                                                                                             loaded    inactive dead      Disk Image Download Service
+  systemd-machined.service                                                                                                            loaded    inactive dead      Virtual Machine and Container Registration Service
+● systemd-remount-fs.service                                                                                                          not-found inactive dead      systemd-remount-fs.service
+  wireplumber.service                                                                                                                 loaded    active   running   Multimedia Service Session Manager
+  xdg-desktop-portal-gtk.service                                                                                                      loaded    active   running   Portal service (GTK/GNOME implementation)
+  xdg-desktop-portal-hyprland.service                                                                                                 loaded    active   running   Portal service (Hyprland implementation)
+  xdg-desktop-portal.service                                                                                                          loaded    active   running   Portal service
+  xdg-document-portal.service                                                                                                         loaded    active   running   flatpak document portal service
+  xdg-permission-store.service                                                                                                        loaded    active   running   sandboxed app permission store
+  xdg-user-dirs.service                                                                                                               loaded    inactive dead      User folders update
+  -.slice                                                                                                                             loaded    active   active    Root Slice
+  app-dbus\x2d:1.13\x2dorg.a11y.atspi.Registry.slice                                                                                  loaded    active   active    Slice /app/dbus-:1.13-org.a11y.atspi.Registry
+  app.slice                                                                                                                           loaded    active   active    User Application Slice
+  machine.slice                                                                                                                       loaded    inactive dead      Virtual Machine and Container Slice
+  session.slice                                                                                                                       loaded    active   active    User Core Session Slice
+  dbus.socket                                                                                                                         loaded    active   running   D-Bus User Message Bus Socket
+  dirmngr.socket                                                                                                                      loaded    active   listening GnuPG network certificate management daemon
+  gpg-agent-browser.socket                                                                                                            loaded    active   listening GnuPG cryptographic agent and passphrase cache (access for web browsers)
+  gpg-agent-extra.socket                                                                                                              loaded    active   listening GnuPG cryptographic agent and passphrase cache (restricted)
+  gpg-agent-ssh.socket                                                                                                                loaded    active   listening GnuPG cryptographic agent (ssh-agent emulation)
+  gpg-agent.socket                                                                                                                    loaded    active   listening GnuPG cryptographic agent and passphrase cache
+  keyboxd.socket                                                                                                                      loaded    active   listening GnuPG public key management service
+  p11-kit-server.socket                                                                                                               loaded    active   listening p11-kit server
+  pipewire-pulse.socket                                                                                                               loaded    active   running   PipeWire PulseAudio
+  pipewire.socket                                                                                                                     loaded    active   running   PipeWire Multimedia System Sockets
+● pulseaudio.socket                                                                                                                   not-found inactive dead      pulseaudio.socket
+  systemd-ask-password.socket                                                                                                         loaded    active   listening Query the User Interactively for a Password
+  systemd-importd.socket                                                                                                              loaded    active   listening Disk Image Download Service Socket
+  systemd-journalctl.socket                                                                                                           loaded    active   listening Journal Log Access Socket
+  systemd-machined.socket                                                                                                             loaded    active   listening Virtual Machine and Container Registration Service Socket
+  systemd-storage-fs.socket                                                                                                           loaded    active   listening Simple File System Backed Storage Provider
+  swapfile.swap                                                                                                                       loaded    active   active    /swapfile
+  basic.target                                                                                                                        loaded    active   active    Basic System
+● blockdev@dev-nvme0n1p1.target                                                                                                       not-found inactive dead      blockdev@dev-nvme0n1p1.target
+  bluetooth.target                                                                                                                    loaded    inactive dead      Bluetooth
+  default.target                                                                                                                      loaded    active   active    Main User Target
+  graphical-session-pre.target                                                                                                        loaded    active   active    Session services which should run early before the graphical session is brought up
+  graphical-session.target                                                                                                            loaded    active   active    Current graphical user session
+  hyprland-session.target                                                                                                             loaded    active   active    Hyprland session
+  paths.target                                                                                                                        loaded    active   active    Paths
+  shutdown.target                                                                                                                     loaded    inactive dead      Shutdown
+  sockets.target                                                                                                                      loaded    active   active    Sockets
+  sound.target                                                                                                                        loaded    inactive dead      Sound Card
+  timers.target                                                                                                                       loaded    active   active    Timers
+
+
+==============================================================================
+RECENT USER JOURNAL — QUICKSHELL/QML/TOPBAR
+==============================================================================
+journal_exit=0
+
+
+==============================================================================
+CURRENT BOOT JOURNAL — RELEVANT SYSTEM EVENTS
+==============================================================================
+2026-11-13T02:52:52.134101+07:00 archlinux systemd[1]: Found device WDC PC SN730 SDBQNTY-256G-1001 K41-ROOT.
+2026-11-13T02:52:56.725288+07:00 archlinux systemd-fsck[237]: K41_ROOT: clean, 155580/15564800 files, 6816284/62248273 blocks
+2026-11-13T02:53:04.719099+07:00 x280 systemd[1]: Condition check resulted in WDC PC SN730 SDBQNTY-256G-1001 K41_EFI being skipped.
+2026-11-13T02:53:05.651212+07:00 x280 systemd[1]: Starting Retain splash frame and release Plymouth display ownership before K41 Hyprland startup...
+2026-11-13T02:53:05.807720+07:00 x280 systemd[1]: Finished Retain splash frame and release Plymouth display ownership before K41 Hyprland startup.
+2026-11-13T02:53:09.946000+07:00 x280 systemd[526]: Reached target Hyprland session.
+2026-11-13T02:53:10.490424+07:00 x280 systemd[526]: Starting Portal service (Hyprland implementation)...
+2026-11-13T02:53:10.509252+07:00 x280 systemd[526]: Started Portal service (Hyprland implementation).
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] Initializing xdph...
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] XDG_CURRENT_DESKTOP set to Hyprland
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] Gathering exported interfaces
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_seat (ver 9)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_data_device_manager (ver 3)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_compositor (ver 6)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_subcompositor (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wl_shm (ver 2)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_viewporter (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_tearing_control_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_fractional_scale_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_output_manager_v1 (ver 3)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_cursor_shape_manager_v1 (ver 2)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_idle_inhibit_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_relative_pointer_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_decoration_manager_v1 (ver 2)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_alpha_modifier_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_gamma_control_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_foreign_toplevel_list_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_pointer_gestures_v1 (ver 3)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_foreign_toplevel_manager_v1 (ver 3)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [toplevel] (activate) locks: 1
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_keyboard_shortcuts_inhibit_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_text_input_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_text_input_manager_v3 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_pointer_constraints_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_output_power_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_activation_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_idle_notifier_v1 (ver 2)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_lock_notifier_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_session_lock_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_input_method_manager_v2 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_virtual_keyboard_manager_v1 (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_virtual_pointer_manager_v1 (ver 2)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_output_manager_v1 (ver 4)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: org_kde_kwin_server_decoration_manager (ver 1)
+2026-11-13T02:53:10.512684+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_focus_grab_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_tablet_manager_v2 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_layer_shell_v1 (ver 5)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_presentation (ver 2)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_wm_base (ver 7)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_data_control_manager_v1 (ver 2)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwp_primary_selection_device_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xwayland_shell_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_toplevel_mapping_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [toplevel mapping] registered manager
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_global_shortcuts_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [globalshortcuts] registered
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_wm_dialog_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_single_pixel_buffer_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_security_context_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_ctm_control_manager_v1 (ver 2)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_input_capture_manager_v1 (ver 2)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [input-capture] initializing input capture portal
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [input-capture] init successful
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_surface_manager_v1 (ver 2)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_content_type_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_toplevel_tag_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xdg_system_bell_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: vicinae_hotkey_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: xx_hotkey_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_workspace_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_data_control_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_pointer_warp_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_fifo_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_exporter_v2 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zxdg_importer_v2 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_background_effect_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: wp_commit_timing_manager_v1 (ver 1)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: zwlr_screencopy_manager_v1 (ver 3)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [pipewire] connected
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG] [screencopy] init successful
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: hyprland_toplevel_export_manager_v1 (ver 2)
+2026-11-13T02:53:10.514619+07:00 x280 xdg-desktop-portal-hyprland[713]: [LOG]  | Got interface: ext_output_image_capture_source_manager_v1 (ver 1)
+
+==============================================================================
+RELEVANT RUNTIME TREE
+==============================================================================
+<HOME>/.config/quickshell/caelestia: present
+shell.qml
+utils/Images.qml
+utils/NetworkConnection.qml
+utils/Icons.qml
+utils/Strings.qml
+utils/SysInfo.qml
+utils/Searcher.qml
+utils/Paths.qml
+services/Time.qml
+services/Recorder.qml
+services/Screens.qml
+services/Wallpapers.qml
+services/Audio.qml
+services/IdleInhibitor.qml
+services/ShellState.qml
+services/Colours.qml
+services/Players.qml
+services/Brightness.qml
+services/Notifs.qml
+services/Nmcli.qml
+services/Hypr.qml
+services/GameMode.qml
+services/Weather.qml
+services/NotifData.qml
+services/VPN.qml
+modules/BatteryMonitor.qml
+modules/Shortcuts.qml
+modules/ServiceLoader.qml
+modules/IdleMonitors.qml
+modules/GSFLoader.qml
+components/AnimLoader.qml
+components/StateLayer.qml
+components/StyledText.qml
+components/CAnim.qml
+components/StyledRect.qml
+components/ScreenState.qml
+components/Anim.qml
+components/AnchorAnim.qml
+components/StyledClippingRect.qml
+components/Logo.qml
+components/MaterialIcon.qml
+components/containers/VerticalFadeFlickable.qml
+components/containers/StyledFlickable.qml
+components/containers/StyledWindow.qml
+components/containers/VerticalFadeListView.qml
+components/containers/StyledListView.qml
+components/controls/IconButton.qml
+components/controls/IconTextButton.qml
+components/controls/StyledRadioButton.qml
+components/controls/ButtonBase.qml
+components/controls/StyledSpinBox.qml
+components/controls/CircularProgress.qml
+components/controls/CircularIndicator.qml
+components/controls/TextButton.qml
+components/controls/CustomMouseArea.qml
+components/controls/TextFieldBase.qml
+components/controls/StyledSwitch.qml
+components/controls/SearchBar.qml
+components/controls/StyledSlider.qml
+components/controls/StyledScrollBar.qml
+components/controls/FilledSlider.qml
+components/controls/StyledProgressBar.qml
+components/controls/SplitButton.qml
+components/controls/Menu.qml
+components/controls/StyledTextField.qml
+components/controls/MenuItem.qml
+components/controls/LoadingIndicator.qml
+components/widgets/CoverArt.qml
+components/widgets/ExtraIndicator.qml
+components/widgets/WavyTopRect.qml
+components/images/FadeImage.qml
+components/images/CachingImage.qml
+components/images/CachingIconImage.qml
+components/filedialog/Sizes.qml
+components/filedialog/Sidebar.qml
+components/filedialog/CurrentItem.qml
+components/filedialog/HeaderBar.qml
+components/filedialog/DialogButtons.qml
+components/filedialog/FolderContents.qml
+components/filedialog/FileDialog.qml
+components/misc/Ref.qml
+components/misc/CustomShortcut.qml
+components/effects/Mask.qml
+components/effects/ColouredIcon.qml
+components/effects/Elevation.qml
+components/effects/Colouriser.qml
+modules/bar/Bar.qml
+modules/bar/BarWrapper.qml
+modules/utilities/Content.qml
+modules/utilities/Background.qml
+modules/utilities/Wrapper.qml
+modules/utilities/RecordingDeleteModal.qml
+modules/launcher/Content.qml
+modules/launcher/AppList.qml
+modules/launcher/WallpaperList.qml
+modules/launcher/ContentList.qml
+modules/launcher/Wrapper.qml
+modules/notifications/Content.qml
+modules/notifications/Notification.qml
+modules/notifications/Wrapper.qml
+modules/dashboard/Content.qml
+modules/dashboard/WeatherTab.qml
+modules/dashboard/Dash.qml
+modules/dashboard/Tabs.qml
+modules/dashboard/Performance.qml
+modules/dashboard/Wrapper.qml
+modules/dashboard/Media.qml
+modules/osd/Content.qml
+modules/osd/Wrapper.qml
+modules/background/Wallpaper.qml
+modules/background/Background.qml
+modules/background/DesktopClock.qml
+modules/background/Visualiser.qml
+modules/sidebar/Content.qml
+modules/sidebar/NotifGroupList.qml
+modules/sidebar/NotifActionList.qml
+modules/sidebar/NotifDockList.qml
+modules/sidebar/Notif.qml
+modules/sidebar/NotifGroup.qml
+modules/sidebar/Props.qml
+modules/sidebar/NotifDock.qml
+modules/sidebar/Wrapper.qml
+modules/drawers/Drawers.qml
+modules/drawers/Panels.qml
+modules/drawers/Regions.qml
+modules/drawers/Exclusions.qml
+modules/drawers/Interactions.qml
+modules/drawers/ContentWindow.qml
+modules/lock/Content.qml
+modules/lock/Center.qml
+modules/lock/LockSurface.qml
+modules/lock/Fetch.qml
+modules/lock/NotifGroup.qml
+modules/lock/NotifDock.qml
+modules/lock/Media.qml
+modules/lock/Resources.qml
+modules/lock/Lock.qml
+modules/lock/Pam.qml
+modules/lock/WeatherInfo.qml
+modules/nexus/NexusState.qml
+modules/nexus/Nexus.qml
+modules/nexus/NavPane.qml
+modules/nexus/PageRegistry.qml
+modules/nexus/Pages.qml
+modules/nexus/PageCompRegistry.qml
+modules/nexus/WindowFactory.qml
+modules/session/Content.qml
+modules/session/Wrapper.qml
+modules/windowinfo/WindowInfo.qml
+modules/windowinfo/Details.qml
+modules/windowinfo/Preview.qml
+modules/windowinfo/Buttons.qml
+modules/areapicker/Picker.qml
+modules/areapicker/AreaPicker.qml
+modules/nexus/common/DialogRowButton.qml
+modules/nexus/common/SelectRow.qml
+modules/nexus/common/DialogSelectButton.qml
+modules/nexus/common/NetworkList.qml
+modules/nexus/common/ItemList.qml
+modules/nexus/common/SectionHeader.qml
+modules/nexus/common/RowButton.qml
+modules/nexus/common/StepperRow.qml
+modules/nexus/common/AudioDeviceList.qml
+modules/nexus/common/PopupRow.qml
+modules/nexus/common/PageBase.qml
+modules/nexus/common/ConnectedRect.qml
+modules/nexus/common/ToggleRow.qml
+modules/nexus/common/TextFieldRow.qml
+modules/nexus/common/NavRow.qml
+modules/nexus/common/StackPage.qml
+modules/nexus/common/BlobPopup.qml
+modules/nexus/common/WallItem.qml
+modules/nexus/common/InfoRow.qml
+modules/nexus/common/ListEditor.qml
+modules/nexus/common/EthernetSection.qml
+modules/nexus/common/SliderRow.qml
+modules/nexus/common/AnimatedLogo.qml
+modules/nexus/navpane/NavLocations.qml
+modules/nexus/pages/NetworkPage.qml
+modules/nexus/pages/AboutPage.qml
+modules/nexus/pages/WallpaperAndStyle.qml
+modules/nexus/pages/PanelsPage.qml
+modules/nexus/pages/AppsPage.qml
+modules/nexus/pages/BluetoothPage.qml
+modules/nexus/pages/AudioPage.qml
+modules/nexus/pages/ServicesPage.qml
+modules/nexus/pages/LanguageAndRegion.qml
+modules/nexus/pages/audio/AppVolumes.qml
+modules/nexus/pages/services/NotificationsPage.qml
+modules/nexus/pages/wallandstyle/ColourSelect.qml
+modules/nexus/pages/wallandstyle/WallpaperCategory.qml
+modules/nexus/pages/wallandstyle/WallpaperSelect.qml
+modules/nexus/pages/bluetooth/BluetoothPairing.qml
+modules/nexus/pages/bluetooth/BtDeviceInfo.qml
+modules/nexus/pages/panels/UtilitiesPanel.qml
+modules/nexus/pages/panels/DashboardPanel.qml
+modules/nexus/pages/panels/SidebarPanel.qml
+modules/nexus/pages/panels/TaskbarPanel.qml
+modules/nexus/pages/panels/LauncherPanel.qml
+modules/nexus/pages/apps/AppInfo.qml
+modules/nexus/pages/apps/AllApps.qml
+modules/nexus/pages/network/AddVpnPage.qml
+modules/nexus/pages/network/AddNetworkPage.qml
+modules/nexus/pages/network/SavedNetworksPage.qml
+modules/nexus/pages/network/EthernetDetailPage.qml
+modules/nexus/pages/network/AllNetworksPage.qml
+modules/nexus/pages/network/NetworkDetailPage.qml
+modules/nexus/pages/panels/taskbar/BarActiveWindow.qml
+modules/nexus/pages/panels/taskbar/BarTray.qml
+modules/nexus/pages/panels/taskbar/BarWorkspaces.qml
+modules/nexus/pages/panels/taskbar/BarClock.qml
+modules/nexus/pages/panels/taskbar/BarStatusIcons.qml
+modules/lock/weather/Forecast.qml
+modules/lock/weather/BriefInfo.qml
+modules/lock/center/StateMessage.qml
+modules/lock/center/ProfilePic.qml
+modules/lock/center/PasswordInput.qml
+modules/lock/center/InputField.qml
+modules/lock/center/Clock.qml
+modules/dashboard/media/Details.qml
+modules/dashboard/media/LyricsInfo.qml
+modules/dashboard/media/CoverVisualiser.qml
+modules/dashboard/media/LyricList.qml
+modules/dashboard/media/BackgroundShapes.qml
+modules/dashboard/media/LyricsAndSelector.qml
+modules/dashboard/performance/BatteryTank.qml
+modules/dashboard/performance/MemoryCard.qml
+modules/dashboard/performance/NetworkCard.qml
+modules/dashboard/performance/HeroCard.qml
+modules/dashboard/performance/StorageCard.qml
+modules/dashboard/dash/Calendar.qml
+modules/dashboard/dash/SmallWeather.qml
+modules/dashboard/dash/User.qml
+modules/dashboard/dash/DateTime.qml
+modules/dashboard/dash/Media.qml
+modules/dashboard/dash/Resources.qml
+modules/launcher/services/Schemes.qml
+modules/launcher/services/Actions.qml
+modules/launcher/services/M3Variants.qml
+modules/launcher/services/Apps.qml
+modules/launcher/items/ActionItem.qml
+modules/launcher/items/CalcItem.qml
+modules/launcher/items/SchemeItem.qml
+modules/launcher/items/VariantItem.qml
+modules/launcher/items/AppItem.qml
+modules/launcher/items/WallpaperItem.qml
+modules/utilities/toasts/Toasts.qml
+modules/utilities/toasts/ToastItem.qml
+modules/utilities/cards/Toggles.qml
+modules/utilities/cards/IdleInhibit.qml
+modules/utilities/cards/RecordingList.qml
+modules/utilities/cards/Record.qml
+modules/bar/components/StatusIcons.qml
+modules/bar/components/Power.qml
+modules/bar/components/TrayItem.qml
+modules/bar/components/ActiveWindow.qml
+modules/bar/components/OsIcon.qml
+modules/bar/components/Clock.qml
+modules/bar/components/Tray.qml
+modules/bar/popouts/Content.qml
+modules/bar/popouts/LockStatus.qml
+modules/bar/popouts/Bluetooth.qml
+modules/bar/popouts/Battery.qml
+modules/bar/popouts/AudioPopout.qml
+modules/bar/popouts/ActiveWindow.qml
+modules/bar/popouts/Wrapper.qml
+modules/bar/popouts/TrayMenu.qml
+modules/bar/popouts/ClipWrapper.qml
+modules/bar/popouts/PopoutState.qml
+modules/bar/popouts/WirelessPassword.qml
+modules/bar/popouts/Network.qml
+modules/bar/popouts/kblayout/KbLayoutModel.qml
+modules/bar/popouts/kblayout/KbLayout.qml
+modules/bar/components/status/BatteryStatus.qml
+modules/bar/components/status/LockStatus.qml
+modules/bar/components/status/BluetoothStatus.qml
+modules/bar/components/workspaces/GapMarkers.qml
+modules/bar/components/workspaces/OccupiedBg.qml
+modules/bar/components/workspaces/Workspace.qml
+modules/bar/components/workspaces/Workspaces.qml
+modules/bar/components/workspaces/SpecialWorkspaces.qml
+modules/bar/components/workspaces/ActiveIndicator.qml
+plugin/src/Caelestia/I18n/Tr.qml
+plugin/src/Caelestia/I18n/Units.qml
+utils/scripts/fuzzysort.js
+utils/scripts/fzf.js
+<HOME>/.config/quickshell/k41: present
+modules/lockscreen/Content.qml
+modules/lockscreen/Center.qml
+modules/lockscreen/LockSurface.qml
+modules/bottombar/Dock.qml
+modules/topbar/Topbar.qml
+modules/lockscreen/center/PasswordInput.qml
+
+==============================================================================
+QML STATIC VALIDATION
+==============================================================================
+qmllint unavailable; no package installation attempted.
+Static lint does not prove Quickshell runtime instantiation; import context and runtime services may differ.
+
+==============================================================================
+DIAGNOSTIC LIMITATIONS
+==============================================================================
+- No Quickshell process is launched; no duplicate shell or temporary panel is created.
+- No reload/restart/deployment or config edit is performed.
+- Journal visibility depends on the current user's permissions.
+- Source/config snippets and logs are automatically redacted, but redaction is not a guarantee; inspect the private report before sharing.
+- The report distinguishes missing evidence from evidence of failure; absence of a log line does not prove an event did not occur.
+- This collector does not identify boot-time bottlenecks; systemd-analyze requires a separate boot audit.
