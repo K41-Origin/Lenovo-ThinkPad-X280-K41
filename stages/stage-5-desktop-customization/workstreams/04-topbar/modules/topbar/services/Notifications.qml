@@ -4,7 +4,7 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 
 // K41 owns org.freedesktop.Notifications after the deployer disables the
-// Caelestia NotificationServer. Keep exactly one instance in Topbar.qml.
+// host notification server. Keep exactly one instance in Topbar.qml.
 QtObject {
     id: root
 
@@ -172,7 +172,6 @@ QtObject {
         bodyImagesSupported: true
         imageSupported: true
         persistenceSupported: true
-        inlineReplySupported: true
 
         onNotification: notification => {
             notification.tracked = true;
@@ -185,10 +184,6 @@ QtObject {
         }
     }
 
-    Component.onCompleted: {
-        if (!storage.loaded)
-            storage.reload();
-    }
 }
 
 // K41_NOTIFICATION_BACKEND_READY
