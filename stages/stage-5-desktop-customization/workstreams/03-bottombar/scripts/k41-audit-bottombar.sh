@@ -354,6 +354,7 @@ except KeyError:
 # URL user-info, and credential-like values before public publication.
 text = re.sub(r"(?m)^Host label:.*$", "Host label: <HOST-REDACTED>", text)
 text = re.sub(r"(?m)^UID/GID:.*$", "UID/GID: <LOCAL-IDENTITY-REDACTED>", text)
+text = re.sub(r"\\b(uid|gid)=\\d+\\b", r"\\1=<REDACTED>", text)
 text = re.sub(r"(?i)(https?://)[^/@\s]+@", r"\1<REDACTED>@", text)
 text = re.sub(r"(?i)\b(password|passwd|token|secret|authorization|cookie|api[_-]?key)\b([=: ]+)[^\s,;]+", r"\1\2<REDACTED>", text)
 text = re.sub(r"(?i)(\bSSID\s*[:=]\s*)(?:'[^']*'|\"[^\"]*\"|[^\s,;)]+)", r"\1<SSID-REDACTED>", text)
