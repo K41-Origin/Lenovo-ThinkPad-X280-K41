@@ -15,6 +15,7 @@ cp -- "$source_root/modules/topbar/Topbar.qml" "$fixture/$workstream/modules/top
 cp -- "$source_root/scripts/k41-implement-topbar.sh" "$fixture/$workstream/scripts/k41-implement-topbar.sh"
 git -C "$fixture" init -q
 
+qml="$fixture/$workstream/modules/topbar/Topbar.qml"
 shell="$config/quickshell/caelestia/shell.qml"
 cat >"$shell" <<'QML'
 import "modules"
@@ -28,6 +29,25 @@ ShellRoot {
 }
 QML
 
+# Static provider contract: all live values must come from existing services.
+grep -Fq 'import Caelestia.Services' "$qml"
+grep -Fq 'import Quickshell.Services.UPower' "$qml"
+grep -Fq 'ServiceRef {' "$qml"
+grep -Fq 'service: Cpu' "$qml"
+grep -Fq 'service: Memory' "$qml"
+grep -Fq 'Cpu.percentage' "$qml"
+grep -Fq 'Memory.percentage' "$qml"
+grep -Fq 'UPower.displayDevice.percentage' "$qml"
+grep -Fq 'UPower.onBattery' "$qml"
+grep -Fq 'Time.format(' "$qml"
+grep -Fq 'Notifs.notClosed.length' "$qml"
+grep -Fq 'ShellState.forScreen(modelData)' "$qml"
+
+if grep -Eq '/proc/(stat|meminfo)|/sys/class/power_supply|new Date\(|Timer[[:space:]]*\{|NotificationServer|trayWindow' "$qml"; then
+    printf 'Forbidden duplicate polling/provider implementation found.\n' >&2
+    exit 1
+fi
+
 run_installer() {
     HOME="$home" XDG_CONFIG_HOME="$config" XDG_STATE_HOME="$state" \
         bash "$fixture/$workstream/scripts/k41-implement-topbar.sh"
@@ -36,7 +56,7 @@ run_installer() {
 target="$config/quickshell/k41/modules/topbar/Topbar.qml"
 run_installer
 test -f "$target"
-cmp -s "$target" "$fixture/$workstream/modules/topbar/Topbar.qml"
+cmp -s "$target" "$qml"
 grep -Fqx 'import "../k41/modules/topbar" as K41Topbar' "$shell"
 grep -Fqx '    K41Topbar.Topbar {}' "$shell"
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
@@ -55,4 +75,4 @@ fi
 after="$(sha256sum "$target" | awk '{print $1}')"
 test "$before" == "$after"
 
-printf 'PASS: deployment, host integration, backup, idempotency, and fail-closed fixture.\n'
+printf 'PASS: provider contract, deployment, host integration, backup, idempotency, and fail-closed fixture.\n'
