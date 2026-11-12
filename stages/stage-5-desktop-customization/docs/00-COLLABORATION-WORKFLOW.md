@@ -2,7 +2,7 @@
 
 ## Tujuan
 
-Dokumen ini menetapkan alur kerja Stage 5. Hasil yang relevan menjadi fondasi **K41-dots**, kumpulan modul Quickshell milik K41, bukan shell mandiri pada tahap ini. Workstream 01 — Boot Experience dikecualikan dari K41-dots dan memiliki alur audit/implementasi tersendiri: Plymouth adalah satu-satunya renderer boot, 100% tanpa QML/Quickshell.
+Dokumen ini menetapkan alur kerja Stage 5. Standar kolaborasi dan siklus perubahan lintas-workstream yang telah disepakati secara rinci dicatat di [Workstream 04 — Workflow Standardization](04-WORKFLOW.md); dokumen ini tetap menjadi panduan operasional Stage 5. Hasil yang relevan menjadi fondasi **K41-dots**, kumpulan modul Quickshell milik K41, bukan shell mandiri pada tahap ini. Workstream 01 — Boot Experience dikecualikan dari K41-dots dan memiliki alur audit/implementasi tersendiri: Plymouth adalah satu-satunya renderer boot, 100% tanpa QML/Quickshell.
 
 ## Pembagian tanggung jawab
 
