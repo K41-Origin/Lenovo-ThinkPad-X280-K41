@@ -9,6 +9,7 @@ bash -n "$script"
 
 for token in \
   'report_root="$state_root/k41/bottombar/audits"' \
+  'export GIT_OPTIONAL_LOCKS=0' \\
   'published_report="$run_dir/published-report.txt"' \
   'publish_report()' \
   'git clone --quiet --no-tags --single-branch --branch main "$remote_url" "$publish_dir"' \
