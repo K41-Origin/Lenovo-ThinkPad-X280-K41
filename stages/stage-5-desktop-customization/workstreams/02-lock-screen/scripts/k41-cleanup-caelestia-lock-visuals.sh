@@ -18,7 +18,7 @@ esac
 
 (( EUID != 0 )) || die 'Run as the regular desktop user, never with sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME is missing or invalid.'
-for command_name in git python3 realpath stat mkdir cp chmod cmp diff date sha256sum; do
+for command_name in git python3 stat mkdir cp cmp date sha256sum mktemp rm dirname; do
     command -v "$command_name" >/dev/null 2>&1 || die "Required command is unavailable: $command_name"
 done
 
@@ -154,28 +154,28 @@ done
     sha256sum -c MANIFEST.sha256
 )
 
-removed=()
-rollback_on_error() {
+cleanup_complete=0
+rollback_on_exit() {
     local rc=$?
-    if (( rc != 0 )); then
+    if (( rc != 0 && cleanup_complete == 0 )); then
         info "Removal failed; restoring candidate files from $backup."
-        restore_backup || printf 'CRITICAL: automatic restore failed; backup retained at %s\n' "$backup" >&2
+        restore_backup || printf 'CRITICAL: automatic restore failed; backup retained at %s\\n' "$backup" >&2
     fi
     return "$rc"
 }
-trap rollback_on_error ERR
+trap rollback_on_exit EXIT
 
 for relative in "${candidates[@]}"; do
     rm -- "$lock_root/$relative"
-    removed+=("$relative")
 done
 for relative in "${candidates[@]}"; do
     [[ ! -e "$lock_root/$relative" && ! -L "$lock_root/$relative" ]] ||
         die "Post-cleanup verification failed; file still exists: $relative"
 done
 
-trap - ERR
-info "Removed ${#removed[@]} inactive Caelestia visual component files."
+cleanup_complete=1
+trap - EXIT
+info "Removed ${#candidates[@]} inactive Caelestia visual component files."
 info "Verified backup: $backup"
 info 'The upstream Git checkout now intentionally contains tracked deletions.'
 info 'Do not run git pull/update on this checkout until these files are restored or the update workflow explicitly accounts for the deletions.'
