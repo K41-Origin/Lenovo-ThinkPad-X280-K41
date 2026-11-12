@@ -91,9 +91,9 @@ grep -Fq '<SSID-REDACTED>' "$script"
 # A read-only audit must never execute start-hyprland: it launches a session,
 # and --version is not a safe/version-only invocation for this command.
 version_loop="$(sed -n '/^for bin in /,/^done$/p' "$script")"
-[[ -n $version_loop ]] || { printf 'FAIL: executable version loop missing.\\n' >&2; exit 1; }
+[[ -n $version_loop ]] || { printf 'FAIL: executable version loop missing.\n' >&2; exit 1; }
 if grep -Eq 'for bin in .*start-hyprland|^[[:space:]]*start-hyprland[|)]|timeout[^|]*start-hyprland.*--version' <<<"$version_loop"; then
-    printf 'FAIL: audit attempts to execute the start-hyprland session launcher.\\n' >&2
+    printf 'FAIL: audit attempts to execute the start-hyprland session launcher.\n' >&2
     exit 1
 fi
 grep -Fq 'Launcher execution: NOT PERFORMED' "$script"
@@ -108,7 +108,7 @@ for token in \
     'IMPLEMENTATION CONFIG CONTENT: .config/k41/hyprlock-fallback.conf' \
     'IMPLEMENTATION INPUTS: REPOSITORY LOCKSCREEN TREE'; do
     grep -Fq -- "$token" "$script" || {
-        printf 'FAIL: implementation evidence coverage missing: %s\\n' "$token" >&2
+        printf 'FAIL: implementation evidence coverage missing: %s\n' "$token" >&2
         exit 1
     }
 done
