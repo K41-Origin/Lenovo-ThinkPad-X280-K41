@@ -168,6 +168,71 @@ for label, root in roots:
     seen.add(key)
     safe_inventory(label, root)
 
+section("QML ENTRY-POINT AND INTEGRATION DISCOVERY (NO SOURCE CONTENT)")
+qml_roots = [
+    ("USER_QUICKSHELL", config / "quickshell"),
+    ("SYSTEM_QUICKSHELL", pathlib.Path("/etc/xdg/quickshell")),
+    ("SYSTEM_SHARE_QUICKSHELL", pathlib.Path("/usr/share/quickshell")),
+]
+qml_candidates = []
+qml_tokens = ("ShellRoot", "PanelWindow", "Variants", "Quickshell", "IpcHandler",
+              "GlobalShortcut", "Notification", "SystemTray", "StatusNotifier")
+scanned = 0
+for label, root in qml_roots:
+    if not root.is_dir() or root.is_symlink():
+        add(f"{label}: unavailable")
+        continue
+    add(f"{label}: available")
+    for base, dirs, names in os.walk(root, followlinks=False):
+        dirs[:] = sorted(d for d in dirs if not (pathlib.Path(base) / d).is_symlink()
+                         and d not in {".git", "node_modules", "build", ".cache"})
+        for name in sorted(names):
+            candidate = pathlib.Path(base) / name
+            if candidate.suffix.lower() != ".qml" or candidate.is_symlink() or not candidate.is_file():
+                continue
+            scanned += 1
+            if scanned > 2500:
+                break
+            try:
+                if candidate.stat().st_size > 1024 * 1024:
+                    continue
+                source = candidate.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            matched = [token for token in qml_tokens if re.search(r"\\b" + re.escape(token) + r"\\b", source)]
+            if matched and (re.search(r"\\b(?:ShellRoot|PanelWindow|Variants)\\b", source)
+                            or candidate.name.lower() in {"shell.qml", "main.qml", "quickshell.qml"}):
+                rel = candidate.relative_to(root).as_posix()
+                qml_candidates.append((label, rel[:180], matched))
+        if scanned > 2500:
+            break
+for label, rel, matched in qml_candidates[:40]:
+    add(f"candidate: root={label}; relative-path={rel}; identifiers={','.join(matched)}")
+add(f"qml-files-scanned={min(scanned, 2500)}; candidate-count={len(qml_candidates)}; scan-truncated={'yes' if scanned > 2500 else 'no'}")
+if not qml_candidates:
+    add("No likely ShellRoot/PanelWindow/Variants entry-point candidate identified by bounded static scan.")
+add("Static token matches are leads only; they do not prove the active entry point or API compatibility.")
+
+section("CPU, MEMORY, CLOCK AND SESSION CAPABILITIES")
+try:
+    stat_lines = pathlib.Path("/proc/stat").read_text(encoding="ascii", errors="replace").splitlines()
+    cpu_line = next((line for line in stat_lines if line.startswith("cpu ")), "")
+    add("CPU counters: " + ("available; aggregate counters present" if cpu_line else "aggregate counters unavailable"))
+except OSError:
+    add("CPU counters: unavailable")
+try:
+    memory_lines = pathlib.Path("/proc/meminfo").read_text(encoding="ascii", errors="replace").splitlines()
+    keys = {"MemTotal", "MemAvailable", "SwapTotal", "SwapFree"}
+    values = [line[:100] for line in memory_lines if line.split(":", 1)[0] in keys]
+    add("Memory fields: " + ("; ".join(values) if values else "not available"))
+except OSError:
+    add("Memory fields: unavailable")
+rc, tz = run(["timedatectl", "show", "-p", "Timezone", "--value"])
+add("Timezone: " + (bounded(tz, 100) if rc == 0 and tz else "timedatectl unavailable"))
+rc, locale_value = run(["locale", "charmap"])
+add("Locale character map: " + (bounded(locale_value, 80) if rc == 0 else "unavailable"))
+add("Clock sample format: " + datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z"))
+
 section("ACTIVE PROCESSES (NAMES ONLY; NO COMMAND-LINE ARGUMENTS)")
 matched = []
 for proc in pathlib.Path("/proc").glob("[0-9]*"):
@@ -188,8 +253,26 @@ rc, value = run(["gdbus", "introspect", "--session", "--dest",
                  "/org/freedesktop/Notifications"])
 add(f"freedesktop notification interface: exit={rc}")
 if rc == 0:
-    methods = sorted(set(re.findall(r"\b(?:method|signal)\s+([A-Za-z_][A-Za-z0-9_]*)", value)))
-    add("interface members: " + (", ".join(methods[:40]) if methods else "introspection succeeded; member parsing unavailable"))
+    # gdbus emits indented methods/signals/properties sections.
+    section_name = None
+    members = {"methods": [], "signals": [], "properties": []}
+    for line in value.splitlines():
+        heading = re.match(r"^\s{2}(methods|signals|properties):\s*$", line)
+        if heading:
+            section_name = heading.group(1)
+            continue
+        if section_name in ("methods", "signals"):
+            match = re.match(r"^\s{4}([A-Za-z_][A-Za-z0-9_]*)\(", line)
+            if match:
+                members[section_name].append(match.group(1))
+        elif section_name == "properties":
+            match = re.match(r"^\s{4}([A-Za-z_][A-Za-z0-9_]*)\s*\(", line)
+            if match:
+                members[section_name].append(match.group(1))
+    for kind in ("methods", "signals", "properties"):
+        names = sorted(set(members[kind]))
+        add(f"  {kind}: " + (", ".join(names[:40]) if names else "none parsed"))
+    add("  parser: gdbus section/signature parser; member names only")
 else:
     add("interface unavailable or session D-Bus not reachable: " + bounded(value, 400))
 add("No test notification is sent.")
@@ -214,21 +297,40 @@ add(f"Hyprland config errors command: exit={rc}; {bounded(value, 800)}")
 
 section("BATTERY AND POWER SUPPLY")
 power_root = pathlib.Path("/sys/class/power_supply")
+sys_devices = pathlib.Path("/sys/devices").resolve()
 if power_root.is_dir():
+    found = 0
     for device in sorted(power_root.iterdir()):
-        if device.is_symlink():
+        try:
+            resolved = device.resolve(strict=True)
+            if os.path.commonpath((str(sys_devices), str(resolved))) != str(sys_devices):
+                add(f"device={device.name[:80]} rejected: target outside /sys/devices")
+                continue
+            if not resolved.is_dir():
+                continue
+        except (OSError, RuntimeError, ValueError):
+            add(f"device={device.name[:80]} unresolved_or_inaccessible")
             continue
         fields = []
-        for key in ("type", "status", "capacity", "online"):
-            item = device / key
+        for key in ("type", "status", "capacity", "online", "energy_now",
+                    "energy_full", "charge_now", "charge_full", "power_now",
+                    "current_now", "voltage_now", "model_name", "manufacturer"):
+            item = resolved / key
             try:
                 if item.is_file() and not item.is_symlink():
-                    fields.append(f"{key}={item.read_text(encoding='ascii', errors='replace').strip()[:40]}")
+                    raw = item.read_text(encoding="ascii", errors="replace").strip()
+                    if raw and all(ord(ch) >= 32 for ch in raw):
+                        fields.append(f"{key}={raw[:48]}")
             except OSError:
                 pass
-        add(f"device={device.name[:80]} " + (", ".join(fields) if fields else "standard attributes unavailable"))
+        add(f"device={device.name[:80]} " + (", ".join(fields) if fields else "known attributes unavailable"))
+        found += 1
+    add(f"power-supply entries inspected={found}")
+    if found == 0:
+        add("No readable power-supply device identified; this does not prove no battery exists.")
 else:
     add("power_supply sysfs path unavailable.")
+
 
 section("K41 IMPLEMENTATION REFERENCES")
 ws = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar"
@@ -247,7 +349,8 @@ add("Visibility target: always visible, all monitors; fullscreen behavior requir
 add("Notification interaction: icon click opens a notification tray/panel; tray is not permanently open.")
 add("Still to decide from evidence: QML integration point, data providers, tray implementation/API, sizing/layout, locale/time format, exclusive zone, focus/fullscreen, hotplug/scaling.")
 add("This audit does not compile QML, prove API compatibility, send notifications, alter services, or verify visual behavior.")
-add("Configuration inventory contains bounded relative filenames and file sizes only; source/configuration contents and process arguments are never published.")
+add("QML discovery is a bounded static scan; candidate relative paths and recognized identifiers are leads, not proof of the active entry point.")
+add("Configuration source contents, source lines, comments, literals, process arguments, environment variables, serial numbers, and absolute home paths are never published.")
 add("Review findings before writing the separate implementation/deployment script.")
 report.write_text("\n".join(out) + "\n", encoding="utf-8")
 print(f"Private audit report created; bytes={report.stat().st_size}")
