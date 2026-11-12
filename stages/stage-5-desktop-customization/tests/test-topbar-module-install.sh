@@ -75,7 +75,7 @@ test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l
 run_installer
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
 
-# Inject a failure at the final Caelestia publication and verify rollback.
+# Inject a failure at host publication after handoff and K41 staging; verify full rollback.
 cp "$backup_root/Notifs.qml" "$notifs"
 notifs_before_rollback="$(sha256sum "$notifs" | cut -d' ' -f1)"
 host_before_rollback="$(sha256sum "$host" | cut -d' ' -f1)"
@@ -84,14 +84,14 @@ cat >"$tmp/bin/mv" <<'SH'
 #!/usr/bin/env bash
 for arg in "$@"; do
     case "$arg" in
-        *.Notifs.install.*) exit 97 ;;
+        *.shell.install.*) exit 97 ;;
     esac
 done
 exec /usr/bin/mv "$@"
 SH
 chmod 0755 "$tmp/bin/mv"
 if TEST_PATH="$tmp/bin:$PATH" run_installer >/dev/null 2>&1; then
-    echo 'Expected injected Caelestia publication failure.' >&2
+    echo 'Expected injected host publication failure.' >&2
     exit 1
 fi
 test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
