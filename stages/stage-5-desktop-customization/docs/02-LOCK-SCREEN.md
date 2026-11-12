@@ -173,6 +173,37 @@ Ini mengoreksi diagnosis sebelumnya yang menganggap startup pada `hyprland.conf`
 
 Status: **IMPLEMENTED** pada updater dan regression test; **CI/RUNTIME NOT YET VERIFIED** pada commit koreksi ini. Setelah `git pull`, jalankan updater satu kali dari root repository sebagai user biasa, lalu reboot untuk validasi. Jangan mengubah PAM, authentication, QML visual, Plymouth, atau systemd.
 
+## Diagnostik Quickshell/Caelestia — 12 November 2026
+
+Report `20261112T041236Z` menunjukkan perintah startup Caelestia telah berada di konfigurasi Lua aktif, tetapi proses Quickshell tidak bertahan dan IPC tidak tersedia. Report itu belum menangkap log QML/plugin/import yang diperlukan untuk membedakan kesalahan konfigurasi, dependency Qt/QML, dan kegagalan runtime.
+
+Collector `workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh` diperluas untuk:
+- Mengambil daftar instance Quickshell (`qs list --all`) dan log konfigurasi Caelestia (`qs log -c caelestia --tail 400 --no-color`).
+- Mengumpulkan `log.qslog` dari runtime directory Quickshell, selain log helper dan journal yang sudah dikumpulkan.
+- Menambahkan probe startup foreground yang eksplisit opt-in. Probe menjalankan `qs -c caelestia` maksimal 15 detik dengan `QT_DEBUG_PLUGINS=1` dan `QML_IMPORT_TRACE=1`, menangkap stdout/stderr, lalu menghentikan proses. Probe dilewati jika Wayland socket/session tidak valid atau proses Quickshell/Caelestia sudah berjalan, untuk menghindari instance duplikat.
+- Menyimpan hanya output probe yang sudah melalui redaksi ke report; file output mentah dihapus setelah diproses.
+
+### Cara menjalankan
+
+Setelah `git pull --ff-only`, jika desktop Hyprland masih dapat dibuka setelah unlock melalui Hyprlock fallback, buka terminal **di dalam sesi desktop tersebut** dan jalankan dari root repository:
+
+```bash
+K41_AUDIT_RUN_QS_PROBE=1 bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
+```
+
+Collector membuat report baru dan mencoba memublikasikan salinan tersanitasi ke `main` menggunakan kredensial Git yang sudah tersedia. Periksa output terminal untuk path report dan status publikasi.
+
+Jika hanya dapat masuk TTY2, jalankan collector tanpa environment variable probe:
+
+```bash
+bash stages/stage-5-desktop-customization/workstreams/02-lock-screen/scripts/k41-audit-desktop-startup.sh
+```
+
+Dalam mode TTY2, probe akan dilewati karena tidak ada Wayland session aktif; log runtime/journal yang tersedia tetap dikumpulkan. Jangan menjalankan `qc`; executable yang benar adalah **`qs`** (Quickshell). Perintah manual foreground yang dipakai probe adalah `qs -c caelestia`, bukan `qc`.
+
+Probe opt-in bukan audit pasif sepenuhnya: shell asli akan dimulai sebentar dan dapat menampilkan window/widget sebelum timeout menghentikannya. Probe tidak mengubah konfigurasi, package, service, PAM, autentikasi, atau boot state. Timeout 15 detik bukan bukti shell berhasil dimuat; keputusan dibuat dari log QML/plugin/import dan status proses.
+
+Status perubahan collector/test: **IMPLEMENTED**. Syntax/regression test dan CI masih menunggu hasil eksekusi setelah commit. Diagnosis final dan pembaruan script implementasi tetap **PENDING** sampai report probe baru diperiksa.
 ## Koreksi keselamatan collector audit — 12 November 2026
 
 Review source terhadap report startup terbaru menemukan defect pada collector: loop pemeriksaan versi menjalankan `start-hyprland --version`. `start-hyprland` adalah session launcher, bukan utilitas versi; pemanggilan tersebut dapat memulai sesi Hyprland sungguhan. Karena itu, report `20261112T021320Z` yang dibuat oleh versi collector lama memuat session start/stop yang dapat dipicu oleh audit itu sendiri dan **tidak boleh dipakai sebagai bukti bahwa boot normal atau lock lifecycle berjalan demikian**.
