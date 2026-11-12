@@ -10,48 +10,64 @@ fixture="$tmp/repository"
 home="$tmp/home"
 config="$tmp/config"
 state="$tmp/state"
-mkdir -p "$fixture/$workstream/modules/bottombar" "$fixture/$workstream/scripts" "$home" "$config/quickshell"
-cp -- "$root/$workstream/modules/bottombar/Dock.Qml" "$fixture/$workstream/modules/bottombar/Dock.Qml"
+mkdir -p "$fixture/$workstream/modules/bottombar" "$fixture/$workstream/scripts" \
+    "$home" "$config/quickshell/caelestia"
+cp -- "$root/$workstream/modules/bottombar/Dock.qml" "$fixture/$workstream/modules/bottombar/Dock.qml"
 cp -- "$root/$workstream/scripts/k41-implement-bottombar.sh" "$fixture/$workstream/scripts/k41-implement-bottombar.sh"
 git -C "$fixture" init -q
+
+shell="$config/quickshell/caelestia/shell.qml"
+cat >"$shell" <<'QML'
+import "modules"
+import "modules/drawers"
+import "modules/k41dock" as K41Dock
+import QtQuick
+import Quickshell
+import qs.services
+
+ShellRoot {
+    Background {}
+    K41Dock.K41Dock {}
+}
+QML
 
 run_installer() {
     HOME="$home" XDG_CONFIG_HOME="$config" XDG_STATE_HOME="$state" \
         bash "$fixture/$workstream/scripts/k41-implement-bottombar.sh"
 }
 
-source="$fixture/$workstream/modules/bottombar/Dock.Qml"
-target="$config/quickshell/k41/modules/bottombar/Dock.Qml"
-caelestia="$config/quickshell/caelestia"
+source="$fixture/$workstream/modules/bottombar/Dock.qml"
+target="$config/quickshell/k41/modules/bottombar/Dock.qml"
+backup_root="$state/k41/backups/bottombar"
+legacy_import='import "modules/k41dock" as K41Dock'
+new_import='import "../k41/modules/bottombar" as K41Bottombar'
+new_instance='K41Bottombar.Dock {}'
 
-# Install creates the dedicated K41 namespace and does not create a Caelestia host.
+# Install module and migrate only the exact K41Dock import/instance in Caelestia.
 run_installer
 cmp -s "$source" "$target"
 [[ $(stat -c %a "$target") == 644 ]]
-[[ ! -e $caelestia ]]
+grep -Fqx "$new_import" "$shell"
+grep -Fqx "$new_instance" "$shell"
+! grep -Fq "$legacy_import" "$shell"
+grep -Fq 'ShellRoot {' "$shell"
+[[ -f "$backup_root"/*/shell.qml ]]
 
 # A second run is idempotent and creates no additional backup.
-backup_root="$state/k41/backups/bottombar"
 before_count=("$backup_root"/*)
 run_installer
 after_count=("$backup_root"/*)
 [[ ${#before_count[@]} -eq ${#after_count[@]} ]]
 
-# A changed module at the K41 target is backed up and repaired.
+# Repair a modified canonical module without changing the Caelestia host.
 printf 'locally-corrupted-module\n' >"$target"
 run_installer
 cmp -s "$source" "$target"
-repaired=0
-for backup in "$backup_root"/*/Dock.Qml; do
-    if [[ -f $backup ]] && grep -Fq 'locally-corrupted-module' "$backup"; then
-        repaired=1
-        break
-    fi
-done
-(( repaired == 1 ))
+grep -Fqx "$new_import" "$shell"
 
-# Inject one atomic-replacement failure; the existing runtime file must be restored.
+# A failed first atomic replacement must leave both paths unchanged.
 printf 'preserve-me-on-failure\n' >"$target"
+cp -- "$shell" "$tmp/shell.before-failure"
 fakebin="$tmp/fakebin"
 mkdir -p "$fakebin"
 real_mv="$(command -v mv)"
@@ -71,13 +87,22 @@ if HOME="$home" XDG_CONFIG_HOME="$config" XDG_STATE_HOME="$state" PATH="$fakebin
     exit 1
 fi
 grep -Fq 'preserve-me-on-failure' "$target"
+cmp -s "$shell" "$tmp/shell.before-failure"
 
-# Installer owns only the K41 module; no Caelestia host or system paths are changed.
-[[ ! -e $caelestia ]]
-if grep -Eiq 'pacman[[:space:]]|systemctl[[:space:]]|shell\.qml|shell\.json|--rollback|--check|--cleanup|sudo' \
-    "$root/$workstream/scripts/k41-implement-bottombar.sh"; then
-    printf 'FAIL: installer contains an out-of-scope host/system operation.\n' >&2
+# Ambiguous host integration must fail closed without modifying the module or host.
+printf 'custom-host-state\n' >>"$shell"
+cp -- "$target" "$tmp/module.before-ambiguous"
+if run_installer; then
+    printf 'FAIL: ambiguous shell.qml unexpectedly accepted.\n' >&2
+    exit 1
+fi
+cmp -s "$shell" <(cat "$tmp/shell.before-failure"; printf 'custom-host-state\n')
+cmp -s "$target" "$tmp/module.before-ambiguous"
+
+if grep -Eiq 'pacman[[:space:]]|systemctl[[:space:]]|sudo|rm[[:space:]].*k41dock' \
+    "$fixture/$workstream/scripts/k41-implement-bottombar.sh"; then
+    printf 'FAIL: installer contains an out-of-scope host/system/cleanup operation.\n' >&2
     exit 1
 fi
 
-printf 'PASS: K41 namespace install/repair, idempotency, backup, rollback, and Caelestia isolation.\n'
+printf 'PASS: K41 module deployment, Caelestia import migration, idempotency, repair, rollback, and fail-closed host handling.\n'
