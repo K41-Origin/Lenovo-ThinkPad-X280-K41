@@ -58,6 +58,9 @@ target_file="$module_root/Topbar.qml"
 # Compatibility mirror retained at the historical sibling namespace.
 legacy_runtime_root="$qs_root/k41"
 legacy_modules_root="$legacy_runtime_root/modules"
+# Compatibility aliases used by the existing standalone-entry guards.
+runtime_root="$legacy_runtime_root"
+modules_root="$legacy_modules_root"
 legacy_module_root="$legacy_modules_root/topbar"
 legacy_target_file="$legacy_module_root/Topbar.qml"
 for standalone_entry in "$runtime_root/shell.qml" "$runtime_root/qmldir" "$modules_root/qmldir" "$module_root/qmldir"; do
