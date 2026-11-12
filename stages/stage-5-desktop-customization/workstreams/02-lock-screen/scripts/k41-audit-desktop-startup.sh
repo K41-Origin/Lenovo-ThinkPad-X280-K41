@@ -510,7 +510,7 @@ except (OSError, subprocess.TimeoutExpired):
     pass
 
 with timeline_path.open("w", encoding="utf-8") as out:
-    out.write("event\tstatus\ttimestamp_utc\tsource\tevidence\n")
+    out.write("event\tstatus\ttimestamp_with_timezone\tsource\tevidence\n")
     all_events = list(events) + list(journal_patterns) + ["LOCK_SURFACE_VISIBLE", "DESKTOP_RESTORED_AFTER_UNLOCK"]
     for name in all_events:
         matches = observed.get(name, journal_events.get(name, []))
@@ -536,7 +536,7 @@ with report_path.open("a", encoding="utf-8") as report:
     report.write("\n===== NORMALIZED LOCK LIFECYCLE TIMELINE =====\n")
     report.write("Evidence status is literal: NOT_OBSERVED does not mean the event did not happen.\n")
     report.write("Authentication and unlock events may be absent because PAM/locker logging is implementation-dependent.\n")
-    report.write("Desktop restoration cannot be proven retrospectively unless the compositor/session emits a correlated event.\n")
+    report.write("LOCK_SURFACE_VISIBLE and DESKTOP_RESTORED_AFTER_UNLOCK are NOT_INSTRUMENTED, not NOT_OBSERVED; no reliable correlated event source exists yet.\n")
     report.write("Timeline file: lifecycle-timeline.tsv\n")
     report.write("Helper logs inspected: " + (", ".join(p.name for p in sources) if sources else "none") + "\n")
     report.write("Journal query: " + ("available" if any(journal_events.values()) else "no matching/accessible evidence") + "\n")
