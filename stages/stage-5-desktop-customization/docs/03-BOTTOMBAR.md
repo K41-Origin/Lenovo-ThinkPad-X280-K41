@@ -13,15 +13,14 @@ Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan ke
 - Memastikan setiap perubahan runtime memiliki preflight, backup, verifikasi pascaperubahan, logging, dan rollback yang diuji.
 - Audit harus read-only terhadap runtime dan Git checkout.
 
-## Workflow kanonis — tiga script
+## Workflow kanonis — audit dan implementasi
 
-Urutan pengerjaan mengikuti pola Workstream 02. Ketiga script memiliki ownership dan tanggung jawab terpisah; tidak boleh digabung menjadi satu installer serba guna.
+Urutan pengerjaan mengikuti pola Workstream 02. Audit dan implementasi memiliki ownership dan tanggung jawab terpisah; tidak digabung menjadi satu installer serba guna. Cleanup Caelestia bukan bagian dari Workstream 03.
 
 | Urutan | Script | Tanggung jawab | Status |
 |---:|---|---|---|
 | 1 | `scripts/k41-audit-bottombar.sh` | Mengumpulkan baseline source/runtime, provenance, dependency, API, konfigurasi, versi, installer lama, test, dan integrasi. Read-only. | **IMPLEMENTED — audit X280 selesai; baseline 2026-11-12** |
 | 2 | `scripts/k41-implement-bottombar.sh` | Deploy `Dock.qml` ke namespace K41 dan migrasikan import/instance Bottombar di Caelestia `shell.qml` dari `k41dock` ke modul canonical K41. Backup privat, atomic replacement, verifikasi, dan rollback dua target. | **IMPLEMENTED — VALIDASI BELUM DIJALANKAN** |
-| 3 | `scripts/k41-cleanup-bottombar.sh` | Audit target cleanup, dry-run, backup, penghapusan/nonaktifkan komponen yang disetujui, verifikasi, dan rollback. | PLANNED |
 
 Source kanonis berada di `stages/stage-5-desktop-customization/workstreams/03-bottombar/modules/bottombar/Dock.qml`. Target runtime adalah `~/.config/quickshell/k41/modules/bottombar/Dock.qml`. Caelestia tetap dijalankan melalui `~/.config/quickshell/caelestia/shell.qml` dan mengimpor direktori K41 melalui path relatif `../k41/modules/bottombar`.
 
@@ -105,17 +104,6 @@ Backup disimpan di `$XDG_STATE_HOME/k41/backups/bottombar/<timestamp>/` (atau `~
 
 Script hanya menerima salah satu dari dua keadaan host: pasangan legacy `import "modules/k41dock" as K41Dock` + `K41Dock.K41Dock {}`, atau pasangan baru yang sudah terpasang. Jika ditemukan struktur lain, duplikasi, atau modifikasi manual yang tidak dikenali, script berhenti tanpa mengubah file. Script tidak menghapus file legacy `modules/k41dock/K41Dock.qml`; penghapusan tersebut merupakan cleanup terpisah setelah runtime baru diverifikasi.
 
-### Tahap 3 — Cleanup
-
-Script cleanup dibuat terpisah dan hanya dijalankan setelah implementasi baru diverifikasi serta pengguna menyetujui target cleanup. Tanggung jawab minimal:
-
-- Inventarisasi referensi, dependency, konfigurasi, dan file upstream yang menjadi target.
-- Default dry-run; tampilkan tepat apa yang akan diubah/dihapus.
-- Tolak target yang tidak cocok dengan provenance/hash yang diaudit.
-- Backup seluruh target dan catat manifest.
-- Terapkan hanya cleanup yang disetujui, verifikasi hasil, dan sediakan rollback.
-- Jangan menghapus source Caelestia atau mengubah konfigurasi global secara luas tanpa bukti dependency dan persetujuan eksplisit.
-
 ## Baseline historis dan temuan awal
 
 Source historis yang ditemukan:
@@ -175,8 +163,10 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 
 - Report audit aktual X280 tersedia di `reports/stage-5-desktop-customization/03-bottombar/audits/20261112T170456Z/` dan telah ditinjau.
 - Source canonical `modules/bottombar/Dock.qml`, installer integrasi Caelestia, dan fixture test telah diperbarui.
+- Pengguna menyatakan file runtime legacy K41Dock telah dihapus secara manual. Penghapusan tersebut tidak dilakukan oleh installer Workstream 03 dan kondisi runtime terkini tidak diverifikasi oleh repository.
 - Fixture test mencakup deploy, migrasi host, idempotensi, repair, rollback, dan host state ambigu; eksekusinya belum diklaim.
-- QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
-- Cleanup script tetap PLANNED dan tidak menjadi bagian dari installer.
+- Bash syntax, ShellCheck, fixture execution, QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
+- Workstream 03 ditutup sebagai COMPLETED / USER ACCEPTED sesuai keputusan pengguna; status ini tidak menyatakan seluruh detail teknis telah TESTED atau VERIFIED.
+- Audit dan cleanup legacy Caelestia yang lebih luas dipindahkan ke Workstream 09 — Clean up Caelestia, yang wajib dikerjakan setelah semua workstream Stage 5 selesai.
 
 Acceptance berikutnya: jalankan `bash -n`, ShellCheck, fixture test, lalu installer pada X280 sebagai user biasa. Setelah deployment, verifikasi QML/runtime dan perilaku visual/interaksi secara terpisah. Deployment modul dan perubahan import belum membuktikan QML berhasil dimuat atau tampilan bekerja; verifikasi runtime pada Caelestia tetap wajib. Catat IMPLEMENTED, TESTED, VERIFIED, dan penerimaan pengguna secara terpisah.
