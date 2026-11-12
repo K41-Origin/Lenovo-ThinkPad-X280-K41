@@ -10,7 +10,7 @@ owned() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 [[ $# -eq 0 ]] || die 'Script ini tidak menerima opsi.'
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk grep; do
+for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk grep cut; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
@@ -73,13 +73,18 @@ new_import='import "../k41/modules/topbar" as K41Topbar'
 import_n="$(grep -Fc -- "$new_import" "$shell_file" || true)"
 instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
 shell_root_n="$(grep -Ec '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' "$shell_file" || true)"
+root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" || true)"
 qtquick_import_n="$(grep -Ec '^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$' "$shell_file" || true)"
-(( shell_root_n == 1 && qtquick_import_n == 1 )) || die 'shell.qml tidak cocok dengan struktur Caelestia yang dikenali.'
+(( shell_root_n == 1 && root_id_n == 1 && qtquick_import_n == 1 )) || die 'shell.qml harus memiliki tepat satu ShellRoot, id: root, dan import QtQuick.'
+shell_root_line="$(grep -nE '^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$' "$shell_file" | cut -d: -f1)"
+root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
+(( root_id_line > shell_root_line )) || die 'id: root tidak berada di dalam ShellRoot.'
 host_change=0
 if [[ $import_n == 0 && $instance_n == 0 ]]; then
     host_change=1
 elif [[ $import_n == 1 && $instance_n == 1 ]]; then
-    :
+    instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
+    (( instance_line > root_id_line )) || die 'Instance Topbar harus berada setelah deklarasi id: root.'
 else
     die 'Integrasi Topbar parsial/duplikat terdeteksi; tidak ada perubahan.'
 fi
@@ -182,9 +187,11 @@ awk -v replacement="$new_import" '
         print
         next
     }
-    $0 ~ /^[[:space:]]*ShellRoot[[:space:]]*\{[[:space:]]*$/ {
+    $0 ~ /^[[:space:]]*id:[[:space:]]*root[[:space:]]*$/ {
         print
         print "    K41Topbar.Topbar {}"
+        next
+    }
         next
     }
     { print }
@@ -192,9 +199,9 @@ awk -v replacement="$new_import" '
 chmod --reference="$shell_file" "$shell_tmp"
 grep -Fqx -- "$new_import" "$shell_tmp" || die 'Staging shell.qml tidak memiliki import Topbar.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" || die 'Staging shell.qml tidak memiliki instance Topbar.'
-
-module_replaced=1
-mv -fT -- "$module_tmp" "$target_file"
+staged_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
+staged_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_tmp" | cut -d: -f1)"
+(( staged_instance_line > staged_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root pada staging.'
 module_tmp=''
 cmp -s -- "$source_file" "$target_file" || die 'Content Topbar.qml tidak cocok setelah deployment.'
 [[ $(stat -c %a -- "$target_file") == 644 ]] || die 'Permission Topbar.qml bukan 0644.'
@@ -203,9 +210,9 @@ mv -fT -- "$shell_tmp" "$shell_file"
 shell_tmp=''
 grep -Fqx -- "$new_import" "$shell_file" || die 'Import Topbar tidak ditemukan setelah deployment.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || die 'Instance Topbar tidak ditemukan setelah deployment.'
-
-module_replaced=0
-shell_replaced=0
+final_root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell_file" | cut -d: -f1)"
+final_instance_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" | cut -d: -f1)"
+(( final_instance_line > final_root_id_line )) || die 'Instance Topbar tidak berada setelah id: root setelah deployment.'
 trap - EXIT
 info "Module K41 canonical: $target_file"
 info "Caelestia host: $shell_file"
