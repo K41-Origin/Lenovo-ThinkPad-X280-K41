@@ -1,6 +1,6 @@
 # Workstream 03 — Bottombar
 
-**Status: IMPLEMENTER DIUBAH UNTUK INTEGRASI K41 → CAELESTIA — VALIDASI BELUM DIJALANKAN.** Source canonical K41 dideploy ke `~/.config/quickshell/k41/modules/bottombar/Dock.qml`; `shell.qml` Caelestia tetap menjadi host dan hanya import/instance Bottombar yang dimigrasikan.
+**Status: COMPLETED / USER ACCEPTED.** Implementasi Bottombar K41 dan integrasi host Caelestia sesuai arsitektur yang disepakati telah diselesaikan. Cleanup sisa fitur Caelestia dipisahkan ke Workstream 09 dan dikerjakan paling akhir.
 
 Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan kerja mengikuti Workstream 02, tetapi implementasi Bottombar tetap disesuaikan dengan hasil audit dan kontrak Quickshell/Caelestia yang benar-benar terverifikasi.
 
