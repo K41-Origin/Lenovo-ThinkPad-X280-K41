@@ -10,7 +10,7 @@ owned() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 [[ $# -eq 0 ]] || die 'Script ini tidak menerima opsi.'
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in git install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk grep; do
+for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date awk grep; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
