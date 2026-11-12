@@ -38,6 +38,14 @@ module_root="$modules_root/bottombar"
 target_file="$module_root/Dock.qml"
 legacy_case_file="$module_root/Dock.Qml"
 
+# K41 is a module namespace hosted by Caelestia, not a standalone Quickshell
+# configuration. Do not create or silently adopt standalone entry points.
+for standalone_entry in "$runtime_root/shell.qml" "$runtime_root/qmldir" \
+                        "$modules_root/qmldir" "$module_root/qmldir"; do
+    [[ ! -e $standalone_entry && ! -L $standalone_entry ]] ||
+        die "Arsitektur K41 module-only tidak cocok: temukan entry point qmldir/shell: $standalone_entry. Review manual diperlukan."
+done
+
 # Dock.qml is the sole canonical runtime filename. Preserve any pre-existing
 # case-variant file for explicit user-managed cleanup; never deploy to it.
 legacy_case_present=0
@@ -171,10 +179,12 @@ if (( host_change )); then
     shell_tmp="$(mktemp "$caelestia_root/.shell.install.XXXXXX")"
     awk -v replacement="$new_import" '
         $0 ~ /^[[:space:]]*import[[:space:]]+"modules\/k41dock"[[:space:]]+as[[:space:]]+K41Dock[[:space:]]*$/ {
-            sub(/import "modules\/k41dock" as K41Dock/, replacement)
+            print replacement
+            next
         }
         $0 ~ /^[[:space:]]*K41Dock\.K41Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$/ {
-            sub(/K41Dock\.K41Dock \{\}/, "K41Bottombar.Dock {}")
+            print "K41Bottombar.Dock {}"
+            next
         }
         { print }
     ' "$shell_file" >"$shell_tmp"
@@ -217,6 +227,8 @@ if (( legacy_case_present )); then
 fi
 info "Caelestia host: $shell_file"
 info "Backup privat: $backup_root"
-info 'shell.qml tetap milik Caelestia; hanya import/instance Bottombar yang dimigrasikan.'
+info 'Arsitektur: Caelestia adalah shell host; K41 hanya menyediakan modul Dock.qml.'
+info 'Tidak membuat shell.qml, qmldir, atau konfigurasi Quickshell mandiri di namespace K41.'
+info 'Integrasi memakai relative import ../k41/modules/bottombar dan K41Bottombar.Dock {}.'
 info 'File legacy k41dock tidak dihapus; cleanup dilakukan terpisah setelah runtime verification.'
 info 'Quickshell tidak di-reload atau di-restart.'
