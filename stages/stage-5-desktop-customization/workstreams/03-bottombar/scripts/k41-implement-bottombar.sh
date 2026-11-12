@@ -40,6 +40,9 @@ target_file="$module_root/Dock.qml"
 # Compatibility mirror retained at the historical sibling namespace.
 legacy_runtime_root="$qs_root/k41"
 legacy_modules_root="$legacy_runtime_root/modules"
+# Compatibility aliases used by the existing standalone-entry guards.
+runtime_root="$legacy_runtime_root"
+modules_root="$legacy_modules_root"
 legacy_module_root="$legacy_modules_root/bottombar"
 legacy_target_file="$legacy_module_root/Dock.qml"
 legacy_case_file="$module_root/Dock.Qml"
@@ -88,15 +91,18 @@ if [[ -e $target_file || -L $target_file ]]; then
 fi
 
 old_import='import "modules/k41dock" as K41Dock'
+legacy_relative_import='import "../k41/modules/bottombar" as K41Bottombar'
 new_import='import qs.k41.modules.bottombar as K41Bottombar'
 old_import_n="$(grep -Ec '^[[:space:]]*import[[:space:]]+"modules/k41dock"[[:space:]]+as[[:space:]]+K41Dock[[:space:]]*$' "$shell_file" || true)"
-new_import_n="$(grep -Ec '^[[:space:]]*import[[:space:]]+"\.\./k41/modules/bottombar"[[:space:]]+as[[:space:]]+K41Bottombar[[:space:]]*$' "$shell_file" || true)"
+new_import_n="$(grep -Fc -- "$new_import" "$shell_file" || true)"
 old_instance_n="$(grep -Ec '^[[:space:]]*K41Dock\.K41Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
 new_instance_n="$(grep -Ec '^[[:space:]]*K41Bottombar\.Dock[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell_file" || true)"
 host_change=0
+legacy_relative_import_n="$(grep -Fc -- "$legacy_relative_import" "$shell_file" || true)"
 if [[ $old_import_n == 1 && $old_instance_n == 1 && $new_import_n == 0 && $new_instance_n == 0 ]]; then
     host_change=1
-elif [[ $new_import_n == 1 && $new_instance_n == 1 && $old_import_n == 0 && $old_instance_n == 0 ]]; then
+elif [[ $new_instance_n == 1 && $old_import_n == 0 && $old_instance_n == 0 && ( $new_import_n == 1 || $legacy_relative_import_n == 1 ) ]]; then
+    if [[ $legacy_relative_import_n == 1 ]]; then host_change=1; fi
     :
 else
     die 'shell.qml bukan pasangan legacy K41Dock atau integrasi K41 baru yang dikenali; tidak ada perubahan.'
@@ -253,6 +259,6 @@ info "Caelestia host: $shell_file"
 info "Backup privat: $backup_root"
 info 'Arsitektur: Caelestia adalah shell host; K41 hanya menyediakan modul Dock.qml.'
 info 'Tidak membuat shell.qml, qmldir, atau konfigurasi Quickshell mandiri di namespace K41.'
-info 'Integrasi memakai relative import qs.k41.modules.bottombar dan K41Bottombar.Dock {}.'
+info 'Integrasi memakai import qs.k41.modules.bottombar dan K41Bottombar.Dock {}.'
 info 'File legacy k41dock tidak dihapus; cleanup dilakukan terpisah setelah runtime verification.'
 info 'Quickshell tidak di-reload atau di-restart.'
