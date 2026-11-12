@@ -73,6 +73,27 @@ test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l
 run_installer
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
 
+# A legacy/misplaced instance must be normalized after id: root, not duplicated.
+cat >"$shell" <<'QML'
+import "../k41/modules/topbar" as K41Topbar
+import "modules"
+import QtQuick
+import Quickshell
+import qs.services
+
+ShellRoot {
+    K41Topbar.Topbar {}
+    id: root
+    Background {}
+}
+QML
+run_installer
+root_id_line="$(grep -nE '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$shell" | cut -d: -f1)"
+topbar_line="$(grep -nE '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell" | cut -d: -f1)"
+test "$topbar_line" -gt "$root_id_line"
+test "$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$shell")" -eq 1
+test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 2
+
 # A partial host integration must fail closed without changing the module.
 sed -i '/K41Topbar.Topbar/d' "$shell"
 before="$(sha256sum "$target" | awk '{print $1}')"
