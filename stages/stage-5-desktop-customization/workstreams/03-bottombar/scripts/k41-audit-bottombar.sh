@@ -122,7 +122,7 @@ def describe(path):
     return f"{kind} | mode={stat.S_IMODE(st.st_mode):04o} | uid={st.st_uid} | bytes={st.st_size if path.is_file() else '-'}{digest}"
 
 workstream = repo / "stages/stage-5-desktop-customization/workstreams/03-bottombar"
-canonical_source = workstream / "modules/bottombar/Dock.Qml"
+canonical_source = workstream / "modules/bottombar/Dock.qml"
 legacy_source = repo / "stages/stage-5-desktop-customization/workstreams/04-taskbar-panel/config/quickshell/caelestia/modules/k41dock/K41Dock.qml"
 implementer = workstream / "scripts/k41-implement-bottombar.sh"
 audit_script = workstream / "scripts/k41-audit-bottombar.sh"
@@ -204,7 +204,7 @@ for label, root in k41_roots:
             for i, line in enumerate(lines, 1):
                 if re.search(r"import\s+|bottombar|Dock\.Qml|ShellRoot\s*\{", line, re.I):
                     add(f"    {i}: {clean(line[:500])}")
-    target = root / "modules/bottombar/Dock.Qml"
+    target = root / "modules/bottombar/Dock.qml"
     add(f"  Bottombar target: {clean(target)} | {describe(target)}")
     module_dir = root / "modules/bottombar"
     if module_dir.is_dir() and not module_dir.is_symlink():
@@ -220,7 +220,7 @@ for label, root in host_roots:
     add(f"{label}: {clean(root)} | {describe(root)}")
     if root.is_symlink() or not root.is_dir(): continue
     available_hosts.append((label, root))
-    for rel in ("shell.qml", "modules/k41dock/K41Dock.qml", "modules/bottombar/Dock.Qml",
+    for rel in ("shell.qml", "modules/k41dock/K41Dock.qml", "modules/bottombar/Dock.qml",
                 "modules/bar/Bar.qml", "shell.json"):
         p = root / rel
         add(f"  {rel}: {describe(p)}")
@@ -342,7 +342,7 @@ if not safe_file(canonical_source): blockers.append("Canonical source is missing
 if not safe_file(implementer): blockers.append("Implementation script is missing/unsafe.")
 target_seen = False
 for label, root in k41_roots:
-    target = root / "modules/bottombar/Dock.Qml"
+    target = root / "modules/bottombar/Dock.qml"
     if root.is_dir() and not root.is_symlink():
         target_seen = True
         if target.is_symlink(): blockers.append(f"{label} target is a symlink.")
