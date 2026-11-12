@@ -328,7 +328,7 @@ section 'IMPLEMENTATION INPUTS: REPOSITORY LOCKSCREEN TREE'
 repo_lock_root="$repo_root/stages/stage-5-desktop-customization/workstreams/02-lock-screen"
 if [[ -d $repo_lock_root && ! -L $repo_lock_root ]]; then
     find "$repo_lock_root" -maxdepth 5 -type f \( -name '*.qml' -o -name '*.conf' -o -name '*.json' -o -name '*.lua' -o -name '*.sh' -o -name '*.service' -o -name '*.target' \) \
-        -printf '%P (%s bytes)\\n' 2>/dev/null | sort | head -n 300 | redact >>"$report" || true
+        -printf '%P (%s bytes)\n' 2>/dev/null | sort | head -n 300 | redact >>"$report" || true
 else
     note '[repository lockscreen workstream directory missing or unsafe]'
 fi
