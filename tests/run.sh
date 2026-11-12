@@ -23,7 +23,6 @@ tests=(
   stages/stage-4-desktop-validation/tests/test-desktop-validation.sh
   stages/stage-4-desktop-validation/tests/test-desktop-repair.sh
   stages/stage-6-hardware-optimization/tests/test-hardware-audit.sh
-  stages/stage-5-desktop-customization/tests/test-guest-storage-audit.sh
   stages/stage-5-desktop-customization/tests/test-caelestia-dashboard-cleanup.sh
   stages/stage-5-desktop-customization/tests/test-caelestia-module-repair.sh
   stages/stage-6-hardware-optimization/tests/test-power-management-audit.sh
