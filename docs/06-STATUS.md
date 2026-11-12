@@ -48,3 +48,11 @@
 ## Bukti historis
 
 Bukti Stage 4 historis tetap tersimpan pada commit arsip 02f6194ed04c8f13ea64eda35b7afb94f7006504. Snapshot tersebut bukan laporan runtime terkini.
+
+## Lock Screen audit publisher correction — 12 November 2026
+
+- **IMPLEMENTED:** `k41-audit-desktop-startup.sh` now publishes through a temporary independent clone rather than fetching and registering a linked worktree in the user's active checkout. The publisher's Git operations are isolated from local branch/HEAD/index/FETCH_HEAD/worktree metadata.
+- **IMPLEMENTED:** startup audit now records revision/hash metadata for the relevant updater, helper, fallback config, visual deployer, and visual auditor; it compares the installed Hyprlock fallback config against repository source and captures Hyprland instance metadata.
+- **IMPLEMENTED:** regression test updated to reject local-checkout fetch/worktree operations and require the independent clone path.
+- **NOT TESTED YET:** Bash syntax, ShellCheck, regression suite, end-to-end push simulation, and fresh X280 audit report. No claim of runtime verification is made.
+- **Scope note:** automatic deployment-log publisher in `k41-deploy-lockscreen-visual.sh` still uses the older linked-worktree pattern and remains a separate follow-up; this change only corrects the startup audit publisher.
