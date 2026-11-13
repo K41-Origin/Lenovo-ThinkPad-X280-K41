@@ -25,19 +25,37 @@ owned "$source_file" || die 'Source Topbar.qml bukan milik user aktif.'
 service_source_dir="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services"
 required_services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 [[ -d $service_source_dir && ! -L $service_source_dir ]] || die 'Direktori service K41 belum tersedia; migrasi service harus diselesaikan sebelum deployment Topbar.'
+# Inspect executable QML/JS source, not attribution or explanatory comments.
+# Cpu.qml intentionally credits its upstream algorithm in comments; that is
+# provenance, not a runtime dependency. Reject actual legacy imports/references.
+has_legacy_dependency() {
+    local file=$1
+    awk '
+        {
+            sub(/\\/\\/.*/, "")
+            if ($0 ~ /qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.|import[[:space:]]+Caelestia([.]|[[:space:]])|Caelestia[.]/) {
+                print FNR ":" $0
+                found=1
+            }
+        }
+        END { exit !found }
+    ' "$file"
+}
+
 for service in "${required_services[@]}"; do
     service_file="$service_source_dir/$service"
     [[ -f $service_file && ! -L $service_file ]] || die "Service K41 belum dimigrasikan: $service"
     owned "$service_file" || die "Source service bukan milik user aktif: $service"
-    if grep -En 'Caelestia|qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.' "$service_file"; then
-        die "Dependency internal Caelestia terdeteksi pada $service; migrasi belum mandiri."
+    if has_legacy_dependency "$service_file"; then
+        die "Dependency runtime internal Caelestia terdeteksi pada $service; migrasi belum mandiri."
     fi
 done
 
 # K41 module is self-contained: no private Caelestia modules/services are allowed.
-if grep -En 'Caelestia|qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.' "$source_file"; then
-    die 'Dependency internal Caelestia terdeteksi; migrasikan source ke API mandiri K41 terlebih dahulu.'
+if has_legacy_dependency "$source_file"; then
+    die 'Dependency runtime internal Caelestia terdeteksi; migrasikan source ke API mandiri K41 terlebih dahulu.'
 fi
+
 grep -Fq 'K41Topbar' "$source_file" || die 'Source tidak memiliki marker K41Topbar.'
 
 config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
