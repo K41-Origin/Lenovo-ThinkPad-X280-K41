@@ -32,7 +32,6 @@ ShellRoot {
     id: root
 }
 QML
-host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
 notifs="$config/quickshell/caelestia/services/Notifs.qml"
 cat >"$notifs" <<'QML'
@@ -64,7 +63,7 @@ done
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
-if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$notifs"; then
     echo 'Caelestia NotificationServer was not disabled.' >&2
     exit 1
 fi
@@ -75,23 +74,20 @@ test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l
 run_installer
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 1
 
-# Duplicate only the exact K41-owned host lines; deployment must overwrite
-# them with one canonical import and one instance, preserving other host code.
+# Duplicate exact K41-owned host lines; normalize to one canonical import and instance.
 awk '
-    /import qs\.k41\.modules\.topbar as K41Topbar/ { print; print; next }
-    /K41Topbar\.Topbar \{\}/ { print; print; next }
+    /import qs\\.k41\\.modules\\.topbar as K41Topbar/ { print; print; next }
+    /K41Topbar\\.Topbar \\{\\}/ { print; print; next }
     { print }
 ' "$host" >"$host.duplicate"
 mv "$host.duplicate" "$host"
 run_installer
 test "$(grep -Fc 'import qs.k41.modules.topbar as K41Topbar' "$host")" -eq 1
-test "$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host")" -eq 1
+test "$(grep -Ec '^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*$' "$host")" -eq 1
 test "$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d | wc -l)" -eq 2
 
-# Inject a failure at host publication after handoff and K41 staging; verify full rollback.
+# Inject failure at host publication and verify rollback restores both notification owners' files.
 cp "$backup_root/Notifs.qml" "$notifs"
-# Model a fresh install: the host has no K41 import yet, while its target
-# directory contains an older, currently unused K41 copy.
 cat >"$host" <<'QML'
 import QtQuick
 import Quickshell
@@ -123,28 +119,16 @@ for service in "${services[@]}"; do
     cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
 done
 
-# An unrecognized Caelestia source must fail before any further mutation.
+# Unknown Caelestia source must fail before mutation.
 host_after_install="$(sha256sum "$host" | cut -d' ' -f1)"
-printf 'pragma Singleton\nSingleton { }\n' >"$notifs"
+printf 'pragma Singleton\\nSingleton { }\\n' >"$notifs"
 if run_installer >/dev/null 2>&1; then
     echo 'Expected unknown Caelestia source rejection.' >&2
     exit 1
 fi
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_after_install"
-# Restore the already-patched handoff state for the remaining guards.
-cat >"$notifs" <<'QML'
-pragma Singleton
-Singleton {
-    id: root
-    property list<var> list: []
-    // K41_NOTIFICATION_SERVER_DISABLED_BY_K41
-}
-QML
 
-# Exercise the audited partial-install state: K41 is integrated in shell.qml,
-# but the old Caelestia NotificationServer is still present. Migration must
-# refuse while Quickshell runs, refuse when the bus cannot be inspected, and
-# proceed only when the process is stopped and the user bus confirms no owner.
+# Offline migration guards for the audited partial-install state.
 mkdir -p "$tmp/offline-bin"
 cat >"$tmp/offline-bin/pgrep" <<'SH'
 #!/usr/bin/env bash
@@ -154,11 +138,9 @@ SH
 cat >"$tmp/offline-bin/busctl" <<'SH'
 #!/usr/bin/env bash
 [[ ${MOCK_BUS_UNAVAILABLE:-0} == 1 ]] && exit 1
+printf 'NAME PID PROCESS USER CONNECTION UNIT SESSION DESCRIPTION\\n'
 if [[ ${MOCK_BUS_OWNER:-0} == 1 ]]; then
-    printf 'NAME PID PROCESS USER CONNECTION UNIT SESSION DESCRIPTION\\n'
     printf 'org.freedesktop.Notifications 123 qs user :1.2 - - mock\\n'
-else
-    printf 'NAME PID PROCESS USER CONNECTION UNIT SESSION DESCRIPTION\\n'
 fi
 SH
 chmod 0755 "$tmp/offline-bin/pgrep" "$tmp/offline-bin/busctl"
@@ -178,54 +160,39 @@ cp "$backup_root/Notifs.qml" "$notifs"
 partial_host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 partial_notifs_before="$(sha256sum "$notifs" | cut -d' ' -f1)"
 if MOCK_QS_RUNNING=1 run_installer >/dev/null 2>&1; then
-    echo 'Expected offline migration to reject a running Quickshell process.' >&2
+    echo 'Expected rejection while Quickshell is running.' >&2
     exit 1
 fi
-test "$(sha256sum "$host" | cut -d' ' -f1)" = "$partial_host_before"
-test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$partial_notifs_before"
 if MOCK_BUS_UNAVAILABLE=1 run_installer >/dev/null 2>&1; then
-    echo 'Expected offline migration to reject an unavailable user bus.' >&2
+    echo 'Expected rejection when the user bus cannot be inspected.' >&2
     exit 1
 fi
 if MOCK_BUS_OWNER=1 run_installer >/dev/null 2>&1; then
-    echo 'Expected offline migration to reject an active notification owner.' >&2
+    echo 'Expected rejection while the notification name has an owner.' >&2
     exit 1
 fi
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$partial_host_before"
 test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$partial_notifs_before"
-run_installer
+
+# Also exercise the one-sided partial state: only the import remains.
+sed -i '/K41Topbar.Topbar/d' "$host"
+if MOCK_BUS_OWNER=0 run_installer; then
+    : # Expected to migrate safely with Quickshell stopped and no D-Bus owner.
+else
+    echo 'Expected safe migration for import-only partial state.' >&2
+    exit 1
+fi
 test "$(grep -Fc 'import qs.k41.modules.topbar as K41Topbar' "$host")" -eq 1
-test "$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\\}[[:space:]]*
-printf '\nimport Caelestia.Services\n' >>"$qml"
-before="$(sha256sum "$target" | cut -d' ' -f1)"
-if run_installer >/dev/null 2>&1; then
-    echo 'Expected Caelestia dependency rejection.' >&2
-    exit 1
-fi
-test "$(sha256sum "$target" | cut -d' ' -f1)" = "$before"
-
-# Restore valid source before exercising the symlink guard.
-cp "$source_root/modules/topbar/Topbar.qml" "$qml"
-rm -f "$target"
-ln -s "$host" "$target"
-if run_installer >/dev/null 2>&1; then
-    echo 'Expected symlink target rejection.' >&2
-    exit 1
-fi
-test -L "$target"
-test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
-
-printf 'PASS: service deployment, Caelestia handoff, offline partial-install migration guards, idempotency, duplicate overwrite, rollback, dependency and symlink guards.\n'
- "$host")" -eq 1
+test "$(grep -Ec '^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*$' "$host")" -eq 1
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
-if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$notifs"; then
     echo 'Offline migration did not disable the Caelestia server.' >&2
     exit 1
 fi
 host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
 # Dependency rejection must not mutate installed files.
-printf '\nimport Caelestia.Services\n' >>"$qml"
+printf '\\nimport Caelestia.Services\\n' >>"$qml"
 before="$(sha256sum "$target" | cut -d' ' -f1)"
 if run_installer >/dev/null 2>&1; then
     echo 'Expected Caelestia dependency rejection.' >&2
@@ -244,4 +211,4 @@ fi
 test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
-printf 'PASS: service deployment, Caelestia handoff, offline partial-install migration guards, idempotency, duplicate overwrite, rollback, dependency and symlink guards.\n'
+printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\\n'
