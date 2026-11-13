@@ -28,7 +28,7 @@ QtObject {
     function save(): void {
         if (!loaded)
             return;
-        const data = list.filter(entry => !entry.transient).map(entry => ({
+        const data = list.filter(entry => !entry.transientNotification).map(entry => ({
             notificationId: entry.notificationId,
             appName: entry.appName,
             appIcon: entry.appIcon,
@@ -75,7 +75,7 @@ QtObject {
                         resident: Boolean(saved.resident),
                         expireTimeout: -1,
                         time: saved.time ? new Date(saved.time) : new Date(),
-                        transient: false
+                        transientNotification: false
                     });
                     if (entry)
                         root.list = [...root.list, entry];
@@ -112,7 +112,7 @@ QtObject {
             property string image: notification ? notification.image : ""
             property int urgency: notification ? notification.urgency : 1
             property bool resident: notification ? notification.resident : false
-            property bool transient: notification ? notification.transient : false
+            property bool transientNotification: notification ? notification.transient : false
             property real expireTimeout: notification ? notification.expireTimeout : -1
             property date time: new Date()
 
