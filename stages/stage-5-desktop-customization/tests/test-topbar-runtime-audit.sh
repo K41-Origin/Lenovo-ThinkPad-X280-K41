@@ -13,6 +13,7 @@ for token in \
   'RUNTIME CAELESTIA HOST SHELL' \
   'RUNTIME K41 TOPBAR MODULE' \
   'CANONICAL K41 TOPBAR SOURCE' \
+  'import qs.k41.modules.topbar as K41Topbar' \
   'RUNTIME CAELESTIA NOTIFS SERVICE' \
   'RUNTIME K41 NOTIFICATIONS SERVICE' \
   'K41.Topbar.Topbar {}' \
