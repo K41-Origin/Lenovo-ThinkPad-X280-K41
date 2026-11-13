@@ -38,6 +38,7 @@ jobs:
           bash -n stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-implement-topbar.sh
           bash -n stages/stage-5-desktop-customization/tests/test-topbar-module-install.sh
           bash stages/stage-5-desktop-customization/tests/test-topbar-module-install.sh
+          shellcheck --severity=error stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-implement-topbar.sh stages/stage-5-desktop-customization/tests/test-topbar-module-install.sh
 
       - name: Validate Bash syntax
         shell: bash
