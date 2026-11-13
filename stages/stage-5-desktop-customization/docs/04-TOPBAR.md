@@ -1,6 +1,7 @@
 # Workstream 04 — Topbar
 
-**Status: COMPLETED / USER ACCEPTED (13 November 2026).** Source K41, deployment, notification ownership handoff, and runtime audit have been completed for the agreed WS04 scope. Runtime verification is recorded separately from remaining QML lint and functional edge-case coverage. Enam service/state K41 kini tersedia. Backend Notifications memiliki NotificationServer, model, action, expiry, dismiss, serta penyimpanan riwayat non-transient. Deployer menyiapkan backup dan handoff terkontrol dengan menonaktifkan satu blok NotificationServer pada Caelestia `services/Notifs.qml`, mempertahankan singleton, DND, IPC, dan model historis lama. K41 dock menjadi frontend untuk notifikasi baru. Deployer mempertahankan entry point `~/.config/quickshell/caelestia/shell.qml` dan tidak me-reload Quickshell. Implementasi sudah ditulis ke GitHub; Bash/fixture/QML validation dan runtime X280 masih menunggu pengujian.
+**Status: COMPLETED / USER ACCEPTED (13 November 2026).** Source K41, deployment, NotificationServer ownership handoff, runtime audit, dan sinkronisasi compatibility mirror telah diselesaikan untuk scope WS04. Pengguna mengonfirmasi bahwa deployer compatibility mirror telah diterapkan dan berhasil pada X280. Status ini mencatat keberhasilan deployment dan penerimaan scope; bukan klaim bahwa seluruh edge case QML, visual, maupun interaksi telah diuji. Enam service/state K41 tersedia; backend Notifications memiliki model, actions, expiry, dismiss, dan persistence riwayat non-transient. Deployer mempertahankan entry point Caelestia dan menyediakan backup/rollback. Validasi teknis yang belum dilakukan tetap dicatat secara terpisah.
+
 ## Tujuan dan batas ownership
 
 Membuat panel horizontal di tepi atas layar sebagai area informasi/status desktop yang ringkas. Topbar melengkapi Bottombar tanpa menduplikasi indikator workspace atau mengambil terlalu banyak ruang vertikal.
@@ -97,8 +98,7 @@ Source canonical dan deployer saat ini menggunakan arsitektur modul K41 di dalam
 
 | Service/komponen | Status implementasi | Perilaku saat ini |
 |---|---|---|
-| `Cpu.qml` | **IMPLEMENTED** | Adaptasi algoritma Caelestia `cpu.cpp`: delta tujuh counter aggregate `/proc/stat`; dibaca melalui Quickshell `Process`. |
-| `Memory.qml` | **IMPLEMENTED** | Adaptasi perhitungan `MemTotal - MemAvailable` dari `memory.cpp`; membaca `/proc/meminfo` melalui Quickshell `Process`. |
+| `Cpu.qml` | **IMPLEMENTED** | Adaptasi algoritma Caelestia `cpu.cpp`: delta tujuh counter aggregate `/proc/stat`; dibaca melalui Quickshell `Process`. || `Memory.qml` | **IMPLEMENTED** | Adaptasi perhitungan `MemTotal - MemAvailable` dari `memory.cpp`; membaca `/proc/meminfo` melalui Quickshell `Process`. |
 | `Battery.qml` | **IMPLEMENTED** | Menggunakan `Quickshell.Services.UPower`; persentase UPower berupa fraction 0.0–1.0 dan dikonversi ke persen pada Topbar. |
 | `Clock.qml` | **IMPLEMENTED** | Menggunakan Quickshell `SystemClock` dan `Qt.formatDateTime`; tidak membuat timer polling tanggal sendiri. |
 | `TopbarState.qml` | **IMPLEMENTED** | State lokal untuk membuka/menutup panel notifikasi; bukan backend notifikasi. |
@@ -198,7 +198,6 @@ Keputusan pendekatan, lima elemen, urutan, properti visual, visibility, dan caku
 Source canonical K41 boleh disiapkan setelah baseline teknis disepakati, tetapi deployment runtime tetap menunggu review implementasi dan validasi preflight pada X280. Jika audit menunjukkan kebutuhan tidak jelas atau API belum terverifikasi, tandai BLOCKED dan lakukan investigasi terarah.
 
 ### Tahap 3 — Implementasi dan deployment
-
 Implementasi harus mengikuti hasil audit dan spesifikasi yang disetujui:
 
 1. Tetapkan source canonical K41, target runtime, host file yang perlu diintegrasikan, dan dependency.
@@ -289,7 +288,7 @@ Audit X280 terbaru yang dipublikasikan pada commit `faef1785050da16ae3a437099ee1
 - Audit tidak menemukan `qmllint`, `qmlformat`, atau `qml` melalui PATH.
 - Hasil tersebut membuktikan kesesuaian file dan struktur integrasi, bukan bahwa QML berhasil dimuat atau panel dirender.
 
-Pengguna menyampaikan bahwa reboot diperlukan untuk melihat perubahan yang telah diterapkan. Karena itu WS04 ditandai **PENDING** sampai sesi baru setelah reboot diperiksa. Tidak ada reboot yang dijalankan oleh proses dokumentasi ini.
+Pengguna menyampaikan bahwa reboot diperlukan untuk melihat perubahan yang telah diterapkan. Catatan **PENDING** pada snapshot audit tersebut telah superseded: pengguna kini mengonfirmasi deploy compatibility mirror berhasil pada X280. Tidak ada reboot atau deployment yang dijalankan oleh proses dokumentasi ini.
 
 ### Langkah verifikasi setelah reboot
 
@@ -297,8 +296,7 @@ Pengguna menyampaikan bahwa reboot diperlukan untuk melihat perubahan yang telah
 2. Periksa log startup/runtime Quickshell untuk error import, unresolved type/property, binding, atau instantiation.
 3. Pastikan Topbar terlihat dan lima indikator menampilkan data yang masuk akal.
 4. Uji klik notification indicator dan pastikan Notification Dock Caelestia terbuka pada monitor yang benar.
-5. Periksa fullscreen, multi-monitor, scaling 1.5, dan regression Bottombar.
-6. Catat hasil aktual. Jika panel tetap tidak tampil, kumpulkan log runtime sebelum mengubah source atau melakukan restart tambahan.
+5. Periksa fullscreen, multi-monitor, scaling 1.5, dan regression Bottombar.6. Catat hasil aktual. Jika panel tetap tidak tampil, kumpulkan log runtime sebelum mengubah source atau melakukan restart tambahan.
 
 Jangan menganggap reboot saja sebagai bukti keberhasilan. Gate WS04 tetap memerlukan observasi runtime dan penerimaan pengguna.
 
@@ -397,8 +395,7 @@ File CPU, Memory, Clock, dan Battery sekarang memiliki komentar provenance/adapt
 ├── services/
 │   ├── Battery.qml
 │   ├── Clock.qml
-│   ├── Cpu.qml
-│   ├── Memory.qml
+│   ├── Cpu.qml│   ├── Memory.qml
 │   ├── Notifications.qml
 │   └── TopbarState.qml
 └── modules/
@@ -419,9 +416,13 @@ Compatibility mirror memakai source canonical yang sama; relative import `../../
 - **Runtime audit X280:** `reports/stage-5-desktop-customization/04-topbar/runtime-audits/20261113T080041Z/report.txt` menunjukkan satu import dan instance Topbar, kecocokan source/runtime Topbar, marker backend K41, nonaktifnya NotificationServer Caelestia, satu D-Bus owner `org.freedesktop.Notifications` pada Quickshell, serta tidak ditemukannya daemon notifikasi pesaing.
 - **QML tooling:** `qmllint` tidak tersedia saat audit; validasi QML statis tidak dijalankan. Laporan journal tidak memberikan bukti lengkap untuk seluruh fungsi visual/interaksi.
 - **Acceptance:** pengguna meminta WS04 ditandai completed. `COMPLETED / USER ACCEPTED` merekam penerimaan scope, bukan klaim seluruh edge case QML/runtime telah diuji.
-- **Audit terbaru 13 November 2026 (`20261113T082656Z`):** struktur aktif Caelestia sudah menggunakan `k41/services` dan direktori legacy nested sudah tidak ada. Namun compatibility mirror sibling masih berisi Topbar lama; laporan menyatakan `Runtime compatibility module equals canonical source: NO`.
-- **Koreksi deployer:** installer kini menyalin Topbar dan enam service canonical ke compatibility mirror, mempertahankan service K41 lain, mem-backup file mirror yang diganti, memverifikasi setiap hasil copy, dan memasukkan pemulihan mirror ke rollback. Sinkronisasi mirror yang belum sesuai masuk ke offline safety gate; jalankan hanya setelah logout penuh dari Quickshell dan user D-Bus memastikan notification owner tidak ada.
-- **Status pascarefactor:** implementasi sinkronisasi mirror sudah ada di repository, tetapi belum diterapkan pada X280. Jalankan fixture terbaru, deployer dari TTY, lalu audit ulang untuk mengonfirmasi Topbar dan seluruh enam service pada kedua lokasi sama dengan source canonical.
+- **Audit terbaru 13 November 2026 (`20261113T082656Z`):** struktur aktif Caelestia sudah menggunakan `k41/services` dan direktori legacy nested sudah tidak ada. Namun compatibility mirror sibling masih berisi Topbar lama; laporan menyatakan `Runtime compatibility module equals canonical source: NO`. Ini adalah temuan historis sebelum perbaikan mirror diterapkan.
+- **Koreksi deployer:** installer kini menyalin Topbar dan enam service canonical ke compatibility mirror, mempertahankan service K41 lain, mem-backup file mirror yang diganti, memverifikasi setiap hasil copy, dan memasukkan pemulihan mirror ke rollback. Sinkronisasi mirror dilakukan melalui offline safety gate; prosedur tersebut telah dijalankan pengguna dan hasilnya dikonfirmasi berhasil.
+- **Status pascadeploy:** pengguna mengonfirmasi sinkronisasi mirror berhasil diterapkan pada X280. Audit pascadeploy terpisah tetap dapat dilakukan untuk menyimpan bukti checksum/runtime yang independen.
 
 
 **Safety gate migrasi struktur:** bila direktori legacy `k41/modules/topbar/services` masih ada sementara host telah memuat Topbar K41, deployer mensyaratkan Quickshell berhenti dan user D-Bus dapat membuktikan tidak ada owner `org.freedesktop.Notifications`. Ini mencegah file watcher memuat ulang Topbar di antara pemindahan service dan perubahan relative import. Backup legacy tetap dipertahankan untuk rollback.
+
+## Pembaruan status pascadeploy — 13 November 2026
+
+Pengguna mengonfirmasi bahwa sinkronisasi compatibility mirror telah diterapkan dan berhasil pada X280. Dengan demikian, seluruh catatan historis yang menyebut mirror sync pending atau belum diterapkan harus dibaca sebagai snapshot sebelum deployment dan tidak lagi mencerminkan status terkini. Status WS04 tetap **COMPLETED / USER ACCEPTED**. Validasi QML dan functional edge cases yang belum dijalankan tetap berstatus belum diverifikasi.
