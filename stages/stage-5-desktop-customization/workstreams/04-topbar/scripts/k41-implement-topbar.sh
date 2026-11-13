@@ -228,6 +228,11 @@ cp -a "$caelestia_notifs_file" "$backup_root/Notifs.qml"
     printf 'module_target=%s\nmodule_previous=%s\nmodule_source_sha256=%s\n' "$target_file" "$had_module" "$(sha256sum "$source_file" | cut -d' ' -f1)"
     printf 'host_target=%s\nhost_previous_sha256=%s\n' "$host_file" "$(sha256sum "$host_file" | cut -d' ' -f1)"
     printf 'caelestia_notifs_target=%s\ncaelestia_notifs_previous_sha256=%s\n' "$caelestia_notifs_file" "$(sha256sum "$caelestia_notifs_file" | cut -d' ' -f1)"
+    printf 'compat_module_target=%s\\ncompat_module_previous=%s\\n' "$compat_target_file" "$had_compat_module"
+    printf 'compat_services_target=%s\\n' "$compat_service_target_dir"
+    for service in "${required_services[@]}"; do
+        printf 'compat_service_%s_previous=%s\\n' "$service" "${had_compat_services[$service]}"
+    done
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
