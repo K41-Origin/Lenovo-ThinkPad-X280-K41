@@ -123,7 +123,7 @@ root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_fil
 # If this is the audited partial-install state, migration is allowed only
 # offline: no Quickshell process and a reachable user bus proving that the
 # notification name currently has no owner. Never kill/restart the user's shell.
-if (( handoff_needed && import_n > 0 && instance_n > 0 )); then
+if (( handoff_needed && (import_n > 0 || instance_n > 0) )); then
     for process_name in qs quickshell; do
         if pgrep -x "$process_name" >/dev/null 2>&1; then
             die "Quickshell masih berjalan ($process_name); logout dari sesi desktop sepenuhnya sebelum migrasi offline."
