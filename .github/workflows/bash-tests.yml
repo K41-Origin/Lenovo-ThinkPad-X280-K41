@@ -31,6 +31,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y jq python3 gcc shellcheck shfmt gdisk parted cryptsetup dosfstools e2fsprogs
 
+      - name: Validate and test K41 Topbar installer
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-implement-topbar.sh
+          bash -n stages/stage-5-desktop-customization/tests/test-topbar-module-install.sh
+          bash stages/stage-5-desktop-customization/tests/test-topbar-module-install.sh
+
       - name: Validate Bash syntax
         shell: bash
         run: |
