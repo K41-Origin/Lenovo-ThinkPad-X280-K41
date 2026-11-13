@@ -119,8 +119,10 @@ import_n="$(grep -Fc "$new_import" "$host_file" || true)"
 instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || true)"
 root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_file" || true)"
 (( root_id_n == 1 )) || die 'Caelestia shell.qml harus memiliki tepat satu id: root.'
-(( import_n <= 1 && instance_n <= 1 )) || die 'Integrasi K41 duplikat terdeteksi.'
-if (( handoff_needed && import_n == 1 && instance_n == 1 )); then
+# Duplicate/partial K41-owned lines are normalized in the staged host file.
+# Only exact K41 import and instance lines are managed; unrelated host content
+# is preserved. A live Caelestia NotificationServer still blocks a handoff.
+if (( handoff_needed && import_n > 0 && instance_n > 0 )); then
     die 'K41 sudah terpasang sementara NotificationServer Caelestia masih aktif; hentikan dan audit kemungkinan D-Bus owner ganda sebelum melanjutkan.'
 fi
 services_match=1
@@ -134,10 +136,6 @@ if (( import_n == 1 && instance_n == 1 && services_match == 1 && handoff_needed 
     info 'K41 services dan Topbar sudah terpasang pada Caelestia host; tidak ada perubahan.'
     exit 0
 fi
-if (( (import_n == 1) != (instance_n == 1) )); then
-    die 'Integrasi K41 parsial terdeteksi; periksa shell.qml secara manual.'
-fi
-
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}"
 [[ $state_home == /* ]] || die 'XDG_STATE_HOME harus absolut.'
 backup_parent="$state_home/k41/backups/topbar"
@@ -221,12 +219,24 @@ module_tmp="$(mktemp "$module_root/.Topbar.install.XXXXXX")"
 host_tmp="$(mktemp "$host_root/.shell.install.XXXXXX")"
 install -m 0644 "$source_file" "$module_tmp"
 awk -v new_import="$new_import" '
-    $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ && !added_import { print new_import; added_import=1 }
+    # Replace every exact K41-owned import/instance with one canonical copy.
+    $0 ~ /^[[:space:]]*import[[:space:]]+qs\.k41\.modules\.topbar[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ { next }
     $0 ~ /^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$/ { next }
-    $0 ~ /^[[:space:]]*id:[[:space:]]*root[[:space:]]*$/ { print; print "    K41Topbar.Topbar {}"; added_instance=1; next }
+    $0 ~ /^[[:space:]]*import[[:space:]]+QtQuick[[:space:]]*$/ && !added_import {
+        print
+        print new_import
+        added_import=1
+        next
+    }
+    $0 ~ /^[[:space:]]*id:[[:space:]]*root[[:space:]]*$/ {
+        print
+        print "    K41Topbar.Topbar {}"
+        added_instance=1
+        next
+    }
     { print }
     END { if (!added_import || !added_instance) exit 42 }
-' "$host_file" >"$host_tmp" || die 'Tidak dapat menyisipkan K41 Topbar secara aman ke host.'
+' "$host_file" >"$host_tmp" || die 'Tidak dapat menormalisasi integrasi K41 secara aman ke host.'
 chmod --reference="$host_file" "$host_tmp"
 grep -Fqx "$new_import" "$host_tmp" || die 'Import K41 tidak ada pada staging.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_tmp" || die 'Instance K41 tidak ada pada staging.'
