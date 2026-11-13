@@ -60,6 +60,9 @@ cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
     cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
 done
+grep -Fq 'property bool transientNotification:' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+! grep -Eq '^[[:space:]]*property[[:space:]]+[^;]*[[:space:]]transient([[:space:]:=]|$)' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+grep -Fq 'notification.transient' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
