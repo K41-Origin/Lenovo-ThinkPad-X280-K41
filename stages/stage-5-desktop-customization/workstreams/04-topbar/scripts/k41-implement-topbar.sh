@@ -10,7 +10,7 @@ owned() { [[ $(stat -c %u -- "$1") == "$EUID" ]]; }
 [[ $# -eq 0 ]] || die 'Script ini tidak menerima opsi.'
 (( EUID != 0 )) || die 'Jalankan sebagai user desktop biasa, tanpa sudo.'
 [[ -n ${HOME:-} && $HOME == /* && -d $HOME ]] || die 'HOME tidak valid.'
-for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date grep awk cut; do
+for cmd in git dirname install cp cmp sha256sum stat mkdir chmod mktemp mv rm date grep awk cut pgrep busctl; do
     command -v "$cmd" >/dev/null 2>&1 || die "Command wajib tidak tersedia: $cmd"
 done
 
@@ -120,10 +120,25 @@ instance_n="$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*
 root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_file" || true)"
 (( root_id_n == 1 )) || die 'Caelestia shell.qml harus memiliki tepat satu id: root.'
 # Duplicate/partial K41-owned lines are normalized in the staged host file.
-# Only exact K41 import and instance lines are managed; unrelated host content
-# is preserved. A live Caelestia NotificationServer still blocks a handoff.
+# If this is the audited partial-install state, migration is allowed only
+# offline: no Quickshell process and a reachable user bus proving that the
+# notification name currently has no owner. Never kill/restart the user's shell.
 if (( handoff_needed && import_n > 0 && instance_n > 0 )); then
-    die 'K41 sudah terpasang sementara NotificationServer Caelestia masih aktif; hentikan dan audit kemungkinan D-Bus owner ganda sebelum melanjutkan.'
+    for process_name in qs quickshell; do
+        if pgrep -x "$process_name" >/dev/null 2>&1; then
+            die "Quickshell masih berjalan ($process_name); logout dari sesi desktop sepenuhnya sebelum migrasi offline."
+        else
+            pgrep_rc=$?
+            (( pgrep_rc == 1 )) || die "Tidak dapat memastikan status proses Quickshell ($process_name); migrasi dibatalkan."
+        fi
+    done
+
+    bus_names="$(busctl --user --no-pager list 2>/dev/null)" \
+        || die 'User D-Bus tidak dapat diperiksa; migrasi offline dibatalkan fail-closed.'
+    if awk '$1 == "org.freedesktop.Notifications" { found=1 } END { exit !found }' <<<"$bus_names"; then
+        die 'org.freedesktop.Notifications masih memiliki D-Bus owner; pastikan sesi Quickshell benar-benar berhenti sebelum migrasi.'
+    fi
+    info 'Offline handoff terkonfirmasi: Quickshell berhenti dan user D-Bus tidak memiliki notification owner.'
 fi
 services_match=1
 for service in "${required_services[@]}"; do
