@@ -231,6 +231,25 @@ if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
 fi
 host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
+# A stale compatibility mirror is repaired only after the same offline checks.
+printf 'stale compatibility module\\n' >"$compat_target"
+compat_stale_before="$(sha256sum "$compat_target" | cut -d' ' -f1)"
+if MOCK_QS_RUNNING=1 run_installer >/dev/null 2>&1; then
+    echo 'Expected compatibility mirror sync to reject an active Quickshell process.' >&2
+    exit 1
+fi
+if MOCK_BUS_OWNER=1 run_installer >/dev/null 2>&1; then
+    echo 'Expected compatibility mirror sync to reject an active notification owner.' >&2
+    exit 1
+fi
+test "$(sha256sum "$compat_target" | cut -d' ' -f1)" = "$compat_stale_before"
+if MOCK_BUS_OWNER=0 run_installer >/dev/null 2>&1; then
+    cmp -s "$compat_target" "$qml"
+else
+    echo 'Expected offline compatibility mirror sync to succeed.' >&2
+    exit 1
+fi
+
 # A legacy directory migration is also guarded while the already-integrated shell is active.
 mkdir -p "$legacy_service_target"
 printf 'second legacy sentinel\n' >"$legacy_service_target/Legacy.qml"
