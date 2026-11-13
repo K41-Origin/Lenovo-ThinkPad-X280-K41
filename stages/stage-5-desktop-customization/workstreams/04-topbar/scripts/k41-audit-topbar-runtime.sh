@@ -59,7 +59,9 @@ qs_root = config_home / "quickshell"
 host = qs_root / "caelestia" / "shell.qml"
 module = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "Topbar.qml"
 compat_module = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
+compat_services = qs_root / "k41" / "services"
 source_module = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
+source_services = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/services"
 notifs = qs_root / "caelestia" / "services" / "Notifs.qml"
 k41_notifications = qs_root / "caelestia" / "k41" / "services" / "Notifications.qml"
 legacy_k41_services = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "services"
@@ -140,10 +142,24 @@ add("Primary module expected: ~/.config/quickshell/caelestia/k41/modules/topbar/
 add("K41 services expected: ~/.config/quickshell/caelestia/k41/services/*.qml")
 add("Legacy nested services path should be absent: ~/.config/quickshell/caelestia/k41/modules/topbar/services/")
 add("Compatibility mirror expected: ~/.config/quickshell/k41/modules/topbar/Topbar.qml")
+add("Compatibility services expected: ~/.config/quickshell/k41/services/{Cpu,Memory,Battery,Clock,Notifications,TopbarState}.qml")
 file_block("RUNTIME CAELESTIA HOST SHELL", host, True)
 file_block("RUNTIME PRIMARY K41 TOPBAR MODULE", module, True)
 file_block("RUNTIME COMPATIBILITY TOPBAR MODULE", compat_module, True)
 file_block("CANONICAL K41 TOPBAR SOURCE", source_module, True)
+for service_name in ("Cpu.qml", "Memory.qml", "Battery.qml", "Clock.qml", "Notifications.qml", "TopbarState.qml"):
+    primary_service = qs_root / "caelestia" / "k41" / "services" / service_name
+    compat_service = compat_services / service_name
+    canonical_service = source_services / service_name
+    file_block("RUNTIME PRIMARY K41 SERVICE " + service_name, primary_service)
+    file_block("RUNTIME COMPATIBILITY K41 SERVICE " + service_name, compat_service)
+    file_block("CANONICAL K41 SERVICE " + service_name, canonical_service)
+    for label, runtime_path in (("primary", primary_service), ("compatibility", compat_service)):
+        if runtime_path.is_file() and not runtime_path.is_symlink() and canonical_service.is_file() and not canonical_service.is_symlink():
+            add(f"Runtime {label} service {service_name} equals canonical source: " +
+                ("YES" if runtime_path.read_bytes() == canonical_service.read_bytes() else "NO"))
+        else:
+            add(f"Runtime {label} service {service_name} equals canonical source: UNKNOWN")
 file_block("RUNTIME CAELESTIA NOTIFS SERVICE", notifs, True, 98304)
 file_block("RUNTIME K41 NOTIFICATIONS SERVICE", k41_notifications, True, 98304)
 add("Legacy nested K41 service directory: " + ("PRESENT (migration required)" if legacy_k41_services.is_dir() and not legacy_k41_services.is_symlink() else "ABSENT"))
