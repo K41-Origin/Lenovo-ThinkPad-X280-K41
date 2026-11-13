@@ -383,3 +383,6 @@ Referensi upstream yang diperiksa pada branch `main` saat audit:
 File CPU, Memory, Clock, dan Battery sekarang memiliki komentar provenance/adaptasi. Source Caelestia berlisensi GPL-3.0; perubahan turunan wajib mempertahankan atribusi dan memenuhi ketentuan lisensi. Lihat upstream [Caelestia Shell](https://github.com/caelestia-dots/shell) dan [GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.html).
 
 **Pembaruan setelah audit handoff:** K41 notification service/model/dock dan patch deployer untuk menonaktifkan NotificationServer Caelestia sudah diimplementasikan pada source repository. Singleton `Notifs` Caelestia tetap dipertahankan karena masih digunakan sidebar, lock screen, DND, dan IPC; hanya blok server yang dinonaktifkan. Notification UI baru dikelola K41 Topbar. Sisa pekerjaan bukan lagi porting source, melainkan pengujian Bash/fixture, validasi QML, dan verifikasi satu pemilik D-Bus pada runtime X280 setelah reload.
+
+
+**Perbaikan QML (13 November 2026):** backend notifikasi memakai `transientNotification` sebagai nama property internal karena `transient` merupakan reserved keyword QML; akses ke properti API Quickshell tetap `notification.transient`. Deployer memvalidasi agar deklarasi property internal yang memakai identifier terlarang tidak ikut terpasang. Fixture test memeriksa kedua kondisi ini.
