@@ -11,7 +11,11 @@ for token in \
   'chmod 0700 "$run_dir"' \
   'chmod 0600 "$report"' \
   'RUNTIME CAELESTIA HOST SHELL' \
-  'RUNTIME K41 TOPBAR MODULE' \
+  'RUNTIME PRIMARY K41 TOPBAR MODULE' \
+  'RUNTIME COMPATIBILITY TOPBAR MODULE' \
+  'Compatibility services expected:' \
+  'RUNTIME COMPATIBILITY K41 SERVICE' \
+  'Runtime compatibility service' \
   'CANONICAL K41 TOPBAR SOURCE' \
   'import qs.k41.modules.topbar as K41Topbar' \
   'RUNTIME CAELESTIA NOTIFS SERVICE' \
