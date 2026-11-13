@@ -195,7 +195,7 @@ test "$(sha256sum "$host" | cut -d' ' -f1)" = "$partial_host_before"
 test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$partial_notifs_before"
 run_installer
 test "$(grep -Fc 'import qs.k41.modules.topbar as K41Topbar' "$host")" -eq 1
-test "$(grep -Ec '^[[:space:]]*K41Topbar\\.Topbar[[:space:]]*\\{[[:space:]]*\\}[[:space:]]*
+test "$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\\}[[:space:]]*
 printf '\nimport Caelestia.Services\n' >>"$qml"
 before="$(sha256sum "$target" | cut -d' ' -f1)"
 if run_installer >/dev/null 2>&1; then
@@ -218,10 +218,11 @@ test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 printf 'PASS: service deployment, Caelestia handoff, offline partial-install migration guards, idempotency, duplicate overwrite, rollback, dependency and symlink guards.\n'
  "$host")" -eq 1
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
-if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\\{' "$notifs"; then
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
     echo 'Offline migration did not disable the Caelestia server.' >&2
     exit 1
 fi
+host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
 # Dependency rejection must not mutate installed files.
 printf '\nimport Caelestia.Services\n' >>"$qml"
@@ -243,4 +244,4 @@ fi
 test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
-printf 'PASS: service deployment, Caelestia handoff, idempotency, duplicate overwrite, fail-closed, dependency and symlink guards.\n'
+printf 'PASS: service deployment, Caelestia handoff, offline partial-install migration guards, idempotency, duplicate overwrite, rollback, dependency and symlink guards.\n'
