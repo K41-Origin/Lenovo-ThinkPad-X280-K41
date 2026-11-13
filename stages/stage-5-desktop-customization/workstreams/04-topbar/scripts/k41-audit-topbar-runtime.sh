@@ -151,7 +151,7 @@ for label, runtime_path in (("primary", module), ("compatibility", compat_module
 if host.is_file() and not host.is_symlink():
     text = host.read_text(encoding="utf-8", errors="replace")
     lines = text.splitlines()
-    for needle in ('import "../k41/modules/topbar" as K41Topbar','K41Topbar.Topbar {}','K41.Topbar.Topbar {}'):
+    for needle in ('import qs.k41.modules.topbar as K41Topbar','import "../k41/modules/topbar" as K41Topbar','K41Topbar.Topbar {}','K41.Topbar.Topbar {}'):
         matches = [str(i) for i,line in enumerate(lines,1) if needle in line]
         add(f"Host token {needle!r}: lines={','.join(matches) if matches else 'NOT_FOUND'}")
     root_ids = [i for i,line in enumerate(lines,1) if re.match(r"^\s*id:\s*root\s*$",line)]
