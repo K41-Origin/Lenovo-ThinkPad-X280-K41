@@ -12,7 +12,10 @@ workstream="stages/stage-5-desktop-customization/workstreams/04-topbar"
 services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 grep -Fq 'import "../../services" as Services' "$source_root/modules/topbar/Topbar.qml"
 
-mkdir -p "$fixture/$workstream/modules/services" "$fixture/$workstream/modules/topbar" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services"
+mkdir -p "$fixture/$workstream/modules/services" "$fixture/$workstream/modules/topbar" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services" "$config/quickshell/k41/modules/topbar" "$config/quickshell/k41/services"
+printf 'preserve shared K41 service\n' >"$config/quickshell/k41/services/Other.qml"
+printf 'old compatibility service\n' >"$config/quickshell/k41/services/Cpu.qml"
+printf 'old compatibility Topbar\n' >"$config/quickshell/k41/modules/topbar/Topbar.qml"
 cp "$source_root/scripts/k41-implement-topbar.sh" "$fixture/$workstream/scripts/"
 for service in "${services[@]}"; do
     cp "$source_root/modules/services/$service" "$fixture/$workstream/modules/services/$service"
@@ -55,6 +58,8 @@ run_installer() {
 }
 
 target="$config/quickshell/caelestia/k41/modules/topbar/Topbar.qml"
+compat_target="$config/quickshell/k41/modules/topbar/Topbar.qml"
+compat_service_target="$config/quickshell/k41/services"
 service_target="$config/quickshell/caelestia/k41/services"
 legacy_service_target="$config/quickshell/caelestia/k41/modules/topbar/services"
 mkdir -p "$legacy_service_target"
@@ -62,10 +67,17 @@ printf 'legacy sentinel\n' >"$legacy_service_target/Legacy.qml"
 run_installer
 backup_root="$(find "$state/k41/backups/topbar" -mindepth 1 -maxdepth 1 -type d -print -quit)"
 cmp -s "$target" "$qml"
+cmp -s "$compat_target" "$qml"
+test -f "$backup_root/compat-Topbar.qml"
+test -f "$backup_root/compat-services/Cpu.qml"
+grep -Fq 'old compatibility Topbar' "$backup_root/compat-Topbar.qml"
+grep -Fq 'old compatibility service' "$backup_root/compat-services/Cpu.qml"
+grep -Fq 'preserve shared K41 service' "$compat_service_target/Other.qml"
 test ! -e "$legacy_service_target"
 test -f "$backup_root/legacy-topbar-services/Legacy.qml"
 for service in "${services[@]}"; do
     cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
+    cmp -s "$compat_service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
 grep -Fq 'property bool transientNotification:' "$fixture/$workstream/modules/services/Notifications.qml"
 ! grep -Eq '^[[:space:]]*property[[:space:]]+[^;]*[[:space:]]transient([[:space:]:=]|$)' "$fixture/$workstream/modules/services/Notifications.qml"
@@ -117,6 +129,10 @@ ShellRoot {
     id: root
 }
 QML
+printf 'old mirror content for rollback\n' >"$compat_target"
+printf 'old service content for rollback\n' >"$compat_service_target/Cpu.qml"
+compat_module_before_rollback="$(sha256sum "$compat_target" | cut -d' ' -f1)"
+compat_service_before_rollback="$(sha256sum "$compat_service_target/Cpu.qml" | cut -d' ' -f1)"
 notifs_before_rollback="$(sha256sum "$notifs" | cut -d' ' -f1)"
 host_before_rollback="$(sha256sum "$host" | cut -d' ' -f1)"
 mkdir -p "$tmp/bin"
@@ -136,6 +152,8 @@ if TEST_PATH="$tmp/bin:$PATH" run_installer >/dev/null 2>&1; then
 fi
 test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
+test "$(sha256sum "$compat_target" | cut -d' ' -f1)" = "$compat_module_before_rollback"
+test "$(sha256sum "$compat_service_target/Cpu.qml" | cut -d' ' -f1)" = "$compat_service_before_rollback"
 cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
     cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
@@ -252,4 +270,4 @@ fi
 test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
-printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
+printf 'PASS: primary and compatibility service deployment, shared-file preservation, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
