@@ -124,9 +124,9 @@ Target deployment adalah `~/.config/quickshell/caelestia/k41/modules/topbar/`; h
 - **SOURCE-LEVEL REVIEWED:** CPU, Memory, Battery, dan Clock telah ditinjau terhadap perilaku/upstream API yang menjadi referensi. Ini bukan bukti runtime.
 - **NOT TESTED:** Bash syntax, fixture regression, ShellCheck, QML lint/compile untuk revisi saat ini. Test fixture telah diperluas tetapi belum dijalankan.
 - **NOT VERIFIED:** QML load/render, data provider aktual, interaksi panel, multi-monitor/hotplug, fullscreen, scaling, konsumsi resource, dan regression Bottombar pada X280.
-- **NOT DEPLOYED:** deployer belum dijalankan pada runtime X280 untuk revisi ini.
+- **DEPLOYED (USER CONFIRMED):** pengguna telah menjalankan deployer pada X280 dan mengonfirmasi hasilnya berhasil.
 
-Status **RUNNING** berarti source implementation dan handoff telah dibuat, tetapi hasilnya belum dinyatakan TESTED atau VERIFIED. Fokus berikutnya adalah menjalankan fixture regression, Bash/ShellCheck, QML lint/compile, lalu deployment dan runtime verification pada X280.
+Status WS04 adalah **COMPLETED / USER ACCEPTED**. Deployment mirror telah dikonfirmasi berhasil oleh pengguna. Bash/fixture/QML validation dan functional edge-case coverage tetap harus dilaporkan terpisah; jangan menganggapnya lulus tanpa hasil test.
 
 ## Batas scope
 
@@ -153,7 +153,7 @@ Urutan mengikuti pola Workstream 02 dan 03: audit read-only lebih dahulu, keputu
 |---:|---|---|---|
 | 1 | Audit Topbar | Inventaris source/runtime aktif, versi, dependency/API, panel/bar yang tersedia, konfigurasi, monitor/scaling, tray/status providers, lifecycle, dan titik integrasi. Read-only. | **IMPLEMENTED — audit X280 2026-11-12 direview; source Caelestia dipin dan API Notifs diperiksa** |
 | 2 | Review audit dan spesifikasi | Validasi keputusan desain yang sudah disepakati terhadap bukti teknis; tetapkan backend, format data, detail layout, dan acceptance final. | **IMPLEMENTED — baseline backend/integrasi awal ditetapkan; detail visual/runtime masih perlu review** |
-| 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **IMPLEMENTED — source/deployer dibuat; deployment X280 belum dijalankan** |
+| 3 | Implementasi/deployment | Buat source K41 seperlunya dan integrasikan dengan perubahan minimum. Preflight, backup, staging/atomic write bila sesuai, verifikasi, logging, dan rollback. | **IMPLEMENTED / DEPLOYED — pengguna mengonfirmasi deployment X280 berhasil** |
 | 4 | Automated testing | Bash syntax/ShellCheck untuk script; fixture/mock untuk path, backup, idempotensi, failure, rollback, serta kontrak integrasi yang dapat diuji statis. | **PENDING — hasil test versi implementasi awal tidak dianggap berlaku untuk revisi backend; bash -n dan fixture harus dijalankan ulang. ShellCheck/QML lint belum tersedia pada audit X280.** |
 | 5 | Runtime verification dan review | Verifikasi QML/API pada versi X280, visual/interaksi, seluruh monitor, fullscreen/fokus, restart, error log, dan resource. | **PLANNED** |
 | 6 | Acceptance dan handoff | Tinjau bukti, catat batas yang belum diverifikasi, minta penerimaan pengguna, lalu perbarui status dan lanjutkan ke WS05 bila gate terpenuhi. | **PLANNED** |
@@ -360,7 +360,7 @@ Fixture test diperluas untuk menguji migrasi offline (proses aktif, D-Bus tidak 
 
 **Dampak kompatibilitas yang disengaja:** Notifs singleton dan model historis Caelestia tetap ada untuk menghindari kerusakan referensi lama, tetapi servernya tidak lagi menerima notifikasi baru. Notifikasi baru dikelola dan ditampilkan oleh K41 dock. Caelestia sidebar/lock-screen notification view tidak menjadi frontend notifikasi baru; tampilan tersebut dapat tetap memperlihatkan entri historis yang tersimpan di model lamanya. DND dan IPC Caelestia dipertahankan.
 
-**Belum VERIFIED:** Source handoff menghapus deklarasi server Caelestia, tetapi kepemilikan D-Bus aktual baru dapat dikonfirmasi setelah deploy dan reload pada sesi X280. Deployer tidak dapat menjamin tidak ada daemon notifikasi pihak ketiga yang juga berjalan. Sebelum menganggap handoff runtime berhasil, pastikan hanya satu proses memiliki `org.freedesktop.Notifications` setelah reload.
+**Batas bukti runtime:** audit sebelum perbaikan mirror telah mengonfirmasi satu pemilik D-Bus `org.freedesktop.Notifications` pada Quickshell. Pengguna kemudian mengonfirmasi deployment mirror berhasil; audit pascadeploy terpisah belum diklaim di sini. Deployer tidak dapat menjamin tidak ada daemon notifikasi pihak ketiga yang juga berjalan. Sebelum menganggap handoff runtime berhasil, pastikan hanya satu proses memiliki `org.freedesktop.Notifications` setelah reload.
 
 **Testing status:** fixture regression khusus Topbar, Bash syntax dua file, dan ShellCheck dua file telah lulus di GitHub Actions. Pemeriksaan repo-wide masih terblokir oleh syntax error pada test lock-screen yang terpisah. QML parse/load dan runtime X280 belum diuji.
 
