@@ -77,6 +77,9 @@ notification_source="$service_source_dir/Notifications.qml"
 caelestia_notifs_file="$host_root/services/Notifs.qml"
 grep -Fq 'K41_NOTIFICATION_BACKEND_READY' "$notification_source" \
     || die 'Backend notifikasi K41 belum memiliki implementasi lengkap.'
+if grep -Eq '^[[:space:]]*property[[:space:]]+[^;]*[[:space:]]transient([[:space:]:=]|$)' "$notification_source"; then
+    die 'Identifier QML reserved "transient" ditemukan pada backend notifikasi; gunakan nama property non-reserved.'
+fi
 [[ -f $caelestia_notifs_file && ! -L $caelestia_notifs_file ]] \
     || die 'Caelestia services/Notifs.qml tidak ditemukan sebagai regular file.'
 owned "$caelestia_notifs_file" \
