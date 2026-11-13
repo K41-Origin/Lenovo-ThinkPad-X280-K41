@@ -3,8 +3,11 @@ import QtQuick
 
 // Adapted from caelestia-dots/shell services/Time.qml (GPL-3.0):
 // use Quickshell SystemClock rather than constructing Date on every tick.
-QtObject {
+Item {
     id: root
+    visible: false
+    width: 0
+    height: 0
 
     readonly property date date: clock.date
     readonly property int hours: clock.hours
