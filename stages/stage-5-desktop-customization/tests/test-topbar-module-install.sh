@@ -232,7 +232,7 @@ fi
 host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
 # A stale compatibility mirror is repaired only after the same offline checks.
-printf 'stale compatibility module\\n' >"$compat_target"
+printf 'stale compatibility module\n' >"$compat_target"
 compat_stale_before="$(sha256sum "$compat_target" | cut -d' ' -f1)"
 if MOCK_QS_RUNNING=1 run_installer >/dev/null 2>&1; then
     echo 'Expected compatibility mirror sync to reject an active Quickshell process.' >&2
