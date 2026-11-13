@@ -414,3 +414,6 @@ Source canonical mengikuti struktur yang sama di `workstreams/04-topbar/modules/
 - **QML tooling:** `qmllint` tidak tersedia saat audit; validasi QML statis tidak dijalankan. Laporan journal tidak memberikan bukti lengkap untuk seluruh fungsi visual/interaksi.
 - **Acceptance:** pengguna meminta WS04 ditandai completed. `COMPLETED / USER ACCEPTED` merekam penerimaan scope, bukan klaim seluruh edge case QML/runtime telah diuji.
 - **Pascarefactor:** fixture Topbar dan deployer harus dijalankan ulang sebelum struktur services baru diterapkan pada X280. Runtime X280 untuk struktur baru belum diverifikasi sampai audit ulang mengonfirmasi `caelestia/k41/services` tersedia dan `caelestia/k41/modules/topbar/services` tidak ada.
+
+
+**Safety gate migrasi struktur:** bila direktori legacy `k41/modules/topbar/services` masih ada sementara host telah memuat Topbar K41, deployer mensyaratkan Quickshell berhenti dan user D-Bus dapat membuktikan tidak ada owner `org.freedesktop.Notifications`. Ini mencegah file watcher memuat ulang Topbar di antara pemindahan service dan perubahan relative import. Backup legacy tetap dipertahankan untuk rollback.
