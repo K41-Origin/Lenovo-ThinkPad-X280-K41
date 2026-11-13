@@ -5,8 +5,11 @@ import Quickshell.Services.Notifications
 
 // K41 owns org.freedesktop.Notifications after the deployer disables the
 // host notification server. Keep exactly one instance in Topbar.qml.
-QtObject {
+Item {
     id: root
+    visible: false
+    width: 0
+    height: 0
 
     readonly property bool backendAvailable: true
     readonly property string status: "K41 notification service active"
@@ -100,8 +103,11 @@ QtObject {
     Component {
         id: entryFactory
 
-        QtObject {
+        Item {
             id: entry
+            visible: false
+            width: 0
+            height: 0
 
             property var notification: null
             property int notificationId: notification ? notification.id : 0
