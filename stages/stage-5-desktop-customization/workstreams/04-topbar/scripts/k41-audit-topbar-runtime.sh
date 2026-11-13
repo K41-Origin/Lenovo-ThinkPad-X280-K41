@@ -60,6 +60,9 @@ host = qs_root / "caelestia" / "shell.qml"
 module = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "Topbar.qml"
 compat_module = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
 source_module = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
+notifs = qs_root / "caelestia" / "services" / "Notifs.qml"
+k41_notifications = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "services" / "Notifications.qml"
+source_notifications = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services/Notifications.qml"
 out = []
 
 def add(s=""): out.append(str(s))
@@ -138,6 +141,9 @@ file_block("RUNTIME CAELESTIA HOST SHELL", host, True)
 file_block("RUNTIME PRIMARY K41 TOPBAR MODULE", module, True)
 file_block("RUNTIME COMPATIBILITY TOPBAR MODULE", compat_module, True)
 file_block("CANONICAL K41 TOPBAR SOURCE", source_module, True)
+file_block("RUNTIME CAELESTIA NOTIFS SERVICE", notifs, True, 98304)
+file_block("RUNTIME K41 NOTIFICATIONS SERVICE", k41_notifications, True, 98304)
+file_block("CANONICAL K41 NOTIFICATIONS SOURCE", source_notifications, True, 98304)
 for label, runtime_path in (("primary", module), ("compatibility", compat_module)):
     if runtime_path.is_file() and not runtime_path.is_symlink() and source_module.is_file() and not source_module.is_symlink():
         add(f"Runtime {label} module equals canonical source: " + ("YES" if runtime_path.read_bytes() == source_module.read_bytes() else "NO"))
@@ -152,6 +158,55 @@ if host.is_file() and not host.is_symlink():
     instances = [i for i,line in enumerate(lines,1) if re.match(r"^\s*K41Topbar\.Topbar\s*\{\s*\}\s*$",line)]
     add(f"Host root-id lines={root_ids}; K41Topbar instance lines={instances}")
     add("Structural placement after root id: " + ("YES" if root_ids and instances and instances[0] > root_ids[0] else "NO_OR_UNKNOWN"))
+
+section("NOTIFICATION SERVER CONFIGURATION AND D-BUS OWNERSHIP")
+for label, path in (("Caelestia Notifs.qml", notifs), ("K41 Notifications.qml", k41_notifications)):
+    add(f"{label}: exists={path.is_file() and not path.is_symlink()} symlink={path.is_symlink()}")
+    if path.is_file() and not path.is_symlink():
+        try:
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+            server_lines = [i for i,line in enumerate(lines,1) if re.match(r"^\s*NotificationServer\s*\{", line)]
+            marker_lines = [i for i,line in enumerate(lines,1) if "K41_NOTIFICATION_SERVER_DISABLED_BY_K41" in line]
+            backend_lines = [i for i,line in enumerate(lines,1) if "K41_NOTIFICATION_BACKEND_READY" in line]
+            add(f"{label}: NotificationServer_opening_lines={server_lines}; K41_disabled_marker_lines={marker_lines}; K41_backend_ready_marker_lines={backend_lines}")
+        except OSError as exc:
+            add(f"{label}: READ_FAILED={type(exc).__name__}")
+add("Static QML block counts are textual evidence only; nested syntax is not parsed.")
+
+section("D-BUS org.freedesktop.Notifications OWNER")
+if shutil.which("busctl"):
+    command_block("BUSCTL OWNER STATUS", ["busctl", "--user", "status", "org.freedesktop.Notifications"], 8, 5000)
+    command_block("BUSCTL GETNAMEOWNER", ["busctl", "--user", "call", "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus", "GetNameOwner", "s", "org.freedesktop.Notifications"], 8, 3000)
+    rc, listing = run(["busctl", "--user", "list", "--no-pager", "--no-legend"], 8)
+    section("D-BUS NOTIFICATION-RELATED NAME OWNERS")
+    add(f"exit={rc}")
+    selected = [line for line in listing.splitlines() if re.search(r"notification|notify|dunst|mako|swaync|fnott", line, re.I)]
+    add(redact("\n".join(selected) if selected else "No matching names in busctl list output."))
+else:
+    add("busctl: NOT_FOUND; D-Bus owner query unavailable.")
+if shutil.which("dbus-send"):
+    command_block("DBUS-SEND GETNAMEOWNER", ["dbus-send", "--session", "--print-reply=literal", "--dest=org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus.GetNameOwner", "string:org.freedesktop.Notifications"], 8, 3000)
+else:
+    add("dbus-send: NOT_FOUND; secondary D-Bus query unavailable.")
+
+section("KNOWN COMPETING NOTIFICATION DAEMONS")
+daemon_names = {"dunst", "mako", "swaync", "fnott", "xfce4-notifyd", "notification-daemon"}
+daemon_count = 0
+for proc in pathlib.Path("/proc").glob("[0-9]*"):
+    try:
+        comm = (proc / "comm").read_text(errors="replace").strip()
+        if comm.lower() in daemon_names:
+            daemon_count += 1
+            try: exe = os.readlink(proc / "exe")
+            except OSError: exe = "unavailable"
+            add(f"daemon pid={proc.name}; comm={comm}; exe={redact(exe)}")
+    except OSError:
+        pass
+add(f"known_competing_daemon_process_count={daemon_count}")
+command_block("USER NOTIFICATION-RELATED SYSTEMD UNITS", ["systemctl", "--user", "list-units", "--all", "--no-legend", "--no-pager"], 10, 16000)
+for package in ("dunst", "mako", "swaync", "fnott", "xfce4-notifyd", "notification-daemon"):
+    rc, value = run(["pacman", "-Q", package], 5)
+    add(f"notification package {package}: {redact(value.strip()) if rc == 0 else 'not installed or pacman unavailable'}")
 
 section("ACTIVE QUICKSHELL PROCESS AND SELECTOR")
 count = 0
@@ -301,7 +356,8 @@ add("Static lint does not prove Quickshell runtime instantiation; import context
 
 section("DIAGNOSTIC LIMITATIONS")
 add("- Battery telemetry is observed only; no UPower, kernel, firmware, or power-management state is changed.")
-add("- Notification source discovery reads installed QML/JS files only; no sidebar action is triggered.")
+add("- Notification diagnostics include bounded full Caelestia/K41 notification QML sources, static NotificationServer markers, D-Bus owner queries, and known competing daemon processes/units.")
+add("- D-Bus owner queries may be unavailable outside the active user session; unavailable output is an evidence gap, not proof that no owner exists.")
 add("- No Quickshell process is launched; no duplicate shell or temporary panel is created.")
 add("- No reload/restart/deployment or config edit is performed.")
 add("- Journal visibility depends on the current user's permissions.")
@@ -322,7 +378,7 @@ Run as the regular desktop user, preferably from TTY after the failed desktop st
 
   bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audit-topbar-runtime.sh
 
-The collector is read-only. It records runtime Topbar files, Quickshell logs, UPower device telemetry, kernel battery sysfs values, and bounded Caelestia notification/sidebar QML source references. It does not deploy files, launch Quickshell, trigger notification/sidebar actions, reload/restart services, install packages, or edit configuration. The complete local report is private under ~/.local/state/k41/topbar/runtime-audits/.
+The collector is read-only. It records runtime Topbar and notification QML files, static NotificationServer markers, the org.freedesktop.Notifications D-Bus owner, known notification-daemon processes and user units, Quickshell logs, UPower telemetry, and bounded Caelestia notification/sidebar QML references. It does not deploy files, launch Quickshell, trigger notification/sidebar actions, reload/restart services, install packages, or edit configuration. The complete local report is private under ~/.local/state/k41/topbar/runtime-audits/.
 
 A separately redacted copy is published to the repository reports directory through an independent temporary clone. Review the published report for residual sensitive information. If publication fails, the private local report remains available and the script exits non-zero.
 EOF
