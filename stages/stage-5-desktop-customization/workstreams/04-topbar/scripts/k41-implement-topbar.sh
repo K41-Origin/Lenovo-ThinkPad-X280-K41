@@ -67,6 +67,10 @@ module_root="$host_root/k41/modules/topbar"
 target_file="$module_root/Topbar.qml"
 service_target_dir="$host_root/k41/services"
 legacy_service_target_dir="$module_root/services"
+compat_root="$qs_root/k41"
+compat_module_root="$compat_root/modules/topbar"
+compat_target_file="$compat_module_root/Topbar.qml"
+compat_service_target_dir="$compat_root/services"
 [[ -d $qs_root && ! -L $qs_root && -d $host_root && ! -L $host_root ]] || die 'Quickshell/Caelestia config directory tidak tersedia atau berupa symlink.'
 [[ -f $host_file && ! -L $host_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$host_root" && owned "$host_file" || die 'Caelestia host bukan milik user aktif.'
@@ -99,7 +103,7 @@ else
         || die 'Model Notifs.qml tidak cocok dengan baseline yang diaudit.'
     handoff_needed=1
 fi
-for path in "$host_root/k41" "$host_root/k41/modules" "$module_root" "$service_target_dir" "$legacy_service_target_dir"; do
+for path in "$host_root/k41" "$host_root/k41/modules" "$module_root" "$service_target_dir" "$legacy_service_target_dir" "$compat_root" "$compat_root/modules" "$compat_module_root" "$compat_service_target_dir"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then [[ -d $path ]] || die "Path runtime bukan direktori: $path"; owned "$path" || die "Path bukan milik user aktif: $path"; fi
 done
@@ -107,7 +111,7 @@ if [[ -e $target_file || -L $target_file ]]; then
     [[ -f $target_file && ! -L $target_file ]] || die 'Target Topbar bukan regular file.'
     owned "$target_file" || die 'Target Topbar bukan milik user aktif.'
 fi
-for service_dir in "$service_target_dir" "$legacy_service_target_dir"; do
+for service_dir in "$service_target_dir" "$legacy_service_target_dir" "$compat_service_target_dir"; do
     if [[ -e $service_dir || -L $service_dir ]]; then
         [[ -d $service_dir && ! -L $service_dir ]] || die "Target service bukan direktori regular: $service_dir"
         owned "$service_dir" || die "Target service bukan milik user aktif: $service_dir"
@@ -119,6 +123,11 @@ for service_dir in "$service_target_dir" "$legacy_service_target_dir"; do
         done
     fi
 done
+
+if [[ -e $compat_target_file || -L $compat_target_file ]]; then
+    [[ -f $compat_target_file && ! -L $compat_target_file ]] || die 'Compatibility Topbar bukan regular file.'
+    owned "$compat_target_file" || die 'Compatibility Topbar bukan milik user aktif.'
+fi
 
 new_import='import qs.k41.modules.topbar as K41Topbar'
 import_n="$(grep -Fc "$new_import" "$host_file" || true)"
@@ -155,8 +164,15 @@ for service in "${required_services[@]}"; do
         break
     fi
 done
-if (( import_n == 1 && instance_n == 1 && services_match == 1 && handoff_needed == 0 )) && [[ ! -e $legacy_service_target_dir && ! -L $legacy_service_target_dir ]] && cmp -s "$source_file" "$target_file"; then
-    info 'K41 services dan Topbar sudah terpasang pada Caelestia host; tidak ada perubahan.'
+compat_services_match=1
+for service in "${required_services[@]}"; do
+    if ! cmp -s "$service_source_dir/$service" "$compat_service_target_dir/$service"; then
+        compat_services_match=0
+        break
+    fi
+done
+if (( import_n == 1 && instance_n == 1 && services_match == 1 && compat_services_match == 1 && handoff_needed == 0 )) && [[ ! -e $legacy_service_target_dir && ! -L $legacy_service_target_dir ]] && cmp -s "$source_file" "$target_file" && cmp -s "$source_file" "$compat_target_file"; then
+    info 'K41 services, Topbar, dan compatibility mirror sudah sinkron; tidak ada perubahan.'
     exit 0
 fi
 state_home="${XDG_STATE_HOME:-$HOME/.local/state}"
@@ -166,7 +182,7 @@ for path in "$state_home" "$state_home/k41" "$state_home/k41/backups" "$backup_p
     [[ ! -L $path ]] || die "Symlink backup ditolak: $path"
     if [[ -e $path ]]; then [[ -d $path ]] || die "Path backup bukan direktori: $path"; owned "$path" || die 'Path backup bukan milik user aktif.'; fi
 done
-mkdir -p "$module_root" "$backup_parent"
+mkdir -p "$module_root" "$compat_module_root" "$compat_service_target_dir" "$backup_parent"
 chmod 0700 "$backup_parent"
 stamp="$(date -u +'%Y%m%dT%H%M%SZ')"; backup_root="$backup_parent/$stamp"; n=0
 while ! mkdir "$backup_root" 2>/dev/null; do
@@ -176,6 +192,17 @@ done
 chmod 0700 "$backup_root"
 had_module=0
 if [[ -f $target_file ]]; then had_module=1; cp -a "$target_file" "$backup_root/Topbar.qml"; fi
+had_compat_module=0
+if [[ -f $compat_target_file ]]; then had_compat_module=1; cp -a "$compat_target_file" "$backup_root/compat-Topbar.qml"; fi
+declare -A had_compat_services=()
+for service in "${required_services[@]}"; do
+    had_compat_services[$service]=0
+    if [[ -f $compat_service_target_dir/$service ]]; then
+        had_compat_services[$service]=1
+        mkdir -p "$backup_root/compat-services"
+        cp -a "$compat_service_target_dir/$service" "$backup_root/compat-services/$service"
+    fi
+done
 had_services=0
 if [[ -d $service_target_dir ]]; then
     had_services=1
@@ -195,7 +222,8 @@ cp -a "$caelestia_notifs_file" "$backup_root/Notifs.qml"
 } >"$backup_root/manifest.txt"
 chmod 0600 "$backup_root/manifest.txt"
 
-module_tmp=''; host_tmp=''; services_tmp=''; notifs_tmp=''; module_replaced=0; host_replaced=0; services_replaced=0; notifs_replaced=0
+module_tmp=''; host_tmp=''; services_tmp=''; compat_services_tmp=''; compat_module_tmp=''; notifs_tmp=''
+module_replaced=0; host_replaced=0; services_replaced=0; compat_replaced=0; notifs_replaced=0
 rollback() {
     local rc=$1 restore
     trap - EXIT
@@ -217,6 +245,25 @@ rollback() {
             fi
             printf 'ROLLBACK: K41 services dan struktur legacy dipulihkan.\n' >&2
         fi
+        if (( compat_replaced )); then
+            for service in "${required_services[@]}"; do
+                rm -f -- "$compat_service_target_dir/$service"
+                if (( ${had_compat_services[$service]} )); then
+                    cp -a "$backup_root/compat-services/$service" "$compat_service_target_dir/$service"
+                fi
+            done
+            if (( had_compat_module )); then
+                restore="$(mktemp "$compat_module_root/.Topbar.restore.XXXXXX")"
+                if cp -a "$backup_root/compat-Topbar.qml" "$restore" && mv -fT "$restore" "$compat_target_file"; then
+                    printf 'ROLLBACK: compatibility Topbar/services dipulihkan.\\n' >&2
+                else
+                    rm -f "$restore"
+                    printf 'CRITICAL: rollback compatibility mirror gagal; backup %s\\n' "$backup_root" >&2
+                fi
+            else
+                rm -f -- "$compat_target_file"
+            fi
+        fi
         if (( module_replaced )); then
             if (( had_module )); then
                 restore="$(mktemp "$module_root/.Topbar.restore.XXXXXX")"
@@ -232,6 +279,8 @@ rollback() {
     [[ -z $module_tmp ]] || rm -f "$module_tmp"
     [[ -z $host_tmp ]] || rm -f "$host_tmp"
     [[ -z $services_tmp ]] || rm -rf "$services_tmp"
+    [[ -z $compat_services_tmp ]] || rm -rf "$compat_services_tmp"
+    [[ -z $compat_module_tmp ]] || rm -f "$compat_module_tmp"
     [[ -z $notifs_tmp ]] || rm -f "$notifs_tmp"
     exit "$rc"
 }
@@ -240,14 +289,19 @@ trap 'rollback $?' EXIT
 # Stage every K41 file first. No host import is published until the
 # Caelestia NotificationServer has been disabled and verified.
 services_tmp="$(mktemp -d "$host_root/k41/.services.install.XXXXXX")"
+compat_services_tmp="$(mktemp -d "$compat_root/.topbar-services.install.XXXXXX")"
 for service in "${required_services[@]}"; do
     install -m 0644 "$service_source_dir/$service" "$services_tmp/$service"
     cmp -s "$service_source_dir/$service" "$services_tmp/$service" || die "Verifikasi staging service gagal: $service"
+    install -m 0644 "$service_source_dir/$service" "$compat_services_tmp/$service"
+    cmp -s "$service_source_dir/$service" "$compat_services_tmp/$service" || die "Verifikasi staging compatibility service gagal: $service"
 done
 
 module_tmp="$(mktemp "$module_root/.Topbar.install.XXXXXX")"
+compat_module_tmp="$(mktemp "$compat_module_root/.Topbar.install.XXXXXX")"
 host_tmp="$(mktemp "$host_root/.shell.install.XXXXXX")"
 install -m 0644 "$source_file" "$module_tmp"
+install -m 0644 "$source_file" "$compat_module_tmp"
 awk -v new_import="$new_import" '
     # Replace every exact K41-owned import/instance with one canonical copy.
     $0 ~ /^[[:space:]]*import[[:space:]]+qs\.k41\.modules\.topbar[[:space:]]+as[[:space:]]+K41Topbar[[:space:]]*$/ { next }
@@ -271,6 +325,7 @@ chmod --reference="$host_file" "$host_tmp"
 grep -Fqx "$new_import" "$host_tmp" || die 'Import K41 tidak ada pada staging.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_tmp" || die 'Instance K41 tidak ada pada staging.'
 cmp -s "$source_file" "$module_tmp" || die 'Verifikasi staging module gagal.'
+cmp -s "$source_file" "$compat_module_tmp" || die 'Verifikasi staging compatibility module gagal.'
 
 # Prepare the Caelestia handoff without mutating the live file.
 if (( handoff_needed )); then
@@ -336,18 +391,35 @@ fi
 mv -T "$services_tmp" "$service_target_dir"
 services_tmp=''
 
+# Keep the sibling namespace as a complete compatibility mirror. Only the
+# six WS04-owned service files are replaced; unrelated shared K41 services
+# are preserved. The active Caelestia host never imports this mirror.
+compat_replaced=1
+for service in "${required_services[@]}"; do
+    mv -fT "$compat_services_tmp/$service" "$compat_service_target_dir/$service"
+done
+compat_services_tmp=''
+mv -fT "$compat_module_tmp" "$compat_target_file"
+compat_module_tmp=''
+
 module_replaced=1
 mv -fT "$module_tmp" "$target_file"
 module_tmp=''
 cmp -s "$source_file" "$target_file" || die 'Verifikasi module setelah install gagal.'
+cmp -s "$source_file" "$compat_target_file" || die 'Verifikasi compatibility module setelah install gagal.'
+for service in "${required_services[@]}"; do
+    cmp -s "$service_source_dir/$service" "$compat_service_target_dir/$service" || die "Verifikasi compatibility service setelah install gagal: $service"
+done
 host_replaced=1
 mv -fT "$host_tmp" "$host_file"
 host_tmp=''
 grep -Fqx "$new_import" "$host_file" || die 'Import K41 tidak ditemukan setelah install.'
 grep -Eq '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host_file" || die 'Instance K41 tidak ditemukan setelah install.'
-module_replaced=0; host_replaced=0; services_replaced=0; notifs_replaced=0; trap - EXIT
+module_replaced=0; host_replaced=0; services_replaced=0; compat_replaced=0; notifs_replaced=0; trap - EXIT
 info "K41 services: $service_target_dir"
 info "K41 module: $target_file"
+info "Compatibility module: $compat_target_file"
+info "Compatibility services: $compat_service_target_dir (WS04 files only)"
 info "Entrypoint host tetap: $host_file"
 info "Backup privat: $backup_root"
 info "Notification handoff: $caelestia_notifs_file"
