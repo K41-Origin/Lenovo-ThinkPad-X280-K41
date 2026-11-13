@@ -32,8 +32,8 @@ has_legacy_dependency() {
     local file=$1
     awk '
         {
-            sub(/\\/\\/.*/, "")
-            if ($0 ~ /qs\\.services|ShellState|Notifs|Time\\.format|ServiceRef|import[[:space:]]+qs\\.|import[[:space:]]+Caelestia([.]|[[:space:]])|Caelestia[.]/) {
+            sub(/\/\/.*/, "")
+            if ($0 ~ /qs\.services|ShellState|Notifs|Time\.format|ServiceRef|import[[:space:]]+qs\.|import[[:space:]]+Caelestia([.]|[[:space:]])|Caelestia[.]/) {
                 print FNR ":" $0
                 found=1
             }
@@ -41,7 +41,6 @@ has_legacy_dependency() {
         END { exit !found }
     ' "$file"
 }
-
 for service in "${required_services[@]}"; do
     service_file="$service_source_dir/$service"
     [[ -f $service_file && ! -L $service_file ]] || die "Service K41 belum dimigrasikan: $service"
