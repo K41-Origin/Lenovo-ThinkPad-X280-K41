@@ -22,7 +22,7 @@ source_file="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topb
 owned "$source_file" || die 'Source Topbar.qml bukan milik user aktif.'
 
 # Require all K41 service sources before deployment.
-service_source_dir="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services"
+service_source_dir="$repo_root/stages/stage-5-desktop-customization/workstreams/04-topbar/modules/services"
 required_services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 [[ -d $service_source_dir && ! -L $service_source_dir ]] || die 'Direktori service K41 belum tersedia; migrasi service harus diselesaikan sebelum deployment Topbar.'
 # Inspect executable QML/JS source, not attribution or explanatory comments.
@@ -65,7 +65,8 @@ host_root="$qs_root/caelestia"
 host_file="$host_root/shell.qml"
 module_root="$host_root/k41/modules/topbar"
 target_file="$module_root/Topbar.qml"
-service_target_dir="$module_root/services"
+service_target_dir="$host_root/k41/services"
+legacy_service_target_dir="$module_root/services"
 [[ -d $qs_root && ! -L $qs_root && -d $host_root && ! -L $host_root ]] || die 'Quickshell/Caelestia config directory tidak tersedia atau berupa symlink.'
 [[ -f $host_file && ! -L $host_file ]] || die 'Caelestia shell.qml tidak tersedia atau bukan regular file.'
 owned "$qs_root" && owned "$host_root" && owned "$host_file" || die 'Caelestia host bukan milik user aktif.'
@@ -98,7 +99,7 @@ else
         || die 'Model Notifs.qml tidak cocok dengan baseline yang diaudit.'
     handoff_needed=1
 fi
-for path in "$host_root/k41" "$host_root/k41/modules" "$module_root"; do
+for path in "$host_root/k41" "$host_root/k41/modules" "$module_root" "$service_target_dir" "$legacy_service_target_dir"; do
     [[ ! -L $path ]] || die "Symlink runtime ditolak: $path"
     if [[ -e $path ]]; then [[ -d $path ]] || die "Path runtime bukan direktori: $path"; owned "$path" || die "Path bukan milik user aktif: $path"; fi
 done
@@ -106,16 +107,18 @@ if [[ -e $target_file || -L $target_file ]]; then
     [[ -f $target_file && ! -L $target_file ]] || die 'Target Topbar bukan regular file.'
     owned "$target_file" || die 'Target Topbar bukan milik user aktif.'
 fi
-if [[ -e $service_target_dir || -L $service_target_dir ]]; then
-    [[ -d $service_target_dir && ! -L $service_target_dir ]] || die 'Target service bukan direktori regular.'
-    owned "$service_target_dir" || die 'Target service bukan milik user aktif.'
-    for service in "${required_services[@]}"; do
-        if [[ -e $service_target_dir/$service || -L $service_target_dir/$service ]]; then
-            [[ -f $service_target_dir/$service && ! -L $service_target_dir/$service ]] || die "Target service tidak valid: $service"
-            owned "$service_target_dir/$service" || die "Target service bukan milik user aktif: $service"
-        fi
-    done
-fi
+for service_dir in "$service_target_dir" "$legacy_service_target_dir"; do
+    if [[ -e $service_dir || -L $service_dir ]]; then
+        [[ -d $service_dir && ! -L $service_dir ]] || die "Target service bukan direktori regular: $service_dir"
+        owned "$service_dir" || die "Target service bukan milik user aktif: $service_dir"
+        for service in "${required_services[@]}"; do
+            if [[ -e $service_dir/$service || -L $service_dir/$service ]]; then
+                [[ -f $service_dir/$service && ! -L $service_dir/$service ]] || die "Target service tidak valid: $service"
+                owned "$service_dir/$service" || die "Target service bukan milik user aktif: $service"
+            fi
+        done
+    fi
+done
 
 new_import='import qs.k41.modules.topbar as K41Topbar'
 import_n="$(grep -Fc "$new_import" "$host_file" || true)"
@@ -150,7 +153,7 @@ for service in "${required_services[@]}"; do
         break
     fi
 done
-if (( import_n == 1 && instance_n == 1 && services_match == 1 && handoff_needed == 0 )) && cmp -s "$source_file" "$target_file"; then
+if (( import_n == 1 && instance_n == 1 && services_match == 1 && handoff_needed == 0 )) && [[ ! -e $legacy_service_target_dir && ! -L $legacy_service_target_dir ]] && cmp -s "$source_file" "$target_file"; then
     info 'K41 services dan Topbar sudah terpasang pada Caelestia host; tidak ada perubahan.'
     exit 0
 fi
@@ -176,6 +179,11 @@ if [[ -d $service_target_dir ]]; then
     had_services=1
     cp -a "$service_target_dir" "$backup_root/services"
 fi
+had_legacy_services=0
+if [[ -d $legacy_service_target_dir ]]; then
+    had_legacy_services=1
+    cp -a "$legacy_service_target_dir" "$backup_root/legacy-topbar-services"
+fi
 cp -a "$host_file" "$backup_root/shell.qml"
 cp -a "$caelestia_notifs_file" "$backup_root/Notifs.qml"
 {
@@ -197,13 +205,15 @@ rollback() {
             if cp -a "$backup_root/shell.qml" "$restore" && mv -fT "$restore" "$host_file"; then printf 'ROLLBACK: Caelestia shell.qml dipulihkan.\n' >&2; else rm -f "$restore"; printf 'CRITICAL: rollback host gagal; backup %s\n' "$backup_root" >&2; fi
         fi
         if (( services_replaced )); then
+            rm -rf -- "$service_target_dir"
             if (( had_services )); then
-                rm -rf -- "$service_target_dir"
                 cp -a "$backup_root/services" "$service_target_dir"
-                printf 'ROLLBACK: K41 services dipulihkan.\n' >&2
-            else
-                rm -rf -- "$service_target_dir"
             fi
+            if (( had_legacy_services )); then
+                rm -rf -- "$legacy_service_target_dir"
+                cp -a "$backup_root/legacy-topbar-services" "$legacy_service_target_dir"
+            fi
+            printf 'ROLLBACK: K41 services dan struktur legacy dipulihkan.\n' >&2
         fi
         if (( module_replaced )); then
             if (( had_module )); then
@@ -227,7 +237,7 @@ trap 'rollback $?' EXIT
 
 # Stage every K41 file first. No host import is published until the
 # Caelestia NotificationServer has been disabled and verified.
-services_tmp="$(mktemp -d "$module_root/.services.install.XXXXXX")"
+services_tmp="$(mktemp -d "$host_root/k41/.services.install.XXXXXX")"
 for service in "${required_services[@]}"; do
     install -m 0644 "$service_source_dir/$service" "$services_tmp/$service"
     cmp -s "$service_source_dir/$service" "$services_tmp/$service" || die "Verifikasi staging service gagal: $service"
@@ -314,10 +324,13 @@ fi
 
 # Publish services and module only after the old server is disabled. Publish
 # shell.qml last because this is the point at which K41 starts its server.
+services_replaced=1
 if [[ -e $service_target_dir ]]; then
     mv -T "$service_target_dir" "$backup_root/services.previous"
 fi
-services_replaced=1
+if [[ -e $legacy_service_target_dir ]]; then
+    mv -T "$legacy_service_target_dir" "$backup_root/legacy-topbar-services.previous"
+fi
 mv -T "$services_tmp" "$service_target_dir"
 services_tmp=''
 

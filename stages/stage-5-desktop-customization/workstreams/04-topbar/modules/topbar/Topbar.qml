@@ -4,7 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import "services" as Services
+import "../../services" as Services
 
 // K41Topbar: K41-owned presentation and service bindings.
 Scope {

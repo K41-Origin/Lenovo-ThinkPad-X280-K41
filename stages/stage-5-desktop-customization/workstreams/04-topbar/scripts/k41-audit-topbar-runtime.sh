@@ -61,8 +61,9 @@ module = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "Topbar.qml"
 compat_module = qs_root / "k41" / "modules" / "topbar" / "Topbar.qml"
 source_module = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/Topbar.qml"
 notifs = qs_root / "caelestia" / "services" / "Notifs.qml"
-k41_notifications = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "services" / "Notifications.qml"
-source_notifications = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/topbar/services/Notifications.qml"
+k41_notifications = qs_root / "caelestia" / "k41" / "services" / "Notifications.qml"
+legacy_k41_services = qs_root / "caelestia" / "k41" / "modules" / "topbar" / "services"
+source_notifications = repo / "stages/stage-5-desktop-customization/workstreams/04-topbar/modules/services/Notifications.qml"
 out = []
 
 def add(s=""): out.append(str(s))
@@ -136,6 +137,8 @@ for package in ("caelestia-shell","quickshell","quickshell-git","hyprland","qt6-
 section("EXPECTED RUNTIME FILES")
 add("Host expected: ~/.config/quickshell/caelestia/shell.qml")
 add("Primary module expected: ~/.config/quickshell/caelestia/k41/modules/topbar/Topbar.qml")
+add("K41 services expected: ~/.config/quickshell/caelestia/k41/services/*.qml")
+add("Legacy nested services path should be absent: ~/.config/quickshell/caelestia/k41/modules/topbar/services/")
 add("Compatibility mirror expected: ~/.config/quickshell/k41/modules/topbar/Topbar.qml")
 file_block("RUNTIME CAELESTIA HOST SHELL", host, True)
 file_block("RUNTIME PRIMARY K41 TOPBAR MODULE", module, True)
@@ -143,6 +146,7 @@ file_block("RUNTIME COMPATIBILITY TOPBAR MODULE", compat_module, True)
 file_block("CANONICAL K41 TOPBAR SOURCE", source_module, True)
 file_block("RUNTIME CAELESTIA NOTIFS SERVICE", notifs, True, 98304)
 file_block("RUNTIME K41 NOTIFICATIONS SERVICE", k41_notifications, True, 98304)
+add("Legacy nested K41 service directory: " + ("PRESENT (migration required)" if legacy_k41_services.is_dir() and not legacy_k41_services.is_symlink() else "ABSENT"))
 file_block("CANONICAL K41 NOTIFICATIONS SOURCE", source_notifications, True, 98304)
 for label, runtime_path in (("primary", module), ("compatibility", compat_module)):
     if runtime_path.is_file() and not runtime_path.is_symlink() and source_module.is_file() and not source_module.is_symlink():

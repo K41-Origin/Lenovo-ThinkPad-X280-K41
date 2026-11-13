@@ -1,6 +1,6 @@
 # Workstream 04 — Topbar
 
-**Status: RUNNING — CORE SERVICES AND NOTIFICATION HANDOFF IMPLEMENTED IN SOURCE; AUTOMATED AND X280 RUNTIME VALIDATION PENDING.** Enam service/state K41 kini tersedia. Backend Notifications memiliki NotificationServer, model, action, expiry, dismiss, serta penyimpanan riwayat non-transient. Deployer menyiapkan backup dan handoff terkontrol dengan menonaktifkan satu blok NotificationServer pada Caelestia `services/Notifs.qml`, mempertahankan singleton, DND, IPC, dan model historis lama. K41 dock menjadi frontend untuk notifikasi baru. Deployer mempertahankan entry point `~/.config/quickshell/caelestia/shell.qml` dan tidak me-reload Quickshell. Implementasi sudah ditulis ke GitHub; Bash/fixture/QML validation dan runtime X280 masih menunggu pengujian.
+**Status: COMPLETED / USER ACCEPTED (13 November 2026).** Source K41, deployment, notification ownership handoff, and runtime audit have been completed for the agreed WS04 scope. Runtime verification is recorded separately from remaining QML lint and functional edge-case coverage. Enam service/state K41 kini tersedia. Backend Notifications memiliki NotificationServer, model, action, expiry, dismiss, serta penyimpanan riwayat non-transient. Deployer menyiapkan backup dan handoff terkontrol dengan menonaktifkan satu blok NotificationServer pada Caelestia `services/Notifs.qml`, mempertahankan singleton, DND, IPC, dan model historis lama. K41 dock menjadi frontend untuk notifikasi baru. Deployer mempertahankan entry point `~/.config/quickshell/caelestia/shell.qml` dan tidak me-reload Quickshell. Implementasi sudah ditulis ke GitHub; Bash/fixture/QML validation dan runtime X280 masih menunggu pengujian.
 ## Tujuan dan batas ownership
 
 Membuat panel horizontal di tepi atas layar sebagai area informasi/status desktop yang ringkas. Topbar melengkapi Bottombar tanpa menduplikasi indikator workspace atau mengambil terlalu banyak ruang vertikal.
@@ -386,3 +386,31 @@ File CPU, Memory, Clock, dan Battery sekarang memiliki komentar provenance/adapt
 
 
 **Perbaikan QML (13 November 2026):** backend notifikasi memakai `transientNotification` sebagai nama property internal karena `transient` merupakan reserved keyword QML; akses ke properti API Quickshell tetap `notification.transient`. Deployer memvalidasi agar deklarasi property internal yang memakai identifier terlarang tidak ikut terpasang. Fixture test memeriksa kedua kondisi ini.
+
+
+## Struktur final services — 13 November 2026
+
+**IMPLEMENTED pada repository:** service K41 dipisahkan dari modul Topbar agar dapat digunakan lintas-komponen:
+
+```text
+~/.config/quickshell/caelestia/k41/
+├── services/
+│   ├── Battery.qml
+│   ├── Clock.qml
+│   ├── Cpu.qml
+│   ├── Memory.qml
+│   ├── Notifications.qml
+│   └── TopbarState.qml
+└── modules/
+    └── topbar/
+        └── Topbar.qml
+```
+
+Source canonical mengikuti struktur yang sama di `workstreams/04-topbar/modules/services/` dan `workstreams/04-topbar/modules/topbar/`. `Topbar.qml` memakai `import "../../services" as Services`. Deployer memasang service ke `k41/services`, mem-backup direktori legacy `modules/topbar/services`, dan memulihkan kedua lokasi bila rollback diperlukan.
+
+## Bukti penyelesaian dan batas verifikasi
+
+- **Runtime audit X280:** `reports/stage-5-desktop-customization/04-topbar/runtime-audits/20261113T080041Z/report.txt` menunjukkan satu import dan instance Topbar, kecocokan source/runtime Topbar, marker backend K41, nonaktifnya NotificationServer Caelestia, satu D-Bus owner `org.freedesktop.Notifications` pada Quickshell, serta tidak ditemukannya daemon notifikasi pesaing.
+- **QML tooling:** `qmllint` tidak tersedia saat audit; validasi QML statis tidak dijalankan. Laporan journal tidak memberikan bukti lengkap untuk seluruh fungsi visual/interaksi.
+- **Acceptance:** pengguna meminta WS04 ditandai completed. `COMPLETED / USER ACCEPTED` merekam penerimaan scope, bukan klaim seluruh edge case QML/runtime telah diuji.
+- **Pascarefactor:** fixture Topbar dan deployer harus dijalankan ulang sebelum struktur services baru diterapkan pada X280. Runtime X280 untuk struktur baru belum diverifikasi sampai audit ulang mengonfirmasi `caelestia/k41/services` tersedia dan `caelestia/k41/modules/topbar/services` tidak ada.

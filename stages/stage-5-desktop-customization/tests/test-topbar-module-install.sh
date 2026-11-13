@@ -10,11 +10,12 @@ config="$tmp/config"
 state="$tmp/state"
 workstream="stages/stage-5-desktop-customization/workstreams/04-topbar"
 services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
+grep -Fq 'import "../../services" as Services' "$source_root/modules/topbar/Topbar.qml"
 
-mkdir -p "$fixture/$workstream/modules/topbar/services" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services"
+mkdir -p "$fixture/$workstream/modules/services" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services"
 cp "$source_root/scripts/k41-implement-topbar.sh" "$fixture/$workstream/scripts/"
 for service in "${services[@]}"; do
-    cp "$source_root/modules/topbar/services/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cp "$source_root/modules/services/$service" "$fixture/$workstream/modules/services/$service"
 done
 
 git -C "$fixture" init -q
@@ -54,29 +55,34 @@ run_installer() {
 }
 
 target="$config/quickshell/caelestia/k41/modules/topbar/Topbar.qml"
-service_target="$config/quickshell/caelestia/k41/modules/topbar/services"
+service_target="$config/quickshell/caelestia/k41/services"
+legacy_service_target="$config/quickshell/caelestia/k41/modules/topbar/services"
+mkdir -p "$legacy_service_target"
+printf 'legacy sentinel\n' >"$legacy_service_target/Legacy.qml"
 run_installer
 cmp -s "$target" "$qml"
+test ! -e "$legacy_service_target"
+test -f "$backup_root/legacy-topbar-services/Legacy.qml"
 for service in "${services[@]}"; do
-    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
-grep -Fq 'property bool transientNotification:' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-! grep -Eq '^[[:space:]]*property[[:space:]]+[^;]*[[:space:]]transient([[:space:]:=]|$)' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq 'notification.transient' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq 'Item {' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq 'visible: false' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq 'Item {' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq 'visible: false' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq 'Item {' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq 'visible: false' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq 'Item {' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq 'visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq 'id: entry' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq 'SystemClock {' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+grep -Fq 'property bool transientNotification:' "$fixture/$workstream/modules/services/Notifications.qml"
+! grep -Eq '^[[:space:]]*property[[:space:]]+[^;]*[[:space:]]transient([[:space:]:=]|$)' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq 'notification.transient' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq 'Item {' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq 'visible: false' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq 'Item {' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq 'visible: false' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq 'Item {' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq 'visible: false' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq 'Item {' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq 'visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq 'id: entry' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq 'SystemClock {' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
@@ -133,7 +139,7 @@ test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
 cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
-    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
 
 # Unknown Caelestia source must fail before mutation.
@@ -229,14 +235,14 @@ test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
 printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
-Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq  "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Clock.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq 'SystemClock {' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq  "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/services/Clock.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq 'SystemClock {' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
@@ -293,7 +299,7 @@ test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
 cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
-    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
 
 # Unknown Caelestia source must fail before mutation.
@@ -389,13 +395,13 @@ test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
 printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
-Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq  "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq 'SystemClock {' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq  "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq 'SystemClock {' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq     id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
@@ -452,7 +458,7 @@ test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
 cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
-    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
 
 # Unknown Caelestia source must fail before mutation.
@@ -548,12 +554,12 @@ test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
 printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
-Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Cpu.qml"
-grep -Fq 'Process {' "$fixture/$workstream/modules/topbar/services/Memory.qml"
-grep -Fq 'SystemClock {' "$fixture/$workstream/modules/topbar/services/Clock.qml"
-grep -Fq  "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Cpu.qml"
+grep -Fq 'Process {' "$fixture/$workstream/modules/services/Memory.qml"
+grep -Fq 'SystemClock {' "$fixture/$workstream/modules/services/Clock.qml"
+grep -Fq  "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
@@ -610,7 +616,7 @@ test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
 cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
-    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
 
 # Unknown Caelestia source must fail before mutation.
@@ -706,8 +712,8 @@ test -L "$target"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
 
 printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
-Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
-grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/topbar/services/Notifications.qml"
+Item {\n    id: root\n    visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
+grep -Fq             id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"Item {\n            id: entry\n            visible: false' "$fixture/$workstream/modules/services/Notifications.qml"
 grep -Fqx 'import qs.k41.modules.topbar as K41Topbar' "$host"
 grep -Fqx '    K41Topbar.Topbar {}' "$host"
 grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
@@ -764,7 +770,7 @@ test "$(sha256sum "$notifs" | cut -d' ' -f1)" = "$notifs_before_rollback"
 test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before_rollback"
 cmp -s "$target" "$qml"
 for service in "${services[@]}"; do
-    cmp -s "$service_target/$service" "$fixture/$workstream/modules/topbar/services/$service"
+    cmp -s "$service_target/$service" "$fixture/$workstream/modules/services/$service"
 done
 
 # Unknown Caelestia source must fail before mutation.
