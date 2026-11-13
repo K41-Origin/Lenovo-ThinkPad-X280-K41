@@ -12,8 +12,8 @@ Stage 5 menjadi fondasi bertahap **k41-dots**: kumpulan komponen desktop K41 yan
 |---:|---:|---|---|
 | 1 | 01 | [Boot Experience](01-BOOT-EXPERIENCE.md) | PAUSED — investigasi tampilan Plymouth |
 | 2 | 02 | [Lock Screen](02-LOCK-SCREEN.md) | COMPLETED / USER ACCEPTED |
-| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **COMPLETED / USER ACCEPTED** |
-| 4 | 04 | [Topbar](04-TOPBAR.md) | COMPLETED / USER ACCEPTED — compatibility mirror sync pending on X280 |
+| 3 | 03 | [Bottombar](03-BOTTOMBAR.md) | **AUDIT — dependency independence review** |
+| 4 | 04 | [Topbar](04-TOPBAR.md) | **COMPLETED / USER ACCEPTED** — compatibility mirror deployment confirmed successful on X280 |
 | 5 | 05 | [Launcher](05-LAUNCHER.md) | PLANNED |
 | 6 | 06 | [Sidebar](06-SIDEBAR.md) | PLANNED |
 | 7 | 07 | [Utilities](07-UTILITIES.md) | PLANNED |
@@ -34,7 +34,7 @@ ID workstream aktif sekarang berurutan 01–08. Topbar menggunakan ID 04; Launch
 
 ## Peta implementasi repository
 
-Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Workstream 03 — Bottombar berstatus **COMPLETED / USER ACCEPTED**. Workstream 04 — Topbar juga berstatus **COMPLETED / USER ACCEPTED**; batas validasi runtime dan refactor struktur services dijelaskan pada dokumen pemilik. Dokumen pemilik [Bottombar](03-BOTTOMBAR.md) mencatat arsitektur K41 → Caelestia, source canonical, deployment, integrasi host, batas validasi, dan keputusan pengguna. [Historical Implementation Record](03-BOTTOMBAR-IMPLEMENTATION.md) hanya menyimpan baseline lama. Validasi syntax, fixture, QML, dan runtime tetap harus dibedakan dari status penerimaan workstream.
+Workstream 02 — Lock Screen berstatus COMPLETED / USER ACCEPTED. Source visual, audit, helper startup, updater, deployment, cleanup hook, dan cleanup visual upstream berada di workstreams/02-lock-screen/. Prosedur, urutan kerja, bukti, dan batas validasi dicatat pada [Workstream 02 — Lock Screen](02-LOCK-SCREEN.md). Status penerimaan tidak menyatakan seluruh runtime X280 VERIFIED. Workstream 03 — Bottombar berstatus **AUDIT** untuk penilaian ulang dependency dan kemandirian modul. Workstream 04 — Topbar berstatus **COMPLETED / USER ACCEPTED**; pengguna telah mengonfirmasi sinkronisasi compatibility mirror berhasil diterapkan pada X280. Batas validasi teknis yang belum dijalankan tetap dijelaskan pada dokumen pemilik. Dokumen pemilik [Bottombar](03-BOTTOMBAR.md) mencatat arsitektur K41 → Caelestia, source canonical, deployment, integrasi host, batas validasi, dan keputusan pengguna. [Historical Implementation Record](03-BOTTOMBAR-IMPLEMENTATION.md) hanya menyimpan baseline lama. Validasi syntax, fixture, QML, dan runtime tetap harus dibedakan dari status penerimaan workstream.
 
 ## Alur kolaborasi dan verifikasi
 
@@ -64,3 +64,9 @@ Design System menentukan bahasa visual lintas-komponen. Implementasi global yang
 ## Cleanup Caelestia — Workstream 08
 
 Pekerjaan cleanup luas Caelestia ditunda sampai seluruh workstream komponen Stage 5 selesai dan diterima. Scope, audit read-only, dependency map, approval gate, dry-run, backup, rollback, dan acceptance dicatat di [Workstream 08 — Clean up Caelestia](08-CLEAN-UP-CAELESTIA.md). Catatan dashboard yang sudah dinonaktifkan tetap menjadi histori; jangan menyamakan cleanup dashboard terdahulu dengan cleanup final seluruh Caelestia.
+
+
+## Pembaruan status — 13 November 2026
+
+- **WS03 Bottombar: AUDIT.** Implementasi tetap tersedia, tetapi dependency map dan kemandirian dari internal Caelestia perlu ditinjau ulang sebelum workstream ditutup.
+- **WS04 Topbar: COMPLETED / USER ACCEPTED.** Pengguna telah menerapkan dan mengonfirmasi keberhasilan sinkronisasi compatibility mirror pada X280. Catatan lama yang menyebut sinkronisasi pending sudah tidak berlaku.
