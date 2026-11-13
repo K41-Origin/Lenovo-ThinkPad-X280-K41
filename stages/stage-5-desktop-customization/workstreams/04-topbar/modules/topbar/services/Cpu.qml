@@ -5,8 +5,11 @@ import QtQuick
 // Adapted from caelestia-dots/shell:
 // plugin/src/Caelestia/Services/cpu.cpp (GPL-3.0).
 // Retains Caelestia's /proc/stat delta algorithm; uses a K41-owned QML reader.
-QtObject {
+Item {
     id: root
+    visible: false
+    width: 0
+    height: 0
 
     property real percentage: 0
     property double previousTotal: 0
