@@ -316,7 +316,7 @@ bash stages/stage-5-desktop-customization/workstreams/04-topbar/scripts/k41-audi
 
 Audit mengumpulkan:
 - Versi Quickshell, Caelestia, Hyprland, paket Qt, serta ketersediaan `qmllint`.
-- Isi dan SHA-256 host `shell.qml`, module Topbar runtime, source canonical K41, Caelestia `services/Notifs.qml`, serta K41 `services/Notifications.qml`; file notifikasi dibatasi hingga 96 KiB per file.
+- Isi dan SHA-256 host `shell.qml`, modul Topbar aktif, compatibility mirror, source canonical, keenam service K41 pada kedua runtime namespace, serta Caelestia `services/Notifs.qml`; isi file notifikasi dibatasi hingga 96 KiB per file. Audit melaporkan kesamaan setiap file runtime dengan source canonical secara terpisah.
 - Deteksi tekstual deklarasi `NotificationServer {`, marker handoff Caelestia, dan marker kesiapan backend K41.
 - Status pemilik D-Bus aktual untuk `org.freedesktop.Notifications` melalui `busctl status`, `GetNameOwner`, dan daftar nama terkait; kegagalan query dicatat sebagai bukti tidak tersedia, bukan dianggap tidak ada owner.
 - Inventaris proses Quickshell dan daemon notifikasi umum (dunst, mako, swaync, fnott, xfce4-notifyd, notification-daemon), paket terkait, serta user systemd units.
