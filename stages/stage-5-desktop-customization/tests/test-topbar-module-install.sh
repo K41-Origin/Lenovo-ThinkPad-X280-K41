@@ -205,38 +205,15 @@ else
     exit 1
 fi
 test "$(grep -Fc 'import qs.k41.modules.topbar as K41Topbar' "$host")" -eq 1
-test "$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
+test "$(grep -Ec '^[[:space:]]*K41Topbar\.Topbar[[:space:]]*\{[[:space:]]*\}[[:space:]]*$' "$host")" -eq 1
+grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
+if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
     echo 'Offline migration did not disable the Caelestia server.' >&2
     exit 1
 fi
 host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
-# Dependency rejection must not mutate installed files.
-printf '\nimport Caelestia.Services\n' >>"$qml"
-before="$(sha256sum "$target" | cut -d' ' -f1)"
-if run_installer >/dev/null 2>&1; then
-    echo 'Expected Caelestia dependency rejection.' >&2
-    exit 1
-fi
-test "$(sha256sum "$target" | cut -d' ' -f1)" = "$before"
-
-# Restore valid source before exercising the symlink guard.
-cp "$source_root/modules/topbar/Topbar.qml" "$qml"
-rm -f "$target"
-ln -s "$host" "$target"
-if run_installer >/dev/null 2>&1; then
-    echo 'Expected symlink target rejection.' >&2
-    exit 1
-fi
-test -L "$target"
-test "$(sha256sum "$host" | cut -d' ' -f1)" = "$host_before"
-
-printf 'PASS: service deployment, notification handoff, idempotency, duplicate normalization, rollback, offline partial-migration guards, dependency and symlink guards.\n'
- "$host")" -eq 1
-grep -Fq 'K41_NOTIFICATION_SERVER_DISABLED_BY_K41' "$notifs"
-
-# Moving a legacy service directory while the host is active must be offline,
-# even after notification ownership has already been handed to K41.
+# A legacy directory migration is also guarded while the already-integrated shell is active.
 mkdir -p "$legacy_service_target"
 printf 'second legacy sentinel\n' >"$legacy_service_target/Legacy.qml"
 if MOCK_QS_RUNNING=1 run_installer >/dev/null 2>&1; then
@@ -254,11 +231,6 @@ else
     echo 'Expected offline structural service migration to succeed.' >&2
     exit 1
 fi
-if grep -Eq '^[[:space:]]*NotificationServer[[:space:]]*\{' "$notifs"; then
-    echo 'Offline migration did not disable the Caelestia server.' >&2
-    exit 1
-fi
-host_before="$(sha256sum "$host" | cut -d' ' -f1)"
 
 # Dependency rejection must not mutate installed files.
 printf '\nimport Caelestia.Services\n' >>"$qml"
