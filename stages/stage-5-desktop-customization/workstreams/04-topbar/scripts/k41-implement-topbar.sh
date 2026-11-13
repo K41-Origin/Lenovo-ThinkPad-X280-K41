@@ -412,6 +412,7 @@ compat_replaced=1
 for service in "${required_services[@]}"; do
     mv -fT "$compat_services_tmp/$service" "$compat_service_target_dir/$service"
 done
+rm -d -- "$compat_services_tmp"
 compat_services_tmp=''
 mv -fT "$compat_module_tmp" "$compat_target_file"
 compat_module_tmp=''
