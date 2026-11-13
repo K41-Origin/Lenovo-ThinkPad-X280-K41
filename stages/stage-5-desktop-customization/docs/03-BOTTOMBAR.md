@@ -1,6 +1,6 @@
 # Workstream 03 — Bottombar
 
-**Status: COMPLETED / USER ACCEPTED.** Implementasi Bottombar K41 dan integrasi host Caelestia sesuai arsitektur yang disepakati telah diselesaikan. Cleanup sisa fitur Caelestia dipisahkan ke Workstream 08 dan dikerjakan paling akhir.
+**Status: AUDIT.** Workstream 03 dibuka kembali untuk audit arsitektur dependency dan tingkat kemandirian Bottombar K41. Implementasi dan deployment yang sudah ada tidak dianggap dibatalkan; status AUDIT berarti dependency transitif, API/internal service Caelestia, serta batas ownership/runtime perlu dipetakan dan dinilai ulang sebelum WS03 dapat kembali dinyatakan selesai. Cleanup sisa fitur Caelestia tetap dipisahkan ke Workstream 08 dan dikerjakan paling akhir.
 
 Dokumen ini adalah dokumen pemilik Workstream 03. Pola dokumentasi dan urutan kerja mengikuti Workstream 02, tetapi implementasi Bottombar tetap disesuaikan dengan hasil audit dan kontrak Quickshell/Caelestia yang benar-benar terverifikasi.
 
@@ -166,7 +166,23 @@ Test berbahaya harus menggunakan fixture/mock. Runtime verification dilakukan pa
 - Pengguna menyatakan file runtime legacy K41Dock telah dihapus secara manual. Penghapusan tersebut tidak dilakukan oleh installer Workstream 03 dan kondisi runtime terkini tidak diverifikasi oleh repository.
 - Fixture test mencakup deploy, migrasi host, idempotensi, repair, rollback, dan host state ambigu; eksekusinya belum diklaim.
 - Bash syntax, ShellCheck, fixture execution, QML compile/runtime compatibility, visual behavior, multi-monitor, fullscreen, dan regression belum VERIFIED.
-- Workstream 03 ditutup sebagai COMPLETED / USER ACCEPTED sesuai keputusan pengguna; status ini tidak menyatakan seluruh detail teknis telah TESTED atau VERIFIED.
+- Status workstream sekarang **AUDIT** atas keputusan pengguna. Implementasi Bottombar yang telah ada tetap dipertahankan, tetapi klaim kemandirian dependency belum diterima sampai audit dependency dan integrasi selesai.
 - Audit dan cleanup legacy Caelestia yang lebih luas dipindahkan ke Workstream 08 — Clean up Caelestia, yang wajib dikerjakan setelah semua workstream Stage 5 selesai.
 
 Acceptance berikutnya: jalankan `bash -n`, ShellCheck, fixture test, lalu installer pada X280 sebagai user biasa. Setelah deployment, verifikasi QML/runtime dan perilaku visual/interaksi secara terpisah. Deployment modul dan perubahan import belum membuktikan QML berhasil dimuat atau tampilan bekerja; verifikasi runtime pada Caelestia tetap wajib. Catat IMPLEMENTED, TESTED, VERIFIED, dan penerimaan pengguna secara terpisah.
+
+
+## Pembukaan kembali untuk audit dependency — 13 November 2026
+
+Status WS03 diubah dari `COMPLETED / USER ACCEPTED` menjadi **AUDIT**. Alasan: proses migrasi dependency yang digunakan Bottombar belum dinilai cukup optimal dan mandiri. Audit lanjutan harus membedakan dependency runtime yang memang diperlukan dari dependency internal Caelestia yang masih tersisa, memeriksa import dan API transitif, serta menilai apakah modul dapat dipelihara tanpa coupling yang tidak perlu terhadap implementasi internal Caelestia.
+
+Ruang lingkup audit minimum:
+
+1. Inventaris seluruh import QML/JS/C++ dan dependency transitif Bottombar.
+2. Klasifikasikan dependency sebagai Quickshell API publik, Hyprland integration, Caelestia host contract, atau internal Caelestia implementation.
+3. Identifikasi service/helper/state Caelestia yang masih dipakai langsung maupun tidak langsung.
+4. Tentukan mana yang harus diadaptasi menjadi K41-owned, mana yang aman tetap menjadi dependency host, dan mana yang tidak diperlukan.
+5. Periksa provenance, lisensi, versi/API, serta kompatibilitas dengan runtime X280.
+6. Susun target arsitektur dan acceptance criteria sebelum mengubah source atau deployer.
+
+Audit awal bersifat read-only. Jangan melakukan migrasi tambahan, cleanup upstream, atau perubahan runtime sebelum dependency map dan rencana perubahan direview. Status **AUDIT** bukan berarti implementasi sebelumnya gagal; status ini menandai bahwa kemandirian dan batas dependency belum cukup dibuktikan untuk menutup WS03.
