@@ -6,8 +6,11 @@ import QtQuick
 // plugin/src/Caelestia/Services/memory.cpp (GPL-3.0).
 // Uses the same MemTotal - MemAvailable calculation and exposes normalized
 // percentage plus used/total KiB for K41 consumers.
-QtObject {
+Item {
     id: root
+    visible: false
+    width: 0
+    height: 0
 
     property real used: 0
     property real total: 0
