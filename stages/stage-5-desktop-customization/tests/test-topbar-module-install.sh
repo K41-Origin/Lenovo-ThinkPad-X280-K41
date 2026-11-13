@@ -12,7 +12,7 @@ workstream="stages/stage-5-desktop-customization/workstreams/04-topbar"
 services=(Cpu.qml Memory.qml Battery.qml Clock.qml Notifications.qml TopbarState.qml)
 grep -Fq 'import "../../services" as Services' "$source_root/modules/topbar/Topbar.qml"
 
-mkdir -p "$fixture/$workstream/modules/services" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services"
+mkdir -p "$fixture/$workstream/modules/services" "$fixture/$workstream/modules/topbar" "$fixture/$workstream/scripts" "$home" "$config/quickshell/caelestia/services"
 cp "$source_root/scripts/k41-implement-topbar.sh" "$fixture/$workstream/scripts/"
 for service in "${services[@]}"; do
     cp "$source_root/modules/services/$service" "$fixture/$workstream/modules/services/$service"
