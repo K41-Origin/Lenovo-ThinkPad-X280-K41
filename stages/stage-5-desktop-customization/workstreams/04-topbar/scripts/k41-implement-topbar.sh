@@ -140,6 +140,15 @@ root_id_n="$(grep -Ec '^[[:space:]]*id:[[:space:]]*root[[:space:]]*$' "$host_fil
 # notification name currently has no owner. Never kill/restart the user's shell.
 structural_migration_needed=0
 if [[ -d $legacy_service_target_dir ]]; then structural_migration_needed=1; fi
+# Updating a stale/missing compatibility copy also rewrites the active module
+# deployment transaction; require the same offline safety gate.
+if ! cmp -s "$source_file" "$compat_target_file"; then structural_migration_needed=1; fi
+for service in "${required_services[@]}"; do
+    if ! cmp -s "$service_source_dir/$service" "$compat_service_target_dir/$service"; then
+        structural_migration_needed=1
+        break
+    fi
+done
 if (( (handoff_needed || structural_migration_needed) && (import_n > 0 || instance_n > 0) )); then
     for process_name in qs quickshell; do
         if pgrep -x "$process_name" >/dev/null 2>&1; then
